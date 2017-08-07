@@ -87,7 +87,7 @@ public class ModelConsistencyTest{
     private ApplicationContext ctx;   
     
     @Test
-    public void errorsInModelMustBeFound() {
+    public void validateModel() {
         assertTrue("Model inconsistency found. Please check target folder for validation output",
                 ProcessApplicationValidator.findModelInconsistencies(ctx).isEmpty());
     }
