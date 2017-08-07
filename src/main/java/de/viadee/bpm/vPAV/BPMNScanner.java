@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -120,14 +119,20 @@ public class BPMNScanner {
     /**
      * Return the Implementation of an specific element (sendTask, ServiceTask or BusinessRuleTask)
      *
-     * @param path,
-     *            id
-     * @throws ParserConfigurationException,
-     *             XPathExpressionException, SAXException, IOException
-     * @return
+     * @param path
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     * @return return_implementation contains implementation
      */
     public String getImplementation(String path, String id)
-            throws SAXException, IOException, XPathExpressionException, ParserConfigurationException {
+            throws SAXException, IOException, ParserConfigurationException {
         // List to hold return values
         String return_implementation = null;
 
@@ -195,7 +200,14 @@ public class BPMNScanner {
      * Check if model has an scriptTag
      *
      * @param path
-     * @return boolean
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @return return_scriptType contains script type
      */
     public String getScriptType(String path, String id) throws SAXException, IOException {
         // bool to hold return values
@@ -230,10 +242,16 @@ public class BPMNScanner {
      * Return a list of used gateways for a given bpmn model
      *
      * @param path
-     *            from model
-     * @throws IOException
+     *            path to model
+     * @param id
+     *            id of bpmn element
      * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
      * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     * @return gateway contains script type
      *
      */
     public String getXorGateWays(String path, String id)
@@ -270,12 +288,20 @@ public class BPMNScanner {
         return gateway;
     }
 
-    /*
+    /**
      * Return number of outgoing
      *
-     * @param path, id
-     *
-     * @return number of outgoing
+     * @param path
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     * @return outgoing number of outgoing
      */
     public int getOutgoing(String path, String id) throws SAXException, IOException, ParserConfigurationException {
         final NodeList nodeList;

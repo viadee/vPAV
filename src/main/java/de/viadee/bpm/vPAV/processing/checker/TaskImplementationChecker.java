@@ -3,7 +3,6 @@ package de.viadee.bpm.vPAV.processing.checker;
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.xml.sax.SAXException;
@@ -36,7 +35,7 @@ public class TaskImplementationChecker {
                 CheckerFactory.implementation = scan.getImplementation(path, bpmnElement.getId());
             }
 
-        } catch (XPathExpressionException | SAXException | IOException | ParserConfigurationException e) {
+        } catch (SAXException | IOException | ParserConfigurationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
