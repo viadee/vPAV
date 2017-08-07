@@ -157,7 +157,7 @@ public abstract class AbstractRunner {
     /**
      * write output files (xml / json/ js)
      *
-     * @param filteredIssue
+     * @param filteredIssues
      * @throws OutputWriterException
      */
     // 6 write check results to xml and json and js file

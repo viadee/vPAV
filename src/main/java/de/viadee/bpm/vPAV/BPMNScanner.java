@@ -120,11 +120,11 @@ public class BPMNScanner {
     /**
      * Return the Implementation of an specific element (sendTask, ServiceTask or BusinessRuleTask)
      *
-     * @param path
-     *            from model
-     * @throws ParserConfigurationException
-     *
-     * @id from specific element
+     * @param path,
+     *            id
+     * @throws ParserConfigurationException,
+     *             XPathExpressionException, SAXException, IOException
+     * @return
      */
     public String getImplementation(String path, String id)
             throws SAXException, IOException, XPathExpressionException, ParserConfigurationException {
@@ -191,12 +191,11 @@ public class BPMNScanner {
         return return_implementation;
     }
 
-    /*
+    /**
      * Check if model has an scriptTag
      *
-     * @param path from model
-     *
-     * return boolean
+     * @param path
+     * @return boolean
      */
     public String getScriptType(String path, String id) throws SAXException, IOException {
         // bool to hold return values
@@ -273,9 +272,9 @@ public class BPMNScanner {
 
     /*
      * Return number of outgoing
-     * 
+     *
      * @param path, id
-     * 
+     *
      * @return number of outgoing
      */
     public int getOutgoing(String path, String id) throws SAXException, IOException, ParserConfigurationException {

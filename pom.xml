@@ -1,13 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>de.viadee.bpm</groupId>
+	<groupId>de.viadee</groupId>
 	<artifactId>viadeeProcessApplicationValidator</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+	<version>2.0.0</version>
 	<packaging>maven-plugin</packaging>
 
 	<name>viadee Process Application Validator - Maven Plugin</name>
+
+	<description>The tool checks Camunda projects for consistency and discovers errors in process-driven applications. 
+	Called as a Maven plugin or JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the 
+	sourcecode of an underlying java project, such as a delegate reference to a non-existing java class or a non-existing Spring bean.
+  	</description>
+
+	<url>https://github.com/viadee/vPAV</url>
 
 	<licenses>
 		<license>
@@ -15,6 +21,41 @@
 			<url>https://opensource.org/licenses/bsd-license.php</url>
 		</license>
 	</licenses>
+
+
+	<organization>
+		<name>viadee Unternehmensberatung GmbH</name>
+		<url>http://www.viadee.de</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<name>Frank Koehne</name>
+			<email>frank.koehne@viadee.de@viadee.de</email>
+			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organizationUrl>http://www.viadee.de</organizationUrl>
+		</developer>
+		<developer>
+			<name>Claus Usener</name>
+			<email>Claus-Alexander.Usener@viadee.de</email>
+			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organizationUrl>http://www.viadee.de</organizationUrl>
+		</developer>
+		<developer>
+			<name>Marcel Flasskamp</name>
+			<email>Marcel.Flasskamp@viadee.de</email>
+		</developer>
+		<developer>
+			<name>Sascha Di Bernardo</name>
+			<email>Sascha.DiBernardo@viadee.de</email>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://https://github.com/viadee/vPAV.git</connection>
+		<developerConnection>scm:git:ssh://github.com:viadee/vPAV.git</developerConnection>
+		<url>https://github.com/viadee/vPAV/tree/master</url>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -105,7 +146,6 @@
 			<artifactId>gson</artifactId>
 			<version>2.7</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-project-info-reports-plugin -->
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-project-info-reports-plugin</artifactId>
@@ -116,13 +156,50 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.0.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar-no-fork</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.4</version>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
+					<executions>
+						<execution>
+							<id>sign-artifacts</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>sign</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.19</version>
 				</plugin>
-
-				<!-- The Compiler Plugin is used to compile the sources of your project. -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -132,8 +209,6 @@
 						<target>1.7</target>
 					</configuration>
 				</plugin>
-				<!-- create a Maven plugin descriptor for any Mojo's found in the source 
-					tree -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
@@ -160,7 +235,6 @@
 						</execution>
 					</executions>
 				</plugin>
-				<!-- create license Header -->
 				<plugin>
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
@@ -197,13 +271,11 @@
 						</execution>
 					</executions>
 				</plugin>
-
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.6</version>
 				</plugin>
-
 			</plugins>
 		</pluginManagement>
 	</build>
