@@ -92,9 +92,12 @@ public class ElementGraphBuilder {
      * create data flow graphs for a model
      *
      * @param modelInstance
+     *            BpmnModelInstance
      * @param processdefinition
-     * @param cl
-     * @return
+     *            processdefinitions
+     * @param calledElementHierarchy
+     *            calledElementHierarchy
+     * @return graphCollection returns graphCollection
      */
     public Collection<IGraph> createProcessGraph(final BpmnModelInstance modelInstance,
             final String processdefinition, final Collection<String> calledElementHierarchy) {
@@ -194,7 +197,9 @@ public class ElementGraphBuilder {
      * add process variables on event for a specific message name
      *
      * @param element
+     *            FlowElement
      * @param node
+     *            BpmnElement
      */
     private void addProcessVariablesForMessageName(final FlowElement element,
             final BpmnElement node) {
@@ -229,7 +234,8 @@ public class ElementGraphBuilder {
      * create invalid paths for data flow anomalies
      *
      * @param graphCollection
-     * @return
+     *            IGraph
+     * @return invalidPathMap returns invalidPathMap
      */
     public Map<AnomalyContainer, List<Path>> createInvalidPaths(
             final Collection<IGraph> graphCollection) {

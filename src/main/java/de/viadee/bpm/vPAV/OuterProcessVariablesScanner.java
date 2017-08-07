@@ -65,6 +65,7 @@ public class OuterProcessVariablesScanner {
      * scan variables
      *
      * @throws IOException
+     *             possible exception if filepath can not be resolved
      */
     public void scanProcessVariables() throws IOException {
         for (final String filePath : javaResources) {
@@ -106,7 +107,7 @@ public class OuterProcessVariablesScanner {
     /**
      * get mapping for message id
      *
-     * @return
+     * @return messageIdToVariableMap returns messageIdToVariableMap
      */
     public Map<String, Collection<String>> getMessageIdToVariableMap() {
         return messageIdToVariableMap;
@@ -115,7 +116,7 @@ public class OuterProcessVariablesScanner {
     /**
      * get mapping for process id
      *
-     * @return
+     * @return processIdToVariableMap returns processIdToVariableMap
      */
     public Map<String, Collection<String>> getProcessIdToVariableMap() {
         return processIdToVariableMap;
@@ -125,7 +126,8 @@ public class OuterProcessVariablesScanner {
      * read resource file
      *
      * @param fileName
-     * @return
+     *            Name of file
+     * @return methodBody returns methodBody
      */
     @SuppressWarnings("deprecation")
     private String readResourceFile(final String fileName) {

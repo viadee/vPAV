@@ -44,7 +44,11 @@ public final class CheckerFactory {
      * create checkers
      *
      * @param ruleConf
+     *            rules
+     * @param resourcesNewestVersions
+     *            resourcesNewestVersions
      * @param element
+     *            BpmnElement
      * @return Checkers
      */
 

@@ -22,7 +22,7 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 
 /**
  * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- * 
+ *
  * A class for a directed graph. Implemented by an adjacency list representation of a graph.
  */
 import java.util.ArrayList;
@@ -174,7 +174,7 @@ public class Graph implements IGraph {
 
     /**
      * set anomaly information on data flow graph
-     * 
+     *
      */
     @Override
     public void setAnomalyInformation(final BpmnElement source) {
@@ -183,7 +183,7 @@ public class Graph implements IGraph {
 
     /**
      * set anomaly information recursive on data flow graph (forward)
-     * 
+     *
      * @param startNode
      * @param currentPath
      */
@@ -273,7 +273,7 @@ public class Graph implements IGraph {
 
     /**
      * search all paths with variables, which has not been set
-     * 
+     *
      * source: http://codereview.stackexchange.com/questions/45678/find-all-paths-from-source-to-destination
      */
     @Override
@@ -285,9 +285,9 @@ public class Graph implements IGraph {
 
     /**
      * search all paths with variables, which has not been set (backward)
-     * 
+     *
      * source: http://codereview.stackexchange.com/questions/45678/find-all-paths-from-source-to-destination
-     * 
+     *
      * @param startNode
      * @param varName
      * @param currentPath
@@ -333,7 +333,7 @@ public class Graph implements IGraph {
 
     /**
      * exit condition for path finding (ur anomaly)
-     * 
+     *
      * @param startNode
      * @param anomaly
      * @param currentPath
@@ -364,7 +364,7 @@ public class Graph implements IGraph {
 
     /**
      * is variable deleted
-     * 
+     *
      * @param anomaly
      * @param in
      * @param out
@@ -379,7 +379,7 @@ public class Graph implements IGraph {
 
     /**
      * exit condition for path finding (du / dd anomaly)
-     * 
+     *
      * @param startNode
      * @param anomaly
      * @param currentPath
@@ -403,6 +403,7 @@ public class Graph implements IGraph {
         return null;
     }
 
+    @Override
     public String toString() {
         Set<BpmnElement> keys = adjacencyListSucessor.keySet();
         String str = "digraph G {\n";
@@ -429,9 +430,11 @@ public class Graph implements IGraph {
 
     /**
      * generate intersection for variable maps and remind precedence rule for variable states
-     * 
+     *
      * @param mapA
+     *            mapA
      * @param mapB
+     *            mapB
      * @return intersection
      */
     public static Map<String, InOutState> intersection(final Map<String, InOutState> mapA,
@@ -457,9 +460,11 @@ public class Graph implements IGraph {
 
     /**
      * get union and remind precedence rule for variable states
-     * 
+     *
      * @param mapA
+     *            mapA
      * @param mapB
+     *            mapB
      * @return union
      */
     public static Map<String, InOutState> unionWithStatePrecedence(final Map<String, InOutState> mapA,
@@ -476,9 +481,9 @@ public class Graph implements IGraph {
 
     /**
      * precedence rule for variable states
-     * 
+     *
      * 1) delete 2) read 3) define
-     * 
+     *
      * @param element1
      * @param element2
      * @return

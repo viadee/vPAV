@@ -95,6 +95,9 @@ public class BPMNScanner {
     /**
      * The Camunda API's method "getimplementation" doesn't return the correct Implementation, so the we have to scan
      * the xml of the model for the implementation
+     *
+     * @throws ParserConfigurationException
+     *             exception if document cant be parsed
      */
     public BPMNScanner() throws ParserConfigurationException {
         factory = DocumentBuilderFactory.newInstance();
