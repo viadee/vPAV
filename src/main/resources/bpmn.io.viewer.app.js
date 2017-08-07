@@ -207,7 +207,7 @@ function createTable(bpmnFile) {
             var a = document.createElement("a");
             a.appendChild(myText);
             //link to docu
-            a.setAttribute("href", "https://github.com/viadee/vPAV/tree/master/docs/" + issue.ruleName + ".md");
+            a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
 
             myCell.appendChild(a);
             myRow.appendChild(myCell);
