@@ -46,6 +46,8 @@ public class BPMNScanner {
 
     private final String out_one = "bpmn:outgoing";
 
+    // -----------------------
+
     private final String businessRuleTask_two = "bpmn2:businessRuleTask";
 
     private final String serviceTask_two = "bpmn2:serviceTask";
@@ -56,6 +58,8 @@ public class BPMNScanner {
 
     private final String out_two = "bpmn2:outgoing";
 
+    // -----------------------
+
     private final String businessRuleTask_three = "businessRuleTask";
 
     private final String serviceTask_three = "serviceTask";
@@ -65,6 +69,8 @@ public class BPMNScanner {
     private final String gateway_three = "exclusiveGateway";
 
     private final String out_three = "outgoing";
+
+    // ------------------------
 
     private final String scriptTag = "camunda:script";
 
@@ -88,9 +94,11 @@ public class BPMNScanner {
 
     private Document doc;
 
-    // private boolean new_model = true;
+    private ModelVersionEnum model_Version;
 
-    private String model_Version;
+    private enum ModelVersionEnum {
+        V1, V2, V3
+    }
 
     /**
      * The Camunda API's method "getimplementation" doesn't return the correct Implementation, so the we have to scan
@@ -110,11 +118,11 @@ public class BPMNScanner {
         doc = builder.parse(path);
 
         if (doc.getElementsByTagName("bpmn:definitions").getLength() > 0)
-            model_Version = "one";
+            model_Version = ModelVersionEnum.V1;
         else if (doc.getElementsByTagName("bpmn2:definitions").getLength() > 0)
-            model_Version = "two";
+            model_Version = ModelVersionEnum.V2;
         else if (doc.getElementsByTagName("definitions").getLength() > 0)
-            model_Version = "three";
+            model_Version = ModelVersionEnum.V3;
         else
             throw new ParserConfigurationException("Can't get the version of the BPMN Model");
     }
@@ -148,16 +156,16 @@ public class BPMNScanner {
         // set Model Version
         setModelVersion(path);
 
-        if (model_Version == "one") {
+        if (model_Version.equals(ModelVersionEnum.V1)) {
             // create nodelist that contains all Tasks with the namespace
             listNodeList.add(doc.getElementsByTagName(businessRuleTask_one));
             listNodeList.add(doc.getElementsByTagName(serviceTask_one));
             listNodeList.add(doc.getElementsByTagName(sendTask_one));
-        } else if (model_Version == "two") {
+        } else if (model_Version.equals(ModelVersionEnum.V2)) {
             listNodeList.add(doc.getElementsByTagName(businessRuleTask_two));
             listNodeList.add(doc.getElementsByTagName(serviceTask_two));
             listNodeList.add(doc.getElementsByTagName(sendTask_two));
-        } else if (model_Version == "three") {
+        } else if (model_Version.equals(ModelVersionEnum.V3)) {
             listNodeList.add(doc.getElementsByTagName(businessRuleTask_three));
             listNodeList.add(doc.getElementsByTagName(serviceTask_three));
             listNodeList.add(doc.getElementsByTagName(sendTask_three));
@@ -268,12 +276,12 @@ public class BPMNScanner {
         // set Model Version
         setModelVersion(path);
 
-        if (model_Version == "one") {
+        if (model_Version.equals(ModelVersionEnum.V1)) {
             // create nodelist that contains all Tasks with the namespace
             nodeList = doc.getElementsByTagName(gateway_one);
-        } else if (model_Version == "two") {
+        } else if (model_Version.equals(ModelVersionEnum.V2)) {
             nodeList = doc.getElementsByTagName(gateway_two);
-        } else if (model_Version == "three") {
+        } else if (model_Version.equals(ModelVersionEnum.V3)) {
             nodeList = doc.getElementsByTagName(gateway_three);
         } else {
             return "";
@@ -316,14 +324,14 @@ public class BPMNScanner {
         // set Model Version
         setModelVersion(path);
 
-        if (model_Version == "one") {
+        if (model_Version.equals(ModelVersionEnum.V1)) {
             // create nodelist that contains all Tasks with the namespace
             nodeList = doc.getElementsByTagName(gateway_one);
             out = out_one;
-        } else if (model_Version == "two") {
+        } else if (model_Version.equals(ModelVersionEnum.V2)) {
             nodeList = doc.getElementsByTagName(gateway_two);
             out = out_two;
-        } else if (model_Version == "three") {
+        } else if (model_Version.equals(ModelVersionEnum.V3)) {
             nodeList = doc.getElementsByTagName(gateway_three);
             out = out_three;
         } else {
