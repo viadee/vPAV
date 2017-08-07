@@ -21,7 +21,7 @@ Consistency checks are performed by individual modules called checkers, which se
 |[ProcessVariablesModelChecker](ProcessVariablesModelChecker.md)                       | Are process variables in the model provided in the code for all paths?   | Experimental |
 |[ProcessVariablesNameConventionChecker](ProcessVariablesNameConventionChecker.md)     | Do process variables in the model fit into a desired regex pattern?      | Done         |
 |[TaskNamingConventionChecker](TaskNamingConventionChecker.md)                         | Do task names in the model fit into a desired regex pattern?             | Done         |
-|[VersioningChecker](VersioningChecker.md)                                             | Are java classes implementing tasks fit to a version scheme?             | Done         |
+|[VersioningChecker](VersioningChecker.md)                                             | Do java classes implementing tasks fit  a version scheme?             | Done         |
 |[XorNamingConventionChecker](XorNamingConventionChecker.md)                           | Are XOR gateways ending with "?"                                         | Done         |
 |[NoScriptChecker](NoScriptChecker.md)                                                 | Is there any script in the model?                                        | Done         |
 
@@ -115,12 +115,13 @@ We will keep these as stable as possible, in order to enable users to analyse an
 ## Cooperation
 Feel free to report issues, questions, ideas or patches. We are looking forward to it.
 
+## Resources
+Status of the development branch: [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=development)](https://travis-ci.org/viadee/vPAV)
+
 ## Licenses
-All licenses can be found on the [maven site] (viadeeProcessApplicationValidator/docs/MavenSite/project-info.html)
+All licenses of reused components can be found on the [maven site] (viadeeProcessApplicationValidator/docs/MavenSite/project-info.html)
+Additionally we reuse the [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
 
-**Additional license:** 
-
-[BPMN.io](https://bpmn.io/license/)
 
 **License (BSD4)** <br/>
 All rights reserved.
