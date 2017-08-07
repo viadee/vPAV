@@ -40,6 +40,8 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
  */
 public final class CheckerFactory {
 
+    public static String implementation;
+
     /**
      * create checkers
      *
@@ -51,9 +53,6 @@ public final class CheckerFactory {
      *            given BpmnElement
      * @return checkers returns checkers
      */
-
-    public static String implementation;
-
     public static Collection<ElementChecker> createCheckerInstancesBpmnElement(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
             final BpmnElement element)
