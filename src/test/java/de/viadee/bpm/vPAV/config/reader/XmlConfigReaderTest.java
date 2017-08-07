@@ -69,7 +69,7 @@ public class XmlConfigReaderTest {
         // Default rules correct
         assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
         assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());
-        assertTrue("False Default ruleSet ", result.get("VersioningChecker").isActive());
+        assertFalse("False Default ruleSet ", result.get("VersioningChecker").isActive());
         assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").isActive());
         assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
         assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").isActive());
