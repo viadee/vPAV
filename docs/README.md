@@ -44,7 +44,9 @@ An overlay specifies the number of errors found on an element. Details can be se
 All errors are laid out in a table below the model. Clicking on the _rulename opens_ the corresponding documentation.
 Clicking on the _Element-Id_ or _invalid sequenzflow_ marks the corresponding element(s) in the model.
 <br/><br/>
-[Here](Output.md) you can find an example of the output. 
+### Example
+<a href="img/output.PNG?raw=true" target="_blank"><img src="img/output.PNG" 
+alt="Example HTML-Output" width="791" height="1281" border="5" /></a>
 
 ## Requirements
 - Camunda BPM Engine 7.4.0 and above
