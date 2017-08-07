@@ -1,0 +1,68 @@
+<ruleSe>	<!--  XML wird nicht erkannt, da Tag typo -->
+  <rule>
+    <name>JavaDelegateChecker</name>
+    <state>true</state>
+  </rule>
+  <rule>
+    <name>BusinessRuleTask</name>
+    <state>true</state>
+  </rule>
+  <rule>
+    <name>EmbeddedGroovyScriptChecker</name>
+    <state>true</state>
+  </rule>
+  <rule>
+    <name>VersioningChecker</name>
+    <state>true</state>
+    <settings>
+      <setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(java|groovy)
+      </setting>
+    </settings>
+  </rule>
+  <rule>
+    <name>DmnTskChecker</name>
+    <state>true</state>
+  </rule>
+  <rule>
+    <name>ProcessVariablesModelChecker</name>
+    <state>false</state>
+  </rule>
+  <rule>
+    <name>ProcessVariablesNameConventionChecker</name>
+    <state>false</state>
+    <elementConventions>
+      <elementConvention>
+        <name>internal</name>
+        <!-- field types for process variables -->
+        <elementFieldTypes excluded="true">
+          <elementFieldTyp>Class</elementFieldTyp>
+          <elementFieldType>ExternalScript</elementFieldType>
+          <elementFieldType>DMN</elementFieldType>
+          <elementFieldType>DelegateExpression</elementFieldType>
+        </elementFieldTypes>
+        <pattern>int_[a-zA-Z]+</pattern>
+      </elementConvention>
+      <elementConvention>
+        <name>external</name>
+        <!-- field types for process variables -->
+        <elementFieldTypes>
+          <elementFieldType>Class</elementFieldType>
+          <elementFieldType>ExternalScript</elementFieldType>
+          <elementFieldType>DMN</elementFieldType>
+          <elementFieldType>DelegateExpression</elementFieldType>
+        </elementFieldTypes>
+        <pattern>ext_[a-zA-Z]+</pattern>
+      </elementConvention>
+    </elementConventions>
+  </rule>
+  <rule>
+    <name>TaskNamingConventionChecker</name>
+    <state>false</state>
+    <elementConventions>
+      <elementConvention>
+        <name>convention</name>
+        <pattern>[A-ZÄÖÜ][a-zäöü\\\-\\\s]+</pattern>
+      </elementConvention>
+    </elementConventions>
+  </rule>
+</ruleSe>

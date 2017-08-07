@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="Collaboration_10ecumj">
+    <bpmn:participant id="Participant_0y9uqk8" processRef="OuterProcessVariablesTest" />
+  </bpmn:collaboration>
+  <bpmn:process id="OuterProcessVariablesTest" name="" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_05bq8nu">
+      <bpmn:outgoing>SequenceFlow_0y05v3o</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_1ovh0jh" />
+    </bpmn:startEvent>
+    <bpmn:task id="Task_09a5d81" name="Task">
+      <bpmn:incoming>SequenceFlow_0y05v3o</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0q5vaw5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="SequenceFlow_0y05v3o" sourceRef="StartEvent_05bq8nu" targetRef="Task_09a5d81" />
+    <bpmn:sequenceFlow id="SequenceFlow_0q5vaw5" sourceRef="Task_09a5d81" targetRef="IntermediateCatchEvent_103fbi3" />
+    <bpmn:endEvent id="EndEvent_1uckatl">
+      <bpmn:incoming>SequenceFlow_1dfj7sz</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1dfj7sz" sourceRef="IntermediateCatchEvent_103fbi3" targetRef="EndEvent_1uckatl" />
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_103fbi3">
+      <bpmn:incoming>SequenceFlow_0q5vaw5</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1dfj7sz</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_1vkja53" />
+    </bpmn:intermediateCatchEvent>
+  </bpmn:process>
+  <bpmn:message id="Message_1ovh0jh" name="startMessage" />
+  <bpmn:message id="Message_1vkja53" name="intermediateMessage" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_10ecumj">
+      <bpmndi:BPMNShape id="Participant_0y9uqk8_di" bpmnElement="Participant_0y9uqk8">
+        <dc:Bounds x="116" y="51" width="600" height="250" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_05bq8nu_di" bpmnElement="StartEvent_05bq8nu">
+        <dc:Bounds x="175" y="163" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="148" y="199" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_09a5d81_di" bpmnElement="Task_09a5d81">
+        <dc:Bounds x="263" y="141" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0y05v3o_di" bpmnElement="SequenceFlow_0y05v3o">
+        <di:waypoint xsi:type="dc:Point" x="211" y="181" />
+        <di:waypoint xsi:type="dc:Point" x="263" y="181" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="192" y="171" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0q5vaw5_di" bpmnElement="SequenceFlow_0q5vaw5">
+        <di:waypoint xsi:type="dc:Point" x="363" y="181" />
+        <di:waypoint xsi:type="dc:Point" x="409" y="181" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="341" y="171" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_1uckatl_di" bpmnElement="EndEvent_1uckatl">
+        <dc:Bounds x="510" y="163" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="483" y="199" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1dfj7sz_di" bpmnElement="SequenceFlow_1dfj7sz">
+        <di:waypoint xsi:type="dc:Point" x="445" y="181" />
+        <di:waypoint xsi:type="dc:Point" x="510" y="181" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="432.5" y="171" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_103fbi3_di" bpmnElement="IntermediateCatchEvent_103fbi3">
+        <dc:Bounds x="409" y="163" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="382" y="199" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

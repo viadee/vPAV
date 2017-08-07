@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_1" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_1xgyt6e</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1xgyt6e" sourceRef="StartEvent_1" targetRef="CallActivity_00laz0p" />
+    <bpmn:endEvent id="EndEvent_1ipbr1f">
+      <bpmn:incoming>SequenceFlow_1y9brrg</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1y9brrg" sourceRef="CallActivity_00laz0p" targetRef="EndEvent_1ipbr1f" />
+    <bpmn:callActivity id="CallActivity_00laz0p" name="Test Input/Output">
+      <bpmn:extensionElements>
+    	<camunda:in source="someVariableInMainProcess" target="nameOfVariableInSubProcess" />
+    	<camunda:in source="someVariableInMainProcess2" target="nameOfVariableInSubProcess2" />
+    	<camunda:out source="someVariableInSubProcess" target="nameOfVariableInMainProcess" />
+    	<camunda:out source="someVariableInSubProcess2" target="nameOfVariableInMainProcess2" />
+  	  </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1xgyt6e</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1y9brrg</bpmn:outgoing>
+    </bpmn:callActivity>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="173" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1xgyt6e_di" bpmnElement="SequenceFlow_1xgyt6e">
+        <di:waypoint xsi:type="dc:Point" x="209" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="309" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="214" y="110" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_1ipbr1f_di" bpmnElement="EndEvent_1ipbr1f">
+        <dc:Bounds x="504" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="477" y="138" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1y9brrg_di" bpmnElement="SequenceFlow_1y9brrg">
+        <di:waypoint xsi:type="dc:Point" x="409" y="120" />
+        <di:waypoint xsi:type="dc:Point" x="504" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="418" y="110" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="CallActivity_00laz0p_di" bpmnElement="CallActivity_00laz0p">
+        <dc:Bounds x="309" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

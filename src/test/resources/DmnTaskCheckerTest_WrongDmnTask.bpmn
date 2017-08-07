@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="Collaboration_1bndksh">
+    <bpmn:participant id="Participant_1e4cxgs" processRef="Process_1" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_1" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_1aapyv6</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1aapyv6" sourceRef="StartEvent_1" targetRef="BusinessRuleTask_1cjjqz9" />
+    <bpmn:endEvent id="EndEvent_13uioac">
+      <bpmn:incoming>SequenceFlow_0gxjuxm</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0gxjuxm" sourceRef="BusinessRuleTask_1cjjqz9" targetRef="EndEvent_13uioac" />
+    <bpmn:businessRuleTask id="BusinessRuleTask_1cjjqz9" name="Rechnung abschicken" camunda:decisionRef="" camunda:decisionRefBinding="undefined">
+      <bpmn:incoming>SequenceFlow_1aapyv6</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0gxjuxm</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1bndksh">
+      <bpmndi:BPMNShape id="Participant_1e4cxgs_di" bpmnElement="Participant_1e4cxgs">
+        <dc:Bounds x="55" y="9" width="482" height="202" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="105" y="86" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="78" y="122" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_13uioac_di" bpmnElement="EndEvent_13uioac">
+        <dc:Bounds x="433" y="86" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="406" y="122" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1aapyv6_di" bpmnElement="SequenceFlow_1aapyv6">
+        <di:waypoint xsi:type="dc:Point" x="141" y="104" />
+        <di:waypoint xsi:type="dc:Point" x="262" y="104" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="157" y="94" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0gxjuxm_di" bpmnElement="SequenceFlow_0gxjuxm">
+        <di:waypoint xsi:type="dc:Point" x="362" y="104" />
+        <di:waypoint xsi:type="dc:Point" x="433" y="104" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="352.5" y="94" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BusinessRuleTask_1cjjqz9_di" bpmnElement="BusinessRuleTask_1cjjqz9">
+        <dc:Bounds x="262" y="64" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
