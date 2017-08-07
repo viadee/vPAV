@@ -198,9 +198,9 @@ public class BPMNScanner {
      *
      * return boolean
      */
-    public boolean hasScript(String path, String id) throws SAXException, IOException {
+    public String getScriptType(String path, String id) throws SAXException, IOException {
         // bool to hold return values
-        boolean return_script = false;
+        String return_scriptType = null;
 
         // List for all Task elements
         NodeList nodeList;
@@ -214,16 +214,17 @@ public class BPMNScanner {
         // search for parent with id
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node n = nodeList.item(i).getParentNode();
+            return_scriptType = n.getNodeName();
             while (n.getParentNode() != null) {
                 if (((Element) n).getAttribute("id").equals(id)) {
-                    return true;
+                    return return_scriptType;
                 } else {
                     n = n.getParentNode();
                 }
             }
         }
 
-        return return_script;
+        return null;
     }
 
     /**
