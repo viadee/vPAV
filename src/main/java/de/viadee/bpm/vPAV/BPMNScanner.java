@@ -156,19 +156,24 @@ public class BPMNScanner {
         // set Model Version
         setModelVersion(path);
 
-        if (model_Version.equals(ModelVersionEnum.V1)) {
-            // create nodelist that contains all Tasks with the namespace
-            listNodeList.add(doc.getElementsByTagName(businessRuleTask_one));
-            listNodeList.add(doc.getElementsByTagName(serviceTask_one));
-            listNodeList.add(doc.getElementsByTagName(sendTask_one));
-        } else if (model_Version.equals(ModelVersionEnum.V2)) {
-            listNodeList.add(doc.getElementsByTagName(businessRuleTask_two));
-            listNodeList.add(doc.getElementsByTagName(serviceTask_two));
-            listNodeList.add(doc.getElementsByTagName(sendTask_two));
-        } else if (model_Version.equals(ModelVersionEnum.V3)) {
-            listNodeList.add(doc.getElementsByTagName(businessRuleTask_three));
-            listNodeList.add(doc.getElementsByTagName(serviceTask_three));
-            listNodeList.add(doc.getElementsByTagName(sendTask_three));
+        switch (model_Version) {
+            case V1:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_one));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_one));
+                listNodeList.add(doc.getElementsByTagName(sendTask_one));
+                break;
+            case V2:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_two));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_two));
+                listNodeList.add(doc.getElementsByTagName(sendTask_two));
+                break;
+            case V3:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_three));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_three));
+                listNodeList.add(doc.getElementsByTagName(sendTask_three));
+                break;
+            default:
+                listNodeList = null;
         }
 
         // iterate over list<NodeList> and check each NodeList (BRTask, ServiceTask and SendTask)
@@ -276,15 +281,18 @@ public class BPMNScanner {
         // set Model Version
         setModelVersion(path);
 
-        if (model_Version.equals(ModelVersionEnum.V1)) {
-            // create nodelist that contains all Tasks with the namespace
-            nodeList = doc.getElementsByTagName(gateway_one);
-        } else if (model_Version.equals(ModelVersionEnum.V2)) {
-            nodeList = doc.getElementsByTagName(gateway_two);
-        } else if (model_Version.equals(ModelVersionEnum.V3)) {
-            nodeList = doc.getElementsByTagName(gateway_three);
-        } else {
-            return "";
+        switch (model_Version) {
+            case V1:
+                nodeList = doc.getElementsByTagName(gateway_one);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(gateway_two);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(gateway_three);
+                break;
+            default:
+                return "";
         }
 
         // iterate over list and check each item
@@ -324,18 +332,22 @@ public class BPMNScanner {
         // set Model Version
         setModelVersion(path);
 
-        if (model_Version.equals(ModelVersionEnum.V1)) {
-            // create nodelist that contains all Tasks with the namespace
-            nodeList = doc.getElementsByTagName(gateway_one);
-            out = out_one;
-        } else if (model_Version.equals(ModelVersionEnum.V2)) {
-            nodeList = doc.getElementsByTagName(gateway_two);
-            out = out_two;
-        } else if (model_Version.equals(ModelVersionEnum.V3)) {
-            nodeList = doc.getElementsByTagName(gateway_three);
-            out = out_three;
-        } else {
-            return -1;
+        switch (model_Version) {
+            case V1:
+                // create nodelist that contains all Tasks with the namespace
+                nodeList = doc.getElementsByTagName(gateway_one);
+                out = out_one;
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(gateway_two);
+                out = out_two;
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(gateway_three);
+                out = out_three;
+                break;
+            default:
+                return -1;
         }
 
         // iterate over list and check each item
