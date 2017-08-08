@@ -55,6 +55,7 @@ public final class CheckerFactory {
      * @return checkers returns checkers
      * 
      * @throws ConfigItemNotFoundException
+     *             exception when ConfigItem (e.g. rule) not found
      */
     public static Collection<ElementChecker> createCheckerInstancesBpmnElement(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
