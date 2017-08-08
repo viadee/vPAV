@@ -121,7 +121,7 @@ Feel free to report issues, questions, ideas or patches. We are looking forward 
 Status of the development branch: [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=development)](https://travis-ci.org/viadee/vPAV)
 
 ## Licenses
-All licenses of reused components can be found on the [maven site] (viadeeProcessApplicationValidator/docs/MavenSite/project-info.html)
+All licenses of reused components can be found on the [maven site](http://rawgit.com/viadee/vPAV/master/docs/MavenSite/project-info.html)
 Additionally we reuse the [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
 
 
