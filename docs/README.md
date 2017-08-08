@@ -8,11 +8,11 @@ Find a list of the consistency checks below.
 
 We recommend to integrate the consistency check in your CI builds - you can't find these inconsistencies early enough.
 
-We forked the [Camunda BPM examples](https://github.com/viadee/camunda-bpm-examples/) to demonstrate the easy integration of vPAV to an existing project.
+We forked the [Camunda BPM examples](https://github.com/viadee/camunda-bpm-examples/) to demonstrate the easy integration of vPAV.
 
 # Features
 
-## Checker
+## Model-Code Inconsistencies and Checkers
 Consistency checks are performed by individual modules called checkers, which search for certain types of inconsistencies. Currently, the following checkers are implemented: 
 
 | Checker                                                                              | Summary                                                                  | Status       |
