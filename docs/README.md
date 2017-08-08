@@ -8,6 +8,8 @@ Find a list of the consistency checks below.
 
 We recommend to integrate the consistency check in your CI builds - you can't find these inconsistencies early enough.
 
+We forked the [Camunda BPM examples](https://github.com/viadee/camunda-bpm-examples/) to demonstrate the easy integration of vPAV to an existing project.
+
 # Features
 
 ## Checker
@@ -122,7 +124,7 @@ Status of the development branch: [![Build Status](https://travis-ci.org/viadee/
 
 ## Licenses
 All licenses of reused components can be found on the [maven site](http://rawgit.com/viadee/vPAV/master/docs/MavenSite/project-info.html)
-Additionally we reuse the [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
+</br> Additionally we reuse the [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
 
 
 **License (BSD4)** <br/>
