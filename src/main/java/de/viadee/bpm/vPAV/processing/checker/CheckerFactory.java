@@ -51,7 +51,10 @@ public final class CheckerFactory {
      *            resourcesNewestVersions in context
      * @param element
      *            given BpmnElement
+     * 
      * @return checkers returns checkers
+     * 
+     * @throws ConfigItemNotFoundException
      */
     public static Collection<ElementChecker> createCheckerInstancesBpmnElement(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
