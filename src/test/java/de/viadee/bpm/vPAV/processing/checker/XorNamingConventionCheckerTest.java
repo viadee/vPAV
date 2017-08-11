@@ -55,10 +55,10 @@ public class XorNamingConventionCheckerTest {
 
     private static ClassLoader cl;
 
+    private final Rule rule = new Rule("DmnTaskChecker", true, null, null, null);
+
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        final Rule rule = new Rule("DmnTaskChecker", true, null, null, null);
-        checker = new XorNamingConventionChecker(rule);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
@@ -81,6 +81,7 @@ public class XorNamingConventionCheckerTest {
     public void testCorrectXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorNamingConventionChecker_correct.bpmn";
+        checker = new XorNamingConventionChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -90,7 +91,7 @@ public class XorNamingConventionCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() > 0) {
             Assert.fail("correct naming convention should not generate an issue");
@@ -111,6 +112,7 @@ public class XorNamingConventionCheckerTest {
     public void testFalseXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorNamingConventionChecker_false.bpmn";
+        checker = new XorNamingConventionChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -120,7 +122,7 @@ public class XorNamingConventionCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("wrong naming convention should generate an issue");

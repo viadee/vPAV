@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -35,9 +34,7 @@ import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BPMNScanner;
-import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.CheckName;
@@ -53,36 +50,29 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class JavaDelegateChecker extends AbstractElementChecker {
 
-    public JavaDelegateChecker(final Rule rule) {
+    private final String path;
+
+    public JavaDelegateChecker(final Rule rule, final String path) {
         super(rule);
+        this.path = path;
     }
 
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        String path;
-        for (final String output : AbstractRunner.getModelPath()) {
-            path = ConstantsConfig.BASEPATH + output;
-            try {
-                issues.addAll(checkSingleModel(element, path));
-            } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return issues;
-    }
-
-    public Collection<CheckerIssue> checkSingleModel(final BpmnElement element, String path)
-            throws ParserConfigurationException, XPathExpressionException, SAXException, IOException {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
         final BaseElement bpmnElement = element.getBaseElement();
+        final BPMNScanner scan;
+        String implementationAttr = null;
 
-        BPMNScanner scan = new BPMNScanner();
-
-        // read attributes from task
-        final String implementationAttr = scan.getImplementation(path, bpmnElement.getId());
+        try {
+            scan = new BPMNScanner();
+            // read attributes from task
+            implementationAttr = scan.getImplementation(path, bpmnElement.getId());
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         final String classAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                 "class");

@@ -60,11 +60,10 @@ public class NoScriptCheckerTest {
 
     private static ClassLoader cl;
 
+    private final Rule rule = new Rule("NoScriptChecker", true, null, null, null);
+
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        final Rule rule = new Rule("NoScriptChecker", true, null, null, null);
-
-        checker = new NoScriptChecker(rule);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
@@ -85,6 +84,7 @@ public class NoScriptCheckerTest {
     public void testModelWithNoScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithoutScript.bpmn";
+        checker = new NoScriptChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -94,7 +94,7 @@ public class NoScriptCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() > 0) {
             Assert.fail("correct model generates an issue");
@@ -113,6 +113,7 @@ public class NoScriptCheckerTest {
     public void testModelWithInputScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithInputScript.bpmn";
+        checker = new NoScriptChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -123,7 +124,7 @@ public class NoScriptCheckerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -145,6 +146,7 @@ public class NoScriptCheckerTest {
     public void testModelWithOutputScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithOutputScript.bpmn";
+        checker = new NoScriptChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -155,7 +157,7 @@ public class NoScriptCheckerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -177,6 +179,7 @@ public class NoScriptCheckerTest {
     public void testModelWithExecutionlistenerScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithExecutionlistenerScript.bpmn";
+        checker = new NoScriptChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -187,7 +190,7 @@ public class NoScriptCheckerTest {
         final BpmnElement elementGate = new BpmnElement(PATH, baseElementsGate.iterator().next());
         final BaseElement baseElementGate = elementGate.getBaseElement();
 
-        Collection<CheckerIssue> issues = checker.checkSingleModel(elementGate, PATH);
+        Collection<CheckerIssue> issues = checker.check(elementGate);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -210,6 +213,7 @@ public class NoScriptCheckerTest {
     public void testModelWithTasklistenerScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithTasklistenerScript.bpmn";
+        checker = new NoScriptChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -220,7 +224,7 @@ public class NoScriptCheckerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -242,6 +246,7 @@ public class NoScriptCheckerTest {
     public void testModelWithScriptTask()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithScriptTask.bpmn";
+        checker = new NoScriptChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -252,7 +257,7 @@ public class NoScriptCheckerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.Process;
@@ -33,9 +32,7 @@ import org.camunda.bpm.model.bpmn.instance.ScriptTask;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BPMNScanner;
-import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -51,50 +48,44 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class NoScriptChecker extends AbstractElementChecker {
 
-    public NoScriptChecker(final Rule rule) {
+    private final String path;
+
+    public NoScriptChecker(final Rule rule, final String path) {
         super(rule);
+        this.path = path;
     }
 
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        String path;
-        for (final String output : AbstractRunner.getModelPath()) {
-            path = ConstantsConfig.BASEPATH + output;
-            try {
-                issues.addAll(checkSingleModel(element, path));
-            } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return issues;
-    }
-
-    public Collection<CheckerIssue> checkSingleModel(final BpmnElement element, String path)
-            throws ParserConfigurationException, XPathExpressionException, SAXException, IOException {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
-        BPMNScanner scan = new BPMNScanner();
+        final BPMNScanner scan;
 
-        // ScripTasks not allowed
-        if (bpmnElement instanceof ScriptTask) {
-            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                    bpmnElement.getAttributeValue("name"), null, null, null,
-                    "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
-        }
+        try {
+            scan = new BPMNScanner();
 
-        if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)) {
-            // Search for camunda:script tag
-            if (scan.getScriptType(path, bpmnElement.getAttributeValue("id")) != null) {
-                // Error, because script were found
+            // ScripTasks not allowed
+            if (bpmnElement instanceof ScriptTask) {
                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
-                        "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                + scan.getScriptType(path, bpmnElement.getAttributeValue("id")) + "' script"));
+                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
             }
+
+            if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)) {
+                // Search for camunda:script tag
+                if (scan.getScriptType(path, bpmnElement.getAttributeValue("id")) != null) {
+                    // Error, because script were found
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                            bpmnElement.getAttributeValue("name"), null, null, null,
+                            "task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                    + scan.getScriptType(path, bpmnElement.getAttributeValue("id")) + "' script"));
+                }
+            }
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            e.printStackTrace();
         }
 
         return issues;

@@ -96,7 +96,8 @@ public class BpmnModelDispatcher {
                 element = new BpmnElement(processdefinition.getPath(), baseElement);
             }
             final Collection<ElementChecker> checkerCollection = CheckerFactory
-                    .createCheckerInstancesBpmnElement(conf, resourcesNewestVersions, element);
+                    .createCheckerInstancesBpmnElement(conf, resourcesNewestVersions, element,
+                            processdefinition.getPath());
             for (final ElementChecker checker : checkerCollection) {
                 issues.addAll(checker.check(element));
             }

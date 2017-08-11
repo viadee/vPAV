@@ -57,10 +57,10 @@ public class DmnTaskCheckerTest {
 
     private static ClassLoader cl;
 
+    private final Rule rule = new Rule("DmnTaskChecker", true, null, null, null);
+
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        final Rule rule = new Rule("DmnTaskChecker", true, null, null, null);
-        checker = new DmnTaskChecker(rule);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
@@ -83,6 +83,7 @@ public class DmnTaskCheckerTest {
     public void testCorrectDMN()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_CorrectDMN.bpmn";
+        checker = new DmnTaskChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -92,7 +93,7 @@ public class DmnTaskCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() > 0) {
             Assert.fail("correct DMN-File generates an issue");
@@ -113,6 +114,7 @@ public class DmnTaskCheckerTest {
     public void testDMNTaskWithoutReference()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_WrongDmnTask.bpmn";
+        checker = new DmnTaskChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -123,7 +125,7 @@ public class DmnTaskCheckerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -147,6 +149,7 @@ public class DmnTaskCheckerTest {
     public void testDMNTaskWithWrongDMN()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_wrongDMNReference.bpmn";
+        checker = new DmnTaskChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -157,7 +160,7 @@ public class DmnTaskCheckerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -181,6 +184,7 @@ public class DmnTaskCheckerTest {
     public void testReadReferencedDMNFile()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_ReadReferencedDMN.bpmn";
+        checker = new DmnTaskChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -190,7 +194,7 @@ public class DmnTaskCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() > 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");

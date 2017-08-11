@@ -59,9 +59,10 @@ public class JavaDelegateCheckerTest {
 
     private static ClassLoader cl;
 
+    private final Rule rule = new Rule("JavaDelegateChecker", true, null, null, null);
+
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        final Rule rule = new Rule("JavaDelegateChecker", true, null, null, null);
 
         // Bean-Mapping
         final Map<String, String> beanMapping = new HashMap<String, String>();
@@ -69,7 +70,6 @@ public class JavaDelegateCheckerTest {
         beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.delegates.TestDelegate");
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
-        checker = new JavaDelegateChecker(rule);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
@@ -90,6 +90,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReference()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReference.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -99,7 +100,7 @@ public class JavaDelegateCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() > 0) {
             Assert.fail("correct java delegate generates an issue");
@@ -118,6 +119,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReferenceSignal()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReferenceSignal.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -127,7 +129,7 @@ public class JavaDelegateCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() > 0) {
             Assert.fail("correct java delegate generates an issue");
@@ -146,6 +148,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReferenceAbstract()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReferenceAbstract.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -155,7 +158,7 @@ public class JavaDelegateCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() > 0) {
             Assert.fail("correct java delegate generates an issue");
@@ -174,6 +177,7 @@ public class JavaDelegateCheckerTest {
     public void testNoTechnicalAttributes()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoTechnicalAttributes.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -184,7 +188,7 @@ public class JavaDelegateCheckerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -206,6 +210,7 @@ public class JavaDelegateCheckerTest {
     public void testNoJavaDelegateEntered()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoJavaDelegateEntered.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -216,7 +221,7 @@ public class JavaDelegateCheckerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -238,6 +243,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegatePath()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegatePath.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -249,7 +255,7 @@ public class JavaDelegateCheckerTest {
 
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -271,6 +277,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateInterface()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateInterface.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -282,7 +289,7 @@ public class JavaDelegateCheckerTest {
 
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -306,6 +313,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateEntered()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateEntered.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -317,7 +325,7 @@ public class JavaDelegateCheckerTest {
 
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -340,6 +348,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateExpression.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -351,7 +360,7 @@ public class JavaDelegateCheckerTest {
 
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -373,6 +382,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongClassReference()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongClassReference.bpmn";
+        checker = new JavaDelegateChecker(rule, PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -384,7 +394,7 @@ public class JavaDelegateCheckerTest {
 
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<CheckerIssue> issues = checker.checkSingleModel(element, PATH);
+        final Collection<CheckerIssue> issues = checker.check(element);
 
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");

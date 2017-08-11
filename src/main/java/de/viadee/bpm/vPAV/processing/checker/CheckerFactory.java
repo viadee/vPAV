@@ -59,7 +59,7 @@ public final class CheckerFactory {
      */
     public static Collection<ElementChecker> createCheckerInstancesBpmnElement(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
-            final BpmnElement element)
+            final BpmnElement element, String path)
             throws ConfigItemNotFoundException {
 
         final String c_class = "camunda:class";
@@ -90,26 +90,26 @@ public final class CheckerFactory {
 
         if (baseElement instanceof ServiceTask || baseElement instanceof BusinessRuleTask
                 || baseElement instanceof SendTask) {
-            TaskImplementationChecker.getTaskImplementation(element);
+            TaskImplementationChecker.getTaskImplementation(element, path);
 
             if (implementation.equals(c_class) && javaDelegateRule.isActive()) {
-                checkers.add(new JavaDelegateChecker(javaDelegateRule));
+                checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
             }
             if (implementation.equals(c_exp) && javaDelegateRule.isActive()) {
-                checkers.add(new JavaDelegateChecker(javaDelegateRule));
+                checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
             }
             if (implementation.equals(c_dexp) && javaDelegateRule.isActive()) {
-                checkers.add(new JavaDelegateChecker(javaDelegateRule));
+                checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
             }
             if (implementation.equals(c_ext)) {
                 // do nothing for now
             }
             if (implementation.equals(c_dmn) && dmnTaskRule.isActive()) {
-                checkers.add(new DmnTaskChecker(dmnTaskRule));
+                checkers.add(new DmnTaskChecker(dmnTaskRule, path));
             }
             if (implementation.equals(imp)) {
                 // TODO: Write issue
-                checkers.add(new JavaDelegateChecker(javaDelegateRule));
+                checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
             }
         }
 
@@ -117,14 +117,14 @@ public final class CheckerFactory {
         if (xorNamingConventionRule == null)
             throw new ConfigItemNotFoundException(getClassName(XorNamingConventionChecker.class) + " not found");
         if (xorNamingConventionRule.isActive()) {
-            checkers.add(new XorNamingConventionChecker(xorNamingConventionRule));
+            checkers.add(new XorNamingConventionChecker(xorNamingConventionRule, path));
         }
 
         final Rule noScriptCheckerRule = ruleConf.get(getClassName(NoScriptChecker.class));
         if (noScriptCheckerRule == null)
             throw new ConfigItemNotFoundException(getClassName(NoScriptChecker.class) + " not found");
         if (noScriptCheckerRule.isActive()) {
-            checkers.add(new NoScriptChecker(noScriptCheckerRule));
+            checkers.add(new NoScriptChecker(noScriptCheckerRule, path));
         }
 
         final Rule processVariablesNameConventionRule = ruleConf

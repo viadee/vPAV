@@ -7,9 +7,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BPMNScanner;
-import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
 public class TaskImplementationChecker {
@@ -21,21 +19,14 @@ public class TaskImplementationChecker {
      *            BpmnElement
      */
 
-    public static void getTaskImplementation(BpmnElement element) {
+    public static void getTaskImplementation(BpmnElement element, String path) {
 
         final BPMNScanner scan;
 
         try {
-
             scan = new BPMNScanner();
             final BaseElement bpmnElement = element.getBaseElement();
-
-            String path;
-            for (final String output : AbstractRunner.getModelPath()) {
-                path = ConstantsConfig.BASEPATH + output;
-                CheckerFactory.implementation = scan.getImplementation(path, bpmnElement.getId());
-            }
-
+            CheckerFactory.implementation = scan.getImplementation(path, bpmnElement.getId());
         } catch (SAXException | IOException | ParserConfigurationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
