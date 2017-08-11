@@ -218,7 +218,7 @@ function createTable(bpmnFile) {
             //create link 
             var c = document.createElement("a");
             c.appendChild(myText);
-            c.setAttribute("onclick", "selectModel('" + bpmnFile.replace("\\", "\\\\") + "','" + issue.elementId + "', 0 , 2)");
+            c.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.elementId + "', 0 , 2)");
             c.setAttribute("href", "#");
 
             myCell.appendChild(c);
@@ -261,7 +261,7 @@ function createTable(bpmnFile) {
 
                 var b = document.createElement("a");
                 b.appendChild(myText);
-                b.setAttribute("onclick", "selectModel('" + bpmnFile.replace("\\", "\\\\") + "','" + issue.id + "','" + x + "', 1)");
+                b.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.id + "','" + x + "', 1)");
                 b.setAttribute("href", "#");
 
                 myCell.appendChild(b);
@@ -417,7 +417,7 @@ function toggleDialog(sh) {
         li.style.padding = "0";
 
         a.appendChild(document.createTextNode(subName + " (" + countIssues(model.name) + ")"));
-        a.setAttribute("onclick", "selectModel('" + model.name.replace("\\", "\\\\") + "', null, null, 0 )");
+        a.setAttribute("onclick", "selectModel('" + model.name.replace(/\\/g, "\\\\") + "', null, null, 0 )");
         a.setAttribute("href", "#");
         a.style.padding = "0.4em";
         a.style.border = "1px solid black";
