@@ -69,7 +69,7 @@ You can start the validation as a Maven plugin. Therefore, add the dependency to
 
 Then, use the following maven goal to start the validation.  
 ```java
-de.viadee.bpm:viadeeProcessApplicationValidator:2.0.0-SNAPSHOT:check
+de.viadee.bpm:viadeeProcessApplicationValidator:2.0.0:check
 ```
 Please note: This approach is not useful, if you use Spring managed java delegates in your processes.
 
