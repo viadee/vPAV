@@ -149,7 +149,7 @@ public class FileScanner {
     /**
      * get file paths for process definitions
      *
-     * @return
+     * @return processdefinitions Process definitions
      */
     public Set<String> getProcessdefinitions() {
         return processdefinitions;
@@ -158,7 +158,7 @@ public class FileScanner {
     /**
      * get file paths of java resources
      *
-     * @return
+     * @return javaResources returns file paths of java resources
      */
     public Set<String> getJavaResources() {
         return javaResources;
@@ -167,7 +167,7 @@ public class FileScanner {
     /**
      * get mapping from process id to file path of bpmn models
      *
-     * @return
+     * @return processIdToPathMap returns processIdToPathMap
      */
     public Map<String, String> getProcessIdToPathMap() {
         return processIdToPathMap;
@@ -176,7 +176,7 @@ public class FileScanner {
     /**
      * get mapping from decisionRef to file path of dmn models
      *
-     * @return
+     * @return decisionRefToPathMap returns decisionRefToPathMap
      */
     public Map<String, String> getDecisionRefToPathMap() {
         return decisionRefToPathMap;
@@ -185,7 +185,7 @@ public class FileScanner {
     /**
      * get a list of versioned resources (only with current versions)
      *
-     * @return
+     * @return resourcesNewestVersions returns resourcesNewestVersions
      */
     public Collection<String> getResourcesNewestVersions() {
         return resourcesNewestVersions;

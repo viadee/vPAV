@@ -60,7 +60,7 @@ public class JsOutputWriter implements IssueOutputWriter {
         String output = "var diagramXMLSource = [\n";
         try {
             for (final String bpmnFilename : AbstractRunner.getModelPath()) {
-                String prettyBpmnFileName = bpmnFilename.replaceAll("\\\\", "\\\\\\\\"); // replace \\ with \\\\
+                String prettyBpmnFileName = replace("\\", "\\\\", bpmnFilename);
                 output += "{\"name\":\"" + prettyBpmnFileName + "\",\n \"xml\": \"";
                 output += convertBpmnFile(ConstantsConfig.BASEPATH + bpmnFilename);
                 output += "\"},\n";
@@ -69,6 +69,16 @@ public class JsOutputWriter implements IssueOutputWriter {
             throw new OutputWriterException("bpmnFile not found");
         }
         return output + "];\n";
+    }
+
+    private String replace(String search, String replace, String str) {
+        int start = str.indexOf(search);
+
+        while (start != -1) {
+            str = str.substring(0, start) + replace + str.substring(start + search.length(), str.length());
+            start = str.indexOf(search, start + replace.length());
+        }
+        return (str);
     }
 
     private String convertBpmnFile(String path) throws IOException {

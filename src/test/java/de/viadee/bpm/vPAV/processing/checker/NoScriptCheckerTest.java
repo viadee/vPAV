@@ -128,7 +128,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with script",
+            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'camunda:inputParameter' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -160,7 +160,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with script",
+            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'camunda:outputParameter' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -192,7 +192,8 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElementGate) + "' with script",
+            Assert.assertEquals(
+                    "task '" + CheckName.checkName(baseElementGate) + "' with 'camunda:executionListener' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -224,7 +225,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with script",
+            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'camunda:taskListener' script",
                     issues.iterator().next().getMessage());
         }
     }

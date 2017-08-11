@@ -35,6 +35,8 @@ public class BeanMappingGenerator {
      * Generates bean mapping HashMap for jUnit start
      *
      * @param ctx
+     *            ApplicationContext
+     * @return beanNameToClassMap contains beanmapping
      */
     public static Map<String, String> generateBeanMappingFile(final ApplicationContext ctx) {
 

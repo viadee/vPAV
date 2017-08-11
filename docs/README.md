@@ -8,9 +8,11 @@ Find a list of the consistency checks below.
 
 We recommend to integrate the consistency check in your CI builds - you can't find these inconsistencies early enough.
 
+We forked the [Camunda BPM examples](https://github.com/viadee/camunda-bpm-examples/) to demonstrate the easy integration of vPAV.
+
 # Features
 
-## Checker
+## Model-Code Inconsistencies and Checkers
 Consistency checks are performed by individual modules called checkers, which search for certain types of inconsistencies. Currently, the following checkers are implemented: 
 
 | Checker                                                                              | Summary                                                                  | Status       |
@@ -21,7 +23,7 @@ Consistency checks are performed by individual modules called checkers, which se
 |[ProcessVariablesModelChecker](ProcessVariablesModelChecker.md)                       | Are process variables in the model provided in the code for all paths?   | Experimental |
 |[ProcessVariablesNameConventionChecker](ProcessVariablesNameConventionChecker.md)     | Do process variables in the model fit into a desired regex pattern?      | Done         |
 |[TaskNamingConventionChecker](TaskNamingConventionChecker.md)                         | Do task names in the model fit into a desired regex pattern?             | Done         |
-|[VersioningChecker](VersioningChecker.md)                                             | Are java classes implementing tasks fit to a version scheme?             | Done         |
+|[VersioningChecker](VersioningChecker.md)                                             | Do java classes implementing tasks fit  a version scheme?             | Done         |
 |[XorNamingConventionChecker](XorNamingConventionChecker.md)                           | Are XOR gateways ending with "?"                                         | Done         |
 |[NoScriptChecker](NoScriptChecker.md)                                                 | Is there any script in the model?                                        | Done         |
 
@@ -43,8 +45,10 @@ In the BPMN model, the elements with errors are highlighted. Error categories ar
 An overlay specifies the number of errors found on an element. Details can be seen by clicking on the overlay.
 All errors are laid out in a table below the model. Clicking on the _rulename opens_ the corresponding documentation.
 Clicking on the _Element-Id_ or _invalid sequenzflow_ marks the corresponding element(s) in the model.
-<br/><br/>
-[Here](Output.md) you can find an example of the output. 
+
+### Example
+<a href="img/output.PNG?raw=true" target="_blank"><img src="img/output.PNG" 
+alt="Example HTML-Output" width="791" height="1281" border="5" /></a>
 
 ## Requirements
 - Camunda BPM Engine 7.4.0 and above
@@ -87,7 +91,7 @@ public class ModelConsistencyTest{
     private ApplicationContext ctx;   
     
     @Test
-    public void errorsInModelMustBeFound() {
+    public void validateModel() {
         assertTrue("Model inconsistency found. Please check target folder for validation output",
                 ProcessApplicationValidator.findModelInconsistencies(ctx).isEmpty());
     }
@@ -115,12 +119,13 @@ We will keep these as stable as possible, in order to enable users to analyse an
 ## Cooperation
 Feel free to report issues, questions, ideas or patches. We are looking forward to it.
 
+## Resources
+Status of the development branch: [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=development)](https://travis-ci.org/viadee/vPAV)
+
 ## Licenses
-All licenses can be found on the [maven site] (viadeeProcessApplicationValidator/docs/MavenSite/project-info.html)
+All licenses of reused components can be found on the [maven site](http://rawgit.com/viadee/vPAV/master/docs/MavenSite/project-info.html)
+</br> Additionally we reuse the [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
 
-**Additional license:** 
-
-[BPMN.io](https://bpmn.io/license/)
 
 **License (BSD4)** <br/>
 All rights reserved.

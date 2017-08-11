@@ -87,12 +87,13 @@ public class NoScriptChecker extends AbstractElementChecker {
 
         if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)) {
             // Search for camunda:script tag
-            if (scan.hasScript(path, bpmnElement.getAttributeValue("id"))) {
+            if (scan.getScriptType(path, bpmnElement.getAttributeValue("id")) != null) {
                 // Error, because script were found
                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
-                        "task '" + CheckName.checkName(bpmnElement) + "' with script"));
+                        "task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                + scan.getScriptType(path, bpmnElement.getAttributeValue("id")) + "' script"));
             }
         }
 

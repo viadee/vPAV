@@ -40,16 +40,23 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
  */
 public final class CheckerFactory {
 
+    public static String implementation;
+
     /**
      * create checkers
      *
      * @param ruleConf
+     *            rules for checker
+     * @param resourcesNewestVersions
+     *            resourcesNewestVersions in context
      * @param element
-     * @return Checkers
+     *            given BpmnElement
+     * 
+     * @return checkers returns checkers
+     * 
+     * @throws ConfigItemNotFoundException
+     *             exception when ConfigItem (e.g. rule) not found
      */
-
-    public static String implementation;
-
     public static Collection<ElementChecker> createCheckerInstancesBpmnElement(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
             final BpmnElement element)

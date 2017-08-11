@@ -91,7 +91,9 @@ public final class ProcessVariableReader {
     /**
      * Examining an bpmn element for variables
      *
-     * @return variables
+     * @param element
+     *            BpmnElement
+     * @return processVariables returns processVariables
      */
     public Map<String, ProcessVariable> getVariablesFromElement(final BpmnElement element) {
 

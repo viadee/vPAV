@@ -157,11 +157,11 @@ public abstract class AbstractRunner {
     /**
      * write output files (xml / json/ js)
      *
-     * @param filteredIssue
-     * @throws OutputWriterException
+     * @param filteredIssues
+     *            List of filteredIssues
+     * @throws RuntimeException
+     *             Abort if writer can not be instantiated
      */
-    // 6 write check results to xml and json and js file
-    // 6a if no issues, delete files
     public static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
         if (filteredIssues.size() > 0) {
             final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
