@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,6 +40,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -55,7 +57,7 @@ public class XorNamingConventionCheckerTest {
 
     private static ClassLoader cl;
 
-    private final Rule rule = new Rule("DmnTaskChecker", true, null, null, null);
+    private final Rule rule = createRule();
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -67,6 +69,41 @@ public class XorNamingConventionCheckerTest {
         RuntimeConfig.getInstance().setClassLoader(cl);
     }
 
+    
+    
+    /**
+     * Case: XOR gateway with correct naming convention and XOR join that should not be checked
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     *
+     */
+
+    @Test
+    public void testOutgoingXor()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingXor.bpmn";
+        checker = new XorNamingConventionChecker(rule, PATH);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ExclusiveGateway> baseElements = modelInstance
+                .getModelElementsByType(ExclusiveGateway.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final Collection<CheckerIssue> issues = checker.check(element);
+
+        if (issues.size() > 0) {
+            Assert.fail("correct naming convention should not generate an issue");
+        }
+    }
+
+    
+    
     /**
      * Case: XOR gateway with correct naming convention
      *
@@ -128,5 +165,26 @@ public class XorNamingConventionCheckerTest {
             Assert.fail("wrong naming convention should generate an issue");
         }
     }
+    
+    /**
+     * Creates rule configuration
+     * 
+     * @return rule
+     */
+    private static Rule createRule() {
+
+        final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+
+        final ElementConvention elementConvention = new ElementConvention("convention", null,
+                "[A-ZÄÖÜ][a-zäöü]*\\?");
+        elementConventions.add(elementConvention);
+
+        final Rule rule = new Rule("XorNamingConventionChecker", true, null, elementConventions, null);
+
+        return rule;
+    }
+    
+    
+    
 
 }
