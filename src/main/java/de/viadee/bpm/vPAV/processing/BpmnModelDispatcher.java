@@ -51,8 +51,8 @@ public class BpmnModelDispatcher {
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,
             final Map<String, Collection<String>> processIdToVariables,
-            final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf,
-            final ClassLoader cl) throws ConfigItemNotFoundException {
+            final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf)
+            throws ConfigItemNotFoundException {
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);

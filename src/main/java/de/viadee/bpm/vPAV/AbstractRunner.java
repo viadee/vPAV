@@ -336,7 +336,7 @@ public abstract class AbstractRunner {
             modelIssues = BpmnModelDispatcher.dispatch(new File(ConstantsConfig.BASEPATH + processdef),
                     fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
                     variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
-                    fileScanner.getResourcesNewestVersions(), rules, RuntimeConfig.getInstance().getClassLoader());
+                    fileScanner.getResourcesNewestVersions(), rules);
 
         } catch (final ConfigItemNotFoundException e) {
             throw new RuntimeException("Config item couldn't be read");
