@@ -29,6 +29,15 @@ Consistency checks are performed by individual modules called checkers, which se
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
 
+### Exclusion of false positives
+An ignore file can be created to exclude false positives. The file have to be named **".ignoreIssues"** and have to be stored in **"src/main/resources"** . 
+There you have to enter the IDs of the issues, who should be ignored. This must be done line by line. Line comments are initiated with "#".
+
+**Example**
+```
+# Comment 
+8d04f2e77a7d282c521098ab947ac060
+```
 ## Output
 
 The result of the check is first of all a direct one: if at least one inconsistency is 
