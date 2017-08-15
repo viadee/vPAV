@@ -64,6 +64,7 @@ You can start the validation as a Maven plugin. Therefore, add the dependency to
   <groupId>de.viadee.bpm</groupId>
   <artifactId>viadeeProcessApplicationValidator</artifactId>
   <version>...</version>
+  <scope>test</scope>
 </dependency>
 ```
 
