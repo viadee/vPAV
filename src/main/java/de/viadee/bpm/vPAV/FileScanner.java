@@ -129,8 +129,8 @@ public class FileScanner {
             // get current versions for resources, that match the name schema
             resourcesNewestVersions = createResourcesToNewestVersions(
                     new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())), versioningSchema);
-
         }
+
     }
 
     /**

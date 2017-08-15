@@ -49,16 +49,12 @@ public class OuterProcessVariablesScanner {
 
     private Set<String> javaResources;
 
-    private ClassLoader classLoader;
-
     private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<String, Collection<String>>();
 
     private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
 
-    public OuterProcessVariablesScanner(final Set<String> javaResources,
-            final ClassLoader classLoader) {
+    public OuterProcessVariablesScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
-        this.classLoader = classLoader;
     }
 
     /**
@@ -133,10 +129,11 @@ public class OuterProcessVariablesScanner {
     private String readResourceFile(final String fileName) {
         String methodBody = "";
         if (fileName != null && fileName.trim().length() > 0) {
-            final InputStream resource = classLoader.getResourceAsStream(fileName);
+            final InputStream resource = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(fileName);
             if (resource != null) {
                 try {
-                    methodBody = IOUtils.toString(classLoader.getResourceAsStream(fileName));
+                    methodBody = IOUtils
+                            .toString(RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(fileName));
                 } catch (final IOException ex) {
                     throw new RuntimeException(
                             "resource '" + fileName + "' could not be read: " + ex.getMessage(), ex);
@@ -249,7 +246,7 @@ public class OuterProcessVariablesScanner {
                         return null;
                     }
                 };
-                InputStream in = classLoader
+                InputStream in = RuntimeConfig.getInstance().getClassLoader()
                         .getResourceAsStream(splittedFilePath[0] + "$InitialProcessVariables.class");
                 if (in != null) {
                     ClassReader classReader = new ClassReader(in);

@@ -132,15 +132,13 @@ public abstract class AbstractRunner {
         final Rule processVariablesLocationRule = rules.get(ConstantsConfig.PROCESS_VARIABLES_LOCATION);
 
         if (processVariablesLocationRule == null) {
-            logger.warning("Could not find rule for ProcessVariablesLocation. Please verify the ruleSet.xml");
-        } else if (processVariablesLocationRule != null && rules.containsKey(ConstantsConfig.PROCESS_VARIABLES_LOCATION)
-                && processVariablesLocationRule.isActive()) {
-            variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResources(),
-                    RuntimeConfig.getInstance().getClassLoader());
+            logger.warning("Could not find setting for ProcessVariablesLocation. Please verify the ruleSet.xml");
+        } else if (processVariablesLocationRule != null
+                && rules.containsKey(ConstantsConfig.PROCESS_VARIABLES_LOCATION)) {
+            variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResources());
             readOuterProcessVariables(variableScanner);
         } else {
-            variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResources(),
-                    RuntimeConfig.getInstance().getClassLoader());
+            variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResources());
         }
     }
 
