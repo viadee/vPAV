@@ -262,7 +262,7 @@ public abstract class AbstractRunner {
         try {
             fileReader = new FileReader(filePath);
         } catch (final FileNotFoundException ex) {
-            logger.info(".ignoredIssues file doesn't exist");
+            logger.info(".ignoreIssues file doesn't exist");
         }
         if (fileReader != null) {
             final BufferedReader bufferedReader = new BufferedReader(fileReader);
