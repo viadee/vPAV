@@ -53,6 +53,7 @@ import org.camunda.bpm.model.dmn.instance.Decision;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
 
 /**
@@ -64,6 +65,8 @@ public class FileScanner {
     private final Set<String> processdefinitions;
 
     private Set<String> javaResources = new HashSet<String>();
+
+    private Set<String> includedFiles = new HashSet<String>();
 
     private Map<String, String> decisionRefToPathMap;
 
@@ -121,16 +124,68 @@ public class FileScanner {
                 new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
 
         // determine version name schema for resources
-        final String versioningSchema = loadVersioningSchemaClass(rules);
-        if (versioningSchema != null) {
-            scanner.setIncludes(new String[] { versioningSchema });
-            scanner.scan();
+        String versioningSchema = null;
 
-            // get current versions for resources, that match the name schema
-            resourcesNewestVersions = createResourcesToNewestVersions(
-                    new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())), versioningSchema);
+        try {
+            versioningSchema = loadVersioningSchemaClass(rules);
+        } catch (ConfigItemNotFoundException e) {
+            e.printStackTrace();
         }
 
+        if (versioningSchema != null) {
+            // add all files to "includedFiles"
+            getAllFiles(new File("src/main/java"));
+            // get current versions for resources, that match the name schema
+            resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningSchema);
+        }
+    }
+
+    /**
+     * add all files from dir to includedFiles
+     * 
+     * @param dir
+     */
+    private void getAllFiles(File dir) {
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    getAllFiles(files[i]);
+                } else {
+                    includedFiles.add(formatPath(files[i].getPath()));
+                }
+            }
+        }
+    }
+
+    /**
+     * delete "src\main\java\" and change "\" to "/" from path
+     * 
+     * @param s
+     * @return
+     */
+    private String formatPath(String path) {
+        String sPath = replace("src\\main\\java\\", "", path);
+        String result = replace("\\", "/", sPath);
+        return result;
+    }
+
+    /**
+     * replace String (search) with String (replace) from String (str)
+     * 
+     * @param search
+     * @param replace
+     * @param str
+     * @return
+     */
+    private String replace(String search, String replace, String str) {
+        int start = str.indexOf(search);
+
+        while (start != -1) {
+            str = str.substring(0, start) + replace + str.substring(start + search.length(), str.length());
+            start = str.indexOf(search, start + replace.length());
+        }
+        return (str);
     }
 
     /**
@@ -313,8 +368,9 @@ public class FileScanner {
      *
      * @param rules
      * @return schema (regex), if null the checker is inactive
+     * @throws ConfigItemNotFoundException
      */
-    private static String loadVersioningSchemaClass(final Map<String, Rule> rules) {
+    private static String loadVersioningSchemaClass(final Map<String, Rule> rules) throws ConfigItemNotFoundException {
         final String SETTING_NAME = "versioningSchemaClass";
         String schema = null;
         final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
@@ -322,10 +378,7 @@ public class FileScanner {
             final Map<String, Setting> settings = rule.getSettings();
             final Setting setting = settings.get(SETTING_NAME);
             if (setting == null) {
-                schema = ConstantsConfig.DEFAULT_VERSIONED_FILE_PATTERN;
-                final Setting newSetting = new Setting(SETTING_NAME,
-                        ConstantsConfig.DEFAULT_VERSIONED_FILE_PATTERN);
-                settings.put(SETTING_NAME, newSetting);
+                throw new ConfigItemNotFoundException("Settings for VersioningChecker not found");
             } else {
                 schema = setting.getValue();
             }

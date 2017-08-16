@@ -40,7 +40,7 @@ public final class ConstantsConfig {
 
     public static final String JAR_FILE_PATTERN = ".jar";
 
-    public static final String DEFAULT_VERSIONED_FILE_PATTERN = "([^_]*)_{1}([0-9][_][0-9]{1})\\.(java|groovy)";
+    public static final String JAVAPATH = "src/main/java";
 
     public static final String VALIDATION_XML_OUTPUT = "target/bpmn_validation.xml";
 
