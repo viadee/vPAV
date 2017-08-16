@@ -162,6 +162,7 @@ public abstract class AbstractRunner {
      */
     public static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
         if (filteredIssues.size() > 0) {
+            makeDirs(); // create folders
             final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
             final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();
             final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
@@ -176,9 +177,9 @@ public abstract class AbstractRunner {
         } else {
             // 6a if no issues, then delete files if exists
             ArrayList<Path> destinations = new ArrayList<Path>();
-            destinations.add(Paths.get("target/bpmn_validation.js"));
-            destinations.add(Paths.get("target/bpmn_validation.json"));
-            destinations.add(Paths.get("target/bpmn_validation.xml"));
+            destinations.add(Paths.get(ConstantsConfig.VALIDATION_JS_OUTPUT));
+            destinations.add(Paths.get(ConstantsConfig.VALIDATION_JSON_OUTPUT));
+            destinations.add(Paths.get(ConstantsConfig.VALIDATION_XML_OUTPUT));
             deleteFiles(destinations);
         }
     }
@@ -188,21 +189,63 @@ public abstract class AbstractRunner {
     public static void copyFiles() throws RuntimeException {
         // 7a delete files before copy
         ArrayList<Path> destinations = new ArrayList<Path>();
-        destinations.add(Paths.get("target/bpmn-navigated-viewer.js"));
-        destinations.add(Paths.get("target/bpmn.io.viewer.app.js"));
-        destinations.add(Paths.get("target/bpmn.io.viewer.html"));
-        destinations.add(Paths.get("target/logo.png"));
-        destinations.add(Paths.get("target/noIssues.html"));
+        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "js/bpmn-navigated-viewer.js"));
+        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "js/bpmn.io.viewer.app.js"));
+        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "validationResult.html"));
+        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "noIssues.html"));
+        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "img/logo.png"));
+        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/DialogStyle.css"));
+        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/MarkerStyle.css"));
+        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/TableStyle.css"));
         deleteFiles(destinations);
 
         if (filteredIssues.size() > 0) {
-            copyFileToTarget("bpmn-navigated-viewer.js");
-            copyFileToTarget("bpmn.io.viewer.app.js");
-            copyFileToTarget("bpmn.io.viewer.html");
-            copyFileToTarget("logo.png");
+            copyFileToDir("bpmn-navigated-viewer.js", "js/");
+            copyFileToDir("bpmn.io.viewer.app.js", "js/");
+            copyFileToDir("DialogStyle.css", "css/");
+            copyFileToDir("MarkerStyle.css", "css/");
+            copyFileToDir("TableStyle.css", "css/");
+            copyFileToDir("logo.png", "img/");
+            copyFileToDir("validationResult.html", "");
         } else {
-            copyFileToTarget("noIssues.html");
-            copyFileToTarget("logo.png");
+            deleteDirs();
+            copyFileToDir("noIssues.html", "");
+            copyFileToDir("logo.png", "img/");
+        }
+    }
+
+    private static void makeDirs() {
+        // mdir
+        File dir = new File(ConstantsConfig.VALIDATION_FOLDER + "js");
+        dir.mkdirs();
+        dir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
+        dir.mkdirs();
+        dir = new File(ConstantsConfig.VALIDATION_FOLDER + "img");
+        dir.mkdirs();
+    }
+
+    private static void deleteDirs() {
+        File dir = new File(ConstantsConfig.VALIDATION_FOLDER + "js");
+        dir.delete();
+        dir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
+        dir.delete();
+    }
+
+    private static void deleteFiles(ArrayList<Path> destinations) {
+        for (Path destination : destinations) {
+            if (destination.toFile().exists()) // if file exist, delete
+                destination.toFile().delete();
+        }
+    }
+
+    private static void copyFileToDir(String File, String dir) throws RuntimeException {
+        InputStream source = AbstractRunner.class.getClassLoader().getResourceAsStream(File);
+        Path destination = Paths.get(ConstantsConfig.VALIDATION_FOLDER + dir + File);
+        try {
+            Files.copy(source, destination);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
@@ -276,24 +319,6 @@ public abstract class AbstractRunner {
         }
 
         return ignoredIssues;
-    }
-
-    private static void deleteFiles(ArrayList<Path> destinations) {
-        for (Path destination : destinations) {
-            if (destination.toFile().exists()) // if file exist, delete
-                destination.toFile().delete();
-        }
-    }
-
-    private static void copyFileToTarget(String File) throws RuntimeException {
-        InputStream source = AbstractRunner.class.getClassLoader().getResourceAsStream(File);
-        Path destination = Paths.get("target/" + File);
-        try {
-            Files.copy(source, destination);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
     /**

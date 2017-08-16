@@ -1,0 +1,32 @@
+		table {
+            border: 1px none black;
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		td,
+		th {
+			border: 1px solid #ddd;
+			padding: 8px;
+			border-radius: 10px 10px 0 0;
+		}
+
+		th {
+			padding-top: 12px;
+			padding-bottom: 12px;
+			text-align: center;
+			background-color: darkgray;
+			color: black;
+		}
+
+		td{
+			font-size: 12px;
+		}
+
+		tr:hover {
+			opacity: 0.8;
+		}
+		
+		.header img{
+			float: right;
+		}
