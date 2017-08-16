@@ -134,7 +134,7 @@ public class FileScanner {
 
         if (versioningSchema != null) {
             // add all files to "includedFiles"
-            getAllFiles(new File("src/main/java"));
+            getAllFiles(new File(ConstantsConfig.JAVAPATH));
             // get current versions for resources, that match the name schema
             resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningSchema);
         }
