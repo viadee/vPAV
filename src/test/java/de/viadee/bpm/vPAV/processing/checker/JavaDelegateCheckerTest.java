@@ -193,7 +193,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task " + CheckName.checkName(baseElement) + " with no class name",
+            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with no class name",
                     issues.iterator().next().getMessage());
         }
     }
@@ -226,7 +226,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task " + CheckName.checkName(baseElement) + " with no class name",
+            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with no class name",
                     issues.iterator().next().getMessage());
         }
     }
@@ -260,7 +260,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class for task " + CheckName.checkName(baseElement) + " not found",
+            Assert.assertEquals("class for task '" + CheckName.checkName(baseElement) + "' not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -295,8 +295,8 @@ public class JavaDelegateCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "class for task " + CheckName.checkName(baseElement)
-                            + " does not implement/extends the correct interface/class",
+                    "class for task '" + CheckName.checkName(baseElement)
+                            + "' does not implement/extends the correct interface/class",
                     issues.iterator().next().getMessage());
         }
     }
@@ -330,8 +330,8 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("Couldn't find correct beanmapping for delegate expression in task "
-                    + CheckName.checkName(baseElement),
+            Assert.assertEquals("Couldn't find correct beanmapping for delegate expression in task '"
+                    + CheckName.checkName(baseElement) + "'",
                     issues.iterator().next().getMessage());
         }
     }
@@ -365,7 +365,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class for task " + CheckName.checkName(baseElement) + " not found",
+            Assert.assertEquals("class for task '" + CheckName.checkName(baseElement) + "' not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -399,7 +399,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class for task " + CheckName.checkName(baseElement) + " not found",
+            Assert.assertEquals("class for task '" + CheckName.checkName(baseElement) + "' not found",
                     issues.iterator().next().getMessage());
         }
     }
