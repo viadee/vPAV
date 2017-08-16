@@ -92,7 +92,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task " + CheckName.checkName(bpmnElement) + " with no class name"));
+                            "task '" + CheckName.checkName(bpmnElement) + "' with no class name"));
                 } else {
                     issues.addAll(checkClassFile(element, classAttr));
                 }
@@ -105,7 +105,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task " + CheckName.checkName(bpmnElement) + " with no delegate expression"));
+                            "task '" + CheckName.checkName(bpmnElement) + "' with no delegate expression"));
                 } else {
                     // check validity of a bean
                     if (RuntimeConfig.getInstance().getBeanMapping() != null) {
@@ -125,8 +125,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                             bpmnElement.getAttributeValue("name"), null, null, null,
-                                            "Couldn't find correct beanmapping for delegate expression in task "
-                                                    + CheckName.checkName(bpmnElement)));
+                                            "Couldn't find correct beanmapping for delegate expression in task '"
+                                                    + CheckName.checkName(bpmnElement) + "'"));
                                 }
                             }
                         } else {
@@ -146,7 +146,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task " + CheckName.checkName(bpmnElement) + " with no expression"));
+                            "task '" + CheckName.checkName(bpmnElement) + "' with no expression"));
                 }
                 // expression überprüfbar?
             }
@@ -158,7 +158,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task " + CheckName.checkName(bpmnElement) + " with no external topic"));
+                            "task '" + CheckName.checkName(bpmnElement) + "' with no external topic"));
                 }
                 // external topic prüfbar?
             }
@@ -170,7 +170,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task " + CheckName.checkName(bpmnElement) + " with no code reference yet"));
+                            "task '" + CheckName.checkName(bpmnElement) + "' with no code reference yet"));
                 }
         }
         return issues;
@@ -207,8 +207,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), classPath, bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
-                        "class for task " + CheckName.checkName(bpmnElement)
-                                + " does not implement/extends the correct interface/class"));
+                        "class for task '" + CheckName.checkName(bpmnElement)
+                                + "' does not implement/extends the correct interface/class"));
             }
 
         } catch (final ClassNotFoundException e) {
@@ -216,7 +216,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                     element.getProcessdefinition(), classPath, bpmnElement.getAttributeValue("id"),
                     bpmnElement.getAttributeValue("name"), null, null, null,
-                    "class for task " + CheckName.checkName(bpmnElement) + " not found"));
+                    "class for task '" + CheckName.checkName(bpmnElement) + "' not found"));
         }
 
         return issues;
