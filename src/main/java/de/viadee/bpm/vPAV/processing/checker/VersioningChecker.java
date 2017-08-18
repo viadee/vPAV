@@ -115,7 +115,7 @@ public class VersioningChecker extends AbstractElementChecker {
             if (l_delegateExpression != null) {
                 prepareBeanWarning(l_delegateExpression, element, issues);
             }
-            final String javaReference = getJavaReference(listener.getCamundaClass());
+            final String javaReference = getClassReference(listener.getCamundaClass());
             if (javaReference != null) {
                 prepareClassWarning(javaReference, element, issues);
             }
@@ -123,7 +123,7 @@ public class VersioningChecker extends AbstractElementChecker {
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
                     && script.getCamundaScriptFormat().equals("groovy")) {
-                final String resourcePath = script.getCamundaResource();
+                final String resourcePath = getGroovyReference(script.getCamundaResource());
                 prepareScriptWarning(resourcePath, element, issues);
             }
         }
@@ -151,7 +151,7 @@ public class VersioningChecker extends AbstractElementChecker {
             if (l_delegateExpression != null) {
                 prepareBeanWarning(l_delegateExpression, element, issues);
             }
-            final String javaReference = getJavaReference(listener.getCamundaClass());
+            final String javaReference = getClassReference(listener.getCamundaClass());
             if (javaReference != null) {
                 prepareClassWarning(javaReference, element, issues);
             }
@@ -159,7 +159,7 @@ public class VersioningChecker extends AbstractElementChecker {
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
                     && script.getCamundaScriptFormat().equals("groovy")) {
-                final String resourcePath = script.getCamundaResource();
+                final String resourcePath = getGroovyReference(script.getCamundaResource());
                 prepareScriptWarning(resourcePath, element, issues);
             }
         }
@@ -189,7 +189,7 @@ public class VersioningChecker extends AbstractElementChecker {
             if (t_delegateExpression != null) {
                 prepareBeanWarning(t_delegateExpression, element, issues);
             }
-            final String javaReference = getJavaReference(
+            final String javaReference = getClassReference(
                     baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "class"));
             if (javaReference != null) {
                 prepareClassWarning(javaReference, element, issues);
@@ -212,6 +212,7 @@ public class VersioningChecker extends AbstractElementChecker {
             if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals("groovy")) {
                 // External Resource
                 String resourcePath = scriptTask.getCamundaResource();
+                resourcePath = getGroovyReference(resourcePath);
                 prepareScriptWarning(resourcePath, element, issues);
             }
         }
@@ -230,7 +231,7 @@ public class VersioningChecker extends AbstractElementChecker {
         if (baseElement instanceof MessageEventDefinition) {
             // Class, Expression, Delegate Expression
             final MessageEventDefinition eventDef = (MessageEventDefinition) baseElement;
-            final String javaReference = getJavaReference(eventDef.getCamundaClass());
+            final String javaReference = getClassReference(eventDef.getCamundaClass());
             if (javaReference != null) {
                 prepareClassWarning(javaReference, element, issues);
             }
@@ -247,14 +248,28 @@ public class VersioningChecker extends AbstractElementChecker {
     }
 
     /**
-     * convert package format into java file path
+     * convert package format into class file name
      *
      * @param javaResource
-     * @return file path
+     * @return file
      */
-    private String getJavaReference(final String javaResource) {
+    private String getClassReference(final String javaResource) {
         if (javaResource != null) {
-            return javaResource.replaceAll("\\.", "/") + ".java";
+            return javaResource.substring(javaResource.lastIndexOf('.') + 1, javaResource.length()) + ".class";
+        }
+        return null;
+    }
+
+    /**
+     * convert package format into groovy file name
+     *
+     * @param javaResource
+     * @return file
+     */
+    private String getGroovyReference(String resourcePath) {
+        if (resourcePath != null) {
+            resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf('.'));
+            return resourcePath.substring(resourcePath.lastIndexOf('.') + 1, resourcePath.length()) + ".groovy";
         }
         return null;
     }
@@ -284,7 +299,8 @@ public class VersioningChecker extends AbstractElementChecker {
                 }
             }
             if (!paths.isEmpty()) {
-                return getJavaReference(paths.iterator().next());
+                return getClassReference(paths.iterator().next());
+
             }
         } catch (final ELException e) {
             throw new ProcessingException(

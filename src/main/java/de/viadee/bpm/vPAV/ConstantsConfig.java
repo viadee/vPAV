@@ -32,13 +32,7 @@ public final class ConstantsConfig {
 
     public static final String DMN_FILE_PATTERN = "**/*.dmn";
 
-    public static final String SCRIPT_FILE_PATTERN = ".*\\.groovy";
-
-    public static final String JAVA_FILE_PATTERN = ".*\\.java";
-
-    public static final String JAR_FILE_PATTERN = ".jar";
-
-    public static final String JAVAPATH = "src/main/java";
+    public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
 
     public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
 

@@ -133,63 +133,18 @@ public class FileScanner {
         }
 
         if (versioningSchema != null) {
-            // add all files to "includedFiles"
-            getAllFiles(new File(ConstantsConfig.JAVAPATH));
-            // get current versions for resources, that match the name schema
+            // also add groovy files to included files
+            scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
+            scanner.scan();
+            includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
+
+            // filter files by versioningSchema
             resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningSchema);
         }
     }
 
     /**
-     * add all files from dir to includedFiles
-     * 
-     * @param dir
-     */
-    private void getAllFiles(File dir) {
-        File[] files = dir.listFiles();
-        if (files != null) {
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].isDirectory()) {
-                    getAllFiles(files[i]);
-                } else {
-                    includedFiles.add(formatPath(files[i].getPath()));
-                }
-            }
-        }
-    }
-
-    /**
-     * delete "src\main\java\" and change "\" to "/" from path
-     * 
-     * @param s
-     * @return
-     */
-    private String formatPath(String path) {
-        String sPath = replace("src\\main\\java\\", "", path);
-        String result = replace("\\", "/", sPath);
-        return result;
-    }
-
-    /**
-     * replace String (search) with String (replace) from String (str)
-     * 
-     * @param search
-     * @param replace
-     * @param str
-     * @return
-     */
-    private String replace(String search, String replace, String str) {
-        int start = str.indexOf(search);
-
-        while (start != -1) {
-            str = str.substring(0, start) + replace + str.substring(start + search.length(), str.length());
-            start = str.indexOf(search, start + replace.length());
-        }
-        return (str);
-    }
-
-    /**
-     * process classes and add resource
+     * process classes and add resource add all files to includedFiles
      *
      */
     private void addResources(LinkedList<File> classes) {
@@ -198,6 +153,7 @@ public class FileScanner {
             if (file.getName().endsWith(".class")) {
                 javaResources.add(file.getName());
             }
+            includedFiles.add(file.getName());
         }
     }
 
