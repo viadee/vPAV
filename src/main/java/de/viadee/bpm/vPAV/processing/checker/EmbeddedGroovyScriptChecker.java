@@ -99,7 +99,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
                 if (issueInvalidScript != null)
                     issues.add(issueInvalidScript);
             } else {
-                if (script == null) {
+                if (scriptTask.getCamundaResource() == null) {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
                             baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
                             "there is an empty script reference"));
