@@ -161,6 +161,9 @@ public abstract class AbstractRunner {
      *             Abort if writer can not be instantiated
      */
     public static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
+
+        createVPavFolderIfNotExists();
+
         if (filteredIssues.size() > 0) {
             makeDirs(); // create folders
             final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
@@ -175,12 +178,22 @@ public abstract class AbstractRunner {
                 throw new RuntimeException("Output couldn't be written");
             }
         } else {
+            makeDirsForFlawlessOutput();
             // 6a if no issues, then delete files if exists
             ArrayList<Path> destinations = new ArrayList<Path>();
             destinations.add(Paths.get(ConstantsConfig.VALIDATION_JS_OUTPUT));
             destinations.add(Paths.get(ConstantsConfig.VALIDATION_JSON_OUTPUT));
             destinations.add(Paths.get(ConstantsConfig.VALIDATION_XML_OUTPUT));
             deleteFiles(destinations);
+        }
+    }
+    private static void createVPavFolderIfNotExists() throws RuntimeException {
+       File vPavDir = new File(ConstantsConfig.VALIDATION_FOLDER);
+        if (!vPavDir.exists()) {
+           boolean success = vPavDir.mkdir();
+           if (!success) {
+               throw new RuntimeException("vPav directory does not exist and could not be created");
+           }
         }
     }
 
@@ -220,8 +233,17 @@ public abstract class AbstractRunner {
         dir.mkdirs();
         dir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
         dir.mkdirs();
+        makeImageFolder();
+    }
+
+    private static void makeImageFolder() {
+        File dir;
         dir = new File(ConstantsConfig.VALIDATION_FOLDER + "img");
         dir.mkdirs();
+    }
+
+    private static void makeDirsForFlawlessOutput() {
+       makeImageFolder();
     }
 
     private static void deleteDirs() {
