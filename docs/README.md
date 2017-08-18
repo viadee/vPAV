@@ -111,12 +111,14 @@ public class ModelConsistencyTest{
 Note, that the Validator receives the Spring context. Thereby, the validation can
 check delegate Beans and their names.
 
+#### Methods
+The `ctx` parameter is optional. If **no** Spring context is used, jUnit can also be started without the context parameter.
 
-If __no__ Spring context is used, jUnit can also be started without the context parameter:
-```java
-assertTrue("Model inconsistency found. Please check target folder for validation output",
-                ProcessApplicationValidator.findModelInconsistencies().isEmpty());
-````
+`findModelInconsistencies(ctx)` finds all model inconsistencies.
+
+`findModelErrors(ctx)` finds all model inconsistencies with **ERROR** status.
+
+
 
 ## Commitments
 This library will remain under an open source licence indefinately.
