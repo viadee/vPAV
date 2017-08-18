@@ -114,9 +114,9 @@ check delegate Beans and their names.
 #### Methods
 The `ctx` parameter is optional. If **no** Spring context is used, jUnit can also be started without the context parameter.
 
-`findModelInconsistencies(ctx)` finds all model inconsistencies.
+- `findModelInconsistencies(ctx)` finds all model inconsistencies.
 
-`findModelErrors(ctx)` finds all model inconsistencies with **ERROR** status.
+- `findModelErrors(ctx)` finds all model inconsistencies with **ERROR** status.
 
 
 
