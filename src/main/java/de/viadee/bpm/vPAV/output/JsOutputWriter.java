@@ -38,9 +38,11 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
-/*
+/**
+ * 
  * Create the JavaScript file for HTML-output; Needs: issues and bpmnFile names
  * 
+ *
  */
 public class JsOutputWriter implements IssueOutputWriter {
 
