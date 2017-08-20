@@ -161,11 +161,11 @@ public abstract class AbstractRunner {
      *             Abort if writer can not be instantiated
      */
     public static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
-
-        createVPavFolderIfNotExists();
+    	//create vPAV and img folder
+    	createBaseFolder();
 
         if (filteredIssues.size() > 0) {
-            makeDirs(); // create folders
+            createCssJsFolder(); // create folders
             final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
             final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();
             final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
@@ -178,39 +178,96 @@ public abstract class AbstractRunner {
                 throw new RuntimeException("Output couldn't be written");
             }
         } else {
-            makeDirsForFlawlessOutput();
             // 6a if no issues, then delete files if exists
-            ArrayList<Path> destinations = new ArrayList<Path>();
-            destinations.add(Paths.get(ConstantsConfig.VALIDATION_JS_OUTPUT));
-            destinations.add(Paths.get(ConstantsConfig.VALIDATION_JSON_OUTPUT));
-            destinations.add(Paths.get(ConstantsConfig.VALIDATION_XML_OUTPUT));
-            deleteFiles(destinations);
+            ArrayList<Path> validationFiles = new ArrayList<Path>();
+            validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_JS_OUTPUT));
+            validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_JSON_OUTPUT));
+            validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_XML_OUTPUT));
+            deleteFiles(validationFiles);
         }
     }
-    private static void createVPavFolderIfNotExists() throws RuntimeException {
-       File vPavDir = new File(ConstantsConfig.VALIDATION_FOLDER);
-        if (!vPavDir.exists()) {
-           boolean success = vPavDir.mkdir();
-           if (!success) {
-               throw new RuntimeException("vPav directory does not exist and could not be created");
-           }
+    
+    /**
+     * create Base folders vPAV/img
+     * @throws RuntimeException
+     */
+    private static void createBaseFolder() throws RuntimeException {
+       File imgDir = new File(ConstantsConfig.VALIDATION_FOLDER + "img");
+        
+        if (!imgDir.exists()) {
+            boolean success = imgDir.mkdirs();
+            if (!success) {
+                throw new RuntimeException("vPav/img directory does not exist and could not be created");
+            }
+         }
+    }
+
+    /**
+     * make js and css folder
+     */
+    private static void createCssJsFolder() {
+        // js folder
+        File jsDir = new File(ConstantsConfig.VALIDATION_FOLDER + "js");
+        if(!jsDir.exists()){
+        	boolean success = jsDir.mkdirs();
+        	if (!success) 
+        		throw new RuntimeException("vPav/js directory does not exist and could not be created");
+        }
+        
+        //css folder
+        File cssDir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
+        if(!jsDir.exists()){
+        	boolean success = cssDir.mkdirs();
+        	if (!success) 
+        		throw new RuntimeException("vPav/css directory does not exist and could not be created");
+        }
+        
+    }
+
+    /**
+     * delete js and css folder
+     */
+    private static void deleteCssJsFolder() {
+        File jsDir = new File(ConstantsConfig.VALIDATION_FOLDER + "js");
+        if(jsDir.exists()){
+        	boolean success = jsDir.delete();
+        	if (!success) 
+        		throw new RuntimeException("Could not delete vPAV/js folder");        
+        }
+        
+        if(jsDir.exists()){
+        	File cssDir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
+        	boolean success = cssDir.delete();
+        	if (!success) 
+        		throw new RuntimeException("Could not delete vPAV/css folder");
         }
     }
 
+    /**
+     * delete files from destinations
+     * @param destinations
+     */
+    private static void deleteFiles(ArrayList<Path> destinations) {
+        for (Path destination : destinations) {
+            if (destination.toFile().exists())
+                destination.toFile().delete();
+        }
+    }
+    
     // 7 copy html-files to target
     // 7a delete files before
     public static void copyFiles() throws RuntimeException {
         // 7a delete files before copy
-        ArrayList<Path> destinations = new ArrayList<Path>();
-        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "js/bpmn-navigated-viewer.js"));
-        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "js/bpmn.io.viewer.app.js"));
-        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "validationResult.html"));
-        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "noIssues.html"));
-        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "img/logo.png"));
-        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/DialogStyle.css"));
-        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/MarkerStyle.css"));
-        destinations.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/TableStyle.css"));
-        deleteFiles(destinations);
+        ArrayList<Path> outputFiles = new ArrayList<Path>();
+        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "js/bpmn-navigated-viewer.js"));
+        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "js/bpmn.io.viewer.app.js"));
+        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "validationResult.html"));
+        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "noIssues.html"));
+        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "img/logo.png"));
+        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/DialogStyle.css"));
+        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/MarkerStyle.css"));
+        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/TableStyle.css"));
+        deleteFiles(outputFiles);
 
         if (filteredIssues.size() > 0) {
             copyFileToDir("bpmn-navigated-viewer.js", "js/");
@@ -221,42 +278,9 @@ public abstract class AbstractRunner {
             copyFileToDir("logo.png", "img/");
             copyFileToDir("validationResult.html", "");
         } else {
-            deleteDirs();
+        	deleteCssJsFolder();
             copyFileToDir("noIssues.html", "");
             copyFileToDir("logo.png", "img/");
-        }
-    }
-
-    private static void makeDirs() {
-        // mdir
-        File dir = new File(ConstantsConfig.VALIDATION_FOLDER + "js");
-        dir.mkdirs();
-        dir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
-        dir.mkdirs();
-        makeImageFolder();
-    }
-
-    private static void makeImageFolder() {
-        File dir;
-        dir = new File(ConstantsConfig.VALIDATION_FOLDER + "img");
-        dir.mkdirs();
-    }
-
-    private static void makeDirsForFlawlessOutput() {
-       makeImageFolder();
-    }
-
-    private static void deleteDirs() {
-        File dir = new File(ConstantsConfig.VALIDATION_FOLDER + "js");
-        dir.delete();
-        dir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
-        dir.delete();
-    }
-
-    private static void deleteFiles(ArrayList<Path> destinations) {
-        for (Path destination : destinations) {
-            if (destination.toFile().exists()) // if file exist, delete
-                destination.toFile().delete();
         }
     }
 
@@ -266,7 +290,6 @@ public abstract class AbstractRunner {
         try {
             Files.copy(source, destination);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
