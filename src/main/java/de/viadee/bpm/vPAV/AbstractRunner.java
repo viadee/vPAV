@@ -216,7 +216,7 @@ public abstract class AbstractRunner {
         
         //css folder
         File cssDir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
-        if(!jsDir.exists()){
+        if(!cssDir.exists()){
         	boolean success = cssDir.mkdirs();
         	if (!success) 
         		throw new RuntimeException("vPav/css directory does not exist and could not be created");
@@ -235,8 +235,8 @@ public abstract class AbstractRunner {
         		throw new RuntimeException("Could not delete vPAV/js folder");        
         }
         
-        if(jsDir.exists()){
-        	File cssDir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
+        File cssDir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
+        if(cssDir.exists()){        	
         	boolean success = cssDir.delete();
         	if (!success) 
         		throw new RuntimeException("Could not delete vPAV/css folder");
