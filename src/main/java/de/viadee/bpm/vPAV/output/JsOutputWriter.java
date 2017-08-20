@@ -20,6 +20,7 @@
  */
 package de.viadee.bpm.vPAV.output;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,9 +59,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 
     private String transformToXMLDatastructure() throws OutputWriterException {
         String output = "var diagramXMLSource = [\n";
+
         try {
             for (final String bpmnFilename : AbstractRunner.getModelPath()) {
-                String prettyBpmnFileName = replace("\\", "\\\\", bpmnFilename);
+                String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
                 output += "{\"name\":\"" + prettyBpmnFileName + "\",\n \"xml\": \"";
                 output += convertBpmnFile(ConstantsConfig.BASEPATH + bpmnFilename);
                 output += "\"},\n";
@@ -71,7 +73,7 @@ public class JsOutputWriter implements IssueOutputWriter {
         return output + "];\n";
     }
 
-    private String replace(String search, String replace, String str) {
+    private static String replace(String search, String replace, String str) {
         int start = str.indexOf(search);
 
         while (start != -1) {
@@ -98,7 +100,7 @@ public class JsOutputWriter implements IssueOutputWriter {
             for (final CheckerIssue issue : issues) {
                 final JsonObject obj = new JsonObject();
                 obj.addProperty("id", issue.getId());
-                obj.addProperty("bpmnFile", issue.getBpmnFile());
+                obj.addProperty("bpmnFile", replace(File.separator, "\\", issue.getBpmnFile()));
                 obj.addProperty("ruleName", issue.getRuleName());
                 obj.addProperty("elementId", issue.getElementId());
                 obj.addProperty("elementName", issue.getElementName());
