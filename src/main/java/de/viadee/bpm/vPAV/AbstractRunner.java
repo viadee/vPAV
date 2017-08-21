@@ -66,12 +66,6 @@ public abstract class AbstractRunner {
 
     private static ArrayList<String> allOutputFilesArray = createAllOutputFilesArray();
 
-    private final static String imgFolder = "img/";
-
-    private final static String cssFolder = "css/";
-
-    private final static String jsFolder = "js/";
-
     public static void run_vPAV() {
 
         /*
@@ -200,7 +194,7 @@ public abstract class AbstractRunner {
 
     /**
      * create Base folders vPAV/img
-     * 
+     *
      * @throws RuntimeException
      */
     private static void createBaseFolder() throws RuntimeException {
@@ -257,7 +251,7 @@ public abstract class AbstractRunner {
 
     /**
      * delete files from destinations
-     * 
+     *
      * @param destinations
      */
     private static void deleteFiles(ArrayList<Path> destinations) {

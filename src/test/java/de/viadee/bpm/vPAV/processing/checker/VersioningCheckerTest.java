@@ -70,7 +70,7 @@ public class VersioningCheckerTest {
 
         // Versions
         final Collection<String> resourcesNewestVersions = new ArrayList<String>();
-        resourcesNewestVersions.add("de/test/TestDelegate_1_2.java");
+        resourcesNewestVersions.add("de/test/TestDelegate_1_2.class");
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

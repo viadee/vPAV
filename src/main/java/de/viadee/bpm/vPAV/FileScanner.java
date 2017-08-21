@@ -129,7 +129,7 @@ public class FileScanner {
         String versioningSchema = null;
 
         try {
-            versioningSchema = loadVersioningSchemaClass(rules);
+            versioningSchema = loadVersioningSchemaClass(rules).trim();
         } catch (ConfigItemNotFoundException e) {
             e.printStackTrace();
         }

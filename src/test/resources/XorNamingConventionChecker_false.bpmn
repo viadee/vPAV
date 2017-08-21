@@ -9,8 +9,8 @@
       <bpmn:outgoing>SequenceFlow_1pou10l</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_0zux6bg</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_1pou10l" sourceRef="ExclusiveGateway_11xmbyv" targetRef="Task_0fjchrm" />
-    <bpmn:sequenceFlow id="SequenceFlow_0zux6bg" sourceRef="ExclusiveGateway_11xmbyv" targetRef="Task_0a76rap" />
+    <bpmn:sequenceFlow id="SequenceFlow_1pou10l" name="Ja" sourceRef="ExclusiveGateway_11xmbyv" targetRef="Task_0fjchrm" />
+    <bpmn:sequenceFlow id="SequenceFlow_0zux6bg" name="Nein" sourceRef="ExclusiveGateway_11xmbyv" targetRef="Task_0a76rap" />
     <bpmn:sequenceFlow id="SequenceFlow_0ns2v6s" sourceRef="StartEvent_1" targetRef="ExclusiveGateway_11xmbyv" />
     <bpmn:endEvent id="EndEvent_01lnthr">
       <bpmn:incoming>SequenceFlow_1lqwk7x</bpmn:incoming>
@@ -49,7 +49,7 @@
         <di:waypoint xsi:type="dc:Point" x="342" y="120" />
         <di:waypoint xsi:type="dc:Point" x="381" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="357" y="139.5" width="0" height="12" />
+          <dc:Bounds x="351" y="140" width="12" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0zux6bg_di" bpmnElement="SequenceFlow_0zux6bg">
@@ -58,7 +58,7 @@
         <di:waypoint xsi:type="dc:Point" x="342" y="225" />
         <di:waypoint xsi:type="dc:Point" x="381" y="225" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="357" y="192" width="0" height="12" />
+          <dc:Bounds x="346" y="192" width="22" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0ns2v6s_di" bpmnElement="SequenceFlow_0ns2v6s">

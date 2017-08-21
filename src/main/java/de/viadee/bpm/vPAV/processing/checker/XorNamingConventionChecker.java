@@ -10,6 +10,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ExclusiveGateway;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BPMNScanner;
@@ -70,6 +72,19 @@ public class XorNamingConventionChecker extends AbstractElementChecker {
                                 new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, element.getProcessdefinition(),
                                         null, bpmnElement.getId(), bpmnElement.getAttributeValue("name"), null, null,
                                         null, "xor gateway name must be specified"));
+                    }
+
+                    ArrayList<Node> incorrectEdges = scan.getOutgoingEdges(path, bpmnElement.getId());
+                    if (incorrectEdges.size() > 0) {
+                        for (int i = 0; i < incorrectEdges.size(); i++) {
+                            Element Task_Element = (Element) incorrectEdges.get(i);
+                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                    element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
+                                    Task_Element.getAttribute("name"), null, null, null,
+                                    "outgoing edges of xor gateway '"
+                                            + CheckName.checkName(bpmnElement)
+                                            + "' are against the naming convention"));
+                        }
                     }
                 }
 

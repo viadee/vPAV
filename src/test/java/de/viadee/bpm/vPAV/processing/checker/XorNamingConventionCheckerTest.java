@@ -69,8 +69,6 @@ public class XorNamingConventionCheckerTest {
         RuntimeConfig.getInstance().setClassLoader(cl);
     }
 
-    
-    
     /**
      * Case: XOR gateway with correct naming convention and XOR join that should not be checked
      *
@@ -102,8 +100,6 @@ public class XorNamingConventionCheckerTest {
         }
     }
 
-    
-    
     /**
      * Case: XOR gateway with correct naming convention
      *
@@ -165,10 +161,72 @@ public class XorNamingConventionCheckerTest {
             Assert.fail("wrong naming convention should generate an issue");
         }
     }
-    
+
+    /**
+     * Case: XOR gateway with correctly named outgoing edges
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     *
+     */
+
+    @Test
+    public void testOutgoingEdgesCorrect()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingEdgesCorrect.bpmn";
+        checker = new XorNamingConventionChecker(rule, PATH);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ExclusiveGateway> baseElements = modelInstance
+                .getModelElementsByType(ExclusiveGateway.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final Collection<CheckerIssue> issues = checker.check(element);
+
+        if (issues.size() > 1) {
+            Assert.fail("correct naming convention should not generate an issue");
+        }
+    }
+
+    /**
+     * Case: XOR gateway with wrongly named outgoing edges
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     *
+     */
+
+    @Test
+    public void testOutgoingEdgesFalse()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingEdgesFalse.bpmn";
+        checker = new XorNamingConventionChecker(rule, PATH);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ExclusiveGateway> baseElements = modelInstance
+                .getModelElementsByType(ExclusiveGateway.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final Collection<CheckerIssue> issues = checker.check(element);
+
+        if (issues.size() != 1) {
+            Assert.fail("wrong naming convention of edges should generate an issue");
+        }
+    }
+
     /**
      * Creates rule configuration
-     * 
+     *
      * @return rule
      */
     private static Rule createRule() {
@@ -176,15 +234,12 @@ public class XorNamingConventionCheckerTest {
         final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
         final ElementConvention elementConvention = new ElementConvention("convention", null,
-                "[A-ZÄÖÜ][a-zäöü]*\\?");
+                "[A-ZÄÖÜ][a-zäöü]*\\?{1}");
         elementConventions.add(elementConvention);
 
         final Rule rule = new Rule("XorNamingConventionChecker", true, null, elementConventions, null);
 
         return rule;
     }
-    
-    
-    
 
 }

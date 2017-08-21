@@ -22,6 +22,7 @@ package de.viadee.bpm.vPAV;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,337 +37,440 @@ import org.xml.sax.SAXException;
 
 public class BPMNScanner {
 
-	private final String businessRuleTask_one = "bpmn:businessRuleTask";
+    private final String businessRuleTask_one = "bpmn:businessRuleTask";
 
-	private final String serviceTask_one = "bpmn:serviceTask";
+    private final String serviceTask_one = "bpmn:serviceTask";
 
-	private final String sendTask_one = "bpmn:sendTask";
+    private final String sendTask_one = "bpmn:sendTask";
 
-	private final String gateway_one = "bpmn:exclusiveGateway";
+    private final String gateway_one = "bpmn:exclusiveGateway";
 
-	private final String out_one = "bpmn:outgoing";
+    private final String out_one = "bpmn:outgoing";
 
-	// -----------------------
+    private final String sequence_one = "bpmn:sequenceFlow";
 
-	private final String businessRuleTask_two = "bpmn2:businessRuleTask";
+    // -----------------------
 
-	private final String serviceTask_two = "bpmn2:serviceTask";
+    private final String businessRuleTask_two = "bpmn2:businessRuleTask";
 
-	private final String sendTask_two = "bpmn2:sendTask";
+    private final String serviceTask_two = "bpmn2:serviceTask";
 
-	private final String gateway_two = "bpmn2:exclusiveGateway";
+    private final String sendTask_two = "bpmn2:sendTask";
 
-	private final String out_two = "bpmn2:outgoing";
+    private final String gateway_two = "bpmn2:exclusiveGateway";
 
-	// -----------------------
+    private final String out_two = "bpmn2:outgoing";
 
-	private final String businessRuleTask_three = "businessRuleTask";
+    private final String sequence_two = "bpmn2:sequenceFlow";
 
-	private final String serviceTask_three = "serviceTask";
+    // -----------------------
 
-	private final String sendTask_three = "sendTask";
+    private final String businessRuleTask_three = "businessRuleTask";
 
-	private final String gateway_three = "exclusiveGateway";
+    private final String serviceTask_three = "serviceTask";
 
-	private final String out_three = "outgoing";
+    private final String sendTask_three = "sendTask";
 
-	// ------------------------
+    private final String gateway_three = "exclusiveGateway";
 
-	private final String scriptTag = "camunda:script";
+    private final String out_three = "outgoing";
 
-	private final String c_class = "camunda:class";
+    private final String sequence_three = "sequenceFlow";
 
-	private final String c_exp = "camunda:expression";
+    // ------------------------
 
-	private final String c_dexp = "camunda:delegateExpression";
+    private final String scriptTag = "camunda:script";
 
-	private final String c_dmn = "camunda:decisionRef";
+    private final String c_class = "camunda:class";
 
-	private final String c_ext = "camunda:type";
+    private final String c_exp = "camunda:expression";
 
-	private final String imp = "implementation";
+    private final String c_dexp = "camunda:delegateExpression";
 
-	private String node_name;
+    private final String c_dmn = "camunda:decisionRef";
 
-	private DocumentBuilderFactory factory;
+    private final String c_ext = "camunda:type";
 
-	private DocumentBuilder builder;
+    private final String imp = "implementation";
 
-	private Document doc;
+    private String node_name;
 
-	private ModelVersionEnum model_Version;
+    private DocumentBuilderFactory factory;
 
-	private enum ModelVersionEnum {
-		V1, V2, V3
-	}
+    private DocumentBuilder builder;
 
-	/**
-	 * The Camunda API's method "getimplementation" doesn't return the correct
-	 * Implementation, so the we have to scan the xml of the model for the
-	 * implementation
-	 *
-	 * @throws ParserConfigurationException
-	 *             exception if document cant be parsed
-	 */
-	public BPMNScanner() throws ParserConfigurationException {
-		factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(true);
-		builder = factory.newDocumentBuilder();
-	}
+    private Document doc;
 
-	private void setModelVersion(String path) throws SAXException, IOException, ParserConfigurationException {
-		// parse the given bpmn model
-		doc = builder.parse(path);
+    private ModelVersionEnum model_Version;
 
-		if (doc.getElementsByTagName("bpmn:definitions").getLength() > 0)
-			model_Version = ModelVersionEnum.V1;
-		else if (doc.getElementsByTagName("bpmn2:definitions").getLength() > 0)
-			model_Version = ModelVersionEnum.V2;
-		else if (doc.getElementsByTagName("definitions").getLength() > 0)
-			model_Version = ModelVersionEnum.V3;
-		else
-			throw new ParserConfigurationException("Can't get the version of the BPMN Model");
-	}
+    private enum ModelVersionEnum {
+        V1, V2, V3
+    }
 
-	/**
-	 * Return the Implementation of an specific element (sendTask, ServiceTask
-	 * or BusinessRuleTask)
-	 *
-	 * @param path
-	 *            path to model
-	 * @param id
-	 *            id of bpmn element
-	 * @throws SAXException
-	 *             possible exception while process xml
-	 * @throws IOException
-	 *             possible exception if file not found
-	 * @throws ParserConfigurationException
-	 *             possible exception if file could not be parsed
-	 * @return return_implementation contains implementation
-	 */
-	public String getImplementation(String path, String id)
-			throws SAXException, IOException, ParserConfigurationException {
-		// List to hold return values
-		String return_implementation = null;
+    public static Logger logger = Logger.getLogger(BPMNScanner.class.getName());
 
-		// List for all Task elements
-		ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+    /**
+     * The Camunda API's method "getimplementation" doesn't return the correct Implementation, so the we have to scan
+     * the xml of the model for the implementation
+     *
+     * @throws ParserConfigurationException
+     *             exception if document cant be parsed
+     */
+    public BPMNScanner() throws ParserConfigurationException {
+        factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        builder = factory.newDocumentBuilder();
+    }
 
-		// parse the given bpmn model
-		doc = builder.parse(path);
+    private void setModelVersion(String path) throws SAXException, IOException, ParserConfigurationException {
+        // parse the given bpmn model
+        doc = builder.parse(path);
 
-		// set Model Version
-		setModelVersion(path);
+        if (doc.getElementsByTagName("bpmn:definitions").getLength() > 0)
+            model_Version = ModelVersionEnum.V1;
+        else if (doc.getElementsByTagName("bpmn2:definitions").getLength() > 0)
+            model_Version = ModelVersionEnum.V2;
+        else if (doc.getElementsByTagName("definitions").getLength() > 0)
+            model_Version = ModelVersionEnum.V3;
+        else
+            throw new ParserConfigurationException("Can't get the version of the BPMN Model");
+    }
 
-		switch (model_Version) {
-		case V1:
-			listNodeList.add(doc.getElementsByTagName(businessRuleTask_one));
-			listNodeList.add(doc.getElementsByTagName(serviceTask_one));
-			listNodeList.add(doc.getElementsByTagName(sendTask_one));
-			break;
-		case V2:
-			listNodeList.add(doc.getElementsByTagName(businessRuleTask_two));
-			listNodeList.add(doc.getElementsByTagName(serviceTask_two));
-			listNodeList.add(doc.getElementsByTagName(sendTask_two));
-			break;
-		case V3:
-			listNodeList.add(doc.getElementsByTagName(businessRuleTask_three));
-			listNodeList.add(doc.getElementsByTagName(serviceTask_three));
-			listNodeList.add(doc.getElementsByTagName(sendTask_three));
-			break;
-		default:
-			listNodeList = null;
-		}
+    /**
+     * Return the Implementation of an specific element (sendTask, ServiceTask or BusinessRuleTask)
+     *
+     * @param path
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     * @return return_implementation contains implementation
+     */
+    public String getImplementation(String path, String id)
+            throws SAXException, IOException, ParserConfigurationException {
+        // List to hold return values
+        String return_implementation = null;
 
-		// iterate over list<NodeList> and check each NodeList (BRTask,
-		// ServiceTask and SendTask)
-		for (final NodeList list : listNodeList) {
-			// iterate over list and check child of each node
-			for (int i = 0; i < list.getLength(); i++) {
-				Element Task_Element = (Element) list.item(i);
-				NamedNodeMap Task_Element_Attr = Task_Element.getAttributes();
+        // List for all Task elements
+        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
 
-				// check if the ids are corresponding
-				if (id.equals(Task_Element.getAttribute("id"))) {
-					// check if more than 1 inner attribute exists
-					if (Task_Element_Attr.getLength() > 1) {
-						// check all attributes, whether they fit an
-						// implementation
-						for (int x = 0; x < Task_Element_Attr.getLength(); x++) {
-							Node attr = Task_Element_Attr.item(x);
-							// node_name equals an implementation
-							node_name = attr.getNodeName();
-							if (node_name.equals(c_class) || node_name.equals(c_exp) || node_name.equals(c_dexp)
-									|| node_name.equals(c_dmn) || node_name.equals(c_ext)) {
-								return_implementation = node_name;
-							}
-						}
-						// if inner attributes dont consist of implementations
-					}
-					if (Task_Element_Attr.getNamedItem(c_class) == null && Task_Element_Attr.getNamedItem(c_exp) == null
-							&& Task_Element_Attr.getNamedItem(c_dexp) == null
-							&& Task_Element_Attr.getNamedItem(c_dmn) == null
-							&& Task_Element_Attr.getNamedItem(c_ext) == null) {
-						return_implementation = imp;
-					}
-				}
-			}
-		}
-		return return_implementation;
-	}
+        // parse the given bpmn model
+        doc = builder.parse(path);
 
-	/**
-	 * Check if model has an scriptTag
-	 *
-	 * @param path
-	 *            path to model
-	 * @param id
-	 *            id of bpmn element
-	 * @throws SAXException
-	 *             possible exception while process xml
-	 * @throws IOException
-	 *             possible exception if file not found
-	 * @return return_scriptType contains script type
-	 */
-	public String getScriptType(String path, String id) throws SAXException, IOException {
-		// bool to hold return values
-		String return_scriptType = null;
+        // set Model Version
+        setModelVersion(path);
 
-		// List for all Task elements
-		NodeList nodeList;
+        switch (model_Version) {
+            case V1:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_one));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_one));
+                listNodeList.add(doc.getElementsByTagName(sendTask_one));
+                break;
+            case V2:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_two));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_two));
+                listNodeList.add(doc.getElementsByTagName(sendTask_two));
+                break;
+            case V3:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_three));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_three));
+                listNodeList.add(doc.getElementsByTagName(sendTask_three));
+                break;
+            default:
+                listNodeList = null;
+        }
 
-		// parse the given bpmn model
-		doc = builder.parse(path);
+        // iterate over list<NodeList> and check each NodeList (BRTask,
+        // ServiceTask and SendTask)
+        for (final NodeList list : listNodeList) {
+            // iterate over list and check child of each node
+            for (int i = 0; i < list.getLength(); i++) {
+                Element Task_Element = (Element) list.item(i);
+                NamedNodeMap Task_Element_Attr = Task_Element.getAttributes();
 
-		// search for script tag
-		nodeList = doc.getElementsByTagName(scriptTag);
+                // check if the ids are corresponding
+                if (id.equals(Task_Element.getAttribute("id"))) {
+                    // check if more than 1 inner attribute exists
+                    if (Task_Element_Attr.getLength() > 1) {
+                        // check all attributes, whether they fit an
+                        // implementation
+                        for (int x = 0; x < Task_Element_Attr.getLength(); x++) {
+                            Node attr = Task_Element_Attr.item(x);
+                            // node_name equals an implementation
+                            node_name = attr.getNodeName();
+                            if (node_name.equals(c_class) || node_name.equals(c_exp) || node_name.equals(c_dexp)
+                                    || node_name.equals(c_dmn) || node_name.equals(c_ext)) {
+                                return_implementation = node_name;
+                            }
+                        }
+                        // if inner attributes dont consist of implementations
+                    }
+                    if (Task_Element_Attr.getNamedItem(c_class) == null && Task_Element_Attr.getNamedItem(c_exp) == null
+                            && Task_Element_Attr.getNamedItem(c_dexp) == null
+                            && Task_Element_Attr.getNamedItem(c_dmn) == null
+                            && Task_Element_Attr.getNamedItem(c_ext) == null) {
+                        return_implementation = imp;
+                    }
+                }
+            }
+        }
+        return return_implementation;
+    }
 
-		// search for parent with id
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node n = nodeList.item(i).getParentNode();
-			return_scriptType = n.getNodeName();
-			while (n.getParentNode() != null) {
-				if (((Element) n).getAttribute("id").equals(id)) {
-					return return_scriptType;
-				} else {
-					n = n.getParentNode();
-				}
-			}
-		}
+    /**
+     * Check if model has an scriptTag
+     *
+     * @param path
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @return return_scriptType contains script type
+     */
+    public String getScriptType(String path, String id) throws SAXException, IOException {
+        // bool to hold return values
+        String return_scriptType = null;
 
-		return null;
-	}
+        // List for all Task elements
+        NodeList nodeList;
 
-	/**
-	 * Return a list of used gateways for a given bpmn model
-	 *
-	 * @param path
-	 *            path to model
-	 * @param id
-	 *            id of bpmn element
-	 * @throws SAXException
-	 *             possible exception while process xml
-	 * @throws IOException
-	 *             possible exception if file not found
-	 * @throws ParserConfigurationException
-	 *             possible exception if file could not be parsed
-	 * @return gateway contains script type
-	 *
-	 */
-	public String getXorGateWays(String path, String id)
-			throws SAXException, IOException, ParserConfigurationException {
-		final NodeList nodeList;
+        // parse the given bpmn model
+        doc = builder.parse(path);
 
-		String gateway = "";
+        // search for script tag
+        nodeList = doc.getElementsByTagName(scriptTag);
 
-		doc = builder.parse(path);
+        // search for parent with id
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node n = nodeList.item(i).getParentNode();
+            return_scriptType = n.getNodeName();
+            while (n.getParentNode() != null) {
+                if (((Element) n).getAttribute("id").equals(id)) {
+                    return return_scriptType;
+                } else {
+                    n = n.getParentNode();
+                }
+            }
+        }
 
-		// set Model Version
-		setModelVersion(path);
+        return null;
+    }
 
-		switch (model_Version) {
-		case V1:
-			nodeList = doc.getElementsByTagName(gateway_one);
-			break;
-		case V2:
-			nodeList = doc.getElementsByTagName(gateway_two);
-			break;
-		case V3:
-			nodeList = doc.getElementsByTagName(gateway_three);
-			break;
-		default:
-			return "";
-		}
+    /**
+     * Return a list of used gateways for a given bpmn model
+     *
+     * @param path
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     * @return gateway contains script type
+     *
+     */
+    public String getXorGateWays(String path, String id)
+            throws SAXException, IOException, ParserConfigurationException {
+        final NodeList nodeList;
 
-		// iterate over list and check each item
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Element Task_Element = (Element) nodeList.item(i);
+        String gateway = "";
 
-			// check if the ids are corresponding
-			if (id.equals(Task_Element.getAttribute("id"))) {
-				gateway = Task_Element.getAttribute("id");
-			}
-		}
-		return gateway;
-	}
+        doc = builder.parse(path);
 
-	/**
-	 * Return number of outgoing
-	 *
-	 * @param path
-	 *            path to model
-	 * @param id
-	 *            id of bpmn element
-	 * @throws SAXException
-	 *             possible exception while process xml
-	 * @throws IOException
-	 *             possible exception if file not found
-	 * @throws ParserConfigurationException
-	 *             possible exception if file could not be parsed
-	 * @return outgoing number of outgoing
-	 */
-	public int getOutgoing(String path, String id) throws SAXException, IOException, ParserConfigurationException {
-		final NodeList nodeList;
-		String out = "";
-		int outgoing = 0;
+        // set Model Version
+        setModelVersion(path);
 
-		doc = builder.parse(path);
+        switch (model_Version) {
+            case V1:
+                nodeList = doc.getElementsByTagName(gateway_one);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(gateway_two);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(gateway_three);
+                break;
+            default:
+                return "";
+        }
 
-		// set Model Version
-		setModelVersion(path);
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element Task_Element = (Element) nodeList.item(i);
 
-		switch (model_Version) {
-		case V1:
-			// create nodelist that contains all Tasks with the namespace
-			nodeList = doc.getElementsByTagName(gateway_one);
-			out = out_one;
-			break;
-		case V2:
-			nodeList = doc.getElementsByTagName(gateway_two);
-			out = out_two;
-			break;
-		case V3:
-			nodeList = doc.getElementsByTagName(gateway_three);
-			out = out_three;
-			break;
-		default:
-			return -1;
-		}
+            // check if the ids are corresponding
+            if (id.equals(Task_Element.getAttribute("id"))) {
+                gateway = Task_Element.getAttribute("id");
+            }
+        }
+        return gateway;
+    }
 
-		// iterate over list and check each item
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Element Task_Element = (Element) nodeList.item(i);
+    /**
+     * Return number of outgoing
+     *
+     * @param path
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     * @return outgoing number of outgoing
+     */
+    public int getOutgoing(String path, String id) throws SAXException, IOException, ParserConfigurationException {
+        final NodeList nodeList;
+        String out = "";
+        int outgoing = 0;
 
-			// check if the ids are corresponding
-			if (id.equals(Task_Element.getAttribute("id"))) {
-				NodeList childNodeGateway = Task_Element.getChildNodes();
-				for (int x = 0; x < childNodeGateway.getLength(); x++) {
-					if (childNodeGateway.item(x).getNodeName().equals(out)) {
-						outgoing++;
-					}
-				}
-			}
-		}
-		return outgoing;
-	}
+        doc = builder.parse(path);
+
+        // set Model Version
+        setModelVersion(path);
+
+        switch (model_Version) {
+            case V1:
+                // create nodelist that contains all Tasks with the namespace
+                nodeList = doc.getElementsByTagName(gateway_one);
+                out = out_one;
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(gateway_two);
+                out = out_two;
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(gateway_three);
+                out = out_three;
+                break;
+            default:
+                return -1;
+        }
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element Task_Element = (Element) nodeList.item(i);
+
+            // check if the ids are corresponding
+            if (id.equals(Task_Element.getAttribute("id"))) {
+                NodeList childNodeGateway = Task_Element.getChildNodes();
+                for (int x = 0; x < childNodeGateway.getLength(); x++) {
+                    if (childNodeGateway.item(x).getNodeName().equals(out)) {
+                        outgoing++;
+                    }
+                }
+            }
+        }
+        return outgoing;
+    }
+
+    /**
+     * check xor gateways for outgoing edges
+     *
+     * @param path
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     */
+
+    public ArrayList<Node> getOutgoingEdges(String path, String id)
+            throws SAXException, IOException, ParserConfigurationException {
+
+        ArrayList<Node> incorrectEdges = new ArrayList<Node>();
+        NodeList nodeList = null;
+        String out = "";
+
+        doc = builder.parse(path);
+
+        // set Model Version
+        setModelVersion(path);
+
+        switch (model_Version) {
+            case V1:
+                // create nodelist that contains all Tasks with the namespace
+                nodeList = doc.getElementsByTagName(gateway_one);
+                out = out_one;
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(gateway_two);
+                out = out_two;
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(gateway_three);
+                out = out_three;
+                break;
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element Task_Element = (Element) nodeList.item(i);
+
+            // check if the ids are corresponding and retrieve the outgoing edges of the xor gateway
+            if (id.equals(Task_Element.getAttribute("id"))) {
+                NodeList children = Task_Element.getChildNodes();
+                for (int j = 0; j < children.getLength(); j++) {
+                    if (children.item(j).getNodeName().equals(out)) {
+                        if (checkNamingOfEdges(children.item(j).getTextContent()) != null) {
+                            incorrectEdges.add(checkNamingOfEdges(children.item(j).getTextContent()));
+                        }
+                    }
+                }
+            }
+        }
+        return incorrectEdges;
+    }
+
+    /**
+     * check xor gateways for outgoing edges
+     *
+     * @param id
+     *            id of edge
+     */
+    public Node checkNamingOfEdges(String id) {
+
+        Node incorrectEdge = null;
+        NodeList nodeList = null;
+
+        switch (model_Version) {
+            case V1:
+                // create nodelist that contains all Tasks with the namespace
+                nodeList = doc.getElementsByTagName(sequence_one);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(sequence_two);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(sequence_three);
+                break;
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element Task_Element = (Element) nodeList.item(i);
+            if (Task_Element.getAttribute("id").equals(id)) {
+                if (Task_Element.getAttribute("name") == null || Task_Element.getAttribute("name").isEmpty()) {
+                    incorrectEdge = Task_Element;
+                }
+            }
+        }
+        return incorrectEdge;
+    }
+
 }

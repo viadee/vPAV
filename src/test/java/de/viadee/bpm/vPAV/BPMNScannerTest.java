@@ -183,5 +183,4 @@ public class BPMNScannerTest {
 
         assertTrue("More or less outgoing sequentflows as expected", out == anzOut);
     }
-
 }
