@@ -1,14 +1,13 @@
 		table {
             border: 1px none black;
 			border-collapse: collapse;
-			width: 100%;
+			width: 97%;
 		}
 
 		td,
 		th {
-			border: 1px solid #ddd;
+			border: 1px solid black;
 			padding: 8px;
-			border-radius: 10px 10px 0 0;
 		}
 
 		th {
@@ -23,10 +22,6 @@
 			font-size: 12px;
 		}
 
-		tr:hover {
-			opacity: 0.8;
-		}
-		
-		.header img{
-			float: right;
+		tr:hover {			
+			background-color:lightgrey;
 		}

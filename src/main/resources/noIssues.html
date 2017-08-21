@@ -12,8 +12,13 @@
 			font-family: Arial;
 		}
 
-		.header img{
+		.right{
 			float: right;
+			width: 15%;
+		}
+
+		#git{
+			float:right;
 		}
 
 		#noIssues{
@@ -22,6 +27,8 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			float:left;
+			width: 85%;
 		}
 	</style>
 
@@ -29,9 +36,12 @@
 </head>
 
 <body>
-	<div class="header">
-  		<a href="https://www.viadee.de/"><img src="img/logo.png" alt="viadee Homepage" /></a>
+	<div class="right">
+		  <a href="https://www.viadee.de/"><img src="img/logo.png" alt="viadee Homepage" /></a>	
+		  <a id="git" href="https://github.com/viadee/vPAV">GitHub</a>	 
+		  <a id="vPAV" href="https://viadee.github.io/vPAV/">vPAV</a> 
 	</div>
+	
 	<div id=noIssues>
 		<h1 id=noIssues> no issues were found</h1>	
 	</div>

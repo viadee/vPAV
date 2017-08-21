@@ -201,7 +201,7 @@ function createTable(bpmnFile) {
             //ruleName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
-            myRow.setAttribute("id", issue.ruleName) // mark hole row
+            myCell.setAttribute("id", issue.ruleName) // mark hole row
 
             //create link 
             var a = document.createElement("a");
@@ -422,8 +422,6 @@ function toggleDialog(sh) {
         a.style.padding = "0.4em";
         a.style.border = "1px solid black";
         a.style.color = "black";
-        a.style.borderRadius = "10px 10px 0 0";
-        a.style.boxShadow = "0px 5px 10px white inset";
         if (countIssues(model.name) == 0)
             a.style.background = "rgba(0, 255, 0, 0.5)";
         else
