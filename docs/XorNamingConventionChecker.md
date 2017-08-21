@@ -14,9 +14,17 @@ The rule should be configured as follows:
 <rule>
 	<name>XorNamingConventionChecker</name>
 	<state>true</state>
+	<elementConventions>
+		<elementConvention>
+			<name>convention</name>
+			<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
+		</elementConvention>
+	</elementConventions>
 </rule>
 
 ```
+
+The pattern can be any regular expression and is useful to enforce naming conventions.
 
 ## Error messages:
 -----------------------------------------
