@@ -19,12 +19,18 @@ The rule should be configured as follows:
 			<name>convention</name>
 			<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
 		</elementConvention>
+		<elementConvention>
+			<name>convention2</name>
+			<pattern>[A-ZÄÖÜ][a-zäöü]*</pattern>
+		</elementConvention>
 	</elementConventions>
 </rule>
 
 ```
 
-The pattern can be any regular expression and is useful to enforce naming conventions.
+The pattern can be any regular expression and is useful to enforce naming conventions.  
+"convention" refers to the naming convention of xor gateways themselves.  
+"convention2" refers to the outgoing edges of a xor gateway.
 
 ## Error messages:
 -----------------------------------------
