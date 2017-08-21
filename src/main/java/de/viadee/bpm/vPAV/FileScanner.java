@@ -74,6 +74,8 @@ public class FileScanner {
 
     private Map<String, String> processIdToPathMap;
 
+    private final String targetClassFolder = "target/classes";
+
     public static Logger logger = Logger.getLogger(FileScanner.class.getName());
 
     public FileScanner(final Map<String, Rule> rules, final String classPathScanLocation)
@@ -105,8 +107,8 @@ public class FileScanner {
 
             // retrieve all jars during runtime and pass them to get class files
             for (URL url : urls) {
-                if (url.getFile().contains("target/classes")) {
-                    File f = new File(url.getFile().substring(1) + classPathScanLocation);
+                if (url.getFile().contains(targetClassFolder)) {
+                    File f = new File(url.getFile() + classPathScanLocation);
                     if (f.exists()) {
                         files = (LinkedList<File>) FileUtils.listFiles(f,
                                 TrueFileFilter.INSTANCE,
@@ -217,7 +219,7 @@ public class FileScanner {
         for (final String classPathElement : classPathElements) {
             classpathElementUrls.add(new File(classPathElement).toURI().toURL());
         }
-        classpathElementUrls.add(new File("src/main/java").toURI().toURL());
+        classpathElementUrls.add(new File(ConstantsConfig.JAVAPATH).toURI().toURL());
         return new URLClassLoader(classpathElementUrls.toArray(new URL[classpathElementUrls.size()]),
                 Thread.currentThread().getContextClassLoader());
     }
