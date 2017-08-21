@@ -235,7 +235,11 @@ public class XorNamingConventionCheckerTest {
 
         final ElementConvention elementConvention = new ElementConvention("convention", null,
                 "[A-ZÄÖÜ][a-zäöü]*\\?{1}");
+
+        final ElementConvention elementConvention2 = new ElementConvention("convention2", null,
+                "[A-ZÄÖÜ][a-zäöü]*");
         elementConventions.add(elementConvention);
+        elementConventions.add(elementConvention2);
 
         final Rule rule = new Rule("XorNamingConventionChecker", true, null, elementConventions, null);
 

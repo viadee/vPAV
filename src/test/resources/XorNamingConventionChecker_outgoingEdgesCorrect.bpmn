@@ -17,8 +17,8 @@
       <bpmn:incoming>SequenceFlow_0kfsymg</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0qodaci</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="SequenceFlow_0jge9dr" name="Name1" sourceRef="ExclusiveGateway_0r205of" targetRef="Task_1345nse" />
-    <bpmn:sequenceFlow id="SequenceFlow_0kfsymg" name="Name2" sourceRef="ExclusiveGateway_0r205of" targetRef="Task_0ywce1a" />
+    <bpmn:sequenceFlow id="SequenceFlow_0jge9dr" name="Nein" sourceRef="ExclusiveGateway_0r205of" targetRef="Task_1345nse" />
+    <bpmn:sequenceFlow id="SequenceFlow_0kfsymg" name="Ja" sourceRef="ExclusiveGateway_0r205of" targetRef="Task_0ywce1a" />
     <bpmn:sequenceFlow id="SequenceFlow_0d4knvn" sourceRef="StartEvent_1" targetRef="ExclusiveGateway_0r205of" />
     <bpmn:endEvent id="EndEvent_1p12g16">
       <bpmn:incoming>SequenceFlow_0309tx8</bpmn:incoming>

@@ -395,7 +395,7 @@ public class BPMNScanner {
     public ArrayList<Node> getOutgoingEdges(String path, String id)
             throws SAXException, IOException, ParserConfigurationException {
 
-        ArrayList<Node> incorrectEdges = new ArrayList<Node>();
+        ArrayList<Node> outgoingEdges = new ArrayList<Node>();
         NodeList nodeList = null;
         String out = "";
 
@@ -428,14 +428,12 @@ public class BPMNScanner {
                 NodeList children = Task_Element.getChildNodes();
                 for (int j = 0; j < children.getLength(); j++) {
                     if (children.item(j).getNodeName().equals(out)) {
-                        if (checkNamingOfEdges(children.item(j).getTextContent()) != null) {
-                            incorrectEdges.add(checkNamingOfEdges(children.item(j).getTextContent()));
-                        }
+                        outgoingEdges.add(checkNamingOfEdges(children.item(j).getTextContent()));
                     }
                 }
             }
         }
-        return incorrectEdges;
+        return outgoingEdges;
     }
 
     /**
@@ -446,7 +444,7 @@ public class BPMNScanner {
      */
     public Node checkNamingOfEdges(String id) {
 
-        Node incorrectEdge = null;
+        Node edge = null;
         NodeList nodeList = null;
 
         switch (model_Version) {
@@ -465,12 +463,10 @@ public class BPMNScanner {
         for (int i = 0; i < nodeList.getLength(); i++) {
             Element Task_Element = (Element) nodeList.item(i);
             if (Task_Element.getAttribute("id").equals(id)) {
-                if (Task_Element.getAttribute("name") == null || Task_Element.getAttribute("name").isEmpty()) {
-                    incorrectEdge = Task_Element;
-                }
+                edge = Task_Element;
             }
         }
-        return incorrectEdge;
+        return edge;
     }
 
 }

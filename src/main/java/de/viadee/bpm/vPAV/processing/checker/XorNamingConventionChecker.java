@@ -48,14 +48,15 @@ public class XorNamingConventionChecker extends AbstractElementChecker {
 
                 if (scan.getOutgoing(path, xor_gateway) > 1) {
 
-                    final Collection<ElementConvention> elementConventions = rule.getElementConventions();
+                    final ArrayList<ElementConvention> elementConventions = (ArrayList<ElementConvention>) rule
+                            .getElementConventions();
 
-                    if (elementConventions == null || elementConventions.size() < 1 || elementConventions.size() > 1) {
+                    if (elementConventions == null) {
                         throw new ProcessingException(
                                 "xor naming convention checker must have one element convention!");
                     }
 
-                    final String patternString = elementConventions.iterator().next().getPattern();
+                    final String patternString = elementConventions.get(0).getPattern().trim();
                     final String taskName = bpmnElement.getAttributeValue("name");
                     if (taskName != null && taskName.trim().length() > 0) {
                         final Pattern pattern = Pattern.compile(patternString);
@@ -74,18 +75,32 @@ public class XorNamingConventionChecker extends AbstractElementChecker {
                                         null, "xor gateway name must be specified"));
                     }
 
-                    ArrayList<Node> incorrectEdges = scan.getOutgoingEdges(path, bpmnElement.getId());
-                    if (incorrectEdges.size() > 0) {
-                        for (int i = 0; i < incorrectEdges.size(); i++) {
-                            Element Task_Element = (Element) incorrectEdges.get(i);
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                                    element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
-                                    Task_Element.getAttribute("name"), null, null, null,
-                                    "outgoing edges of xor gateway '"
-                                            + CheckName.checkName(bpmnElement)
-                                            + "' are against the naming convention"));
+                    final ArrayList<Node> edges = scan.getOutgoingEdges(path, bpmnElement.getId());
+                    final String patternString2 = elementConventions.get(1).getPattern().trim();
+
+                    for (int i = 0; i < edges.size(); i++) {
+                        Element Task_Element = (Element) edges.get(i);
+                        final String edgeName = Task_Element.getAttribute("name");
+                        if (edgeName != null && edgeName.trim().length() > 0) {
+                            final Pattern pattern = Pattern.compile(patternString2);
+                            Matcher matcher = pattern.matcher(edgeName);
+                            if (!matcher.matches()) {
+                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                        element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
+                                        Task_Element.getAttribute("name"), null, null, null,
+                                        "outgoing edges of xor gateway '"
+                                                + CheckName.checkName(bpmnElement)
+                                                + "' are against the naming convention"));
+                            }
+                        } else {
+                            issues.add(
+                                    new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                            element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
+                                            Task_Element.getAttribute("name"), null, null, null,
+                                            "outgoing edges of xor gateway need to be named"));
                         }
                     }
+
                 }
 
             } catch (ParserConfigurationException | SAXException | IOException e) {
