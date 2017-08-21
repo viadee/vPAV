@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -60,6 +61,16 @@ public abstract class AbstractRunner {
     private static Collection<CheckerIssue> issues;
 
     private static Collection<CheckerIssue> filteredIssues;
+
+    private static Map<String, String> fileMapping = createFileFolderMapping();
+
+    private static ArrayList<String> allOutputFilesArray = createAllOutputFilesArray();
+
+    private final static String imgFolder = "img/";
+
+    private final static String cssFolder = "css/";
+
+    private final static String jsFolder = "js/";
 
     public static void run_vPAV() {
 
@@ -161,8 +172,8 @@ public abstract class AbstractRunner {
      *             Abort if writer can not be instantiated
      */
     public static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
-    	//create vPAV and img folder
-    	createBaseFolder();
+        // create vPAV and img folder
+        createBaseFolder();
 
         if (filteredIssues.size() > 0) {
             createCssJsFolder(); // create folders
@@ -186,20 +197,21 @@ public abstract class AbstractRunner {
             deleteFiles(validationFiles);
         }
     }
-    
+
     /**
      * create Base folders vPAV/img
+     * 
      * @throws RuntimeException
      */
     private static void createBaseFolder() throws RuntimeException {
-       File imgDir = new File(ConstantsConfig.VALIDATION_FOLDER + "img");
-        
+        File imgDir = new File(ConstantsConfig.IMG_FOLDER);
+
         if (!imgDir.exists()) {
             boolean success = imgDir.mkdirs();
             if (!success) {
                 throw new RuntimeException("vPav/img directory does not exist and could not be created");
             }
-         }
+        }
     }
 
     /**
@@ -207,44 +219,45 @@ public abstract class AbstractRunner {
      */
     private static void createCssJsFolder() {
         // js folder
-        File jsDir = new File(ConstantsConfig.VALIDATION_FOLDER + "js");
-        if(!jsDir.exists()){
-        	boolean success = jsDir.mkdirs();
-        	if (!success) 
-        		throw new RuntimeException("vPav/js directory does not exist and could not be created");
+        File jsDir = new File(ConstantsConfig.JS_FOLDER);
+        if (!jsDir.exists()) {
+            boolean success = jsDir.mkdirs();
+            if (!success)
+                throw new RuntimeException("vPav/js directory does not exist and could not be created");
         }
-        
-        //css folder
-        File cssDir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
-        if(!cssDir.exists()){
-        	boolean success = cssDir.mkdirs();
-        	if (!success) 
-        		throw new RuntimeException("vPav/css directory does not exist and could not be created");
+
+        // css folder
+        File cssDir = new File(ConstantsConfig.CSS_FOLDER);
+        if (!cssDir.exists()) {
+            boolean success = cssDir.mkdirs();
+            if (!success)
+                throw new RuntimeException("vPav/css directory does not exist and could not be created");
         }
-        
+
     }
 
     /**
      * delete js and css folder
      */
     private static void deleteCssJsFolder() {
-        File jsDir = new File(ConstantsConfig.VALIDATION_FOLDER + "js");
-        if(jsDir.exists()){
-        	boolean success = jsDir.delete();
-        	if (!success) 
-        		throw new RuntimeException("Could not delete vPAV/js folder");        
+        File jsDir = new File(ConstantsConfig.JS_FOLDER);
+        if (jsDir.exists()) {
+            boolean success = jsDir.delete();
+            if (!success)
+                throw new RuntimeException("Could not delete vPAV/js folder");
         }
-        
-        File cssDir = new File(ConstantsConfig.VALIDATION_FOLDER + "css");
-        if(cssDir.exists()){        	
-        	boolean success = cssDir.delete();
-        	if (!success) 
-        		throw new RuntimeException("Could not delete vPAV/css folder");
+
+        File cssDir = new File(ConstantsConfig.CSS_FOLDER);
+        if (cssDir.exists()) {
+            boolean success = cssDir.delete();
+            if (!success)
+                throw new RuntimeException("Could not delete vPAV/css folder");
         }
     }
 
     /**
      * delete files from destinations
+     * 
      * @param destinations
      */
     private static void deleteFiles(ArrayList<Path> destinations) {
@@ -253,40 +266,56 @@ public abstract class AbstractRunner {
                 destination.toFile().delete();
         }
     }
-    
+
     // 7 copy html-files to target
     // 7a delete files before
-    public static void copyFiles() throws RuntimeException {
+    private static void copyFiles() throws RuntimeException {
         // 7a delete files before copy
         ArrayList<Path> outputFiles = new ArrayList<Path>();
-        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "js/bpmn-navigated-viewer.js"));
-        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "js/bpmn.io.viewer.app.js"));
-        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "validationResult.html"));
-        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "noIssues.html"));
-        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "img/logo.png"));
-        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/DialogStyle.css"));
-        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/MarkerStyle.css"));
-        outputFiles.add(Paths.get(ConstantsConfig.VALIDATION_FOLDER + "css/TableStyle.css"));
+        for (String file : allOutputFilesArray)
+            outputFiles.add(Paths.get(fileMapping.get(file), file));
         deleteFiles(outputFiles);
 
         if (filteredIssues.size() > 0) {
-            copyFileToDir("bpmn-navigated-viewer.js", "js/");
-            copyFileToDir("bpmn.io.viewer.app.js", "js/");
-            copyFileToDir("DialogStyle.css", "css/");
-            copyFileToDir("MarkerStyle.css", "css/");
-            copyFileToDir("TableStyle.css", "css/");
-            copyFileToDir("logo.png", "img/");
-            copyFileToDir("validationResult.html", "");
+            for (String file : allOutputFilesArray)
+                if (!file.equals("noIssues.html"))
+                    copyFileToVPAVFolder(file);
         } else {
-        	deleteCssJsFolder();
-            copyFileToDir("noIssues.html", "");
-            copyFileToDir("logo.png", "img/");
+            deleteCssJsFolder();
+            copyFileToVPAVFolder("noIssues.html");
+            copyFileToVPAVFolder("logo.png");
         }
     }
 
-    private static void copyFileToDir(String File, String dir) throws RuntimeException {
-        InputStream source = AbstractRunner.class.getClassLoader().getResourceAsStream(File);
-        Path destination = Paths.get(ConstantsConfig.VALIDATION_FOLDER + dir + File);
+    private static ArrayList<String> createAllOutputFilesArray() {
+        ArrayList<String> allFiles = new ArrayList<String>();
+        allFiles.add("bpmn-navigated-viewer.js");
+        allFiles.add("bpmn.io.viewer.app.js");
+        allFiles.add("DialogStyle.css");
+        allFiles.add("MarkerStyle.css");
+        allFiles.add("TableStyle.css");
+        allFiles.add("logo.png");
+        allFiles.add("validationResult.html");
+        allFiles.add("noIssues.html");
+        return allFiles;
+    }
+
+    private static Map<String, String> createFileFolderMapping() {
+        Map<String, String> fMap = new HashMap<String, String>();
+        fMap.put("bpmn-navigated-viewer.js", ConstantsConfig.JS_FOLDER);
+        fMap.put("bpmn.io.viewer.app.js", ConstantsConfig.JS_FOLDER);
+        fMap.put("DialogStyle.css", ConstantsConfig.CSS_FOLDER);
+        fMap.put("MarkerStyle.css", ConstantsConfig.CSS_FOLDER);
+        fMap.put("TableStyle.css", ConstantsConfig.CSS_FOLDER);
+        fMap.put("logo.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
+        fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);
+        return fMap;
+    }
+
+    private static void copyFileToVPAVFolder(String file) throws RuntimeException {
+        InputStream source = AbstractRunner.class.getClassLoader().getResourceAsStream(file);
+        Path destination = Paths.get(fileMapping.get(file) + file);
         try {
             Files.copy(source, destination);
         } catch (IOException e) {

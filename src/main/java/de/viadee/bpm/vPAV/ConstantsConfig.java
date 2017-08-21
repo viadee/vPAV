@@ -42,7 +42,15 @@ public final class ConstantsConfig {
 
     public static final String VALIDATION_FOLDER = "target/vPAV/";
 
+    public static final String JS_FOLDER = "target/vPAV/js/";
+
+    public static final String CSS_FOLDER = "target/vPAV/css/";
+
+    public static final String IMG_FOLDER = "target/vPAV/img/";
+
     public static final String BASEPATH = "src/main/resources/";
+
+    public static final String JAVAPATH = "src/main/java/";
 
     public static final String TEST_BASEPATH = "src/test/resources/";
 
