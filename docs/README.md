@@ -103,7 +103,7 @@ public class ModelConsistencyTest{
     @Test
     public void validateModel() {
         assertTrue("Model inconsistency found. Please check target folder for validation output",
-                ProcessApplicationValidator.findModelInconsistencies(ctx).isEmpty());
+                ProcessApplicationValidator.findModelErrors(ctx).isEmpty());
     }
 }
 
@@ -114,9 +114,9 @@ check delegate Beans and their names.
 #### Methods
 The `ctx` parameter is optional. If **no** Spring context is used, jUnit can also be started without the context parameter.
 
-- `findModelInconsistencies(ctx)` finds all model inconsistencies.
-
 - `findModelErrors(ctx)` finds all model inconsistencies with **ERROR** status.
+
+- `findModelInconsistencies(ctx)` finds **all** model inconsistencies (Error, Warning, Info).
 
 
 
