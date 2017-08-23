@@ -81,7 +81,7 @@ public abstract class AbstractRunner {
         scanClassPath(rules);
 
         // 3
-        getProcessVariables();
+        getProcessVariables(rules);
 
         // 4
         createIssues(rules);
@@ -114,19 +114,37 @@ public abstract class AbstractRunner {
     // 2b - Scan classpath for models
     public static void scanClassPath(Map<String, Rule> rules) {
 
-        try {
-            fileScanner = new FileScanner(rules);
-        } catch (DependencyResolutionRequiredException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        final Rule processVariablesLocationRule = rules.get(ConstantsConfig.PROCESS_VARIABLES_LOCATION);
 
+        try {
+
+            if (processVariablesLocationRule == null) {
+                logger.warning("Could not find rule for ProcessVariablesLocation. Please verify the ruleSet.xml");
+                fileScanner = new FileScanner(rules, "");
+            } else {
+                final String location = processVariablesLocationRule.getSettings().get("location").getValue();
+                fileScanner = new FileScanner(rules, location);
+            }
+
+        } catch (final DependencyResolutionRequiredException e) {
+            throw new RuntimeException("Classpath could not be resolved");
+        }
     }
 
     // 3 - Get process variables
-    public static void getProcessVariables() {
-        variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResources());
-        readOuterProcessVariables(variableScanner);
+    public static void getProcessVariables(final Map<String, Rule> rules) {
+
+        final Rule processVariablesLocationRule = rules.get(ConstantsConfig.PROCESS_VARIABLES_LOCATION);
+
+        if (processVariablesLocationRule == null) {
+            logger.warning("Could not find setting for ProcessVariablesLocation. Please verify the ruleSet.xml");
+        } else if (processVariablesLocationRule != null
+                && rules.containsKey(ConstantsConfig.PROCESS_VARIABLES_LOCATION)) {
+            variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResources());
+            readOuterProcessVariables(variableScanner);
+        } else {
+            variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResources());
+        }
     }
 
     // 4 - Check each model
