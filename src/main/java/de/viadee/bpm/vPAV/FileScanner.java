@@ -129,7 +129,7 @@ public class FileScanner {
         String versioningSchema = null;
 
         try {
-            versioningSchema = loadVersioningSchemaClass(rules).trim();
+            versioningSchema = loadVersioningSchemaClass(rules);
         } catch (ConfigItemNotFoundException e) {
             e.printStackTrace();
         }
@@ -338,7 +338,7 @@ public class FileScanner {
             if (setting == null) {
                 throw new ConfigItemNotFoundException("Settings for VersioningChecker not found");
             } else {
-                schema = setting.getValue();
+                schema = setting.getValue().trim();
             }
         }
         return schema;
