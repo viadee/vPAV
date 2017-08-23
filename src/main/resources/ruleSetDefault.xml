@@ -11,12 +11,12 @@
 		<state>true</state>
 		<elementConventions>
 			<elementConvention>
-				<name>convention</name>
-				<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
+				<name>xorGateway</name>
+				<pattern>(([A-Z][a-z]*)(.?)([A-Z][a-z]*)*)\?</pattern>
 			</elementConvention>
 			<elementConvention>
-				<name>convention2</name>
-				<pattern>[A-ZÄÖÜ][a-zäöü]*</pattern>
+				<name>edges</name>
+				<pattern>[A-ZÄÖÜ]?[a-zäöü]*</pattern>
 			</elementConvention>
 		</elementConventions>
 	</rule>
