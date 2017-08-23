@@ -286,7 +286,8 @@ public abstract class AbstractRunner {
             for (String file : allOutputFilesArray)
                 if (!file.equals("validationResult.html") && !file.equals("MarkerStyle.css")
                         && !file.equals("bpmn.io.viewer.app.js")
-                        && !file.equals("bpmn-navigated-viewer.js"))
+                        && !file.equals("bpmn-navigated-viewer.js") && !file.equals("error.png")
+                        && !file.equals("warning.png") && !file.equals("info.png"))
                     copyFileToVPAVFolder(file);
         }
     }
@@ -307,6 +308,9 @@ public abstract class AbstractRunner {
         allFiles.add("viadee_Logo.png");
         allFiles.add("GitHub.png");
         allFiles.add("success.png");
+        allFiles.add("error.png");
+        allFiles.add("warning.png");
+        allFiles.add("info.png");
 
         allFiles.add("validationResult.html");
         allFiles.add("noIssues.html");
@@ -329,6 +333,9 @@ public abstract class AbstractRunner {
         fMap.put("viadee_Logo.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("GitHub.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("success.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("error.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("warning.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("ingo.png", ConstantsConfig.IMG_FOLDER);
 
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
         fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);

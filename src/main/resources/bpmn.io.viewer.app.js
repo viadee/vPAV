@@ -133,15 +133,22 @@ function addCountOverlay(overlays, bpmnFile) {
                     dRule.style.marginTop = "1rem";
                     dRule.style.padding = "0.5rem";
 
-                    var hClass = document.createElement("h5");
-                    var pRule = document.createElement("p");
-                    var pMessage = document.createElement("p");
+                    var oImg = document.createElement("img");
+                    oImg.setAttribute('src', 'img/'+issue.classification+'.png');
+                    oImg.setAttribute('alt', 'issue.classification'); 
+                    oImg.setAttribute('class', 'float-left mr-2');
 
-                    hClass.appendChild(document.createTextNode(issue.classification));
+                    var pRule = document.createElement("p");
+                    pRule.setAttribute('class', 'h5 mb-2');
+
+                    var pMessage = document.createElement("p");
+                    pMessage.setAttribute('class', 'text-muted');
+
                     pRule.appendChild(document.createTextNode(issue.ruleName));
                     pMessage.appendChild(document.createTextNode(issue.message));
 
-                    dRule.appendChild(hClass);
+                    dRule.appendChild(oImg);
+                    
                     dRule.appendChild(pRule);
                     dRule.appendChild(pMessage);
 
@@ -224,16 +231,22 @@ function createTable(bpmnFile) {
 
             myCell.appendChild(c);
             myRow.appendChild(myCell);
+            
             //elementName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.elementName);
             myCell.appendChild(myText);
             myRow.appendChild(myCell);
+            
             //classification
             myCell = document.createElement("td");
-            myText = document.createTextNode(issue.classification);
-            myCell.appendChild(myText);
+            myCell.setAttribute("align", "center");
+            var oImg = document.createElement("img");
+            oImg.setAttribute('src', 'img/'+issue.classification+'.png');
+            oImg.setAttribute('alt', 'issue.classification');
+            myCell.appendChild(oImg);
             myRow.appendChild(myCell);
+
             //message
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.message);
@@ -394,14 +407,6 @@ var dialogOpen = false, lastFocus, dialog, okbutton, pagebackground;
 function toggleDialog(sh) {
     dialog = $('#issueModal');
     dialog.modal();
-   /*  if (sh == 'show') {
-        dialogOpen = true;
-        // show the dialog  
-        dialog.setAttribute('open', 'open');
-    } else {
-        dialogOpen = false;
-        dialog.setAttribute('open', 'false');
-    } */
 }
 
 // List all ProcessInstances
