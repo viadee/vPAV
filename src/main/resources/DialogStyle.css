@@ -1,22 +1,10 @@
-		.diagram-zahl {
-			background-color: red;
-			color: white;
-			border-radius: 100px;
-			font-family: Arial;
-			font-size: 10px;
-			padding: 5px;
-			min-height: 16px;
-			width: 10px;
-			text-align: center;
-		}
-
 		dialog {
 			display: none;
-			background: #fffbf0;
-			border: 1px solid #e7c157;
+			background: #CED6E3;
+			border: 1px solid #003278;
 			z-index: 1002;
 			padding: .5em 1em;
-			width: 100%;
+			width: auto;
 			height: auto;
 		}
 
@@ -24,26 +12,20 @@
 			display: block;
 		}
 
-		@media (min-width: 30em) {
+		@media (min-width: 22em) {
 			dialog {
 				position: absolute;
 				top: 50%;
 				margin-top: -10em;
 				left: 50%;
 				margin-left: -10em;
-				width: 19.5em;
+				width: 22em;
 			}
 		}
 
-		dialog::backdrop {
-			/* noch nicht implementiert */
-			background-color: #000;
-			opacity: 0.5;
-		}
-
 		button {
-			background-color: #666;
-			border: 1px solid #333;
+			background-color: #3C5C8E;
+			border: 1px solid #003278;
 			border-radius: 0 .5em .5em;
 			color: white;
 			cursor: pointer;
@@ -52,9 +34,9 @@
 		}
 
 		button:focus {
-			background-color: #999;
+			background-color: #3C5C8E;
 		}
 
-		#d_message {
+		.d_message {
 			font-style: italic;
 		}

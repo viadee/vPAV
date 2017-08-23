@@ -6,58 +6,44 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="css/DialogStyle.css">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap.override.css">
 	<link rel="stylesheet" href="css/MarkerStyle.css">
-	<link rel="stylesheet" href="css/TableStyle.css">
+	<link rel="stylesheet" href="css/DialogStyle.css">
+
 	<style type="text/css">
 		* {
 			font-family: Arial;
 		}
 
+		header {
+			background-color: #CED6E3;
+		}
+
 		#canvas {
-			width: 97%;
-			height: 500px;
-			border: 1px solid black;
-			margin: 3px;
-			padding: 0px;
-			float: left;
+			height: 35rem;
+			padding: 0;
+			margin: 0;
+			margin-top: 0.2rem;
+			border-width: .2rem;
+			border: solid #003278;
 		}
 
 		#noIssues {
-			background-color: green;
-			color: white;
 			display: none;
-			width: 83%;
 		}
 
-		#linkList {
-			margin: 0;
-			padding: 0.3em;
-			text-align: left;
-			width: 83%;
+		#tableHeader {
+			padding-top: 0.5rem;
+			margin-top: 1rem;
+			margin-bottom: 0;
+			border-width: .2rem;
+			border: solid #f7f7f9;
 		}
 
-		#h2 {
-			margin: 2px;
-			padding: 4px;
-		}
-
-		#git{
-			float: right;
-			padding-right: 50px;
-		}
-
-		#h1_table{
-			float: left;
-		}
-
-		.focusClass:hover,
-		.focusClass:focus {
-			font-weight: bold;
-		}
-
-		.header img{
-			float: right;
+		#logo{
+			margin-top: 0.4rem;
+			margin-right: 1rem;
 		}
 	</style>
 
@@ -65,54 +51,85 @@
 </head>
 
 <body>
-	<div class="header">
-		<a id=logo href="https://www.viadee.de/"><img src="img/logo.png" alt="viadee Homepage" /></a>
-		<h1 id=modell></h1>
-		<div id=h2>
-			<h2 id=noIssues> no issues were found</h2>
-		</div>
-	</div>
-	<div id="model">
-		<ul id="linkList">
+	<header class="navbar sticky-top ">
+		<h3 id=modell></h3>
+		<ul class="navbar-nav flex-row ml-md-auto">
+			<li class="nav-item">
+				<a class="nav-link" id="logo" href="https://viadee.github.io/vPAV/">
+					<img src="img/vPAV.png"  alt="vPAV"/>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="logo" href="https://github.com/viadee/vPAV">
+					<img src="img/GitHub.png"  alt="GitHub"/>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="https://www.viadee.de/">
+					<img src="img/viadee_Logo.png" alt="viadee Homepage" height="50"/>
+				</a>
+			</li>
 		</ul>
-	</div>
-	<div>
-		<dialog tabindex="-1" role="dialog" aria-labelledby="myDialog">
-			<div id="dia"></div>
-			<button onclick="toggleDialog('hide');" class="close-button">OK</button>
-		</dialog>
+	</header>
+
+	<!-- navBar -->
+	<div class="row">
+		<div class="col">
+			<ul id="linkList" class="nav nav-pills">
+			</ul>
+		</div>
 	</div>
 
 	<!-- element to draw bpmn diagram in -->
-	<div id="canvas"></div>
-
-	<!-- Issue table -->
-	<h1 id="h1_table">Error list</h1>
-	<a id="git" href="https://github.com/viadee/vPAV">GitHub</a>
-	<div id="div_table" style="overflow-x:auto;">
-		<table id="table_issues">
-			<thead>
-				<tr id="tr_ueberschriften">
-					<th id="th_ruleName">Rulename</th>
-					<th id="th_elementId">Element-Id</th>
-					<th id="th_elementName">Elementname</th>
-					<th id="th_classification">Classification</th>
-					<th id="th_message">Message</th>
-					<th id="th_paths">Invalid Sequenzflow</th>
-				</tr>
-			</thead>
-		</table>
+	<div class="row">
+		<div class="col" id="can">
+			<div id="canvas"></div>
+		</div>
 	</div>
 
+	<!-- Issue table -->
+	<div class="row">
+		<div class="col">
+			<h2 id="tableHeader">Error list</h2>
+			<table id="table_issues" class="table table-bordered .table-responsive">
+				<thead>
+					<tr id="tr_ueberschriften" class="table-primary">
+						<th id="th_ruleName">Rulename</th>
+						<th id="th_elementId">Element-Id</th>
+						<th id="th_elementName">Elementname</th>
+						<th id="th_classification">Classification</th>
+						<th id="th_message">Message</th>
+						<th id="th_paths">Invalid Sequenzflow</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+	</div>
+
+	<!-- no Issues -->
+	<div class="row" id="noIssues">
+		<div class="col">
+			<div class="alert alert-success" role="alert"> no issues were found</div>
+		</div>
+	</div>
+
+	<dialog tabindex="-1" role="dialog" aria-labelledby="myDialog">
+		<div id="dia"></div>
+		<button onclick="toggleDialog('hide');">OK</button>
+	</dialog>
 
 	<!-- scripts -->
-
 	<!-- bpmn-js viewer -->
 	<script src="js/bpmn-navigated-viewer.js"></script>
 	<!-- bpmn-files and issues -->
 	<script src="js/bpmn_validation.js"></script>
 	<!-- application -->
 	<script src="js/bpmn.io.viewer.app.js"></script>
+	<!-- bootstrap -->
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/popper.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+
 </body>
 
 </html>

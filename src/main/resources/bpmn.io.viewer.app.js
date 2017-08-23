@@ -109,13 +109,13 @@ function addCountOverlay(overlays, bpmnFile) {
     //Add Overlays
     for (id in issues) {
         var overlayHtml = document.createElement("div");
-        overlayHtml.setAttribute("class", "diagram-zahl");
+        overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
         overlayHtml.appendChild(document.createTextNode(issues[id].anz));
 
         // add DialogMessage
         function clickOverlay(id) {
             //clear dialog
-            var dp = document.querySelectorAll('.d');
+            var dp = document.querySelectorAll('#d');
             for (var i = 0; i < dp.length; i++) {
                 if (dp[i].children.length === 0) {
                     dp[i].parentNode.removeChild(dp[i]);
@@ -132,10 +132,10 @@ function addCountOverlay(overlays, bpmnFile) {
                     var pRule = document.createElement("p");
                     var pMessage = document.createElement("p");
 
-                    pMessage.setAttribute("id", "d_message");
-                    pMessage.setAttribute("class", "d");
-                    hClass.setAttribute("class", "d");
-                    pRule.setAttribute("class", "d");
+                    pMessage.setAttribute("class", "d_message");
+                    pMessage.setAttribute("id", "d");
+                    hClass.setAttribute("id", "d");
+                    pRule.setAttribute("id", "d");
 
                     hClass.appendChild(document.createTextNode(issue.classification));
                     pRule.appendChild(document.createTextNode(issue.ruleName));
@@ -195,8 +195,7 @@ function createTable(bpmnFile) {
         if (elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
             issue = elementsToMark[id];
             myParent = document.getElementsByTagName("body").item(0);
-
-            myTBody = document.createElement("tbody");
+            myTBody = document.createElement("tbody");            
             myRow = document.createElement("tr");
             //ruleName
             myCell = document.createElement("td");
@@ -278,6 +277,7 @@ function createTable(bpmnFile) {
             }
             myRow.appendChild(myCell);
             //---------
+            myParent.setAttribute("class", "container-fluid");
             myTBody.appendChild(myRow);
             myTable.appendChild(myTBody);
             myParent.appendChild(myTable);
@@ -368,10 +368,10 @@ function setUeberschrift(name) {
 //hideTable
 function tableVisible(show) {
     if (show) {
-        document.getElementById("h1_table").style.display = "block";
+        document.getElementById("tableHeader").style.display = "block";
         document.getElementById("table_issues").style.display = "table";
     } else {
-        document.getElementById("h1_table").style.display = "none";
+        document.getElementById("tableHeader").style.display = "none";
         document.getElementById("table_issues").style.display = "none";
     }
 }
@@ -404,6 +404,7 @@ function toggleDialog(sh) {
 
 // List all ProcessInstances
 (function () {
+    var first = true;
     for (id in diagramXMLSource) {
         model = diagramXMLSource[id];
         var ul = document.getElementById("linkList");
@@ -411,22 +412,18 @@ function toggleDialog(sh) {
         var a = document.createElement("a");
         var subName = model.name.substr(0, model.name.length - 5);
         li.appendChild(a);
-        li.style.display = "inline";
-        li.style.listStyle = "none";
-        li.style.margin = "0";
-        li.style.padding = "0";
+        li.setAttribute("class", "nav-item");
 
         a.appendChild(document.createTextNode(subName + " (" + countIssues(model.name) + ")"));
         a.setAttribute("onclick", "selectModel('" + model.name.replace(/\\/g, "\\\\") + "', null, null, 0 )");
         a.setAttribute("href", "#");
-        a.style.padding = "0.4em";
-        a.style.border = "1px solid black";
-        a.style.color = "black";
-        if (countIssues(model.name) == 0)
-            a.style.background = "rgba(0, 255, 0, 0.5)";
-        else
-            a.style.background = "rgba(255, 0, 0, 0.5)";
-        a.setAttribute("class", "focusClass");
+        if (first == true) {
+            a.setAttribute("class", "nav-link active");
+            first = false;
+        } else {
+            a.setAttribute("class", "nav-link");
+        }
+
         a.setAttribute("id", model.name);
         ul.appendChild(li);
     }
@@ -439,7 +436,10 @@ function setFocus(name) {
 //reload model diagram
 function selectModel(name, issue_id, path_nr, func) {
     for (id in diagramXMLSource) {
+        var a = document.getElementById(diagramXMLSource[id].name);
+        a.setAttribute("class", "nav-link");
         if (diagramXMLSource[id].name == name) {
+            a.setAttribute("class", "nav-link active");
             if (func == 0) {
                 viewer.reload(diagramXMLSource[id]);
             } else if (func == 1) {

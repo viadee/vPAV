@@ -166,11 +166,10 @@ public abstract class AbstractRunner {
      *             Abort if writer can not be instantiated
      */
     public static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
-        // create vPAV and img folder
+        // create vPAV, img, css, js folders
         createBaseFolder();
 
         if (filteredIssues.size() > 0) {
-            createCssJsFolder(); // create folders
             final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
             final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();
             final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
@@ -193,11 +192,36 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * create Base folders vPAV/img
+     * create Base folders
      *
      * @throws RuntimeException
      */
     private static void createBaseFolder() throws RuntimeException {
+        createvPAVFolder();
+        createImgFolder();
+        createCssFolder();
+        createJsFolder();
+    }
+
+    /**
+     * make vPAV folder
+     */
+    private static void createvPAVFolder() {
+        File vPavDir = new File(ConstantsConfig.VALIDATION_FOLDER);
+
+        if (!vPavDir.exists()) {
+            boolean success = vPavDir.mkdirs();
+            if (!success) {
+                throw new RuntimeException("vPav directory does not exist and could not be created");
+            }
+        }
+    }
+
+    /**
+     * make img folder
+     */
+    private static void createImgFolder() {
+
         File imgDir = new File(ConstantsConfig.IMG_FOLDER);
 
         if (!imgDir.exists()) {
@@ -209,18 +233,21 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * make js and css folder
+     * make css folder
      */
-    private static void createCssJsFolder() {
-        // js folder
+    private static void createJsFolder() {
         File jsDir = new File(ConstantsConfig.JS_FOLDER);
         if (!jsDir.exists()) {
             boolean success = jsDir.mkdirs();
             if (!success)
                 throw new RuntimeException("vPav/js directory does not exist and could not be created");
         }
+    }
 
-        // css folder
+    /**
+     * make css folder
+     */
+    private static void createCssFolder() {
         File cssDir = new File(ConstantsConfig.CSS_FOLDER);
         if (!cssDir.exists()) {
             boolean success = cssDir.mkdirs();
@@ -228,25 +255,6 @@ public abstract class AbstractRunner {
                 throw new RuntimeException("vPav/css directory does not exist and could not be created");
         }
 
-    }
-
-    /**
-     * delete js and css folder
-     */
-    private static void deleteCssJsFolder() {
-        File jsDir = new File(ConstantsConfig.JS_FOLDER);
-        if (jsDir.exists()) {
-            boolean success = jsDir.delete();
-            if (!success)
-                throw new RuntimeException("Could not delete vPAV/js folder");
-        }
-
-        File cssDir = new File(ConstantsConfig.CSS_FOLDER);
-        if (cssDir.exists()) {
-            boolean success = cssDir.delete();
-            if (!success)
-                throw new RuntimeException("Could not delete vPAV/css folder");
-        }
     }
 
     /**
@@ -275,20 +283,31 @@ public abstract class AbstractRunner {
                 if (!file.equals("noIssues.html"))
                     copyFileToVPAVFolder(file);
         } else {
-            deleteCssJsFolder();
-            copyFileToVPAVFolder("noIssues.html");
-            copyFileToVPAVFolder("logo.png");
+            for (String file : allOutputFilesArray)
+                if (!file.equals("validationResult.html") && !file.equals("MarkerStyle.css")
+                        && !file.equals("DialogStyle.css") && !file.equals("bpmn.io.viewer.app.js")
+                        && !file.equals("bpmn-navigated-viewer.js"))
+                    copyFileToVPAVFolder(file);
         }
     }
 
     private static ArrayList<String> createAllOutputFilesArray() {
         ArrayList<String> allFiles = new ArrayList<String>();
+        allFiles.add("bootstrap.min.js");
         allFiles.add("bpmn-navigated-viewer.js");
         allFiles.add("bpmn.io.viewer.app.js");
+        allFiles.add("jquery-3.2.1.min.js");
+        allFiles.add("popper.min.js");
+
+        allFiles.add("bootstrap.min.css");
+        allFiles.add("bootstrap.override.css");
         allFiles.add("DialogStyle.css");
         allFiles.add("MarkerStyle.css");
-        allFiles.add("TableStyle.css");
-        allFiles.add("logo.png");
+
+        allFiles.add("vPAV.png");
+        allFiles.add("viadee_Logo.png");
+        allFiles.add("GitHub.png");
+
         allFiles.add("validationResult.html");
         allFiles.add("noIssues.html");
         return allFiles;
@@ -296,12 +315,21 @@ public abstract class AbstractRunner {
 
     private static Map<String, String> createFileFolderMapping() {
         Map<String, String> fMap = new HashMap<String, String>();
+        fMap.put("bootstrap.min.js", ConstantsConfig.JS_FOLDER);
         fMap.put("bpmn-navigated-viewer.js", ConstantsConfig.JS_FOLDER);
         fMap.put("bpmn.io.viewer.app.js", ConstantsConfig.JS_FOLDER);
+        fMap.put("jquery-3.2.1.min.js", ConstantsConfig.JS_FOLDER);
+        fMap.put("popper.min.js", ConstantsConfig.JS_FOLDER);
+
+        fMap.put("bootstrap.min.css", ConstantsConfig.CSS_FOLDER);
+        fMap.put("bootstrap.override.css", ConstantsConfig.CSS_FOLDER);
         fMap.put("DialogStyle.css", ConstantsConfig.CSS_FOLDER);
         fMap.put("MarkerStyle.css", ConstantsConfig.CSS_FOLDER);
-        fMap.put("TableStyle.css", ConstantsConfig.CSS_FOLDER);
-        fMap.put("logo.png", ConstantsConfig.IMG_FOLDER);
+
+        fMap.put("vPAV.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("viadee_Logo.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("GitHub.png", ConstantsConfig.IMG_FOLDER);
+
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
         fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);
         return fMap;

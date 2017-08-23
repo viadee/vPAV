@@ -71,11 +71,11 @@
 		}
 
 		.NoScriptChecker .djs-visual> :nth-child(1) {
-			stroke: rgba(168, 168, 168, 1.0) !important;
+			stroke: rgba(110, 134, 86, 1.0) !important;
 		}
 
 		.NoScriptChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
-			fill: rgba(168, 168, 168, 0.5) !important;
+			fill: rgba(110, 134, 86, 0.5) !important;
 		}
 
 		.XorNamingConventionChecker .djs-visual> :nth-child(1) {
@@ -95,37 +95,37 @@
 		}
 
 		#ProcessVariablesNameConventionChecker {			
-			background-color: rgba(255, 0, 0, 0.5)
+			background-color: rgba(255, 0, 0, 0.25)
 		}
 
 		#JavaDelegateChecker {
-			background-color: rgba(255, 255, 0, 0.5);
+			background-color: rgba(255, 255, 0, 0.25);
 		}
 
 		#VersioningChecker {
-			background-color: rgba(255, 135, 41, 0.5);			
+			background-color: rgba(255, 135, 41, 0.25);			
 		}
 
 		#EmbeddedGroovyScriptChecker {
-			background-color: rgba(0, 0, 255, 0.5)
+			background-color: rgba(0, 0, 255, 0.25)
 		}
 
 		#DmnTaskChecker {
-			background-color: rgba(128, 128, 128, 0.5);
+			background-color: rgba(128, 128, 128, 0.25);
 		}
 
 		#ProcessVariablesModelChecker {
-			background-color: rgba(0, 255, 0, 0.5)
+			background-color: rgba(0, 255, 0, 0.25)
 		}
 
 		#TaskNamingConventionChecker {			
-			background-color: rgba(255, 20, 197, 0.5);
+			background-color: rgba(255, 20, 197, 0.25);
 		}
 
 		#NoScriptChecker{
-			background-color: rgba(168,168,168,0.5);
+			background-color: rgba(110, 134, 86, 0.25);
 		}
 
 		#XorNamingConventionChecker{
-			background-color: rgba(255, 20, 197, 0.5);
+			background-color: rgba(255, 20, 197, 0.25);
 		}

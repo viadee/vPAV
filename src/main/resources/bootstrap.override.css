@@ -1,0 +1,20 @@
+
+		.table-primary,
+		.table-primary>th,
+		.table-primary>td {
+			background-color: #CED6E3;
+		}
+
+		.nav-pills .nav-link.active,
+		.show>.nav-pills .nav-link {
+			color: #fff;
+			background-color: #3C5C8E;
+		}
+
+		a {
+			color: #3C5C8E;
+		}
+
+		a:hover {
+			color: #003278
+		}
