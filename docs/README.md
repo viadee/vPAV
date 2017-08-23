@@ -136,7 +136,11 @@ Status of the development branch: [![Build Status](https://travis-ci.org/viadee/
 
 ## Licenses
 All licenses of reused components can be found on the [maven site](http://rawgit.com/viadee/vPAV/master/docs/MavenSite/project-info.html)
-</br> Additionally we reuse the [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
+</br> Additionally we use the following third-party dependencies, that are not distributed via maven:
+- [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
+- [Bootstrap](https://github.com/twbs/bootstrap/blob/v4-dev/LICENSE) licensed under MIT
+- [jQuery](https://jquery.org/license/) licensed under MIT
+- [PopperJS](https://github.com/FezVrasta/popper.js/blob/master/LICENSE.md) licensed under MIT
 
 
 **License (BSD4)** <br/>
