@@ -7,43 +7,12 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="css/bootstrap.min.css">
-	<link rel="stylesheet" href="css/bootstrap.override.css">
+	<link rel="stylesheet" href="css/viadee.css">
 	<link rel="stylesheet" href="css/MarkerStyle.css">
-	<link rel="stylesheet" href="css/DialogStyle.css">
 
 	<style type="text/css">
 		* {
 			font-family: Arial;
-		}
-
-		header {
-			background-color: #CED6E3;
-		}
-
-		#canvas {
-			height: 35rem;
-			padding: 0;
-			margin: 0;
-			margin-top: 0.2rem;
-			border-width: .2rem;
-			border: solid #003278;
-		}
-
-		#noIssues {
-			display: none;
-		}
-
-		#tableHeader {
-			padding-top: 0.5rem;
-			margin-top: 1rem;
-			margin-bottom: 0;
-			border-width: .2rem;
-			border: solid #f7f7f9;
-		}
-
-		#logo{
-			margin-top: 0.4rem;
-			margin-right: 1rem;
 		}
 	</style>
 
@@ -51,16 +20,16 @@
 </head>
 
 <body>
-	<header class="navbar sticky-top ">
+	<header class="navbar sticky-top viadee-lightblue-bg">
 		<h3 id=modell></h3>
 		<ul class="navbar-nav flex-row ml-md-auto">
 			<li class="nav-item">
-				<a class="nav-link" id="logo" href="https://viadee.github.io/vPAV/">
+				<a class="nav-link mt-2 mr-4" id="logo" href="https://viadee.github.io/vPAV/">
 					<img src="img/vPAV.png"  alt="vPAV"/>
 				</a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" id="logo" href="https://github.com/viadee/vPAV">
+				<a class="nav-link mt-2 mr-4" id="logo" href="https://github.com/viadee/vPAV">
 					<img src="img/GitHub.png"  alt="GitHub"/>
 				</a>
 			</li>
@@ -82,15 +51,15 @@
 
 	<!-- element to draw bpmn diagram in -->
 	<div class="row">
-		<div class="col" id="can">
-			<div id="canvas"></div>
+		<div class="col">
+			<div class="m-0 p-0 mt-1 viadee-darkblue-border" id="canvas"></div>
 		</div>
 	</div>
 
 	<!-- Issue table -->
 	<div class="row">
 		<div class="col">
-			<h2 id="tableHeader">Error list</h2>
+			<h2 class="border border-light pt-2 mt-4 mb-0 pl-1" id="tableHeader">Error list</h2>
 			<table id="table_issues" class="table table-bordered .table-responsive">
 				<thead>
 					<tr id="tr_ueberschriften" class="table-primary">
@@ -109,26 +78,40 @@
 	<!-- no Issues -->
 	<div class="row" id="noIssues">
 		<div class="col">
-			<div class="alert alert-success" role="alert"> no issues were found</div>
+			<div class="alert alert-success mt-3" role="alert"> no issues were found</div>
 		</div>
 	</div>
 
-	<dialog tabindex="-1" role="dialog" aria-labelledby="myDialog">
-		<div id="dia"></div>
-		<button onclick="toggleDialog('hide');">OK</button>
-	</dialog>
+	<div class="modal" id="issueModal">
+		<div class="modal-dialog" role="document">
+		  <div class="modal-content">
+			<div class="modal-header viadee-lightblue-bg viadee-head">
+			  <h4 class="modal-title">Issue details</h4>
+			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+			<div class="modal-body">
+			  <p>Modal body text goes here.</p>
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-viadee" data-dismiss="modal">Close</button>
+			</div>
+		  </div>
+		</div>												
+	  </div>
 
 	<!-- scripts -->
 	<!-- bpmn-js viewer -->
 	<script src="js/bpmn-navigated-viewer.js"></script>
 	<!-- bpmn-files and issues -->
 	<script src="js/bpmn_validation.js"></script>
-	<!-- application -->
-	<script src="js/bpmn.io.viewer.app.js"></script>
 	<!-- bootstrap -->
 	<script src="js/jquery-3.2.1.min.js"></script>
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
+	<!-- application -->
+	<script src="js/bpmn.io.viewer.app.js"></script>
 
 </body>
 

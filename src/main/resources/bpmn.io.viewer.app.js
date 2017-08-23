@@ -110,40 +110,42 @@ function addCountOverlay(overlays, bpmnFile) {
     for (id in issues) {
         var overlayHtml = document.createElement("div");
         overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
+        overlayHtml.setAttribute("type", "button");
+        overlayHtml.setAttribute("data-toggle", "bmodal");
+        overlayHtml.setAttribute("data-target", "#issueModal");
         overlayHtml.appendChild(document.createTextNode(issues[id].anz));
 
         // add DialogMessage
         function clickOverlay(id) {
             //clear dialog
-            var dp = document.querySelectorAll('#d');
-            for (var i = 0; i < dp.length; i++) {
-                if (dp[i].children.length === 0) {
-                    dp[i].parentNode.removeChild(dp[i]);
-                }
-            }
+            const dialogContent = document.querySelector(".modal-body");
+            while (dialogContent.hasChildNodes()) {
+                dialogContent.removeChild(dialogContent.lastChild);
+              }
 
             var eId = issues[id].i.elementId;
             for (y in issues) {
                 if (issues[y].i.elementId == eId) {
                     var issue = issues[y].i;
-                    var dl = document.getElementById("dia");
+                  
+                    var dRule = document.createElement("div");
+                    dRule.style.border = "solid #f7f7f9";
+                    dRule.style.marginTop = "1rem";
+                    dRule.style.padding = "0.5rem";
 
-                    var hClass = document.createElement("h3");
+                    var hClass = document.createElement("h5");
                     var pRule = document.createElement("p");
                     var pMessage = document.createElement("p");
-
-                    pMessage.setAttribute("class", "d_message");
-                    pMessage.setAttribute("id", "d");
-                    hClass.setAttribute("id", "d");
-                    pRule.setAttribute("id", "d");
 
                     hClass.appendChild(document.createTextNode(issue.classification));
                     pRule.appendChild(document.createTextNode(issue.ruleName));
                     pMessage.appendChild(document.createTextNode(issue.message));
 
-                    dl.appendChild(hClass);
-                    dl.appendChild(pRule);
-                    dl.appendChild(pMessage);
+                    dRule.appendChild(hClass);
+                    dRule.appendChild(pRule);
+                    dRule.appendChild(pMessage);
+
+                    dialogContent.appendChild(dRule);
                 }
             }
             toggleDialog('show');
@@ -155,7 +157,7 @@ function addCountOverlay(overlays, bpmnFile) {
                 clickOverlay(currentId);
             };
 
-        })();
+        })(); 
         attachOverlay();
     }
 
@@ -325,7 +327,7 @@ function initDiagram(diagramXML, issue_id, path_nr, func) {
                 createTable(diagramXML.name);
                 tableVisible(true);
             } else {
-                document.getElementById("noIssues").style.display = "initial";
+                document.getElementById("noIssues").setAttribute("class", "collapse.show");
                 tableVisible(false);
             }
         });
@@ -361,7 +363,7 @@ function initDiagram(diagramXML, issue_id, path_nr, func) {
 function setUeberschrift(name) {
     subName = name.substr(0, name.length - 5);
     document.querySelector("#modell").innerHTML = "Consistency check: " + subName;
-    document.getElementById("noIssues").style.display = "none";
+    document.getElementById("noIssues").setAttribute("class", "collapse");
     setFocus(name);
 }
 
@@ -390,16 +392,16 @@ function countIssues(bpmnFile) {
 //dialog
 var dialogOpen = false, lastFocus, dialog, okbutton, pagebackground;
 function toggleDialog(sh) {
-    dialog = document.querySelector('dialog');
-
-    if (sh == 'show') {
+    dialog = $('#issueModal');
+    dialog.modal();
+   /*  if (sh == 'show') {
         dialogOpen = true;
         // show the dialog  
         dialog.setAttribute('open', 'open');
     } else {
         dialogOpen = false;
         dialog.setAttribute('open', 'false');
-    }
+    } */
 }
 
 // List all ProcessInstances

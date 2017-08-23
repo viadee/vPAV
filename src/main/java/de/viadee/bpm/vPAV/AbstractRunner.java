@@ -280,12 +280,12 @@ public abstract class AbstractRunner {
 
         if (filteredIssues.size() > 0) {
             for (String file : allOutputFilesArray)
-                if (!file.equals("noIssues.html"))
+                if (!file.equals("noIssues.html") && !file.equals("success.png"))
                     copyFileToVPAVFolder(file);
         } else {
             for (String file : allOutputFilesArray)
                 if (!file.equals("validationResult.html") && !file.equals("MarkerStyle.css")
-                        && !file.equals("DialogStyle.css") && !file.equals("bpmn.io.viewer.app.js")
+                        && !file.equals("bpmn.io.viewer.app.js")
                         && !file.equals("bpmn-navigated-viewer.js"))
                     copyFileToVPAVFolder(file);
         }
@@ -300,13 +300,13 @@ public abstract class AbstractRunner {
         allFiles.add("popper.min.js");
 
         allFiles.add("bootstrap.min.css");
-        allFiles.add("bootstrap.override.css");
-        allFiles.add("DialogStyle.css");
+        allFiles.add("viadee.css");
         allFiles.add("MarkerStyle.css");
 
         allFiles.add("vPAV.png");
         allFiles.add("viadee_Logo.png");
         allFiles.add("GitHub.png");
+        allFiles.add("success.png");
 
         allFiles.add("validationResult.html");
         allFiles.add("noIssues.html");
@@ -322,13 +322,13 @@ public abstract class AbstractRunner {
         fMap.put("popper.min.js", ConstantsConfig.JS_FOLDER);
 
         fMap.put("bootstrap.min.css", ConstantsConfig.CSS_FOLDER);
-        fMap.put("bootstrap.override.css", ConstantsConfig.CSS_FOLDER);
-        fMap.put("DialogStyle.css", ConstantsConfig.CSS_FOLDER);
+        fMap.put("viadee.css", ConstantsConfig.CSS_FOLDER);
         fMap.put("MarkerStyle.css", ConstantsConfig.CSS_FOLDER);
 
         fMap.put("vPAV.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("viadee_Logo.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("GitHub.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("success.png", ConstantsConfig.IMG_FOLDER);
 
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
         fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);

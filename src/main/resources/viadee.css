@@ -1,0 +1,53 @@
+
+		.table-primary,
+		.table-primary>th,
+		.table-primary>td {
+			background-color: #CED6E3;
+		}
+
+		.nav-pills .nav-link.active,
+		.show>.nav-pills .nav-link {
+			color: #fff;
+			background-color: #3C5C8E;
+			border-radius: 0;
+		}
+
+		a {
+			color: #3C5C8E;
+		}
+
+		a:hover {
+			color: #003278
+		}
+
+		.btn-viadee {
+			color: #fff;
+			background-color: #3C5C8E;
+			border-color: #003278;
+		}
+
+		.viadee-head{
+			border-bottom: 1px solid #003278;
+		}
+
+		.viadee-lightblue-bg{
+			background-color: #CED6E3;
+		}
+
+		.viadee-blue-bg{
+			background-color: #3C5C8E;
+		}
+
+		.viadee-darkblue-border{
+			border: solid #003278;
+		}
+
+		.viadee-border{
+			border-radius: 0.25rem;
+		}
+
+		#canvas {
+			height: 35rem;
+		}
+
+
