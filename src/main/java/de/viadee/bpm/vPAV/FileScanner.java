@@ -33,7 +33,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,9 +75,7 @@ public class FileScanner {
 
     private final String targetClassFolder = "target/classes";
 
-    public static Logger logger = Logger.getLogger(FileScanner.class.getName());
-
-    public FileScanner(final Map<String, Rule> rules, final String classPathScanLocation)
+    public FileScanner(final Map<String, Rule> rules)
             throws DependencyResolutionRequiredException {
 
         final DirectoryScanner scanner = new DirectoryScanner();
@@ -93,28 +90,26 @@ public class FileScanner {
         processIdToPathMap = createProcessIdToPathMap(processdefinitions);
 
         // get file paths of java files
-        if (classPathScanLocation != null && !classPathScanLocation.isEmpty()) {
-            URL[] urls;
-            LinkedList<File> files = new LinkedList<File>();
+        URL[] urls;
+        LinkedList<File> files = new LinkedList<File>();
 
-            URLClassLoader ucl;
-            if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
-                ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
-            } else {
-                ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
-            }
-            urls = ucl.getURLs();
+        URLClassLoader ucl;
+        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
+        } else {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
+        }
+        urls = ucl.getURLs();
 
-            // retrieve all jars during runtime and pass them to get class files
-            for (URL url : urls) {
-                if (url.getFile().contains(targetClassFolder)) {
-                    File f = new File(url.getFile() + classPathScanLocation);
-                    if (f.exists()) {
-                        files = (LinkedList<File>) FileUtils.listFiles(f,
-                                TrueFileFilter.INSTANCE,
-                                TrueFileFilter.INSTANCE);
-                        addResources(files);
-                    }
+        // retrieve all jars during runtime and pass them to get class files
+        for (URL url : urls) {
+            if (url.getFile().contains(targetClassFolder)) {
+                File f = new File(url.getFile());
+                if (f.exists()) {
+                    files = (LinkedList<File>) FileUtils.listFiles(f,
+                            TrueFileFilter.INSTANCE,
+                            TrueFileFilter.INSTANCE);
+                    addResources(files);
                 }
             }
         }
@@ -147,7 +142,9 @@ public class FileScanner {
 
     /**
      * process classes and add resource add all files to includedFiles
-     *
+     * 
+     * @param classes
+     *            LinkedList containing all files from target folder
      */
     private void addResources(LinkedList<File> classes) {
 
