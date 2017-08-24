@@ -252,6 +252,7 @@ function createTable(bpmnFile) {
             myText = document.createTextNode(issue.message);
             myCell.appendChild(myText);
             myRow.appendChild(myCell);
+            
             //path
             myCell = document.createElement("td");
             var path_text = "";
@@ -268,14 +269,14 @@ function createTable(bpmnFile) {
                         else
                             path_text += issue.paths[x][y].elementName
                 }
-                myText = document.createTextNode(path_text);
+                myText = document.createTextNode("Mark invalid flow");
 
                 //path markieren
                 var p = issue.paths[x];
 
                 var b = document.createElement("a");
                 b.appendChild(myText);
-                b.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.id + "','" + x + "', 1)");
+                b.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.id + "','" + x + "', 1, '" + path_text + "')");
                 b.setAttribute("href", "#");
 
                 myCell.appendChild(b);
@@ -441,7 +442,8 @@ function setFocus(name) {
 }
 
 //reload model diagram
-function selectModel(name, issue_id, path_nr, func) {
+function selectModel(name, issue_id, path_nr, func, path) {
+    document.getElementById("rowPath").setAttribute("class", "collapse");
     for (id in diagramXMLSource) {
         var a = document.getElementById(diagramXMLSource[id].name);
         a.setAttribute("class", "nav-link");
@@ -451,6 +453,8 @@ function selectModel(name, issue_id, path_nr, func) {
                 viewer.reload(diagramXMLSource[id]);
             } else if (func == 1) {
                 viewer.reloadMarkPath(diagramXMLSource[id], issue_id, path_nr);
+                document.getElementById('invalidPath').innerHTML = path;
+                document.getElementById("rowPath").setAttribute("class", "collapse.show");
             } else if (func == 2) {
                 viewer.reloadMarkElement(diagramXMLSource[id], issue_id);
             }

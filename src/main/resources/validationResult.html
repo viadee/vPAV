@@ -26,9 +26,9 @@
 				<li class="nav-item dropdown">
 					<a class="nav-item nav-link mr-4 mt-3" id="version" data-toggle="dropdown">versions</a>
 					<div class="dropdown-menu" aria-labelledby="versions">
-							<a class="dropdown-item" id="mv"></a>
-							<a class="dropdown-item" id="vPAV"></a>
-							<a class="dropdown-item" id="java"></a>
+							<a class="dropdown-item disabled" id="mv"></a>
+							<a class="dropdown-item disabled" id="vPAV"></a>
+							<a class="dropdown-item disabled" id="java"></a>
 					</div>						
 					</li>
 			<li class="nav-item">
@@ -57,12 +57,21 @@
 		</div>
 	</div>
 
+<!-- Path-->
+<div class="row collapse" id="rowPath">
+	<div class="col">
+		<div class="alert alert-danger mt-2 mb-0 ml-0 pb-1 pt-1 viadee-small-alert" role="alert" id="invalidPath"></div>
+	</div>
+</div>
+
 	<!-- element to draw bpmn diagram in -->
 	<div class="row">
 		<div class="col">
 			<div class="m-0 p-0 mt-1 viadee-darkblue-border" id="canvas"></div>
 		</div>
 	</div>
+
+		
 
 	<!-- Issue table -->
 	<div class="row">
