@@ -335,7 +335,7 @@ public abstract class AbstractRunner {
         fMap.put("success.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("error.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("warning.png", ConstantsConfig.IMG_FOLDER);
-        fMap.put("ingo.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("info.png", ConstantsConfig.IMG_FOLDER);
 
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
         fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);
