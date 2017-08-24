@@ -458,3 +458,6 @@ function selectModel(name, issue_id, path_nr, func) {
     }
 }
 viewer = initDiagram(diagramXMLSource[0], 0, null);
+document.getElementById('mv').innerHTML = mvVersion;
+document.getElementById('vPAV').innerHTML = vPavVersion;
+document.getElementById('java').innerHTML = javaVersion;

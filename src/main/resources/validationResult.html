@@ -20,9 +20,17 @@
 </head>
 
 <body>
-	<header class="navbar sticky-top viadee-lightblue-bg">
+	<header class="navbar sticky-top navbar-expand viadee-lightblue-bg">
 		<h3 id=modell></h3>
 		<ul class="navbar-nav flex-row ml-md-auto">
+				<li class="nav-item dropdown">
+					<a class="nav-item nav-link mr-4 mt-3" id="version" data-toggle="dropdown">versions</a>
+					<div class="dropdown-menu" aria-labelledby="versions">
+							<a class="dropdown-item" id="mv"></a>
+							<a class="dropdown-item" id="vPAV"></a>
+							<a class="dropdown-item" id="java"></a>
+					</div>						
+					</li>
 			<li class="nav-item">
 				<a class="nav-link mt-2 mr-4" id="logo" href="https://viadee.github.io/vPAV/">
 					<img src="img/vPAV.png"  alt="vPAV"/>
@@ -106,6 +114,7 @@
 	<script src="js/bpmn-navigated-viewer.js"></script>
 	<!-- bpmn-files and issues -->
 	<script src="js/bpmn_validation.js"></script>
+	<script src="js/infoPOM.js"></script>
 	<!-- bootstrap -->
 	<script src="js/jquery-3.2.1.min.js"></script>
 	<script src="js/popper.min.js"></script>

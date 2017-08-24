@@ -299,6 +299,7 @@ public abstract class AbstractRunner {
         allFiles.add("bpmn.io.viewer.app.js");
         allFiles.add("jquery-3.2.1.min.js");
         allFiles.add("popper.min.js");
+        allFiles.add("infoPOM.js");
 
         allFiles.add("bootstrap.min.css");
         allFiles.add("viadee.css");
@@ -313,7 +314,8 @@ public abstract class AbstractRunner {
         allFiles.add("info.png");
 
         allFiles.add("validationResult.html");
-        allFiles.add("noIssues.html");
+        allFiles.add("noIssues.html");        
+        
         return allFiles;
     }
 
@@ -324,6 +326,7 @@ public abstract class AbstractRunner {
         fMap.put("bpmn.io.viewer.app.js", ConstantsConfig.JS_FOLDER);
         fMap.put("jquery-3.2.1.min.js", ConstantsConfig.JS_FOLDER);
         fMap.put("popper.min.js", ConstantsConfig.JS_FOLDER);
+        fMap.put("infoPOM.js", ConstantsConfig.JS_FOLDER);
 
         fMap.put("bootstrap.min.css", ConstantsConfig.CSS_FOLDER);
         fMap.put("viadee.css", ConstantsConfig.CSS_FOLDER);
@@ -338,7 +341,8 @@ public abstract class AbstractRunner {
         fMap.put("info.png", ConstantsConfig.IMG_FOLDER);
 
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
-        fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);
+        fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);        
+        
         return fMap;
     }
 
