@@ -14,7 +14,7 @@
 			font-family: Arial;
 		}
 
-		header {
+		header, footer {
 			background-color: #CED6E3;
 		}
 	</style>
@@ -58,6 +58,13 @@
 		<p class="mt-2">No issues were found</p>
 	</div>
 
+	<footer class="footer fixed-bottom pt-1 pb-1 pl-2 m-0 ml-3 mr-3">
+		<p class="text-muted">
+				viadee Unternehmensberatung GmbH - viadee Process Application Validator <span id="v"></span>
+		</p>
+	</footer>
+
+
 	<!-- scripts -->
 	<script src="js/infoPOM.js"></script>
 	<!-- bootstrap -->
@@ -69,6 +76,7 @@
 		document.getElementById('mv').innerHTML = mvVersion;
 		document.getElementById('vPAV').innerHTML = vPavVersion;
 		document.getElementById('java').innerHTML = javaVersion;
+		document.getElementById('v').innerHTML = vPavVersion.substr(5);
 	</script>
 </body>
 

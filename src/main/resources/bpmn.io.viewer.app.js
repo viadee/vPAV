@@ -307,6 +307,23 @@ function createTable(bpmnFile) {
 }
 
 /**
+ * create Footer
+ */
+function createFooter(){
+    const body = document.querySelector("body");
+    var footer = document.createElement("footer");
+    footer.setAttribute("class", "footer pt-1 pb-1 pl-2 m-0");
+    footer.style.backgroundColor = "#CED6E3";
+
+    var fP = document.createElement("p");
+    fP.setAttribute("class", "text-muted");
+    fP.innerHTML = "viadee Unternehmensberatung GmbH - viadee Process Application Validator " + vPavVersion.substr(5);
+    
+    footer.appendChild(fP);
+    body.appendChild(footer);
+}
+
+/**
  * bpmn-js-seed
  *
  * This is an example script that loads an embedded diagram file <diagramXML>
@@ -345,9 +362,11 @@ function initDiagram(diagramXML, issue_id, path_nr, func) {
                 }
                 createTable(diagramXML.name);
                 tableVisible(true);
+                createFooter();
             } else {
                 document.getElementById("noIssues").setAttribute("class", "collapse.show");
                 tableVisible(false);
+                createFooter();
             }
         });
     };
@@ -451,6 +470,12 @@ function setFocus(name) {
 //reload model diagram
 function selectModel(name, issue_id, path_nr, func, path) {
     document.getElementById("rowPath").setAttribute("class", "collapse");
+    
+    //delete footer
+    const footer = document.querySelector("footer");
+    if(!(footer === null))
+        footer.parentNode.removeChild(footer);
+
     for (id in diagramXMLSource) {
         var a = document.getElementById(diagramXMLSource[id].name);
         a.setAttribute("class", "nav-link");
