@@ -57,7 +57,7 @@ Clicking on the _Element-Id_ or _invalid sequenzflow_ marks the corresponding el
 
 ### Example
 <a href="img/output.PNG?raw=true" target="_blank"><img src="img/output.PNG" 
-alt="Example HTML-Output" width="951" height="1348" border="5" /></a>
+alt="Example HTML-Output" width="791" height="985" border="5" /></a>
 
 ## Requirements
 - Camunda BPM Engine 7.4.0 and above
