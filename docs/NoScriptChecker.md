@@ -2,7 +2,7 @@ No Script Checker
 ================================= 
 The No Script Checker processes BPMN models and checks whether there is a script in the model.
 
-**Exclusion:** 	Script as condition expression of a sequence flow <br\>
+**Exclusion:** 	Script as condition expression of a sequence flow  
 **Reason:** The goal of the checker is to separate process control and technical content. A script in a sequence flow is always part of the sequence control.
 
 
