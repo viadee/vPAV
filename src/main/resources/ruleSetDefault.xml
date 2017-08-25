@@ -1,4 +1,4 @@
-<ruleSet>
+<ruleSet>	
 	<rule>
 		<name>ProcessVariablesLocation</name>
 		<state>false</state>

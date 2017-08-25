@@ -26,6 +26,10 @@ public final class ConstantsConfig {
 
     public static final String RULESETDEFAULT = "ruleSetDefault.xml";
 
+    public static final String RULESETPARENT = "parentRuleSet.xml";
+
+    public static final String HASPARENTRULESET = "HasParentRuleSet";
+
     public static final String IGNORE_FILE = "src/main/resources/.ignoreIssues";
 
     public static final String BPMN_FILE_PATTERN = "**/*.bpmn";

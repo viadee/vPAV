@@ -26,6 +26,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -68,12 +70,6 @@ public abstract class AbstractRunner {
 
     public static void run_vPAV() {
 
-        /*
-         * 1. Read Config 1b. Read Bean Mapping (Mojo) 1c. Create Bean Mapping (JUnit) 2. Retrieve Class Path for
-         * JUnit/Maven 2b. Scan Class Path for Models 3. Get Process Variables 4. Check Each Model 5. Remove Ignored
-         * Issues 6. Write Check Results 6a. delete files 7. Copy Files 7a. delete files before
-         */
-
         // 1
         final Map<String, Rule> rules = readConfig();
 
@@ -99,16 +95,44 @@ public abstract class AbstractRunner {
 
     }
 
-    // 1a - Read config file
-
+    // 1
     public static Map<String, Rule> readConfig() {
-        final Map<String, Rule> rules;
+        Map<String, Rule> rules;
         try {
+
             rules = new XmlConfigReader().read(new File(ConstantsConfig.RULESET));
+
+            if ((!rules.containsKey(ConstantsConfig.HASPARENTRULESET))
+                    || rules.containsKey(ConstantsConfig.HASPARENTRULESET)
+                            && !rules.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
+                return rules;
+            } else if (rules.containsKey(ConstantsConfig.HASPARENTRULESET)
+                    && rules.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
+                rules = readParentRule(rules);
+            } else {
+                rules = new XmlConfigReader().read(new File(ConstantsConfig.RULESETDEFAULT));
+            }
         } catch (final ConfigReaderException e) {
             throw new RuntimeException("Config file could not be read");
         }
         return rules;
+    }
+
+    // 1b - Read parent config file
+    public static Map<String, Rule> readParentRule(final Map<String, Rule> childRules) {
+        final Map<String, Rule> parentRules;
+        final Map<String, Rule> finalRules = new HashMap<>();
+        try {
+            parentRules = new XmlConfigReader().read(new File(getParentConfig()));
+        } catch (final ConfigReaderException e) {
+            throw new RuntimeException("Parent config file could not be read");
+        }
+
+        finalRules.putAll(parentRules);
+        finalRules.putAll(childRules);
+        finalRules.remove(ConstantsConfig.HASPARENTRULESET);
+
+        return finalRules;
     }
 
     // 2b - Scan classpath for models
@@ -188,12 +212,6 @@ public abstract class AbstractRunner {
             validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_JSON_OUTPUT));
             validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_XML_OUTPUT));
             deleteFiles(validationFiles);
-            final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
-            try {
-                jsOutputWriter.write(filteredIssues);
-            } catch (OutputWriterException e) {
-                throw new RuntimeException("JavaScript File couldn't be written");
-            }
         }
     }
 
@@ -284,9 +302,18 @@ public abstract class AbstractRunner {
             outputFiles.add(Paths.get(fileMapping.get(file), file));
         deleteFiles(outputFiles);
 
-        for (String file : allOutputFilesArray)
-            copyFileToVPAVFolder(file);
-
+        if (filteredIssues.size() > 0) {
+            for (String file : allOutputFilesArray)
+                if (!file.equals("noIssues.html") && !file.equals("success.png"))
+                    copyFileToVPAVFolder(file);
+        } else {
+            for (String file : allOutputFilesArray)
+                if (!file.equals("validationResult.html") && !file.equals("MarkerStyle.css")
+                        && !file.equals("bpmn.io.viewer.app.js")
+                        && !file.equals("bpmn-navigated-viewer.js") && !file.equals("error.png")
+                        && !file.equals("warning.png") && !file.equals("info.png"))
+                    copyFileToVPAVFolder(file);
+        }
     }
 
     private static ArrayList<String> createAllOutputFilesArray() {
@@ -305,11 +332,13 @@ public abstract class AbstractRunner {
         allFiles.add("vPAV.png");
         allFiles.add("viadee_Logo.png");
         allFiles.add("GitHub.png");
+        allFiles.add("success.png");
         allFiles.add("error.png");
         allFiles.add("warning.png");
         allFiles.add("info.png");
 
         allFiles.add("validationResult.html");
+        allFiles.add("noIssues.html");
 
         return allFiles;
     }
@@ -330,11 +359,13 @@ public abstract class AbstractRunner {
         fMap.put("vPAV.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("viadee_Logo.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("GitHub.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("success.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("error.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("warning.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("info.png", ConstantsConfig.IMG_FOLDER);
 
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
+        fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);
 
         return fMap;
     }
@@ -345,7 +376,7 @@ public abstract class AbstractRunner {
         try {
             Files.copy(source, destination);
         } catch (IOException e) {
-            throw new RuntimeException("Files couldn't be written");
+            e.printStackTrace();
         }
     }
 
@@ -501,6 +532,28 @@ public abstract class AbstractRunner {
 
     public static Collection<CheckerIssue> getfilteredIssues() {
         return filteredIssues;
+    }
+
+    /**
+     * get path to parent ruleset
+     *
+     * @return String path to ruleset at runtime
+     */
+    public static String getParentConfig() {
+
+        URL[] urls;
+
+        URLClassLoader ucl;
+        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
+        } else {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
+        }
+        urls = ucl.getURLs();
+
+        final URL path = ucl.getResource(ConstantsConfig.RULESETPARENT);
+
+        return path.toString().substring(6);
     }
 
 }
