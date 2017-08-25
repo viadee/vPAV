@@ -26,14 +26,9 @@
 	<header class="navbar sticky-top navbar-expand viadee-lightblue-bg">
 		<h3 id=modell>Validation successful</h3>
 		<ul class="navbar-nav flex-row ml-md-auto">
-				<li class="nav-item dropdown">
-					<a class="nav-item nav-link mr-4 mt-3" id="version" data-toggle="dropdown">versions</a>
-					<div class="dropdown-menu" aria-labelledby="versions">
-							<a class="dropdown-item" id="mv"></a>
-							<a class="dropdown-item" id="vPAV"></a>
-							<a class="dropdown-item" id="java"></a>
-					</div>						
-					</li>
+			<li class="nav-item">					
+				<a class="nav-item nav-link mr-4 mt-3" id="vPAV"></a>											
+			</li>
 			<li class="nav-item">
 				<a class="nav-link mt-2 mr-4" id="logo" href="https://viadee.github.io/vPAV/">
 					<img src="img/vPAV.png"  alt="vPAV"/>
@@ -59,8 +54,7 @@
 	</div>
 
 	<footer class="footer fixed-bottom pt-1 pb-1 pl-2 m-0 ml-3 mr-3">
-		<p class="text-muted">
-				viadee Unternehmensberatung GmbH - viadee Process Application Validator <span id="v"></span>
+		<p class="text-muted" id="footerText">
 		</p>
 	</footer>
 
@@ -73,10 +67,8 @@
 	<script src="js/bootstrap.min.js"></script>
 	
 	<script type="text/javascript">
-		document.getElementById('mv').innerHTML = mvVersion;
 		document.getElementById('vPAV').innerHTML = vPavVersion;
-		document.getElementById('java').innerHTML = javaVersion;
-		document.getElementById('v').innerHTML = vPavVersion.substr(5);
+		document.getElementById('footerText').innerHTML = viadee + " - " + vPavName + " " +  vPavVersion;
 	</script>
 </body>
 

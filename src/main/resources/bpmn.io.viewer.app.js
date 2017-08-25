@@ -317,7 +317,7 @@ function createFooter(){
 
     var fP = document.createElement("p");
     fP.setAttribute("class", "text-muted");
-    fP.innerHTML = "viadee Unternehmensberatung GmbH - viadee Process Application Validator " + vPavVersion.substr(5);
+    fP.innerHTML = viadee + " - " + vPavName + " " + vPavVersion;
     
     footer.appendChild(fP);
     body.appendChild(footer);
@@ -494,6 +494,4 @@ function selectModel(name, issue_id, path_nr, func, path) {
     }
 }
 viewer = initDiagram(diagramXMLSource[0], 0, null);
-document.getElementById('mv').innerHTML = mvVersion;
 document.getElementById('vPAV').innerHTML = vPavVersion;
-document.getElementById('java').innerHTML = javaVersion;

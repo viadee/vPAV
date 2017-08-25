@@ -1,3 +1,3 @@
-var mvVersion = "Maven: ${maven.version}";
-var vPavVersion = "vPAV: ${version}";
-var javaVersion = "Java: ${java.version}";
+var vPavVersion = "${version}";
+var viadee = "${organization.name}";
+var vPavName = "${name}";
