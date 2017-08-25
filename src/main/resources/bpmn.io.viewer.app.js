@@ -108,12 +108,13 @@ function addCountOverlay(overlays, bpmnFile) {
 
     //Add Overlays
     for (id in issues) {
-        var overlayHtml = document.createElement("div");
+        var overlayHtml = document.createElement("span");
         overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
         overlayHtml.setAttribute("type", "button");
         overlayHtml.setAttribute("data-toggle", "bmodal");
         overlayHtml.setAttribute("data-target", "#issueModal");
-        overlayHtml.appendChild(document.createTextNode(issues[id].anz));
+        overlayHtml.setAttribute("title", "issues");
+        overlayHtml.innerHTML = issues[id].anz;
 
         // add DialogMessage
         function clickOverlay(id) {
@@ -127,32 +128,35 @@ function addCountOverlay(overlays, bpmnFile) {
             for (y in issues) {
                 if (issues[y].i.elementId == eId) {
                     var issue = issues[y].i;
-                  
-                    var dRule = document.createElement("div");
-                    dRule.style.border = "solid #f7f7f9";
-                    dRule.style.marginTop = "1rem";
-                    dRule.style.padding = "0.5rem";
+
+                    var dCard = document.createElement("div");
+                    dCard.setAttribute("class", "card bg-light mb-3");
+
+                    var dCardBody = document.createElement("div");
+                    dCardBody.setAttribute("class", "card-body");
+
+                    var dCardTitle = document.createElement("h5");
+                    dCardTitle.setAttribute("class", "card-header");
+
+                    var dCardText = document.createElement("p");
+                    dCardText.setAttribute("class", "card-text");
+                    
 
                     var oImg = document.createElement("img");
                     oImg.setAttribute('src', 'img/'+issue.classification+'.png');
                     oImg.setAttribute('alt', 'issue.classification'); 
                     oImg.setAttribute('class', 'float-left mr-2');
-
-                    var pRule = document.createElement("p");
-                    pRule.setAttribute('class', 'h5 mb-2');
-
-                    var pMessage = document.createElement("p");
-                    pMessage.setAttribute('class', 'text-muted');
-
-                    pRule.appendChild(document.createTextNode(issue.ruleName));
-                    pMessage.appendChild(document.createTextNode(issue.message));
-
-                    dRule.appendChild(oImg);
+                    oImg.setAttribute("title", issue.classification);
                     
-                    dRule.appendChild(pRule);
-                    dRule.appendChild(pMessage);
+                    dCardTitle.innerHTML = issue.ruleName;
+                    dCardTitle.appendChild(oImg);
+                    dCardText.innerHTML = issue.message;
 
-                    dialogContent.appendChild(dRule);
+                    dCard.appendChild(dCardTitle);
+                    dCardBody.appendChild(dCardText);
+                    dCard.appendChild(dCardBody);
+
+                    dialogContent.appendChild(dCard);
                 }
             }
             toggleDialog('show');
@@ -206,29 +210,29 @@ function createTable(bpmnFile) {
             myParent = document.getElementsByTagName("body").item(0);
             myTBody = document.createElement("tbody");            
             myRow = document.createElement("tr");
+            
             //ruleName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
-            myCell.setAttribute("id", issue.ruleName) // mark hole row
-
+            myCell.setAttribute("id", issue.ruleName) // mark cell
             //create link 
             var a = document.createElement("a");
             a.appendChild(myText);
             //link to docu
             a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
-
+            a.setAttribute("title", "checker documentation");
             myCell.appendChild(a);
             myRow.appendChild(myCell);
+            
             //elementId
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.elementId);
-
             //create link 
             var c = document.createElement("a");
             c.appendChild(myText);
             c.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.elementId + "', 0 , 2)");
             c.setAttribute("href", "#");
-
+            c.setAttribute("title", "mark element");
             myCell.appendChild(c);
             myRow.appendChild(myCell);
             
@@ -244,6 +248,7 @@ function createTable(bpmnFile) {
             var oImg = document.createElement("img");
             oImg.setAttribute('src', 'img/'+issue.classification+'.png');
             oImg.setAttribute('alt', 'issue.classification');
+            oImg.setAttribute("title", issue.classification);
             myCell.appendChild(oImg);
             myRow.appendChild(myCell);
 
@@ -421,8 +426,10 @@ function toggleDialog(sh) {
         var subName = model.name.substr(0, model.name.length - 5);
         li.appendChild(a);
         li.setAttribute("class", "nav-item");
-
-        a.appendChild(document.createTextNode(subName + " (" + countIssues(model.name) + ")"));
+        if(countIssues(model.name) == 0)
+            a.innerHTML = subName + " <span class='badge badge-pill badge-success pt-1 pb-1'>" + countIssues(model.name) + "</span>";
+        else
+            a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 viadee-darkblue-text viadee-lightblue-bg'>" + countIssues(model.name) + "</span>";
         a.setAttribute("onclick", "selectModel('" + model.name.replace(/\\/g, "\\\\") + "', null, null, 0 )");
         a.setAttribute("href", "#");
         if (first == true) {

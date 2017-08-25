@@ -24,7 +24,7 @@
 		<h3 id=modell></h3>
 		<ul class="navbar-nav flex-row ml-md-auto">
 				<li class="nav-item dropdown">
-					<a class="nav-item nav-link mr-4 mt-3" id="version" data-toggle="dropdown">versions</a>
+					<a class="nav-item nav-link mr-4 mt-3" id="version" data-toggle="dropdown" title="used versions">versions</a>
 					<div class="dropdown-menu" aria-labelledby="versions">
 							<a class="dropdown-item disabled" id="mv"></a>
 							<a class="dropdown-item disabled" id="vPAV"></a>
@@ -33,17 +33,17 @@
 					</li>
 			<li class="nav-item">
 				<a class="nav-link mt-2 mr-4" id="logo" href="https://viadee.github.io/vPAV/">
-					<img src="img/vPAV.png"  alt="vPAV"/>
+					<img src="img/vPAV.png"  alt="vPAV" title="documentation"/>
 				</a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link mt-2 mr-4" id="logo" href="https://github.com/viadee/vPAV">
-					<img src="img/GitHub.png"  alt="GitHub"/>
+					<img src="img/GitHub.png"  alt="GitHub" title="GitHub vPAV"/>
 				</a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" href="https://www.viadee.de/">
-					<img src="img/viadee_Logo.png" alt="viadee Homepage" height="50"/>
+					<img src="img/viadee_Logo.png" alt="viadee Homepage" height="50" title="viadee Homepage"/>
 				</a>
 			</li>
 		</ul>
@@ -69,9 +69,7 @@
 		<div class="col">
 			<div class="m-0 p-0 mt-1 viadee-darkblue-border" id="canvas"></div>
 		</div>
-	</div>
-
-		
+	</div>	
 
 	<!-- Issue table -->
 	<div class="row">
@@ -103,13 +101,12 @@
 		<div class="modal-dialog" role="document">
 		  <div class="modal-content">
 			<div class="modal-header viadee-lightblue-bg viadee-head">
-			  <h4 class="modal-title">Issue details</h4>
+			  <h4 class="modal-title">Issues</h4>
 			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 				<span aria-hidden="true">&times;</span>
 			  </button>
 			</div>
 			<div class="modal-body">
-			  <p>Modal body text goes here.</p>
 			</div>
 			<div class="modal-footer">
 			  <button type="button" class="btn btn-viadee" data-dismiss="modal">Close</button>
@@ -121,10 +118,10 @@
 	<!-- scripts -->
 	<!-- bpmn-js viewer -->
 	<script src="js/bpmn-navigated-viewer.js"></script>
-	<!-- bpmn-files and issues -->
+	<!-- bpmn-files, issues and pomInfo -->
 	<script src="js/bpmn_validation.js"></script>
 	<script src="js/infoPOM.js"></script>
-	<!-- bootstrap -->
+	<!-- bootstrap with dependencies-->
 	<script src="js/jquery-3.2.1.min.js"></script>
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
