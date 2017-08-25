@@ -19,7 +19,7 @@
 	<title>Process Model Validation Report</title>
 </head>
 
-<body>
+<body class="container-fluid">
 	<header class="navbar sticky-top navbar-expand viadee-lightblue-bg">
 		<h3 id=modell></h3>
 		<ul class="navbar-nav flex-row ml-md-auto">
@@ -66,6 +66,13 @@
 		</div>
 	</div>	
 
+	<!-- reset Button -->
+	<div class="row">
+			<div class="col">
+				<button type="button" class="btn btn-viadee mt-2 collapse" id="reset">Mark all issues</button>
+			</div>
+		</div>
+
 	<!-- Issue table -->
 	<div class="row">
 		<div class="col">
@@ -107,9 +114,7 @@
 			  <button type="button" class="btn btn-viadee" data-dismiss="modal">Close</button>
 			</div>
 		</div>
-	</div>
-	
-	
+	</div>	
 
 	<!-- scripts -->
 	<!-- bpmn-js viewer -->

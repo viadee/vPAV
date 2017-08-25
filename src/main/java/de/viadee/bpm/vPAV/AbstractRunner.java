@@ -188,6 +188,12 @@ public abstract class AbstractRunner {
             validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_JSON_OUTPUT));
             validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_XML_OUTPUT));
             deleteFiles(validationFiles);
+            final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
+            try {
+                jsOutputWriter.write(filteredIssues);
+            } catch (OutputWriterException e) {
+                throw new RuntimeException("JavaScript File couldn't be written");
+            }
         }
     }
 
@@ -278,18 +284,9 @@ public abstract class AbstractRunner {
             outputFiles.add(Paths.get(fileMapping.get(file), file));
         deleteFiles(outputFiles);
 
-        if (filteredIssues.size() > 0) {
-            for (String file : allOutputFilesArray)
-                if (!file.equals("noIssues.html") && !file.equals("success.png"))
-                    copyFileToVPAVFolder(file);
-        } else {
-            for (String file : allOutputFilesArray)
-                if (!file.equals("validationResult.html") && !file.equals("MarkerStyle.css")
-                        && !file.equals("bpmn.io.viewer.app.js")
-                        && !file.equals("bpmn-navigated-viewer.js") && !file.equals("error.png")
-                        && !file.equals("warning.png") && !file.equals("info.png"))
-                    copyFileToVPAVFolder(file);
-        }
+        for (String file : allOutputFilesArray)
+            copyFileToVPAVFolder(file);
+
     }
 
     private static ArrayList<String> createAllOutputFilesArray() {
@@ -308,14 +305,12 @@ public abstract class AbstractRunner {
         allFiles.add("vPAV.png");
         allFiles.add("viadee_Logo.png");
         allFiles.add("GitHub.png");
-        allFiles.add("success.png");
         allFiles.add("error.png");
         allFiles.add("warning.png");
         allFiles.add("info.png");
 
         allFiles.add("validationResult.html");
-        allFiles.add("noIssues.html");        
-        
+
         return allFiles;
     }
 
@@ -335,14 +330,12 @@ public abstract class AbstractRunner {
         fMap.put("vPAV.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("viadee_Logo.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("GitHub.png", ConstantsConfig.IMG_FOLDER);
-        fMap.put("success.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("error.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("warning.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("info.png", ConstantsConfig.IMG_FOLDER);
 
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
-        fMap.put("noIssues.html", ConstantsConfig.VALIDATION_FOLDER);        
-        
+
         return fMap;
     }
 
@@ -352,7 +345,7 @@ public abstract class AbstractRunner {
         try {
             Files.copy(source, destination);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Files couldn't be written");
         }
     }
 

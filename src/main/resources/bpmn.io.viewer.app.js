@@ -28,7 +28,12 @@ function markNodes(canvas, bpmnFile) {
 }
 
 //mark invalide path
-function markPath(canvas, id, pos) {
+function markPath(canvas, id, pos, model) {
+    var btReset = document.getElementById("reset");
+    btReset.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
+    btReset.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 0 )");
+    btReset.setAttribute("href", "#");
+
     for (y in elementsToMark) {
         if (elementsToMark[y].id == id) {
             for (x in elementsToMark[y].paths[pos]) {
@@ -315,10 +320,22 @@ function createFooter(){
     footer.setAttribute("class", "footer pt-1 pb-1 pl-2 m-0");
     footer.style.backgroundColor = "#CED6E3";
 
-    var fP = document.createElement("p");
+    var fP = document.createElement("span");
     fP.setAttribute("class", "text-muted");
     fP.innerHTML = viadee + " - " + vPavName + " " + vPavVersion;
+
+    var aL = document.createElement("a");
+    aL.setAttribute("class", "text-muted float-right pr-2");
+    aL.setAttribute("href", "https://viadee.github.io/vPAV/#licenses");
+    aL.innerHTML = "Licenses";
+
+    var aI = document.createElement("a");
+    aI.setAttribute("class", "text-muted float-right pr-2");
+    aI.setAttribute("href", "https://www.viadee.de/impressum-datenschutz.html");
+    aI.innerHTML = "Impressum";
     
+    fP.appendChild(aL);
+    fP.appendChild(aI);
     footer.appendChild(fP);
     body.appendChild(footer);
 }
@@ -356,7 +373,7 @@ function initDiagram(diagramXML, issue_id, path_nr, func) {
                     markNodes(canvas, diagramXML.name);
                     addCountOverlay(overlays, diagramXML.name);
                 } else if (func == 1) {
-                    markPath(canvas, issue_id, path_nr);
+                    markPath(canvas, issue_id, path_nr, diagramXML.name);
                 } else if (func == 2) {
                     markElement(canvas, issue_id);
                 }
@@ -483,6 +500,7 @@ function selectModel(name, issue_id, path_nr, func, path) {
             a.setAttribute("class", "nav-link active");
             if (func == 0) {
                 viewer.reload(diagramXMLSource[id]);
+                document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
             } else if (func == 1) {
                 viewer.reloadMarkPath(diagramXMLSource[id], issue_id, path_nr);
                 document.getElementById('invalidPath').innerHTML = path;

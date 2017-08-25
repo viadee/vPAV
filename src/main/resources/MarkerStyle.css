@@ -1,9 +1,9 @@
 		.path .djs-visual> :nth-child(1) {
-			stroke: rgba(255, 0, 0, 1.0) !important;
+			stroke: #f5c6cb !important;
 		}
 
 		.path:not(.djs-connection) .djs-visual> :nth-child(1) {
-			fill: rgba(255, 0, 0, 0.5) !important;
+			fill: #f8d7da !important;
 		}
 
 		.oneElement .djs-visual> :nth-child(1) {
@@ -71,11 +71,11 @@
 		}
 
 		.NoScriptChecker .djs-visual> :nth-child(1) {
-			stroke: rgba(110, 134, 86, 1.0) !important;
+			stroke: rgba(86, 135, 36, 1.0) !important;
 		}
 
 		.NoScriptChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
-			fill: rgba(110, 134, 86, 0.5) !important;
+			fill: rgba(86, 135, 36, 0.50) !important;
 		}
 
 		.XorNamingConventionChecker .djs-visual> :nth-child(1) {
@@ -123,7 +123,7 @@
 		}
 
 		#NoScriptChecker{
-			background-color: rgba(110, 134, 86, 0.25);
+			background-color: rgba(86, 135, 36, 0.50);
 		}
 
 		#XorNamingConventionChecker{
