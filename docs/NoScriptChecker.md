@@ -7,11 +7,9 @@ The No Script Checker processes BPMN models and checks whether there is a script
 
 
 ## Assumptions
-----------------------------------------------
 - The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
-------------------------------------------
 The rule should be configured as follows:
 ```xml
 <rule>
@@ -22,7 +20,6 @@ The rule should be configured as follows:
 ```
 
 ## Error messages:
------------------------------------------
 **task %elementId with script**
 
 _There is a script inside a script task or a script as an execution listener or a script as a task listener or a script inside an inputOutput parameter mapping_
@@ -33,7 +30,6 @@ _There is a script inside a script task or a script as an execution listener or 
 _ScriptTask not allowed_
 
 ## Examples
-----------------------------------------
 
 | **task %elementId with script**                                                                        | 
 |:------------------------------------------------------------------------------------------------------:| 
