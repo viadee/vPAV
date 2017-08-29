@@ -52,6 +52,14 @@ Furthermore you can use the plugin to manage multiple projects. Just create a bl
 
 The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit". Local sets of rules will override inherited rules in order to allow for customization.
 
+Make sure that inheritance is activated in the ruleSet.xml of your project.
+```
+# xml 
+<rule>
+	<name>HasParentRuleSet</name>
+	<state>true</state>
+</rule>
+```
 ### Exclusion of false positives
 An ignore file can be created to exclude false positives. The file has to be named **".ignoreIssues"** and has to be stored in **"src/test/resources"**. 
 Here, you can list IDs of the issues which should be ignored in the next validation run. This must be done line by line. Line comments are initiated with "#".
