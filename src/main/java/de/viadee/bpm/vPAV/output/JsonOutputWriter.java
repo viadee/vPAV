@@ -20,8 +20,10 @@
  */
 package de.viadee.bpm.vPAV.output;
 
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,8 +41,11 @@ public class JsonOutputWriter implements IssueOutputWriter {
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
         final String json = transformToJsonDatastructure(issues);
         if (json != null && !json.isEmpty()) {
-            try (final FileWriter file = new FileWriter(ConstantsConfig.VALIDATION_JSON_OUTPUT)) {
-                file.write(json);
+            try {
+                final OutputStreamWriter osWriter = new OutputStreamWriter(
+                        new FileOutputStream(ConstantsConfig.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8);
+                osWriter.write(json);
+                osWriter.close();
             } catch (final IOException ex) {
                 throw new OutputWriterException("json output couldn't be written");
             }
