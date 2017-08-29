@@ -55,8 +55,7 @@ public class BpmnCheckerMojo extends AbstractRunner implements org.apache.maven.
         try {
             RuntimeConfig.getInstance().setClassLoader(RuntimeConfig.getInstance().getClassLoader(project));
         } catch (MalformedURLException | DependencyResolutionRequiredException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new MojoExecutionException("Classloader couldn't be load");
         }
 
         run_vPAV();

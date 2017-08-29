@@ -78,8 +78,7 @@ public class FileScanner {
 
     public static Logger logger = Logger.getLogger(FileScanner.class.getName());
 
-    public FileScanner(final Map<String, Rule> rules, final String classPathScanLocation)
-            throws DependencyResolutionRequiredException {
+    public FileScanner(final Map<String, Rule> rules, final String classPathScanLocation) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
         scanner.setBasedir(ConstantsConfig.BASEPATH);
@@ -209,11 +208,11 @@ public class FileScanner {
      *
      * @param project
      * @return
-     * @throws DependencyResolutionRequiredException
      * @throws MalformedURLException
+     * @throws DependencyResolutionRequiredException
      */
     static ClassLoader getClassLoader(final MavenProject project)
-            throws DependencyResolutionRequiredException, MalformedURLException {
+            throws MalformedURLException, DependencyResolutionRequiredException {
         final List<String> classPathElements = project.getRuntimeClasspathElements();
         final List<URL> classpathElementUrls = new ArrayList<URL>(classPathElements.size());
         for (final String classPathElement : classPathElements) {

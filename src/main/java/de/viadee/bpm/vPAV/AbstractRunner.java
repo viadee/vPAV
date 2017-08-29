@@ -38,8 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
@@ -140,19 +138,14 @@ public abstract class AbstractRunner {
 
         final Rule processVariablesLocationRule = rules.get(ConstantsConfig.PROCESS_VARIABLES_LOCATION);
 
-        try {
-
-            if (processVariablesLocationRule == null) {
-                logger.warning("Could not find rule for ProcessVariablesLocation. Please verify the ruleSet.xml");
-                fileScanner = new FileScanner(rules, "");
-            } else {
-                final String location = processVariablesLocationRule.getSettings().get("location").getValue();
-                fileScanner = new FileScanner(rules, location);
-            }
-
-        } catch (final DependencyResolutionRequiredException e) {
-            throw new RuntimeException("Classpath could not be resolved");
+        if (processVariablesLocationRule == null) {
+            logger.warning("Could not find rule for ProcessVariablesLocation. Please verify the ruleSet.xml");
+            fileScanner = new FileScanner(rules, "");
+        } else {
+            final String location = processVariablesLocationRule.getSettings().get("location").getValue();
+            fileScanner = new FileScanner(rules, location);
         }
+
     }
 
     // 3 - Get process variables
