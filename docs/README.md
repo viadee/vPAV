@@ -28,9 +28,32 @@ Consistency checks are performed by individual modules called checkers, which se
 |[NoScriptChecker](NoScriptChecker.md)                                                 | Is there any script in the model?                                        | Done         |
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
+### Configuration
+The viadee Process Application Validator comes with a default ruleSet.xml which provides some basic rules. In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
+This allows you to use your own set of rules for naming conventions or to de-/activate certain checkers.
+
+### One set of rules to rule them all
+Furthermore you can use the plugin to manage multiple projects. Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar). In your child projects you have to add the dependency to the parent project and to vPAV.
+
+```
+# xml 
+<dependency>
+  <groupId>de.viadee</groupId>
+	<artifactId>parent_config</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+</dependency>
+
+<dependency>
+	<groupId>de.viadee</groupId>
+	<artifactId>viadeeProcessApplicationValidator</artifactId>
+	<version>2.1.0-SNAPSHOT</version>
+</dependency>
+```
+
+The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit". Local sets of rules will override inherited rules in order to allow for customization.
 
 ### Exclusion of false positives
-An ignore file can be created to exclude false positives. The file has to be named **".ignoreIssues"** and has to be stored in **"src/main/resources"**. 
+An ignore file can be created to exclude false positives. The file has to be named **".ignoreIssues"** and has to be stored in **"src/test/resources"**. 
 Here, you can list IDs of the issues which should be ignored in the next validation run. This must be done line by line. Line comments are initiated with "#".
 
 **Example**
