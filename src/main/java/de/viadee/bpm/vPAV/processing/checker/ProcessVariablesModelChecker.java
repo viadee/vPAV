@@ -55,15 +55,37 @@ public class ProcessVariablesModelChecker implements ModelChecker {
             final List<Path> paths = invalidPathsMap.get(anomaly);
             final ProcessVariable var = anomaly.getVariable();
             if (paths != null) {
-                issues.add(new CheckerIssue(rule.getName(), determineCriticality(anomaly.getAnomaly()),
-                        var.getElement().getProcessdefinition(), var.getResourceFilePath(),
-                        var.getElement().getBaseElement().getId(),
-                        var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
-                        anomaly.getAnomaly(), paths,
-                        "process variable (" + var.getName() + ") creates a "
-                                + anomaly.getAnomaly().toString()
-                                + "-anomaly (compare: "
-                                + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+                if (anomaly.getAnomaly() == Anomaly.DD) {
+                    issues.add(new CheckerIssue(rule.getName(), determineCriticality(anomaly.getAnomaly()),
+                            var.getElement().getProcessdefinition(), var.getResourceFilePath(),
+                            var.getElement().getBaseElement().getId(),
+                            var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
+                            anomaly.getAnomaly(), paths,
+                            "process variable (" + var.getName() + ") will be overwritten in activity '"
+                                    + var.getElement().getBaseElement().getAttributeValue("name")
+                                    + " without use. (compare: "
+                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+                } else if (anomaly.getAnomaly() == Anomaly.DU) {
+                    issues.add(new CheckerIssue(rule.getName(), determineCriticality(anomaly.getAnomaly()),
+                            var.getElement().getProcessdefinition(), var.getResourceFilePath(),
+                            var.getElement().getBaseElement().getId(),
+                            var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
+                            anomaly.getAnomaly(), paths,
+                            "process variable (" + var.getName() + ") will be deleted in activity '"
+                                    + var.getElement().getBaseElement().getAttributeValue("name")
+                                    + "' without use. (compare: "
+                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+                } else if (anomaly.getAnomaly() == Anomaly.UR) {
+                    issues.add(new CheckerIssue(rule.getName(), determineCriticality(anomaly.getAnomaly()),
+                            var.getElement().getProcessdefinition(), var.getResourceFilePath(),
+                            var.getElement().getBaseElement().getId(),
+                            var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
+                            anomaly.getAnomaly(), paths,
+                            "there is a read access to variable (" + var.getName() + ") in activity '"
+                                    + var.getElement().getBaseElement().getAttributeValue("name")
+                                    + "', but no value has been set before. (compare: "
+                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+                }
             }
         }
 
