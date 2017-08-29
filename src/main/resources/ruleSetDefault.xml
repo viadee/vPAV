@@ -12,11 +12,11 @@
 		<elementConventions>
 			<elementConvention>
 				<name>xorGateway</name>
-				<pattern>(([A-Z][a-z]*)(.?)([A-Z][a-z]*)*)\?</pattern>
+				<pattern>.*\?</pattern>
 			</elementConvention>
 			<elementConvention>
 				<name>edges</name>
-				<pattern>[A-ZÄÖÜ]?[a-zäöü]*</pattern>
+				<pattern>.*</pattern>
 			</elementConvention>
 		</elementConventions>
 	</rule>
