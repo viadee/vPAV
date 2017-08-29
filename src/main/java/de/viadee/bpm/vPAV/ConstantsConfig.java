@@ -40,6 +40,8 @@ public final class ConstantsConfig {
 
     public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
 
+    public static final String VALIDATION_JS_MODEL_OUTPUT = "target/vPAV/js/bpmn_model.js";
+
     public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
 
     public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";

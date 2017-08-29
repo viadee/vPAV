@@ -21,8 +21,11 @@
 package de.viadee.bpm.vPAV.output;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -50,9 +53,16 @@ public class JsOutputWriter implements IssueOutputWriter {
         final String json = transformToJsonDatastructure(issues);
         final String bpmn = transformToXMLDatastructure();
         if (json != null && !json.isEmpty()) {
-            try (final FileWriter file = new FileWriter(ConstantsConfig.VALIDATION_JS_OUTPUT)) {
+            try {
+                final FileWriter file = new FileWriter(ConstantsConfig.VALIDATION_JS_MODEL_OUTPUT);
                 file.write(bpmn);
-                file.write(json);
+                file.close();
+
+                final OutputStreamWriter osWriter = new OutputStreamWriter(
+                        new FileOutputStream(ConstantsConfig.VALIDATION_JS_OUTPUT), StandardCharsets.UTF_8);
+                osWriter.write(json);
+                osWriter.close();
+
             } catch (final IOException ex) {
                 throw new OutputWriterException("js output couldn't be written");
             }
