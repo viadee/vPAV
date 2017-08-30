@@ -227,14 +227,20 @@ public class BPMNScanner {
     }
 
     /**
-     * Return the value of ExecutionListener
      * 
      * @param path
+     *            path to model
      * @param id
-     * @return
+     *            id of bpmn element
+     * @param listType
+     *            Type of ExecutionListener
+     * @return value of ExecutionListener
      * @throws SAXException
+     *             possible exception while process xml
      * @throws IOException
+     *             possible exception if file not found
      * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
      */
     public ArrayList<String> getExecutionListener(String path, String id, String listType)
             throws SAXException, IOException, ParserConfigurationException {
@@ -268,11 +274,12 @@ public class BPMNScanner {
     }
 
     /**
-     * check attributes for attName
      * 
-     * @param n
-     * @param attName
-     * @return
+     * @param node
+     *            node to check
+     * @param listType
+     *            Type of ExecutionListener
+     * @return textConetent of ListenerType
      */
     private String checkAttributesOfNode(Node node, String listType) {
         NamedNodeMap attributes = node.getAttributes();
