@@ -152,8 +152,8 @@
 			<version>2.9</version>
 		</dependency>
 	</dependencies>
-	
-	
+
+
 	<profiles>
 		<profile>
 			<id>release-sign-artifacts</id>
@@ -164,148 +164,8 @@
 				</property>
 			</activation>
 			<build>
-				<resources>
-					<resource>
-						<directory>src/main/resources-filtered</directory>
-						<filtering>true</filtering>
-					</resource>
-					<resource>
-						<directory>src/main/resources</directory>
-					</resource>
-				</resources>
-
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-release-plugin</artifactId>
-							<version>2.5.3</version>
-							<executions>
-								<execution>
-									<goals>
-										<goal>deploy</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-
-
-
 				<plugins>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<version>3.0.1</version>
-						<executions>
-							<execution>
-								<id>attach-sources</id>
-								<goals>
-									<goal>jar-no-fork</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.4</version>
-						<executions>
-							<execution>
-								<id>attach-javadocs</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>2.19</version>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<version>3.5.1</version>
-						<configuration>
-							<source>1.7</source>
-							<target>1.7</target>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-plugin-plugin</artifactId>
-						<version>3.5</version>
-						<configuration>
-							<goalPrefix>viadeeProcessApplicationValidator</goalPrefix>
-							<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-							<source>1.8</source>
-							<target>1.7</target>
-						</configuration>
-						<executions>
-							<execution>
-								<id>mojo-descriptor</id>
-								<goals>
-									<goal>descriptor</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>help-goal</id>
-								<goals>
-									<goal>helpmojo</goal>
-								</goals>
-								<phase>process-classes</phase>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>com.mycila</groupId>
-						<artifactId>license-maven-plugin</artifactId>
-						<version>2.3</version>
-						<configuration>
-							<header>src/main/resources/BSD4-license.txt</header>
-							<properties>
-								<owner>viadee Unternehmensberatung GmbH</owner>
-								<inceptionYear>2017</inceptionYear>
-								<email>frank.koehne@viadee.de</email>
-							</properties>
-							<excludes>
-								<exclude>**/README</exclude>
-								<exclude>src/test/resources/**</exclude>
-								<exclude>src/main/resources/**</exclude>
-								<exclude>src/main/resources-filtered/**</exclude>
-								<exclude>docs/**</exclude>
-								<exclude>*.xml</exclude>
-								<exclude>*.yml</exclude>
-								<exclude>*.log</exclude>
-								<exclude>*.pmd</exclude>
-								<exclude>LICENSE.txt</exclude>
-							</excludes>
-						</configuration>
-						<executions>
-							<execution>
-								<id>Check licenses</id>
-								<goals>
-									<goal>check</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>Insert or update license</id>
-								<phase>generate-sources</phase>
-								<goals>
-									<goal>format</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-site-plugin</artifactId>
-						<version>3.6</version>
-					</plugin>
-					<plugin>
-
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
 						<version>1.6</version>
@@ -323,6 +183,153 @@
 			</build>
 		</profile>
 	</profiles>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources-filtered</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+
+
+
+
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5.3</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>deploy</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>3.5</version>
+				<configuration>
+					<goalPrefix>viadeeProcessApplicationValidator</goalPrefix>
+					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+					<source>1.8</source>
+					<target>1.7</target>
+				</configuration>
+				<executions>
+					<execution>
+						<id>mojo-descriptor</id>
+						<goals>
+							<goal>descriptor</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>help-goal</id>
+						<goals>
+							<goal>helpmojo</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<header>src/main/resources/BSD4-license.txt</header>
+					<properties>
+						<owner>viadee Unternehmensberatung GmbH</owner>
+						<inceptionYear>2017</inceptionYear>
+						<email>frank.koehne@viadee.de</email>
+					</properties>
+					<excludes>
+						<exclude>**/README</exclude>
+						<exclude>src/test/resources/**</exclude>
+						<exclude>src/main/resources/**</exclude>
+						<exclude>src/main/resources-filtered/**</exclude>
+						<exclude>docs/**</exclude>
+						<exclude>*.xml</exclude>
+						<exclude>*.yml</exclude>
+						<exclude>*.log</exclude>
+						<exclude>*.pmd</exclude>
+						<exclude>LICENSE.txt</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>Check licenses</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>Insert or update license</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.6</version>
+			</plugin>
+		</plugins>
+	</build>
+
 	<distributionManagement>
 		<site>
 			<id>website</id>
