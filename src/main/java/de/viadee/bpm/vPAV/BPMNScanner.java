@@ -91,6 +91,10 @@ public class BPMNScanner {
 
     private final String c_ext = "camunda:type";
 
+    private final String c_exList = "camunda:executionListener";
+
+    private final String extElements = "extensionElements";
+
     private final String imp = "implementation";
 
     private String node_name;
@@ -220,6 +224,64 @@ public class BPMNScanner {
             }
         }
         return return_implementation;
+    }
+
+    /**
+     * Return the value of ExecutionListener
+     * 
+     * @param path
+     * @param id
+     * @return
+     * @throws SAXException
+     * @throws IOException
+     * @throws ParserConfigurationException
+     */
+    public ArrayList<String> getExecutionListener(String path, String id, String listType)
+            throws SAXException, IOException, ParserConfigurationException {
+
+        // bool to hold return values
+        ArrayList<String> returnAttrList = new ArrayList<String>();
+
+        // List for all Task elements
+        NodeList nodeListExtensionElements;
+
+        // parse the given bpmn model
+        doc = builder.parse(path);
+
+        // search for script tag
+        nodeListExtensionElements = doc.getElementsByTagName("extensionElements");
+
+        // search for parent with id
+        for (int i = 0; i < nodeListExtensionElements.getLength(); i++) {
+            if (((Element) nodeListExtensionElements.item(i).getParentNode()).getAttribute("id").equals(id)) {
+                NodeList childNodes = nodeListExtensionElements.item(i).getChildNodes();
+                for (int x = 0; x < childNodes.getLength(); x++) {
+                    if (childNodes.item(x).getNodeName().equals(c_exList)) {
+                        String attName = checkAttributesOfNode(childNodes.item(x), listType);
+                        if (attName != null)
+                            returnAttrList.add(attName);
+                    }
+                }
+            }
+        }
+        return returnAttrList;
+    }
+
+    /**
+     * check attributes for attName
+     * 
+     * @param n
+     * @param attName
+     * @return
+     */
+    private String checkAttributesOfNode(Node node, String listType) {
+        NamedNodeMap attributes = node.getAttributes();
+        for (int x = 0; x < attributes.getLength(); x++) {
+            if (attributes.item(x).getNodeName().equals(listType)) {
+                return attributes.item(x).getTextContent();
+            }
+        }
+        return null;
     }
 
     /**

@@ -26,8 +26,8 @@ import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
-import org.camunda.bpm.model.bpmn.instance.SendTask;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.SubProcess;
 import org.camunda.bpm.model.bpmn.instance.Task;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -62,18 +62,6 @@ public final class CheckerFactory {
             final BpmnElement element, String path)
             throws ConfigItemNotFoundException {
 
-        final String c_class = "camunda:class";
-
-        final String c_exp = "camunda:expression";
-
-        final String c_dexp = "camunda:delegateExpression";
-
-        final String c_dmn = "camunda:decisionRef";
-
-        final String c_ext = "camunda:type";
-
-        final String imp = "implementation";
-
         final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
         final BaseElement baseElement = element.getBaseElement();
         if (baseElement == null) {
@@ -83,34 +71,15 @@ public final class CheckerFactory {
         final Rule javaDelegateRule = ruleConf.get(getClassName(JavaDelegateChecker.class));
         if (javaDelegateRule == null)
             throw new ConfigItemNotFoundException(getClassName(JavaDelegateChecker.class) + " not found");
+        if (javaDelegateRule.isActive() && !(baseElement instanceof Process) && !(baseElement instanceof SubProcess)) {
+            checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
+        }
 
         final Rule dmnTaskRule = ruleConf.get(getClassName(DmnTaskChecker.class));
         if (dmnTaskRule == null)
             throw new ConfigItemNotFoundException(getClassName(DmnTaskChecker.class) + " not found");
-
-        if (baseElement instanceof ServiceTask || baseElement instanceof BusinessRuleTask
-                || baseElement instanceof SendTask) {
-            TaskImplementationChecker.getTaskImplementation(element, path);
-
-            if (implementation.equals(c_class) && javaDelegateRule.isActive()) {
-                checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
-            }
-            if (implementation.equals(c_exp) && javaDelegateRule.isActive()) {
-                checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
-            }
-            if (implementation.equals(c_dexp) && javaDelegateRule.isActive()) {
-                checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
-            }
-            if (implementation.equals(c_ext)) {
-                // do nothing for now
-            }
-            if (implementation.equals(c_dmn) && dmnTaskRule.isActive()) {
-                checkers.add(new DmnTaskChecker(dmnTaskRule, path));
-            }
-            if (implementation.equals(imp)) {
-                // TODO: Write issue
-                checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
-            }
+        if (dmnTaskRule.isActive() && baseElement instanceof BusinessRuleTask) {
+            checkers.add(new DmnTaskChecker(dmnTaskRule, path));
         }
 
         final Rule xorNamingConventionRule = ruleConf.get(getClassName(XorNamingConventionChecker.class));

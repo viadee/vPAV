@@ -260,7 +260,8 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class for task '" + CheckName.checkName(baseElement) + "' not found",
+            Assert.assertEquals("class 'de.viadee.bpm.vPAV.TestDelegate2' for task '" + CheckName.checkName(baseElement)
+                    + "' not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -365,7 +366,8 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class for task '" + CheckName.checkName(baseElement) + "' not found",
+            Assert.assertEquals("class 'de.viadee.bpm.vPAV.TestDelegate2' for task '" + CheckName.checkName(baseElement)
+                    + "' not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -399,7 +401,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class for task '" + CheckName.checkName(baseElement) + "' not found",
+            Assert.assertEquals("class '${testDelegate}' for task '" + CheckName.checkName(baseElement) + "' not found",
                     issues.iterator().next().getMessage());
         }
     }
