@@ -453,6 +453,7 @@ public class BPMNScanner {
      *            path to model
      * @param id
      *            id of bpmn element
+     * @return ArrayList of outgoing Nodes
      * @throws SAXException
      *             possible exception while process xml
      * @throws IOException
@@ -460,7 +461,6 @@ public class BPMNScanner {
      * @throws ParserConfigurationException
      *             possible exception if file could not be parsed
      */
-
     public ArrayList<Node> getOutgoingEdges(String path, String id)
             throws SAXException, IOException, ParserConfigurationException {
 
@@ -510,6 +510,7 @@ public class BPMNScanner {
      *
      * @param id
      *            id of edge
+     * @return edge
      */
     public Node checkNamingOfEdges(String id) {
 

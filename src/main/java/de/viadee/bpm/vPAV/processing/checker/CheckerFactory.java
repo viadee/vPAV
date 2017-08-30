@@ -51,7 +51,8 @@ public final class CheckerFactory {
      *            resourcesNewestVersions in context
      * @param element
      *            given BpmnElement
-     * 
+     * @param path
+     *            path to model file
      * @return checkers returns checkers
      * 
      * @throws ConfigItemNotFoundException

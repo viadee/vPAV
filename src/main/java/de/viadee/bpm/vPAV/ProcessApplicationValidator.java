@@ -15,6 +15,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
      * find issues with given ApplicationContext (Spring)
      * 
      * @param ctx
+     *            spring context
      * @return all issues
      */
     public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
@@ -30,6 +31,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
      * find issues with given ApplicationContext (Spring)
      * 
      * @param ctx
+     *            spring context
      * @return issues with status error
      */
     public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {

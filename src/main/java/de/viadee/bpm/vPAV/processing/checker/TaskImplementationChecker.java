@@ -17,8 +17,9 @@ public class TaskImplementationChecker {
      *
      * @param element
      *            BpmnElement
+     * @param path
+     *            path to model file
      */
-
     public static void getTaskImplementation(BpmnElement element, String path) {
 
         final BPMNScanner scan;
