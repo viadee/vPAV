@@ -6,13 +6,16 @@ Service Tasks, Send Tasks, Receive Tasks, Script Tasks or Business Rule Tasks:
 - Class not found, although specified as implemented 
 - Class doesn't implement the *JavaDelegate* or *SignallableActivityBehavior* interface or doesn't extends the *AbstractBpmnActivityBehavior* class
 
+All Elements are also check on their ExecutionListener:
+- No implementation specified
+- Class not found, although specified as implemented 
+- Class doesn't implement the *ExecutionListener* interface 
+
 ## Assumptions
-----------------------------------------------
 - The **BPMN-models** have to be in the **classpath** at build time
 - The **java classes _(delegates)_** have to be in the **classpath** at build time
 
 ## Configuration
-------------------------------------------
 The rule should be configured as follows:
 ```xml
 <rule>
@@ -26,7 +29,6 @@ Via `<state>true</state>` the check can be enabled.
 Via `<state>false</state>` the check can be disabled.
 
 ## Error messages:
------------------------------------------
 **task '%taskName%' with no class name/delegate expression/expression/dmn reference/external topic/code reference**<br/>
 _No reference to source code has been deposited. An implementation must be created._
 
