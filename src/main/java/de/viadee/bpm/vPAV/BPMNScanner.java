@@ -1,3 +1,32 @@
+/**
+ * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the viadee Unternehmensberatung GmbH.
+ * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY <{owner}> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package de.viadee.bpm.vPAV;
 /**
  * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
@@ -90,8 +119,6 @@ public class BPMNScanner {
     private final String c_dmn = "camunda:decisionRef";
 
     private final String c_ext = "camunda:type";
-
-    private final String c_exList = "camunda:executionListener";
 
     private final String extElements = "extensionElements";
 
@@ -233,8 +260,10 @@ public class BPMNScanner {
      * @param id
      *            id of bpmn element
      * @param listType
-     *            Type of ExecutionListener
-     * @return value of ExecutionListener
+     *            Type of Attribute
+     * @param extType
+     *            Type of Listener
+     * @return value of Listener
      * @throws SAXException
      *             possible exception while process xml
      * @throws IOException
@@ -242,7 +271,7 @@ public class BPMNScanner {
      * @throws ParserConfigurationException
      *             possible exception if file could not be parsed
      */
-    public ArrayList<String> getExecutionListener(String path, String id, String listType)
+    public ArrayList<String> getListener(String path, String id, String listType, String extType)
             throws SAXException, IOException, ParserConfigurationException {
 
         // bool to hold return values
@@ -255,14 +284,14 @@ public class BPMNScanner {
         doc = builder.parse(path);
 
         // search for script tag
-        nodeListExtensionElements = doc.getElementsByTagName("extensionElements");
+        nodeListExtensionElements = doc.getElementsByTagName(extElements);
 
         // search for parent with id
         for (int i = 0; i < nodeListExtensionElements.getLength(); i++) {
             if (((Element) nodeListExtensionElements.item(i).getParentNode()).getAttribute("id").equals(id)) {
                 NodeList childNodes = nodeListExtensionElements.item(i).getChildNodes();
                 for (int x = 0; x < childNodes.getLength(); x++) {
-                    if (childNodes.item(x).getNodeName().equals(c_exList)) {
+                    if (childNodes.item(x).getNodeName().equals(extType)) {
                         String attName = checkAttributesOfNode(childNodes.item(x), listType);
                         if (attName != null)
                             returnAttrList.add(attName);
