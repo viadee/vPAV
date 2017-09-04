@@ -19,6 +19,21 @@ The rule should be configured as follows:
 
 ```
 
+You can add settings to disable the **NoScriptChecker** in specific places. All places where scripts can be found are listed below:
+``` xml
+<rule>
+	<name>NoScriptChecker</name>
+	<state>true</state>
+	<settings>
+		<setting name="ScriptTask">false</setting>
+		<setting name="inputParameter">false</setting>
+		<setting name="outputParameter">false</setting>
+		<setting name="executionListener">false</setting>
+		<setting name="taskListener">false</setting>
+	</settings>
+</rule>
+```
+
 ## Error messages:
 **task %elementId with script**
 
