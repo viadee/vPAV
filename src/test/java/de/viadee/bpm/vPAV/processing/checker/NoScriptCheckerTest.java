@@ -26,6 +26,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -44,6 +46,7 @@ import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -60,7 +63,9 @@ public class NoScriptCheckerTest {
 
     private static ClassLoader cl;
 
-    private final Rule rule = new Rule("NoScriptChecker", true, null, null, null);
+    private static Map<String, Setting> setting = new HashMap<String, Setting>();
+
+    private final Rule rule = new Rule("NoScriptChecker", true, setting, null, null);
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -129,7 +134,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'camunda:inputParameter' script",
+            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'inputParameter' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -162,7 +167,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'camunda:outputParameter' script",
+            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'outputParameter' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -196,7 +201,7 @@ public class NoScriptCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "task '" + CheckName.checkName(baseElementGate) + "' with 'camunda:executionListener' script",
+                    "task '" + CheckName.checkName(baseElementGate) + "' with 'executionListener' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -229,7 +234,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'camunda:taskListener' script",
+            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'taskListener' script",
                     issues.iterator().next().getMessage());
         }
     }
