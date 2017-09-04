@@ -23,6 +23,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -34,6 +35,7 @@ import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -64,9 +66,11 @@ public class NoScriptChecker extends AbstractElementChecker {
 
         try {
             scan = new BPMNScanner();
+            Map<String, Setting> settings = rule.getSettings();
 
             // ScripTasks not allowed
-            if (bpmnElement instanceof ScriptTask) {
+            if (bpmnElement instanceof ScriptTask && ((settings.containsKey("ScriptTask")
+                    && settings.get("ScriptTask").getValue().equals("true")) || !settings.containsKey("ScriptTask"))) {
                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
@@ -74,14 +78,21 @@ public class NoScriptChecker extends AbstractElementChecker {
             }
 
             if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)) {
-                // Search for camunda:script tag
-                if (scan.getScriptType(path, bpmnElement.getAttributeValue("id")) != null) {
-                    // Error, because script were found
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                            bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                    + scan.getScriptType(path, bpmnElement.getAttributeValue("id")) + "' script"));
+                String scriptType = scan.getScriptType(path, bpmnElement.getAttributeValue("id"));
+                if (scriptType != null) {
+                    // delete 'camunda:'
+                    scriptType = scriptType.substring(scriptType.indexOf(':') + 1);
+
+                    if (!settings.containsKey(scriptType)
+                            || (settings.containsKey(scriptType)
+                                    && settings.get(scriptType).getValue().equals("true"))) {
+                        // Error, because script were found
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                        + scriptType + "' script"));
+                    }
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {
