@@ -62,4 +62,6 @@ public final class ConstantsConfig {
 
     public static final String PROCESS_VARIABLES_LOCATION = "ProcessVariablesLocation";
 
+    public static final String LOCATION = "location";
+
 }

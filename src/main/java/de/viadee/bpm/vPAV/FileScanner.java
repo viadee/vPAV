@@ -144,6 +144,72 @@ public class FileScanner {
         }
     }
 
+    public FileScanner(final Map<String, Rule> rules) {
+
+        final DirectoryScanner scanner = new DirectoryScanner();
+        scanner.setBasedir(ConstantsConfig.BASEPATH);
+
+        // get file paths of process definitions
+        scanner.setIncludes(new String[] { ConstantsConfig.BPMN_FILE_PATTERN });
+        scanner.scan();
+        processdefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+
+        // get mapping from process id to file path
+        processIdToPathMap = createProcessIdToPathMap(processdefinitions);
+
+        // get file paths of java files
+
+        URL[] urls;
+        LinkedList<File> files = new LinkedList<File>();
+
+        URLClassLoader ucl;
+        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
+        } else {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
+        }
+        urls = ucl.getURLs();
+
+        // retrieve all jars during runtime and pass them to get class files
+        for (URL url : urls) {
+            if (url.getFile().contains(targetClassFolder)) {
+                File f = new File(url.getFile());
+                if (f.exists()) {
+                    files = (LinkedList<File>) FileUtils.listFiles(f,
+                            TrueFileFilter.INSTANCE,
+                            TrueFileFilter.INSTANCE);
+                    addResources(files);
+                }
+            }
+
+        }
+
+        // get mapping from decision reference to file path
+        scanner.setIncludes(new String[] { ConstantsConfig.DMN_FILE_PATTERN });
+        scanner.scan();
+        decisionRefToPathMap = createDmnKeyToPathMap(
+                new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
+
+        // determine version name schema for resources
+        String versioningSchema = null;
+
+        try {
+            versioningSchema = loadVersioningSchemaClass(rules);
+        } catch (ConfigItemNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (versioningSchema != null) {
+            // also add groovy files to included files
+            scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
+            scanner.scan();
+            includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
+
+            // filter files by versioningSchema
+            resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningSchema);
+        }
+    }
+
     /**
      * process classes and add resource add all files to includedFiles
      *
