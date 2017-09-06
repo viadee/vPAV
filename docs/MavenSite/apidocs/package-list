@@ -1,0 +1,9 @@
+de.viadee.bpm.vPAV
+de.viadee.bpm.vPAV.beans
+de.viadee.bpm.vPAV.config.model
+de.viadee.bpm.vPAV.config.reader
+de.viadee.bpm.vPAV.output
+de.viadee.bpm.vPAV.processing
+de.viadee.bpm.vPAV.processing.checker
+de.viadee.bpm.vPAV.processing.model.data
+de.viadee.bpm.vPAV.processing.model.graph
