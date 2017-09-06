@@ -1,31 +1,22 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 /**
@@ -51,6 +42,8 @@ package de.viadee.bpm.vPAV;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -78,6 +71,12 @@ public class BPMNScanner {
 
     private final String sequence_one = "bpmn:sequenceFlow";
 
+    private final String intermediateCatchEvent_one = "bpmn:intermediateCatchEvent";
+
+    private final String startEvent_one = "bpmn:startEvent";
+
+    private final String boundaryEvent_one = "bpmn:boundaryEvent";
+
     // -----------------------
 
     private final String businessRuleTask_two = "bpmn2:businessRuleTask";
@@ -91,6 +90,12 @@ public class BPMNScanner {
     private final String out_two = "bpmn2:outgoing";
 
     private final String sequence_two = "bpmn2:sequenceFlow";
+
+    private final String intermediateCatchEvent_two = "bpmn2:intermediateCatchEvent";
+
+    private final String startEvent_two = "bpmn2:startEvent";
+
+    private final String boundaryEvent_two = "bpmn2:boundaryEvent";
 
     // -----------------------
 
@@ -106,6 +111,11 @@ public class BPMNScanner {
 
     private final String sequence_three = "sequenceFlow";
 
+    private final String intermediateCatchEvent_three = "intermediateCatchEvent";
+
+    private final String startEvent_three = "startEvent";
+
+    private final String boundaryEvent_three = "boundaryEvent";
     // ------------------------
 
     private final String scriptTag = "camunda:script";
@@ -123,6 +133,14 @@ public class BPMNScanner {
     private final String extElements = "extensionElements";
 
     private final String imp = "implementation";
+
+    private final String timerEventDefinition = "timerEventDefinition";
+
+    private final String timeDuration = "timeDuration";
+
+    private final String timeDate = "timeDate";
+
+    private final String timeCycle = "timeCycle";
 
     private String node_name;
 
@@ -254,7 +272,7 @@ public class BPMNScanner {
     }
 
     /**
-     * 
+     *
      * @param path
      *            path to model
      * @param id
@@ -303,7 +321,7 @@ public class BPMNScanner {
     }
 
     /**
-     * 
+     *
      * @param node
      *            node to check
      * @param listType
@@ -568,4 +586,78 @@ public class BPMNScanner {
         return edge;
     }
 
+    /**
+     * get ids and timer definition for all timer event types
+     *
+     * @return id
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     */
+    public Map<String, String> getTimerImplementation(final String path)
+            throws SAXException, IOException, ParserConfigurationException {
+
+        // List for all Task elements
+        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+
+        // parse the given bpmn model
+        doc = builder.parse(path);
+
+        // set Model Version
+        setModelVersion(path);
+
+        switch (model_Version) {
+            case V1:
+                listNodeList.add(doc.getElementsByTagName(startEvent_one));
+                listNodeList.add(doc.getElementsByTagName(intermediateCatchEvent_one));
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_one));
+                break;
+            case V2:
+                listNodeList.add(doc.getElementsByTagName(startEvent_two));
+                listNodeList.add(doc.getElementsByTagName(intermediateCatchEvent_two));
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_two));
+                break;
+            case V3:
+                listNodeList.add(doc.getElementsByTagName(startEvent_three));
+                listNodeList.add(doc.getElementsByTagName(intermediateCatchEvent_three));
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_three));
+                break;
+            default:
+                listNodeList = null;
+        }
+
+        final Map<String, String> timerDefinitions = new HashMap<>();
+
+        // iterate over list<NodeList> and check for attribute "id"
+        for (final NodeList list : listNodeList) {
+            for (int i = 0; i < list.getLength(); i++) {
+                final Element Task_Element = (Element) list.item(i);
+
+                // list of childnodes of timer events
+                final NodeList childNodes = Task_Element.getChildNodes();
+                for (int x = 0; x < childNodes.getLength(); x++) {
+
+                    if (childNodes.item(x).getLocalName() != null
+                            && childNodes.item(x).getLocalName().equals(timerEventDefinition)) {
+
+                        final Element timerDefinition = (Element) childNodes.item(x);
+                        final NodeList childChildNodes = timerDefinition.getChildNodes();
+
+                        for (int y = 0; y < childChildNodes.getLength(); y++) {
+                            if (childChildNodes.item(y).getLocalName() != null) {
+
+                                final Element Root_Element = (Element) childChildNodes.item(y)
+                                        .getParentNode()
+                                        .getParentNode();
+                                timerDefinitions.put(Root_Element.getAttribute("id"),
+                                        childChildNodes.item(y).getTextContent());
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        return timerDefinitions;
+    }
 }

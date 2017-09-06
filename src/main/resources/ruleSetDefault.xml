@@ -1,4 +1,4 @@
-<ruleSet>	
+<ruleSet>
 	<rule>
 		<name>ProcessVariablesLocation</name>
 		<state>false</state>
@@ -21,15 +21,25 @@
 		</elementConventions>
 	</rule>
 	<rule>
+		<name>TimerExpressionChecker</name>
+		<state>true</state>
+		<elementConventions>
+			<elementConvention>
+				<name>timePattern</name>
+				<pattern>.*\\?</pattern>
+			</elementConvention>
+		</elementConventions>
+	</rule>
+	<rule>
 		<name>NoScriptChecker</name>
 		<state>true</state>
 		<settings>
-		<setting name="ScriptTask">true</setting>
-		<setting name="inputParameter">true</setting>
-		<setting name="outputParameter">true</setting>
-		<setting name="executionListener">true</setting>
-		<setting name="taskListener">true</setting>
-	</settings>
+			<setting name="ScriptTask">true</setting>
+			<setting name="inputParameter">true</setting>
+			<setting name="outputParameter">true</setting>
+			<setting name="executionListener">true</setting>
+			<setting name="taskListener">true</setting>
+		</settings>
 	</rule>
 	<rule>
 		<name>JavaDelegateChecker</name>
@@ -43,7 +53,8 @@
 		<name>VersioningChecker</name>
 		<state>false</state>
 		<settings>
-			<setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)</setting>
+			<setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)
+			</setting>
 		</settings>
 	</rule>
 	<rule>
