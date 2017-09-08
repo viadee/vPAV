@@ -30,7 +30,8 @@ If no `script` is specified, the checker is completely disabled for this element
 	<settings>
 		<setting name="ScriptTask"></setting>
 		<setting name="ServiceTask" script="outputParameter"></setting>
-		<setting name="businessRuleTask" script="executionListener"></setting>
+		<setting name="ServiceTask" script="inputParameter"></setting>
+		<setting name="BusinessRuleTask" script="executionListener"></setting>
 		<setting name="UserTask" script="taskListener"></setting>
 	</settings>
 </rule>
