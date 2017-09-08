@@ -2,10 +2,6 @@ No Script Checker
 ================================= 
 The No Script Checker processes BPMN models and checks whether there is a script in the model.
 
-**Exclusion:** 	Script as condition expression of a sequence flow  
-**Reason:** The goal of the checker is to separate process control and technical content. A script in a sequence flow is always part of the sequence control.
-
-
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
 
@@ -30,12 +26,18 @@ If no `script` is specified, the checker is completely disabled for this element
 	<settings>
 		<setting name="ScriptTask"></setting>
 		<setting name="ServiceTask" script="outputParameter"></setting>
-		<setting name="ServiceTask" script="inputParameter"></setting>
-		<setting name="BusinessRuleTask" script="executionListener"></setting>
-		<setting name="UserTask" script="taskListener"></setting>
 	</settings>
 </rule>
 ```
+
+`script` can be:
+- inputParameter
+- outputParameter
+- executionListener
+- taskListener
+- conditionExpression
+
+For more information go to [docs camunda](https://docs.camunda.org/manual/7.7/user-guide/process-engine/scripting/)
 
 ## Error messages:
 **task %elementId with script**
