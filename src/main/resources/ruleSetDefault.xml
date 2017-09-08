@@ -34,7 +34,7 @@
 		<name>NoScriptChecker</name>
 		<state>true</state>
 		<settings>
-			<setting name="ScriptTask">true</setting>
+			<setting name="ScriptTask" script="inputParameter">true</setting>
 			<setting name="inputParameter">true</setting>
 			<setting name="outputParameter">true</setting>
 			<setting name="executionListener">true</setting>
@@ -53,8 +53,7 @@
 		<name>VersioningChecker</name>
 		<state>false</state>
 		<settings>
-			<setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)
-			</setting>
+			<setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)</setting>
 		</settings>
 	</rule>
 	<rule>

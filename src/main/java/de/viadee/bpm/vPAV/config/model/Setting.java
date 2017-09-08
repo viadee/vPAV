@@ -29,23 +29,37 @@
  */
 package de.viadee.bpm.vPAV.config.model;
 
+import java.util.ArrayList;
+
 public class Setting {
 
-  private String name;
+    private String name;
 
-  private String value;
+    private String value;
 
-  public Setting(final String name, final String value) {
-    super();
-    this.name = name;
-    this.value = value;
-  }
+    private ArrayList<String> scriptPlaces = new ArrayList<String>();
 
-  public String getName() {
-    return name;
-  }
+    public Setting(final String name, final String scriptPlace, final String value) {
+        super();
+        this.name = name;
+        this.value = value;
+        if (scriptPlace != null)
+            scriptPlaces.add(scriptPlace);
+    }
 
-  public String getValue() {
-    return value;
-  }
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public ArrayList<String> getScriptPlaces() {
+        return scriptPlaces;
+    }
+
+    public void addScriptPlace(String place) {
+        scriptPlaces.add(place);
+    }
 }

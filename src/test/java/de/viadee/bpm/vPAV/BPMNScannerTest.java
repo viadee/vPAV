@@ -33,6 +33,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -143,7 +144,7 @@ public class BPMNScannerTest {
     @Test
     public void testGetScriptType() throws SAXException, IOException, ParserConfigurationException {
         final String PATH = BASE_PATH + "BPMN_Model_Version_V3.bpmn";
-        final String scriptType = "camunda:inputParameter";
+        final String scriptType = "inputParameter";
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -154,9 +155,9 @@ public class BPMNScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
         BPMNScanner scanner = new BPMNScanner();
-        String script = scanner.getScriptType(PATH, element.getBaseElement().getId());
+        ArrayList<String> scripts = scanner.getScriptTypes(PATH, element.getBaseElement().getId());
 
-        assertTrue("Get unexpected implementation", script.equals(scriptType));
+        assertTrue("Get unexpected implementation", scripts.contains(scriptType));
     }
 
     /**

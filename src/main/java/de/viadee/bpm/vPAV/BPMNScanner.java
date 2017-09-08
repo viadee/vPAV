@@ -1,22 +1,31 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
- * distribution. 3. All advertising materials mentioning features or use of this software must display the following
- * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
- * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
- * products derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the viadee Unternehmensberatung GmbH.
+ * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
- * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 /**
@@ -349,11 +358,11 @@ public class BPMNScanner {
      *             possible exception while process xml
      * @throws IOException
      *             possible exception if file not found
-     * @return return_scriptType contains script type
+     * @return scriptPlaces contains script type
      */
-    public String getScriptType(String path, String id) throws SAXException, IOException {
+    public ArrayList<String> getScriptTypes(String path, String id) throws SAXException, IOException {
         // bool to hold return values
-        String return_scriptType = null;
+        ArrayList<String> return_scriptType = new ArrayList<String>();
 
         // List for all Task elements
         NodeList nodeList;
@@ -367,17 +376,38 @@ public class BPMNScanner {
         // search for parent with id
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node n = nodeList.item(i).getParentNode();
-            return_scriptType = n.getNodeName();
-            while (n.getParentNode() != null) {
-                if (((Element) n).getAttribute("id").equals(id)) {
-                    return return_scriptType;
-                } else {
-                    n = n.getParentNode();
-                }
+            if (idMatch(nodeList.item(i), id)) {
+                return_scriptType.add(n.getLocalName());
             }
         }
 
-        return null;
+        return return_scriptType;
+    }
+
+    /**
+     * Check if any parentnode has the specific id
+     * 
+     * @param n
+     *            Node to check their parents
+     * @param id
+     *            id to check
+     * @return true if id was found
+     */
+    public boolean idMatch(Node n, String id) {
+        Element e = (Element) n;
+
+        if (e.getAttribute("id").equals(id))
+            return true;
+
+        while (e.getParentNode() != null && !e.getParentNode().getLocalName().equals("process")) {
+            Element check = (Element) e.getParentNode();
+            if (check.getAttribute("id").equals(id)) {
+                return true;
+            } else {
+                e = (Element) e.getParentNode();
+            }
+        }
+        return false;
     }
 
     /**

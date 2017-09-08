@@ -123,8 +123,12 @@ public final class XmlConfigReader implements ConfigReader {
             final Map<String, Setting> settings = new HashMap<String, Setting>();
             if (xmlSettings != null) {
                 for (final XmlSetting xmlSetting : xmlSettings) {
-                    settings.put(xmlSetting.getName(),
-                            new Setting(xmlSetting.getName(), xmlSetting.getValue()));
+                    if (!settings.containsKey(xmlSetting.getName())) {
+                        settings.put(xmlSetting.getName(),
+                                new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getValue()));
+                    } else {
+                        settings.get(xmlSetting.getName()).addScriptPlace(xmlSetting.getScript());
+                    }
                 }
             }
             rules.put(name, new Rule(name, state, settings, elementConventions, modelConventions));

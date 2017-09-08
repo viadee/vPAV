@@ -37,7 +37,6 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.ScriptTask;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
 import org.xml.sax.SAXException;
@@ -74,34 +73,41 @@ public class NoScriptChecker extends AbstractElementChecker {
         final BPMNScanner scan;
 
         try {
-            scan = new BPMNScanner();
-            Map<String, Setting> settings = rule.getSettings();
+            if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)
+                    && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals("Process")
+                    && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals("SubProcess")) {
+                scan = new BPMNScanner();
+                Map<String, Setting> settings = rule.getSettings();
 
-            // ScripTasks not allowed
-            if (bpmnElement instanceof ScriptTask && ((settings.containsKey("ScriptTask")
-                    && settings.get("ScriptTask").getValue().equals("true")) || !settings.containsKey("ScriptTask"))) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                        bpmnElement.getAttributeValue("name"), null, null, null,
-                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
-            }
+                ArrayList<String> scriptTypes = scan.getScriptTypes(path, bpmnElement.getAttributeValue("id"));
+                if (scriptTypes != null && !scriptTypes.isEmpty()) {
+                    if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
+                        for (String place : scriptTypes)
+                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                    bpmnElement.getAttributeValue("name"), null, null, null,
+                                    "task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                            + place + "' script"));
+                    } else {
+                        ArrayList<String> allowedPlaces = settings
+                                .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
+                        if (!allowedPlaces.isEmpty())
+                            for (String scriptType : scriptTypes)
+                                if (!allowedPlaces.contains(scriptType))
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                            bpmnElement.getAttributeValue("name"), null, null, null,
+                                            "task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                                    + scriptType + "' script"));
 
-            if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)) {
-                String scriptType = scan.getScriptType(path, bpmnElement.getAttributeValue("id"));
-                if (scriptType != null) {
-                    // delete 'camunda:'
-                    scriptType = scriptType.substring(scriptType.indexOf(':') + 1);
-
-                    if (!settings.containsKey(scriptType)
-                            || (settings.containsKey(scriptType)
-                                    && settings.get(scriptType).getValue().equals("true"))) {
-                        // Error, because script were found
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
-                                "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                        + scriptType + "' script"));
                     }
+                }
+
+                if (bpmnElement instanceof ScriptTask && !settings.containsKey("ScriptTask")) {
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                            bpmnElement.getAttributeValue("name"), null, null, null,
+                            "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {

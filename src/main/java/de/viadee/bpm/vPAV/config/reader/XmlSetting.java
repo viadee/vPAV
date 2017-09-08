@@ -35,37 +35,49 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 @XmlRootElement(name = "setting")
-@XmlType(propOrder = { "name", "value" })
+@XmlType(propOrder = { "name", "script", "value" })
 public class XmlSetting {
 
-  private String name;
+    private String name;
 
-  private String value;
+    private String value;
 
-  public XmlSetting() {
-  }
+    private String script;
 
-  public XmlSetting(final String name, final String value) {
-    super();
-    this.name = name;
-    this.value = value;
-  }
+    public XmlSetting() {
+    }
 
-  @XmlAttribute(name = "name", required = true)
-  public String getName() {
-    return name;
-  }
+    public XmlSetting(final String name, final String script, final String value) {
+        super();
+        this.name = name;
+        this.value = value;
+        this.script = script;
+    }
 
-  @XmlValue
-  public String getValue() {
-    return value;
-  }
+    @XmlAttribute(name = "name", required = true)
+    public String getName() {
+        return name;
+    }
 
-  public void setName(final String name) {
-    this.name = name;
-  }
+    @XmlAttribute(name = "script", required = false)
+    public String getScript() {
+        return script;
+    }
 
-  public void setValue(final String value) {
-    this.value = value;
-  }
+    @XmlValue
+    public String getValue() {
+        return value;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setValue(final String value) {
+        this.value = value;
+    }
+
+    public void setScript(final String script) {
+        this.script = script;
+    }
 }
