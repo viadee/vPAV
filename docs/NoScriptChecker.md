@@ -31,14 +31,12 @@ If no `script` is specified, the checker is completely disabled for this element
 ```
 
 `script` can be:
-``` xml
-<setting name="AnyElementType" script="inputParameter"></setting>
-<setting name="AnyElementType" script="outputParameter"></setting>
-<setting name="AnyElementType" script="executionListener"></setting>
+- inputParameter
+- outputParameter
+- executionListener
+- taskListener
+- conditionExpression
 
-<setting name="UserTask" script="taskListener"></setting>
-<setting name="SequenceFlow" script="conditionExpression"></setting>
-```
 For more information go to [docs camunda](https://docs.camunda.org/manual/7.7/user-guide/process-engine/scripting/)
 
 ## Error messages:
