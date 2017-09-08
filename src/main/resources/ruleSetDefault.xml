@@ -34,11 +34,6 @@
 		<name>NoScriptChecker</name>
 		<state>true</state>
 		<settings>
-			<setting name="ScriptTask" script="inputParameter">true</setting>
-			<setting name="inputParameter">true</setting>
-			<setting name="outputParameter">true</setting>
-			<setting name="executionListener">true</setting>
-			<setting name="taskListener">true</setting>
 		</settings>
 	</rule>
 	<rule>

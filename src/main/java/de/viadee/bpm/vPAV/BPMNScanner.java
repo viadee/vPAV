@@ -1,34 +1,4 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-package de.viadee.bpm.vPAV;
-/**
  * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -40,14 +10,15 @@ package de.viadee.bpm.vPAV;
  * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
  * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package de.viadee.bpm.vPAV;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -151,6 +122,10 @@ public class BPMNScanner {
 
     private final String timeCycle = "timeCycle";
 
+    private final String condExp = "conditionExpression";
+
+    private final String lang = "language";
+
     private String node_name;
 
     private DocumentBuilderFactory factory;
@@ -160,6 +135,8 @@ public class BPMNScanner {
     private Document doc;
 
     private ModelVersionEnum model_Version;
+
+    private NodeList childNodes;
 
     private enum ModelVersionEnum {
         V1, V2, V3
@@ -393,7 +370,7 @@ public class BPMNScanner {
      *            id to check
      * @return true if id was found
      */
-    public boolean idMatch(Node n, String id) {
+    private boolean idMatch(Node n, String id) {
         Element e = (Element) n;
 
         if (e.getAttribute("id").equals(id))
@@ -405,6 +382,62 @@ public class BPMNScanner {
                 return true;
             } else {
                 e = (Element) e.getParentNode();
+            }
+        }
+        return false;
+    }
+
+    public boolean hasScriptInCondExp(String path, String id)
+            throws SAXException, IOException, ParserConfigurationException {
+        // List for all Task elements
+        NodeList nodeList = null;
+
+        // set Model Version and parse doc
+        setModelVersion(path);
+
+        switch (model_Version) {
+            case V1:
+                // create nodelist that contains all Tasks with the namespace
+                nodeList = doc.getElementsByTagName(sequence_one);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(sequence_two);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(sequence_three);
+                break;
+        }
+
+        // search for parent with id
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element sequence_Element = (Element) nodeList.item(i);
+            if (sequence_Element.getAttribute("id").equals(id)) {
+                return hasCondExp(sequence_Element);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * check if sequenceFlow has an Script (value in language attribute) in conditionalExpression
+     * 
+     * @param sq
+     *            sequenceFlowNode
+     * @return true or false
+     */
+    private boolean hasCondExp(Element sq) {
+        NodeList childNodes = null;
+        if (sq.hasChildNodes()) {
+            childNodes = sq.getChildNodes();
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                Node childNode = childNodes.item(i);
+                // if (childNode.getNodeName().equals("conditionExpression")) {
+                if (childNode.getLocalName() != null && childNode.getLocalName().equals(condExp)) {
+                    Element childElement = (Element) childNode;
+                    if (childElement.getAttribute(lang).trim().length() > 0)
+                        return true;
+                }
             }
         }
         return false;
@@ -690,4 +723,5 @@ public class BPMNScanner {
         }
         return timerDefinitions;
     }
+
 }
