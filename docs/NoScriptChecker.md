@@ -21,7 +21,7 @@ The rule should be configured as follows:
 
 You can add settings to disable the **NoScriptChecker** in specific places. 
 `name` contains the element type, in which the checker is deactivated.
-If no script is specified, the checker is completely disabled for this element type.
+If no `script` is specified, the checker is completely disabled for this element type.
 
 ``` xml
 <rule>
