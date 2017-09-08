@@ -1,31 +1,22 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -88,6 +79,16 @@ public class JavaDelegateChecker extends AbstractElementChecker {
     private final String attr_decR = "decisionRef";
 
     private final String attr_type = "type";
+
+    private final String interface_del = "JavaDelegate";
+
+    private final String interface_ExList = "ExecutionListener";
+
+    private final String interface_taskList = "TaskListener";
+
+    private final String interface_SigActBeh = "SignallableActivityBehavior";
+
+    private final String superClass_abstBpmnActBeh = "AbstractBpmnActivityBehavior";
 
     public JavaDelegateChecker(final Rule rule, final String path) {
         super(rule);
@@ -178,7 +179,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                     issues.addAll(checkClassFile(element, classFile, false, false));
                                 } else {
                                     // incorrect beanmapping
-                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                             bpmnElement.getAttributeValue("name"), null, null, null,
                                             "Couldn't find correct beanmapping for delegate expression: "
@@ -289,7 +290,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                     issues.addAll(checkClassFile(element, classFile, true, taskListener));
                                 } else {
                                     // incorrect beanmapping
-                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                             element.getProcessdefinition(), null,
                                             bpmnElement.getAttributeValue("id"),
                                             bpmnElement.getAttributeValue("name"), null, null, null,
@@ -344,7 +345,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             // Checks, whether the correct interface was implemented
             Class<?> sClass = clazz.getSuperclass();
             boolean extendsSuperClass = false;
-            if (!listener && sClass.getName().contains("AbstractBpmnActivityBehavior")) {
+            if (!listener && sClass.getName().contains(superClass_abstBpmnActBeh)) {
                 extendsSuperClass = true;
             }
 
@@ -353,15 +354,15 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             boolean interfaceImplemented = false;
             for (final Class<?> _interface : interfaces) {
                 if (!listener) {
-                    if (_interface.getName().contains("JavaDelegate")
-                            || _interface.getName().contains("SignallableActivityBehavior")) {
+                    if (_interface.getName().contains(interface_del)
+                            || _interface.getName().contains(interface_SigActBeh)) {
                         interfaceImplemented = true;
                     }
                 } else {
-                    if (taskListener && _interface.getName().contains("TaskListener")) {
+                    if (taskListener && _interface.getName().contains(interface_taskList)) {
                         interfaceImplemented = true;
-                    } else if (_interface.getName().contains("ExecutionListener")
-                            || _interface.getName().contains("JavaDelegate")) {
+                    } else if (_interface.getName().contains(interface_ExList)
+                            || _interface.getName().contains(interface_del)) {
                         interfaceImplemented = true;
                     }
                 }
