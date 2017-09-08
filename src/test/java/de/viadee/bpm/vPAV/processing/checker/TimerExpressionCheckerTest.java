@@ -1,31 +1,22 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -42,14 +33,13 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.TimerEventDefinition;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -66,7 +56,7 @@ public class TimerExpressionCheckerTest {
 
     private static ClassLoader cl;
 
-    private final Rule rule = createRule();
+    private final Rule rule = new Rule("TimerExpressionChecker", true, null, null, null);
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -80,17 +70,18 @@ public class TimerExpressionCheckerTest {
     }
 
     /**
-     * Case: TimerExpression is correct
+     * Case: TimerExpression in start event is correct
      *
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
      * @throws XPathExpressionException
      */
+
     @Test
-    public void testCorrectTimerExpression()
+    public void testTimerExpression_Correct()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerEvent_Correct.bpmn";
+        final String PATH = BASE_PATH + "testTimerExpression_Correct.bpmn";
         checker = new TimerExpressionChecker(rule, PATH);
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -98,10 +89,10 @@ public class TimerExpressionCheckerTest {
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<TimerEventDefinition> baseElements = modelInstance
-                .getModelElementsByType(TimerEventDefinition.class);
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
 
-        for (TimerEventDefinition event : baseElements) {
+        for (BaseElement event : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, event);
             issues.addAll(checker.check(element));
         }
@@ -112,22 +103,68 @@ public class TimerExpressionCheckerTest {
     }
 
     /**
-     * Creates rule configuration
+     * Case: TimerExpression in start event is wrong
      *
-     * @return rule
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
      */
-    private static Rule createRule() {
+    @Test
+    public void testTimerExpression_Wrong()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "testTimerExpression_Wrong.bpmn";
+        checker = new TimerExpressionChecker(rule, PATH);
 
-        final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final ElementConvention elementConvention = new ElementConvention("convention", null,
-                "[A-ZÄÖÜ][a-zäöü]*\\?{1}");
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        elementConventions.add(elementConvention);
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
 
-        final Rule rule = new Rule("TimerExpressionChecker", true, null, elementConventions, null);
+        for (BaseElement event : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, event);
+            issues.addAll(checker.check(element));
+        }
 
-        return rule;
+        if (issues.size() != 1) {
+            Assert.fail("wrong timer expression should generate an issue");
+        }
+    }
+
+    /**
+     * Case: Several timer expressions
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+    @Test
+    public void testTimerExpressions()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "testTimerExpressions.bpmn";
+        checker = new TimerExpressionChecker(rule, PATH);
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
+
+        for (BaseElement event : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, event);
+            issues.addAll(checker.check(element));
+        }
+
+        if (issues.size() != 2) {
+            Assert.fail("model should consist of two issues");
+        }
+
     }
 
 }

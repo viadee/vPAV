@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.8.0">
   <bpmn:process id="Process_1" isExecutable="false">
-    <bpmn:intermediateCatchEvent id="IntermediateThrowEvent_0fh3sf9">
+    <bpmn:startEvent id="StartEvent_00jwrk1">
       <bpmn:timerEventDefinition>
-        <bpmn:timeDate xsi:type="bpmn:tFormalExpression">23</bpmn:timeDate>
+        <bpmn:timeDate xsi:type="bpmn:tFormalExpression">R3/PT5M</bpmn:timeDate>
       </bpmn:timerEventDefinition>
-    </bpmn:intermediateCatchEvent>
+    </bpmn:startEvent>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-      <bpmndi:BPMNShape id="IntermediateCatchEvent_0fredtm_di" bpmnElement="IntermediateThrowEvent_0fh3sf9">
-        <dc:Bounds x="247" y="217" width="36" height="36" />
+      <bpmndi:BPMNShape id="StartEvent_1lrr41m_di" bpmnElement="StartEvent_00jwrk1">
+        <dc:Bounds x="178" y="156" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="265" y="257" width="0" height="12" />
+          <dc:Bounds x="186" y="196" width="21" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>

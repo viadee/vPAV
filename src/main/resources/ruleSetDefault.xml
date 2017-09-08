@@ -23,12 +23,6 @@
 	<rule>
 		<name>TimerExpressionChecker</name>
 		<state>true</state>
-		<elementConventions>
-			<elementConvention>
-				<name>timePattern</name>
-				<pattern>.*\\?</pattern>
-			</elementConvention>
-		</elementConventions>
 	</rule>
 	<rule>
 		<name>NoScriptChecker</name>

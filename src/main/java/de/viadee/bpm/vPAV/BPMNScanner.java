@@ -116,12 +116,6 @@ public class BPMNScanner {
 
     private final String timerEventDefinition = "timerEventDefinition";
 
-    private final String timeDuration = "timeDuration";
-
-    private final String timeDate = "timeDate";
-
-    private final String timeCycle = "timeCycle";
-
     private final String condExp = "conditionExpression";
 
     private final String lang = "language";
@@ -135,8 +129,6 @@ public class BPMNScanner {
     private Document doc;
 
     private ModelVersionEnum model_Version;
-
-    private NodeList childNodes;
 
     private enum ModelVersionEnum {
         V1, V2, V3
@@ -312,7 +304,7 @@ public class BPMNScanner {
      *            node to check
      * @param listType
      *            Type of ExecutionListener
-     * @return textConetent of ListenerType
+     * @return textContent of ListenerType
      */
     private String checkAttributesOfNode(Node node, String listType) {
         NamedNodeMap attributes = node.getAttributes();
@@ -363,7 +355,7 @@ public class BPMNScanner {
 
     /**
      * Check if any parentnode has the specific id
-     * 
+     *
      * @param n
      *            Node to check their parents
      * @param id
@@ -421,7 +413,7 @@ public class BPMNScanner {
 
     /**
      * check if sequenceFlow has an Script (value in language attribute) in conditionalExpression
-     * 
+     *
      * @param sq
      *            sequenceFlowNode
      * @return true or false
@@ -657,7 +649,7 @@ public class BPMNScanner {
      * @throws IOException
      * @throws SAXException
      */
-    public Map<String, String> getTimerImplementation(final String path)
+    public Map<Element, Element> getTimerImplementation(final String path, final String id)
             throws SAXException, IOException, ParserConfigurationException {
 
         // List for all Task elements
@@ -689,39 +681,42 @@ public class BPMNScanner {
                 listNodeList = null;
         }
 
-        final Map<String, String> timerDefinitions = new HashMap<>();
+        // final ArrayList<Element> timerList = new ArrayList<>();
+        final Map<Element, Element> timerList = new HashMap<>();
 
-        // iterate over list<NodeList> and check for attribute "id"
+        // iterate over list<NodeList>
         for (final NodeList list : listNodeList) {
             for (int i = 0; i < list.getLength(); i++) {
                 final Element Task_Element = (Element) list.item(i);
 
-                // list of childnodes of timer events
-                final NodeList childNodes = Task_Element.getChildNodes();
-                for (int x = 0; x < childNodes.getLength(); x++) {
+                // check whether a node matches with the provided id
+                if (Task_Element.getAttribute("id").equals(id)) {
 
-                    if (childNodes.item(x).getLocalName() != null
-                            && childNodes.item(x).getLocalName().equals(timerEventDefinition)) {
+                    final NodeList childNodes = Task_Element.getChildNodes();
+                    for (int x = 0; x < childNodes.getLength(); x++) {
 
-                        final Element timerDefinition = (Element) childNodes.item(x);
-                        final NodeList childChildNodes = timerDefinition.getChildNodes();
+                        // check if an event consists of a timereventdefinition tag
+                        if (childNodes.item(x).getLocalName() != null
+                                && childNodes.item(x).getLocalName().equals(timerEventDefinition)) {
 
-                        for (int y = 0; y < childChildNodes.getLength(); y++) {
-                            if (childChildNodes.item(y).getLocalName() != null) {
+                            timerList.put(Task_Element, null);
 
-                                final Element Root_Element = (Element) childChildNodes.item(y)
-                                        .getParentNode()
-                                        .getParentNode();
-                                timerDefinitions.put(Root_Element.getAttribute("id"),
-                                        childChildNodes.item(y).getTextContent());
+                            // retrieve values of children
+                            final Element Task_Element2 = (Element) childNodes.item(x);
+                            final NodeList childChildNodes = Task_Element2.getChildNodes();
+                            for (int y = 0; y < childChildNodes.getLength(); y++) {
+                                // localname must be either timeDate, timeCycle or timeDuration
+                                // add nodes/elements to map
+                                if (childChildNodes.item(y).getLocalName() != null) {
+                                    timerList.put(Task_Element, (Element) childChildNodes.item(y));
+                                }
                             }
                         }
                     }
-
                 }
             }
         }
-        return timerDefinitions;
+        return timerList;
     }
 
 }
