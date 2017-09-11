@@ -4,12 +4,10 @@ The DMN Task Checker processes BPMN models and checks whether a BusinessRuleTask
 
 
 ## Assumptions
-----------------------------------------------
 - The **BPMN-models** have to be in the **classpath** at build time
 - The referenced **DMN-file** has to be in the **classpath** at build time
 
 ## Configuration
-------------------------------------------
 The rule should be configured as follows:
 ```xml
 <rule>
@@ -20,14 +18,12 @@ The rule should be configured as follows:
 ```
 
 ## Error messages
------------------------------------------
 **business rule task with dmn implementation without a decision ref**
 
 _This message indicates that no decision reference to a DMN file was found._
 
 
 ## Examples
-----------------------------------------
 
 | **No Decision Ref**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
