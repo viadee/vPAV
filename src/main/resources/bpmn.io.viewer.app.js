@@ -20,6 +20,10 @@ function markNodes(canvas, bpmnFile) {
                 canvas.addMarker(elementsToMark[id].elementId, 'NoScriptChecker');
             } else if (elementsToMark[id].ruleName == "XorNamingConventionChecker") {
                 canvas.addMarker(elementsToMark[id].elementId, 'XorNamingConventionChecker');
+            } else if (elementsToMark[id].ruleName == "ElementIdConventionChecker") {
+                canvas.addMarker(elementsToMark[id].elementId, 'ElementIdConventionChecker');
+            } else if (elementsToMark[id].ruleName == "TimerExpressionChecker") {
+                canvas.addMarker(elementsToMark[id].elementId, 'TimerExpressionChecker');
             } else {
                 canvas.addMarker(elementsToMark[id].elementId, 'new');
             }
@@ -127,7 +131,7 @@ function addCountOverlay(overlays, bpmnFile) {
             const dialogContent = document.querySelector(".modal-body");
             while (dialogContent.hasChildNodes()) {
                 dialogContent.removeChild(dialogContent.lastChild);
-              }
+            }
 
             var eId = issues[id].i.elementId;
             for (y in issues) {
@@ -145,14 +149,14 @@ function addCountOverlay(overlays, bpmnFile) {
 
                     var dCardText = document.createElement("p");
                     dCardText.setAttribute("class", "card-text");
-                    
+
 
                     var oImg = document.createElement("img");
-                    oImg.setAttribute('src', 'img/'+issue.classification+'.png');
-                    oImg.setAttribute('alt', 'issue.classification'); 
+                    oImg.setAttribute('src', 'img/' + issue.classification + '.png');
+                    oImg.setAttribute('alt', 'issue.classification');
                     oImg.setAttribute('class', 'float-left mr-2');
                     oImg.setAttribute("title", issue.classification);
-                    
+
                     dCardTitle.innerHTML = issue.ruleName;
                     dCardTitle.appendChild(oImg);
                     dCardText.innerHTML = issue.message;
@@ -173,7 +177,7 @@ function addCountOverlay(overlays, bpmnFile) {
                 clickOverlay(currentId);
             };
 
-        })(); 
+        })();
         attachOverlay();
     }
 
@@ -213,9 +217,9 @@ function createTable(bpmnFile) {
         if (elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
             issue = elementsToMark[id];
             myParent = document.getElementsByTagName("body").item(0);
-            myTBody = document.createElement("tbody");            
+            myTBody = document.createElement("tbody");
             myRow = document.createElement("tr");
-            
+
             //ruleName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
@@ -228,7 +232,7 @@ function createTable(bpmnFile) {
             a.setAttribute("title", "checker documentation");
             myCell.appendChild(a);
             myRow.appendChild(myCell);
-            
+
             //elementId
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.elementId);
@@ -240,18 +244,18 @@ function createTable(bpmnFile) {
             c.setAttribute("title", "mark element");
             myCell.appendChild(c);
             myRow.appendChild(myCell);
-            
+
             //elementName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.elementName);
             myCell.appendChild(myText);
             myRow.appendChild(myCell);
-            
+
             //classification
             myCell = document.createElement("td");
             myCell.setAttribute("align", "center");
             var oImg = document.createElement("img");
-            oImg.setAttribute('src', 'img/'+issue.classification+'.png');
+            oImg.setAttribute('src', 'img/' + issue.classification + '.png');
             oImg.setAttribute('alt', 'issue.classification');
             oImg.setAttribute("title", issue.classification);
             myCell.appendChild(oImg);
@@ -262,7 +266,7 @@ function createTable(bpmnFile) {
             myText = document.createTextNode(issue.message);
             myCell.appendChild(myText);
             myRow.appendChild(myCell);
-            
+
             //path
             myCell = document.createElement("td");
             var path_text = "";
@@ -314,7 +318,7 @@ function createTable(bpmnFile) {
 /**
  * create Footer
  */
-function createFooter(){
+function createFooter() {
     const body = document.querySelector("body");
     var footer = document.createElement("footer");
     footer.setAttribute("class", "footer pt-1 pb-1 pl-2 m-0");
@@ -333,7 +337,7 @@ function createFooter(){
     aI.setAttribute("class", "text-muted float-right pr-2");
     aI.setAttribute("href", "https://www.viadee.de/impressum-datenschutz.html");
     aI.innerHTML = "Impressum";
-    
+
     fP.appendChild(aL);
     fP.appendChild(aI);
     footer.appendChild(fP);
@@ -462,7 +466,7 @@ function toggleDialog(sh) {
         var subName = model.name.substr(0, model.name.length - 5);
         li.appendChild(a);
         li.setAttribute("class", "nav-item");
-        if(countIssues(model.name) == 0)
+        if (countIssues(model.name) == 0)
             a.innerHTML = subName + " <span class='badge badge-pill badge-success pt-1 pb-1'>" + countIssues(model.name) + "</span>";
         else
             a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 viadee-darkblue-text viadee-lightblue-bg'>" + countIssues(model.name) + "</span>";
@@ -487,10 +491,10 @@ function setFocus(name) {
 //reload model diagram
 function selectModel(name, issue_id, path_nr, func, path) {
     document.getElementById("rowPath").setAttribute("class", "collapse");
-    
+
     //delete footer
     const footer = document.querySelector("footer");
-    if(!(footer === null))
+    if (!(footer === null))
         footer.parentNode.removeChild(footer);
 
     for (id in diagramXMLSource) {
