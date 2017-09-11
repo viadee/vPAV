@@ -36,8 +36,7 @@ This allows you to use your own set of rules for naming conventions or to de-/ac
 ### One set of rules to rule them all
 Furthermore you can use the plugin to manage multiple projects. Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar). In your child projects you have to add the dependency to the parent project and to vPAV.
 
-```
-# xml 
+```xml
 <dependency>
   <groupId>de.viadee</groupId>
 	<artifactId>parent_config</artifactId>
@@ -54,8 +53,7 @@ Furthermore you can use the plugin to manage multiple projects. Just create a bl
 The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit". Local sets of rules will override inherited rules in order to allow for customization.
 
 Make sure that inheritance is activated in the ruleSet.xml of your project.
-```
-# xml 
+```xml 
 <rule>
 	<name>HasParentRuleSet</name>
 	<state>true</state>
