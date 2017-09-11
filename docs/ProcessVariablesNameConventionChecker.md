@@ -3,11 +3,9 @@ Process Variables Name Convention Checker
 Elements in business processes are regularly subject to naming conventions. This checker validates the names of process variables with a configurable regular expression.
 
 ## Assumptions
-----------------------------------------------
 - The **BPMN-models** have to be in the **classpath**
 
 ## Configuration
-------------------------------------------
 The rule should be configured as follows:
 ```xml
 <rule>
@@ -56,7 +54,6 @@ _LoopCardinality, CompletionCondition, InlineScript, ExternalScript, Assignee, C
 
 
 ## Error messages
------------------------------------------
 **process variable is against the naming convention '%conventionName%' (compare %Chapter%, %ElementFieldType%)**
 
 _The message indicates that a process variable violates a specific naming convention._<br/>
@@ -68,7 +65,6 @@ _**Solution:** the variable has to be adapted to the convention._
 
 
 ## Examples
-----------------------------------------
 
 | **process variable is against the naming convention 'external' (compare Details, Class)**              | 
 |:------------------------------------------------------------------------------------------------------:| 
