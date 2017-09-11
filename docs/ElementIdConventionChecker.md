@@ -34,5 +34,5 @@ _The id of the task is invalid and has to be changed according to the naming con
 
 | **ID 'serviceTask_WrongId' is against the naming convention**                                          | 
 |:------------------------------------------------------------------------------------------------------:| 
-| name convention: `serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*` (No underscore allowed) <br/> <br/> ![Id against naming convention](img/ElementIdConventionChecker.PNG "Task Id against naming convention")    |
+| No underscore allowed <br/> <br/> ![Id against naming convention](img/ElementIdConventionChecker.PNG "Task Id against naming convention")    |
 | |
