@@ -149,6 +149,15 @@ public final class CheckerFactory {
             checkers.add(new TimerExpressionChecker(timerExpressionRule, path));
         }
 
+        final Rule elementIdConventionRule = ruleConf
+                .get(getClassName(ElementIdConventionChecker.class));
+        if (elementIdConventionRule == null)
+            throw new ConfigItemNotFoundException(
+                    getClassName(ElementIdConventionChecker.class) + " not found");
+        if (taskNamingConventionRule.isActive()) {
+            checkers.add(new ElementIdConventionChecker(taskNamingConventionRule));
+        }
+
         return checkers;
     }
 

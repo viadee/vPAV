@@ -91,4 +91,14 @@
 			</elementConvention>
 		</elementConventions>
 	</rule>
+		<rule>
+		<name>ElementIdConventionChecker</name>
+		<state>false</state>
+		<elementConventions>
+			<elementConvention>
+				<name>ServiceTask</name>
+				<pattern>serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*</pattern>
+			</elementConvention>
+		</elementConventions>
+	</rule>
 </ruleSet>
