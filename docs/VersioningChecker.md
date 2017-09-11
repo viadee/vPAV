@@ -5,12 +5,10 @@ to the declaration of a versioned java implementation.
 When a versioned implementation is referenced, it is checked whether it is up-to-date.
 
 ## Assumptions
-----------------------------------------------
 - The **BPMN-models** have to be in the **classpath** at build time
 - Classes have to be versioned
 
 ## Configuration
-------------------------------------------
 The rule should be configured as follows:<a name="code"></a>
 ```xml
 <rule>
@@ -33,7 +31,6 @@ The setting „versioningSchemaClass“ includes a file name scheme (regular exp
 This is required for the identification of such classes, here e.g. <name>_<majorversion>_<minorversion>.jave/groovy
 
 ## Error messages
------------------------------------------
 **class reference is deprecated or file with version doesn't exist**
 
 _A referenced Java class is deprecated or isn't versioned._
@@ -55,7 +52,6 @@ _Unless a versioned spring-bean is undeposited, it must be adapted to the versio
 
 
 ## Examples
-----------------------------------------
 
 | **current situation**                                                                                               | **class reference is deprecated or file with version doesn't exist**               | 
 | :---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------:| 
