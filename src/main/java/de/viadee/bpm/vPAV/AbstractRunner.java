@@ -116,7 +116,11 @@ public abstract class AbstractRunner {
             if ((!rules.containsKey(ConstantsConfig.HASPARENTRULESET))
                     || rules.containsKey(ConstantsConfig.HASPARENTRULESET)
                             && !rules.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
-                ruleSetOutputWriter.write(rules);
+                try {
+					ruleSetOutputWriter.write(rules);
+				} catch (OutputWriterException e) {
+					e.printStackTrace();
+				}
                 return rules;
             } else if (rules.containsKey(ConstantsConfig.HASPARENTRULESET)
                     && rules.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
@@ -127,7 +131,11 @@ public abstract class AbstractRunner {
         } catch (final ConfigReaderException e) {
             throw new RuntimeException("Config file could not be read");
         }
-        ruleSetOutputWriter.write(rules);
+        try {
+			ruleSetOutputWriter.write(rules);
+		} catch (OutputWriterException e) {
+			e.printStackTrace();
+		}
         return rules;
     }
 

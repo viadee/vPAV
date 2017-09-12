@@ -68,7 +68,7 @@ public class RuleSetOutputWriter {
 	
 	private static Logger logger = Logger.getLogger(RuleSetOutputWriter.class.getName());
 
-    public void write(Map<String, Rule> rules) {
+    public void write(Map<String, Rule> rules) throws OutputWriterException {
         Writer writer = null;
         
         Path path = Paths.get(ConstantsConfig.EFFECTIVE_RULESET);        
@@ -83,11 +83,11 @@ public class RuleSetOutputWriter {
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             m.marshal(transformToXmlDatastructure(rules), writer);
         } catch (final UnsupportedEncodingException e) {
-        		logger.warning("unsupported encoding");
+        		throw new OutputWriterException("unsupported encoding");
         } catch (final FileNotFoundException e) {        		
-        		logger.warning("Effective config file couldn't be generated");
+        		throw new OutputWriterException("Effective config file couldn't be generated");
         } catch (final JAXBException e) {
-        		logger.warning("xml output (effective config file) couldn't be generated (jaxb-error)");
+        		throw new OutputWriterException("xml output (effective config file) couldn't be generated (jaxb-error)");
         } finally {
             try {
                 writer.close();
