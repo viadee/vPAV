@@ -107,6 +107,7 @@ public abstract class AbstractRunner {
 
     // 1
     public static Map<String, Rule> readConfig() {
+    		createBaseFolder();
         Map<String, Rule> rules;
         final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
         try {
@@ -203,9 +204,6 @@ public abstract class AbstractRunner {
      *             Abort if writer can not be instantiated
      */
     public static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
-        // create vPAV, img, css, js folders
-        createBaseFolder();
-
         if (filteredIssues.size() > 0) {
             final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
             final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();

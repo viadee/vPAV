@@ -35,14 +35,18 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
@@ -61,9 +65,15 @@ import de.viadee.bpm.vPAV.config.reader.XmlSetting;
  * 
  */
 public class RuleSetOutputWriter {
+	
+	private static Logger logger = Logger.getLogger(RuleSetOutputWriter.class.getName());
 
     public void write(Map<String, Rule> rules) {
         Writer writer = null;
+        
+        Path path = Paths.get(ConstantsConfig.EFFECTIVE_RULESET);        
+        if (path.toFile().exists())
+        		path.toFile().delete();        
 
         try {
             writer = new BufferedWriter(
@@ -74,8 +84,8 @@ public class RuleSetOutputWriter {
             m.marshal(transformToXmlDatastructure(rules), writer);
         } catch (final UnsupportedEncodingException e) {
             throw new RuntimeException("unsupported encoding");
-        } catch (final FileNotFoundException e) {
-            throw new RuntimeException("Effective config file couldn't be generated");
+        } catch (final FileNotFoundException e) {        		
+        		logger.warning("Effective config file couldn't be generated");
         } catch (final JAXBException e) {
             throw new RuntimeException("xml output (effective config file) couldn't be generated (jaxb-error)");
         } finally {
