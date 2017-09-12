@@ -83,11 +83,11 @@ public class RuleSetOutputWriter {
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             m.marshal(transformToXmlDatastructure(rules), writer);
         } catch (final UnsupportedEncodingException e) {
-            throw new RuntimeException("unsupported encoding");
+        		logger.warning("unsupported encoding");
         } catch (final FileNotFoundException e) {        		
         		logger.warning("Effective config file couldn't be generated");
         } catch (final JAXBException e) {
-            throw new RuntimeException("xml output (effective config file) couldn't be generated (jaxb-error)");
+        		logger.warning("xml output (effective config file) couldn't be generated (jaxb-error)");
         } finally {
             try {
                 writer.close();
