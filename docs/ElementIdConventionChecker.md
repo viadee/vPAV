@@ -22,7 +22,8 @@ The rule should be configured as follows:
 ```
 
 `name` contains the element type to check.<br/>
-`pattern` contains a regular expression, whereupon the Id of the element type above is checked. 
+`pattern` contains a regular expression, whereupon the Id of the element type above is checked. <br/><br/>
+*The example pattern matches strings that start with 'serviceTask' followed by an uppercase letter, contain only letters and numbers, and contain at least one lowercase letter and at least one other uppercase letter.*
 
 ## Error messages
 
