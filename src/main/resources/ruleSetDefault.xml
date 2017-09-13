@@ -42,7 +42,8 @@
 		<name>VersioningChecker</name>
 		<state>false</state>
 		<settings>
-			<setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)</setting>
+			<setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)
+			</setting>
 		</settings>
 	</rule>
 	<rule>
@@ -91,13 +92,14 @@
 			</elementConvention>
 		</elementConventions>
 	</rule>
-		<rule>
+	<rule>
 		<name>ElementIdConventionChecker</name>
 		<state>false</state>
 		<elementConventions>
 			<elementConvention>
 				<name>ServiceTask</name>
-				<pattern>serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*</pattern>
+				<pattern>serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*
+				</pattern>
 			</elementConvention>
 		</elementConventions>
 	</rule>
