@@ -85,7 +85,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                 for (Map.Entry<Element, Element> entry : list.entrySet()) {
 
                     if (entry.getValue() != null) {
-                        timerDefinition = entry.getValue().getParentNode().getTextContent();
+                        timerDefinition = entry.getValue().getParentNode().getTextContent().trim();
                     } else {
                         timerDefinition = "";
                     }
