@@ -610,7 +610,19 @@ public final class ProcessVariableReader {
         if (fileName != null && fileName.trim().length() > 0) {
             try {
                 final DirectoryScanner scanner = new DirectoryScanner();
-                scanner.setBasedir(ConstantsConfig.JAVAPATH);
+
+                if (RuntimeConfig.getInstance().isTest()) {
+                    if (fileName.endsWith(".java"))
+                        scanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
+                    else
+                        scanner.setBasedir(ConstantsConfig.TEST_BASEPATH);
+                } else {
+                    if (fileName.endsWith(".java"))
+                        scanner.setBasedir(ConstantsConfig.JAVAPATH);
+                    else
+                        scanner.setBasedir(ConstantsConfig.BASEPATH);
+                }
+
                 Resource s = scanner.getResource(fileName);
 
                 InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
