@@ -107,7 +107,7 @@ public abstract class AbstractRunner {
 
     // 1
     public static Map<String, Rule> readConfig() {
-    		createBaseFolder();
+        createBaseFolder();
         Map<String, Rule> rules;
         final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
         try {
@@ -117,10 +117,10 @@ public abstract class AbstractRunner {
                     || rules.containsKey(ConstantsConfig.HASPARENTRULESET)
                             && !rules.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
                 try {
-					ruleSetOutputWriter.write(rules);
-				} catch (OutputWriterException e) {
-					e.printStackTrace();
-				}
+                    ruleSetOutputWriter.write(rules);
+                } catch (OutputWriterException e) {
+                    e.printStackTrace();
+                }
                 return rules;
             } else if (rules.containsKey(ConstantsConfig.HASPARENTRULESET)
                     && rules.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
@@ -132,10 +132,10 @@ public abstract class AbstractRunner {
             throw new RuntimeException("Config file could not be read");
         }
         try {
-			ruleSetOutputWriter.write(rules);
-		} catch (OutputWriterException e) {
-			e.printStackTrace();
-		}
+            ruleSetOutputWriter.write(rules);
+        } catch (OutputWriterException e) {
+            e.printStackTrace();
+        }
         return rules;
     }
 
@@ -145,6 +145,7 @@ public abstract class AbstractRunner {
         final Map<String, Rule> finalRules = new HashMap<>();
         try {
             parentRules = new XmlConfigReader().read(new File(getParentConfig()));
+
         } catch (final ConfigReaderException e) {
             throw new RuntimeException("Parent config file could not be read");
         }
@@ -558,9 +559,12 @@ public abstract class AbstractRunner {
             ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
         }
 
-        final URL path = ucl.getResource(ConstantsConfig.RULESETPARENT);
+        final URL url = ucl.getResource(ConstantsConfig.RULESETPARENT);
 
-        return path.toString().substring(6);
+        if (url == null)
+            throw new RuntimeException("Parent config file could not be read");
+
+        return url.getPath();
     }
 
     public static boolean isExecuted() {
