@@ -27,6 +27,7 @@ Consistency checks are performed by individual modules called checkers, which se
 |[XorNamingConventionChecker](XorNamingConventionChecker.md)                           | Are XOR gateways ending with "?"                                         | Done         |
 |[NoScriptChecker](NoScriptChecker.md)                                                 | Is there any script in the model?                                        | Done         |
 |[ElementIdConventionChecker](ElementIdConventionChecker.md)                           | Do task ids in the model fit into a desired regex pattern?           | Done         |
+|[TimerExpressionChecker](TimerExpressionChecker.md)                                   | Are time events following the ISO 8601 scheme?                                        | Done         |
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
 ### Configuration
