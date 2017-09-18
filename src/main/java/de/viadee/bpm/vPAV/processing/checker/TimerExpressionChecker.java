@@ -133,7 +133,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             boolean isCron = false;
                             boolean hasRepeatingIntervals = false;
 
-                            if (!timerDefinition.contains("P")) {
+                            if (!timerDefinition.contains("P") && !timerDefinition.contains("Z")) {
                                 isCron = true;
                             }
 
@@ -148,31 +148,30 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                     CronParser cronParser = new CronParser(cronDef);
                                     Cron cronJob = cronParser.parse(timerDefinition);
                                     cronJob.validate();
+                                    isParsed = true;
                                 } catch (IllegalArgumentException e) {
                                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                             baseElement.getAttributeValue("name"), null, null, null,
                                             "time event '" + CheckName.checkTimer(entry.getKey())
                                                     + "' does not follow the scheme for CRON jobs."));
-                                    isParsed = true;
-                                    isCron = true;
                                 }
                             }
 
                             if (!isParsed && !isCron && !hasRepeatingIntervals) {
                                 try {
                                     MomentInterval.parseISO(timerDefinition);
+                                    isParsed = true;
                                 } catch (ParseException e) {
                                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                             baseElement.getAttributeValue("name"), null, null, null,
                                             "time event '" + CheckName.checkTimer(entry.getKey())
                                                     + "' does not follow the ISO 8601 scheme for intervals."));
-                                    isParsed = true;
                                 }
                             }
 
-                            if (isParsed && !isCron && !hasRepeatingIntervals) {
+                            if (!isParsed && !isCron && !hasRepeatingIntervals) {
                                 try {
                                     Duration.parsePeriod(timerDefinition);
                                 } catch (ParseException ex) {
