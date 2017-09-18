@@ -1,31 +1,22 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -59,7 +50,6 @@ import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import net.time4j.Duration;
 import net.time4j.range.IsoRecurrence;
 import net.time4j.range.MomentInterval;
 
@@ -138,11 +128,12 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                         if (entry.getValue() != null && (entry.getValue().getNodeName() != null
                                 && entry.getValue().getNodeName().contains(timeCycle))) {
 
-                            boolean isParsed = false;
                             boolean isCron = false;
+                            boolean isDur = false;
                             boolean hasRepeatingIntervals = false;
 
-                            if (!timerDefinition.contains("P") && !timerDefinition.contains("Z")) {
+                            if (!timerDefinition.contains("P") && !timerDefinition.contains("Z")
+                                    && timerDefinition.contains(" ")) {
                                 isCron = true;
                             }
 
@@ -150,14 +141,18 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                 hasRepeatingIntervals = true;
                             }
 
-                            if (!isParsed && isCron) {
+                            if (timerDefinition.startsWith("P")
+                                    && !(timerDefinition.contains("/") || timerDefinition.contains("--"))) {
+                                isDur = true;
+                            }
+
+                            if (isCron) {
                                 try {
                                     CronDefinition cronDef = CronDefinitionBuilder
                                             .instanceDefinitionFor(CronType.QUARTZ);
                                     CronParser cronParser = new CronParser(cronDef);
                                     Cron cronJob = cronParser.parse(timerDefinition);
                                     cronJob.validate();
-                                    isParsed = true;
                                 } catch (IllegalArgumentException e) {
                                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
@@ -167,10 +162,9 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                 }
                             }
 
-                            if (!isParsed && !isCron && !hasRepeatingIntervals) {
+                            if (!isCron && !hasRepeatingIntervals && !isDur) {
                                 try {
                                     MomentInterval.parseISO(timerDefinition);
-                                    isParsed = true;
                                 } catch (ParseException e) {
                                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
@@ -180,20 +174,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                 }
                             }
 
-                            if (!isParsed && !isCron && !hasRepeatingIntervals) {
-                                try {
-                                    Duration.parsePeriod(timerDefinition);
-                                } catch (ParseException ex) {
-                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                                            element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
-                                            baseElement.getAttributeValue("name"), null, null, null,
-                                            "time event '" + CheckName.checkTimer(entry.getKey())
-                                                    + "' does not follow the ISO 8601 scheme for periods."));
-                                    isParsed = true;
-                                }
-                            }
-
-                            if (!isParsed && !isCron && hasRepeatingIntervals) {
+                            if (!isCron && hasRepeatingIntervals && !isDur) {
                                 try {
                                     IsoRecurrence<MomentInterval> ir = IsoRecurrence
                                             .parseMomentIntervals(timerDefinition);
@@ -206,6 +187,17 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                 }
                             }
 
+                            if (isDur && !isCron && !hasRepeatingIntervals) {
+                                try {
+                                    DatatypeFactory.newInstance().newDuration(timerDefinition);
+                                } catch (Exception ex) {
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                            element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
+                                            baseElement.getAttributeValue("name"), null, null, null,
+                                            "time event '" + CheckName.checkTimer(entry.getKey())
+                                                    + "' does not follow the ISO 8601 scheme for durations as interval."));
+                                }
+                            }
                         }
 
                     } else if (entry.getValue() == null || entry.getValue().getLocalName() == null
