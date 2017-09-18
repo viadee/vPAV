@@ -38,6 +38,12 @@ import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import com.cronutils.model.Cron;
+import com.cronutils.model.CronType;
+import com.cronutils.model.definition.CronDefinition;
+import com.cronutils.model.definition.CronDefinitionBuilder;
+import com.cronutils.parser.CronParser;
+
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.CheckName;
@@ -45,6 +51,7 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import net.time4j.Duration;
+import net.time4j.range.IsoRecurrence;
 import net.time4j.range.MomentInterval;
 
 public class TimerExpressionChecker extends AbstractElementChecker {
@@ -121,19 +128,51 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                         // timeCycle
                         if (entry.getValue() != null && (entry.getValue().getNodeName() != null
                                 && entry.getValue().getNodeName().contains(timeCycle))) {
+
                             boolean isParsed = false;
-                            try {
-                                MomentInterval.parseISO(timerDefinition);
-                            } catch (ParseException e) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                                        element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
-                                        baseElement.getAttributeValue("name"), null, null, null,
-                                        "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the ISO 8601 scheme for timeCycle."));
-                                isParsed = true;
+                            boolean isCron = false;
+                            boolean hasRepeatingIntervals = false;
+
+                            if (!timerDefinition.contains("P")) {
+                                isCron = true;
                             }
 
-                            if (isParsed) {
+                            if (timerDefinition.startsWith("R")) {
+                                hasRepeatingIntervals = true;
+                            }
+
+                            if (!isParsed && isCron) {
+                                try {
+                                    CronDefinition cronDef = CronDefinitionBuilder
+                                            .instanceDefinitionFor(CronType.QUARTZ);
+                                    CronParser cronParser = new CronParser(cronDef);
+                                    Cron cronJob = cronParser.parse(timerDefinition);
+                                    cronJob.validate();
+                                } catch (IllegalArgumentException e) {
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                            element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
+                                            baseElement.getAttributeValue("name"), null, null, null,
+                                            "time event '" + CheckName.checkTimer(entry.getKey())
+                                                    + "' does not follow the scheme for CRON jobs."));
+                                    isParsed = true;
+                                    isCron = true;
+                                }
+                            }
+
+                            if (!isParsed && !isCron && !hasRepeatingIntervals) {
+                                try {
+                                    MomentInterval.parseISO(timerDefinition);
+                                } catch (ParseException e) {
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                            element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
+                                            baseElement.getAttributeValue("name"), null, null, null,
+                                            "time event '" + CheckName.checkTimer(entry.getKey())
+                                                    + "' does not follow the ISO 8601 scheme for intervals."));
+                                    isParsed = true;
+                                }
+                            }
+
+                            if (isParsed && !isCron && !hasRepeatingIntervals) {
                                 try {
                                     Duration.parsePeriod(timerDefinition);
                                 } catch (ParseException ex) {
@@ -141,9 +180,24 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                             baseElement.getAttributeValue("name"), null, null, null,
                                             "time event '" + CheckName.checkTimer(entry.getKey())
-                                                    + "' does not follow the ISO 8601 scheme for timeCycle."));
+                                                    + "' does not follow the ISO 8601 scheme for periods."));
+                                    isParsed = true;
                                 }
                             }
+
+                            if (!isParsed && !isCron && hasRepeatingIntervals) {
+                                try {
+                                    IsoRecurrence<MomentInterval> ir = IsoRecurrence
+                                            .parseMomentIntervals(timerDefinition);
+                                } catch (ParseException ex) {
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                            element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
+                                            baseElement.getAttributeValue("name"), null, null, null,
+                                            "time event '" + CheckName.checkTimer(entry.getKey())
+                                                    + "' does not follow the ISO 8601 scheme for repeating intervals."));
+                                }
+                            }
+
                         }
 
                     } else if (entry.getValue() == null || entry.getValue().getLocalName() == null

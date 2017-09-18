@@ -3,7 +3,7 @@
   <bpmn:process id="Process_1" isExecutable="false">
     <bpmn:startEvent id="StartEvent_00jwrk1">
       <bpmn:timerEventDefinition>
-        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">P2DT1H45M/2012-01-01T14:15Z</bpmn:timeCycle>
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">*/45 * * * * ?</bpmn:timeCycle>
       </bpmn:timerEventDefinition>
     </bpmn:startEvent>
   </bpmn:process>
