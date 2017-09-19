@@ -142,6 +142,7 @@ public class ModelConsistencyTest{
 Note, that the Validator receives the Spring context. Thereby, the validation can
 check delegate Beans and their names.
 
+
 #### Methods
 The `ctx` parameter is optional. If **no** Spring context is used, jUnit can also be started without the context parameter.
 
@@ -150,6 +151,81 @@ The `ctx` parameter is optional. If **no** Spring context is used, jUnit can als
 - `findModelInconsistencies(ctx)` finds **all** model inconsistencies (Error, Warning, Info).
 
 
+#### SpringTestConfig
+
+In order to evaluate beans in a Spring environment, you should specify a config class for your JUnit test
+
+```java
+
+import ServiceTaskOneDelegate;
+import ServiceTaskTwoDelegate;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SpringTestConfig {
+
+    public SpringTestConfig() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @InjectMocks
+    private ServiceTaskOneDelegate serviceTaskOneDelegate;
+
+    @InjectMocks
+    private ServiceTaskTwoDelegate serviceTaskTwoDelegate;
+
+    @Bean
+    public ServiceTaskOneDelegate serviceTaskOneDelegate() {
+        return serviceTaskOneDelegate;
+    }
+
+    @Bean
+    public ServiceTaskTwoDelegate serviceTaskTwoDelegate() {
+        return serviceTaskTwoDelegate;
+    }
+
+}
+```
+
+
+#### Additionally required dependencies 
+
+```xml
+<dependency>
+	<groupId>org.mockito</groupId>
+	<artifactId>mockito-all</artifactId>
+	<version>1.10.19</version>
+	<scope>test</scope>
+</dependency>
+
+<dependency>	
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-test</artifactId>
+	<version>4.3.11.RELEASE</version>
+</dependency>
+		
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-beans</artifactId>
+	<version>4.3.11.RELEASE</version>
+</dependency>
+
+<dependency>
+	<groupId>javax.servlet</groupId>
+	<artifactId>javax.servlet-api</artifactId>
+	<version>4.0.0</version>
+	<scope>provided</scope>
+</dependency>
+
+<dependency>
+	<groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>4.12</version>
+</dependency>
+```
 
 ## Commitments
 This library will remain under an open source licence indefinately.
