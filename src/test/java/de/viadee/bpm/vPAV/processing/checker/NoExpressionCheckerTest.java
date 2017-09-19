@@ -43,6 +43,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.Task;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -54,22 +55,21 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
 /**
- * unit tests for class TimerExpressionChecker
+ * unit tests for class NoExpressionChecke
  *
  */
-public class TimerExpressionCheckerTest {
+public class NoExpressionCheckerTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
-    private static TimerExpressionChecker checker;
+    private static NoExpressionChecker checker;
 
     private static ClassLoader cl;
 
-    private final Rule rule = new Rule("TimerExpressionChecker", true, null, null, null);
+    private final Rule rule = new Rule("NoExpressionChecker", true, null, null, null);
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
@@ -79,40 +79,39 @@ public class TimerExpressionCheckerTest {
     }
 
     /**
-     * Case: TimerExpression in start event is correct
+     * Case: Tasks without Expressions
      *
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
      * @throws XPathExpressionException
      */
-
     @Test
-    public void testTimerExpression_Correct()
+    public void testTaskWithoutExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Correct.bpmn";
-        checker = new TimerExpressionChecker(rule, PATH);
+        final String PATH = BASE_PATH + "NoExpressionChecker_WithoutExpressions.bpmn";
+        checker = new NoExpressionChecker(rule, PATH);
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+        final Collection<Task> baseElements = modelInstance
+                .getModelElementsByType(Task.class);
 
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement);
             issues.addAll(checker.check(element));
         }
 
         if (issues.size() > 0) {
-            Assert.fail("correct timer expression generates an issue");
+            Assert.fail("correct model generates an issue");
         }
     }
 
     /**
-     * Case: TimerExpression in start event is wrong
+     * Case: Tasks with Expressions
      *
      * @throws IOException
      * @throws SAXException
@@ -120,60 +119,27 @@ public class TimerExpressionCheckerTest {
      * @throws XPathExpressionException
      */
     @Test
-    public void testTimerExpression_Wrong()
+    public void testTaskWithExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong.bpmn";
-        checker = new TimerExpressionChecker(rule, PATH);
+        final String PATH = BASE_PATH + "NoExpressionChecker_WithExpressions.bpmn";
+        checker = new NoExpressionChecker(rule, PATH);
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+        final Collection<Task> baseElements = modelInstance
+                .getModelElementsByType(Task.class);
 
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
-            issues.addAll(checker.check(element));
-        }
-
-        if (issues.size() != 1) {
-            Assert.fail("wrong timer expression should generate an issue");
-        }
-    }
-
-    /**
-     * Case: Several timer expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testTimerExpressions()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest.bpmn";
-        checker = new TimerExpressionChecker(rule, PATH);
-
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement);
             issues.addAll(checker.check(element));
         }
 
         if (issues.size() != 2) {
-            Assert.fail("model should consist of two issues");
+            Assert.fail("correct model generates an issue");
         }
-
     }
 
 }

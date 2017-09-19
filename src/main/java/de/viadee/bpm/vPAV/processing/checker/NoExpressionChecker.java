@@ -29,49 +29,67 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
+import org.camunda.bpm.model.bpmn.instance.SendTask;
+import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.config.model.ElementConvention;
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
-public class ElementIdConventionChecker extends AbstractElementChecker {
+public class NoExpressionChecker extends AbstractElementChecker {
 
-    public ElementIdConventionChecker(final Rule rule) {
+    public String path;
+
+    public NoExpressionChecker(final Rule rule, final String path) {
         super(rule);
+        this.path = path;
     }
 
     @Override
-    public Collection<CheckerIssue> check(final BpmnElement element) {
+    public Collection<CheckerIssue> check(BpmnElement element) {
+
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement baseElement = element.getBaseElement();
+        final BPMNScanner scan;
 
-        final Collection<ElementConvention> elementConventions = rule.getElementConventions();
+        if (baseElement instanceof ServiceTask || baseElement instanceof BusinessRuleTask
+                || baseElement instanceof SendTask) {
 
-        final String elementId = baseElement.getAttributeValue("id");
+            try {
 
-        if (elementConventions != null && !elementConventions.isEmpty() && elementId != null) {
-            for (final ElementConvention convention : elementConventions) {
-                final Pattern pattern = Pattern.compile(convention.getPattern());
-                Matcher matcher = pattern.matcher(elementId);
-                String bpmnInstance = convention.getName();
-                if (!matcher.matches()
-                        && baseElement.getElementType().getInstanceType().getSimpleName().toLowerCase()
-                                .equals(bpmnInstance.toLowerCase())) {
+                scan = new BPMNScanner();
+                // read attributes from task
+                final String implementationAttr = scan.getImplementation(path, baseElement.getId());
+
+                if (implementationAttr != null && implementationAttr.equals(scan.getC_exp())) {
+
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), null, baseElement.getId(),
+                            element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
-                            "ID '" + elementId + "' is against the naming convention"));
+                            "Usage of expression in '" + CheckName.checkName(baseElement)
+                                    + "' is against best practices."));
                 }
+
+            } catch (ParserConfigurationException | SAXException | IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
+
         }
+
         return issues;
     }
+
 }

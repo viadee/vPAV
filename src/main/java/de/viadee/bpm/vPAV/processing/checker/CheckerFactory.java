@@ -158,6 +158,15 @@ public final class CheckerFactory {
             checkers.add(new ElementIdConventionChecker(elementIdConventionRule));
         }
 
+        final Rule noExpressionCheckerRule = ruleConf
+                .get(getClassName(NoExpressionChecker.class));
+        if (noExpressionCheckerRule == null)
+            throw new ConfigItemNotFoundException(
+                    getClassName(NoExpressionChecker.class) + " not found");
+        if (noExpressionCheckerRule.isActive()) {
+            checkers.add(new NoExpressionChecker(noExpressionCheckerRule, path));
+        }
+
         return checkers;
     }
 

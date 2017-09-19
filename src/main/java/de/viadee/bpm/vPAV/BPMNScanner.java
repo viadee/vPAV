@@ -735,4 +735,8 @@ public class BPMNScanner {
         return timerList;
     }
 
+    public String getC_exp() {
+        return c_exp;
+    }
+
 }

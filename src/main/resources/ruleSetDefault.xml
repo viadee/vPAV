@@ -39,6 +39,10 @@
 		<state>true</state>
 	</rule>
 	<rule>
+		<name>NoExpressionChecker</name>
+		<state>true</state>
+	</rule>
+	<rule>
 		<name>VersioningChecker</name>
 		<state>false</state>
 		<settings>
