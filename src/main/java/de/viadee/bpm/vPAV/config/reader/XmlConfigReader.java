@@ -41,7 +41,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import de.viadee.bpm.vPAV.ConstantsConfig;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.ModelConvention;
@@ -68,14 +68,21 @@ public final class XmlConfigReader implements ConfigReader {
                 final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(file);
                 return transformFromXmlDatastructues(ruleSet);
             } else {
-                final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller
-                        .unmarshal(this.getClass().getClassLoader()
-                                .getResourceAsStream(ConstantsConfig.RULESETDEFAULT));
-                return transformFromXmlDatastructues(ruleSet);
+                return null;
             }
         } catch (JAXBException e) {
             throw new ConfigReaderException(e);
         }
+    }
+
+    public Map<String, Rule> getDeactivatedRuleSet() {
+        final Map<String, Rule> rules = new HashMap<String, Rule>();
+
+        for (String name : RuntimeConfig.getInstance().getAllRules())
+            rules.put(name, new Rule(name, false, new HashMap<String, Setting>(), new ArrayList<ElementConvention>(),
+                    new ArrayList<ModelConvention>()));
+
+        return rules;
     }
 
     private static Map<String, Rule> transformFromXmlDatastructues(final XmlRuleSet ruleSet)

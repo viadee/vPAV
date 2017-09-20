@@ -105,54 +105,50 @@ public abstract class AbstractRunner {
 
     }
 
-    // 1
+    /**
+     * 1) If local_ruleSet doesn't exist, then load default_RuleSet 2) If local_ruleSet exist and parent is deactivated
+     * then override deactivatedRules with local_ruleSet 3) If local_ruleSet exist and parent is activated then override
+     * deactivatedRules with parent_ruleSet and then override with local_ruleSet
+     *
+     * write effectiveRuleSet to vPAV folder
+     * 
+     * @return merged ruleSet
+     */
     public static Map<String, Rule> readConfig() {
         createBaseFolder();
-        Map<String, Rule> rules;
+        Map<String, Rule> rules = new XmlConfigReader().getDeactivatedRuleSet();
         final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
         try {
-            rules = new XmlConfigReader().read(new File(ConstantsConfig.RULESET));
+            if (new File(ConstantsConfig.RULESET).exists()) {
+                Map<String, Rule> localRule = new XmlConfigReader().read(new File(ConstantsConfig.RULESET));
 
-            if ((!rules.containsKey(ConstantsConfig.HASPARENTRULESET))
-                    || rules.containsKey(ConstantsConfig.HASPARENTRULESET)
-                            && !rules.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
-                try {
-                    ruleSetOutputWriter.write(rules);
-                } catch (OutputWriterException e) {
-                    e.printStackTrace();
+                if (localRule.containsKey(ConstantsConfig.HASPARENTRULESET)
+                        && localRule.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
+                    rules = mergeRuleSet(rules, new XmlConfigReader().read(new File(getParentConfig())));
+                    rules = mergeRuleSet(rules, localRule);
+                } else {
+                    rules = mergeRuleSet(rules, localRule);
                 }
-                return rules;
-            } else if (rules.containsKey(ConstantsConfig.HASPARENTRULESET)
-                    && rules.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
-                rules = readParentRule(rules);
             } else {
                 rules = new XmlConfigReader().read(new File(ConstantsConfig.RULESETDEFAULT));
             }
-        } catch (final ConfigReaderException e) {
-            throw new RuntimeException("Config file could not be read");
-        }
-        try {
             ruleSetOutputWriter.write(rules);
-        } catch (OutputWriterException e) {
-            e.printStackTrace();
+
+        } catch (final ConfigReaderException | OutputWriterException e) {
+            throw new RuntimeException("Config file could not be read or written");
         }
+
+        rules.remove(ConstantsConfig.HASPARENTRULESET);
         return rules;
     }
 
-    // 1b - Read parent config file
-    public static Map<String, Rule> readParentRule(final Map<String, Rule> childRules) {
-        final Map<String, Rule> parentRules;
+    // 1b merge ruleSets
+    private static Map<String, Rule> mergeRuleSet(final Map<String, Rule> parentRules,
+            final Map<String, Rule> childRules) {
         final Map<String, Rule> finalRules = new HashMap<>();
-        try {
-            parentRules = new XmlConfigReader().read(new File(getParentConfig()));
-
-        } catch (final ConfigReaderException e) {
-            throw new RuntimeException("Parent config file could not be read");
-        }
 
         finalRules.putAll(parentRules);
         finalRules.putAll(childRules);
-        finalRules.remove(ConstantsConfig.HASPARENTRULESET);
 
         return finalRules;
     }
@@ -551,7 +547,7 @@ public abstract class AbstractRunner {
      *
      * @return String path to ruleset at runtime
      */
-    public static String getParentConfig() {
+    private static String getParentConfig() {
         URLClassLoader ucl;
         if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
             ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());

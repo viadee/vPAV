@@ -45,6 +45,11 @@ public class RuntimeConfig {
 
     private boolean test = false;
 
+    private String[] allRules = { "ProcessVariablesLocation", "XorNamingConventionChecker",
+            "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
+            "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
+            "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker" };
+
     private RuntimeConfig() {
     }
 
@@ -89,6 +94,10 @@ public class RuntimeConfig {
 
     public void setTest(boolean test) {
         this.test = test;
+    }
+
+    public String[] getAllRules() {
+        return allRules;
     }
 
 }

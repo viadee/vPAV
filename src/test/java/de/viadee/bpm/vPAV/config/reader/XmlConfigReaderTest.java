@@ -37,6 +37,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 
@@ -73,8 +74,10 @@ public class XmlConfigReaderTest {
         Map<String, Rule> result = reader.read(new File("non-existing.xml"));
 
         // Then
-        // DefaultXML correctly read
-        assertFalse("No rules could be read - no defaults are returned", result.isEmpty());
+        assertFalse("load ruleSet which does nit exist", result != null);
+
+        // load DefaultRuleSet
+        result = AbstractRunner.readConfig();
         // Default rules correct
         assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
         assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());
@@ -83,7 +86,6 @@ public class XmlConfigReaderTest {
         assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
         assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").isActive());
         assertFalse("False Default ruleSet ", result.get("TaskNamingConventionChecker").isActive());
-
     }
 
     /**
