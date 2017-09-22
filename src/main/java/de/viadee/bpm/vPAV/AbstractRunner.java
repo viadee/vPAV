@@ -26,8 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -115,7 +113,7 @@ public abstract class AbstractRunner {
 
                 if (localRule.containsKey(ConstantsConfig.HASPARENTRULESET)
                         && localRule.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
-                    rules = mergeRuleSet(rules, new XmlConfigReader().read(getParentConfig()));
+                    rules = mergeRuleSet(rules, new XmlConfigReader().read(ConstantsConfig.RULESETPARENT));
                     rules = mergeRuleSet(rules, localRule);
                 } else {
                     rules = mergeRuleSet(rules, localRule);
@@ -531,27 +529,6 @@ public abstract class AbstractRunner {
 
     public static Collection<CheckerIssue> getfilteredIssues() {
         return filteredIssues;
-    }
-
-    /**
-     * get path to parent ruleset
-     *
-     * @return String path to ruleset at runtime
-     */
-    private static String getParentConfig() {
-        URLClassLoader ucl;
-        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
-            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
-        } else {
-            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
-        }
-
-        final URL url = ucl.getResource(ConstantsConfig.RULESETPARENT);
-
-        if (url == null)
-            throw new RuntimeException("Parent config file could not be read");
-
-        return url.getPath();
     }
 
     public static boolean isExecuted() {
