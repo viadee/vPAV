@@ -29,7 +29,7 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,18 +57,19 @@ import de.viadee.bpm.vPAV.config.model.Setting;
  */
 public final class XmlConfigReader implements ConfigReader {
 
-    public Map<String, Rule> read(final File file) throws ConfigReaderException {
+    public Map<String, Rule> read(final String file) throws ConfigReaderException {
 
         try {
             final JAXBContext jaxbContext = JAXBContext.newInstance(XmlRuleSet.class);
             final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            // If ruleSet.xml doesn't exists, then load default ruleSet
-            if (file.exists()) {
-                final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(file);
+            InputStream fRuleSet = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(file);
+
+            if (fRuleSet != null) {
+                final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(fRuleSet);
                 return transformFromXmlDatastructues(ruleSet);
             } else {
-                return null;
+                throw new ConfigReaderException("ConfigFile coudn't be found");
             }
         } catch (JAXBException e) {
             throw new ConfigReaderException(e);

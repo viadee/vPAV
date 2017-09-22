@@ -33,15 +33,32 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Map;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 
 public class XmlConfigReaderTest {
+
+    private static ClassLoader cl;
+
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+    }
 
     /**
      * Test loading a correct config file
@@ -54,7 +71,7 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When
-        Map<String, Rule> result = reader.read(new File(ConstantsConfig.RULESET));
+        Map<String, Rule> result = reader.read(ConstantsConfig.RULESET);
 
         // Then
         assertFalse("No rules could be read", result.isEmpty());
@@ -71,21 +88,21 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When
-        Map<String, Rule> result = reader.read(new File("non-existing.xml"));
-
-        // Then
-        assertFalse("load ruleSet which does nit exist", result != null);
-
-        // load DefaultRuleSet
-        result = AbstractRunner.readConfig();
-        // Default rules correct
-        assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
-        assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());
-        assertFalse("False Default ruleSet ", result.get("VersioningChecker").isActive());
-        assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").isActive());
-        assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
-        assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").isActive());
-        assertFalse("False Default ruleSet ", result.get("TaskNamingConventionChecker").isActive());
+        try {
+            Map<String, Rule> result = reader.read("non-existing.xml");
+            assertTrue("Exception expected, but no one was thrown.", result != null);
+        } catch (ConfigReaderException e) {
+            // load DefaultRuleSet
+            Map<String, Rule> result = AbstractRunner.readConfig();
+            // Default rules correct
+            assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
+            assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("VersioningChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("TaskNamingConventionChecker").isActive());
+        }
     }
 
     /**
@@ -99,7 +116,7 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When Then
-        reader.read(new File("src/test/resources/ruleSetIncorrectName.xml"));
+        reader.read("ruleSetIncorrectName.xml");
 
     }
 
@@ -114,7 +131,7 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When Then
-        reader.read(new File("src/test/resources/ruleSetIncorrect.xml"));
+        reader.read("ruleSetIncorrect.xml");
 
     }
 
@@ -128,6 +145,6 @@ public class XmlConfigReaderTest {
         // Given
         XmlConfigReader reader = new XmlConfigReader();
 
-        reader.read(new File("src/test/resources/ruleSetIncorrectRegEx.xml"));
+        reader.read("ruleSetIncorrectRegEx.xml");
     }
 }

@@ -120,17 +120,17 @@ public abstract class AbstractRunner {
         final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
         try {
             if (new File(ConstantsConfig.RULESET).exists()) {
-                Map<String, Rule> localRule = new XmlConfigReader().read(new File(ConstantsConfig.RULESET));
+                Map<String, Rule> localRule = new XmlConfigReader().read(ConstantsConfig.RULESET);
 
                 if (localRule.containsKey(ConstantsConfig.HASPARENTRULESET)
                         && localRule.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
-                    rules = mergeRuleSet(rules, new XmlConfigReader().read(new File(getParentConfig())));
+                    rules = mergeRuleSet(rules, new XmlConfigReader().read(getParentConfig()));
                     rules = mergeRuleSet(rules, localRule);
                 } else {
                     rules = mergeRuleSet(rules, localRule);
                 }
             } else {
-                rules = new XmlConfigReader().read(new File(ConstantsConfig.RULESETDEFAULT));
+                rules = new XmlConfigReader().read(ConstantsConfig.RULESETDEFAULT);
             }
             ruleSetOutputWriter.write(rules);
 

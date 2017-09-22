@@ -31,7 +31,7 @@ package de.viadee.bpm.vPAV;
 
 public final class ConstantsConfig {
 
-    public static final String RULESET = "src/test/resources/ruleSet.xml";
+    public static final String RULESET = "ruleSet.xml";
 
     public static final String RULESETDEFAULT = "ruleSetDefault.xml";
 
