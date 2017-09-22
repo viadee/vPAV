@@ -40,7 +40,7 @@
 	</rule>
 	<rule>
 		<name>NoExpressionChecker</name>
-		<state>true</state>
+		<state>true</state>	
 	</rule>
 	<rule>
 		<name>VersioningChecker</name>
