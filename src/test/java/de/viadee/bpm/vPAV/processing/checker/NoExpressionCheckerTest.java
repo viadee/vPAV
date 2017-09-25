@@ -27,6 +27,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -39,6 +40,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -56,7 +58,9 @@ public class NoExpressionCheckerTest {
 
     private static ClassLoader cl;
 
-    private final Rule rule = new Rule("NoExpressionChecker", true, null, null, null);
+    private final Map<String, Rule> rules = AbstractRunner.readConfig();
+
+    private final Rule rule = rules.get("NoExpressionChecker");
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -144,6 +148,38 @@ public class NoExpressionCheckerTest {
     public void testEventsWithExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoExpressionChecker_EventsWithExpressions.bpmn";
+        checker = new NoExpressionChecker(rule, PATH);
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
+
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement);
+            issues.addAll(checker.check(element));
+        }
+
+        if (issues.size() != 3) {
+            Assert.fail("model should generate 3 issues");
+        }
+    }
+
+    /**
+     * Case: Sequenceflow with Expressions
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+    @Test
+    public void testSequenceFlowWithExpression()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "NoExpressionChecker_SequenceFlowWithExpression.bpmn";
         checker = new NoExpressionChecker(rule, PATH);
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

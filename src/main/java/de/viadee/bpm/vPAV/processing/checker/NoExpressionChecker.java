@@ -72,7 +72,8 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 // read attributes from task
                 final String implementationAttr = scan.getImplementation(path, baseElement.getId());
 
-                if (implementationAttr != null && implementationAttr.equals(scan.getC_exp())) {
+                if (implementationAttr != null && implementationAttr.equals(scan.getC_exp())
+                        && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
@@ -86,7 +87,8 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 // read attributes from event
                 final String implementationAttrEvent = scan.getEventImplementation(path, baseElement.getId());
 
-                if (implementationAttrEvent != null && implementationAttrEvent.contains(scan.getC_exp())) {
+                if (implementationAttrEvent != null && implementationAttrEvent.contains(scan.getC_exp())
+                        && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
@@ -99,16 +101,19 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 // get the execution listener
                 final ArrayList<String> listener = scan.getListener(path, baseElement.getId(), "expression",
                         "camunda:executionListener");
-                if (!listener.isEmpty()) {
+                if (!listener.isEmpty()
+                        && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
-                            "Usage of expression in listeners for'" + CheckName.checkName(baseElement)
+                            "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
                                     + "' is against best practices."));
                 }
             }
 
-        } catch (ParserConfigurationException | SAXException | IOException e) {
+        } catch (ParserConfigurationException | SAXException |
+
+                IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

@@ -41,6 +41,9 @@
 	<rule>
 		<name>NoExpressionChecker</name>
 		<state>true</state>	
+		<settings>
+			<setting name ="ServiceTask"></setting>
+		</settings>
 	</rule>
 	<rule>
 		<name>VersioningChecker</name>
