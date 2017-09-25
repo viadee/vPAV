@@ -34,7 +34,11 @@ You can add settings to disable the **NoExpressionChecker** in specific places.
 - BusinessRuleTask
 - ServiceTask
 - SendTask
-- SequenceFlow (this refers to the listener section, where expressions can be used)
+- ScriptTask
+- UserTask
+- ManualTask
+- ExclusiveGateway
+- SequenceFlow
 - EndEvent
 - IntermediateThrowEvent
 
