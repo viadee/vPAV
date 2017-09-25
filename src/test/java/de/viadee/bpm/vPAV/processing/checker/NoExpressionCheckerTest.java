@@ -195,7 +195,7 @@ public class NoExpressionCheckerTest {
             issues.addAll(checker.check(element));
         }
 
-        if (issues.size() != 3) {
+        if (issues.size() != 1) {
             Assert.fail("model should generate 3 issues");
         }
     }

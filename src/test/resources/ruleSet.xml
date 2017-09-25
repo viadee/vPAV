@@ -42,9 +42,6 @@
 		<name>NoExpressionChecker</name>
 		<state>true</state>
 		<settings>
-			<setting name="ServiceTask"></setting>
-			<setting name="BusinessRuleTask"></setting>
-			<setting name="SequenceFlow"></setting>
 		</settings>
 	</rule>
 	<rule>
