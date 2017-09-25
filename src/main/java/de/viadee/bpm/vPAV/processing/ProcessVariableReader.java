@@ -1,31 +1,22 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing;
 
@@ -34,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.el.ELException;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
@@ -78,12 +71,15 @@ import org.camunda.bpm.model.dmn.instance.InputExpression;
 import org.camunda.bpm.model.dmn.instance.Output;
 import org.camunda.bpm.model.dmn.instance.Text;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
+import org.xml.sax.SAXException;
 
 import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
+import de.viadee.bpm.vPAV.HTMLScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -122,6 +118,49 @@ public final class ProcessVariableReader {
         processVariables.putAll(searchVariablesFromSequenceFlow(element));
         // 3) Search variables in ExtensionElements
         processVariables.putAll(searchExtensionsElements(element));
+        // 4) Search variables in Forms
+        processVariables.putAll(getVariablesFromHTML(element));
+
+        return processVariables;
+    }
+
+    private Map<String, ProcessVariable> getVariablesFromHTML(BpmnElement element) {
+        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final BaseElement baseElement = element.getBaseElement();
+        final BpmnModelElementInstance scopeElement = baseElement.getScope();
+
+        String scopeElementId = null;
+        if (scopeElement != null) {
+            scopeElementId = scopeElement.getAttributeValue("id");
+        }
+
+        try {
+            final BPMNScanner bScanner = new BPMNScanner();
+            String htmlFileName = bScanner.getForm(element.getProcessdefinition(), baseElement.getId(),
+                    baseElement.getElementType().getTypeName());
+            if (htmlFileName != null) {
+                final DirectoryScanner ds = new DirectoryScanner();
+                ds.setBasedir("src/main/webapp/forms/");
+                String path = ds.getResource(htmlFileName).toString();
+
+                HTMLScanner hScanner = new HTMLScanner(path);
+                ArrayList<String> writtenVariables = hScanner.getWriteVariables();
+                for (String name : writtenVariables)
+                    processVariables.put(name,
+                            new ProcessVariable(name, element, ElementChapter.FormData, KnownElementFieldType.FormField,
+                                    null, VariableOperation.WRITE, scopeElementId));
+
+                ArrayList<String> readVariables = hScanner.getReadVariables();
+                for (String name : readVariables)
+                    processVariables.put(name,
+                            new ProcessVariable(name, element, ElementChapter.FormData, KnownElementFieldType.FormField,
+                                    null, VariableOperation.READ, scopeElementId));
+
+            }
+
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            logger.warning("Couldn't parse HTML-file");
+        }
 
         return processVariables;
     }
