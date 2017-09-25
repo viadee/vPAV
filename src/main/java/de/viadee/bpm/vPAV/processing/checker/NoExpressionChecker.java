@@ -37,6 +37,7 @@ import org.camunda.bpm.model.bpmn.instance.ScriptTask;
 import org.camunda.bpm.model.bpmn.instance.SendTask;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.camunda.bpm.model.bpmn.instance.UserTask;
 import org.xml.sax.SAXException;
 
@@ -99,7 +100,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 }
 
             } else if (baseElement instanceof IntermediateThrowEvent
-                    || baseElement instanceof EndEvent) {
+                    || baseElement instanceof EndEvent || baseElement instanceof StartEvent) {
 
                 // read attributes from event
                 final String implementationAttrEvent = scan.getEventImplementation(path, baseElement.getId());
