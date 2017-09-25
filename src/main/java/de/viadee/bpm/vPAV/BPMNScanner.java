@@ -53,9 +53,15 @@ public class BPMNScanner {
 
     private final String intermediateCatchEvent_one = "bpmn:intermediateCatchEvent";
 
+    private final String intermediateThrowEvent_one = "bpmn:intermediateThrowEvent";
+
     private final String startEvent_one = "bpmn:startEvent";
 
     private final String boundaryEvent_one = "bpmn:boundaryEvent";
+
+    private final String endEvent_one = "bpmn:endEvent";
+
+    private final String extElements_one = "bpmn:extensionElements";
 
     // -----------------------
 
@@ -73,9 +79,15 @@ public class BPMNScanner {
 
     private final String intermediateCatchEvent_two = "bpmn2:intermediateCatchEvent";
 
+    private final String intermediateThrowEvent_two = "bpmn2:intermediateThrowEvent";
+
     private final String startEvent_two = "bpmn2:startEvent";
 
     private final String boundaryEvent_two = "bpmn2:boundaryEvent";
+
+    private final String endEvent_two = "bpmn2:endEvent";
+
+    private final String extElements_two = "bpmn2:extensionElements";
 
     // -----------------------
 
@@ -93,9 +105,16 @@ public class BPMNScanner {
 
     private final String intermediateCatchEvent_three = "intermediateCatchEvent";
 
+    private final String intermediateThrowEvent_three = "intermediateThrowEvent";
+
     private final String startEvent_three = "startEvent";
 
     private final String boundaryEvent_three = "boundaryEvent";
+
+    private final String endEvent_three = "endEvent";
+
+    private final String extElements_three = "extensionElements";
+
     // ------------------------
 
     private final String scriptTag = "camunda:script";
@@ -109,8 +128,6 @@ public class BPMNScanner {
     private final String c_dmn = "camunda:decisionRef";
 
     private final String c_ext = "camunda:type";
-
-    private final String extElements = "extensionElements";
 
     private final String imp = "implementation";
 
@@ -197,16 +214,22 @@ public class BPMNScanner {
                 listNodeList.add(doc.getElementsByTagName(businessRuleTask_one));
                 listNodeList.add(doc.getElementsByTagName(serviceTask_one));
                 listNodeList.add(doc.getElementsByTagName(sendTask_one));
+                listNodeList.add(doc.getElementsByTagName(endEvent_one));
+                listNodeList.add(doc.getElementsByTagName(intermediateThrowEvent_one));
                 break;
             case V2:
                 listNodeList.add(doc.getElementsByTagName(businessRuleTask_two));
                 listNodeList.add(doc.getElementsByTagName(serviceTask_two));
                 listNodeList.add(doc.getElementsByTagName(sendTask_two));
+                listNodeList.add(doc.getElementsByTagName(endEvent_two));
+                listNodeList.add(doc.getElementsByTagName(intermediateThrowEvent_two));
                 break;
             case V3:
                 listNodeList.add(doc.getElementsByTagName(businessRuleTask_three));
                 listNodeList.add(doc.getElementsByTagName(serviceTask_three));
                 listNodeList.add(doc.getElementsByTagName(sendTask_three));
+                listNodeList.add(doc.getElementsByTagName(endEvent_three));
+                listNodeList.add(doc.getElementsByTagName(intermediateThrowEvent_three));
                 break;
             default:
                 listNodeList = null;
@@ -250,6 +273,81 @@ public class BPMNScanner {
     }
 
     /**
+     * Return the Implementation of an specific element (endEvent and/or intermediateThrowEvent)
+     *
+     * @param path
+     *            path to model
+     * @param id
+     *            id of bpmn element
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     * @return return_implementation contains implementation
+     */
+    public String getEventImplementation(String path, String id)
+            throws SAXException, IOException, ParserConfigurationException {
+        // List to hold return values
+        String return_implementation = null;
+
+        // List for all Task elements
+        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+
+        // parse the given bpmn model
+        doc = builder.parse(path);
+
+        // set Model Version
+        setModelVersion(path);
+
+        switch (model_Version) {
+            case V1:
+                listNodeList.add(doc.getElementsByTagName(endEvent_one));
+                listNodeList.add(doc.getElementsByTagName(intermediateThrowEvent_one));
+                break;
+            case V2:
+                listNodeList.add(doc.getElementsByTagName(endEvent_two));
+                listNodeList.add(doc.getElementsByTagName(intermediateThrowEvent_two));
+                break;
+            case V3:
+                listNodeList.add(doc.getElementsByTagName(endEvent_three));
+                listNodeList.add(doc.getElementsByTagName(intermediateThrowEvent_three));
+                break;
+            default:
+                listNodeList = null;
+        }
+
+        // iterate over list<NodeList> and check each NodeList (endEvent, intermediateThrowEvent)
+        for (final NodeList list : listNodeList) {
+            // iterate over list and check child of each node
+            for (int i = 0; i < list.getLength(); i++) {
+                final Element Task_Element = (Element) list.item(i);
+
+                // check if the ids are corresponding
+                if (id.equals(Task_Element.getAttribute("id"))) {
+
+                    final NodeList childNodes = Task_Element.getChildNodes();
+
+                    // check all attributes, whether they equal a messageEventDefinition
+                    for (int x = 0; x < childNodes.getLength(); x++) {
+                        if (childNodes.item(x).getLocalName() != null
+                                && childNodes.item(x).getLocalName().equals("messageEventDefinition")) {
+                            final Element event = (Element) childNodes.item(x);
+
+                            // if the node messageEventDefinition contains the camunda expression -> return
+                            if (event.getAttributeNode(c_exp) != null) {
+                                return_implementation = event.getAttributeNode(c_exp).toString();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return return_implementation;
+    }
+
+    /**
      *
      * @param path
      *            path to model
@@ -270,7 +368,7 @@ public class BPMNScanner {
     public ArrayList<String> getListener(String path, String id, String listType, String extType)
             throws SAXException, IOException, ParserConfigurationException {
 
-        // bool to hold return values
+        // list to hold return values
         ArrayList<String> returnAttrList = new ArrayList<String>();
 
         // List for all Task elements
@@ -279,8 +377,24 @@ public class BPMNScanner {
         // parse the given bpmn model
         doc = builder.parse(path);
 
+        // set Model Version
+        setModelVersion(path);
+
         // search for script tag
-        nodeListExtensionElements = doc.getElementsByTagName(extElements);
+
+        switch (model_Version) {
+            case V1:
+                nodeListExtensionElements = doc.getElementsByTagName(extElements_one);
+                break;
+            case V2:
+                nodeListExtensionElements = doc.getElementsByTagName(extElements_two);
+                break;
+            case V3:
+                nodeListExtensionElements = doc.getElementsByTagName(extElements_three);
+                break;
+            default:
+                nodeListExtensionElements = null;
+        }
 
         // search for parent with id
         for (int i = 0; i < nodeListExtensionElements.getLength(); i++) {

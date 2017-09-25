@@ -40,7 +40,7 @@
         <di:waypoint xsi:type="dc:Point" x="357" y="120" />
         <di:waypoint xsi:type="dc:Point" x="443" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="400" y="99" width="0" height="12" />
+          <dc:Bounds x="355" y="99" width="90" height="12" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1jrjqyx_di" bpmnElement="SequenceFlow_1jrjqyx">

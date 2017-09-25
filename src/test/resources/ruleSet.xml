@@ -41,6 +41,8 @@
 	<rule>
 		<name>NoExpressionChecker</name>
 		<state>true</state>
+		<settings>
+		</settings>
 	</rule>
 	<rule>
 		<name>VersioningChecker</name>
