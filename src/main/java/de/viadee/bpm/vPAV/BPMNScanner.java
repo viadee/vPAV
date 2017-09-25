@@ -412,6 +412,23 @@ public class BPMNScanner {
         return returnAttrList;
     }
 
+    /**
+     * get Filename of the form
+     * 
+     * @param path
+     *            path from model
+     * @param id
+     *            id of the element
+     * @param tagName
+     *            elementTyp
+     * @return Filnename of the form
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception while parse xml
+     */
     public String getForm(final String path, final String id, String tagName)
             throws SAXException, IOException, ParserConfigurationException {
         NodeList nList;
