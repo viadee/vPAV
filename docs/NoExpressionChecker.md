@@ -39,8 +39,10 @@ You can add settings to disable the **NoExpressionChecker** in specific places.
 - ManualTask
 - ExclusiveGateway
 - SequenceFlow
-- EndEvent
+- StartEvent
 - IntermediateThrowEvent
+- EndEvent
+
 
 
 ## Error messages:
