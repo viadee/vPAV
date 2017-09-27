@@ -40,7 +40,7 @@ Furthermore you can use the plugin to manage multiple projects. Just create a bl
 
 ```xml
 <dependency>
-  <groupId>de.viadee</groupId>
+	<groupId>de.viadee</groupId>
 	<artifactId>parent_config</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 </dependency>
