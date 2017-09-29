@@ -109,7 +109,7 @@ public abstract class AbstractRunner {
      * deactivatedRules with parent_ruleSet and then override with local_ruleSet
      *
      * write effectiveRuleSet to vPAV folder
-     * 
+     *
      * @return merged ruleSet
      */
     public static Map<String, Rule> readConfig() {
@@ -153,39 +153,13 @@ public abstract class AbstractRunner {
 
     // 2b - Scan classpath for models
     public static void scanClassPath(Map<String, Rule> rules) {
-
-        final Rule processVariablesLocationRule = rules.get(ConstantsConfig.PROCESS_VARIABLES_LOCATION);
-
-        // logger.warning(processVariablesLocationRule.getSettings().get(ConstantsConfig.LOCATION).getValue());
-
-        if (processVariablesLocationRule == null
-                || processVariablesLocationRule.getSettings().get(ConstantsConfig.LOCATION).getValue() == null
-                || processVariablesLocationRule.getSettings().get(ConstantsConfig.LOCATION).getValue().isEmpty()) {
-            logger.warning("Rule for ProcessVariablesLocation is not working correctly. Please verify the ruleSet.xml");
-            fileScanner = new FileScanner(rules);
-        } else {
-            final String location = processVariablesLocationRule.getSettings().get("location").getValue();
-            fileScanner = new FileScanner(rules, location);
-        }
-
+        fileScanner = new FileScanner(rules);
     }
 
     // 3 - Get process variables
     public static void getProcessVariables(final Map<String, Rule> rules) {
-
-        final Rule processVariablesLocationRule = rules.get(ConstantsConfig.PROCESS_VARIABLES_LOCATION);
-
         variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
-
-        if (processVariablesLocationRule == null
-                || processVariablesLocationRule.getSettings().get(ConstantsConfig.LOCATION).getValue() == null
-                || processVariablesLocationRule.getSettings().get(ConstantsConfig.LOCATION).getValue().isEmpty()) {
-            logger.warning("Rule for ProcessVariablesLocation is not working correctly. Please verify the ruleSet.xml");
-        } else if (rules.containsKey(ConstantsConfig.PROCESS_VARIABLES_LOCATION)
-                && processVariablesLocationRule.isActive()) {
-            readOuterProcessVariables(variableScanner);
-        }
-
+        readOuterProcessVariables(variableScanner);
     }
 
     // 4 - Check each model
