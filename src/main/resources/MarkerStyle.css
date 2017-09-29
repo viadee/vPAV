@@ -102,6 +102,14 @@
 			fill: rgba(121, 3, 203, 0.5) !important;
 		}
 
+		.NoExpressionChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(132, 3, 133, 1.0) !important;
+		}
+
+		.NoExpressionChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(132, 3, 133, 0.5) !important;
+		}
+
 		.new .djs-visual> :nth-child(1) {
 			stroke: rgba(0, 0, 0, 1.0) !important;
 		}
@@ -112,10 +120,12 @@
 
 
 
-		
+		#NoExpressionChecker {			
+			background-color: rgba(132, 3, 133, 0.25);
+		}
 
 		#ProcessVariablesNameConventionChecker {			
-			background-color: rgba(255, 0, 0, 0.25)
+			background-color: rgba(255, 0, 0, 0.25);
 		}
 
 		#JavaDelegateChecker {

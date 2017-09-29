@@ -24,6 +24,8 @@ function markNodes(canvas, bpmnFile) {
                 canvas.addMarker(elementsToMark[id].elementId, 'ElementIdConventionChecker');
             } else if (elementsToMark[id].ruleName == "TimerExpressionChecker") {
                 canvas.addMarker(elementsToMark[id].elementId, 'TimerExpressionChecker');
+            } else if (elementsToMark[id].ruleName == "NoExpressionChecker") {
+                canvas.addMarker(elementsToMark[id].elementId, 'NoExpressionChecker');
             } else {
                 canvas.addMarker(elementsToMark[id].elementId, 'new');
             }
