@@ -29,8 +29,10 @@
  */
 package de.viadee.bpm.vPAV;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,6 +45,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.types.Resource;
 
 import groovyjarjarasm.asm.ClassReader;
 import groovyjarjarasm.asm.ClassVisitor;
@@ -135,21 +139,39 @@ public class OuterProcessVariablesScanner {
      * @return methodBody returns methodBody
      */
     @SuppressWarnings("deprecation")
-    private String readResourceFile(final String fileName) {
+    private String readResourceFile(final String filePath) {
         String methodBody = "";
-        if (fileName != null && fileName.trim().length() > 0) {
-            final InputStream resource = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(fileName);
-            if (resource != null) {
-                try {
-                    methodBody = IOUtils
-                            .toString(RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(fileName));
-                } catch (final IOException ex) {
-                    throw new RuntimeException(
-                            "resource '" + fileName + "' could not be read: " + ex.getMessage(), ex);
+
+        if (filePath != null && filePath.trim().length() > 0) {
+            try {
+                final DirectoryScanner scanner = new DirectoryScanner();
+
+                if (RuntimeConfig.getInstance().isTest()) {
+                    scanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
+                } else {
+                    scanner.setBasedir(ConstantsConfig.JAVAPATH);
                 }
+
+                Resource s = scanner.getResource(filePath);
+
+                if (s.isExists()) {
+
+                    InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
+
+                    methodBody = IOUtils.toString(resource);
+
+                } else {
+
+                }
+            } catch (final IOException ex) {
+                throw new RuntimeException(
+                        "resource '" + filePath + "' could not be read: " + ex.getMessage());
             }
+
         }
+
         return methodBody;
+
     }
 
     /**

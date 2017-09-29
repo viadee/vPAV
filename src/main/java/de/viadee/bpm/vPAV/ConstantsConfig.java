@@ -47,6 +47,8 @@ public final class ConstantsConfig {
 
     public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
 
+    public static final String JAVA_FILE_PATTERN = "**/*.java";
+
     public static final String EFFECTIVE_RULESET = "target/vPAV/effectiveRuleSet.xml";
 
     public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";

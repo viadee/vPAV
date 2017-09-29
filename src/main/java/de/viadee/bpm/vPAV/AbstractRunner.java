@@ -175,7 +175,7 @@ public abstract class AbstractRunner {
 
         final Rule processVariablesLocationRule = rules.get(ConstantsConfig.PROCESS_VARIABLES_LOCATION);
 
-        variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResources());
+        variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
 
         if (processVariablesLocationRule == null
                 || processVariablesLocationRule.getSettings().get(ConstantsConfig.LOCATION).getValue() == null

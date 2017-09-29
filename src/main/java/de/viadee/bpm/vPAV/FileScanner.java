@@ -75,6 +75,8 @@ public class FileScanner {
 
     private Set<String> javaResources = new HashSet<String>();
 
+    private Set<String> javaResourcesFileInputStream = new HashSet<String>();
+
     private Set<String> includedFiles = new HashSet<String>();
 
     private Map<String, String> decisionRefToPathMap;
@@ -96,6 +98,12 @@ public class FileScanner {
         scanner.setIncludes(new String[] { ConstantsConfig.BPMN_FILE_PATTERN });
         scanner.scan();
         processdefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+
+        scanner.setBasedir(ConstantsConfig.JAVAPATH);
+        // get file paths of process definitions
+        scanner.setIncludes(new String[] { ConstantsConfig.JAVA_FILE_PATTERN });
+        scanner.scan();
+        javaResourcesFileInputStream = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
         // get mapping from process id to file path
         processIdToPathMap = createProcessIdToPathMap(processdefinitions);
@@ -417,5 +425,9 @@ public class FileScanner {
             }
         }
         return schema;
+    }
+
+    public Set<String> getJavaResourcesFileInputStream() {
+        return javaResourcesFileInputStream;
     }
 }
