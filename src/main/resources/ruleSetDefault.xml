@@ -1,12 +1,5 @@
 <ruleSet>
 	<rule>
-		<name>ProcessVariablesLocation</name>
-		<state>false</state>
-		<settings>
-			<setting name="location"></setting>
-		</settings>
-	</rule>
-	<rule>
 		<name>XorNamingConventionChecker</name>
 		<state>true</state>
 		<elementConventions>
