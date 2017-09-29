@@ -16,7 +16,7 @@
  *    names of its contributors may be used to endorse or promote products
  *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
@@ -29,12 +29,11 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import java.io.File;
 import java.util.Map;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 
 public interface ConfigReader {
 
-  Map<String, Rule> read(final File file) throws ConfigReaderException;
+    Map<String, Rule> read(final String file) throws ConfigReaderException;
 }

@@ -1,22 +1,31 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
- * distribution. 3. All advertising materials mentioning features or use of this software must display the following
- * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
- * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
- * products derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the viadee Unternehmensberatung GmbH.
+ * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -115,7 +124,7 @@ public class VersioningChecker extends AbstractElementChecker {
             if (l_delegateExpression != null) {
                 prepareBeanWarning(l_delegateExpression, element, issues);
             }
-            final String javaReference = getJavaReference(listener.getCamundaClass());
+            final String javaReference = getClassReference(listener.getCamundaClass());
             if (javaReference != null) {
                 prepareClassWarning(javaReference, element, issues);
             }
@@ -123,7 +132,7 @@ public class VersioningChecker extends AbstractElementChecker {
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
                     && script.getCamundaScriptFormat().equals("groovy")) {
-                final String resourcePath = script.getCamundaResource();
+                final String resourcePath = getGroovyReference(script.getCamundaResource());
                 prepareScriptWarning(resourcePath, element, issues);
             }
         }
@@ -151,7 +160,7 @@ public class VersioningChecker extends AbstractElementChecker {
             if (l_delegateExpression != null) {
                 prepareBeanWarning(l_delegateExpression, element, issues);
             }
-            final String javaReference = getJavaReference(listener.getCamundaClass());
+            final String javaReference = getClassReference(listener.getCamundaClass());
             if (javaReference != null) {
                 prepareClassWarning(javaReference, element, issues);
             }
@@ -159,7 +168,7 @@ public class VersioningChecker extends AbstractElementChecker {
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
                     && script.getCamundaScriptFormat().equals("groovy")) {
-                final String resourcePath = script.getCamundaResource();
+                final String resourcePath = getGroovyReference(script.getCamundaResource());
                 prepareScriptWarning(resourcePath, element, issues);
             }
         }
@@ -189,7 +198,7 @@ public class VersioningChecker extends AbstractElementChecker {
             if (t_delegateExpression != null) {
                 prepareBeanWarning(t_delegateExpression, element, issues);
             }
-            final String javaReference = getJavaReference(
+            final String javaReference = getClassReference(
                     baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "class"));
             if (javaReference != null) {
                 prepareClassWarning(javaReference, element, issues);
@@ -212,6 +221,7 @@ public class VersioningChecker extends AbstractElementChecker {
             if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals("groovy")) {
                 // External Resource
                 String resourcePath = scriptTask.getCamundaResource();
+                resourcePath = getGroovyReference(resourcePath);
                 prepareScriptWarning(resourcePath, element, issues);
             }
         }
@@ -230,7 +240,7 @@ public class VersioningChecker extends AbstractElementChecker {
         if (baseElement instanceof MessageEventDefinition) {
             // Class, Expression, Delegate Expression
             final MessageEventDefinition eventDef = (MessageEventDefinition) baseElement;
-            final String javaReference = getJavaReference(eventDef.getCamundaClass());
+            final String javaReference = getClassReference(eventDef.getCamundaClass());
             if (javaReference != null) {
                 prepareClassWarning(javaReference, element, issues);
             }
@@ -247,14 +257,28 @@ public class VersioningChecker extends AbstractElementChecker {
     }
 
     /**
-     * convert package format into java file path
+     * convert package format into class file name
      *
      * @param javaResource
-     * @return file path
+     * @return file
      */
-    private String getJavaReference(final String javaResource) {
+    private String getClassReference(final String javaResource) {
         if (javaResource != null) {
-            return javaResource.replaceAll("\\.", "/") + ".java";
+            return javaResource.substring(javaResource.lastIndexOf('.') + 1, javaResource.length()) + ".class";
+        }
+        return null;
+    }
+
+    /**
+     * convert package format into groovy file name
+     *
+     * @param javaResource
+     * @return file
+     */
+    private String getGroovyReference(String resourcePath) {
+        if (resourcePath != null) {
+            resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf('.'));
+            return resourcePath.substring(resourcePath.lastIndexOf('.') + 1, resourcePath.length()) + ".groovy";
         }
         return null;
     }
@@ -284,7 +308,8 @@ public class VersioningChecker extends AbstractElementChecker {
                 }
             }
             if (!paths.isEmpty()) {
-                return getJavaReference(paths.iterator().next());
+                return getClassReference(paths.iterator().next());
+
             }
         } catch (final ELException e) {
             throw new ProcessingException(
@@ -328,7 +353,8 @@ public class VersioningChecker extends AbstractElementChecker {
             issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                     element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
                     element.getBaseElement().getAttributeValue("name"), null, null, null,
-                    "bean reference is deprecated or file with version does not exist"));
+                    "bean reference is deprecated or file with version does not exist for bean '"
+                            + expression + "'"));
         }
     }
 
@@ -346,7 +372,8 @@ public class VersioningChecker extends AbstractElementChecker {
                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
                         element.getBaseElement().getAttributeValue("name"), null, null, null,
-                        "class reference is deprecated or file with version does not exist"));
+                        "class reference is deprecated or file with version does not exist for class '"
+                                + javaReference + "'"));
             }
         }
     }

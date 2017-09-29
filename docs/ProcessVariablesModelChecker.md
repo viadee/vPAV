@@ -12,11 +12,9 @@ R – Reading a value (reference)
 
 
 ## Assumptions
-----------------------------------------------
 - The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
-------------------------------------------
 The rule should be configured as follows:
 ```xml
 <rule>
@@ -48,7 +46,6 @@ public class InitialProcessVariables extends InitialProcessVariablesBase {
 ```
 
 ## Error messages
------------------------------------------
 **process variable creates an anomaly (compare %Chapter%,%ElementFieldType%)**
 
 _This message indicates that an anomaly was found for a certain process variable._
@@ -56,7 +53,6 @@ _This message indicates that an anomaly was found for a certain process variable
 For debugging purposes check **%Chapter%** and **%ElementFieldType%**.
 
 ## Examples
------------------------------------------
 
 | **Defined-Deleted**                                  | 
 |:------------------------------------------------------------------------------------------------------:| 

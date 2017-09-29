@@ -3,11 +3,9 @@ Task Naming Convention Checker
 The Task Naming Convention Checker verifies if tasks match a predefined naming convention.
 
 ## Assumptions
-----------------------------------------------
 - The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
-------------------------------------------
 The rule should be configured as follows:
 ```xml
 <rule>
@@ -24,7 +22,6 @@ The rule should be configured as follows:
 ```
 
 ## Error messages
------------------------------------------
 **task name must be specified**
 
 _The task name is missing and has to be specified in the model._
@@ -34,7 +31,6 @@ _The task name is missing and has to be specified in the model._
 _The task name is invalid and has to be changed according to the naming convention._
 
 ## Example
-----------------------------------------
 
 | **task name 'Rechnung 1' is against the naming convention**                                                                        | 
 |:------------------------------------------------------------------------------------------------------:| 

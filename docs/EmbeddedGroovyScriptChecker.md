@@ -7,11 +7,9 @@ For this purpose, it checks the following conditions:
 - For Groovy only: The script content doesn't match the script format (syntax check)
 
 ## Assumptions
-----------------------------------------------
 - The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
-------------------------------------------
 The rule should be configured as follows:
 ```xml
 <rule>
@@ -25,7 +23,6 @@ Via `<state>true</state>` the check can be enabled.
 Via `<state>false</state>` the check can be disabled.
 
 ## Error messages
------------------------------------------
 **there is no script format for given script**
 
 _There is no script format for an embedded script. A script format must be defined for the script._
@@ -43,7 +40,6 @@ _No script has been deposited. A script must be specified._
 _The syntax of the script is not valid. (for groovy only)_
 
 ## Examples
-----------------------------------------
 
 | **there is no script format for given script**                                                         | 
 |:------------------------------------------------------------------------------------------------------:| 

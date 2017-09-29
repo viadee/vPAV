@@ -1,22 +1,31 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
- * distribution. 3. All advertising materials mentioning features or use of this software must display the following
- * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
- * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
- * products derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the viadee Unternehmensberatung GmbH.
+ * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 
@@ -53,6 +62,7 @@ import org.camunda.bpm.model.dmn.instance.Decision;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
 
 /**
@@ -65,16 +75,21 @@ public class FileScanner {
 
     private Set<String> javaResources = new HashSet<String>();
 
+    private Set<String> javaResourcesFileInputStream = new HashSet<String>();
+
+    private Set<String> includedFiles = new HashSet<String>();
+
     private Map<String, String> decisionRefToPathMap;
 
     private Collection<String> resourcesNewestVersions = new ArrayList<String>();
 
     private Map<String, String> processIdToPathMap;
 
+    private final String targetClassFolder = "target/classes";
+
     public static Logger logger = Logger.getLogger(FileScanner.class.getName());
 
-    public FileScanner(final Map<String, Rule> rules, final String classPathScanLocation)
-            throws DependencyResolutionRequiredException {
+    public FileScanner(final Map<String, Rule> rules) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
         scanner.setBasedir(ConstantsConfig.BASEPATH);
@@ -84,32 +99,37 @@ public class FileScanner {
         scanner.scan();
         processdefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
+        scanner.setBasedir(ConstantsConfig.JAVAPATH);
+        // get file paths of process definitions
+        scanner.setIncludes(new String[] { ConstantsConfig.JAVA_FILE_PATTERN });
+        scanner.scan();
+        javaResourcesFileInputStream = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+
         // get mapping from process id to file path
         processIdToPathMap = createProcessIdToPathMap(processdefinitions);
 
         // get file paths of java files
-        if (classPathScanLocation != null && !classPathScanLocation.isEmpty()) {
-            URL[] urls;
-            LinkedList<File> files = new LinkedList<File>();
 
-            URLClassLoader ucl;
-            if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
-                ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
-            } else {
-                ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
-            }
-            urls = ucl.getURLs();
+        URL[] urls;
+        LinkedList<File> files = new LinkedList<File>();
 
-            // retrieve all jars during runtime and pass them to get class files
-            for (URL url : urls) {
-                if (url.getFile().contains("target/classes")) {
-                    File f = new File(url.getFile().substring(1) + classPathScanLocation);
-                    if (f.exists()) {
-                        files = (LinkedList<File>) FileUtils.listFiles(f,
-                                TrueFileFilter.INSTANCE,
-                                TrueFileFilter.INSTANCE);
-                        addResources(files);
-                    }
+        URLClassLoader ucl;
+        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
+        } else {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
+        }
+        urls = ucl.getURLs();
+
+        // retrieve all jars during runtime and pass them to get class files
+        for (URL url : urls) {
+            if (url.getFile().contains(targetClassFolder)) {
+                File f = new File(url.getFile());
+                if (f.exists()) {
+                    files = (LinkedList<File>) FileUtils.listFiles(f,
+                            TrueFileFilter.INSTANCE,
+                            TrueFileFilter.INSTANCE);
+                    addResources(files);
                 }
             }
         }
@@ -121,20 +141,27 @@ public class FileScanner {
                 new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
 
         // determine version name schema for resources
-        final String versioningSchema = loadVersioningSchemaClass(rules);
+        String versioningSchema = null;
+
+        try {
+            versioningSchema = loadVersioningSchemaClass(rules);
+        } catch (ConfigItemNotFoundException e) {
+            e.printStackTrace();
+        }
+
         if (versioningSchema != null) {
-            scanner.setIncludes(new String[] { versioningSchema });
+            // also add groovy files to included files
+            scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
             scanner.scan();
+            includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
-            // get current versions for resources, that match the name schema
-            resourcesNewestVersions = createResourcesToNewestVersions(
-                    new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())), versioningSchema);
-
+            // filter files by versioningSchema
+            resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningSchema);
         }
     }
 
     /**
-     * process classes and add resource
+     * process classes and add resource add all files to includedFiles
      *
      */
     private void addResources(LinkedList<File> classes) {
@@ -143,6 +170,7 @@ public class FileScanner {
             if (file.getName().endsWith(".class")) {
                 javaResources.add(file.getName());
             }
+            includedFiles.add(file.getName());
         }
     }
 
@@ -196,17 +224,18 @@ public class FileScanner {
      *
      * @param project
      * @return
-     * @throws DependencyResolutionRequiredException
      * @throws MalformedURLException
+     * @throws DependencyResolutionRequiredException
      */
     static ClassLoader getClassLoader(final MavenProject project)
-            throws DependencyResolutionRequiredException, MalformedURLException {
+            throws MalformedURLException, DependencyResolutionRequiredException {
+        @SuppressWarnings("unchecked")
         final List<String> classPathElements = project.getRuntimeClasspathElements();
         final List<URL> classpathElementUrls = new ArrayList<URL>(classPathElements.size());
         for (final String classPathElement : classPathElements) {
             classpathElementUrls.add(new File(classPathElement).toURI().toURL());
         }
-        classpathElementUrls.add(new File("src/main/java").toURI().toURL());
+        classpathElementUrls.add(new File(ConstantsConfig.JAVAPATH).toURI().toURL());
         return new URLClassLoader(classpathElementUrls.toArray(new URL[classpathElementUrls.size()]),
                 Thread.currentThread().getContextClassLoader());
     }
@@ -313,8 +342,9 @@ public class FileScanner {
      *
      * @param rules
      * @return schema (regex), if null the checker is inactive
+     * @throws ConfigItemNotFoundException
      */
-    private static String loadVersioningSchemaClass(final Map<String, Rule> rules) {
+    private static String loadVersioningSchemaClass(final Map<String, Rule> rules) throws ConfigItemNotFoundException {
         final String SETTING_NAME = "versioningSchemaClass";
         String schema = null;
         final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
@@ -322,14 +352,15 @@ public class FileScanner {
             final Map<String, Setting> settings = rule.getSettings();
             final Setting setting = settings.get(SETTING_NAME);
             if (setting == null) {
-                schema = ConstantsConfig.DEFAULT_VERSIONED_FILE_PATTERN;
-                final Setting newSetting = new Setting(SETTING_NAME,
-                        ConstantsConfig.DEFAULT_VERSIONED_FILE_PATTERN);
-                settings.put(SETTING_NAME, newSetting);
+                throw new ConfigItemNotFoundException("Settings for VersioningChecker not found");
             } else {
-                schema = setting.getValue();
+                schema = setting.getValue().trim();
             }
         }
         return schema;
+    }
+
+    public Set<String> getJavaResourcesFileInputStream() {
+        return javaResourcesFileInputStream;
     }
 }

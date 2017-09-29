@@ -26,9 +26,50 @@ Consistency checks are performed by individual modules called checkers, which se
 |[VersioningChecker](VersioningChecker.md)                                             | Do java classes implementing tasks fit  a version scheme?             | Done         |
 |[XorNamingConventionChecker](XorNamingConventionChecker.md)                           | Are XOR gateways ending with "?"                                         | Done         |
 |[NoScriptChecker](NoScriptChecker.md)                                                 | Is there any script in the model?                                        | Done         |
+|[ElementIdConventionChecker](ElementIdConventionChecker.md)                           | Do task ids in the model fit into a desired regex pattern?           | Done         |
+|[TimerExpressionChecker](TimerExpressionChecker.md)                                   | Are time events following the ISO 8601 scheme?                                        | Done         |
+|[NoExpressionChecker](NoExpressionChecker.md)                                   | Are expressions used against common best-practices?                                        | Done         |
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
+### Configuration
+The viadee Process Application Validator comes with a default ruleSet.xml which provides some basic rules. In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
+This allows you to use your own set of rules for naming conventions or to de-/activate certain checkers.
 
+### One set of rules to rule them all
+Furthermore you can use the plugin to manage multiple projects. Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar). In your child projects you have to add the dependency to the parent project and to vPAV.
+
+```xml
+<dependency>
+	<groupId>de.viadee</groupId>
+	<artifactId>parent_config</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+</dependency>
+
+<dependency>
+	<groupId>de.viadee</groupId>
+	<artifactId>viadeeProcessApplicationValidator</artifactId>
+	<version>...</version>
+</dependency>
+```
+
+The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit". Local sets of rules will override inherited rules in order to allow for customization.
+
+Make sure that inheritance is activated in the ruleSet.xml of your project.
+```xml 
+<rule>
+	<name>HasParentRuleSet</name>
+	<state>true</state>
+</rule>
+```
+### Exclusion of false positives
+An ignore file can be created to exclude false positives. The file has to be named **".ignoreIssues"** and has to be stored in **"src/test/resources"**. 
+Here, you can list IDs of the issues which should be ignored in the next validation run. This must be done line by line. Line comments are initiated with "#".
+
+**Example**
+```
+# Comment 
+8d04f2e77a7d282c521098ab947ac060
+```
 ## Output
 
 The result of the check is first of all a direct one: if at least one inconsistency is 
@@ -48,7 +89,7 @@ Clicking on the _Element-Id_ or _invalid sequenzflow_ marks the corresponding el
 
 ### Example
 <a href="img/output.PNG?raw=true" target="_blank"><img src="img/output.PNG" 
-alt="Example HTML-Output" width="791" height="1281" border="5" /></a>
+alt="Example HTML-Output" width="791" height="985" border="5" /></a>
 
 ## Requirements
 - Camunda BPM Engine 7.4.0 and above
@@ -64,12 +105,13 @@ You can start the validation as a Maven plugin. Therefore, add the dependency to
   <groupId>de.viadee</groupId>
   <artifactId>viadeeProcessApplicationValidator</artifactId>
   <version>...</version>
+  <scope>test</scope>
 </dependency>
 ```
 
 Then, use the following maven goal to start the validation.  
 ```java
-de.viadee.bpm:viadeeProcessApplicationValidator:2.0.0:check
+de.viadee:viadeeProcessApplicationValidator:{version}:check
 ```
 Please note: This approach is not useful, if you use Spring managed java delegates in your processes.
 
@@ -93,7 +135,7 @@ public class ModelConsistencyTest{
     @Test
     public void validateModel() {
         assertTrue("Model inconsistency found. Please check target folder for validation output",
-                ProcessApplicationValidator.findModelInconsistencies(ctx).isEmpty());
+                ProcessApplicationValidator.findModelErrors(ctx).isEmpty());
     }
 }
 
@@ -102,11 +144,89 @@ Note, that the Validator receives the Spring context. Thereby, the validation ca
 check delegate Beans and their names.
 
 
-If __no__ Spring context is used, jUnit can also be started without the context parameter:
+#### Methods
+The `ctx` parameter is optional. If **no** Spring context is used, jUnit can also be started without the context parameter.
+
+- `findModelErrors(ctx)` finds all model inconsistencies with **ERROR** status.
+
+- `findModelInconsistencies(ctx)` finds **all** model inconsistencies (Error, Warning, Info).
+
+
+#### SpringTestConfig
+
+In order to evaluate beans in a Spring environment, you should specify a config class for your JUnit test
+
 ```java
-assertTrue("Model inconsistency found. Please check target folder for validation output",
-                ProcessApplicationValidator.findModelInconsistencies().isEmpty());
-````
+
+import ServiceTaskOneDelegate;
+import ServiceTaskTwoDelegate;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SpringTestConfig {
+
+    public SpringTestConfig() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @InjectMocks
+    private ServiceTaskOneDelegate serviceTaskOneDelegate;
+
+    @InjectMocks
+    private ServiceTaskTwoDelegate serviceTaskTwoDelegate;
+
+    @Bean
+    public ServiceTaskOneDelegate serviceTaskOneDelegate() {
+        return serviceTaskOneDelegate;
+    }
+
+    @Bean
+    public ServiceTaskTwoDelegate serviceTaskTwoDelegate() {
+        return serviceTaskTwoDelegate;
+    }
+
+}
+```
+
+
+#### Additionally required dependencies 
+
+```xml
+<dependency>
+	<groupId>org.mockito</groupId>
+	<artifactId>mockito-all</artifactId>
+	<version>1.10.19</version>
+	<scope>test</scope>
+</dependency>
+
+<dependency>	
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-test</artifactId>
+	<version>4.3.11.RELEASE</version>
+</dependency>
+		
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-beans</artifactId>
+	<version>4.3.11.RELEASE</version>
+</dependency>
+
+<dependency>
+	<groupId>javax.servlet</groupId>
+	<artifactId>javax.servlet-api</artifactId>
+	<version>4.0.0</version>
+	<scope>provided</scope>
+</dependency>
+
+<dependency>
+	<groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>4.12</version>
+</dependency>
+```
 
 ## Commitments
 This library will remain under an open source licence indefinately.
@@ -124,7 +244,11 @@ Status of the development branch: [![Build Status](https://travis-ci.org/viadee/
 
 ## Licenses
 All licenses of reused components can be found on the [maven site](http://rawgit.com/viadee/vPAV/master/docs/MavenSite/project-info.html)
-</br> Additionally we reuse the [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
+</br> Additionally we use the following third-party dependencies, that are not distributed via maven:
+- [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
+- [Bootstrap](https://github.com/twbs/bootstrap/blob/v4-dev/LICENSE) licensed under MIT
+- [jQuery](https://jquery.org/license/) licensed under MIT
+- [PopperJS](https://github.com/FezVrasta/popper.js/blob/master/LICENSE.md) licensed under MIT
 
 
 **License (BSD4)** <br/>

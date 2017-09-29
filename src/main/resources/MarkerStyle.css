@@ -1,0 +1,173 @@
+		.path .djs-visual> :nth-child(1) {
+			stroke: #f5c6cb !important;
+		}
+
+		.path:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: #f8d7da !important;
+		}
+
+		.oneElement .djs-visual> :nth-child(1) {
+			stroke: rgba(255, 0, 0, 1.0) !important;
+		}
+
+		.oneElement:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(255, 0, 0, 0.5) !important;
+		}
+
+		.ProcessVariablesNameConventionChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(255, 0, 0, 1.0) !important;
+		}
+
+		.ProcessVariablesNameConventionChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(255, 0, 0, 0.5) !important;
+		}
+
+		.JavaDelegateChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(255, 255, 0, 1.0) !important;			
+		}
+
+		.JavaDelegateChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(255, 255, 0, 0.5) !important;			
+		}
+
+		.VersioningChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(255, 135, 41, 1.0) !important;
+		}
+
+		.VersioningChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(255, 135, 41, 0.5) !important;
+		}
+
+		.EmbeddedGroovyScriptChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(0, 0, 255, 1.0) !important;
+		}
+
+		.EmbeddedGroovyScriptChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(0, 0, 255, 0.5) !important;
+		}
+
+		.DmnTaskChecker .djs-visual> :nth-child(1) {			
+			stroke: rgba(128, 128, 128, 1.0) !important;
+		}
+
+		.DmnTaskChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(128, 128, 128, 0.5) !important;
+		}
+
+		.ProcessVariablesModelChecker .djs-visual> :nth-child(1) {	
+			stroke: rgba(0, 255, 0, 1.0) !important;
+		}
+
+		.ProcessVariablesModelChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(0, 255, 0, 0.5) !important;
+		}
+
+		.TaskNamingConventionChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(255, 20, 197, 1.0) !important;
+		}
+
+		.TaskNamingConventionChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(255, 20, 197, 0.5) !important;
+		}
+
+		.NoScriptChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(86, 135, 36, 1.0) !important;
+		}
+
+		.NoScriptChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(86, 135, 36, 0.50) !important;
+		}
+
+		.XorNamingConventionChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(255, 20, 197, 1.0) !important;
+		}
+
+		.XorNamingConventionChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(255, 20, 197, 0.5) !important;
+		}
+
+		.ElementIdConventionChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(9, 216, 238, 1) !important;
+		}
+
+		.ElementIdConventionChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(9, 216, 238, 0.5) !important;
+		}
+
+		.TimerExpressionChecker .djs-visual> :nth-child(1) {
+			stroke: rgb(121, 3, 203, 1.0) !important;
+		}
+
+		.TimerExpressionChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(121, 3, 203, 0.5) !important;
+		}
+
+		.NoExpressionChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(132, 3, 133, 1.0) !important;
+		}
+
+		.NoExpressionChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(132, 3, 133, 0.5) !important;
+		}
+
+		.new .djs-visual> :nth-child(1) {
+			stroke: rgba(0, 0, 0, 1.0) !important;
+		}
+
+		.new:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(0, 0, 0, 0.5) !important;
+		}
+
+
+
+		#NoExpressionChecker {			
+			background-color: rgba(132, 3, 133, 0.25);
+		}
+
+		#ProcessVariablesNameConventionChecker {			
+			background-color: rgba(255, 0, 0, 0.25);
+		}
+
+		#JavaDelegateChecker {
+			background-color: rgba(255, 255, 0, 0.25);
+		}
+
+		#VersioningChecker {
+			background-color: rgba(255, 135, 41, 0.25);			
+		}
+
+		#EmbeddedGroovyScriptChecker {
+			background-color: rgba(0, 0, 255, 0.25)
+		}
+
+		#DmnTaskChecker {
+			background-color: rgba(128, 128, 128, 0.25);
+		}
+
+		#ProcessVariablesModelChecker {
+			background-color: rgba(0, 255, 0, 0.25)
+		}
+
+		#TaskNamingConventionChecker {			
+			background-color: rgba(255, 20, 197, 0.25);
+		}
+
+		#NoScriptChecker{
+			background-color: rgba(86, 135, 36, 0.50);
+		}
+
+		#XorNamingConventionChecker{
+			background-color: rgba(255, 20, 197, 0.25);
+		}
+
+		#ElementIdConventionChecker {			
+			background-color: rgba(9, 216, 238, 0.25)
+		}
+
+		#TimerExpressionChecker {			
+			background-color: rgba(121, 3, 203, 0.25)
+		}
+
+		#new {			
+			background-color: rgba(0, 0, 0, 0.25)
+		}

@@ -16,7 +16,7 @@
  *    names of its contributors may be used to endorse or promote products
  *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
@@ -29,7 +29,7 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import de.viadee.bpm.vPAV.ConstantsConfig;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.ModelConvention;
@@ -57,25 +57,33 @@ import de.viadee.bpm.vPAV.config.model.Setting;
  */
 public final class XmlConfigReader implements ConfigReader {
 
-    public Map<String, Rule> read(final File file) throws ConfigReaderException {
+    public Map<String, Rule> read(final String file) throws ConfigReaderException {
 
         try {
             final JAXBContext jaxbContext = JAXBContext.newInstance(XmlRuleSet.class);
             final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            // If ruleSet.xml doesn't exists, then load default ruleSet
-            if (file.exists()) {
-                final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(file);
+            InputStream fRuleSet = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(file);
+
+            if (fRuleSet != null) {
+                final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(fRuleSet);
                 return transformFromXmlDatastructues(ruleSet);
             } else {
-                final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller
-                        .unmarshal(this.getClass().getClassLoader()
-                                .getResourceAsStream(ConstantsConfig.RULESETDEFAULT));
-                return transformFromXmlDatastructues(ruleSet);
+                throw new ConfigReaderException("ConfigFile coudn't be found");
             }
         } catch (JAXBException e) {
             throw new ConfigReaderException(e);
         }
+    }
+
+    public Map<String, Rule> getDeactivatedRuleSet() {
+        final Map<String, Rule> rules = new HashMap<String, Rule>();
+
+        for (String name : RuntimeConfig.getInstance().getAllRules())
+            rules.put(name, new Rule(name, false, new HashMap<String, Setting>(), new ArrayList<ElementConvention>(),
+                    new ArrayList<ModelConvention>()));
+
+        return rules;
     }
 
     private static Map<String, Rule> transformFromXmlDatastructues(final XmlRuleSet ruleSet)
@@ -123,8 +131,12 @@ public final class XmlConfigReader implements ConfigReader {
             final Map<String, Setting> settings = new HashMap<String, Setting>();
             if (xmlSettings != null) {
                 for (final XmlSetting xmlSetting : xmlSettings) {
-                    settings.put(xmlSetting.getName(),
-                            new Setting(xmlSetting.getName(), xmlSetting.getValue()));
+                    if (!settings.containsKey(xmlSetting.getName())) {
+                        settings.put(xmlSetting.getName(),
+                                new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getValue()));
+                    } else {
+                        settings.get(xmlSetting.getName()).addScriptPlace(xmlSetting.getScript());
+                    }
                 }
             }
             rules.put(name, new Rule(name, state, settings, elementConventions, modelConventions));

@@ -16,7 +16,7 @@
  *    names of its contributors may be used to endorse or promote products
  *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
@@ -29,23 +29,48 @@
  */
 package de.viadee.bpm.vPAV.config.model;
 
+import java.util.ArrayList;
+
 public class Setting {
 
-  private String name;
+    private String name;
 
-  private String value;
+    private String value;
 
-  public Setting(final String name, final String value) {
-    super();
-    this.name = name;
-    this.value = value;
-  }
+    private ArrayList<String> scriptPlaces = new ArrayList<String>();
 
-  public String getName() {
-    return name;
-  }
+    public Setting(final String name, final String scriptPlace, final String value) {
+        super();
+        this.name = name;
+        this.value = value;
+        if (scriptPlace != null)
+            scriptPlaces.add(scriptPlace);
+    }
 
-  public String getValue() {
-    return value;
-  }
+    // public Setting(final String name, final ArrayList<String> scriptPlaces, final String value) {
+    // super();
+    // this.name = name;
+    // this.value = value;
+    // this.scriptPlaces = scriptPlaces;
+    // }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public ArrayList<String> getScriptPlaces() {
+        return scriptPlaces;
+    }
+
+    public void addScriptPlace(String place) {
+        scriptPlaces.add(place);
+    }
+
+    public void setScriptPlace(ArrayList<String> scriptPlaces) {
+        this.scriptPlaces = scriptPlaces;
+    }
 }

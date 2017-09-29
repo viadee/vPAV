@@ -1,27 +1,38 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
- * distribution. 3. All advertising materials mentioning features or use of this software must display the following
- * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
- * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
- * products derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the viadee Unternehmensberatung GmbH.
+ * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,6 +45,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.types.Resource;
 
 import groovyjarjarasm.asm.ClassReader;
 import groovyjarjarasm.asm.ClassVisitor;
@@ -49,16 +62,12 @@ public class OuterProcessVariablesScanner {
 
     private Set<String> javaResources;
 
-    private ClassLoader classLoader;
-
     private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<String, Collection<String>>();
 
     private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
 
-    public OuterProcessVariablesScanner(final Set<String> javaResources,
-            final ClassLoader classLoader) {
+    public OuterProcessVariablesScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
-        this.classLoader = classLoader;
     }
 
     /**
@@ -130,20 +139,39 @@ public class OuterProcessVariablesScanner {
      * @return methodBody returns methodBody
      */
     @SuppressWarnings("deprecation")
-    private String readResourceFile(final String fileName) {
+    private String readResourceFile(final String filePath) {
         String methodBody = "";
-        if (fileName != null && fileName.trim().length() > 0) {
-            final InputStream resource = classLoader.getResourceAsStream(fileName);
-            if (resource != null) {
-                try {
-                    methodBody = IOUtils.toString(classLoader.getResourceAsStream(fileName));
-                } catch (final IOException ex) {
-                    throw new RuntimeException(
-                            "resource '" + fileName + "' could not be read: " + ex.getMessage(), ex);
+
+        if (filePath != null && filePath.trim().length() > 0) {
+            try {
+                final DirectoryScanner scanner = new DirectoryScanner();
+
+                if (RuntimeConfig.getInstance().isTest()) {
+                    scanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
+                } else {
+                    scanner.setBasedir(ConstantsConfig.JAVAPATH);
                 }
+
+                Resource s = scanner.getResource(filePath);
+
+                if (s.isExists()) {
+
+                    InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
+
+                    methodBody = IOUtils.toString(resource);
+
+                } else {
+
+                }
+            } catch (final IOException ex) {
+                throw new RuntimeException(
+                        "resource '" + filePath + "' could not be read: " + ex.getMessage());
             }
+
         }
+
         return methodBody;
+
     }
 
     /**
@@ -249,7 +277,7 @@ public class OuterProcessVariablesScanner {
                         return null;
                     }
                 };
-                InputStream in = classLoader
+                InputStream in = RuntimeConfig.getInstance().getClassLoader()
                         .getResourceAsStream(splittedFilePath[0] + "$InitialProcessVariables.class");
                 if (in != null) {
                     ClassReader classReader = new ClassReader(in);
