@@ -26,7 +26,7 @@ _This message indicates that no message or message name was specified for a give
 
 | **Correct usage**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|!Correct usage of message event](img/MessageEventChecker_correct.PNG "Message has been specified")         |
+|![Correct usage of message event](img/MessageEventChecker_correct.PNG "Message has been specified")         |
 
 
 | **No Message Name**                                                                                    |
