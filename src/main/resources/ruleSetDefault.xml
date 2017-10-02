@@ -1,5 +1,9 @@
 <ruleSet>
 	<rule>
+		<name>MessageEventChecker</name>
+		<state>true</state>
+	</rule>
+	<rule>
 		<name>XorNamingConventionChecker</name>
 		<state>true</state>
 		<elementConventions>
