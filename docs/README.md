@@ -29,6 +29,11 @@ Consistency checks are performed by individual modules called checkers, which se
 |[ElementIdConventionChecker](ElementIdConventionChecker.md)                           | Do task ids in the model fit into a desired regex pattern?           | Done         |
 |[TimerExpressionChecker](TimerExpressionChecker.md)                                   | Are time events following the ISO 8601 scheme?                                        | Done         |
 |[NoExpressionChecker](NoExpressionChecker.md)                                   | Are expressions used against common best-practices?                                        | Done         |
+|[MessageEventChecker](MessageEventChecker.md)                                   | Are MessageEvents referencing messages and do they provide message names?                                  | Done         |
+
+
+
+
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
 ### Configuration
