@@ -228,6 +228,9 @@ public class SpringTestConfig {
 </dependency>
 ```
 
+## Release Notes
+You can find our release notes over [here](https://github.com/viadee/vPAV/blob/development/docs/ReleaseNotes.md).
+
 ## Commitments
 This library will remain under an open source licence indefinately.
 
