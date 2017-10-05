@@ -83,6 +83,13 @@ public class RuntimeConfig {
         return classLoader;
     }
 
+    /**
+     * Retrieves the classloader for a given MavenProject
+     * @param project
+     * @return
+     * @throws MalformedURLException
+     * @throws DependencyResolutionRequiredException
+     */
     public ClassLoader getClassLoader(MavenProject project)
             throws MalformedURLException, DependencyResolutionRequiredException {
         return FileScanner.getClassLoader(project);

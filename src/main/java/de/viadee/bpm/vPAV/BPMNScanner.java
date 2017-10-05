@@ -175,6 +175,14 @@ public class BPMNScanner {
         builder = factory.newDocumentBuilder();
     }
 
+    /**
+     * Checks which camunda namespace is used in a given model and sets the version correspondingly
+     * 
+     * @param path
+     * @throws SAXException
+     * @throws IOException
+     * @throws ParserConfigurationException
+     */
     private void setModelVersion(String path) throws SAXException, IOException, ParserConfigurationException {
         // parse the given bpmn model
         doc = builder.parse(path);
@@ -565,6 +573,15 @@ public class BPMNScanner {
         return false;
     }
 
+    /**
+     * Checks for scripts in conditional expressions
+     * @param path
+     * @param id
+     * @return
+     * @throws SAXException
+     * @throws IOException
+     * @throws ParserConfigurationException
+     */
     public boolean hasScriptInCondExp(String path, String id)
             throws SAXException, IOException, ParserConfigurationException {
         // List for all Task elements

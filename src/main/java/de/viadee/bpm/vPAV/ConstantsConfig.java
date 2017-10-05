@@ -29,6 +29,10 @@
  */
 package de.viadee.bpm.vPAV;
 
+/**
+ * Class to hold global constants
+ */ 
+
 public final class ConstantsConfig {
 
     public static final String RULESET = "ruleSet.xml";

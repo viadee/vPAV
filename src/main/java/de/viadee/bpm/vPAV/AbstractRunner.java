@@ -75,6 +75,11 @@ public abstract class AbstractRunner {
     private static ArrayList<String> allOutputFilesArray = createAllOutputFilesArray();
 
     private static boolean isExecuted = false;
+    
+   /**
+    * Main method which represents lifecycle of the validation process
+    * Calls main functions
+    */
 
     public static void run_vPAV() {
 
@@ -85,7 +90,7 @@ public abstract class AbstractRunner {
         scanClassPath(rules);
 
         // 3
-        getProcessVariables(rules);
+        getProcessVariables();
 
         // 4
         createIssues(rules);
@@ -110,7 +115,7 @@ public abstract class AbstractRunner {
      *
      * write effectiveRuleSet to vPAV folder
      *
-     * @return merged ruleSet
+     * @return Map<String, Rule>ruleSet
      */
     public static Map<String, Rule> readConfig() {
         createBaseFolder();
@@ -140,7 +145,11 @@ public abstract class AbstractRunner {
         return rules;
     }
 
-    // 1b merge ruleSets
+    /**
+     * merges ruleSets according to inheritance hierarchy (Deactivated < global < default < local)
+     * @param parentRules
+     * @return Map<String, Rule> finalRules
+     */
     private static Map<String, Rule> mergeRuleSet(final Map<String, Rule> parentRules,
             final Map<String, Rule> childRules) {
         final Map<String, Rule> finalRules = new HashMap<>();
@@ -151,29 +160,42 @@ public abstract class AbstractRunner {
         return finalRules;
     }
 
-    // 2b - Scan classpath for models
+    /**
+     * Initializes the fileScanner with the current set of rules
+     * @param rules
+     */
     public static void scanClassPath(Map<String, Rule> rules) {
         fileScanner = new FileScanner(rules);
     }
 
-    // 3 - Get process variables
-    public static void getProcessVariables(final Map<String, Rule> rules) {
+    /**
+     * Initializes the variableScanner to scan and read outer process variables with the current javaResources
+     */
+    public static void getProcessVariables() {
         variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
         readOuterProcessVariables(variableScanner);
     }
 
-    // 4 - Check each model
+    /**
+     * Creates the list of issues found for a given model and ruleSet
+     * Throws a RuntimeException if errors are found, so automated builds in a CI/CD pipeline will fail
+     * @param rules
+     * @throws RuntimeException
+     */
     public static void createIssues(Map<String, Rule> rules) throws RuntimeException {
         issues = checkModels(rules, fileScanner, variableScanner);
     }
 
-    // 5 remove ignored issues
+    /**
+     * Removes whitelisted issues from the list of issues found
+     * @throws RuntimeException
+     */
     public static void removeIgnoredIssues() throws RuntimeException {
         filteredIssues = filterIssues(issues);
     }
 
     /**
-     * write output files (xml / json/ js)
+     * Write output files (xml / json / js)
      *
      * @param filteredIssues
      *            List of filteredIssues
@@ -210,7 +232,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * create Base folders
+     * Create Base folders
      *
      * @throws RuntimeException
      */
@@ -222,7 +244,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * make vPAV folder
+     * Create vPAV folder
      */
     private static void createvPAVFolder() {
         File vPavDir = new File(ConstantsConfig.VALIDATION_FOLDER);
@@ -236,7 +258,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * make img folder
+     * Make img folder
      */
     private static void createImgFolder() {
 
@@ -251,7 +273,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * make css folder
+     * Make css folder
      */
     private static void createJsFolder() {
         File jsDir = new File(ConstantsConfig.JS_FOLDER);
@@ -263,7 +285,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * make css folder
+     * Make css folder
      */
     private static void createCssFolder() {
         File cssDir = new File(ConstantsConfig.CSS_FOLDER);
@@ -276,8 +298,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * delete files from destinations
-     *
+     * Delete files from destinations
      * @param destinations
      */
     private static void deleteFiles(ArrayList<Path> destinations) {
@@ -287,8 +308,10 @@ public abstract class AbstractRunner {
         }
     }
 
-    // 7 copy html-files to target
-    // 7a delete files before
+    /**
+     * Copies all necessary files and deletes outputFiles
+     * @throws RuntimeException
+     */
     private static void copyFiles() throws RuntimeException {
         // 7a delete files before copy
         ArrayList<Path> outputFiles = new ArrayList<Path>();
@@ -300,6 +323,10 @@ public abstract class AbstractRunner {
             copyFileToVPAVFolder(file);
     }
 
+    /**
+     * Creates ArrayList to hold output files
+     * @return ArrayList<String> allFiles
+     */
     private static ArrayList<String> createAllOutputFilesArray() {
         ArrayList<String> allFiles = new ArrayList<String>();
         allFiles.add("bootstrap.min.js");
@@ -325,6 +352,10 @@ public abstract class AbstractRunner {
         return allFiles;
     }
 
+    /**
+     * Creates Map for files and corresponding folders
+     * @return Map<String, String> fMap
+     */
     private static Map<String, String> createFileFolderMapping() {
         Map<String, String> fMap = new HashMap<String, String>();
         fMap.put("bootstrap.min.js", ConstantsConfig.JS_FOLDER);
@@ -350,6 +381,12 @@ public abstract class AbstractRunner {
         return fMap;
     }
 
+    /**
+     * Copies files to vPAV folder
+     * 
+     * @param file
+     * @throws RuntimeException
+     */
     private static void copyFileToVPAVFolder(String file) throws RuntimeException {
         InputStream source = AbstractRunner.class.getClassLoader().getResourceAsStream(file);
         Path destination = Paths.get(fileMapping.get(file) + file);
@@ -433,7 +470,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * check consistency of all models
+     * Check consistency of all models
      *
      * @param rules
      * @param beanMapping
@@ -454,7 +491,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * check consistency of a model
+     * Check consistency of a model
      *
      * @param rules
      * @param beanMapping
@@ -481,7 +518,7 @@ public abstract class AbstractRunner {
     }
 
     /**
-     * scan process variables in external classes, which are not referenced from model
+     * Scan process variables in external classes, which are not referenced from model
      *
      * @param scanner
      * @throws IOException

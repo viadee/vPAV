@@ -161,8 +161,9 @@ public class FileScanner {
     }
 
     /**
-     * process classes and add resource add all files to includedFiles
-     *
+     * Process classes and add compiled classes to javaResources
+     * Also adss all filenames to includedFiles 
+     * @param classes
      */
     private void addResources(LinkedList<File> classes) {
 
