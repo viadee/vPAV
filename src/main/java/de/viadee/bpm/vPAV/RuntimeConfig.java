@@ -48,7 +48,8 @@ public class RuntimeConfig {
     private final String[] allRules = { "ProcessVariablesLocation", "XorNamingConventionChecker",
             "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
-            "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker" };
+            "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
+            "MessageEventChecker" };
 
     private RuntimeConfig() {
     }
@@ -85,6 +86,7 @@ public class RuntimeConfig {
 
     /**
      * Retrieves the classloader for a given MavenProject
+     * 
      * @param project
      * @return
      * @throws MalformedURLException
