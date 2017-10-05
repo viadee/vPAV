@@ -45,7 +45,7 @@ public class RuntimeConfig {
 
     private boolean test = false;
 
-    private String[] allRules = { "ProcessVariablesLocation", "XorNamingConventionChecker",
+    private final String[] allRules = { "ProcessVariablesLocation", "XorNamingConventionChecker",
             "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
             "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker" };

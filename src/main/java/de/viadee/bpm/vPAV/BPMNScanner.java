@@ -347,8 +347,18 @@ public class BPMNScanner {
                             // if the node messageEventDefinition contains the camunda expression -> return
                             if (event.getAttributeNode(c_exp) != null) {
                                 return_implementation = event.getAttributeNode(c_exp).toString();
-                            }
-                        }
+                            } else if(event.getAttributeNode(c_dexp) != null){
+                                return_implementation = event.getAttributeNode(c_dexp).toString();
+                            } else if(event.getAttributeNode(c_class) != null){
+                                return_implementation = event.getAttributeNode(c_class).toString();
+                            } else if(event.getAttributeNode(c_ext) != null){
+                                return_implementation = event.getAttributeNode(c_ext).toString();
+                            }  
+                            
+                            if(event.getAttributeNode(c_dexp) == null && event.getAttributeNode(c_exp) == null && event.getAttributeNode(c_class) == null && event.getAttributeNode(c_ext) == null){
+                                return_implementation = imp;
+                            }                           
+                        } 
                     }
                 }
             }
