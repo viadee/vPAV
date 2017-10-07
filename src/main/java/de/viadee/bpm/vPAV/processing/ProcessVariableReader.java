@@ -129,12 +129,49 @@ public final class ProcessVariableReader {
         processVariables.putAll(searchExtensionsElements(element));
         // 4) Search variables in Forms
         processVariables.putAll(getVariablesFromHTML(element));
+        // 5) Search variables in Output Parameters
+        processVariables.putAll(getVariablesFromOutput(element));
 
         return processVariables;
     }
 
     /**
-     * Analyse HTML Forms for variables
+     * Analyze Output Parameters for variables
+     * 
+     * @param element
+     * @return Map of ProcessVariable
+     * 
+     */
+    private Map<String, ProcessVariable> getVariablesFromOutput(BpmnElement element) {
+        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final BaseElement baseElement = element.getBaseElement();
+        final BpmnModelElementInstance scopeElement = baseElement.getScope();
+
+        String scopeElementId = null;
+        if (scopeElement != null) {
+            scopeElementId = scopeElement.getAttributeValue("id");
+        }
+        try {
+            BPMNScanner scanner = new BPMNScanner();
+
+            ArrayList<String> outVar = scanner.getOutputVariables(element.getProcessdefinition(),
+                    element.getBaseElement().getId());
+
+            for (String name : outVar)
+                processVariables.put(name,
+                        new ProcessVariable(name, element, ElementChapter.InputOutput,
+                                KnownElementFieldType.OutputParameter,
+                                element.getProcessdefinition(), VariableOperation.WRITE, scopeElementId));
+
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return processVariables;
+    }
+
+    /**
+     * Analyze HTML Forms for variables
      * 
      * @param element
      * @return Map of ProcessVariable
@@ -182,7 +219,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * Analyse bpmn extension elements for variables
+     * Analyze bpmn extension elements for variables
      *
      * @param element
      * @return variables

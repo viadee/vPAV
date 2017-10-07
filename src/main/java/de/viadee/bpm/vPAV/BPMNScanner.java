@@ -138,6 +138,8 @@ public class BPMNScanner {
 
     private final String c_ext = "camunda:type";
 
+    private final String c_outPar = "camunda:outputParameter";
+
     private final String imp = "implementation";
 
     private final String timerEventDefinition = "timerEventDefinition";
@@ -940,4 +942,25 @@ public class BPMNScanner {
         return c_exp;
     }
 
+    public ArrayList<String> getOutputVariables(String path, String id) throws SAXException, IOException {
+        // List for all Task elements
+        ArrayList<String> listVariables = new ArrayList<String>();
+
+        // parse the given bpmn model
+        doc = builder.parse(path);
+
+        NodeList nodeList = doc.getElementsByTagName(c_outPar);
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (idMatch(node, id)) {
+                NamedNodeMap attrList = node.getAttributes();
+                for (int x = 0; x < attrList.getLength(); x++) {
+                    listVariables.add(attrList.item(x).getNodeValue());
+                }
+            }
+
+        }
+        return listVariables;
+    }
 }
