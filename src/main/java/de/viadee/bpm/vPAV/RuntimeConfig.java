@@ -88,9 +88,12 @@ public class RuntimeConfig {
      * Retrieves the classloader for a given MavenProject
      * 
      * @param project
-     * @return
+     *            MavenProject
+     * @return Classloader
      * @throws MalformedURLException
+     *             indicate that a malformed URL has occurred
      * @throws DependencyResolutionRequiredException
+     *             DependencyResolutionRequiredException
      */
     public ClassLoader getClassLoader(MavenProject project)
             throws MalformedURLException, DependencyResolutionRequiredException {

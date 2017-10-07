@@ -55,14 +55,14 @@ public class BpmnCheckerMojo extends AbstractRunner implements org.apache.maven.
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
-    
+
     /**
-     * The execute method gets called by the goal "check" and is the entry point into the mojo lifecycle
-     * Throws a MojoExecutionException if the Mojo specific classloader could not be used
+     * The execute method gets called by the goal "check" and is the entry point into the mojo lifecycle Throws a
+     * MojoExecutionException if the Mojo specific classloader could not be used
      * 
      * @throws MojoExecutionException
+     *             Classloader couldn't be load
      */
-
     @Override
     public void execute() throws MojoExecutionException {
 

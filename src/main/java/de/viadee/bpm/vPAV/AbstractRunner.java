@@ -79,7 +79,6 @@ public abstract class AbstractRunner {
     /**
      * Main method which represents lifecycle of the validation process Calls main functions
      */
-
     public static void run_vPAV() {
 
         // 1
@@ -148,7 +147,10 @@ public abstract class AbstractRunner {
      * merges ruleSets according to inheritance hierarchy (Deactivated < global < default < local)
      * 
      * @param parentRules
-     * @return Map(String, Rule) finalRules
+     *            Basis RuleSet which will be overwritten
+     * @param childRules
+     *            New RuleSet
+     * @return Map(String, Rule) finalRules merged ruleSet
      */
     private static Map<String, Rule> mergeRuleSet(final Map<String, Rule> parentRules,
             final Map<String, Rule> childRules) {
@@ -164,6 +166,7 @@ public abstract class AbstractRunner {
      * Initializes the fileScanner with the current set of rules
      * 
      * @param rules
+     *            Map of rules
      */
     public static void scanClassPath(Map<String, Rule> rules) {
         fileScanner = new FileScanner(rules);
@@ -182,7 +185,9 @@ public abstract class AbstractRunner {
      * automated builds in a CI/CD pipeline will fail
      * 
      * @param rules
+     *            Map of rules
      * @throws RuntimeException
+     *             Config item couldn't be read
      */
     public static void createIssues(Map<String, Rule> rules) throws RuntimeException {
         issues = checkModels(rules, fileScanner, variableScanner);
@@ -192,6 +197,7 @@ public abstract class AbstractRunner {
      * Removes whitelisted issues from the list of issues found
      * 
      * @throws RuntimeException
+     *             Ignored issues couldn't be read successfully
      */
     public static void removeIgnoredIssues() throws RuntimeException {
         filteredIssues = filterIssues(issues);
@@ -238,6 +244,7 @@ public abstract class AbstractRunner {
      * Create Base folders
      *
      * @throws RuntimeException
+     *             Folders couldn't be created
      */
     private static void createBaseFolder() throws RuntimeException {
         createvPAVFolder();
@@ -248,6 +255,7 @@ public abstract class AbstractRunner {
 
     /**
      * Create vPAV folder
+     * 
      */
     private static void createvPAVFolder() {
         File vPavDir = new File(ConstantsConfig.VALIDATION_FOLDER);
@@ -304,6 +312,7 @@ public abstract class AbstractRunner {
      * Delete files from destinations
      * 
      * @param destinations
+     *            List of destinations who will be deleted
      */
     private static void deleteFiles(ArrayList<Path> destinations) {
         for (Path destination : destinations) {
@@ -316,6 +325,7 @@ public abstract class AbstractRunner {
      * Copies all necessary files and deletes outputFiles
      * 
      * @throws RuntimeException
+     *             Files couldn't be copied
      */
     private static void copyFiles() throws RuntimeException {
         // 7a delete files before copy
@@ -392,7 +402,9 @@ public abstract class AbstractRunner {
      * Copies files to vPAV folder
      * 
      * @param file
+     *            File who will be copied to vPAV folder
      * @throws RuntimeException
+     *             Files couldn't be written
      */
     private static void copyFileToVPAVFolder(String file) throws RuntimeException {
         InputStream source = AbstractRunner.class.getClassLoader().getResourceAsStream(file);
@@ -408,8 +420,10 @@ public abstract class AbstractRunner {
      * filter issues based on black list
      *
      * @param issues
-     * @return
+     *            all found issues
+     * @return filtered issues
      * @throws IOException
+     *             Ignored issues couldn't be read successfully
      */
     private static Collection<CheckerIssue> filterIssues(final Collection<CheckerIssue> issues)
             throws RuntimeException {
@@ -426,8 +440,10 @@ public abstract class AbstractRunner {
      * remove false positives from issue collection
      *
      * @param issues
+     *            collection of issues
      * @return filteredIssues
      * @throws IOException
+     *             ignoreIssues file doesn't exist
      */
     private static Collection<CheckerIssue> getFilteredIssues(Collection<CheckerIssue> issues)
             throws IOException {
@@ -449,8 +465,10 @@ public abstract class AbstractRunner {
      * Assumption: Each row is an issue id
      *
      * @param filePath
+     *            Path of ignoredIssues-file
      * @return issue ids
      * @throws IOException
+     *             ignoreIssues file doesn't exist
      */
     private static Collection<String> collectIgnoredIssues(final String filePath) throws IOException {
 
@@ -480,11 +498,16 @@ public abstract class AbstractRunner {
      * Check consistency of all models
      *
      * @param rules
+     *            all rules of ruleSet.xml
      * @param beanMapping
+     *            beanMapping if spring context is available
      * @param fileScanner
+     *            fileScanner
      * @param variableScanner
-     * @return
+     *            variablenScanner
+     * @return foundIssues
      * @throws ConfigItemNotFoundException
+     *             ConfigItem not found
      */
     private static Collection<CheckerIssue> checkModels(final Map<String, Rule> rules, final FileScanner fileScanner,
             final OuterProcessVariablesScanner variableScanner) throws RuntimeException {
@@ -501,11 +524,16 @@ public abstract class AbstractRunner {
      * Check consistency of a model
      *
      * @param rules
+     *            all rules of ruleSet.xml
      * @param beanMapping
+     *            beanMapping if spring context is available
      * @param processdef
+     *            processdefintion
      * @param fileScanner
+     *            fileScanner
      * @param variableScanner
-     * @return
+     *            variableScanner
+     * @return modelIssues
      * @throws ConfigItemNotFoundException
      */
     private static Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processdef,
@@ -528,7 +556,9 @@ public abstract class AbstractRunner {
      * Scan process variables in external classes, which are not referenced from model
      *
      * @param scanner
+     *            OuterProcessVariablesScanner
      * @throws IOException
+     *             Outer process variables couldn't be read
      */
     private static void readOuterProcessVariables(final OuterProcessVariablesScanner scanner)
             throws RuntimeException {
@@ -543,11 +573,13 @@ public abstract class AbstractRunner {
      * Add ignored issue
      *
      * @param issues
-     * @param zeile
+     *            Collection of issues
+     * @param row
+     *            row of file
      */
-    private static void addIgnoredIssue(final Collection<String> issues, final String zeile) {
-        if (zeile != null && !zeile.isEmpty() && !zeile.trim().startsWith("#"))
-            issues.add(zeile);
+    private static void addIgnoredIssue(final Collection<String> issues, final String row) {
+        if (row != null && !row.isEmpty() && !row.trim().startsWith("#"))
+            issues.add(row);
     }
 
     public static Set<String> getModelPath() {

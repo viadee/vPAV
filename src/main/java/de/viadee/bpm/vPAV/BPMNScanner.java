@@ -355,18 +355,20 @@ public class BPMNScanner {
                             // if the node messageEventDefinition contains the camunda expression -> return
                             if (event.getAttributeNode(c_exp) != null) {
                                 return_implementation = event.getAttributeNode(c_exp).toString();
-                            } else if(event.getAttributeNode(c_dexp) != null){
+                            } else if (event.getAttributeNode(c_dexp) != null) {
                                 return_implementation = event.getAttributeNode(c_dexp).toString();
-                            } else if(event.getAttributeNode(c_class) != null){
+                            } else if (event.getAttributeNode(c_class) != null) {
                                 return_implementation = event.getAttributeNode(c_class).toString();
-                            } else if(event.getAttributeNode(c_ext) != null){
+                            } else if (event.getAttributeNode(c_ext) != null) {
                                 return_implementation = event.getAttributeNode(c_ext).toString();
-                            }  
-                            
-                            if(event.getAttributeNode(c_dexp) == null && event.getAttributeNode(c_exp) == null && event.getAttributeNode(c_class) == null && event.getAttributeNode(c_ext) == null){
+                            }
+
+                            if (event.getAttributeNode(c_dexp) == null && event.getAttributeNode(c_exp) == null
+                                    && event.getAttributeNode(c_class) == null
+                                    && event.getAttributeNode(c_ext) == null) {
                                 return_implementation = imp;
-                            }                           
-                        } 
+                            }
+                        }
                     }
                 }
             }
@@ -575,12 +577,18 @@ public class BPMNScanner {
 
     /**
      * Checks for scripts in conditional expressions
+     * 
      * @param path
+     *            path to model
      * @param id
-     * @return
+     *            id of the element
+     * @return boolean has condition Expression
      * @throws SAXException
+     *             possible exception while process xml
      * @throws IOException
+     *             possible exception if file not found
      * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
      */
     public boolean hasScriptInCondExp(String path, String id)
             throws SAXException, IOException, ParserConfigurationException {
