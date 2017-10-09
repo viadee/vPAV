@@ -197,7 +197,7 @@ public final class ProcessVariableReader {
                 String path = ds.getResource(htmlFileName).toString();
 
                 HTMLScanner hScanner = new HTMLScanner(path);
-                ArrayList<String> writtenVariables = hScanner.getWriteVariables();
+                ArrayList<String> writtenVariables = hScanner.getWrittenVariables();
                 for (String name : writtenVariables)
                     processVariables.put(name,
                             new ProcessVariable(name, element, ElementChapter.FormData, KnownElementFieldType.FormField,

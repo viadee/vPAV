@@ -75,14 +75,26 @@ public class HTMLScanner {
      * 
      * @return ArrayList of written variablesnames
      */
-    public ArrayList<String> getWriteVariables() {
+    public ArrayList<String> getWrittenVariables() {
         ArrayList<String> writtenVariables = new ArrayList<String>();
 
-        Elements inputList = doc.select(input + "[" + camundaVar + "]" + "[required=true]");
-        inputList.addAll(doc.select(input + "[" + camundaVar + "]" + "[required]"));
+        // cam-variable-name
+        Elements inputListC = doc.select(input + "[" + camundaVar + "]" + "[required=true]");
+        inputListC.addAll(doc.select(input + "[" + camundaVar + "]" + "[required]"));
 
-        for (Element e : inputList) {
+        for (Element e : inputListC) {
             writtenVariables.add(e.attr(camundaVar));
+        }
+
+        // ng-model
+        Elements inputListN = doc.select(input + "[" + ngVar + "]" + "[required=true]");
+        inputListN.addAll(doc.select(input + "[" + ngVar + "]" + "[required]"));
+
+        for (Element e : inputListN) {
+            if (e.attr(ngVar).contains("."))
+                writtenVariables.add(e.attr(ngVar).substring(0, e.attr(ngVar).indexOf('.')));
+            else
+                writtenVariables.add(e.attr(ngVar));
         }
 
         return writtenVariables;
@@ -96,15 +108,17 @@ public class HTMLScanner {
     public ArrayList<String> getReadVariables() {
         ArrayList<String> readVariables = new ArrayList<String>();
 
+        // cam-variable-name
         Elements inputListC = doc.select(input + "[" + camundaVar + "]" + "[readonly=true]");
         inputListC.addAll(doc.select(input + "[" + camundaVar + "]" + "[readonly]"));
-
-        Elements inputListN = doc.select(input + "[" + ngVar + "]" + "[readonly]");
-        inputListN.addAll(doc.select(input + "[" + ngVar + "]" + "[readonly]"));
 
         for (Element e : inputListC) {
             readVariables.add(e.attr(camundaVar));
         }
+
+        // ng-model
+        Elements inputListN = doc.select(input + "[" + ngVar + "]" + "[readonly=true]");
+        inputListN.addAll(doc.select(input + "[" + ngVar + "]" + "[readonly]"));
 
         for (Element e : inputListN) {
             if (e.attr(ngVar).contains("."))
