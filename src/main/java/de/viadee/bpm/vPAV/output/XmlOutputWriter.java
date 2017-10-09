@@ -50,10 +50,19 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
  * Ergebnisse aus dem Checker in ein definiertes XML-Format schreiben
- * 
+ *
  */
 public class XmlOutputWriter implements IssueOutputWriter {
 
+    /**
+     * Writes the result as XML to the vPAV output folder
+     *
+     * @param issues
+     *            Contains the list of found issues
+     * @throws OutputWriterException
+     *             Occurs if output can not be written
+     */
+    @Override
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
 
         Writer writer = null;
@@ -78,6 +87,12 @@ public class XmlOutputWriter implements IssueOutputWriter {
         }
     }
 
+    /**
+     * Transforms the given issues into XML datastructure
+     *
+     * @param issues
+     * @return
+     */
     private static XmlCheckerIssues transformToXmlDatastructure(
             final Collection<CheckerIssue> issues) {
         XmlCheckerIssues xmlIssues = new XmlCheckerIssues();

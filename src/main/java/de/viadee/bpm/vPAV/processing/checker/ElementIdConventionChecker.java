@@ -48,6 +48,11 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
         super(rule);
     }
 
+    /**
+     * Check if an element follows a configurable pattern
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

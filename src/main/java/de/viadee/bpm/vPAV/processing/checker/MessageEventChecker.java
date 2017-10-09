@@ -50,6 +50,11 @@ public class MessageEventChecker extends AbstractElementChecker {
         super(rule);
     }
 
+    /**
+     * Check MessageEvents for implementation and messages
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(BpmnElement element) {
 

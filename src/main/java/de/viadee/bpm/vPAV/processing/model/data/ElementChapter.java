@@ -30,7 +30,7 @@
 package de.viadee.bpm.vPAV.processing.model.data;
 
 /**
- * element chapter
+ * Element chapter
  */
 public enum ElementChapter {
 

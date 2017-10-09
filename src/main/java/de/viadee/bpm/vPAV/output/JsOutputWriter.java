@@ -51,13 +51,14 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
- * 
  * Create the JavaScript file for HTML-output; Needs: issues and bpmnFile names
- * 
- *
  */
 public class JsOutputWriter implements IssueOutputWriter {
 
+    /**
+     * Writes the output as JavaScript to the vPAV output folder
+     */
+    @Override
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
         final String json = transformToJsonDatastructure(issues);
         final String bpmn = transformToXMLDatastructure();
@@ -78,6 +79,12 @@ public class JsOutputWriter implements IssueOutputWriter {
         }
     }
 
+    /**
+     * Transforms the path and filename to XML
+     * 
+     * @return output
+     * @throws OutputWriterException
+     */
     private String transformToXMLDatastructure() throws OutputWriterException {
         String output = "var diagramXMLSource = [\n";
 
@@ -94,6 +101,13 @@ public class JsOutputWriter implements IssueOutputWriter {
         return output + "];\n";
     }
 
+    /**
+     *
+     * @param search
+     * @param replace
+     * @param str
+     * @return str
+     */
     private static String replace(String search, String replace, String str) {
         int start = str.indexOf(search);
 
@@ -104,6 +118,13 @@ public class JsOutputWriter implements IssueOutputWriter {
         return (str);
     }
 
+    /**
+     * Cleans bad unicode chars in a string
+     *
+     * @param path
+     * @return s
+     * @throws IOException
+     */
     private String convertBpmnFile(String path) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         String s = new String(encoded);
@@ -115,6 +136,12 @@ public class JsOutputWriter implements IssueOutputWriter {
         return s;
     }
 
+    /**
+     * Transforms the collection of issues into JSON format
+     *
+     * @param issues
+     * @return
+     */
     private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues) {
         final JsonArray jsonIssues = new JsonArray();
         if (issues != null && issues.size() > 0) {

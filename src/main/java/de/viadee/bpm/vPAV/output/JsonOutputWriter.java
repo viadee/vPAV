@@ -47,6 +47,13 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 public class JsonOutputWriter implements IssueOutputWriter {
 
+    /**
+     * Writes all collected issues to the vPAV output
+     *
+     * @param issues
+     *            Collection of CheckerIssues
+     */
+    @Override
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
         final String json = transformToJsonDatastructure(issues);
         if (json != null && !json.isEmpty()) {
@@ -61,6 +68,12 @@ public class JsonOutputWriter implements IssueOutputWriter {
         }
     }
 
+    /**
+     * Transforms the collected issues to a JSON-String
+     *
+     * @param issues
+     * @return String
+     */
     private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues) {
         final JsonArray jsonIssues = new JsonArray();
         if (issues != null && issues.size() > 0) {

@@ -30,7 +30,7 @@
 package de.viadee.bpm.vPAV.processing.model.data;
 
 /**
- * known element field types
+ * Known element field types
  */
 public enum KnownElementFieldType {
     Class("Class"), FormField("Form Field"), Expression("Expression"), DelegateExpression(

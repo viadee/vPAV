@@ -50,6 +50,11 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
         super(rule);
     }
 
+    /**
+     * Check if elements adhere to a configurable naming convention
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

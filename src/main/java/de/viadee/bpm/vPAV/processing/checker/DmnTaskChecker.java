@@ -61,6 +61,11 @@ public class DmnTaskChecker extends AbstractElementChecker {
         this.path = path;
     }
 
+    /**
+     * Check a BusinessRuleTask for a DMN reference
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -95,6 +100,14 @@ public class DmnTaskChecker extends AbstractElementChecker {
         return issues;
     }
 
+    /**
+     * Check if the referenced DMN in a BusinessRuleTask exists
+     *
+     * @param element
+     * @param dmnName
+     * @param path
+     * @return issues
+     */
     private Collection<CheckerIssue> checkDMNFile(final BpmnElement element, final String dmnName, final String path) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

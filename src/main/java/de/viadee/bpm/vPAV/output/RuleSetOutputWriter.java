@@ -64,6 +64,14 @@ import de.viadee.bpm.vPAV.config.reader.XmlSetting;
  */
 public class RuleSetOutputWriter {
 
+    /**
+     * Writes the effective ruleSet to the vPAV output folder to provide traceability
+     *
+     * @param rules
+     *            Contains the actual configuration of rules
+     * @throws OutputWriterException
+     *             Occurs if output can not be written
+     */
     public void write(Map<String, Rule> rules) throws OutputWriterException {
         Writer writer = null;
 
@@ -92,6 +100,12 @@ public class RuleSetOutputWriter {
         }
     }
 
+    /**
+     * Reads the final ruleSet and recreates a XML file
+     *
+     * @param rules
+     * @return xmlRuleSet
+     */
     private static XmlRuleSet transformToXmlDatastructure(final Map<String, Rule> rules) {
         XmlRuleSet xmlRuleSet = new XmlRuleSet();
         Collection<XmlRule> xmlRules = new ArrayList<XmlRule>();

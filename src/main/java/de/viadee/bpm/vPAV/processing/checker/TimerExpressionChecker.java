@@ -77,6 +77,11 @@ public class TimerExpressionChecker extends AbstractElementChecker {
         this.path = path;
     }
 
+    /**
+     * Check TimerEvents for correct usage of ISO 8601 and CRON definitions
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 

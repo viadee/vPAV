@@ -36,7 +36,6 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Helper methods for Maven Plugin CamundaStaticValidator
- *
  */
 public class BeanMappingGenerator {
 

@@ -31,10 +31,9 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
-/*
- * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- *
- * Representation of a directed graph edge.
+/**
+ * University of Washington, Computer Science and Engineering, Course 373, Winter 2011, Jessica Miller Representation of
+ * a directed graph edge
  */
 
 public class Edge {

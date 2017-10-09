@@ -56,6 +56,11 @@ public class ProcessVariablesModelChecker implements ModelChecker {
         this.invalidPathsMap = invalidPathsMap;
     }
 
+    /**
+     * Checks variables of a given process and identifies read/write/delete anomalies
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnModelInstance processdefinition) {
 

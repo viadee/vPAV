@@ -30,9 +30,9 @@
 package de.viadee.bpm.vPAV.processing.model.data;
 
 /**
- * Criticality Enum
+ * Criticality Enum representing the severity of an issue
  *
  */
 public enum CriticalityEnum {
-  INFO, WARNING, ERROR;
+    INFO, WARNING, ERROR;
 }
