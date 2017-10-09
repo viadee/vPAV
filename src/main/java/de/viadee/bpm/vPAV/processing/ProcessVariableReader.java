@@ -88,7 +88,6 @@ import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
-import de.viadee.bpm.vPAV.HTMLScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -127,9 +126,7 @@ public final class ProcessVariableReader {
         processVariables.putAll(searchVariablesFromSequenceFlow(element));
         // 3) Search variables in ExtensionElements
         processVariables.putAll(searchExtensionsElements(element));
-        // 4) Search variables in Forms
-        processVariables.putAll(getVariablesFromHTML(element));
-        // 5) Search variables in Output Parameters
+        // 4) Search variables in Output Parameters
         processVariables.putAll(getVariablesFromOutput(element));
 
         return processVariables;
@@ -165,54 +162,6 @@ public final class ProcessVariableReader {
 
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
-        }
-
-        return processVariables;
-    }
-
-    /**
-     * Analyze HTML Forms for variables
-     *
-     * @param element
-     * @return Map of ProcessVariable
-     *
-     */
-    private Map<String, ProcessVariable> getVariablesFromHTML(BpmnElement element) {
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
-        final BaseElement baseElement = element.getBaseElement();
-        final BpmnModelElementInstance scopeElement = baseElement.getScope();
-
-        String scopeElementId = null;
-        if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue("id");
-        }
-
-        try {
-            final BPMNScanner bScanner = new BPMNScanner();
-            String htmlFileName = bScanner.getForm(element.getProcessdefinition(), baseElement.getId(),
-                    baseElement.getElementType().getTypeName());
-            if (htmlFileName != null) {
-                final DirectoryScanner ds = new DirectoryScanner();
-                ds.setBasedir("src/main/webapp/forms/");
-                String path = ds.getResource(htmlFileName).toString();
-
-                HTMLScanner hScanner = new HTMLScanner(path);
-                ArrayList<String> writtenVariables = hScanner.getWrittenVariables();
-                for (String name : writtenVariables)
-                    processVariables.put(name,
-                            new ProcessVariable(name, element, ElementChapter.FormData, KnownElementFieldType.FormField,
-                                    null, VariableOperation.WRITE, scopeElementId));
-
-                ArrayList<String> readVariables = hScanner.getReadVariables();
-                for (String name : readVariables)
-                    processVariables.put(name,
-                            new ProcessVariable(name, element, ElementChapter.FormData, KnownElementFieldType.FormField,
-                                    null, VariableOperation.READ, scopeElementId));
-
-            }
-
-        } catch (SAXException | IOException | ParserConfigurationException e) {
-            logger.warning("Couldn't parse HTML-file");
         }
 
         return processVariables;

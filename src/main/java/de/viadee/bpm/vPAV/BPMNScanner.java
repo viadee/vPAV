@@ -444,59 +444,6 @@ public class BPMNScanner {
     }
 
     /**
-     * get Filename of the form
-     * 
-     * @param path
-     *            path from model
-     * @param id
-     *            id of the element
-     * @param tagName
-     *            elementTyp
-     * @return Filnename of the form
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception while parse xml
-     */
-    public String getForm(final String path, final String id, String tagName)
-            throws SAXException, IOException, ParserConfigurationException {
-        NodeList nList;
-
-        // set Model Version
-        setModelVersion(path);
-
-        switch (model_Version) {
-            case V1:
-                tagName = "bpmn:" + tagName;
-                break;
-            case V2:
-                tagName = "bpmn2:" + tagName;
-                break;
-            default:
-                break;
-        }
-
-        nList = doc.getElementsByTagName(tagName);
-
-        for (int i = 0; i < nList.getLength(); i++) {
-            final Element Task_Element = (Element) nList.item(i);
-            if (Task_Element.getAttribute("id").equals(id)) {
-                NamedNodeMap attList = Task_Element.getAttributes();
-
-                for (int x = 0; x < attList.getLength(); x++) {
-                    if (attList.item(x).getNodeName().equals("camunda:formKey"))
-                        return attList.item(x).getTextContent()
-                                .substring(attList.item(x).getTextContent().indexOf("/") + 1);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
      *
      * @param node
      *            node to check
