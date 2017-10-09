@@ -25,7 +25,9 @@ function markNodes(canvas, bpmnFile) {
             } else if (elementsToMark[id].ruleName == "TimerExpressionChecker") {
                 canvas.addMarker(elementsToMark[id].elementId, 'TimerExpressionChecker');
             } else if (elementsToMark[id].ruleName == "NoExpressionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'NoExpressionChecker');
+                canvas.addMarker(elementsToMark[id].elementId, 'NoExpressionChecker'); 
+            } else if (elementsToMark[id].ruleName == "MessageEventChecker") {
+                canvas.addMarker(elementsToMark[id].elementId, 'MessageEventChecker'); 
             } else {
                 canvas.addMarker(elementsToMark[id].elementId, 'new');
             }
