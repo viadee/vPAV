@@ -47,13 +47,6 @@ public class Setting {
             scriptPlaces.add(scriptPlace);
     }
 
-    // public Setting(final String name, final ArrayList<String> scriptPlaces, final String value) {
-    // super();
-    // this.name = name;
-    // this.value = value;
-    // this.scriptPlaces = scriptPlaces;
-    // }
-
     public String getName() {
         return name;
     }

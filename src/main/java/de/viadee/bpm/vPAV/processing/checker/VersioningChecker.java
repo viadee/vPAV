@@ -73,6 +73,11 @@ public class VersioningChecker extends AbstractElementChecker {
         this.resourcesNewestVersions = resourcesNewestVersions;
     }
 
+    /**
+     * Check versions of referenced beans and/or classes
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 

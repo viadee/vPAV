@@ -46,7 +46,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * parses bean mapping file for recognition in the analysis
+ * Parses bean mapping file for recognition in the analysis
  *
  */
 public class BeanMappingXmlParser {
@@ -69,7 +69,7 @@ public class BeanMappingXmlParser {
 
     /**
      * Read Xml document
-     * 
+     *
      * @param beanMappingFile
      * @return
      * @throws ParserConfigurationException
@@ -85,8 +85,8 @@ public class BeanMappingXmlParser {
     }
 
     /**
-     * get bean names with corresponding classes from xml document
-     * 
+     * Get bean names with corresponding classes from xml document
+     *
      * @param xmlDoc
      * @return
      */

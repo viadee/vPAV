@@ -67,6 +67,11 @@ public class NoExpressionChecker extends AbstractElementChecker {
         this.path = path;
     }
 
+    /**
+     * Check if ServiceTasks, BusinessRuleTasks, SendTasks and ScriptTasks use expressions against best practices
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(BpmnElement element) {
 

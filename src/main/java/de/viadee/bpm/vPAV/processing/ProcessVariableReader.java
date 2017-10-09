@@ -137,10 +137,10 @@ public final class ProcessVariableReader {
 
     /**
      * Analyze Output Parameters for variables
-     * 
+     *
      * @param element
      * @return Map of ProcessVariable
-     * 
+     *
      */
     private Map<String, ProcessVariable> getVariablesFromOutput(BpmnElement element) {
         final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
@@ -172,10 +172,10 @@ public final class ProcessVariableReader {
 
     /**
      * Analyze HTML Forms for variables
-     * 
+     *
      * @param element
      * @return Map of ProcessVariable
-     * 
+     *
      */
     private Map<String, ProcessVariable> getVariablesFromHTML(BpmnElement element) {
         final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
@@ -255,13 +255,11 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from execution listeners
+     * Get process variables from execution listeners
      *
      * @param extensionElements
      * @param processdefinition
      * @param elementId
-     * @param cl
-     *            ClassLoader
      * @return variables
      */
     private Map<String, ProcessVariable> getVariablesFromExecutionListener(final BpmnElement element,
@@ -306,15 +304,13 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from task listeners
+     * Get process variables from task listeners
      *
      * TODO: generalise this method eventually
      *
      * @param extensionElements
      * @param processdefinition
      * @param elementId
-     * @param cl
-     *            ClassLoader
      * @return variables
      */
     private Map<String, ProcessVariable> getVariablesFromTaskListener(final BpmnElement element,
@@ -359,7 +355,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from form fields (user tasks)
+     * Get process variables from form fields (user tasks)
      *
      * @param extensionElements
      * @param processdefinition
@@ -389,7 +385,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from camunda input/output associations (call activities)
+     * Get process variables from camunda input/output associations (call activities)
      *
      * @param element
      * @param extensionElements
@@ -430,10 +426,9 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from sequence flow conditions
+     * Get process variables from sequence flow conditions
      *
      * @param element
-     * @param cl
      * @return variables
      */
     private Map<String, ProcessVariable> searchVariablesFromSequenceFlow(final BpmnElement element) {
@@ -477,8 +472,6 @@ public final class ProcessVariableReader {
      * Analyse all types of tasks for process variables
      *
      * @param element
-     * @param cl
-     *            ClassLoader
      * @return variables
      */
     private Map<String, ProcessVariable> getVariablesFromTask(final BpmnElement element) {
@@ -664,8 +657,6 @@ public final class ProcessVariableReader {
      *
      * @param classFile
      * @param element
-     * @param cl
-     *            ClassLoader
      * @return variables
      * @throws MalformedURLException
      */
@@ -686,8 +677,6 @@ public final class ProcessVariableReader {
      * Checks an external groovy script for process variables (read/write).
      *
      * @param groovyFile
-     * @param cl
-     *            ClassLoader
      * @return variables
      */
     private Map<String, ProcessVariable> getVariablesFromGroovyScript(final String groovyFile,
@@ -704,7 +693,6 @@ public final class ProcessVariableReader {
      *
      * @param fileName
      * @param element
-     * @param cl
      * @return variables
      */
     private Map<String, ProcessVariable> readResourceFile(final String fileName,
@@ -810,7 +798,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * search read process variables
+     * Search read process variables
      *
      * @param element
      * @param fileName
@@ -853,7 +841,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * search written process variables
+     * Search written process variables
      *
      * @param element
      * @param fileName
@@ -896,7 +884,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * search removed process variables
+     * Search removed process variables
      *
      * @param element
      * @param chapter

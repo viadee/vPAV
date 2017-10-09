@@ -61,6 +61,11 @@ public class XorNamingConventionChecker extends AbstractElementChecker {
         this.path = path;
     }
 
+    /**
+     * Check if XOR gateways and their outgoing edges adhere to naming conventions
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 

@@ -34,12 +34,11 @@ import java.util.Map;
 
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
-/*
- * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- *
- * A utility class that attaches some "bookkeeping" information to a vertex. Used when searching the graph for a path
- * between two vertices.
+/**
+ * University of Washington, Computer Science and Engineering, Course 373, Winter 2011, Jessica Miller A utility class
+ * that attaches "bookkeeping" information to a vertex. used when searching the graph for a path between two vertices
  */
+
 public class VertexInfo {
 
     /** The vertex itself. */

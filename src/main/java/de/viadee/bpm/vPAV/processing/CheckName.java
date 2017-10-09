@@ -34,6 +34,13 @@ import org.w3c.dom.Element;
 
 public class CheckName {
 
+    /**
+     * Checks the name of a BaseElement and returns the identifier if no name is specified
+     *
+     * @param baseElement
+     *            Holds the BaseElement of a given BPMN element
+     * @return identifier
+     */
     public static String checkName(final BaseElement baseElement) {
 
         String identifier = baseElement.getAttributeValue("name");
@@ -45,6 +52,13 @@ public class CheckName {
         return identifier;
     }
 
+    /**
+     * Checks the name of a Timer and returns the identifier if no name is specified
+     *
+     * @param element
+     *            Holds the element of a given timerEvent
+     * @return identifier
+     */
     public static String checkTimer(final Element element) {
 
         String identifier = element.getAttribute("name");

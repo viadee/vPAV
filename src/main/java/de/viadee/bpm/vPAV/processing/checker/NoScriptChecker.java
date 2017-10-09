@@ -50,13 +50,6 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
-/**
- * Class NoScriptChecker
- *
- * Checks a bpmn model, if there is any script (Script inside a script task - Script as an execution listener - Script
- * as a task listener - Script inside an inputOutput parameter mapping)
- *
- */
 public class NoScriptChecker extends AbstractElementChecker {
 
     private final String path;
@@ -74,6 +67,12 @@ public class NoScriptChecker extends AbstractElementChecker {
         this.path = path;
     }
 
+    /**
+     * Checks a bpmn model, if there is any script (Script inside a script task - Script as an execution listener -
+     * Script as a task listener - Script inside an inputOutput parameter mapping)
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 

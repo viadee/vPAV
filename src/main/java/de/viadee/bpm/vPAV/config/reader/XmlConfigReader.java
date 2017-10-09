@@ -49,14 +49,12 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 
 /**
- * 
- * dient dazu die config Datei (ruleset.xml) einzulesen und die Regeln auszulesen
- * 
- * Annahmen und Voraussetzungen sind ... eine vorhandene xml Datei in resources
- *
+ * Used to read the config file (ruleSet.xml) and extract the configured rules Requirements: Exisiting ruleSet.xml in
+ * src/test/resources
  */
 public final class XmlConfigReader implements ConfigReader {
 
+    @Override
     public Map<String, Rule> read(final String file) throws ConfigReaderException {
 
         try {

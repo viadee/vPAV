@@ -36,13 +36,6 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-/**
- * 
- * dient dazu...
- * 
- * Annahmen und Voraussetzungen sind...
- *
- */
 @XmlRootElement(name = "rule")
 @XmlType(propOrder = { "name", "state", "settings", "elementConventions", "modelConventions" })
 public class XmlRule {

@@ -102,6 +102,12 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         this.path = path;
     }
 
+    /**
+     * Check for JavaDelegates in Tasks
+     *
+     * @return issues
+     */
+
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 
@@ -295,6 +301,16 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         return issues;
     }
 
+    /**
+     * Checks for JavaDelegates in Listeners
+     *
+     * @param element
+     * @param aClass
+     * @param aDelegate
+     * @param aExpression
+     * @param taskListener
+     * @return issues
+     */
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
             ArrayList<String> aDelegate, ArrayList<String> aExpression, boolean taskListener) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -366,6 +382,15 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         return issues;
     }
 
+    /**
+     * Check if class reference for a given element exists
+     *
+     * @param element
+     * @param className
+     * @param listener
+     * @param taskListener
+     * @return issues
+     */
     private Collection<CheckerIssue> checkClassFile(final BpmnElement element, final String className,
             final boolean listener, final boolean taskListener) {
 
