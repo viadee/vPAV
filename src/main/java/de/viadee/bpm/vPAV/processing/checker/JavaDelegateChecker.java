@@ -174,7 +174,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task with no class name"));
+                            "task '" + bpmnElement.getAttributeValue("name")
+                                    + "' with no java class name. (compare model: Details, Java Class)"));
                 } else {
                     issues.addAll(checkClassFile(element, classAttr, false, false));
                 }
@@ -187,7 +188,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task with no delegate expression"));
+                            "task '" + bpmnElement.getAttributeValue("name")
+                                    + "' with no delegate expression. (compare model: Details, Delegate Expression)"));
                 } else {
                     // check validity of a bean
                     if (RuntimeConfig.getInstance().getBeanMapping() != null) {
@@ -228,7 +230,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "task with no external topic"));
+                            "task '" + bpmnElement.getAttributeValue("name") + "' with no external topic"));
                 }
             }
 

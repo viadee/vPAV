@@ -77,7 +77,7 @@ public class ProcessVariablesModelChecker implements ModelChecker {
                             anomaly.getAnomaly(), paths,
                             "process variable (" + var.getName() + ") will be overwritten in activity '"
                                     + var.getElement().getBaseElement().getAttributeValue("name")
-                                    + " without use. (compare model: "
+                                    + "' without use. (compare model: "
                                     + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
                 } else if (anomaly.getAnomaly() == Anomaly.DU) {
                     issues.add(new CheckerIssue(rule.getName(), determineCriticality(anomaly.getAnomaly()),

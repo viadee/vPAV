@@ -358,7 +358,8 @@ public class VersioningChecker extends AbstractElementChecker {
             issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                     element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
                     element.getBaseElement().getAttributeValue("name"), null, null, null,
-                    "bean reference is deprecated or file with version does not exist for bean '"
+                    "bean reference '" + beanReference
+                            + "' is deprecated or file with version does not exist for bean '"
                             + expression + "'"));
         }
     }
