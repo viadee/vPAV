@@ -112,13 +112,7 @@ public class FileScanner {
 
         URL[] urls;
         LinkedList<File> files = new LinkedList<File>();
-
-        URLClassLoader ucl;
-        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
-            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
-        } else {
-            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
-        }
+        final URLClassLoader ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
         urls = ucl.getURLs();
 
         // retrieve all jars during runtime and pass them to get class files
@@ -161,8 +155,8 @@ public class FileScanner {
     }
 
     /**
-     * Process classes and add compiled classes to javaResources
-     * Also adss all filenames to includedFiles 
+     * Process classes and add compiled classes to javaResources Also adss all filenames to includedFiles
+     *
      * @param classes
      */
     private void addResources(LinkedList<File> classes) {
@@ -236,6 +230,7 @@ public class FileScanner {
         for (final String classPathElement : classPathElements) {
             classpathElementUrls.add(new File(classPathElement).toURI().toURL());
         }
+        classpathElementUrls.add(new File(ConstantsConfig.TEST_BASEPATH).toURI().toURL());
         classpathElementUrls.add(new File(ConstantsConfig.JAVAPATH).toURI().toURL());
         return new URLClassLoader(classpathElementUrls.toArray(new URL[classpathElementUrls.size()]),
                 Thread.currentThread().getContextClassLoader());
