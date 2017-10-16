@@ -115,7 +115,7 @@ public abstract class AbstractRunner {
      *
      * @return Map(String, Rule) ruleSet
      */
-    public static Map<String, Rule> readConfig() {
+    private static Map<String, Rule> readConfig() {
         createBaseFolder();
         Map<String, Rule> rules = new XmlConfigReader().getDeactivatedRuleSet();
         final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
@@ -168,14 +168,14 @@ public abstract class AbstractRunner {
      * @param rules
      *            Map of rules
      */
-    public static void scanClassPath(Map<String, Rule> rules) {
+    private static void scanClassPath(Map<String, Rule> rules) {
         fileScanner = new FileScanner(rules);
     }
 
     /**
      * Initializes the variableScanner to scan and read outer process variables with the current javaResources
      */
-    public static void getProcessVariables() {
+    private static void getProcessVariables() {
         variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
         readOuterProcessVariables(variableScanner);
     }
@@ -189,7 +189,7 @@ public abstract class AbstractRunner {
      * @throws RuntimeException
      *             Config item couldn't be read
      */
-    public static void createIssues(Map<String, Rule> rules) throws RuntimeException {
+    private static void createIssues(Map<String, Rule> rules) throws RuntimeException {
         issues = checkModels(rules, fileScanner, variableScanner);
     }
 
@@ -199,7 +199,7 @@ public abstract class AbstractRunner {
      * @throws RuntimeException
      *             Ignored issues couldn't be read successfully
      */
-    public static void removeIgnoredIssues() throws RuntimeException {
+    private static void removeIgnoredIssues() throws RuntimeException {
         filteredIssues = filterIssues(issues);
     }
 
@@ -211,7 +211,7 @@ public abstract class AbstractRunner {
      * @throws RuntimeException
      *             Abort if writer can not be instantiated
      */
-    public static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
+    private static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
         if (filteredIssues.size() > 0) {
             final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
             final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();
