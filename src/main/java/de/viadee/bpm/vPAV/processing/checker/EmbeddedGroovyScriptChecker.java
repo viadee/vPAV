@@ -47,6 +47,7 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import groovy.lang.GroovyShell;
+import groovy.lang.MissingPropertyException;
 
 /**
  * Class EmbeddedGroovyScriptChecker
@@ -207,10 +208,17 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
         final GroovyShell shell = new GroovyShell();
         try {
             shell.evaluate(scriptText);
-        } catch (final CompilationFailedException ex) {
-            return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
-                    baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                    ex.getMessage());
+        } catch (final CompilationFailedException | MissingPropertyException ex) {
+            if (ex instanceof CompilationFailedException) {
+                return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+                        baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                        ex.getMessage());
+            } else {
+                return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+                        baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                        "GroovyScript could not be evaluated. '" + ex.getMessage() + "'");
+            }
+
         }
         return null;
     }
