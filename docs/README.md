@@ -229,8 +229,7 @@ The value specifies the location of the checkerclass.
 ```
 ##### Requirements
 - Your checker-class have to extends the *AbstractElementChecker*. 
-- Only the parameter `Rule` is allowed in the constructor.
-- Your class must have the method `public Collection<CheckerIssue> check(final BpmnElement element)`.
+- Only the parameter `de.viadee.bpm.vPAV.config.model.Rule` is allowed in the constructor.
 
 #### Additionally required dependencies 
 
