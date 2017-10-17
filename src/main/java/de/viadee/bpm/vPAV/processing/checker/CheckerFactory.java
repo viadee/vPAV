@@ -29,16 +29,19 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
-import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
 import org.camunda.bpm.model.bpmn.instance.Task;
 
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -50,6 +53,8 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 public final class CheckerFactory {
 
     public static String implementation;
+
+    private final static String externLocation = "external_Location";
 
     /**
      * create checkers
@@ -88,7 +93,8 @@ public final class CheckerFactory {
         final Rule dmnTaskRule = ruleConf.get(getClassName(DmnTaskChecker.class));
         if (dmnTaskRule == null)
             throw new ConfigItemNotFoundException(getClassName(DmnTaskChecker.class) + " not found");
-        if (dmnTaskRule.isActive() && baseElement instanceof BusinessRuleTask) {
+        if (dmnTaskRule.isActive() &&
+                baseElement instanceof BusinessRuleTask) {
             checkers.add(new DmnTaskChecker(dmnTaskRule, path));
         }
 
@@ -96,7 +102,8 @@ public final class CheckerFactory {
         if (xorNamingConventionRule == null)
             throw new ConfigItemNotFoundException(getClassName(XorNamingConventionChecker.class) + " not found");
         if (xorNamingConventionRule.isActive()) {
-            checkers.add(new XorNamingConventionChecker(xorNamingConventionRule, path));
+            checkers.add(new XorNamingConventionChecker(xorNamingConventionRule,
+                    path));
         }
 
         final Rule noScriptCheckerRule = ruleConf.get(getClassName(NoScriptChecker.class));
@@ -109,18 +116,18 @@ public final class CheckerFactory {
         final Rule processVariablesNameConventionRule = ruleConf
                 .get(getClassName(ProcessVariablesNameConventionChecker.class));
         if (processVariablesNameConventionRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(ProcessVariablesNameConventionChecker.class) + " not found");
+            throw new ConfigItemNotFoundException(getClassName(ProcessVariablesNameConventionChecker.class) +
+                    " not found");
         if (processVariablesNameConventionRule.isActive()) {
             checkers.add(new ProcessVariablesNameConventionChecker(processVariablesNameConventionRule));
         }
 
-        final Rule taskNamingConventionRule = ruleConf
-                .get(getClassName(TaskNamingConventionChecker.class));
+        final Rule taskNamingConventionRule = ruleConf.get(getClassName(TaskNamingConventionChecker.class));
         if (taskNamingConventionRule == null)
             throw new ConfigItemNotFoundException(
                     getClassName(TaskNamingConventionChecker.class) + " not found");
-        if (baseElement instanceof Task && taskNamingConventionRule.isActive()) {
+        if (baseElement instanceof Task &&
+                taskNamingConventionRule.isActive()) {
             checkers.add(new TaskNamingConventionChecker(taskNamingConventionRule));
         }
 
@@ -131,8 +138,7 @@ public final class CheckerFactory {
             checkers.add(new VersioningChecker(versioningRule, resourcesNewestVersions));
         }
 
-        final Rule embeddedGroovyScriptRule = ruleConf
-                .get(getClassName(EmbeddedGroovyScriptChecker.class));
+        final Rule embeddedGroovyScriptRule = ruleConf.get(getClassName(EmbeddedGroovyScriptChecker.class));
         if (embeddedGroovyScriptRule == null)
             throw new ConfigItemNotFoundException(
                     getClassName(EmbeddedGroovyScriptChecker.class) + " not found");
@@ -140,8 +146,7 @@ public final class CheckerFactory {
             checkers.add(new EmbeddedGroovyScriptChecker(embeddedGroovyScriptRule));
         }
 
-        final Rule timerExpressionRule = ruleConf
-                .get(getClassName(TimerExpressionChecker.class));
+        final Rule timerExpressionRule = ruleConf.get(getClassName(TimerExpressionChecker.class));
         if (timerExpressionRule == null)
             throw new ConfigItemNotFoundException(
                     getClassName(TimerExpressionChecker.class) + " not found");
@@ -149,8 +154,7 @@ public final class CheckerFactory {
             checkers.add(new TimerExpressionChecker(timerExpressionRule, path));
         }
 
-        final Rule elementIdConventionRule = ruleConf
-                .get(getClassName(ElementIdConventionChecker.class));
+        final Rule elementIdConventionRule = ruleConf.get(getClassName(ElementIdConventionChecker.class));
         if (elementIdConventionRule == null)
             throw new ConfigItemNotFoundException(
                     getClassName(ElementIdConventionChecker.class) + " not found");
@@ -158,8 +162,7 @@ public final class CheckerFactory {
             checkers.add(new ElementIdConventionChecker(elementIdConventionRule));
         }
 
-        final Rule noExpressionCheckerRule = ruleConf
-                .get(getClassName(NoExpressionChecker.class));
+        final Rule noExpressionCheckerRule = ruleConf.get(getClassName(NoExpressionChecker.class));
         if (noExpressionCheckerRule == null)
             throw new ConfigItemNotFoundException(
                     getClassName(NoExpressionChecker.class) + " not found");
@@ -167,8 +170,7 @@ public final class CheckerFactory {
             checkers.add(new NoExpressionChecker(noExpressionCheckerRule, path));
         }
 
-        final Rule messageEventCheckerRule = ruleConf
-                .get(getClassName(MessageEventChecker.class));
+        final Rule messageEventCheckerRule = ruleConf.get(getClassName(MessageEventChecker.class));
         if (messageEventCheckerRule == null)
             throw new ConfigItemNotFoundException(
                     getClassName(MessageEventChecker.class) + " not found");
@@ -176,10 +178,44 @@ public final class CheckerFactory {
             checkers.add(new MessageEventChecker(messageEventCheckerRule));
         }
 
+        checkers.addAll(addExternalCheckers(ruleConf));
+
         return checkers;
     }
 
     private static String getClassName(Class<?> clazz) {
         return clazz.getSimpleName();
+    }
+
+    /**
+     * Load an external checker class
+     * 
+     * @param ruleConf
+     *            Map of ruleSet
+     * @return Collection of checkers
+     */
+    private static Collection<ElementChecker> addExternalCheckers(final Map<String, Rule> ruleConf) {
+        final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
+
+        for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
+            if (!Arrays.asList(RuntimeConfig.getInstance().getAllRules()).contains(rule.getKey())
+                    && rule.getValue().isActive()
+                    && rule.getValue().getSettings().containsKey(externLocation)) {
+
+                String fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
+                        + "." + rule.getValue().getName();
+
+                try {
+                    Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class);
+                    AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue());
+                    checkers.add(aChecker);
+                } catch (NoSuchMethodException | SecurityException | ClassNotFoundException
+                        | InstantiationException | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return checkers;
     }
 }
