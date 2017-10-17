@@ -196,13 +196,25 @@ public class SpringTestConfig {
 }
 ```
 #### Add external checker 
-You can also simply add your own checker.
-To do this, the project with the checker-class have to add the dependency (vPAV) to the POM ([see above](#maven)).
-The rule must have setting tag with the name attribute "external_Location":
+You can also simply add your own checker. 
+You can find an example project [here](https://github.com/viadee/vPAV_checker_plugin_example).
+In your projects you have to add the dependency to the project with the checker-class(es) (see example below) and to vPAV ([see above](#maven)):
+
+```xml
+<dependency>
+	<groupId>de.viadee</groupId>
+	<artifactId>vPAV_checker_plugin_example</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+Run this project (e.g. vPAV_checker_plugin_example) as maven install (make sure to package as jar). 
+
+The `setting name="external_Location"` defines the checker as an external checker.
+The value specifies the location of the checkerclass.
 
 ```xml
 <rule>
-	<name>NameOfExternalCheckerClass</name>
+	<name>TaskNamingConventionCheckerExtern</name>
 	<state>true</state>
 	<settings>
 		<setting name="external_Location">de.viadee.vPAV_checker_plugin_example</setting>
@@ -215,10 +227,10 @@ The rule must have setting tag with the name attribute "external_Location":
 	</elementConventions>
 </rule>
 ```
-
-The `setting name="external_Location"` defines the checker as an external checker.
-The value specifies the location of the checkerclass.
-You can find an example project [here](https://github.com/viadee/vPAV_checker_plugin_example).
+##### Requirements
+- Your checker-class have to extends the *AbstractElementChecker*. 
+- Only the parameter `Rule` is allowed in the constructor.
+- Your class must have the method `public Collection<CheckerIssue> check(final BpmnElement element)`.
 
 #### Additionally required dependencies 
 
