@@ -34,44 +34,48 @@ import java.util.Map;
 
 public class Rule {
 
-  private String name;
+    private String name;
 
-  private boolean isActive;
+    private boolean isActive;
 
-  private Map<String, Setting> settings;
+    private Map<String, Setting> settings;
 
-  private Collection<ElementConvention> elementConventions;
+    private Collection<ElementConvention> elementConventions;
 
-  private Collection<ModelConvention> modelConventions;
+    private Collection<ModelConvention> modelConventions;
 
-  public Rule(final String name, final boolean isActive, final Map<String, Setting> settings,
-      final Collection<ElementConvention> elementConventions,
-      final Collection<ModelConvention> modelConventions) {
-    super();
-    this.name = name;
-    this.isActive = isActive;
-    this.settings = settings;
-    this.elementConventions = elementConventions;
-    this.modelConventions = modelConventions;
-  }
+    public Rule(final String name, final boolean isActive, final Map<String, Setting> settings,
+            final Collection<ElementConvention> elementConventions,
+            final Collection<ModelConvention> modelConventions) {
+        super();
+        this.name = name;
+        this.isActive = isActive;
+        this.settings = settings;
+        this.elementConventions = elementConventions;
+        this.modelConventions = modelConventions;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public boolean isActive() {
-    return isActive;
-  }
+    public boolean isActive() {
+        return isActive;
+    }
 
-  public Map<String, Setting> getSettings() {
-    return settings;
-  }
+    public Map<String, Setting> getSettings() {
+        return settings;
+    }
 
-  public Collection<ElementConvention> getElementConventions() {
-    return elementConventions;
-  }
+    public Collection<ElementConvention> getElementConventions() {
+        return elementConventions;
+    }
 
-  public Collection<ModelConvention> getModelConventions() {
-    return modelConventions;
-  }
+    public Collection<ModelConvention> getModelConventions() {
+        return modelConventions;
+    }
+
+    public void deactivate() {
+        isActive = false;
+    }
 }

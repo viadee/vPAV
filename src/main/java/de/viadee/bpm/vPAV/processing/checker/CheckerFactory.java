@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
@@ -55,6 +56,8 @@ public final class CheckerFactory {
     public static String implementation;
 
     private final static String externLocation = "external_Location";
+
+    private static Logger logger = Logger.getLogger(CheckerFactory.class.getName());
 
     /**
      * create checkers
@@ -203,7 +206,7 @@ public final class CheckerFactory {
                     && rule.getValue().getSettings().containsKey(externLocation)) {
 
                 String fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
-                        + "." + rule.getValue().getName();
+                        + "." + rule.getValue().getName().trim();
 
                 try {
                     Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class);
@@ -212,7 +215,9 @@ public final class CheckerFactory {
                 } catch (NoSuchMethodException | SecurityException | ClassNotFoundException
                         | InstantiationException | IllegalAccessException | IllegalArgumentException
                         | InvocationTargetException e) {
-                    e.printStackTrace();
+                    logger.warning("Class " + fullyQualifiedName
+                            + " not found or couldn't be instantiated");
+                    rule.getValue().deactivate();
                 }
             }
         }
