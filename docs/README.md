@@ -195,7 +195,30 @@ public class SpringTestConfig {
 
 }
 ```
+#### Add external checker 
+You can also simply add your own checker.
+To do this, the project with the checker-class have to add the dependency (vPAV) to the POM ([see above](#maven)).
+The rule must have setting tag with the name attribute "external_Location":
 
+```xml
+<rule>
+	<name>NameOfExternalCheckerClass</name>
+	<state>true</state>
+	<settings>
+		<setting name="external_Location">de.viadee.vPAV_checker_plugin_example</setting>
+	</settings>
+	<elementConventions>
+		<elementConvention>
+			<name>convention</name>
+			<pattern>[A-ZÄÖÜ][a-zäöü\\\-\\\s]+</pattern>
+		</elementConvention>
+	</elementConventions>
+</rule>
+```
+
+The `setting name="external_Location"` defines the checker as an external checker.
+The value specifies the location of the checkerclass.
+You can find an example project [here](https://github.com/viadee/vPAV_checker_plugin_example).
 
 #### Additionally required dependencies 
 
