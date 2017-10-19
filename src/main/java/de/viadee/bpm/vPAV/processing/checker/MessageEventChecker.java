@@ -46,8 +46,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class MessageEventChecker extends AbstractElementChecker {
 
-    public MessageEventChecker(final Rule rule) {
-        super(rule);
+    public MessageEventChecker(final Rule rule, final String path) {
+        super(rule, path);
     }
 
     /**

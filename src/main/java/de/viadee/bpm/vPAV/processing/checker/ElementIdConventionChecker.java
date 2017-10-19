@@ -44,8 +44,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class ElementIdConventionChecker extends AbstractElementChecker {
 
-    public ElementIdConventionChecker(final Rule rule) {
-        super(rule);
+    public ElementIdConventionChecker(final Rule rule, final String path) {
+        super(rule, path);
     }
 
     /**

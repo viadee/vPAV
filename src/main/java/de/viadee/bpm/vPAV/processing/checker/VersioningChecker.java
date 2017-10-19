@@ -68,8 +68,8 @@ public class VersioningChecker extends AbstractElementChecker {
 
     private Collection<String> resourcesNewestVersions;
 
-    public VersioningChecker(final Rule rule, final Collection<String> resourcesNewestVersions) {
-        super(rule);
+    public VersioningChecker(final Rule rule, final String path, final Collection<String> resourcesNewestVersions) {
+        super(rule, path);
         this.resourcesNewestVersions = resourcesNewestVersions;
     }
 

@@ -64,8 +64,6 @@ import net.time4j.range.MomentInterval;
 
 public class TimerExpressionChecker extends AbstractElementChecker {
 
-    final String path;
-
     final String timeDate = "timeDate";
 
     final String timeDuration = "timeDuration";
@@ -73,8 +71,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
     final String timeCycle = "timeCycle";
 
     public TimerExpressionChecker(final Rule rule, final String path) {
-        super(rule);
-        this.path = path;
+        super(rule, path);
     }
 
     /**

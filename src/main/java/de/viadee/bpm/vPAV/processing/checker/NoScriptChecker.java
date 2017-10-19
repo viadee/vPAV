@@ -52,8 +52,6 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoScriptChecker extends AbstractElementChecker {
 
-    private final String path;
-
     private final String process = "Process";
 
     private final String subProcess = "SubProcess";
@@ -63,8 +61,7 @@ public class NoScriptChecker extends AbstractElementChecker {
     private final String sequenceFlow = "SequenceFlow";
 
     public NoScriptChecker(final Rule rule, final String path) {
-        super(rule);
-        this.path = path;
+        super(rule, path);
     }
 
     /**

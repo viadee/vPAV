@@ -60,11 +60,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoExpressionChecker extends AbstractElementChecker {
 
-    public String path;
-
     public NoExpressionChecker(final Rule rule, final String path) {
-        super(rule);
-        this.path = path;
+        super(rule, path);
     }
 
     /**

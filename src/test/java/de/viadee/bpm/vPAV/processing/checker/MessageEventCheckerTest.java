@@ -84,7 +84,7 @@ public class MessageEventCheckerTest {
     @Test
     public void testStartEvent() {
         final String PATH = BASE_PATH + "MessageEventChecker_testStartEvent.bpmn";
-        checker = new MessageEventChecker(rule);
+        checker = new MessageEventChecker(rule, null);
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -116,7 +116,7 @@ public class MessageEventCheckerTest {
     @Test
     public void testEndEvent() {
         final String PATH = BASE_PATH + "MessageEventChecker_testEndEvent.bpmn";
-        checker = new MessageEventChecker(rule);
+        checker = new MessageEventChecker(rule, null);
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -148,7 +148,7 @@ public class MessageEventCheckerTest {
     @Test
     public void testMixedEvents() {
         final String PATH = BASE_PATH + "MessageEventChecker_testMixedEvents.bpmn";
-        checker = new MessageEventChecker(rule);
+        checker = new MessageEventChecker(rule, null);
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

@@ -61,7 +61,7 @@ public class TaskNamingConventionCheckerTest {
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        checker = new TaskNamingConventionChecker(createRule());
+        checker = new TaskNamingConventionChecker(createRule(), null);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java/");

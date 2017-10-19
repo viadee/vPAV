@@ -57,8 +57,8 @@ import groovy.lang.MissingPropertyException;
  */
 public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
-    public EmbeddedGroovyScriptChecker(final Rule rule) {
-        super(rule);
+    public EmbeddedGroovyScriptChecker(final Rule rule, final String path) {
+        super(rule, path);
     }
 
     /**

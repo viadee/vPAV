@@ -63,8 +63,6 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class JavaDelegateChecker extends AbstractElementChecker {
 
-    private final String path;
-
     private final String c_executionList = "camunda:executionListener";
 
     private final String c_taskList = "camunda:taskListener";
@@ -98,8 +96,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
     private final String superClass_abstBpmnActBeh = "AbstractBpmnActivityBehavior";
 
     public JavaDelegateChecker(final Rule rule, final String path) {
-        super(rule);
-        this.path = path;
+        super(rule, path);
     }
 
     /**

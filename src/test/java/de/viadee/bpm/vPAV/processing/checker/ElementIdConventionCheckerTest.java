@@ -61,7 +61,7 @@ public class ElementIdConventionCheckerTest {
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        checker = new ElementIdConventionChecker(createRule());
+        checker = new ElementIdConventionChecker(createRule(), null);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java/");

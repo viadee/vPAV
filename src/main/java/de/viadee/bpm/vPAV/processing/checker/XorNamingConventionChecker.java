@@ -54,11 +54,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class XorNamingConventionChecker extends AbstractElementChecker {
 
-    final private String path;
-
     public XorNamingConventionChecker(final Rule rule, final String path) {
-        super(rule);
-        this.path = path;
+        super(rule, path);
     }
 
     /**

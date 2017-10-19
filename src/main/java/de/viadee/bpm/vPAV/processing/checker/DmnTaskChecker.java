@@ -38,6 +38,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BPMNScanner;
@@ -54,11 +55,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
-    final private String path;
-
     public DmnTaskChecker(final Rule rule, String path) {
-        super(rule);
-        this.path = path;
+        super(rule, path);
     }
 
     /**
@@ -71,31 +69,33 @@ public class DmnTaskChecker extends AbstractElementChecker {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
         final BPMNScanner scan;
-        try {
-            scan = new BPMNScanner();
+        if (bpmnElement instanceof BusinessRuleTask) {
+            try {
+                scan = new BPMNScanner();
 
-            // read attributes from task
-            final String implementationAttr = scan.getImplementation(path, bpmnElement.getId());
+                // read attributes from task
+                final String implementationAttr = scan.getImplementation(path, bpmnElement.getId());
 
-            final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    "decisionRef");
-            if (implementationAttr != null) {
-                // check if DMN reference is not empty
-                if (implementationAttr.equals("camunda:decisionRef")) {
-                    if (dmnAttr == null || dmnAttr.trim().length() == 0) {
-                        // Error, because no delegateExpression has been configured
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
-                                "task " + CheckName.checkName(bpmnElement) + " with no dmn reference"));
-                    } else {
-                        issues.addAll(checkDMNFile(element, dmnAttr, path));
+                final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                        "decisionRef");
+                if (implementationAttr != null) {
+                    // check if DMN reference is not empty
+                    if (implementationAttr.equals("camunda:decisionRef")) {
+                        if (dmnAttr == null || dmnAttr.trim().length() == 0) {
+                            // Error, because no delegateExpression has been configured
+                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                    bpmnElement.getAttributeValue("name"), null, null, null,
+                                    "task " + CheckName.checkName(bpmnElement) + " with no dmn reference"));
+                        } else {
+                            issues.addAll(checkDMNFile(element, dmnAttr, path));
+                        }
                     }
                 }
+            } catch (ParserConfigurationException | SAXException | IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
         return issues;
     }
