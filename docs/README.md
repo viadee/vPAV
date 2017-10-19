@@ -229,7 +229,10 @@ The value specifies the location of the checkerclass.
 ```
 ##### Requirements
 - Your checker-class have to extends the *AbstractElementChecker*. 
-- Only the parameter `de.viadee.bpm.vPAV.config.model.Rule` is allowed in the constructor.
+- Only the parameters from the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `java.lang.String`) are allowed in the constructor.
+
+#### Checker instructions
+You can use the parameters `de.viadee.bpm.vPAV.config.model.Rule` and the `java.lang.String` which contains the path to the model. For example to use the `de.viadee.bpm.vPAV.BPMNScanner`.
 
 #### Additionally required dependencies 
 
