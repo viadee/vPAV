@@ -71,10 +71,10 @@ public class DmnTaskChecker extends AbstractElementChecker {
         final BPMNScanner scan;
         if (bpmnElement instanceof BusinessRuleTask) {
             try {
-                scan = new BPMNScanner();
+                scan = new BPMNScanner(path);
 
                 // read attributes from task
-                final String implementationAttr = scan.getImplementation(path, bpmnElement.getId());
+                final String implementationAttr = scan.getImplementation(bpmnElement.getId());
 
                 final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                         "decisionRef");

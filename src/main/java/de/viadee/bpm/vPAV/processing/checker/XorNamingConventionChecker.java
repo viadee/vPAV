@@ -73,11 +73,11 @@ public class XorNamingConventionChecker extends AbstractElementChecker {
         if (bpmnElement instanceof ExclusiveGateway) {
 
             try {
-                scan = new BPMNScanner();
+                scan = new BPMNScanner(path);
 
-                String xor_gateway = scan.getXorGateWays(path, bpmnElement.getId());
+                String xor_gateway = scan.getXorGateWays(bpmnElement.getId());
 
-                if (scan.getOutgoing(path, xor_gateway) > 1) {
+                if (scan.getOutgoing(xor_gateway) > 1) {
 
                     final ArrayList<ElementConvention> elementConventions = (ArrayList<ElementConvention>) rule
                             .getElementConventions();
@@ -108,7 +108,7 @@ public class XorNamingConventionChecker extends AbstractElementChecker {
                     }
 
                     // TODO: dont use indices
-                    final ArrayList<Node> edges = scan.getOutgoingEdges(path, bpmnElement.getId());
+                    final ArrayList<Node> edges = scan.getOutgoingEdges(bpmnElement.getId());
                     final String patternString2 = elementConventions.get(1).getPattern().trim();
 
                     for (int i = 0; i < edges.size(); i++) {

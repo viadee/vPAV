@@ -73,8 +73,8 @@ public class BPMNScannerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BPMNScanner scanner = new BPMNScanner();
-        String imp = scanner.getImplementation(PATH, element.getBaseElement().getId());
+        BPMNScanner scanner = new BPMNScanner(PATH);
+        String imp = scanner.getImplementation(element.getBaseElement().getId());
 
         assertTrue("Get unexpected implementation", imp.equals(impClass));
     }
@@ -100,8 +100,8 @@ public class BPMNScannerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BPMNScanner scanner = new BPMNScanner();
-        String imp = scanner.getImplementation(PATH, element.getBaseElement().getId());
+        BPMNScanner scanner = new BPMNScanner(PATH);
+        String imp = scanner.getImplementation(element.getBaseElement().getId());
 
         assertTrue("Get unexpected implementation", imp.equals(impEx));
     }
@@ -127,8 +127,8 @@ public class BPMNScannerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BPMNScanner scanner = new BPMNScanner();
-        String imp = scanner.getImplementation(PATH, element.getBaseElement().getId());
+        BPMNScanner scanner = new BPMNScanner(PATH);
+        String imp = scanner.getImplementation(element.getBaseElement().getId());
 
         assertTrue("Get unexpected implementation", imp.equals(impDel));
     }
@@ -154,8 +154,8 @@ public class BPMNScannerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BPMNScanner scanner = new BPMNScanner();
-        ArrayList<String> scripts = scanner.getScriptTypes(PATH, element.getBaseElement().getId());
+        BPMNScanner scanner = new BPMNScanner(PATH);
+        ArrayList<String> scripts = scanner.getScriptTypes(element.getBaseElement().getId());
 
         assertTrue("Get unexpected implementation", scripts.contains(scriptType));
     }
@@ -181,8 +181,8 @@ public class BPMNScannerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BPMNScanner scanner = new BPMNScanner();
-        String gwId = scanner.getXorGateWays(PATH, element.getBaseElement().getId());
+        BPMNScanner scanner = new BPMNScanner(PATH);
+        String gwId = scanner.getXorGateWays(element.getBaseElement().getId());
 
         assertTrue("Get unexpected Element", gwId.equals(gatewayId));
     }
@@ -208,8 +208,8 @@ public class BPMNScannerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BPMNScanner scanner = new BPMNScanner();
-        int out = scanner.getOutgoing(PATH, element.getBaseElement().getId());
+        BPMNScanner scanner = new BPMNScanner(PATH);
+        int out = scanner.getOutgoing(element.getBaseElement().getId());
 
         assertTrue("More or less outgoing sequentflows as expected", out == anzOut);
     }

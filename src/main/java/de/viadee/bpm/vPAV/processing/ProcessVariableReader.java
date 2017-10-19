@@ -149,10 +149,9 @@ public final class ProcessVariableReader {
             scopeElementId = scopeElement.getAttributeValue("id");
         }
         try {
-            BPMNScanner scanner = new BPMNScanner();
+            BPMNScanner scanner = new BPMNScanner(element.getProcessdefinition());
 
-            ArrayList<String> outVar = scanner.getOutputVariables(element.getProcessdefinition(),
-                    element.getBaseElement().getId());
+            ArrayList<String> outVar = scanner.getOutputVariables(element.getBaseElement().getId());
 
             for (String name : outVar)
                 processVariables.put(name,

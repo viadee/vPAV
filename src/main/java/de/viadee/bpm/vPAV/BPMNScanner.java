@@ -168,13 +168,20 @@ public class BPMNScanner {
      * The Camunda API's method "getimplementation" doesn't return the correct Implementation, so the we have to scan
      * the xml of the model for the implementation
      *
+     ** @param path
+     *            path to model
      * @throws ParserConfigurationException
      *             exception if document cant be parsed
+     * @throws IOException
+     *             Signals that an I/O exception of some sort has occurred
+     * @throws SAXException
+     *             Encapsulate a general SAX error or warning.
      */
-    public BPMNScanner() throws ParserConfigurationException {
+    public BPMNScanner(String path) throws ParserConfigurationException, SAXException, IOException {
         factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         builder = factory.newDocumentBuilder();
+        setModelVersion(path);
     }
 
     /**
@@ -202,8 +209,6 @@ public class BPMNScanner {
     /**
      * Return the Implementation of an specific element (sendTask, ServiceTask or BusinessRuleTask)
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -214,19 +219,13 @@ public class BPMNScanner {
      *             possible exception if file could not be parsed
      * @return return_implementation contains implementation
      */
-    public String getImplementation(String path, String id)
+    public String getImplementation(String id)
             throws SAXException, IOException, ParserConfigurationException {
         // List to hold return values
         String return_implementation = null;
 
         // List for all Task elements
         ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -294,8 +293,6 @@ public class BPMNScanner {
     /**
      * Return the Implementation of an specific element (endEvent and/or intermediateThrowEvent)
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -306,19 +303,13 @@ public class BPMNScanner {
      *             possible exception if file could not be parsed
      * @return return_implementation contains implementation
      */
-    public String getEventImplementation(String path, String id)
+    public String getEventImplementation(String id)
             throws SAXException, IOException, ParserConfigurationException {
         // List to hold return values
         String return_implementation = null;
 
         // List for all Task elements
         ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -380,8 +371,6 @@ public class BPMNScanner {
 
     /**
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @param listType
@@ -396,7 +385,7 @@ public class BPMNScanner {
      * @throws ParserConfigurationException
      *             possible exception if file could not be parsed
      */
-    public ArrayList<String> getListener(String path, String id, String listType, String extType)
+    public ArrayList<String> getListener(String id, String listType, String extType)
             throws SAXException, IOException, ParserConfigurationException {
 
         // list to hold return values
@@ -404,12 +393,6 @@ public class BPMNScanner {
 
         // List for all Task elements
         NodeList nodeListExtensionElements;
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         // search for script tag
 
@@ -464,8 +447,6 @@ public class BPMNScanner {
     /**
      * Check if model has an scriptTag
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -474,15 +455,12 @@ public class BPMNScanner {
      *             possible exception if file not found
      * @return scriptPlaces contains script type
      */
-    public ArrayList<String> getScriptTypes(String path, String id) throws SAXException, IOException {
+    public ArrayList<String> getScriptTypes(String id) throws SAXException, IOException {
         // bool to hold return values
         ArrayList<String> return_scriptType = new ArrayList<String>();
 
         // List for all Task elements
         NodeList nodeList;
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
 
         // search for script tag
         nodeList = doc.getElementsByTagName(scriptTag);
@@ -527,8 +505,6 @@ public class BPMNScanner {
     /**
      * Checks for scripts in conditional expressions
      * 
-     * @param path
-     *            path to model
      * @param id
      *            id of the element
      * @return boolean has condition Expression
@@ -539,13 +515,10 @@ public class BPMNScanner {
      * @throws ParserConfigurationException
      *             possible exception if file could not be parsed
      */
-    public boolean hasScriptInCondExp(String path, String id)
+    public boolean hasScriptInCondExp(String id)
             throws SAXException, IOException, ParserConfigurationException {
         // List for all Task elements
         NodeList nodeList = null;
-
-        // set Model Version and parse doc
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -597,8 +570,6 @@ public class BPMNScanner {
     /**
      * Return a list of used gateways for a given bpmn model
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -610,16 +581,11 @@ public class BPMNScanner {
      * @return gateway contains script type
      *
      */
-    public String getXorGateWays(String path, String id)
+    public String getXorGateWays(String id)
             throws SAXException, IOException, ParserConfigurationException {
         final NodeList nodeList;
 
         String gateway = "";
-
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -650,8 +616,6 @@ public class BPMNScanner {
     /**
      * Return number of outgoing
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -662,15 +626,10 @@ public class BPMNScanner {
      *             possible exception if file could not be parsed
      * @return outgoing number of outgoing
      */
-    public int getOutgoing(String path, String id) throws SAXException, IOException, ParserConfigurationException {
+    public int getOutgoing(String id) throws SAXException, IOException, ParserConfigurationException {
         final NodeList nodeList;
         String out = "";
         int outgoing = 0;
-
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -710,8 +669,6 @@ public class BPMNScanner {
     /**
      * check xor gateways for outgoing edges
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @return ArrayList of outgoing Nodes
@@ -722,17 +679,12 @@ public class BPMNScanner {
      * @throws ParserConfigurationException
      *             possible exception if file could not be parsed
      */
-    public ArrayList<Node> getOutgoingEdges(String path, String id)
+    public ArrayList<Node> getOutgoingEdges(String id)
             throws SAXException, IOException, ParserConfigurationException {
 
         ArrayList<Node> outgoingEdges = new ArrayList<Node>();
         NodeList nodeList = null;
         String out = "";
-
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -803,8 +755,6 @@ public class BPMNScanner {
     /**
      * get ids and timer definition for all timer event types
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @return Map with timerEventDefinition-Node and his child
@@ -815,17 +765,11 @@ public class BPMNScanner {
      * @throws SAXException
      *             possible exception while process xml
      */
-    public Map<Element, Element> getTimerImplementation(final String path, final String id)
+    public Map<Element, Element> getTimerImplementation(final String id)
             throws SAXException, IOException, ParserConfigurationException {
 
         // List for all Task elements
         ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -889,12 +833,9 @@ public class BPMNScanner {
         return c_exp;
     }
 
-    public ArrayList<String> getOutputVariables(String path, String id) throws SAXException, IOException {
+    public ArrayList<String> getOutputVariables(String id) throws SAXException, IOException {
         // List for all Task elements
         ArrayList<String> listVariables = new ArrayList<String>();
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
 
         NodeList nodeList = doc.getElementsByTagName(c_outPar);
 

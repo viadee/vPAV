@@ -81,11 +81,11 @@ public class NoScriptChecker extends AbstractElementChecker {
             if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)
                     && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(process)
                     && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(subProcess)) {
-                scan = new BPMNScanner();
+                scan = new BPMNScanner(path);
                 Map<String, Setting> settings = rule.getSettings();
 
                 // Check all Elements with camunda:script tag
-                ArrayList<String> scriptTypes = scan.getScriptTypes(path, bpmnElement.getAttributeValue("id"));
+                ArrayList<String> scriptTypes = scan.getScriptTypes(bpmnElement.getAttributeValue("id"));
                 if (scriptTypes != null && !scriptTypes.isEmpty()) {
                     if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
                         for (String place : scriptTypes)
@@ -119,7 +119,7 @@ public class NoScriptChecker extends AbstractElementChecker {
 
                 // Check SequenceFlow on script in conditionExpression
                 if (bpmnElement instanceof SequenceFlow) {
-                    boolean scriptCondExp = scan.hasScriptInCondExp(path, bpmnElement.getAttributeValue("id"));
+                    boolean scriptCondExp = scan.hasScriptInCondExp(bpmnElement.getAttributeValue("id"));
                     if (settings.containsKey(sequenceFlow)) {
                         ArrayList<String> allowedPlaces = settings.get(sequenceFlow).getScriptPlaces();
                         if (!allowedPlaces.isEmpty())

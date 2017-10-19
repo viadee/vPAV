@@ -121,22 +121,22 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         ArrayList<String> taskExpression = new ArrayList<String>();
 
         try {
-            scan = new BPMNScanner();
+            scan = new BPMNScanner(path);
             // read attributes from task
             if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
                     || bpmnElement instanceof SendTask))
-                implementationAttr = scan.getImplementation(path, bpmnElement.getId());
+                implementationAttr = scan.getImplementation(bpmnElement.getId());
 
             if (bpmnElement instanceof UserTask) {
-                taskDelegate = scan.getListener(path, bpmnElement.getId(), attr_del, c_taskList);
-                taskClass = scan.getListener(path, bpmnElement.getId(), attr_class, c_taskList);
-                taskExpression = scan.getListener(path, bpmnElement.getId(), attr_ex, c_taskList);
+                taskDelegate = scan.getListener(bpmnElement.getId(), attr_del, c_taskList);
+                taskClass = scan.getListener(bpmnElement.getId(), attr_class, c_taskList);
+                taskExpression = scan.getListener(bpmnElement.getId(), attr_ex, c_taskList);
             }
 
             if (bpmnElement.getElementType().getTypeName()
                     .equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT)
                     || bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)) {
-                final String tempImp = scan.getEventImplementation(path, bpmnElement.getId());
+                final String tempImp = scan.getEventImplementation(bpmnElement.getId());
                 if (tempImp != null && tempImp.contains("=")) {
                     implementationAttr = tempImp.substring(0, tempImp.indexOf("=")).trim();
                     implementation = tempImp.substring(tempImp.indexOf("=") + 1, tempImp.length()).replace("\"", "")
@@ -144,9 +144,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 }
             }
 
-            executionDelegate = scan.getListener(path, bpmnElement.getId(), attr_del, c_executionList);
-            executionClass = scan.getListener(path, bpmnElement.getId(), attr_class, c_executionList);
-            executionExpression = scan.getListener(path, bpmnElement.getId(), attr_ex, c_executionList);
+            executionDelegate = scan.getListener(bpmnElement.getId(), attr_del, c_executionList);
+            executionClass = scan.getListener(bpmnElement.getId(), attr_class, c_executionList);
+            executionExpression = scan.getListener(bpmnElement.getId(), attr_ex, c_executionList);
 
         } catch (SAXException | IOException | ParserConfigurationException e) {
             e.printStackTrace();

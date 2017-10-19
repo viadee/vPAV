@@ -95,8 +95,8 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 
             try {
 
-                scan = new BPMNScanner();
-                list = scan.getTimerImplementation(path, baseElement.getId());
+                scan = new BPMNScanner(path);
+                list = scan.getTimerImplementation(baseElement.getId());
                 String timerDefinition;
 
                 for (Map.Entry<Element, Element> entry : list.entrySet()) {
