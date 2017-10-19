@@ -86,15 +86,7 @@ public final class CheckerFactory {
         }
 
         for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
-            String fullyQualifiedName = "";
-
-            if (Arrays.asList(RuntimeConfig.getInstance().getAllRules()).contains(rule.getKey())
-                    && rule.getValue().isActive()) {
-                fullyQualifiedName = internLocation + rule.getValue().getName().trim();
-            } else if (rule.getValue().isActive() && rule.getValue().getSettings().containsKey(externLocation)) {
-                fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
-                        + "." + rule.getValue().getName().trim();
-            }
+            String fullyQualifiedName = getFullyQualifiedName(rule);
 
             if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")) {
                 try {
@@ -113,49 +105,30 @@ public final class CheckerFactory {
                 } catch (NoSuchMethodException | SecurityException | ClassNotFoundException
                         | InstantiationException | IllegalAccessException | IllegalArgumentException
                         | InvocationTargetException e) {
-                    logger.warning("Class " + fullyQualifiedName
-                            + " not found or couldn't be instantiated");
+                    logger.warning("Class " + fullyQualifiedName + " not found or couldn't be instantiated");
                     rule.getValue().deactivate();
                 }
             }
         }
-
-        // checkers.addAll(getExternalCheckers(ruleConf));
-
         return checkers;
     }
 
     /**
-     * Load an external checker class
+     * get the fullyQualifiedName of the rule
      * 
-     * @param ruleConf
-     *            Map of ruleSet
-     * @return Collection of checkers
+     * @param rule
+     *            Rule in Map
+     * @return fullyQualifiedName
      */
-    private static Collection<ElementChecker> getExternalCheckers(final Map<String, Rule> ruleConf) {
-        final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
-
-        for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
-            if (!Arrays.asList(RuntimeConfig.getInstance().getAllRules()).contains(rule.getKey())
-                    && rule.getValue().isActive()
-                    && rule.getValue().getSettings().containsKey(externLocation)) {
-
-                String fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
-                        + "." + rule.getValue().getName().trim();
-
-                try {
-                    Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class);
-                    AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue());
-                    checkers.add(aChecker);
-                } catch (NoSuchMethodException | SecurityException | ClassNotFoundException
-                        | InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException e) {
-                    logger.warning("Class " + fullyQualifiedName
-                            + " not found or couldn't be instantiated");
-                    rule.getValue().deactivate();
-                }
-            }
+    private static String getFullyQualifiedName(Map.Entry<String, Rule> rule) {
+        String fullyQualifiedName = "";
+        if (Arrays.asList(RuntimeConfig.getInstance().getAllRules()).contains(rule.getKey())
+                && rule.getValue().isActive()) {
+            fullyQualifiedName = internLocation + rule.getValue().getName().trim();
+        } else if (rule.getValue().isActive() && rule.getValue().getSettings().containsKey(externLocation)) {
+            fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
+                    + "." + rule.getValue().getName().trim();
         }
-        return checkers;
+        return fullyQualifiedName;
     }
 }
