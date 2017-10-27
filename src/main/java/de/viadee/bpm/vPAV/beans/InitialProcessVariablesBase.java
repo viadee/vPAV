@@ -28,12 +28,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.beans;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class InitialProcessVariablesBase {
 
+    /**
+     * Creates a map which contains fields and their respective value
+     *
+     * @return Map of variables
+     * @throws IllegalArgumentException
+     *             If the object is not an instance of the class or interface
+     * @throws IllegalAccessException
+     *             If the field is inaccessible
+     */
     public Map<String, Object> createVariableMap() throws IllegalArgumentException, IllegalAccessException {
         final Map<String, Object> map = new HashMap<String, Object>();
         final Field[] fields = this.getClass().getDeclaredFields();

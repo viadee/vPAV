@@ -110,6 +110,14 @@
 			fill: rgba(132, 3, 133, 0.5) !important;
 		}
 
+		.MessageEventChecker .djs-visual> :nth-child(1) {
+			stroke: rgba(57, 219, 165, 1.0) !important;
+		}
+
+		.MessageEventChecker:not(.djs-connection) .djs-visual> :nth-child(1) {
+			fill: rgba(57, 219, 165, 0.5) !important;
+		}
+
 		.new .djs-visual> :nth-child(1) {
 			stroke: rgba(0, 0, 0, 1.0) !important;
 		}
@@ -118,7 +126,9 @@
 			fill: rgba(0, 0, 0, 0.5) !important;
 		}
 
-
+		#MessageEventChecker {			
+			background-color: rgba(57, 219, 165, 0.25);
+		}
 
 		#NoExpressionChecker {			
 			background-color: rgba(132, 3, 133, 0.25);

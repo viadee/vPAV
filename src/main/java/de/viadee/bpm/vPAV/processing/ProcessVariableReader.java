@@ -88,7 +88,6 @@ import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
-import de.viadee.bpm.vPAV.HTMLScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -127,20 +126,20 @@ public final class ProcessVariableReader {
         processVariables.putAll(searchVariablesFromSequenceFlow(element));
         // 3) Search variables in ExtensionElements
         processVariables.putAll(searchExtensionsElements(element));
-        // 4) Search variables in Forms
-        processVariables.putAll(getVariablesFromHTML(element));
+        // 4) Search variables in Output Parameters
+        processVariables.putAll(getVariablesFromOutput(element));
 
         return processVariables;
     }
 
     /**
-     * Analyse HTML Forms for variables
-     * 
+     * Analyze Output Parameters for variables
+     *
      * @param element
      * @return Map of ProcessVariable
-     * 
+     *
      */
-    private Map<String, ProcessVariable> getVariablesFromHTML(BpmnElement element) {
+    private Map<String, ProcessVariable> getVariablesFromOutput(BpmnElement element) {
         final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
         final BaseElement baseElement = element.getBaseElement();
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
@@ -149,40 +148,26 @@ public final class ProcessVariableReader {
         if (scopeElement != null) {
             scopeElementId = scopeElement.getAttributeValue("id");
         }
-
         try {
-            final BPMNScanner bScanner = new BPMNScanner();
-            String htmlFileName = bScanner.getForm(element.getProcessdefinition(), baseElement.getId(),
-                    baseElement.getElementType().getTypeName());
-            if (htmlFileName != null) {
-                final DirectoryScanner ds = new DirectoryScanner();
-                ds.setBasedir("src/main/webapp/forms/");
-                String path = ds.getResource(htmlFileName).toString();
+            BPMNScanner scanner = new BPMNScanner(element.getProcessdefinition());
 
-                HTMLScanner hScanner = new HTMLScanner(path);
-                ArrayList<String> writtenVariables = hScanner.getWriteVariables();
-                for (String name : writtenVariables)
-                    processVariables.put(name,
-                            new ProcessVariable(name, element, ElementChapter.FormData, KnownElementFieldType.FormField,
-                                    null, VariableOperation.WRITE, scopeElementId));
+            ArrayList<String> outVar = scanner.getOutputVariables(element.getBaseElement().getId());
 
-                ArrayList<String> readVariables = hScanner.getReadVariables();
-                for (String name : readVariables)
-                    processVariables.put(name,
-                            new ProcessVariable(name, element, ElementChapter.FormData, KnownElementFieldType.FormField,
-                                    null, VariableOperation.READ, scopeElementId));
+            for (String name : outVar)
+                processVariables.put(name,
+                        new ProcessVariable(name, element, ElementChapter.InputOutput,
+                                KnownElementFieldType.OutputParameter,
+                                element.getProcessdefinition(), VariableOperation.WRITE, scopeElementId));
 
-            }
-
-        } catch (SAXException | IOException | ParserConfigurationException e) {
-            logger.warning("Couldn't parse HTML-file");
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            e.printStackTrace();
         }
 
         return processVariables;
     }
 
     /**
-     * Analyse bpmn extension elements for variables
+     * Analyze bpmn extension elements for variables
      *
      * @param element
      * @return variables
@@ -218,13 +203,11 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from execution listeners
+     * Get process variables from execution listeners
      *
      * @param extensionElements
      * @param processdefinition
      * @param elementId
-     * @param cl
-     *            ClassLoader
      * @return variables
      */
     private Map<String, ProcessVariable> getVariablesFromExecutionListener(final BpmnElement element,
@@ -269,15 +252,13 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from task listeners
+     * Get process variables from task listeners
      *
      * TODO: generalise this method eventually
      *
      * @param extensionElements
      * @param processdefinition
      * @param elementId
-     * @param cl
-     *            ClassLoader
      * @return variables
      */
     private Map<String, ProcessVariable> getVariablesFromTaskListener(final BpmnElement element,
@@ -322,7 +303,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from form fields (user tasks)
+     * Get process variables from form fields (user tasks)
      *
      * @param extensionElements
      * @param processdefinition
@@ -352,7 +333,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from camunda input/output associations (call activities)
+     * Get process variables from camunda input/output associations (call activities)
      *
      * @param element
      * @param extensionElements
@@ -393,10 +374,9 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * get process variables from sequence flow conditions
+     * Get process variables from sequence flow conditions
      *
      * @param element
-     * @param cl
      * @return variables
      */
     private Map<String, ProcessVariable> searchVariablesFromSequenceFlow(final BpmnElement element) {
@@ -440,8 +420,6 @@ public final class ProcessVariableReader {
      * Analyse all types of tasks for process variables
      *
      * @param element
-     * @param cl
-     *            ClassLoader
      * @return variables
      */
     private Map<String, ProcessVariable> getVariablesFromTask(final BpmnElement element) {
@@ -627,8 +605,6 @@ public final class ProcessVariableReader {
      *
      * @param classFile
      * @param element
-     * @param cl
-     *            ClassLoader
      * @return variables
      * @throws MalformedURLException
      */
@@ -649,8 +625,6 @@ public final class ProcessVariableReader {
      * Checks an external groovy script for process variables (read/write).
      *
      * @param groovyFile
-     * @param cl
-     *            ClassLoader
      * @return variables
      */
     private Map<String, ProcessVariable> getVariablesFromGroovyScript(final String groovyFile,
@@ -667,7 +641,6 @@ public final class ProcessVariableReader {
      *
      * @param fileName
      * @param element
-     * @param cl
      * @return variables
      */
     private Map<String, ProcessVariable> readResourceFile(final String fileName,
@@ -773,7 +746,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * search read process variables
+     * Search read process variables
      *
      * @param element
      * @param fileName
@@ -816,7 +789,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * search written process variables
+     * Search written process variables
      *
      * @param element
      * @param fileName
@@ -859,7 +832,7 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * search removed process variables
+     * Search removed process variables
      *
      * @param element
      * @param chapter

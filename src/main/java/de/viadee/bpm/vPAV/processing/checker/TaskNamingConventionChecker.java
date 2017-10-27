@@ -46,15 +46,20 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class TaskNamingConventionChecker extends AbstractElementChecker {
 
-    public TaskNamingConventionChecker(final Rule rule) {
-        super(rule);
+    public TaskNamingConventionChecker(final Rule rule, final String path) {
+        super(rule, path);
     }
 
+    /**
+     * Check if elements adhere to a configurable naming convention
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
         final BaseElement baseElement = element.getBaseElement();
+
         if (baseElement instanceof Task) {
             final Collection<ElementConvention> elementConventions = rule.getElementConventions();
             if (elementConventions == null || elementConventions.size() < 1

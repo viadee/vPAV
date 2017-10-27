@@ -60,13 +60,15 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoExpressionChecker extends AbstractElementChecker {
 
-    public String path;
-
     public NoExpressionChecker(final Rule rule, final String path) {
-        super(rule);
-        this.path = path;
+        super(rule, path);
     }
 
+    /**
+     * Check if ServiceTasks, BusinessRuleTasks, SendTasks and ScriptTasks use expressions against best practices
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(BpmnElement element) {
 
@@ -76,7 +78,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         try {
 
-            scan = new BPMNScanner();
+            scan = new BPMNScanner(path);
 
             final Map<String, Setting> settings = rule.getSettings();
 
@@ -84,7 +86,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
                     || baseElement instanceof SendTask || baseElement instanceof ScriptTask) {
 
                 // read attributes from task
-                final String implementationAttr = scan.getImplementation(path, baseElement.getId());
+                final String implementationAttr = scan.getImplementation(baseElement.getId());
 
                 if (implementationAttr != null && implementationAttr.equals(scan.getC_exp())
                         && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -96,7 +98,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 }
 
                 // get the execution listener
-                final ArrayList<String> listener = scan.getListener(path, baseElement.getId(), "expression",
+                final ArrayList<String> listener = scan.getListener(baseElement.getId(), "expression",
                         "camunda:executionListener");
 
                 if (!listener.isEmpty() && listener.size() > 0
@@ -112,7 +114,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
                     || baseElement instanceof EndEvent || baseElement instanceof StartEvent) {
 
                 // read attributes from event
-                final String implementationAttrEvent = scan.getEventImplementation(path, baseElement.getId());
+                final String implementationAttrEvent = scan.getEventImplementation(baseElement.getId());
 
                 if (implementationAttrEvent != null && implementationAttrEvent.contains(scan.getC_exp())
                         && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -124,7 +126,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 }
 
                 // get the execution listener
-                final ArrayList<String> listener = scan.getListener(path, baseElement.getId(), "expression",
+                final ArrayList<String> listener = scan.getListener(baseElement.getId(), "expression",
                         "camunda:executionListener");
 
                 if (!listener.isEmpty() && listener.size() > 0
@@ -139,7 +141,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             } else if (baseElement instanceof SequenceFlow) {
 
                 // get the execution listener
-                final ArrayList<String> listener = scan.getListener(path, baseElement.getId(), "expression",
+                final ArrayList<String> listener = scan.getListener(baseElement.getId(), "expression",
                         "camunda:executionListener");
                 if (!listener.isEmpty()
                         && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -152,7 +154,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             } else if (baseElement instanceof ExclusiveGateway) {
                 // get the execution listener
-                final ArrayList<String> listener = scan.getListener(path, baseElement.getId(), "expression",
+                final ArrayList<String> listener = scan.getListener(baseElement.getId(), "expression",
                         "camunda:executionListener");
                 if (!listener.isEmpty()
                         && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -164,7 +166,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 }
             } else if (baseElement instanceof UserTask) {
                 // get the execution listener
-                final ArrayList<String> listener = scan.getListener(path, baseElement.getId(), "expression",
+                final ArrayList<String> listener = scan.getListener(baseElement.getId(), "expression",
                         "camunda:executionListener");
                 if (!listener.isEmpty()
                         && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -176,7 +178,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 }
 
                 // get the task listener
-                final ArrayList<String> taskListener = scan.getListener(path, baseElement.getId(), "expression",
+                final ArrayList<String> taskListener = scan.getListener(baseElement.getId(), "expression",
                         "camunda:taskListener");
                 if (!taskListener.isEmpty()
                         && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -189,7 +191,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             } else if (baseElement instanceof ManualTask) {
                 // get the execution listener
-                final ArrayList<String> listener = scan.getListener(path, baseElement.getId(), "expression",
+                final ArrayList<String> listener = scan.getListener(baseElement.getId(), "expression",
                         "camunda:executionListener");
                 if (!listener.isEmpty()
                         && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {

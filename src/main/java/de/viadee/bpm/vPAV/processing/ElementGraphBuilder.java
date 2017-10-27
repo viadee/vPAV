@@ -70,7 +70,7 @@ import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
- * creates data flow graph based on a bpmn model
+ * Creates data flow graph based on a bpmn model
  *
  */
 public class ElementGraphBuilder {
@@ -98,7 +98,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * create data flow graphs for a model
+     * Create data flow graphs for a model
      *
      * @param modelInstance
      *            BpmnModelInstance
@@ -183,7 +183,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * add process variables on start event for a specific process id
+     * Add process variables on start event for a specific process id
      *
      * @param node
      * @param processId
@@ -204,7 +204,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * add process variables on event for a specific message name
+     * Add process variables on event for a specific message name
      *
      * @param element
      *            FlowElement
@@ -218,17 +218,20 @@ public class ElementGraphBuilder {
                 final Event event = (Event) element;
                 final Collection<MessageEventDefinition> messageEventDefinitions = event
                         .getChildElementsByType(MessageEventDefinition.class);
-                if (!(element instanceof EndEvent) && messageEventDefinitions != null) {
+                if (messageEventDefinitions != null) {
                     for (MessageEventDefinition eventDef : messageEventDefinitions) {
                         if (eventDef != null) {
                             final Message message = eventDef.getMessage();
-                            final String messageName = message.getName();
-                            final Collection<String> outerVariables = messageIdToVariables.get(messageName);
-                            if (outerVariables != null) {
-                                for (final String varName : outerVariables) {
-                                    node.setProcessVariable(varName,
-                                            new ProcessVariable(varName, node, ElementChapter.OutstandingVariable,
-                                                    KnownElementFieldType.Class, null, VariableOperation.WRITE, ""));
+                            if (message != null) {
+                                final String messageName = message.getName();
+                                final Collection<String> outerVariables = messageIdToVariables.get(messageName);
+                                if (outerVariables != null) {
+                                    for (final String varName : outerVariables) {
+                                        node.setProcessVariable(varName,
+                                                new ProcessVariable(varName, node, ElementChapter.OutstandingVariable,
+                                                        KnownElementFieldType.Class, null, VariableOperation.WRITE,
+                                                        ""));
+                                    }
                                 }
                             }
                         }
@@ -243,7 +246,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * create invalid paths for data flow anomalies
+     * Create invalid paths for data flow anomalies
      *
      * @param graphCollection
      *            IGraph
@@ -276,7 +279,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * add edges to data flow graph
+     * Add edges to data flow graph
      *
      * @param processdefinition
      * @param graph
@@ -333,7 +336,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * add elements from subprocess to data flow graph
+     * Add elements from subprocess to data flow graph
      *
      * @param subProcesses
      * @param flows
@@ -373,7 +376,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * integrate a called activity into data flow graph
+     * Integrate a called activity into data flow graph
      *
      * @param processdefinition
      * @param modelInstance
@@ -431,7 +434,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * add parallel gateways before and after a call activity
+     * Add parallel gateways before and after a call activity
      *
      * there are needed to connect the called process with the main flow
      *
@@ -465,7 +468,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * connect the parallel gateways in the data flow before and after the call activity
+     * Connect the parallel gateways in the data flow before and after the call activity
      *
      * @param graph
      * @param inVariables
@@ -516,7 +519,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * read and transform process definition into data flows
+     * Read and transform process definition into data flows
      *
      * @param classLoader
      * @param calledElementHierarchy
@@ -537,7 +540,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * integrate parallel gateways into the main data flow before and after the call activity
+     * Integrate parallel gateways into the main data flow before and after the call activity
      *
      * @param callActivity
      * @param graph
@@ -565,7 +568,7 @@ public class ElementGraphBuilder {
     }
 
     /**
-     * read in- und output variables for a call activity
+     * Read in- and output variables for a call activity
      *
      * @param callActivity
      * @param inVariables

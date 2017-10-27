@@ -49,14 +49,16 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 
 /**
- * 
- * dient dazu die config Datei (ruleset.xml) einzulesen und die Regeln auszulesen
- * 
- * Annahmen und Voraussetzungen sind ... eine vorhandene xml Datei in resources
- *
+ * Used to read the config file (ruleSet.xml) and extract the configured rules Requirements: Exisiting ruleSet.xml in
+ * src/test/resources
  */
 public final class XmlConfigReader implements ConfigReader {
 
+    /**
+     * @throws ConfigReaderException
+     *             If file can not be found in classpath
+     */
+    @Override
     public Map<String, Rule> read(final String file) throws ConfigReaderException {
 
         try {
@@ -69,13 +71,18 @@ public final class XmlConfigReader implements ConfigReader {
                 final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(fRuleSet);
                 return transformFromXmlDatastructues(ruleSet);
             } else {
-                throw new ConfigReaderException("ConfigFile coudn't be found");
+                throw new ConfigReaderException("ConfigFile could not be found");
             }
         } catch (JAXBException e) {
             throw new ConfigReaderException(e);
         }
     }
 
+    /**
+     * Retrieves all rules, by default deactivated
+     *
+     * @return rules
+     */
     public Map<String, Rule> getDeactivatedRuleSet() {
         final Map<String, Rule> rules = new HashMap<String, Rule>();
 
@@ -86,6 +93,14 @@ public final class XmlConfigReader implements ConfigReader {
         return rules;
     }
 
+    /**
+     * Transforms XmlRuleSet to rules
+     *
+     * @param ruleSet
+     * @return rules
+     * @throws ConfigReaderException
+     *             If file could not be read properly
+     */
     private static Map<String, Rule> transformFromXmlDatastructues(final XmlRuleSet ruleSet)
             throws ConfigReaderException {
         final Map<String, Rule> rules = new HashMap<String, Rule>();

@@ -29,16 +29,19 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+/**
+ * Represents anomalies like DD("defined-defined"), DU("defined-undefined"), UR("undefined-read");
+ */
 public enum Anomaly {
-  DD("defined-defined"), DU("defined-undefined"), UR("undefined-read");
+    DD("defined-defined"), DU("defined-undefined"), UR("undefined-read");
 
-  private final String description;
+    private final String description;
 
-  private Anomaly(String value) {
-    description = value;
-  }
+    private Anomaly(String value) {
+        description = value;
+    }
 
-  public String getDescription() {
-    return description;
-  }
+    public String getDescription() {
+        return description;
+    }
 }

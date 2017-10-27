@@ -29,16 +29,17 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
-import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.SubProcess;
-import org.camunda.bpm.model.bpmn.instance.Task;
 
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -50,6 +51,12 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 public final class CheckerFactory {
 
     public static String implementation;
+
+    private final static String externLocation = "external_Location";
+
+    private final static String internLocation = "de.viadee.bpm.vPAV.processing.checker.";
+
+    private static Logger logger = Logger.getLogger(CheckerFactory.class.getName());
 
     /**
      * create checkers
@@ -78,99 +85,50 @@ public final class CheckerFactory {
             throw new RuntimeException("Bpmn Element couldn't be found");
         }
 
-        final Rule javaDelegateRule = ruleConf.get(getClassName(JavaDelegateChecker.class));
-        if (javaDelegateRule == null)
-            throw new ConfigItemNotFoundException(getClassName(JavaDelegateChecker.class) + " not found");
-        if (javaDelegateRule.isActive() && !(baseElement instanceof Process) && !(baseElement instanceof SubProcess)) {
-            checkers.add(new JavaDelegateChecker(javaDelegateRule, path));
-        }
+        for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
+            String fullyQualifiedName = getFullyQualifiedName(rule);
 
-        final Rule dmnTaskRule = ruleConf.get(getClassName(DmnTaskChecker.class));
-        if (dmnTaskRule == null)
-            throw new ConfigItemNotFoundException(getClassName(DmnTaskChecker.class) + " not found");
-        if (dmnTaskRule.isActive() && baseElement instanceof BusinessRuleTask) {
-            checkers.add(new DmnTaskChecker(dmnTaskRule, path));
-        }
+            if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")) {
+                try {
+                    if (!rule.getKey().equals("VersioningChecker")) {
+                        Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class, String.class);
+                        AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(), path);
+                        checkers.add(aChecker);
+                    } else {
+                        Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class, String.class,
+                                Collection.class);
+                        AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(), path,
+                                resourcesNewestVersions);
+                        checkers.add(aChecker);
+                    }
 
-        final Rule xorNamingConventionRule = ruleConf.get(getClassName(XorNamingConventionChecker.class));
-        if (xorNamingConventionRule == null)
-            throw new ConfigItemNotFoundException(getClassName(XorNamingConventionChecker.class) + " not found");
-        if (xorNamingConventionRule.isActive()) {
-            checkers.add(new XorNamingConventionChecker(xorNamingConventionRule, path));
+                } catch (NoSuchMethodException | SecurityException | ClassNotFoundException
+                        | InstantiationException | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException e) {
+                    logger.warning("Class " + fullyQualifiedName + " not found or couldn't be instantiated");
+                    rule.getValue().deactivate();
+                }
+            }
         }
-
-        final Rule noScriptCheckerRule = ruleConf.get(getClassName(NoScriptChecker.class));
-        if (noScriptCheckerRule == null)
-            throw new ConfigItemNotFoundException(getClassName(NoScriptChecker.class) + " not found");
-        if (noScriptCheckerRule.isActive()) {
-            checkers.add(new NoScriptChecker(noScriptCheckerRule, path));
-        }
-
-        final Rule processVariablesNameConventionRule = ruleConf
-                .get(getClassName(ProcessVariablesNameConventionChecker.class));
-        if (processVariablesNameConventionRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(ProcessVariablesNameConventionChecker.class) + " not found");
-        if (processVariablesNameConventionRule.isActive()) {
-            checkers.add(new ProcessVariablesNameConventionChecker(processVariablesNameConventionRule));
-        }
-
-        final Rule taskNamingConventionRule = ruleConf
-                .get(getClassName(TaskNamingConventionChecker.class));
-        if (taskNamingConventionRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(TaskNamingConventionChecker.class) + " not found");
-        if (baseElement instanceof Task && taskNamingConventionRule.isActive()) {
-            checkers.add(new TaskNamingConventionChecker(taskNamingConventionRule));
-        }
-
-        final Rule versioningRule = ruleConf.get(getClassName(VersioningChecker.class));
-        if (versioningRule == null)
-            throw new ConfigItemNotFoundException(getClassName(VersioningChecker.class) + " not found");
-        if (versioningRule.isActive()) {
-            checkers.add(new VersioningChecker(versioningRule, resourcesNewestVersions));
-        }
-
-        final Rule embeddedGroovyScriptRule = ruleConf
-                .get(getClassName(EmbeddedGroovyScriptChecker.class));
-        if (embeddedGroovyScriptRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(EmbeddedGroovyScriptChecker.class) + " not found");
-        if (embeddedGroovyScriptRule.isActive()) {
-            checkers.add(new EmbeddedGroovyScriptChecker(embeddedGroovyScriptRule));
-        }
-
-        final Rule timerExpressionRule = ruleConf
-                .get(getClassName(TimerExpressionChecker.class));
-        if (timerExpressionRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(TimerExpressionChecker.class) + " not found");
-        if (timerExpressionRule.isActive()) {
-            checkers.add(new TimerExpressionChecker(timerExpressionRule, path));
-        }
-
-        final Rule elementIdConventionRule = ruleConf
-                .get(getClassName(ElementIdConventionChecker.class));
-        if (elementIdConventionRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(ElementIdConventionChecker.class) + " not found");
-        if (elementIdConventionRule.isActive()) {
-            checkers.add(new ElementIdConventionChecker(elementIdConventionRule));
-        }
-
-        final Rule noExpressionCheckerRule = ruleConf
-                .get(getClassName(NoExpressionChecker.class));
-        if (noExpressionCheckerRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(NoExpressionChecker.class) + " not found");
-        if (noExpressionCheckerRule.isActive()) {
-            checkers.add(new NoExpressionChecker(noExpressionCheckerRule, path));
-        }
-
         return checkers;
     }
 
-    private static String getClassName(Class<?> clazz) {
-        return clazz.getSimpleName();
+    /**
+     * get the fullyQualifiedName of the rule
+     * 
+     * @param rule
+     *            Rule in Map
+     * @return fullyQualifiedName
+     */
+    private static String getFullyQualifiedName(Map.Entry<String, Rule> rule) {
+        String fullyQualifiedName = "";
+        if (Arrays.asList(RuntimeConfig.getInstance().getAllRules()).contains(rule.getKey())
+                && rule.getValue().isActive()) {
+            fullyQualifiedName = internLocation + rule.getValue().getName().trim();
+        } else if (rule.getValue().isActive() && rule.getValue().getSettings().containsKey(externLocation)) {
+            fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
+                    + "." + rule.getValue().getName().trim();
+        }
+        return fullyQualifiedName;
     }
 }

@@ -89,7 +89,7 @@ public class VersioningCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final ElementChecker checker = new VersioningChecker(rule, resourcesNewestVersions);
+        final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
         final Collection<CheckerIssue> issues = checker.check(element);
         assertEquals(1, issues.size());
     }
@@ -115,7 +115,7 @@ public class VersioningCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final ElementChecker checker = new VersioningChecker(rule, resourcesNewestVersions);
+        final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
         final Collection<CheckerIssue> issues = checker.check(element);
         assertEquals(1, issues.size());
     }
@@ -150,7 +150,7 @@ public class VersioningCheckerTest {
 
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final ElementChecker checker = new VersioningChecker(rule, resourcesNewestVersions);
+        final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
         final Collection<CheckerIssue> issues = checker.check(element);
         assertEquals(1, issues.size());
     }

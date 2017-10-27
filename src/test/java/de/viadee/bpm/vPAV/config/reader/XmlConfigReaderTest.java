@@ -41,7 +41,6 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -93,7 +92,7 @@ public class XmlConfigReaderTest {
             assertTrue("Exception expected, but no one was thrown.", result != null);
         } catch (ConfigReaderException e) {
             // load DefaultRuleSet
-            Map<String, Rule> result = AbstractRunner.readConfig();
+            Map<String, Rule> result = reader.read("ruleSetDefault.xml");
             // Default rules correct
             assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
             assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());

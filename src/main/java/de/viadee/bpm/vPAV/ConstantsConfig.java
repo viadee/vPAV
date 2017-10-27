@@ -29,6 +29,10 @@
  */
 package de.viadee.bpm.vPAV;
 
+/**
+ * Class to hold global constants
+ */
+
 public final class ConstantsConfig {
 
     public static final String RULESET = "ruleSet.xml";
@@ -74,8 +78,6 @@ public final class ConstantsConfig {
     public static final String TEST_JAVAPATH = "src/test/java/";
 
     public static final String TEST_BASEPATH = "src/test/resources/";
-
-    public static final String PROCESS_VARIABLES_LOCATION = "ProcessVariablesLocation";
 
     public static final String LOCATION = "location";
 

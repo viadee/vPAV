@@ -50,8 +50,8 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
  */
 public class ProcessVariablesNameConventionChecker extends AbstractElementChecker {
 
-    public ProcessVariablesNameConventionChecker(final Rule rule) {
-        super(rule);
+    public ProcessVariablesNameConventionChecker(final Rule rule, final String path) {
+        super(rule, path);
     }
 
     /**

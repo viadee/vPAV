@@ -29,6 +29,11 @@ Consistency checks are performed by individual modules called checkers, which se
 |[ElementIdConventionChecker](ElementIdConventionChecker.md)                           | Do task ids in the model fit into a desired regex pattern?           | Done         |
 |[TimerExpressionChecker](TimerExpressionChecker.md)                                   | Are time events following the ISO 8601 scheme?                                        | Done         |
 |[NoExpressionChecker](NoExpressionChecker.md)                                   | Are expressions used against common best-practices?                                        | Done         |
+|[MessageEventChecker](MessageEventChecker.md)                                   | Are MessageEvents referencing messages and do they provide message names?                                  | Done         |
+
+
+
+
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
 ### Configuration
@@ -190,7 +195,44 @@ public class SpringTestConfig {
 
 }
 ```
+#### Add external checker 
+You can also simply add your own checker. 
+You can find an example project [here](https://github.com/viadee/vPAV_checker_plugin_example).
+In your projects you have to add the dependency to the project with the checker-class(es) (see example below) and to vPAV ([see above](#maven)):
 
+```xml
+<dependency>
+	<groupId>de.viadee</groupId>
+	<artifactId>vPAV_checker_plugin_example</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+Run this project (e.g. vPAV_checker_plugin_example) as maven install (make sure to package as jar). 
+
+The `setting name="external_Location"` defines the checker as an external checker.
+The value specifies the location of the checkerclass.
+
+```xml
+<rule>
+	<name>TaskNamingConventionCheckerExtern</name>
+	<state>true</state>
+	<settings>
+		<setting name="external_Location">de.viadee.vPAV_checker_plugin_example</setting>
+	</settings>
+	<elementConventions>
+		<elementConvention>
+			<name>convention</name>
+			<pattern>[A-ZÄÖÜ][a-zäöü\\\-\\\s]+</pattern>
+		</elementConvention>
+	</elementConventions>
+</rule>
+```
+##### Requirements
+- Your checker-class have to extends the *AbstractElementChecker*. 
+- Only the parameters from the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `java.lang.String`) are allowed in the constructor.
+
+#### Checker instructions
+You can use the parameters `de.viadee.bpm.vPAV.config.model.Rule` and the `java.lang.String` which contains the path to the model. For example to use the `de.viadee.bpm.vPAV.BPMNScanner`.
 
 #### Additionally required dependencies 
 
@@ -227,6 +269,9 @@ public class SpringTestConfig {
 	<version>4.12</version>
 </dependency>
 ```
+
+## Release Notes
+You can find our release notes over [here](https://github.com/viadee/vPAV/blob/development/docs/ReleaseNotes.md).
 
 ## Commitments
 This library will remain under an open source licence indefinately.

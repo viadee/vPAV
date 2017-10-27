@@ -56,6 +56,28 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  */
 public class BpmnModelDispatcher {
 
+    /**
+     * The BpmnModelDispatcher reads a model and creates a collection of all elements. Iterates through collection and
+     * checks each element for validity Additionally a graph is created to check for invalid paths.
+     *
+     * @param processdefinition
+     *            Holds the path to the BPMN model
+     * @param decisionRefToPathMap
+     *            decisionRefToPathMap
+     * @param processIdToPathMap
+     *            Map of prozessId to bpmn file
+     * @param messageIdToVariables
+     *            Map of messages and their variables
+     * @param processIdToVariables
+     *            map of processId with their variables
+     * @param resourcesNewestVersions
+     *            collection with newest versions of class files
+     * @param conf
+     *            ruleSet
+     * @return issues
+     * @throws ConfigItemNotFoundException
+     *             ruleSet couldn't be read
+     */
     public static Collection<CheckerIssue> dispatch(final File processdefinition,
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,

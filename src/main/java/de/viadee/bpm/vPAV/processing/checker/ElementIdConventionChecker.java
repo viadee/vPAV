@@ -44,10 +44,15 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class ElementIdConventionChecker extends AbstractElementChecker {
 
-    public ElementIdConventionChecker(final Rule rule) {
-        super(rule);
+    public ElementIdConventionChecker(final Rule rule, final String path) {
+        super(rule, path);
     }
 
+    /**
+     * Check if an element follows a configurable pattern
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

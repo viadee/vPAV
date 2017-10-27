@@ -1,31 +1,22 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 
@@ -72,6 +63,8 @@ public class BPMNScanner {
 
     private final String extElements_one = "bpmn:extensionElements";
 
+    private final String message_one = "bpmn:message";
+
     // -----------------------
 
     private final String businessRuleTask_two = "bpmn2:businessRuleTask";
@@ -97,6 +90,8 @@ public class BPMNScanner {
     private final String endEvent_two = "bpmn2:endEvent";
 
     private final String extElements_two = "bpmn2:extensionElements";
+
+    private final String message_two = "bpmn2:message";
 
     // -----------------------
 
@@ -124,6 +119,8 @@ public class BPMNScanner {
 
     private final String extElements_three = "extensionElements";
 
+    private final String message_three = "message";
+
     // ------------------------
 
     private final String scriptTag = "camunda:script";
@@ -137,6 +134,8 @@ public class BPMNScanner {
     private final String c_dmn = "camunda:decisionRef";
 
     private final String c_ext = "camunda:type";
+
+    private final String c_outPar = "camunda:outputParameter";
 
     private final String imp = "implementation";
 
@@ -166,15 +165,30 @@ public class BPMNScanner {
      * The Camunda API's method "getimplementation" doesn't return the correct Implementation, so the we have to scan
      * the xml of the model for the implementation
      *
+     ** @param path
+     *            path to model
      * @throws ParserConfigurationException
      *             exception if document cant be parsed
+     * @throws IOException
+     *             Signals that an I/O exception of some sort has occurred
+     * @throws SAXException
+     *             Encapsulate a general SAX error or warning.
      */
-    public BPMNScanner() throws ParserConfigurationException {
+    public BPMNScanner(String path) throws ParserConfigurationException, SAXException, IOException {
         factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         builder = factory.newDocumentBuilder();
+        setModelVersion(path);
     }
 
+    /**
+     * Checks which camunda namespace is used in a given model and sets the version correspondingly
+     *
+     * @param path
+     * @throws SAXException
+     * @throws IOException
+     * @throws ParserConfigurationException
+     */
     private void setModelVersion(String path) throws SAXException, IOException, ParserConfigurationException {
         // parse the given bpmn model
         doc = builder.parse(path);
@@ -192,8 +206,6 @@ public class BPMNScanner {
     /**
      * Return the Implementation of an specific element (sendTask, ServiceTask or BusinessRuleTask)
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -204,19 +216,13 @@ public class BPMNScanner {
      *             possible exception if file could not be parsed
      * @return return_implementation contains implementation
      */
-    public String getImplementation(String path, String id)
+    public String getImplementation(String id)
             throws SAXException, IOException, ParserConfigurationException {
         // List to hold return values
         String return_implementation = null;
 
         // List for all Task elements
         ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -284,8 +290,6 @@ public class BPMNScanner {
     /**
      * Return the Implementation of an specific element (endEvent and/or intermediateThrowEvent)
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -296,19 +300,13 @@ public class BPMNScanner {
      *             possible exception if file could not be parsed
      * @return return_implementation contains implementation
      */
-    public String getEventImplementation(String path, String id)
+    public String getEventImplementation(String id)
             throws SAXException, IOException, ParserConfigurationException {
         // List to hold return values
         String return_implementation = null;
 
         // List for all Task elements
         ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -347,6 +345,18 @@ public class BPMNScanner {
                             // if the node messageEventDefinition contains the camunda expression -> return
                             if (event.getAttributeNode(c_exp) != null) {
                                 return_implementation = event.getAttributeNode(c_exp).toString();
+                            } else if (event.getAttributeNode(c_dexp) != null) {
+                                return_implementation = event.getAttributeNode(c_dexp).toString();
+                            } else if (event.getAttributeNode(c_class) != null) {
+                                return_implementation = event.getAttributeNode(c_class).toString();
+                            } else if (event.getAttributeNode(c_ext) != null) {
+                                return_implementation = event.getAttributeNode(c_ext).toString();
+                            }
+
+                            if (event.getAttributeNode(c_dexp) == null && event.getAttributeNode(c_exp) == null
+                                    && event.getAttributeNode(c_class) == null
+                                    && event.getAttributeNode(c_ext) == null) {
+                                return_implementation = imp;
                             }
                         }
                     }
@@ -358,8 +368,6 @@ public class BPMNScanner {
 
     /**
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @param listType
@@ -374,7 +382,7 @@ public class BPMNScanner {
      * @throws ParserConfigurationException
      *             possible exception if file could not be parsed
      */
-    public ArrayList<String> getListener(String path, String id, String listType, String extType)
+    public ArrayList<String> getListener(String id, String listType, String extType)
             throws SAXException, IOException, ParserConfigurationException {
 
         // list to hold return values
@@ -382,12 +390,6 @@ public class BPMNScanner {
 
         // List for all Task elements
         NodeList nodeListExtensionElements;
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         // search for script tag
 
@@ -422,59 +424,6 @@ public class BPMNScanner {
     }
 
     /**
-     * get Filename of the form
-     * 
-     * @param path
-     *            path from model
-     * @param id
-     *            id of the element
-     * @param tagName
-     *            elementTyp
-     * @return Filnename of the form
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception while parse xml
-     */
-    public String getForm(final String path, final String id, String tagName)
-            throws SAXException, IOException, ParserConfigurationException {
-        NodeList nList;
-
-        // set Model Version
-        setModelVersion(path);
-
-        switch (model_Version) {
-            case V1:
-                tagName = "bpmn:" + tagName;
-                break;
-            case V2:
-                tagName += "bpmn2:" + tagName;
-                break;
-            default:
-                break;
-        }
-
-        nList = doc.getElementsByTagName(tagName);
-
-        for (int i = 0; i < nList.getLength(); i++) {
-            final Element Task_Element = (Element) nList.item(i);
-            if (Task_Element.getAttribute("id").equals(id)) {
-                NamedNodeMap attList = Task_Element.getAttributes();
-
-                for (int x = 0; x < attList.getLength(); x++) {
-                    if (attList.item(x).getNodeName().equals("camunda:formKey"))
-                        return attList.item(x).getTextContent()
-                                .substring(attList.item(x).getTextContent().indexOf("/") + 1);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
      *
      * @param node
      *            node to check
@@ -495,8 +444,6 @@ public class BPMNScanner {
     /**
      * Check if model has an scriptTag
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -505,15 +452,12 @@ public class BPMNScanner {
      *             possible exception if file not found
      * @return scriptPlaces contains script type
      */
-    public ArrayList<String> getScriptTypes(String path, String id) throws SAXException, IOException {
+    public ArrayList<String> getScriptTypes(String id) throws SAXException, IOException {
         // bool to hold return values
         ArrayList<String> return_scriptType = new ArrayList<String>();
 
         // List for all Task elements
         NodeList nodeList;
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
 
         // search for script tag
         nodeList = doc.getElementsByTagName(scriptTag);
@@ -555,13 +499,23 @@ public class BPMNScanner {
         return false;
     }
 
-    public boolean hasScriptInCondExp(String path, String id)
+    /**
+     * Checks for scripts in conditional expressions
+     *
+     * @param id
+     *            id of the element
+     * @return boolean has condition Expression
+     * @throws SAXException
+     *             possible exception while process xml
+     * @throws IOException
+     *             possible exception if file not found
+     * @throws ParserConfigurationException
+     *             possible exception if file could not be parsed
+     */
+    public boolean hasScriptInCondExp(String id)
             throws SAXException, IOException, ParserConfigurationException {
         // List for all Task elements
         NodeList nodeList = null;
-
-        // set Model Version and parse doc
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -613,8 +567,6 @@ public class BPMNScanner {
     /**
      * Return a list of used gateways for a given bpmn model
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -626,16 +578,11 @@ public class BPMNScanner {
      * @return gateway contains script type
      *
      */
-    public String getXorGateWays(String path, String id)
+    public String getXorGateWays(String id)
             throws SAXException, IOException, ParserConfigurationException {
         final NodeList nodeList;
 
         String gateway = "";
-
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -666,8 +613,6 @@ public class BPMNScanner {
     /**
      * Return number of outgoing
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @throws SAXException
@@ -678,15 +623,10 @@ public class BPMNScanner {
      *             possible exception if file could not be parsed
      * @return outgoing number of outgoing
      */
-    public int getOutgoing(String path, String id) throws SAXException, IOException, ParserConfigurationException {
+    public int getOutgoing(String id) throws SAXException, IOException, ParserConfigurationException {
         final NodeList nodeList;
         String out = "";
         int outgoing = 0;
-
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -726,8 +666,6 @@ public class BPMNScanner {
     /**
      * check xor gateways for outgoing edges
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @return ArrayList of outgoing Nodes
@@ -738,17 +676,12 @@ public class BPMNScanner {
      * @throws ParserConfigurationException
      *             possible exception if file could not be parsed
      */
-    public ArrayList<Node> getOutgoingEdges(String path, String id)
+    public ArrayList<Node> getOutgoingEdges(String id)
             throws SAXException, IOException, ParserConfigurationException {
 
         ArrayList<Node> outgoingEdges = new ArrayList<Node>();
         NodeList nodeList = null;
         String out = "";
-
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -819,8 +752,6 @@ public class BPMNScanner {
     /**
      * get ids and timer definition for all timer event types
      *
-     * @param path
-     *            path to model
      * @param id
      *            id of bpmn element
      * @return Map with timerEventDefinition-Node and his child
@@ -831,17 +762,11 @@ public class BPMNScanner {
      * @throws SAXException
      *             possible exception while process xml
      */
-    public Map<Element, Element> getTimerImplementation(final String path, final String id)
+    public Map<Element, Element> getTimerImplementation(final String id)
             throws SAXException, IOException, ParserConfigurationException {
 
         // List for all Task elements
         ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-
-        // parse the given bpmn model
-        doc = builder.parse(path);
-
-        // set Model Version
-        setModelVersion(path);
 
         switch (model_Version) {
             case V1:
@@ -901,8 +826,66 @@ public class BPMNScanner {
         return timerList;
     }
 
+    /**
+     * Retrieve the message name of a given receiveTask
+     *
+     * @param messageRef
+     * @return messageName
+     */
+    public String getMessageName(String messageRef) {
+        // List for all messages
+        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+        String messageName = "";
+
+        switch (model_Version) {
+            case V1:
+                listNodeList.add(doc.getElementsByTagName(message_one));
+                break;
+            case V2:
+                listNodeList.add(doc.getElementsByTagName(message_two));
+                break;
+            case V3:
+                listNodeList.add(doc.getElementsByTagName(message_three));
+                break;
+            default:
+                listNodeList = null;
+        }
+
+        for (NodeList list : listNodeList) {
+            for (int i = 0; i < list.getLength(); i++) {
+
+                final Element Task_Element = (Element) list.item(i);
+
+                // check whether a node matches with the provided id
+                if (Task_Element.getAttribute("id").equals(messageRef)) {
+                    messageName = Task_Element.getAttribute("name");
+                }
+            }
+        }
+        return messageName;
+
+    }
+
     public String getC_exp() {
         return c_exp;
     }
 
+    public ArrayList<String> getOutputVariables(String id) throws SAXException, IOException {
+        // List for all Task elements
+        ArrayList<String> listVariables = new ArrayList<String>();
+
+        NodeList nodeList = doc.getElementsByTagName(c_outPar);
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (idMatch(node, id)) {
+                NamedNodeMap attrList = node.getAttributes();
+                for (int x = 0; x < attrList.getLength(); x++) {
+                    listVariables.add(attrList.item(x).getNodeValue());
+                }
+            }
+
+        }
+        return listVariables;
+    }
 }

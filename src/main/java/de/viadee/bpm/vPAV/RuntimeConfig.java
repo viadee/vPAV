@@ -45,10 +45,11 @@ public class RuntimeConfig {
 
     private boolean test = false;
 
-    private String[] allRules = { "ProcessVariablesLocation", "XorNamingConventionChecker",
+    private final String[] allRules = { "XorNamingConventionChecker",
             "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
-            "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker" };
+            "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
+            "MessageEventChecker" };
 
     private RuntimeConfig() {
     }
@@ -83,6 +84,17 @@ public class RuntimeConfig {
         return classLoader;
     }
 
+    /**
+     * Retrieves the classloader for a given MavenProject
+     * 
+     * @param project
+     *            MavenProject
+     * @return Classloader
+     * @throws MalformedURLException
+     *             indicate that a malformed URL has occurred
+     * @throws DependencyResolutionRequiredException
+     *             DependencyResolutionRequiredException
+     */
     public ClassLoader getClassLoader(MavenProject project)
             throws MalformedURLException, DependencyResolutionRequiredException {
         return FileScanner.getClassLoader(project);

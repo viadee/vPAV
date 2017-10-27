@@ -199,7 +199,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task with no class name",
+            Assert.assertEquals("task 'Service Task 1' with no java class name. (compare model: Details, Java Class)",
                     issues.iterator().next().getMessage());
         }
     }
@@ -231,7 +231,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task with no class name",
+            Assert.assertEquals("task 'Service Task 1' with no java class name. (compare model: Details, Java Class)",
                     issues.iterator().next().getMessage());
         }
     }

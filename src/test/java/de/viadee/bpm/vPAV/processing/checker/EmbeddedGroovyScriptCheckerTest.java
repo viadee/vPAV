@@ -60,7 +60,7 @@ public class EmbeddedGroovyScriptCheckerTest {
     @BeforeClass
     public static void setup() throws MalformedURLException {
         final Rule rule = new Rule("EmbeddedGroovyScriptChecker", true, null, null, null);
-        checker = new EmbeddedGroovyScriptChecker(rule);
+        checker = new EmbeddedGroovyScriptChecker(rule, null);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");

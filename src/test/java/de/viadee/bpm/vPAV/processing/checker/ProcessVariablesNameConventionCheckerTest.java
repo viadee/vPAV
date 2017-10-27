@@ -76,7 +76,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         beanMapping = new HashMap<String, String>();
         beanMapping.put("myBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
-        checker = new ProcessVariablesNameConventionChecker(createRule());
+        checker = new ProcessVariablesNameConventionChecker(createRule(), null);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java/");

@@ -68,16 +68,20 @@ public class VersioningChecker extends AbstractElementChecker {
 
     private Collection<String> resourcesNewestVersions;
 
-    public VersioningChecker(final Rule rule, final Collection<String> resourcesNewestVersions) {
-        super(rule);
+    public VersioningChecker(final Rule rule, final String path, final Collection<String> resourcesNewestVersions) {
+        super(rule, path);
         this.resourcesNewestVersions = resourcesNewestVersions;
     }
 
+    /**
+     * Check versions of referenced beans and/or classes
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
         final BaseElement baseElement = element.getBaseElement();
 
         // Service Task, Business Task, Send Task
@@ -99,8 +103,8 @@ public class VersioningChecker extends AbstractElementChecker {
 
         // Message Event Definition
         issues.addAll(checkMessageEventDefinition(element));
-
         return issues;
+
     }
 
     /**
@@ -237,6 +241,7 @@ public class VersioningChecker extends AbstractElementChecker {
     private Collection<CheckerIssue> checkMessageEventDefinition(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement baseElement = element.getBaseElement();
+
         if (baseElement instanceof MessageEventDefinition) {
             // Class, Expression, Delegate Expression
             final MessageEventDefinition eventDef = (MessageEventDefinition) baseElement;
@@ -353,7 +358,8 @@ public class VersioningChecker extends AbstractElementChecker {
             issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                     element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
                     element.getBaseElement().getAttributeValue("name"), null, null, null,
-                    "bean reference is deprecated or file with version does not exist for bean '"
+                    "bean reference '" + beanReference
+                            + "' is deprecated or file with version does not exist for bean '"
                             + expression + "'"));
         }
     }
@@ -369,11 +375,20 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
         if (javaReference != null) {
             if (!resourcesNewestVersions.contains(javaReference)) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue("name"), null, null, null,
-                        "class reference is deprecated or file with version does not exist for class '"
-                                + javaReference + "'"));
+                if (element.getBaseElement().getId() == null) {
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                            element.getProcessdefinition(), javaReference,
+                            element.getBaseElement().getParentElement().getAttributeValue("id"),
+                            element.getBaseElement().getParentElement().getAttributeValue("name"), null, null, null,
+                            "class reference is deprecated or file with version does not exist for class '"
+                                    + javaReference + "'"));
+                } else {
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                            element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
+                            element.getBaseElement().getAttributeValue("name"), null, null, null,
+                            "class reference is deprecated or file with version does not exist for class '"
+                                    + javaReference + "'"));
+                }
             }
         }
     }

@@ -47,6 +47,7 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import groovy.lang.GroovyShell;
+import groovy.lang.MissingPropertyException;
 
 /**
  * Class EmbeddedGroovyScriptChecker
@@ -56,10 +57,15 @@ import groovy.lang.GroovyShell;
  */
 public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
-    public EmbeddedGroovyScriptChecker(final Rule rule) {
-        super(rule);
+    public EmbeddedGroovyScriptChecker(final Rule rule, final String path) {
+        super(rule, path);
     }
 
+    /**
+     * Check for GroovyScript in a ScriptTask And checks for GroovyScript in ExtensionElements
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 
@@ -80,8 +86,8 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
     }
 
     /**
-     * check script tasks
-     * 
+     * Check script tasks
+     *
      * @param bpmnFile
      * @param baseElement
      * @return issues
@@ -120,8 +126,8 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
     }
 
     /**
-     * check execution listeners
-     * 
+     * Check execution listeners
+     *
      * @param bpmnFile
      * @param baseElement
      * @param extensionElements
@@ -155,7 +161,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
     }
 
     /**
-     * check task listeners
+     * Check task listeners
      *
      * @param bpmnFile
      * @param baseElement
@@ -190,34 +196,41 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
     }
 
     /**
-     * check, if groovy code is valid
-     * 
+     * Check if groovy code is valid
+     *
      * @param bpmnFile
      * @param baseElement
      * @param scriptText
-     * @return issue
+     * @return CheckerIssue or null
      */
     private CheckerIssue parseGroovyCode(final String bpmnFile, final BaseElement baseElement,
             final String scriptText) {
         final GroovyShell shell = new GroovyShell();
         try {
             shell.evaluate(scriptText);
-        } catch (final CompilationFailedException ex) {
-            return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
-                    baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                    ex.getMessage());
+        } catch (final CompilationFailedException | MissingPropertyException ex) {
+            if (ex instanceof CompilationFailedException) {
+                return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+                        baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                        ex.getMessage());
+            } else {
+                return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+                        baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                        "GroovyScript could not be evaluated. '" + ex.getMessage() + "'");
+            }
+
         }
         return null;
     }
 
     /**
-     * check empty script content
-     * 
+     * Check empty script content
+     *
      * @param bpmnFile
      * @param baseElement
      * @param scriptFormat
      * @param script
-     * @return issue
+     * @return CheckerIssue or null
      */
     private CheckerIssue checkEmptyScriptContent(final String bpmnFile, final BaseElement baseElement,
             final String scriptFormat, final String script) {
@@ -231,13 +244,13 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
     }
 
     /**
-     * check empty script format
-     * 
+     * Check empty script format
+     *
      * @param bpmnFile
      * @param baseElement
      * @param scriptFormat
      * @param script
-     * @return issue
+     * @return CheckerIssue or null
      */
     private CheckerIssue checkEmptyScriptFormat(final String bpmnFile, final BaseElement baseElement,
             final String scriptFormat, final String script) {
@@ -251,13 +264,13 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
     }
 
     /**
-     * check groovy syntax
-     * 
+     * Check groovy syntax
+     *
      * @param bpmnFile
      * @param baseElement
      * @param scriptFormat
      * @param script
-     * @return issue
+     * @return CheckerIssue or null
      */
     private CheckerIssue checkInvalidScriptContent(final String bpmnFile,
             final BaseElement baseElement, final String scriptFormat, final String script) {

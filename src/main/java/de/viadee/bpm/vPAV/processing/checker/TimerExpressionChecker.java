@@ -64,8 +64,6 @@ import net.time4j.range.MomentInterval;
 
 public class TimerExpressionChecker extends AbstractElementChecker {
 
-    final String path;
-
     final String timeDate = "timeDate";
 
     final String timeDuration = "timeDuration";
@@ -73,10 +71,14 @@ public class TimerExpressionChecker extends AbstractElementChecker {
     final String timeCycle = "timeCycle";
 
     public TimerExpressionChecker(final Rule rule, final String path) {
-        super(rule);
-        this.path = path;
+        super(rule, path);
     }
 
+    /**
+     * Check TimerEvents for correct usage of ISO 8601 and CRON definitions
+     *
+     * @return issues
+     */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 
@@ -93,8 +95,8 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 
             try {
 
-                scan = new BPMNScanner();
-                list = scan.getTimerImplementation(path, baseElement.getId());
+                scan = new BPMNScanner(path);
+                list = scan.getTimerImplementation(baseElement.getId());
                 String timerDefinition;
 
                 for (Map.Entry<Element, Element> entry : list.entrySet()) {

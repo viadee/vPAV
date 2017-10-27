@@ -36,6 +36,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -49,9 +50,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
@@ -67,9 +68,9 @@ public class NoExpressionCheckerTest {
 
     private static ClassLoader cl;
 
-    private final Map<String, Rule> rules = AbstractRunner.readConfig();
+    private static Map<String, Setting> setting = new HashMap<String, Setting>();
 
-    private final Rule rule = rules.get("NoExpressionChecker");
+    private final Rule rule = new Rule("NoExpressionChecker", true, setting, null, null);
 
     @BeforeClass
     public static void setup() throws MalformedURLException {

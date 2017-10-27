@@ -35,8 +35,11 @@ public abstract class AbstractElementChecker implements ElementChecker {
 
     protected final Rule rule;
 
-    public AbstractElementChecker(final Rule rule) {
+    protected final String path;
+
+    public AbstractElementChecker(final Rule rule, final String path) {
         this.rule = rule;
+        this.path = path;
     }
 
 }
