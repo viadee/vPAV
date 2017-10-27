@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.viadee</groupId>
 	<artifactId>viadeeProcessApplicationValidator</artifactId>
-	<version>2.2.3-SNAPSHOT</version>
+	<version>2.2.3</version>
 	<packaging>maven-plugin</packaging>
 
 	<name>viadee Process Application Validator - Maven Plugin</name>
@@ -294,7 +294,7 @@
 					<properties>
 						<owner>viadee Unternehmensberatung GmbH</owner>
 						<inceptionYear>2017</inceptionYear>
-						<email>frank.koehne@viadee.de</email>
+						<email>Frank.Koehne@viadee.de</email>
 					</properties>
 					<excludes>
 						<exclude>**/README</exclude>
