@@ -1,7 +1,7 @@
 //mark all nodes with issues
 function markNodes(canvas, bpmnFile) {
     for (id in elementsToMark) {
-        if (elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
+        if ((elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) && (elementsToMark[id].elementId != "")) {
             if (elementsToMark[id].ruleName == "VersioningChecker") {
                 canvas.addMarker(elementsToMark[id].elementId, 'VersioningChecker');
             } else if (elementsToMark[id].ruleName == "ProcessVariablesNameConventionChecker") {
@@ -25,9 +25,9 @@ function markNodes(canvas, bpmnFile) {
             } else if (elementsToMark[id].ruleName == "TimerExpressionChecker") {
                 canvas.addMarker(elementsToMark[id].elementId, 'TimerExpressionChecker');
             } else if (elementsToMark[id].ruleName == "NoExpressionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'NoExpressionChecker'); 
+                canvas.addMarker(elementsToMark[id].elementId, 'NoExpressionChecker');
             } else if (elementsToMark[id].ruleName == "MessageEventChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'MessageEventChecker'); 
+                canvas.addMarker(elementsToMark[id].elementId, 'MessageEventChecker');
             } else {
                 canvas.addMarker(elementsToMark[id].elementId, 'new');
             }
@@ -36,7 +36,7 @@ function markNodes(canvas, bpmnFile) {
 }
 
 //add Botton "mark all issues"
-function activateButtonAllIssues(model){
+function activateButtonAllIssues(model) {
     var btReset = document.getElementById("reset");
     btReset.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     btReset.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 0 )");
@@ -50,7 +50,8 @@ function markPath(canvas, id, pos, model) {
     for (y in elementsToMark) {
         if (elementsToMark[y].id == id) {
             for (x in elementsToMark[y].paths[pos]) {
-                canvas.addMarker(elementsToMark[y].paths[pos][x].elementId, 'path');
+                if (elementsToMark[y].paths[pos][x].elementId != "")
+                    canvas.addMarker(elementsToMark[y].paths[pos][x].elementId, 'path');
             }
         }
     }
@@ -69,7 +70,8 @@ function addCountOverlay(overlays, bpmnFile) {
     var eId = [];
     for (id in elementsToMark) {
         if (elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile))
-            eId[id] = elementsToMark[id].elementId;
+            if (elementsToMark[id].elementId != "")
+                eId[id] = elementsToMark[id].elementId;
     }
 
     //doppelte Löschen
@@ -142,40 +144,41 @@ function addCountOverlay(overlays, bpmnFile) {
             while (dialogContent.hasChildNodes()) {
                 dialogContent.removeChild(dialogContent.lastChild);
             }
+            if (issues[id].i.elementId != "") {
+                var eId = issues[id].i.elementId;
+                for (y in issues) {
+                    if (issues[y].i.elementId == eId) {
+                        var issue = issues[y].i;
 
-            var eId = issues[id].i.elementId;
-            for (y in issues) {
-                if (issues[y].i.elementId == eId) {
-                    var issue = issues[y].i;
+                        var dCard = document.createElement("div");
+                        dCard.setAttribute("class", "card bg-light mb-3");
 
-                    var dCard = document.createElement("div");
-                    dCard.setAttribute("class", "card bg-light mb-3");
+                        var dCardBody = document.createElement("div");
+                        dCardBody.setAttribute("class", "card-body");
 
-                    var dCardBody = document.createElement("div");
-                    dCardBody.setAttribute("class", "card-body");
+                        var dCardTitle = document.createElement("h5");
+                        dCardTitle.setAttribute("class", "card-header");
 
-                    var dCardTitle = document.createElement("h5");
-                    dCardTitle.setAttribute("class", "card-header");
-
-                    var dCardText = document.createElement("p");
-                    dCardText.setAttribute("class", "card-text");
+                        var dCardText = document.createElement("p");
+                        dCardText.setAttribute("class", "card-text");
 
 
-                    var oImg = document.createElement("img");
-                    oImg.setAttribute('src', 'img/' + issue.classification + '.png');
-                    oImg.setAttribute('alt', 'issue.classification');
-                    oImg.setAttribute('class', 'float-left mr-2');
-                    oImg.setAttribute("title", issue.classification);
+                        var oImg = document.createElement("img");
+                        oImg.setAttribute('src', 'img/' + issue.classification + '.png');
+                        oImg.setAttribute('alt', 'issue.classification');
+                        oImg.setAttribute('class', 'float-left mr-2');
+                        oImg.setAttribute("title", issue.classification);
 
-                    dCardTitle.innerHTML = issue.ruleName;
-                    dCardTitle.appendChild(oImg);
-                    dCardText.innerHTML = issue.message;
+                        dCardTitle.innerHTML = issue.ruleName;
+                        dCardTitle.appendChild(oImg);
+                        dCardText.innerHTML = issue.message;
 
-                    dCard.appendChild(dCardTitle);
-                    dCardBody.appendChild(dCardText);
-                    dCard.appendChild(dCardBody);
+                        dCard.appendChild(dCardTitle);
+                        dCardBody.appendChild(dCardText);
+                        dCard.appendChild(dCardBody);
 
-                    dialogContent.appendChild(dCard);
+                        dialogContent.appendChild(dCard);
+                    }
                 }
             }
             toggleDialog('show');
@@ -249,9 +252,11 @@ function createTable(bpmnFile) {
             //create link 
             var c = document.createElement("a");
             c.appendChild(myText);
-            c.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.elementId + "', 0 , 2)");
-            c.setAttribute("href", "#");
-            c.setAttribute("title", "mark element");
+            if (issue.elementId != "") {
+                c.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.elementId + "', 0 , 2)");
+                c.setAttribute("href", "#");
+                c.setAttribute("title", "mark element");
+            }
             myCell.appendChild(c);
             myRow.appendChild(myCell);
 
@@ -280,39 +285,41 @@ function createTable(bpmnFile) {
             //path
             myCell = document.createElement("td");
             var path_text = "";
-            for (x in issue.paths) {
-                for (y in issue.paths[x]) {
-                    if (issue.paths[x][y].elementName == null)
-                        if (y < issue.paths[x].length - 1)
-                            path_text += issue.paths[x][y].elementId + " -> ";
+            if (issue.elementId != null) {
+                for (x in issue.paths) {
+                    for (y in issue.paths[x]) {
+                        if (issue.paths[x][y].elementName == null)
+                            if (y < issue.paths[x].length - 1)
+                                path_text += issue.paths[x][y].elementId + " -> ";
+                            else
+                                path_text += issue.paths[x][y].elementId;
                         else
-                            path_text += issue.paths[x][y].elementId;
-                    else
-                        if (y < issue.paths[x].length - 1)
-                            path_text += issue.paths[x][y].elementName + " -> ";
-                        else
-                            path_text += issue.paths[x][y].elementName
-                }
-                myText = document.createTextNode("Mark invalid flow");
+                            if (y < issue.paths[x].length - 1)
+                                path_text += issue.paths[x][y].elementName + " -> ";
+                            else
+                                path_text += issue.paths[x][y].elementName
+                    }
+                    myText = document.createTextNode("Mark invalid flow");
 
-                //path markieren
-                var p = issue.paths[x];
+                    //path markieren
+                    var p = issue.paths[x];
 
-                var b = document.createElement("a");
-                b.appendChild(myText);
-                b.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.id + "','" + x + "', 1, '" + path_text + "')");
-                b.setAttribute("href", "#");
+                    var b = document.createElement("a");
+                    b.appendChild(myText);
+                    b.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.id + "','" + x + "', 1, '" + path_text + "')");
+                    b.setAttribute("href", "#");
 
-                myCell.appendChild(b);
-                path_text = "";
+                    myCell.appendChild(b);
+                    path_text = "";
 
-                //add break
-                br = document.createElement("br");
-                myCell.appendChild(br);
-                //only add break if its not the last one
-                if (x < issue.paths.length - 1) {
-                    brz = document.createElement("br");
-                    myCell.appendChild(brz);
+                    //add break
+                    br = document.createElement("br");
+                    myCell.appendChild(br);
+                    //only add break if its not the last one
+                    if (x < issue.paths.length - 1) {
+                        brz = document.createElement("br");
+                        myCell.appendChild(brz);
+                    }
                 }
             }
             myRow.appendChild(myCell);
@@ -451,7 +458,7 @@ function tableVisible(show) {
 function countIssues(bpmnFile) {
     count = 0;
     for (id in elementsToMark) {
-        if (elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
+        if (elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile) && elementsToMark[id].classification != "SUCCESS") {
             count++;
         }
     }
