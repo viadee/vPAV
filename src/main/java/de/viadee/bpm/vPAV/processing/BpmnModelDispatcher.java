@@ -132,6 +132,21 @@ public class BpmnModelDispatcher {
             for (final ElementChecker checker : checkerCollection) {
                 issues.addAll(checker.check(element));
             }
+
+            // try {
+            // File dir = new File(ConstantsConfig.VALIDATION_FOLDER + "/Var");
+            // dir.mkdirs();
+            // final FileWriter file = new FileWriter("target/vPAV/Var/" + baseElement.getId() + ".txt");
+            // String s = "";
+            // for (Map.Entry<String, ProcessVariable> entry : element.getProcessVariables().entrySet()) {
+            // s += entry.getValue().getName() + " : " + entry.getValue().getOperation() + "\n";
+            // }
+            // file.write(s);
+            //
+            // file.close();
+            // } catch (IOException e) {
+            // e.printStackTrace();
+            // }
         }
 
         return issues;

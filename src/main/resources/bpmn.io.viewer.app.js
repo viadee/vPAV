@@ -52,7 +52,11 @@ function markPath(canvas, id, pos, model) {
 }
 
 //mark one element
-function markElement(canvas, id) {
+function markElement(canvas, id, model) {
+    var btReset = document.getElementById("reset");
+    btReset.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
+    btReset.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 0 )");
+    btReset.setAttribute("href", "#");
     canvas.addMarker(id, 'oneElement');
 }
 
@@ -383,7 +387,7 @@ function initDiagram(diagramXML, issue_id, path_nr, func) {
                 } else if (func == 1) {
                     markPath(canvas, issue_id, path_nr, diagramXML.name);
                 } else if (func == 2) {
-                    markElement(canvas, issue_id);
+                    markElement(canvas, issue_id, diagramXML.name);
                 }
                 createTable(diagramXML.name);
                 tableVisible(true);
