@@ -30,15 +30,20 @@
 package de.viadee.bpm.vPAV.processing;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.checker.CheckerFactory;
 import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
@@ -85,6 +90,14 @@ public class BpmnModelDispatcher {
             final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf)
             throws ConfigItemNotFoundException {
 
+        // create BPMNScanner
+        BPMNScanner bpmnScanner;
+        try {
+            bpmnScanner = new BPMNScanner(processdefinition.getPath());
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            throw new RuntimeException("Model couldn't be parsed");
+        }
+
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
 
@@ -128,25 +141,10 @@ public class BpmnModelDispatcher {
             }
             final Collection<ElementChecker> checkerCollection = CheckerFactory
                     .createCheckerInstancesBpmnElement(conf, resourcesNewestVersions, element,
-                            processdefinition.getPath());
+                            bpmnScanner);
             for (final ElementChecker checker : checkerCollection) {
                 issues.addAll(checker.check(element));
             }
-
-            // try {
-            // File dir = new File(ConstantsConfig.VALIDATION_FOLDER + "/Var");
-            // dir.mkdirs();
-            // final FileWriter file = new FileWriter("target/vPAV/Var/" + baseElement.getId() + ".txt");
-            // String s = "";
-            // for (Map.Entry<String, ProcessVariable> entry : element.getProcessVariables().entrySet()) {
-            // s += entry.getValue().getName() + " : " + entry.getValue().getOperation() + "\n";
-            // }
-            // file.write(s);
-            //
-            // file.close();
-            // } catch (IOException e) {
-            // e.printStackTrace();
-            // }
         }
 
         return issues;
