@@ -63,9 +63,30 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     private String message;
 
-    public CheckerIssue() {
-    }
-
+    /**
+     * CheckerIssue
+     * 
+     * @param ruleName
+     *            Name of the Rule
+     * @param classification
+     *            Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile
+     *            Path to the BPMNFile
+     * @param resourceFile
+     *            Path to resource file (e.g. dmn oder java)
+     * @param elementId
+     *            Id of the Element with issue
+     * @param elementName
+     *            Name of the Element woth issue
+     * @param variable
+     *            Name of variable
+     * @param anomaly
+     *            Type of anomaly (DD, DU, UR)
+     * @param invalidPaths
+     *            Invalid path
+     * @param message
+     *            Issue message
+     */
     public CheckerIssue(final String ruleName, final CriticalityEnum classification,
             final String bpmnFile, final String resourceFile, final String elementId,
             final String elementName, final String variable, final Anomaly anomaly,
