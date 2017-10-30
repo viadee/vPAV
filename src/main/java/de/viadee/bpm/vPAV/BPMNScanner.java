@@ -217,16 +217,9 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      * @return return_implementation contains implementation
      */
-    public String getImplementation(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public String getImplementation(String id) {
         // List to hold return values
         String return_implementation = null;
 
@@ -301,16 +294,9 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      * @return return_implementation contains implementation
      */
-    public String getEventImplementation(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public String getEventImplementation(String id) {
         // List to hold return values
         String return_implementation = null;
 
@@ -384,15 +370,8 @@ public class BPMNScanner {
      * @param extType
      *            Type of Listener
      * @return value of Listener
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      */
-    public ArrayList<String> getListener(String id, String listType, String extType)
-            throws SAXException, IOException, ParserConfigurationException {
+    public ArrayList<String> getListener(String id, String listType, String extType) {
 
         // list to hold return values
         ArrayList<String> returnAttrList = new ArrayList<String>();
@@ -455,13 +434,9 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
      * @return scriptPlaces contains script type
      */
-    public ArrayList<String> getScriptTypes(String id) throws SAXException, IOException {
+    public ArrayList<String> getScriptTypes(String id) {
         // bool to hold return values
         ArrayList<String> return_scriptType = new ArrayList<String>();
 
@@ -514,15 +489,8 @@ public class BPMNScanner {
      * @param id
      *            id of the element
      * @return boolean has condition Expression
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      */
-    public boolean hasScriptInCondExp(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public boolean hasScriptInCondExp(String id) {
         // List for all Task elements
         NodeList nodeList = null;
 
@@ -578,17 +546,10 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      * @return gateway contains script type
      *
      */
-    public String getXorGateWays(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public String getXorGateWays(String id) {
         final NodeList nodeList;
 
         String gateway = "";
@@ -624,15 +585,9 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      * @return outgoing number of outgoing
      */
-    public int getOutgoing(String id) throws SAXException, IOException, ParserConfigurationException {
+    public int getOutgoing(String id) {
         final NodeList nodeList;
         String out = "";
         int outgoing = 0;
@@ -678,15 +633,8 @@ public class BPMNScanner {
      * @param id
      *            id of bpmn element
      * @return ArrayList of outgoing Nodes
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      */
-    public ArrayList<Node> getOutgoingEdges(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public ArrayList<Node> getOutgoingEdges(String id) {
 
         ArrayList<Node> outgoingEdges = new ArrayList<Node>();
         NodeList nodeList = null;
@@ -764,15 +712,8 @@ public class BPMNScanner {
      * @param id
      *            id of bpmn element
      * @return Map with timerEventDefinition-Node and his child
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws SAXException
-     *             possible exception while process xml
      */
-    public Map<Element, Element> getTimerImplementation(final String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public Map<Element, Element> getTimerImplementation(final String id) {
 
         // List for all Task elements
         ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
@@ -839,6 +780,7 @@ public class BPMNScanner {
      * Retrieve the message name of a given receiveTask
      *
      * @param messageRef
+     *            id of message
      * @return messageName
      */
     public String getMessageName(String messageRef) {
@@ -879,7 +821,14 @@ public class BPMNScanner {
         return c_exp;
     }
 
-    public ArrayList<String> getOutputVariables(String id) throws SAXException, IOException {
+    /**
+     * get List of output variables
+     * 
+     * @param id
+     *            id of the element
+     * @return outputVariables
+     */
+    public ArrayList<String> getOutputVariables(String id) {
         // List for all Task elements
         ArrayList<String> listVariables = new ArrayList<String>();
 
