@@ -29,18 +29,14 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.Event;
 import org.camunda.bpm.model.bpmn.instance.Message;
 import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
-import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -51,8 +47,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class MessageEventChecker extends AbstractElementChecker {
 
-    public MessageEventChecker(final Rule rule, final String path) {
-        super(rule, path);
+    public MessageEventChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+        super(rule, bpmnScanner);
     }
 
     /**
@@ -65,7 +61,6 @@ public class MessageEventChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement baseElement = element.getBaseElement();
-        final BPMNScanner scan;
 
         if (baseElement.getElementType().getTypeName()
                 .equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)
@@ -105,20 +100,13 @@ public class MessageEventChecker extends AbstractElementChecker {
                         "No message has been specified for '" + CheckName.checkName(baseElement)
                                 + "'."));
             } else {
-                try {
-                    scan = new BPMNScanner(path);
-                    if (scan.getMessageName(baseElement.getAttributeValue("messageRef")) == null
-                            || scan.getMessageName(baseElement.getAttributeValue("messageRef")).isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                                baseElement.getAttributeValue("name"), null, null, null,
-                                "No message name has been specified for '" + CheckName.checkName(baseElement)
-                                        + "'."));
-                    }
-
-                } catch (ParserConfigurationException | SAXException | IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                if (bpmnScanner.getMessageName(baseElement.getAttributeValue("messageRef")) == null
+                        || bpmnScanner.getMessageName(baseElement.getAttributeValue("messageRef")).isEmpty()) {
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                            element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
+                            baseElement.getAttributeValue("name"), null, null, null,
+                            "No message name has been specified for '" + CheckName.checkName(baseElement)
+                                    + "'."));
                 }
             }
         }

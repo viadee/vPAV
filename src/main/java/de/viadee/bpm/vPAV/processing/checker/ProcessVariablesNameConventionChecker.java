@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -50,8 +51,8 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
  */
 public class ProcessVariablesNameConventionChecker extends AbstractElementChecker {
 
-    public ProcessVariablesNameConventionChecker(final Rule rule, final String path) {
-        super(rule, path);
+    public ProcessVariablesNameConventionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+        super(rule, bpmnScanner);
     }
 
     /**

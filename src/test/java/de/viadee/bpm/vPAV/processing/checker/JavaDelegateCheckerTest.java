@@ -49,6 +49,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -97,7 +98,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReference()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReference.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -126,7 +127,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReferenceSignal()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReferenceSignal.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -155,7 +156,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReferenceAbstract()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReferenceAbstract.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -184,7 +185,7 @@ public class JavaDelegateCheckerTest {
     public void testNoTechnicalAttributes()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoTechnicalAttributes.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -216,7 +217,7 @@ public class JavaDelegateCheckerTest {
     public void testNoJavaDelegateEntered()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoJavaDelegateEntered.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -248,7 +249,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegatePath()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegatePath.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -280,7 +281,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateInterface()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateInterface.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -313,7 +314,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateEntered()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateEntered.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -345,7 +346,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateExpression.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -377,7 +378,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongClassReference()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongClassReference.bpmn";
-        checker = new JavaDelegateChecker(rule, PATH);
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

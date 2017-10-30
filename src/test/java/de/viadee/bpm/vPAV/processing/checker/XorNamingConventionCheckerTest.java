@@ -48,6 +48,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -92,7 +93,7 @@ public class XorNamingConventionCheckerTest {
     public void testOutgoingXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingXor.bpmn";
-        checker = new XorNamingConventionChecker(rule, PATH);
+        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -123,7 +124,7 @@ public class XorNamingConventionCheckerTest {
     public void testCorrectXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorNamingConventionChecker_correct.bpmn";
-        checker = new XorNamingConventionChecker(rule, PATH);
+        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -154,7 +155,7 @@ public class XorNamingConventionCheckerTest {
     public void testFalseXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorNamingConventionChecker_false.bpmn";
-        checker = new XorNamingConventionChecker(rule, PATH);
+        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -185,7 +186,7 @@ public class XorNamingConventionCheckerTest {
     public void testOutgoingEdgesCorrect()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingEdgesCorrect.bpmn";
-        checker = new XorNamingConventionChecker(rule, PATH);
+        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -216,7 +217,7 @@ public class XorNamingConventionCheckerTest {
     public void testOutgoingEdgesFalse()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingEdgesFalse.bpmn";
-        checker = new XorNamingConventionChecker(rule, PATH);
+        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

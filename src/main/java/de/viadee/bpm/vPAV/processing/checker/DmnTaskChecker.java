@@ -29,17 +29,13 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
-import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -55,8 +51,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
-    public DmnTaskChecker(final Rule rule, String path) {
-        super(rule, path);
+    public DmnTaskChecker(final Rule rule, BPMNScanner bpmnScanner) {
+        super(rule, bpmnScanner);
     }
 
     /**
@@ -68,33 +64,25 @@ public class DmnTaskChecker extends AbstractElementChecker {
     public Collection<CheckerIssue> check(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
-        final BPMNScanner scan;
         if (bpmnElement instanceof BusinessRuleTask) {
-            try {
-                scan = new BPMNScanner(path);
+            // read attributes from task
+            final String implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
 
-                // read attributes from task
-                final String implementationAttr = scan.getImplementation(bpmnElement.getId());
-
-                final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                        "decisionRef");
-                if (implementationAttr != null) {
-                    // check if DMN reference is not empty
-                    if (implementationAttr.equals("camunda:decisionRef")) {
-                        if (dmnAttr == null || dmnAttr.trim().length() == 0) {
-                            // Error, because no delegateExpression has been configured
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                    bpmnElement.getAttributeValue("name"), null, null, null,
-                                    "task " + CheckName.checkName(bpmnElement) + " with no dmn reference"));
-                        } else {
-                            issues.addAll(checkDMNFile(element, dmnAttr, path));
-                        }
+            final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                    "decisionRef");
+            if (implementationAttr != null) {
+                // check if DMN reference is not empty
+                if (implementationAttr.equals("camunda:decisionRef")) {
+                    if (dmnAttr == null || dmnAttr.trim().length() == 0) {
+                        // Error, because no delegateExpression has been configured
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "task " + CheckName.checkName(bpmnElement) + " with no dmn reference"));
+                    } else {
+                        issues.addAll(checkDMNFile(element, dmnAttr));
                     }
                 }
-            } catch (ParserConfigurationException | SAXException | IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
         }
         return issues;
@@ -104,11 +92,12 @@ public class DmnTaskChecker extends AbstractElementChecker {
      * Check if the referenced DMN in a BusinessRuleTask exists
      *
      * @param element
+     *            BpmnElement
      * @param dmnName
-     * @param path
+     *            Name of DMN-File
      * @return issues
      */
-    private Collection<CheckerIssue> checkDMNFile(final BpmnElement element, final String dmnName, final String path) {
+    private Collection<CheckerIssue> checkDMNFile(final BpmnElement element, final String dmnName) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();

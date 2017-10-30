@@ -53,6 +53,7 @@ import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
@@ -68,8 +69,9 @@ public class VersioningChecker extends AbstractElementChecker {
 
     private Collection<String> resourcesNewestVersions;
 
-    public VersioningChecker(final Rule rule, final String path, final Collection<String> resourcesNewestVersions) {
-        super(rule, path);
+    public VersioningChecker(final Rule rule, final BPMNScanner bpmnScanner,
+            final Collection<String> resourcesNewestVersions) {
+        super(rule, bpmnScanner);
         this.resourcesNewestVersions = resourcesNewestVersions;
     }
 

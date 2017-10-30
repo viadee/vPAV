@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
@@ -67,8 +68,8 @@ public final class CheckerFactory {
      *            resourcesNewestVersions in context
      * @param element
      *            given BpmnElement
-     * @param path
-     *            path to model file
+     * @param bpmnScanner
+     *            bpmnScanner for model
      * @return checkers returns checkers
      *
      * @throws ConfigItemNotFoundException
@@ -76,7 +77,7 @@ public final class CheckerFactory {
      */
     public static Collection<ElementChecker> createCheckerInstancesBpmnElement(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
-            final BpmnElement element, String path)
+            final BpmnElement element, BPMNScanner bpmnScanner)
             throws ConfigItemNotFoundException {
 
         final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
@@ -91,13 +92,16 @@ public final class CheckerFactory {
             if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")) {
                 try {
                     if (!rule.getKey().equals("VersioningChecker")) {
-                        Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class, String.class);
-                        AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(), path);
+                        Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class,
+                                BPMNScanner.class);
+                        AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(),
+                                bpmnScanner);
                         checkers.add(aChecker);
                     } else {
-                        Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class, String.class,
-                                Collection.class);
-                        AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(), path,
+                        Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class,
+                                BPMNScanner.class, Collection.class);
+                        AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(),
+                                bpmnScanner,
                                 resourcesNewestVersions);
                         checkers.add(aChecker);
                     }
