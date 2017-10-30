@@ -37,6 +37,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,8 +47,10 @@ import com.google.gson.JsonObject;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
@@ -55,13 +58,16 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  */
 public class JsOutputWriter implements IssueOutputWriter {
 
+    private final String basePath = "src\\main\\resources\\";
+
     /**
      * Writes the output as JavaScript to the vPAV output folder
      */
     @Override
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
-        final String json = transformToJsonDatastructure(issues);
+        final String json = transformToJsonDatastructure(addNoIssues(issues));
         final String bpmn = transformToXMLDatastructure();
+
         if (json != null && !json.isEmpty()) {
             try {
                 final FileWriter file = new FileWriter(ConstantsConfig.VALIDATION_JS_MODEL_OUTPUT);
@@ -77,6 +83,34 @@ public class JsOutputWriter implements IssueOutputWriter {
                 throw new OutputWriterException("js output couldn't be written");
             }
         }
+    }
+
+    private Collection<CheckerIssue> addNoIssues(final Collection<CheckerIssue> issues) {
+        Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
+
+        for (final String bpmnFilename : AbstractRunner.getModelPath()) {
+            Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
+            modelIssues.addAll(issues);
+
+            for (CheckerIssue issue : issues) {
+                if (!issue.getBpmnFile().equals(basePath + bpmnFilename))
+                    modelIssues.remove(issue);
+            }
+
+            for (final String ruleName : RuntimeConfig.getInstance().getAllRules()) {
+                Collection<CheckerIssue> ruleIssues = new ArrayList<CheckerIssue>();
+                ruleIssues.addAll(modelIssues);
+                for (CheckerIssue issue : modelIssues) {
+                    if (!issue.getRuleName().equals(ruleName))
+                        ruleIssues.remove(issue);
+                }
+                if (ruleIssues.isEmpty())
+                    newIssues.add(new CheckerIssue(ruleName, CriticalityEnum.SUCCESS, (basePath + bpmnFilename), null,
+                            "", "", null, null, null, "No issues found"));
+            }
+        }
+        newIssues.addAll(issues);
+        return newIssues;
     }
 
     /**
