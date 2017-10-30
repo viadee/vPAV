@@ -30,10 +30,14 @@
 package de.viadee.bpm.vPAV;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
+
+import de.viadee.bpm.vPAV.config.model.Rule;
 
 public class RuntimeConfig {
 
@@ -45,11 +49,15 @@ public class RuntimeConfig {
 
     private boolean test = false;
 
-    private final String[] allRules = { "XorNamingConventionChecker",
+    private final String[] viadeeRules = { "XorNamingConventionChecker",
             "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
             "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
             "MessageEventChecker" };
+
+    private ArrayList<String> allRules = new ArrayList<>(Arrays.asList(viadeeRules));
+
+    private final String externChecker = "external_Location";
 
     private RuntimeConfig() {
     }
@@ -108,8 +116,20 @@ public class RuntimeConfig {
         this.test = test;
     }
 
-    public String[] getAllRules() {
+    public ArrayList<String> getAllRules() {
         return allRules;
+    }
+
+    public String[] getViadeeRules() {
+        return viadeeRules;
+    }
+
+    public void addExternRules(Map<String, Rule> rules) {
+        for (Map.Entry<String, Rule> entry : rules.entrySet()) {
+            Rule rule = entry.getValue();
+            if (rule.isActive() && rule.getSettings().containsKey(externChecker))
+                allRules.add(rule.getName());
+        }
     }
 
 }

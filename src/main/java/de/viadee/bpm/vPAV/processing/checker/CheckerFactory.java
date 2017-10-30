@@ -126,7 +126,7 @@ public final class CheckerFactory {
      */
     private static String getFullyQualifiedName(Map.Entry<String, Rule> rule) {
         String fullyQualifiedName = "";
-        if (Arrays.asList(RuntimeConfig.getInstance().getAllRules()).contains(rule.getKey())
+        if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getKey())
                 && rule.getValue().isActive()) {
             fullyQualifiedName = internLocation + rule.getValue().getName().trim();
         } else if (rule.getValue().isActive() && rule.getValue().getSettings().containsKey(externLocation)) {

@@ -86,7 +86,7 @@ public final class XmlConfigReader implements ConfigReader {
     public Map<String, Rule> getDeactivatedRuleSet() {
         final Map<String, Rule> rules = new HashMap<String, Rule>();
 
-        for (String name : RuntimeConfig.getInstance().getAllRules())
+        for (String name : RuntimeConfig.getInstance().getViadeeRules())
             rules.put(name, new Rule(name, false, new HashMap<String, Setting>(), new ArrayList<ElementConvention>(),
                     new ArrayList<ModelConvention>()));
 
