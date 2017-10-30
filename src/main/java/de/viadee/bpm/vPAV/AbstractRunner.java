@@ -136,6 +136,7 @@ public abstract class AbstractRunner {
                 rules = new XmlConfigReader().read(ConstantsConfig.RULESETDEFAULT);
             }
             ruleSetOutputWriter.write(rules);
+            RuntimeConfig.getInstance().addExternRules(rules);
 
         } catch (final ConfigReaderException | OutputWriterException e) {
             throw new RuntimeException("Config file could not be read or written");
@@ -364,6 +365,7 @@ public abstract class AbstractRunner {
         allFiles.add("error.png");
         allFiles.add("warning.png");
         allFiles.add("info.png");
+        allFiles.add("success.png");
 
         allFiles.add("validationResult.html");
 
@@ -394,6 +396,7 @@ public abstract class AbstractRunner {
         fMap.put("error.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("warning.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("info.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("success.png", ConstantsConfig.IMG_FOLDER);
 
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
 
