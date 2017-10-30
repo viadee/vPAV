@@ -229,10 +229,37 @@ The value specifies the location of the checkerclass.
 ```
 ##### Requirements
 - Your checker-class have to extends the *AbstractElementChecker*. 
-- Only the parameters from the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `java.lang.String`) are allowed in the constructor.
+- Only the parameters from the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `de.viadee.bpm.vPAV.BPMNScanner`) are allowed in the constructor.
 
 #### Checker instructions
-You can use the parameters `de.viadee.bpm.vPAV.config.model.Rule` and the `java.lang.String` which contains the path to the model. For example to use the `de.viadee.bpm.vPAV.BPMNScanner`.
+You have to return a collection of `de.viadee.bpm.vPAV.processing.model.data.CheckerIssue`.
+
+``` java
+/**
+* CheckerIssue
+* 
+* @param ruleName
+*            Name of the Rule
+* @param classification
+*            Classification (Info, Warning or Error) of the rule
+* @param bpmnFile
+*            Path to the BPMNFile
+* @param resourceFile
+*            Path to resource file (e.g. dmn oder java)
+* @param elementId
+*            Id of the Element with issue
+* @param elementName
+*            Name of the Element with issue
+* @param variable
+*            Name of variable
+* @param anomaly
+*            Type of anomaly (DD, DU, UR)
+* @param invalidPaths
+*            Invalid path
+* @param message
+*            Issue message
+*/
+ ```
 
 #### Additionally required dependencies 
 
