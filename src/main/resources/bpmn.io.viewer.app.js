@@ -35,12 +35,17 @@ function markNodes(canvas, bpmnFile) {
     }
 }
 
-//mark invalide path
-function markPath(canvas, id, pos, model) {
+//add Botton "mark all issues"
+function activateButtonAllIssues(model){
     var btReset = document.getElementById("reset");
     btReset.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     btReset.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 0 )");
     btReset.setAttribute("href", "#");
+}
+
+//mark invalide path
+function markPath(canvas, id, pos, model) {
+    activateButtonAllIssues(model);
 
     for (y in elementsToMark) {
         if (elementsToMark[y].id == id) {
@@ -53,10 +58,7 @@ function markPath(canvas, id, pos, model) {
 
 //mark one element
 function markElement(canvas, id, model) {
-    var btReset = document.getElementById("reset");
-    btReset.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
-    btReset.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 0 )");
-    btReset.setAttribute("href", "#");
+    activateButtonAllIssues(model);
     canvas.addMarker(id, 'oneElement');
 }
 
