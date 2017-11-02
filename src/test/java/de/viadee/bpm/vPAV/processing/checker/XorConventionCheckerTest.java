@@ -59,11 +59,11 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
  * Unit Tests for DmnTaskChecker
  *
  */
-public class XorNamingConventionCheckerTest {
+public class XorConventionCheckerTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
-    private static XorNamingConventionChecker checker;
+    private static XorConventionChecker checker;
 
     private static ClassLoader cl;
 
@@ -92,8 +92,8 @@ public class XorNamingConventionCheckerTest {
     @Test
     public void testOutgoingXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingXor.bpmn";
-        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
+        final String PATH = BASE_PATH + "XorConventionChecker_outgoingXor.bpmn";
+        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -123,8 +123,8 @@ public class XorNamingConventionCheckerTest {
     @Test
     public void testCorrectXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "XorNamingConventionChecker_correct.bpmn";
-        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
+        final String PATH = BASE_PATH + "XorConventionChecker_correct.bpmn";
+        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -154,8 +154,8 @@ public class XorNamingConventionCheckerTest {
     @Test
     public void testFalseXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "XorNamingConventionChecker_false.bpmn";
-        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
+        final String PATH = BASE_PATH + "XorConventionChecker_false.bpmn";
+        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -185,8 +185,8 @@ public class XorNamingConventionCheckerTest {
     @Test
     public void testOutgoingEdgesCorrect()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingEdgesCorrect.bpmn";
-        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
+        final String PATH = BASE_PATH + "XorConventionChecker_outgoingEdgesCorrect.bpmn";
+        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -216,8 +216,8 @@ public class XorNamingConventionCheckerTest {
     @Test
     public void testOutgoingEdgesFalse()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "XorNamingConventionChecker_outgoingEdgesFalse.bpmn";
-        checker = new XorNamingConventionChecker(rule, new BPMNScanner(PATH));
+        final String PATH = BASE_PATH + "XorConventionChecker_outgoingEdgesFalse.bpmn";
+        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -251,7 +251,7 @@ public class XorNamingConventionCheckerTest {
         elementConventions.add(elementConvention);
         elementConventions.add(elementConvention2);
 
-        final Rule rule = new Rule("XorNamingConventionChecker", true, null, elementConventions, null);
+        final Rule rule = new Rule("XorConventionChecker", true, null, elementConventions, null);
 
         return rule;
     }

@@ -31,6 +31,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,15 +43,16 @@ import org.w3c.dom.Node;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
-public class XorNamingConventionChecker extends AbstractElementChecker {
+public class XorConventionChecker extends AbstractElementChecker {
 
-    public XorNamingConventionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public XorConventionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -64,8 +66,17 @@ public class XorNamingConventionChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
+        final Map<String, Setting> settings = rule.getSettings();
 
         if (bpmnElement instanceof ExclusiveGateway) {
+
+            // check default path
+            if (settings != null && settings.get("requiredDefault").getValue().equals("true")
+                    && bpmnElement.getAttributeValue("default") == null)
+                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                        element.getProcessdefinition(), null, bpmnElement.getId(),
+                        bpmnElement.getAttributeValue("name"), null, null, null, "xor gateway '"
+                                + CheckName.checkName(bpmnElement) + "' has no default path"));
 
             String xor_gateway = bpmnScanner.getXorGateWays(bpmnElement.getId());
 

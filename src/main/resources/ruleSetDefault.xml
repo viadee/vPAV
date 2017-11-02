@@ -6,6 +6,9 @@
 	<rule>
 		<name>XorNamingConventionChecker</name>
 		<state>true</state>
+		<settings>
+			<setting name="requiredDefault">false</setting>
+		</settings>
 		<elementConventions>
 			<elementConvention>
 				<name>xorGateway</name>

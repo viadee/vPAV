@@ -49,7 +49,7 @@ public class RuntimeConfig {
 
     private boolean test = false;
 
-    private final String[] viadeeRules = { "XorNamingConventionChecker",
+    private final String[] viadeeRules = { "XorConventionChecker",
             "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
             "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
