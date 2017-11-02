@@ -9,7 +9,7 @@ The XOR Convention Checker processes BPMN models and checks XOR gateways on pred
 The rule should be configured as follows:
 ```xml
 <rule>
-	<name>XorNamingConventionChecker</name>
+	<name>XorConventionChecker</name>
 	<state>true</state>
 	<settings>
 		<setting name="requiredDefault">true</setting>
