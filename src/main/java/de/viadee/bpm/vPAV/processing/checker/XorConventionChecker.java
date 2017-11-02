@@ -105,7 +105,7 @@ public class XorConventionChecker extends AbstractElementChecker {
                     }
                 } else {
                     issues.add(
-                            new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, element.getProcessdefinition(),
+                            new CheckerIssue(rule.getName(), CriticalityEnum.WARNING, element.getProcessdefinition(),
                                     null, bpmnElement.getId(), bpmnElement.getAttributeValue("name"), null, null,
                                     null, "xor gateway name must be specified"));
                 }
