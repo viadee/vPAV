@@ -1,31 +1,22 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -36,6 +27,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -52,6 +45,7 @@ import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
@@ -68,6 +62,8 @@ public class XorConventionCheckerTest {
     private static ClassLoader cl;
 
     private final Rule rule = createRule();
+
+    private final Rule ruleDefault = createRuleDefault();
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -256,4 +252,88 @@ public class XorConventionCheckerTest {
         return rule;
     }
 
+    /**
+     * Creates rule configuration
+     *
+     * @return rule
+     */
+    private static Rule createRuleDefault() {
+
+        final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+
+        final ElementConvention elementConvention = new ElementConvention("convention", null,
+                "[A-ZÄÖÜ][a-zäöü]*\\?{1}");
+
+        final ElementConvention elementConvention2 = new ElementConvention("convention2", null,
+                "[A-ZÄÖÜ][a-zäöü]*");
+        elementConventions.add(elementConvention);
+        elementConventions.add(elementConvention2);
+
+        Setting s = new Setting("requiredDefault", null, "true");
+        final Map<String, Setting> settings = new HashMap<String, Setting>();
+        settings.put("requiredDefault", s);
+        final Rule ruleDefault = new Rule("XorConventionChecker", true, settings, elementConventions, null);
+
+        return ruleDefault;
+    }
+
+    /**
+     * Case: XOR gateway with no default Path
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     *
+     */
+    @Test
+    public void testDefaultPath()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "XorConventionChecker_NoDefault.bpmn";
+        checker = new XorConventionChecker(ruleDefault, new BPMNScanner(PATH));
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ExclusiveGateway> baseElements = modelInstance
+                .getModelElementsByType(ExclusiveGateway.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final Collection<CheckerIssue> issues = checker.check(element);
+
+        if (issues.size() != 1) {
+            Assert.fail("no default path should generate an issue");
+        }
+    }
+
+    /**
+     * Case: XOR gateway with correct default Path
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     *
+     */
+    @Test
+    public void testCorrectDefaultPath()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "XorConventionChecker_CorrectDefault.bpmn";
+        checker = new XorConventionChecker(ruleDefault, new BPMNScanner(PATH));
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ExclusiveGateway> baseElements = modelInstance
+                .getModelElementsByType(ExclusiveGateway.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final Collection<CheckerIssue> issues = checker.check(element);
+
+        if (issues.size() != 0) {
+            Assert.fail("no default path should generate an issue");
+        }
+    }
 }
