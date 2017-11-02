@@ -24,7 +24,7 @@ Consistency checks are performed by individual modules called checkers, which se
 |[ProcessVariablesNameConventionChecker](ProcessVariablesNameConventionChecker.md)     | Do process variables in the model fit into a desired regex pattern?      | Done         |
 |[TaskNamingConventionChecker](TaskNamingConventionChecker.md)                         | Do task names in the model fit into a desired regex pattern?             | Done         |
 |[VersioningChecker](VersioningChecker.md)                                             | Do java classes implementing tasks fit  a version scheme?             | Done         |
-|[XorNamingConventionChecker](XorNamingConventionChecker.md)                           | Are XOR gateways ending with "?"                                         | Done         |
+|[XorConventionChecker](XorConventionChecker.md)                           		| Are XOR gateways ending with "?" or have default path                                         | Done         |
 |[NoScriptChecker](NoScriptChecker.md)                                                 | Is there any script in the model?                                        | Done         |
 |[ElementIdConventionChecker](ElementIdConventionChecker.md)                           | Do task ids in the model fit into a desired regex pattern?           | Done         |
 |[TimerExpressionChecker](TimerExpressionChecker.md)                                   | Are time events following the ISO 8601 scheme?                                        | Done         |
@@ -100,10 +100,9 @@ alt="Example HTML-Output" width="791" height="985" border="5" /></a>
 - Camunda BPM Engine 7.4.0 and above
 
 ## Installation/Usage
-There are two ways of installation. We recommend to use the JUnit approach as follows.
 
 ### Maven
-You can start the validation as a Maven plugin. Therefore, add the dependency to your POM:
+Add the dependency to your POM:
 
 ```xml
 <dependency>
@@ -113,12 +112,6 @@ You can start the validation as a Maven plugin. Therefore, add the dependency to
   <scope>test</scope>
 </dependency>
 ```
-
-Then, use the following maven goal to start the validation.  
-```java
-de.viadee:viadeeProcessApplicationValidator:{version}:check
-```
-Please note: This approach is not useful, if you use Spring managed java delegates in your processes.
 
 ### JUnit
 Configure a JUnit-4 Test to fire up your usual Spring context - esp. delegates referenced in the process, 
@@ -229,10 +222,37 @@ The value specifies the location of the checkerclass.
 ```
 ##### Requirements
 - Your checker-class have to extends the *AbstractElementChecker*. 
-- Only the parameters from the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `java.lang.String`) are allowed in the constructor.
+- Only the parameters from the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `de.viadee.bpm.vPAV.BPMNScanner`) are allowed in the constructor.
 
 #### Checker instructions
-You can use the parameters `de.viadee.bpm.vPAV.config.model.Rule` and the `java.lang.String` which contains the path to the model. For example to use the `de.viadee.bpm.vPAV.BPMNScanner`.
+You have to return a collection of `de.viadee.bpm.vPAV.processing.model.data.CheckerIssue`.
+
+``` java
+/**
+* CheckerIssue
+* 
+* @param ruleName
+*            Name of the Rule
+* @param classification
+*            Classification (Info, Warning or Error) of the rule
+* @param bpmnFile
+*            Path to the BPMNFile
+* @param resourceFile
+*            Path to resource file (e.g. dmn oder java)
+* @param elementId
+*            Id of the Element with issue
+* @param elementName
+*            Name of the Element with issue
+* @param variable
+*            Name of variable
+* @param anomaly
+*            Type of anomaly (DD, DU, UR)
+* @param invalidPaths
+*            Invalid path
+* @param message
+*            Issue message
+*/
+ ```
 
 #### Additionally required dependencies 
 
