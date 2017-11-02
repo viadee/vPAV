@@ -1,4 +1,33 @@
 # Release notes
+
+## 2.2.3-SNAPSHOT
+
+### Features
+
+### Fixes
+**vPAV-129** Classloader could not find files  
+
+### Misc
+**VPAV-34** Blogpost on https://blog.camunda.org/  
+**VPAV-104** Grooming: Formal estimation of backlog items  
+**VPAV-134** Cleaned up Glasbruchprozess for testing/presentation purposes  
+**VPAV-122** Stopped support as Maven-Plugin  
+
+## 2.2.2-SNAPSHOT
+
+### Features
+**VPAV-133** MessageEvents now checked for field "Implementation"  
+
+### Fixes
+**VPAV-128** Variables in messages and processes could not be found  
+**VPAV-123** NullPointer if no message is specified in MessageEvents  
+**VPAV-130** Fix ProcessVariablesModelChecker  
+
+### Misc
+**VPAV-131** Improve documentation with JavaDoc   
+**VPAV-132** Check code coverage  
+**VPAV-101** Translation to english  
+
 ## 2.2.1-SNAPSHOT
 
 ### Features
