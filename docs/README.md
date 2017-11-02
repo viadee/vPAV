@@ -24,7 +24,7 @@ Consistency checks are performed by individual modules called checkers, which se
 |[ProcessVariablesNameConventionChecker](ProcessVariablesNameConventionChecker.md)     | Do process variables in the model fit into a desired regex pattern?      | Done         |
 |[TaskNamingConventionChecker](TaskNamingConventionChecker.md)                         | Do task names in the model fit into a desired regex pattern?             | Done         |
 |[VersioningChecker](VersioningChecker.md)                                             | Do java classes implementing tasks fit  a version scheme?             | Done         |
-|[XorNamingConventionChecker](XorNamingConventionChecker.md)                           | Are XOR gateways ending with "?"                                         | Done         |
+|[XorConventionChecker](XorConventionChecker.md)                           		| Are XOR gateways ending with "?" or have default path                                         | Done         |
 |[NoScriptChecker](NoScriptChecker.md)                                                 | Is there any script in the model?                                        | Done         |
 |[ElementIdConventionChecker](ElementIdConventionChecker.md)                           | Do task ids in the model fit into a desired regex pattern?           | Done         |
 |[TimerExpressionChecker](TimerExpressionChecker.md)                                   | Are time events following the ISO 8601 scheme?                                        | Done         |
