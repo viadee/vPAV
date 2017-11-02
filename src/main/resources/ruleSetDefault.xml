@@ -4,7 +4,7 @@
 		<state>true</state>
 	</rule>
 	<rule>
-		<name>XorNamingConventionChecker</name>
+		<name>XorConventionChecker</name>
 		<state>true</state>
 		<settings>
 			<setting name="requiredDefault">false</setting>
