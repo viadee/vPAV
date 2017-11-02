@@ -100,10 +100,9 @@ alt="Example HTML-Output" width="791" height="985" border="5" /></a>
 - Camunda BPM Engine 7.4.0 and above
 
 ## Installation/Usage
-There are two ways of installation. We recommend to use the JUnit approach as follows.
 
 ### Maven
-You can start the validation as a Maven plugin. Therefore, add the dependency to your POM:
+Add the dependency to your POM:
 
 ```xml
 <dependency>
@@ -113,12 +112,6 @@ You can start the validation as a Maven plugin. Therefore, add the dependency to
   <scope>test</scope>
 </dependency>
 ```
-
-Then, use the following maven goal to start the validation.  
-```java
-de.viadee:viadeeProcessApplicationValidator:{version}:check
-```
-Please note: This approach is not useful, if you use Spring managed java delegates in your processes.
 
 ### JUnit
 Configure a JUnit-4 Test to fire up your usual Spring context - esp. delegates referenced in the process, 
