@@ -74,7 +74,7 @@ function addCountOverlay(overlays, bpmnFile) {
                 eId[id] = elementsToMark[id].elementId;
     }
 
-    //doppelte Löschen
+    //delete duplicates
     var unique = function (origArr) {
         var newArr = [],
             origLen = origArr.length,
@@ -95,7 +95,7 @@ function addCountOverlay(overlays, bpmnFile) {
     }
     var eIdUnique = unique(eId);
 
-    //Anzahl ergänzen
+    //add count
     var i, j;
     var anz = 0;
     var objFehler = { eid: "dummy", anz: 0 };
@@ -112,7 +112,7 @@ function addCountOverlay(overlays, bpmnFile) {
         anz = 0;
     }
 
-    //Anzahl an alle Fehler hängen
+    //Add count on each issue 
     var issue = { i: "dummy", anz: 0 };
     var issues = [];
     for (id in elementsToMark) {
@@ -301,7 +301,7 @@ function createTable(bpmnFile) {
                     }
                     myText = document.createTextNode("Mark invalid flow");
 
-                    //path markieren
+                    //mark path
                     var p = issue.paths[x];
 
                     var b = document.createElement("a");
