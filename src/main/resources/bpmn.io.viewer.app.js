@@ -18,8 +18,8 @@ function markNodes(canvas, bpmnFile) {
                 canvas.addMarker(elementsToMark[id].elementId, 'TaskNamingConventionChecker');
             } else if (elementsToMark[id].ruleName == "NoScriptChecker") {
                 canvas.addMarker(elementsToMark[id].elementId, 'NoScriptChecker');
-            } else if (elementsToMark[id].ruleName == "XorNamingConventionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'XorNamingConventionChecker');
+            } else if (elementsToMark[id].ruleName == "XorConventionChecker") {
+                canvas.addMarker(elementsToMark[id].elementId, 'XorConventionChecker');
             } else if (elementsToMark[id].ruleName == "ElementIdConventionChecker") {
                 canvas.addMarker(elementsToMark[id].elementId, 'ElementIdConventionChecker');
             } else if (elementsToMark[id].ruleName == "TimerExpressionChecker") {
