@@ -1,7 +1,6 @@
-XOR Naming Convention Checker
+XOR Convention Checker
 =================================
-The XOR Naming Convention Checker processes BPMN models and checks if XOR gateways end with "?".
-For future use, we aim to implement a regex check to verify predefined naming conventions.
+The XOR Convention Checker processes BPMN models and checks XOR gateways on predefined naming conventions and an existing default-path.
 
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
@@ -12,6 +11,9 @@ The rule should be configured as follows:
 <rule>
 	<name>XorNamingConventionChecker</name>
 	<state>true</state>
+	<settings>
+		<setting name="requiredDefault">true</setting>
+	</settings>
 	<elementConventions>
 		<elementConvention>
 			<name>convention</name>
@@ -25,7 +27,7 @@ The rule should be configured as follows:
 </rule>
 
 ```
-
+The setting allows you to configure whether a default path is required.
 The pattern can be any regular expression and is useful to enforce naming conventions.  
 "convention" refers to the naming convention of xor gateways themselves.  
 "convention2" refers to the outgoing edges of a xor gateway.
