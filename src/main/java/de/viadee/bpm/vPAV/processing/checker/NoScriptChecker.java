@@ -71,7 +71,6 @@ public class NoScriptChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
-        final BPMNScanner scan;
 
         if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)
                 && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(process)
