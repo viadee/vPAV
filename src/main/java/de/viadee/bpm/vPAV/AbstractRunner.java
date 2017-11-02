@@ -1,31 +1,22 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 
@@ -96,7 +87,7 @@ public abstract class AbstractRunner {
         createIssues(rules);
 
         // 5
-        filteredIssues = filterIssues(issues);
+        removeIgnoredIssues();
 
         // 6
         writeOutput(filteredIssues);
@@ -148,7 +139,7 @@ public abstract class AbstractRunner {
 
     /**
      * merges ruleSets according to inheritance hierarchy (Deactivated < global < default < local)
-     * 
+     *
      * @param parentRules
      *            Basis RuleSet which will be overwritten
      * @param childRules
@@ -167,7 +158,7 @@ public abstract class AbstractRunner {
 
     /**
      * Initializes the fileScanner with the current set of rules
-     * 
+     *
      * @param rules
      *            Map of rules
      */
@@ -186,7 +177,7 @@ public abstract class AbstractRunner {
     /**
      * Creates the list of issues found for a given model and ruleSet Throws a RuntimeException if errors are found, so
      * automated builds in a CI/CD pipeline will fail
-     * 
+     *
      * @param rules
      *            Map of rules
      * @throws RuntimeException
@@ -198,7 +189,7 @@ public abstract class AbstractRunner {
 
     /**
      * Removes whitelisted issues from the list of issues found
-     * 
+     *
      * @throws RuntimeException
      *             Ignored issues couldn't be read successfully
      */
@@ -258,7 +249,7 @@ public abstract class AbstractRunner {
 
     /**
      * Create vPAV folder
-     * 
+     *
      */
     private static void createvPAVFolder() {
         File vPavDir = new File(ConstantsConfig.VALIDATION_FOLDER);
@@ -313,7 +304,7 @@ public abstract class AbstractRunner {
 
     /**
      * Delete files from destinations
-     * 
+     *
      * @param destinations
      *            List of destinations who will be deleted
      */
@@ -326,7 +317,7 @@ public abstract class AbstractRunner {
 
     /**
      * Copies all necessary files and deletes outputFiles
-     * 
+     *
      * @throws RuntimeException
      *             Files couldn't be copied
      */
@@ -343,7 +334,7 @@ public abstract class AbstractRunner {
 
     /**
      * Creates ArrayList to hold output files
-     * 
+     *
      * @return ArrayList<String> allFiles
      */
     private static ArrayList<String> createAllOutputFilesArray() {
@@ -374,7 +365,7 @@ public abstract class AbstractRunner {
 
     /**
      * Creates Map for files and corresponding folders
-     * 
+     *
      * @return Map<String, String> fMap
      */
     private static Map<String, String> createFileFolderMapping() {
@@ -405,7 +396,7 @@ public abstract class AbstractRunner {
 
     /**
      * Copies files to vPAV folder
-     * 
+     *
      * @param file
      *            File who will be copied to vPAV folder
      * @throws RuntimeException
