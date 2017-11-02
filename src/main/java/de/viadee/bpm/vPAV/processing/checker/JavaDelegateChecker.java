@@ -215,7 +215,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 if (dmnAttr == null && classAttr == null && delegateExprAttr == null
                         && exprAttr == null && typeAttr == null) {
                     // No technical attributes have been added
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
                             "task '" + CheckName.checkName(bpmnElement) + "' with no code reference yet"));
@@ -227,7 +227,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 || bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)) {
 
             if (implementationAttr != null && implementationAttr.equals(impl)) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
                         bpmnElement.getElementType().getTypeName() + " '" + bpmnElement.getAttributeValue("id")

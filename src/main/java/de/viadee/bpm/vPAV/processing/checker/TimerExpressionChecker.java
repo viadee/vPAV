@@ -99,7 +99,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                         try {
                             DatatypeConverter.parseDateTime(timerDefinition);
                         } catch (Exception e) {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                     element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                     baseElement.getAttributeValue("name"), null, null, null,
                                     "time event '" + CheckName.checkTimer(entry.getKey())
@@ -112,7 +112,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                         try {
                             DatatypeFactory.newInstance().newDuration(timerDefinition);
                         } catch (Exception e) {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                     element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                     baseElement.getAttributeValue("name"), null, null, null,
                                     "time event '" + CheckName.checkTimer(entry.getKey())
@@ -149,7 +149,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                 Cron cronJob = cronParser.parse(timerDefinition);
                                 cronJob.validate();
                             } catch (IllegalArgumentException e) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "time event '" + CheckName.checkTimer(entry.getKey())
@@ -161,7 +161,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             try {
                                 MomentInterval.parseISO(timerDefinition);
                             } catch (ParseException e) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "time event '" + CheckName.checkTimer(entry.getKey())
@@ -174,7 +174,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                 IsoRecurrence<MomentInterval> ir = IsoRecurrence
                                         .parseMomentIntervals(timerDefinition);
                             } catch (ParseException ex) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "time event '" + CheckName.checkTimer(entry.getKey())
@@ -186,7 +186,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             try {
                                 DatatypeFactory.newInstance().newDuration(timerDefinition);
                             } catch (Exception ex) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "time event '" + CheckName.checkTimer(entry.getKey())
@@ -197,14 +197,14 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 
                 } else if (entry.getValue() == null || entry.getValue().getLocalName() == null
                         || entry.getValue().getLocalName().isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
                             "time event '" + CheckName.checkTimer(entry.getKey())
                                     + "' has no timer definition type specified "));
 
                 } else if (timerDefinition == null || timerDefinition.trim().isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
                             "time event '" + CheckName.checkTimer(entry.getKey())
