@@ -87,6 +87,8 @@ public class FileScanner {
 
     private final String targetClassFolder = "target/classes";
 
+    private static boolean isDirectory = false;
+
     public static Logger logger = Logger.getLogger(FileScanner.class.getName());
 
     public FileScanner(final Map<String, Rule> rules) {
@@ -108,10 +110,19 @@ public class FileScanner {
         // get mapping from process id to file path
         processIdToPathMap = createProcessIdToPathMap(processdefinitions);
 
-        // get file paths of java files
+        // determine version name schema for resources
+        String versioningScheme = null;
 
+        try {
+            versioningScheme = loadVersioningScheme(rules);
+        } catch (ConfigItemNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // get file paths of java files
         URL[] urls;
         LinkedList<File> files = new LinkedList<File>();
+        LinkedList<File> dirs = new LinkedList<File>();
         URLClassLoader ucl;
         if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
             ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
@@ -122,14 +133,27 @@ public class FileScanner {
         urls = ucl.getURLs();
 
         // retrieve all jars during runtime and pass them to get class files
+
         for (URL url : urls) {
             if (url.getFile().contains(targetClassFolder)) {
                 File f = new File(url.getFile());
-                if (f.exists()) {
-                    files = (LinkedList<File>) FileUtils.listFiles(f,
+                if (!isDirectory) {
+                    if (f.exists()) {
+                        files = (LinkedList<File>) FileUtils.listFiles(f,
+                                TrueFileFilter.INSTANCE,
+                                TrueFileFilter.INSTANCE);
+                        addResources(files);
+                    }
+                } else {
+                    files = (LinkedList<File>) FileUtils.listFilesAndDirs(f,
                             TrueFileFilter.INSTANCE,
                             TrueFileFilter.INSTANCE);
-                    addResources(files);
+                    for (File file : files) {
+                        if (file.isDirectory()) {
+                            dirs.add(file);
+                        }
+                    }
+                    checkDirs(dirs);
                 }
             }
         }
@@ -140,23 +164,31 @@ public class FileScanner {
         decisionRefToPathMap = createDmnKeyToPathMap(
                 new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
 
-        // determine version name schema for resources
-        String versioningSchema = null;
-
-        try {
-            versioningSchema = loadVersioningSchemaClass(rules);
-        } catch (ConfigItemNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        if (versioningSchema != null) {
+        if (versioningScheme != null) {
             // also add groovy files to included files
             scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
             scanner.scan();
             includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
             // filter files by versioningSchema
-            resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningSchema);
+            resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
+        }
+    }
+
+    /**
+     * Process folders and prepare for versioning check
+     *
+     * @param classes
+     */
+    private void checkDirs(LinkedList<File> dirs) {
+
+        for (File file : dirs) {
+            String[] files = file.list();
+            for (String name : files) {
+                if (new File(file.getPath() + "\\" + name).isDirectory()) {
+                    System.out.println(name);
+                }
+            }
         }
     }
 
@@ -346,13 +378,22 @@ public class FileScanner {
      * @return schema (regex), if null the checker is inactive
      * @throws ConfigItemNotFoundException
      */
-    private static String loadVersioningSchemaClass(final Map<String, Rule> rules) throws ConfigItemNotFoundException {
-        final String SETTING_NAME = "versioningSchemaClass";
+    private static String loadVersioningScheme(final Map<String, Rule> rules)
+            throws ConfigItemNotFoundException {
         String schema = null;
         final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
         if (rule != null && rule.isActive()) {
+            Setting setting = null;
             final Map<String, Setting> settings = rule.getSettings();
-            final Setting setting = settings.get(SETTING_NAME);
+            if (settings.containsKey(ConstantsConfig.VERSIONINGSCHEMECLASS)
+                    && !settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEDIRECTORY)) {
+                setting = settings.get(ConstantsConfig.VERSIONINGSCHEMECLASS);
+                isDirectory = false;
+            } else if (!settings.containsKey(ConstantsConfig.VERSIONINGSCHEMECLASS)
+                    && settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEDIRECTORY)) {
+                setting = settings.get(ConstantsConfig.VERSIONINGSCHEMEDIRECTORY);
+                isDirectory = true;
+            }
             if (setting == null) {
                 throw new ConfigItemNotFoundException("Settings for VersioningChecker not found");
             } else {
