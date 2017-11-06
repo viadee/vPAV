@@ -73,8 +73,6 @@ public class FileScanner {
 
     private final Set<String> processdefinitions;
 
-    private Set<String> javaResources = new HashSet<String>();
-
     private Set<String> javaResourcesFileInputStream = new HashSet<String>();
 
     private Set<String> includedFiles = new HashSet<String>();
@@ -123,6 +121,7 @@ public class FileScanner {
         URL[] urls;
         LinkedList<File> files = new LinkedList<File>();
         LinkedList<File> dirs = new LinkedList<File>();
+        LinkedList<File> dirs2 = new LinkedList<File>();
         URLClassLoader ucl;
         if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
             ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
@@ -149,14 +148,16 @@ public class FileScanner {
                             TrueFileFilter.INSTANCE,
                             TrueFileFilter.INSTANCE);
                     for (File file : files) {
-                        if (file.isDirectory()) {
+                        if (file.isDirectory() && !dirs.contains(file)) {
+                            // dirs.addAll(getPaths(file, new LinkedList<File>()));
                             dirs.add(file);
                         }
                     }
-                    checkDirs(dirs);
                 }
             }
         }
+
+        dirs2.addAll(findLastDir(dirs));
 
         // get mapping from decision reference to file path
         scanner.setIncludes(new String[] { ConstantsConfig.DMN_FILE_PATTERN });
@@ -176,20 +177,27 @@ public class FileScanner {
     }
 
     /**
-     * Process folders and prepare for versioning check
+     * Find the bottom folder of a given list of starting folders to check a package versioning scheme
      *
-     * @param classes
+     * @param list
+     * @return
      */
-    private void checkDirs(LinkedList<File> dirs) {
+    private LinkedList<File> findLastDir(LinkedList<File> list) {
 
-        for (File file : dirs) {
-            String[] files = file.list();
-            for (String name : files) {
-                if (new File(file.getPath() + "\\" + name).isDirectory()) {
-                    System.out.println(name);
-                }
+        LinkedList<File> returnList = new LinkedList<File>();
+        returnList.addAll(list);
+
+        for (File f : list) {
+            if (f.isFile())
+                returnList.remove(f);
+            File[] fileArr = f.listFiles();
+            for (File uF : fileArr) {
+                if (uF.isDirectory())
+                    returnList.remove(f);
             }
         }
+
+        return returnList;
     }
 
     /**
@@ -200,9 +208,6 @@ public class FileScanner {
     private void addResources(LinkedList<File> classes) {
 
         for (File file : classes) {
-            if (file.getName().endsWith(".class")) {
-                javaResources.add(file.getName());
-            }
             includedFiles.add(file.getName());
         }
     }
@@ -214,15 +219,6 @@ public class FileScanner {
      */
     public Set<String> getProcessdefinitions() {
         return processdefinitions;
-    }
-
-    /**
-     * get file paths of java resources
-     *
-     * @return javaResources returns file paths of java resources
-     */
-    public Set<String> getJavaResources() {
-        return javaResources;
     }
 
     /**
