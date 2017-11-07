@@ -39,8 +39,16 @@ function markNodes(canvas, bpmnFile) {
 function activateButtonAllIssues(model) {
     var btReset = document.getElementById("reset");
     btReset.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
-    btReset.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 0 )");
+    btReset.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 0, 0)");
     btReset.setAttribute("href", "#");
+}
+
+//add attribute to link
+function activateLinkSuccess(model) {
+    var aSuccess = document.getElementById("success");
+    aSuccess.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
+    aSuccess.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 3, 0)");
+    aSuccess.setAttribute("href", "#");
 }
 
 //mark invalide path
@@ -222,13 +230,13 @@ function deleteTable() {
     }
 }
 //create issue table
-function createTable(bpmnFile) {
+function createTable(bpmnFile, tableContent) {
     var myTable = document.getElementById("table_issues");
 
     //fill table with all issuesof current model
-    for (id in elementsToMark) {
-        if (elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
-            issue = elementsToMark[id];
+    for (id in tableContent) {
+        if (tableContent[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
+            issue = tableContent[id];
             myParent = document.getElementsByTagName("body").item(0);
             myTBody = document.createElement("tbody");
             myRow = document.createElement("tr");
@@ -367,7 +375,7 @@ function createFooter() {
  * This is an example script that loads an embedded diagram file <diagramXML>
  * and opens it using the bpmn-js viewer.
  */
-function initDiagram(diagramXML, issue_id, path_nr, func) {
+function initDiagram(diagramXML, issue_id, path_nr, func, success) {
     // create viewer
     var bpmnViewer = new window.BpmnJS({
         container: '#canvas'
@@ -398,12 +406,16 @@ function initDiagram(diagramXML, issue_id, path_nr, func) {
                 } else if (func == 2) {
                     markElement(canvas, issue_id, diagramXML.name);
                 }
-                createTable(diagramXML.name);
+                if (success)
+                    createTable(diagramXML.name, noIssuesElements);
+                else
+                    createTable(diagramXML.name, elementsToMark);
                 tableVisible(true);
                 createFooter();
             } else {
-                document.getElementById("noIssues").setAttribute("class", "collapse.show");
-                tableVisible(false);
+            	document.getElementById("success").setAttribute("class", "btn btn-viadee mt-2 collapse");
+                createTable(diagramXML.name, noIssuesElements);
+                tableVisible(true);
                 createFooter();
             }
         });
@@ -411,22 +423,22 @@ function initDiagram(diagramXML, issue_id, path_nr, func) {
 
     bpmnViewer.xml = diagramXML.xml;
 
-    bpmnViewer.reload = function (model) {
+    bpmnViewer.reload = function (model, success) {
         document.querySelector("#canvas").innerHTML = "";
         deleteTable();
-        initDiagram(model, null, null, 0);
+        initDiagram(model, null, null, 0, success);
     };
 
     bpmnViewer.reloadMarkPath = function (model, issue_id, path_nr) {
         document.querySelector("#canvas").innerHTML = "";
         deleteTable();
-        initDiagram(model, issue_id, path_nr, 1);
+        initDiagram(model, issue_id, path_nr, 1, false);
     };
 
     bpmnViewer.reloadMarkElement = function (model, issue_id) {
         document.querySelector("#canvas").innerHTML = "";
         deleteTable();
-        initDiagram(model, issue_id, null, 2);
+        initDiagram(model, issue_id, null, 2, false);
     };
 
     // import xml
@@ -439,7 +451,6 @@ function initDiagram(diagramXML, issue_id, path_nr, func) {
 function setUeberschrift(name) {
     subName = name.substr(0, name.length - 5);
     document.querySelector("#modell").innerHTML = "Consistency check: " + subName;
-    document.getElementById("noIssues").setAttribute("class", "collapse");
     setFocus(name);
 }
 
@@ -487,7 +498,7 @@ function toggleDialog(sh) {
             a.innerHTML = subName + " <span class='badge badge-pill badge-success pt-1 pb-1'>" + countIssues(model.name) + "</span>";
         else
             a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 viadee-darkblue-text viadee-lightblue-bg'>" + countIssues(model.name) + "</span>";
-        a.setAttribute("onclick", "selectModel('" + model.name.replace(/\\/g, "\\\\") + "', null, null, 0 )");
+        a.setAttribute("onclick", "selectModel('" + model.name.replace(/\\/g, "\\\\") + "', null, null, 0)");
         a.setAttribute("href", "#");
         if (first == true) {
             a.setAttribute("class", "nav-link active");
@@ -505,7 +516,23 @@ function setFocus(name) {
     document.getElementById(name).focus();
 }
 
-//reload model diagram
+/**
+ * reload model diagram
+ * @param {*} name 
+ * model name
+ * @param {*} issue_id 
+ * id of element to mark
+ * @param {*} path_nr
+ * number of path 
+ * @param {*} func
+ * 0 = normal 
+ * 1 = mark path
+ * 2 = mark one element
+ * @param {*} path 
+ * path to mark
+ * @param {*} success
+ * show checkers without issues 
+ */
 function selectModel(name, issue_id, path_nr, func, path) {
     document.getElementById("rowPath").setAttribute("class", "collapse");
 
@@ -519,8 +546,9 @@ function selectModel(name, issue_id, path_nr, func, path) {
         a.setAttribute("class", "nav-link");
         if (diagramXMLSource[id].name == name) {
             a.setAttribute("class", "nav-link active");
+            activateLinkSuccess(diagramXMLSource[id].name);
             if (func == 0) {
-                viewer.reload(diagramXMLSource[id]);
+                viewer.reload(diagramXMLSource[id], false);
                 document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
             } else if (func == 1) {
                 viewer.reloadMarkPath(diagramXMLSource[id], issue_id, path_nr);
@@ -528,9 +556,14 @@ function selectModel(name, issue_id, path_nr, func, path) {
                 document.getElementById("rowPath").setAttribute("class", "collapse.show");
             } else if (func == 2) {
                 viewer.reloadMarkElement(diagramXMLSource[id], issue_id);
+            } else if (func == 3){
+                viewer.reload(diagramXMLSource[id], true);
+                document.getElementById("success").setAttribute("class", "btn btn-viadee mt-2 collapse");
+                activateButtonAllIssues(diagramXMLSource[id].name);
             }
         }
     }
 }
-viewer = initDiagram(diagramXMLSource[0], 0, null);
+viewer = initDiagram(diagramXMLSource[0], 0, null, false);
+activateLinkSuccess(diagramXMLSource[0].name);
 document.getElementById('vPAV').innerHTML = vPavVersion;

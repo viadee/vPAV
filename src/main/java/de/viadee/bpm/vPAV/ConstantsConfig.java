@@ -61,6 +61,8 @@ public final class ConstantsConfig {
 
     public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
 
+    public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
+
     public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";
 
     public static final String VALIDATION_FOLDER = "target/vPAV/";

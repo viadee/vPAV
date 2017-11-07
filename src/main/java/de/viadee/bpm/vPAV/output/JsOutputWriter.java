@@ -65,7 +65,8 @@ public class JsOutputWriter implements IssueOutputWriter {
      */
     @Override
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
-        final String json = transformToJsonDatastructure(addNoIssues(issues));
+        final String json = transformToJsonDatastructure(issues, "elementsToMark");
+        final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues), "noIssuesElements");
         final String bpmn = transformToXMLDatastructure();
 
         if (json != null && !json.isEmpty()) {
@@ -79,13 +80,18 @@ public class JsOutputWriter implements IssueOutputWriter {
                 osWriter.write(json);
                 osWriter.close();
 
+                final OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
+                        new FileOutputStream(ConstantsConfig.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8);
+                osWriterSuccess.write(json_noIssues);
+                osWriterSuccess.close();
+
             } catch (final IOException ex) {
                 throw new OutputWriterException("js output couldn't be written");
             }
         }
     }
 
-    private Collection<CheckerIssue> addNoIssues(final Collection<CheckerIssue> issues) {
+    private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
         Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
 
         for (final String bpmnFilename : AbstractRunner.getModelPath()) {
@@ -109,7 +115,6 @@ public class JsOutputWriter implements IssueOutputWriter {
                             "", "", null, null, null, "No issues found"));
             }
         }
-        newIssues.addAll(issues);
         return newIssues;
     }
 
@@ -176,7 +181,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues) {
+    private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
         final JsonArray jsonIssues = new JsonArray();
         if (issues != null && issues.size() > 0) {
             for (final CheckerIssue issue : issues) {
@@ -214,6 +219,6 @@ public class JsOutputWriter implements IssueOutputWriter {
                 jsonIssues.add(obj);
             }
         }
-        return ("var elementsToMark = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+        return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
     }
 }
