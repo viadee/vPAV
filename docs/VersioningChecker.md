@@ -6,7 +6,7 @@ When a versioned implementation is referenced, it is checked whether it is up-to
 
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
-- Classes have to be versioned
+- Classes or packages have to be versioned
 
 ## Configuration
 The rule should be configured as follows, if you want to use a versioning scheme on a file level:
@@ -20,7 +20,7 @@ The rule should be configured as follows, if you want to use a versioning scheme
  </rule>
 ```
 The setting „versioningSchemeClass“ includes a file name scheme (regular expression) for versioned classes.
-This is required for the identification of such classes, here e.g. <name>_<majorversion>_<minorversion>.jave/groovy
+This is required for the identification of such classes, here e.g. \<name\>\_\<majorversion\>\_\<minorversion\>.java/groovy
 
 
 Alternatively, if you use a package-based versioning scheme, the rule should be configured like below
