@@ -91,6 +91,13 @@ public class JsOutputWriter implements IssueOutputWriter {
         }
     }
 
+    /**
+     * Check all checkers for successful verification
+     * 
+     * @param issues
+     *            list of all issues
+     * @return list with checkers without issues
+     */
     private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
         Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
 
