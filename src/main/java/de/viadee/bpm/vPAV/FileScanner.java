@@ -47,6 +47,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
@@ -85,7 +86,11 @@ public class FileScanner {
 
     private final String targetClassFolder = "target/classes";
 
+    private static String scheme = null;
+
     private static boolean isDirectory = false;
+
+    private static boolean isActive = false;
 
     public static Logger logger = Logger.getLogger(FileScanner.class.getName());
 
@@ -121,7 +126,6 @@ public class FileScanner {
         URL[] urls;
         LinkedList<File> files = new LinkedList<File>();
         LinkedList<File> dirs = new LinkedList<File>();
-        LinkedList<File> dirs2 = new LinkedList<File>();
         URLClassLoader ucl;
         if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
             ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
@@ -145,34 +149,37 @@ public class FileScanner {
                     }
                 } else {
                     files = (LinkedList<File>) FileUtils.listFilesAndDirs(f,
-                            TrueFileFilter.INSTANCE,
+                            DirectoryFileFilter.INSTANCE,
                             TrueFileFilter.INSTANCE);
-                    for (File file : files) {
-                        if (file.isDirectory() && !dirs.contains(file)) {
-                            // dirs.addAll(getPaths(file, new LinkedList<File>()));
-                            dirs.add(file);
-                        }
-                    }
+                    dirs.addAll(findLastDir(files));
                 }
             }
         }
 
-        dirs2.addAll(findLastDir(dirs));
-
         // get mapping from decision reference to file path
+        scanner.setBasedir(ConstantsConfig.BASEPATH);
         scanner.setIncludes(new String[] { ConstantsConfig.DMN_FILE_PATTERN });
         scanner.scan();
         decisionRefToPathMap = createDmnKeyToPathMap(
                 new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
 
-        if (versioningScheme != null) {
-            // also add groovy files to included files
-            scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
-            scanner.scan();
-            includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
+        final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
+        if (rule != null && rule.isActive()) {
+            if (versioningScheme != null && !isDirectory) {
+                // also add groovy files to included files
+                scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
+                scanner.scan();
+                includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
-            // filter files by versioningSchema
-            resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
+                // filter files by versioningSchema
+                resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
+            } else {
+
+                for (File file : dirs) {
+                    includedFiles.add(file.getAbsolutePath());
+                }
+                resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
+            }
         }
     }
 
@@ -338,6 +345,39 @@ public class FileScanner {
     }
 
     /**
+     * reads versioned directories and generates a map with newest versions
+     *
+     * @return Map
+     */
+    private static Collection<String> createDirectoriesToNewestVersions(
+            final Set<String> versionedFiles, final String versioningSchema) {
+        final Map<String, String> newestVersionsMap = new HashMap<String, String>();
+
+        if (versionedFiles != null) {
+            for (final String versionedFile : versionedFiles) {
+                final Pattern pattern = Pattern.compile(versioningSchema);
+                final Matcher matcher = pattern.matcher(versionedFile);
+                while (matcher.find()) {
+
+                    final String temp = versionedFile.replace(matcher.group(0), "");
+                    final String value = versionedFile.substring(versionedFile.lastIndexOf("de"));
+                    final String resource = temp.substring(temp.lastIndexOf("de"));
+                    final String oldVersion = newestVersionsMap.get(resource);
+                    if (oldVersion != null) {
+                        // If smaller than 0 this version is newer
+                        if (oldVersion.compareTo(matcher.group(0)) < 0) {
+                            newestVersionsMap.put(resource, value);
+                        }
+                    } else {
+                        newestVersionsMap.put(resource, value);
+                    }
+                }
+            }
+        }
+        return newestVersionsMap.values();
+    }
+
+    /**
      * reads versioned classes and scripts and generates a map with newest versions
      *
      * @return Map
@@ -376,7 +416,7 @@ public class FileScanner {
      */
     private static String loadVersioningScheme(final Map<String, Rule> rules)
             throws ConfigItemNotFoundException {
-        String schema = null;
+
         final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
         if (rule != null && rule.isActive()) {
             Setting setting = null;
@@ -393,13 +433,21 @@ public class FileScanner {
             if (setting == null) {
                 throw new ConfigItemNotFoundException("Settings for VersioningChecker not found");
             } else {
-                schema = setting.getValue().trim();
+                scheme = setting.getValue().trim();
             }
         }
-        return schema;
+        return scheme;
+    }
+
+    public static String getVersioningScheme() {
+        return scheme;
     }
 
     public Set<String> getJavaResourcesFileInputStream() {
         return javaResourcesFileInputStream;
+    }
+
+    public static boolean getIsDirectory() {
+        return isDirectory;
     }
 }

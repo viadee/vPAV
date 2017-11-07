@@ -42,13 +42,14 @@ public class ProcessApplicationValidator extends AbstractRunner {
 
     /**
      * find issues with given ApplicationContext (Spring)
-     * 
+     *
      * @param ctx
      *            spring context
      * @return all issues
      */
     public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
 
+        RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         run_vPAV();
@@ -58,13 +59,14 @@ public class ProcessApplicationValidator extends AbstractRunner {
 
     /**
      * find issues with given ApplicationContext (Spring)
-     * 
+     *
      * @param ctx
      *            spring context
      * @return issues with status error
      */
     public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {
 
+        RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         run_vPAV();
@@ -74,7 +76,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
 
     /**
      * find model errors without spring context
-     * 
+     *
      * @return all issues
      */
     public static Collection<CheckerIssue> findModelInconsistencies() {
@@ -87,7 +89,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
 
     /**
      * find model errors without spring context
-     * 
+     *
      * @return issues with status error
      */
     public static Collection<CheckerIssue> findModelErrors() {
@@ -100,7 +102,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
 
     /**
      * filter an issue collection by status
-     * 
+     *
      * @param filteredIssues
      * @param status
      * @return issues with status

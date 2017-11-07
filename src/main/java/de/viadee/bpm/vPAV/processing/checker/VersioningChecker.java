@@ -54,6 +54,7 @@ import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
@@ -68,6 +69,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 public class VersioningChecker extends AbstractElementChecker {
 
     private Collection<String> resourcesNewestVersions;
+
+    private final String attr_class = "class";
 
     public VersioningChecker(final Rule rule, final BPMNScanner bpmnScanner,
             final Collection<String> resourcesNewestVersions) {
@@ -201,13 +204,17 @@ public class VersioningChecker extends AbstractElementChecker {
 
             final String t_delegateExpression = baseElement
                     .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "delegateExpression");
-            if (t_delegateExpression != null) {
+            if (t_delegateExpression != null && !FileScanner.getIsDirectory()) {
                 prepareBeanWarning(t_delegateExpression, element, issues);
+            } else if (t_delegateExpression != null && FileScanner.getIsDirectory()) {
+                prepareDirBasedBeanWarning(t_delegateExpression, element, issues);
             }
-            final String javaReference = getClassReference(
-                    baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "class"));
-            if (javaReference != null) {
-                prepareClassWarning(javaReference, element, issues);
+
+            final String javaReference = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, attr_class);
+            if (getClassReference(javaReference) != null && !FileScanner.getIsDirectory()) {
+                prepareClassWarning(getClassReference(javaReference), element, issues);
+            } else if (javaReference != null && FileScanner.getIsDirectory()) {
+                prepareDirBasedClassWarning(javaReference, element, issues);
             }
         }
         return issues;
@@ -270,8 +277,10 @@ public class VersioningChecker extends AbstractElementChecker {
      * @return file
      */
     private String getClassReference(final String javaResource) {
-        if (javaResource != null) {
+        if (javaResource != null && !FileScanner.getIsDirectory()) {
             return javaResource.substring(javaResource.lastIndexOf('.') + 1, javaResource.length()) + ".class";
+        } else if (javaResource != null && FileScanner.getIsDirectory()) {
+            return javaResource;
         }
         return null;
     }
@@ -316,7 +325,6 @@ public class VersioningChecker extends AbstractElementChecker {
             }
             if (!paths.isEmpty()) {
                 return getClassReference(paths.iterator().next());
-
             }
         } catch (final ELException e) {
             throw new ProcessingException(
@@ -367,7 +375,32 @@ public class VersioningChecker extends AbstractElementChecker {
     }
 
     /**
-     * prepares an issue for class after check
+     * Prepares an issue for bean after check. Gets called only if the versioning scheme is directory based
+     *
+     * @param expression
+     * @param element
+     * @param issues
+     */
+    private void prepareDirBasedBeanWarning(final String expression, final BpmnElement element,
+            final Collection<CheckerIssue> issues) {
+        String beanReference = findBeanReferenceInExpression(expression, element, issues);
+
+        if (beanReference != null) {
+            beanReference = beanReference.replace(".", "\\");
+            beanReference = beanReference.substring(0, beanReference.lastIndexOf("\\"));
+
+            if (!resourcesNewestVersions.contains(beanReference)) {
+                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                        element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
+                        element.getBaseElement().getAttributeValue("name"), null, null, null,
+                        "bean reference is deprecated for '"
+                                + beanReference + "'."));
+            }
+        }
+    }
+
+    /**
+     * Prepares an issue for class after check
      *
      * @param javaReference
      * @param element
@@ -394,4 +427,28 @@ public class VersioningChecker extends AbstractElementChecker {
             }
         }
     }
+
+    /**
+     * Prepares an issue for class after check. Gets called only if the versioning scheme is directory based
+     *
+     * @param javaReference
+     * @param element
+     * @param issues
+     */
+    private void prepareDirBasedClassWarning(String javaReference, final BpmnElement element,
+            final Collection<CheckerIssue> issues) {
+        if (javaReference != null) {
+            javaReference = javaReference.replace(".", "\\");
+            javaReference = javaReference.substring(0, javaReference.lastIndexOf("\\"));
+
+            if (!resourcesNewestVersions.contains(javaReference)) {
+                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                        element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
+                        element.getBaseElement().getAttributeValue("name"), null, null, null,
+                        "class reference is deprecated for '"
+                                + javaReference + "'."));
+            }
+        }
+    }
+
 }

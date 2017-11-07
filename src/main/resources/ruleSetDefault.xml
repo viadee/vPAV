@@ -49,7 +49,7 @@
 		<name>VersioningChecker</name>
 		<state>false</state>
 		<settings>
-			<setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)
+			<setting name="versioningSchemeClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)
 			</setting>
 		</settings>
 	</rule>

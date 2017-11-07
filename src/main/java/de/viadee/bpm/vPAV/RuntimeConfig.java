@@ -36,12 +36,15 @@ import java.util.Map;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
+import org.springframework.context.ApplicationContext;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 
 public class RuntimeConfig {
 
     private static RuntimeConfig instance;
+
+    private ApplicationContext ctx;
 
     private Map<String, String> beanMap;
 
@@ -94,7 +97,7 @@ public class RuntimeConfig {
 
     /**
      * Retrieves the classloader for a given MavenProject
-     * 
+     *
      * @param project
      *            MavenProject
      * @return Classloader
@@ -130,6 +133,14 @@ public class RuntimeConfig {
             if (rule.isActive() && rule.getSettings().containsKey(externChecker))
                 allRules.add(rule.getName());
         }
+    }
+
+    public void setApplicationContext(ApplicationContext ctx) {
+        this.ctx = ctx;
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return ctx;
     }
 
 }
