@@ -247,6 +247,7 @@ function createTable(bpmnFile, tableContent) {
             //ruleName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
+            myCell.setAttribute("class", "new") // mark cell
             myCell.setAttribute("id", issue.ruleName) // mark cell
             //create link 
             var a = document.createElement("a");

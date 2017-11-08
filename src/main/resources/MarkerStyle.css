@@ -17,6 +17,15 @@
 	--var-new: rgba(172, 156, 143, 0.5);
 }
 
+.new .djs-visual> :nth-child(1) {
+	stroke: var(--var-new) !important;
+}
+
+.new:not(.djs-connection) .djs-visual> :nth-child(1), .new{
+	fill: var(--var-new) !important;
+	background-color:  var(--var-new);	
+}
+
 .path .djs-visual> :nth-child(1) {
 	stroke: var(--var-path) !important;
 }
@@ -148,13 +157,4 @@
 .MessageEventChecker:not(.djs-connection) .djs-visual> :nth-child(1), #MessageEventChecker{
 	fill: var(--var-MessageEventChecker) !important;
 	background-color:  var(--var-MessageEventChecker);	
-}
-
-.new .djs-visual> :nth-child(1) {
-	stroke: var(--var-new) !important;
-}
-
-.new:not(.djs-connection) .djs-visual> :nth-child(1), #new{
-	fill: var(--var-new) !important;
-	background-color:  var(--var-new);	
 }
