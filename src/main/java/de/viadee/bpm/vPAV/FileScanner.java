@@ -351,14 +351,15 @@ public class FileScanner {
      */
     private static Collection<String> createDirectoriesToNewestVersions(
             final Set<String> versionedFiles, final String versioningSchema) {
+        final Map<String, String> newestVersionsPathMap = new HashMap<String, String>();
         final Map<String, String> newestVersionsMap = new HashMap<String, String>();
-        String temp;
 
         if (versionedFiles != null) {
             for (final String versionedFile : versionedFiles) {
                 final Pattern pattern = Pattern.compile(versioningSchema);
                 final Matcher matcher = pattern.matcher(versionedFile);
                 while (matcher.find()) {
+                    String temp;
                     if (matcher.group(0).contains(File.separator)) {
                         temp = versionedFile
                                 .replace(matcher.group(0).substring(matcher.group(0).lastIndexOf(File.separator)), "");
@@ -369,18 +370,20 @@ public class FileScanner {
 
                     final String resource = temp.substring(temp.lastIndexOf("classes") + 8);
                     final String oldVersion = newestVersionsMap.get(resource);
+
                     if (oldVersion != null) {
-                        // If smaller than 0 this version is newer
                         if (oldVersion.compareTo(matcher.group(0)) < 0) {
-                            newestVersionsMap.put(resource, value);
+                            newestVersionsMap.put(resource, matcher.group(0));
+                            newestVersionsPathMap.put(resource, value);
                         }
                     } else {
-                        newestVersionsMap.put(resource, value);
+                        newestVersionsMap.put(resource, matcher.group(0));
+                        newestVersionsPathMap.put(resource, value);
                     }
                 }
             }
         }
-        return newestVersionsMap.values();
+        return newestVersionsPathMap.values();
     }
 
     /**
