@@ -30,6 +30,7 @@
 package de.viadee.bpm.vPAV.processing.model.graph;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -38,13 +39,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
@@ -78,16 +83,20 @@ public class GraphCreationTest {
 
     /**
      * Case: Data flow graph creation and calculation of invalid paths
+     * 
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
     @Test
-    public void testGraph() {
+    public void testGraph() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
         final File processdefinition = new File(PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BPMNScanner(PATH));
         // create data flow graphs
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
                 processdefinition.getPath(), new ArrayList<String>());

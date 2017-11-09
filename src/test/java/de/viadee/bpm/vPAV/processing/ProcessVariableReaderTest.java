@@ -30,11 +30,14 @@
 package de.viadee.bpm.vPAV.processing;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -44,7 +47,9 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
@@ -74,7 +79,7 @@ public class ProcessVariableReaderTest {
     }
 
     @Test
-    public void testRecogniseVariablesInClass() {
+    public void testRecogniseVariablesInClass() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
 
         // parse bpmn model
@@ -83,7 +88,7 @@ public class ProcessVariableReaderTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null);
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BPMNScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);
@@ -92,7 +97,7 @@ public class ProcessVariableReaderTest {
     }
 
     @Test
-    public void testRecogniseInputOutputAssociations() {
+    public void testRecogniseInputOutputAssociations() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
 
         // parse bpmn model
@@ -101,7 +106,7 @@ public class ProcessVariableReaderTest {
         final Collection<CallActivity> allServiceTasks = modelInstance
                 .getModelElementsByType(CallActivity.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null);
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BPMNScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);

@@ -846,4 +846,21 @@ public class BPMNScanner {
         }
         return listVariables;
     }
+
+    /**
+     * get value of expression
+     * 
+     * @param id
+     *            id from element
+     * @return value of expression
+     */
+    public String getFieldInjectionExpression(String id) {
+        NodeList nodeList = doc.getElementsByTagName(c_exp);
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (idMatch(node, id))
+                return node.getTextContent();
+        }
+        return null;
+    }
 }

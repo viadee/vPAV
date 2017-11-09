@@ -30,6 +30,7 @@
 package de.viadee.bpm.vPAV.processing.model.data;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -39,12 +40,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
@@ -71,7 +76,7 @@ public class CallActivityTest {
     }
 
     @Test
-    public void testEmbedding() {
+    public void testEmbedding() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
         final File processdefinition = new File(PATH);
 
@@ -84,7 +89,8 @@ public class CallActivityTest {
         processIdToPathMap.put("calledcalledProcess",
                 BASE_PATH + "CallActivityTest_calledcalledProcess.bpmn");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
+                new BPMNScanner(PATH));
 
         // create data flow graphs
         final Collection<String> calledElementHierarchy = new ArrayList<String>();

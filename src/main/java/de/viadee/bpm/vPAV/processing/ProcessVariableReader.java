@@ -103,10 +103,13 @@ public final class ProcessVariableReader {
 
     private final Map<String, String> decisionRefToPathMap;
 
+    private final BPMNScanner scanner;
+
     public static Logger logger = Logger.getLogger(ProcessVariableReader.class.getName());
 
-    public ProcessVariableReader(final Map<String, String> decisionRefToPathMap) {
+    public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, BPMNScanner scanner) {
         this.decisionRefToPathMap = decisionRefToPathMap;
+        this.scanner = scanner;
     }
 
     /**
@@ -448,6 +451,13 @@ public final class ProcessVariableReader {
                 processVariables.putAll(findVariablesInExpression(t_delegateExpression, element,
                         ElementChapter.Details, KnownElementFieldType.DelegateExpression, scopeId));
             }
+
+            final String t_fieldInjectionExpression = scanner.getFieldInjectionExpression(baseElement.getId());
+            if (t_fieldInjectionExpression != null) {
+                processVariables.putAll(findVariablesInExpression(t_fieldInjectionExpression, element,
+                        ElementChapter.FieldInjections, KnownElementFieldType.Expression, scopeId));
+            }
+
             final String t_resultVariable = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     "resultVariable");
             if (t_resultVariable != null && t_resultVariable.trim().length() > 0) {

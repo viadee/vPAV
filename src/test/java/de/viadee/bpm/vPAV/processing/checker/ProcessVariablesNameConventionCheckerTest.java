@@ -32,6 +32,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -40,13 +41,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
@@ -92,9 +97,13 @@ public class ProcessVariablesNameConventionCheckerTest {
 
     /**
      * case: internal and external process variables follows the conventions
+     * 
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
     @Test
-    public void testCorrectProcessVariableNames() {
+    public void testCorrectProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH
                 + "ProcessVariablesNameConventionCheckerTest_CorrectProcessVariablesNamingConvention.bpmn";
 
@@ -107,7 +116,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariable> variables = new ProcessVariableReader(null)
+            Map<String, ProcessVariable> variables = new ProcessVariableReader(null, new BPMNScanner(PATH))
                     .getVariablesFromElement(element);
             element.setProcessVariables(variables);
 
@@ -119,9 +128,13 @@ public class ProcessVariablesNameConventionCheckerTest {
 
     /**
      * case: recognise variables which are against the naming conventions (internal/external)
+     * 
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
     @Test
-    public void testWrongProcessVariableNames() {
+    public void testWrongProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH
                 + "ProcessVariablesNameConventionCheckerTest_WrongProcessVariablesNamingConvention.bpmn";
 
@@ -134,7 +147,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariable> variables = new ProcessVariableReader(null)
+            Map<String, ProcessVariable> variables = new ProcessVariableReader(null, new BPMNScanner(PATH))
                     .getVariablesFromElement(element);
             element.setProcessVariables(variables);
 

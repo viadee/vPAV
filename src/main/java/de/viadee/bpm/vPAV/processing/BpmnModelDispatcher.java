@@ -107,7 +107,7 @@ public class BpmnModelDispatcher {
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap,
                 processIdToPathMap, messageIdToVariables,
-                processIdToVariables);
+                processIdToVariables, bpmnScanner);
 
         // create data flow graphs for bpmn model
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
