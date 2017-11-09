@@ -360,8 +360,8 @@ public class FileScanner {
                 while (matcher.find()) {
 
                     final String temp = versionedFile.replace(matcher.group(0), "");
-                    final String value = versionedFile.substring(versionedFile.lastIndexOf("de"));
-                    final String resource = temp.substring(temp.lastIndexOf("de"));
+                    final String value = versionedFile.substring(versionedFile.lastIndexOf("classes") + 8);
+                    final String resource = temp.substring(temp.lastIndexOf("classes") + 8);
                     final String oldVersion = newestVersionsMap.get(resource);
                     if (oldVersion != null) {
                         // If smaller than 0 this version is newer
