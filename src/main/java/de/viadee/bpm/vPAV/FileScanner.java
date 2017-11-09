@@ -352,15 +352,21 @@ public class FileScanner {
     private static Collection<String> createDirectoriesToNewestVersions(
             final Set<String> versionedFiles, final String versioningSchema) {
         final Map<String, String> newestVersionsMap = new HashMap<String, String>();
+        String temp;
 
         if (versionedFiles != null) {
             for (final String versionedFile : versionedFiles) {
                 final Pattern pattern = Pattern.compile(versioningSchema);
                 final Matcher matcher = pattern.matcher(versionedFile);
                 while (matcher.find()) {
-
-                    final String temp = versionedFile.replace(matcher.group(0), "");
+                    if (matcher.group(0).contains(File.separator)) {
+                        temp = versionedFile
+                                .replace(matcher.group(0).substring(matcher.group(0).lastIndexOf(File.separator)), "");
+                    } else {
+                        temp = versionedFile.replace(matcher.group(0), "");
+                    }
                     final String value = versionedFile.substring(versionedFile.lastIndexOf("classes") + 8);
+
                     final String resource = temp.substring(temp.lastIndexOf("classes") + 8);
                     final String oldVersion = newestVersionsMap.get(resource);
                     if (oldVersion != null) {
