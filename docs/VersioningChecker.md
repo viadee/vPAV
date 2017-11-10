@@ -29,18 +29,18 @@ Alternatively, if you use a package-based versioning scheme, the rule should be 
   <name>VersioningChecker</name>
   <state>true</state>
   <settings>
-  	<setting name="versioningSchemeDirectory">v\d+_\d+</setting>
+  	<setting name="versioningSchemePackage">v\d+_\d+</setting>
   </settings>
  </rule>
 ```
-The setting "versioningSchemeDirectory" includes an exemplary regular expression that matches package-based versioning, e.g.
+The setting "versioningSchemePackage" includes an exemplary regular expression that matches package-based versioning, e.g.
 de.viadee.package.v10_20.example. This versioning scheme would be identified and in comparison, de.viadee.package.v12_20.example would be tagged as the newer version. This scheme is configurable as you desire.
 
 Note, that **only one versioning scheme** can be used.
 
 Via `<state>true</state>` the check can be enabled.
 
-_If VersioningChecker is enabled, but no "versioningSchemeClass" is set, the default scheme ([see code above](#code)) will be used._
+_If VersioningChecker is enabled, but no settings for "versioningSchemeClass" or "versioningSchemePackage" are set, the checker will throw a **ConfigItemNotFoundException**. This does not cancel the JUnit test.
 
 Via `<state>false</state>` the check can be disabled.
 
