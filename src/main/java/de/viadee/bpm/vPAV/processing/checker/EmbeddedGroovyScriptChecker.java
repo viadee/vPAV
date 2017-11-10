@@ -42,6 +42,7 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaScript;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.codehaus.groovy.control.CompilationFailedException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -57,8 +58,8 @@ import groovy.lang.MissingPropertyException;
  */
 public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
-    public EmbeddedGroovyScriptChecker(final Rule rule, final String path) {
-        super(rule, path);
+    public EmbeddedGroovyScriptChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+        super(rule, bpmnScanner);
     }
 
     /**

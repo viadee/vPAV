@@ -1,22 +1,31 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
- * distribution. 3. All advertising materials mentioning features or use of this software must display the following
- * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
- * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
- * products derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the viadee Unternehmensberatung GmbH.
+ * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
- * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 
@@ -38,6 +47,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
@@ -64,8 +74,6 @@ public class FileScanner {
 
     private final Set<String> processdefinitions;
 
-    private Set<String> javaResources = new HashSet<String>();
-
     private Set<String> javaResourcesFileInputStream = new HashSet<String>();
 
     private Set<String> includedFiles = new HashSet<String>();
@@ -77,6 +85,10 @@ public class FileScanner {
     private Map<String, String> processIdToPathMap;
 
     private final String targetClassFolder = "target/classes";
+
+    private static String scheme = null;
+
+    private static boolean isDirectory = false;
 
     public static Logger logger = Logger.getLogger(FileScanner.class.getName());
 
@@ -99,10 +111,19 @@ public class FileScanner {
         // get mapping from process id to file path
         processIdToPathMap = createProcessIdToPathMap(processdefinitions);
 
-        // get file paths of java files
+        // determine version name schema for resources
+        String versioningScheme = null;
 
+        try {
+            versioningScheme = loadVersioningScheme(rules);
+        } catch (ConfigItemNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // get file paths of java files
         URL[] urls;
         LinkedList<File> files = new LinkedList<File>();
+        LinkedList<File> dirs = new LinkedList<File>();
         URLClassLoader ucl;
         if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
             ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
@@ -113,42 +134,75 @@ public class FileScanner {
         urls = ucl.getURLs();
 
         // retrieve all jars during runtime and pass them to get class files
+
         for (URL url : urls) {
             if (url.getFile().contains(targetClassFolder)) {
                 File f = new File(url.getFile());
-                if (f.exists()) {
-                    files = (LinkedList<File>) FileUtils.listFiles(f,
-                            TrueFileFilter.INSTANCE,
+                if (!isDirectory) {
+                    if (f.exists()) {
+                        files = (LinkedList<File>) FileUtils.listFiles(f,
+                                TrueFileFilter.INSTANCE,
+                                TrueFileFilter.INSTANCE);
+                        addResources(files);
+                    }
+                } else {
+                    files = (LinkedList<File>) FileUtils.listFilesAndDirs(f,
+                            DirectoryFileFilter.INSTANCE,
                             TrueFileFilter.INSTANCE);
-                    addResources(files);
+                    dirs.addAll(findLastDir(files));
                 }
             }
         }
 
         // get mapping from decision reference to file path
+        scanner.setBasedir(ConstantsConfig.BASEPATH);
         scanner.setIncludes(new String[] { ConstantsConfig.DMN_FILE_PATTERN });
         scanner.scan();
         decisionRefToPathMap = createDmnKeyToPathMap(
                 new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
 
-        // determine version name schema for resources
-        String versioningSchema = null;
+        final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
+        if (rule != null && rule.isActive()) {
+            if (versioningScheme != null && !isDirectory) {
+                // also add groovy files to included files
+                scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
+                scanner.scan();
+                includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
-        try {
-            versioningSchema = loadVersioningSchemaClass(rules);
-        } catch (ConfigItemNotFoundException e) {
-            e.printStackTrace();
+                // filter files by versioningSchema
+                resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
+            } else {
+
+                for (File file : dirs) {
+                    includedFiles.add(file.getAbsolutePath());
+                }
+                resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
+            }
+        }
+    }
+
+    /**
+     * Find the bottom folder of a given list of starting folders to check a package versioning scheme
+     *
+     * @param list
+     * @return
+     */
+    private LinkedList<File> findLastDir(LinkedList<File> list) {
+
+        LinkedList<File> returnList = new LinkedList<File>();
+        returnList.addAll(list);
+
+        for (File f : list) {
+            if (f.isFile())
+                returnList.remove(f);
+            File[] fileArr = f.listFiles();
+            for (File uF : fileArr) {
+                if (uF.isDirectory())
+                    returnList.remove(f);
+            }
         }
 
-        if (versioningSchema != null) {
-            // also add groovy files to included files
-            scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
-            scanner.scan();
-            includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
-
-            // filter files by versioningSchema
-            resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningSchema);
-        }
+        return returnList;
     }
 
     /**
@@ -159,9 +213,6 @@ public class FileScanner {
     private void addResources(LinkedList<File> classes) {
 
         for (File file : classes) {
-            if (file.getName().endsWith(".class")) {
-                javaResources.add(file.getName());
-            }
             includedFiles.add(file.getName());
         }
     }
@@ -173,15 +224,6 @@ public class FileScanner {
      */
     public Set<String> getProcessdefinitions() {
         return processdefinitions;
-    }
-
-    /**
-     * get file paths of java resources
-     *
-     * @return javaResources returns file paths of java resources
-     */
-    public Set<String> getJavaResources() {
-        return javaResources;
     }
 
     /**
@@ -301,6 +343,48 @@ public class FileScanner {
     }
 
     /**
+     * reads versioned directories and generates a map with newest versions
+     *
+     * @return Map
+     */
+    private static Collection<String> createDirectoriesToNewestVersions(
+            final Set<String> versionedFiles, final String versioningSchema) {
+        final Map<String, String> newestVersionsPathMap = new HashMap<String, String>();
+        final Map<String, String> newestVersionsMap = new HashMap<String, String>();
+
+        if (versionedFiles != null && versioningSchema != null) {
+            for (final String versionedFile : versionedFiles) {
+                final Pattern pattern = Pattern.compile(versioningSchema);
+                final Matcher matcher = pattern.matcher(versionedFile);
+                while (matcher.find()) {
+                    String temp;
+                    if (matcher.group(0).contains(File.separator)) {
+                        temp = versionedFile
+                                .replace(matcher.group(0).substring(matcher.group(0).lastIndexOf(File.separator)), "");
+                    } else {
+                        temp = versionedFile.replace(matcher.group(0), "");
+                    }
+                    final String value = versionedFile.substring(versionedFile.lastIndexOf("classes") + 8);
+
+                    final String resource = temp.substring(temp.lastIndexOf("classes") + 8);
+                    final String oldVersion = newestVersionsMap.get(resource);
+
+                    if (oldVersion != null) {
+                        if (oldVersion.compareTo(matcher.group(0)) < 0) {
+                            newestVersionsMap.put(resource, matcher.group(0));
+                            newestVersionsPathMap.put(resource, value);
+                        }
+                    } else {
+                        newestVersionsMap.put(resource, matcher.group(0));
+                        newestVersionsPathMap.put(resource, value);
+                    }
+                }
+            }
+        }
+        return newestVersionsPathMap.values();
+    }
+
+    /**
      * reads versioned classes and scripts and generates a map with newest versions
      *
      * @return Map
@@ -337,23 +421,44 @@ public class FileScanner {
      * @return schema (regex), if null the checker is inactive
      * @throws ConfigItemNotFoundException
      */
-    private static String loadVersioningSchemaClass(final Map<String, Rule> rules) throws ConfigItemNotFoundException {
-        final String SETTING_NAME = "versioningSchemaClass";
-        String schema = null;
+    private static String loadVersioningScheme(final Map<String, Rule> rules)
+            throws ConfigItemNotFoundException {
+
         final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
         if (rule != null && rule.isActive()) {
+            Setting setting = null;
             final Map<String, Setting> settings = rule.getSettings();
-            final Setting setting = settings.get(SETTING_NAME);
+            if (settings.containsKey(ConstantsConfig.VERSIONINGSCHEMECLASS)
+                    && !settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEPACKAGE)) {
+                setting = settings.get(ConstantsConfig.VERSIONINGSCHEMECLASS);
+                isDirectory = false;
+            } else if (!settings.containsKey(ConstantsConfig.VERSIONINGSCHEMECLASS)
+                    && settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEPACKAGE)) {
+                setting = settings.get(ConstantsConfig.VERSIONINGSCHEMEPACKAGE);
+                isDirectory = true;
+            }
             if (setting == null) {
                 throw new ConfigItemNotFoundException("Settings for VersioningChecker not found");
             } else {
-                schema = setting.getValue().trim();
+                scheme = setting.getValue().trim();
             }
         }
-        return schema;
+        return scheme;
+    }
+
+    public static String getVersioningScheme() {
+        return scheme;
     }
 
     public Set<String> getJavaResourcesFileInputStream() {
         return javaResourcesFileInputStream;
+    }
+
+    public static boolean getIsDirectory() {
+        return isDirectory;
+    }
+
+    public static void setIsDirectory(boolean isDirectory) {
+        FileScanner.isDirectory = isDirectory;
     }
 }

@@ -23,22 +23,22 @@
 	<header class="navbar sticky-top navbar-expand viadee-lightblue-bg">
 		<h3 id=modell></h3>
 		<ul class="navbar-nav flex-row ml-md-auto">
-				<li class="nav-item">					
-					<a class="nav-item nav-link mr-4 mt-3" id="vPAV"></a>											
-				</li>
+			<li class="nav-item">
+				<a class="nav-item nav-link mr-4 mt-3" id="vPAV"></a>
+			</li>
 			<li class="nav-item">
 				<a class="nav-link mt-2 mr-4" id="logo" href="https://viadee.github.io/vPAV/">
-					<img src="img/vPAV.png"  alt="vPAV" title="documentation"/>
+					<img src="img/vPAV.png" alt="vPAV" title="documentation" />
 				</a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link mt-2 mr-4" id="logo" href="https://github.com/viadee/vPAV">
-					<img src="img/GitHub.png"  alt="GitHub" title="GitHub vPAV"/>
+					<img src="img/GitHub.png" alt="GitHub" title="GitHub vPAV" />
 				</a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" href="https://www.viadee.de/">
-					<img src="img/viadee_Logo.png" alt="viadee Homepage" height="50" title="viadee Homepage"/>
+					<img src="img/viadee_Logo.png" alt="viadee Homepage" height="50" title="viadee Homepage" />
 				</a>
 			</li>
 		</ul>
@@ -52,30 +52,32 @@
 		</div>
 	</div>
 
-<!-- Path-->
-<div class="row collapse" id="rowPath">
-	<div class="col">
-		<div class="alert alert-danger mt-2 mb-0 ml-0 pb-1 pt-1 viadee-small-alert" role="alert" id="invalidPath"></div>
+	<!-- Path-->
+	<div class="row collapse" id="rowPath">
+		<div class="col">
+			<div class="alert alert-danger mt-2 mb-0 ml-0 pb-1 pt-1 viadee-small-alert" role="alert" id="invalidPath"></div>
+		</div>
 	</div>
-</div>
 
 	<!-- element to draw bpmn diagram in -->
 	<div class="row">
 		<div class="col">
 			<div class="m-0 p-0 mt-1 viadee-darkblue-border" id="canvas"></div>
 		</div>
-	</div>	
+	</div>
 
 	<!-- reset Button -->
 	<div class="row">
-			<div class="col">
-				<button type="button" class="btn btn-viadee mt-2 collapse" id="reset">Mark all issues</button>
-			</div>
+		<div class="col">
+			<button type="button" class="btn btn-viadee mt-2 collapse" id="reset">Show all issues</button>
 		</div>
+	</div>
 
 	<!-- Issue table -->
 	<div class="row">
 		<div class="col">
+			<button type="button" class="btn btn-viadee mt-2" id="success">Show checker without issues</button>
+			<!-- <a class="pt-1 mt-0 mb-0 pl-0" id="success">Checker found no issues</a> -->
 			<h2 class="border border-light pt-2 mt-4 mb-0 pl-1" id="tableHeader">Error list</h2>
 			<table id="table_issues" class="table table-bordered .table-responsive">
 				<thead>
@@ -92,43 +94,37 @@
 		</div>
 	</div>
 
-	<!-- no Issues -->
-	<div class="row" id="noIssues">
-		<div class="col">
-			<div class="alert alert-success mt-3" role="alert"> no issues were found</div>
-		</div>
-	</div>
-
 	<div class="modal" id="issueModal">
 		<div class="modal-dialog" role="document">
-		  <div class="modal-content">
-			<div class="modal-header viadee-lightblue-bg viadee-head">
-			  <h4 class="modal-title">Issues</h4>
-			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			  </button>
-			</div>
-			<div class="modal-body">
-			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-viadee" data-dismiss="modal">Close</button>
+			<div class="modal-content">
+				<div class="modal-header viadee-lightblue-bg viadee-head">
+					<h4 class="modal-title">Issues</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-viadee" data-dismiss="modal">Close</button>
+				</div>
 			</div>
 		</div>
-	</div>	
 
-	<!-- scripts -->
-	<!-- bpmn-js viewer -->
-	<script src="js/bpmn-navigated-viewer.js"></script>
-	<!-- bpmn-files, issues and pomInfo -->
-	<script src="js/bpmn_model.js"></script>
-	<script src="js/bpmn_validation.js"></script>
-	<script src="js/infoPOM.js"></script>
-	<!-- bootstrap with dependencies-->
-	<script src="js/jquery-3.2.1.min.js"></script>
-	<script src="js/popper.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<!-- application -->
-	<script src="js/bpmn.io.viewer.app.js"></script>
+		<!-- scripts -->
+		<!-- bpmn-js viewer -->
+		<script src="js/bpmn-navigated-viewer.js"></script>
+		<!-- bpmn-files, issues and pomInfo -->
+		<script src="js/bpmn_model.js"></script>
+		<script src="js/bpmn_validation.js"></script>
+		<script src="js/bpmn_validation_success.js"></script>
+		<script src="js/infoPOM.js"></script>
+		<!-- bootstrap with dependencies-->
+		<script src="js/jquery-3.2.1.min.js"></script>
+		<script src="js/popper.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<!-- application -->
+		<script src="js/bpmn.io.viewer.app.js"></script>
 
 </body>
 

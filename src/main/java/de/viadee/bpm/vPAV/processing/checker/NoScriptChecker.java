@@ -29,18 +29,14 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ScriptTask;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
-import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -60,8 +56,8 @@ public class NoScriptChecker extends AbstractElementChecker {
 
     private final String sequenceFlow = "SequenceFlow";
 
-    public NoScriptChecker(final Rule rule, final String path) {
-        super(rule, path);
+    public NoScriptChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+        super(rule, bpmnScanner);
     }
 
     /**
@@ -75,73 +71,67 @@ public class NoScriptChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
-        final BPMNScanner scan;
 
-        try {
-            if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)
-                    && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(process)
-                    && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(subProcess)) {
-                scan = new BPMNScanner(path);
-                Map<String, Setting> settings = rule.getSettings();
+        if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)
+                && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(process)
+                && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(subProcess)) {
+            Map<String, Setting> settings = rule.getSettings();
 
-                // Check all Elements with camunda:script tag
-                ArrayList<String> scriptTypes = scan.getScriptTypes(bpmnElement.getAttributeValue("id"));
-                if (scriptTypes != null && !scriptTypes.isEmpty()) {
-                    if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
-                        for (String place : scriptTypes)
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                    bpmnElement.getAttributeValue("name"), null, null, null,
-                                    "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                            + place + "' script"));
-                    } else {
-                        ArrayList<String> allowedPlaces = settings
-                                .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
-                        if (!allowedPlaces.isEmpty())
-                            for (String scriptType : scriptTypes)
-                                if (!allowedPlaces.contains(scriptType))
-                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                            bpmnElement.getAttributeValue("name"), null, null, null,
-                                            "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                                    + scriptType + "' script"));
-
-                    }
-                }
-
-                // ScriptTask
-                if (bpmnElement instanceof ScriptTask && !settings.containsKey(scriptTask)) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                            bpmnElement.getAttributeValue("name"), null, null, null,
-                            "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
-                }
-
-                // Check SequenceFlow on script in conditionExpression
-                if (bpmnElement instanceof SequenceFlow) {
-                    boolean scriptCondExp = scan.hasScriptInCondExp(bpmnElement.getAttributeValue("id"));
-                    if (settings.containsKey(sequenceFlow)) {
-                        ArrayList<String> allowedPlaces = settings.get(sequenceFlow).getScriptPlaces();
-                        if (!allowedPlaces.isEmpty())
-                            if (!allowedPlaces.contains("conditionExpression") && scriptCondExp)
+            // Check all Elements with camunda:script tag
+            ArrayList<String> scriptTypes = bpmnScanner.getScriptTypes(bpmnElement.getAttributeValue("id"));
+            if (scriptTypes != null && !scriptTypes.isEmpty()) {
+                if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
+                    for (String place : scriptTypes)
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                        + place + "' script"));
+                } else {
+                    ArrayList<String> allowedPlaces = settings
+                            .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
+                    if (!allowedPlaces.isEmpty())
+                        for (String scriptType : scriptTypes)
+                            if (!allowedPlaces.contains(scriptType))
                                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                         bpmnElement.getAttributeValue("name"), null, null, null,
-                                        "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                                + "' with script in condition Expression"));
-                    } else {
-                        if (scriptCondExp) {
+                                        "task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                                + scriptType + "' script"));
+
+                }
+            }
+
+            // ScriptTask
+            if (bpmnElement instanceof ScriptTask && !settings.containsKey(scriptTask)) {
+                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                        bpmnElement.getAttributeValue("name"), null, null, null,
+                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
+            }
+
+            // Check SequenceFlow on script in conditionExpression
+            if (bpmnElement instanceof SequenceFlow) {
+                boolean scriptCondExp = bpmnScanner.hasScriptInCondExp(bpmnElement.getAttributeValue("id"));
+                if (settings.containsKey(sequenceFlow)) {
+                    ArrayList<String> allowedPlaces = settings.get(sequenceFlow).getScriptPlaces();
+                    if (!allowedPlaces.isEmpty())
+                        if (!allowedPlaces.contains("conditionExpression") && scriptCondExp)
                             issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                     element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                     bpmnElement.getAttributeValue("name"), null, null, null,
                                     "SequenceFlow '" + CheckName.checkName(bpmnElement)
                                             + "' with script in condition Expression"));
-                        }
+                } else {
+                    if (scriptCondExp) {
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "SequenceFlow '" + CheckName.checkName(bpmnElement)
+                                        + "' with script in condition Expression"));
                     }
                 }
             }
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
         }
 
         return issues;

@@ -30,14 +30,20 @@
 package de.viadee.bpm.vPAV;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
+import org.springframework.context.ApplicationContext;
+
+import de.viadee.bpm.vPAV.config.model.Rule;
 
 public class RuntimeConfig {
 
     private static RuntimeConfig instance;
+
+    private ApplicationContext ctx;
 
     private Map<String, String> beanMap;
 
@@ -45,11 +51,13 @@ public class RuntimeConfig {
 
     private boolean test = false;
 
-    private final String[] allRules = { "XorNamingConventionChecker",
+    private final String[] viadeeRules = { "XorConventionChecker",
             "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
             "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
             "MessageEventChecker" };
+
+    private ArrayList<String> allActiveRules = new ArrayList<>();
 
     private RuntimeConfig() {
     }
@@ -86,7 +94,7 @@ public class RuntimeConfig {
 
     /**
      * Retrieves the classloader for a given MavenProject
-     * 
+     *
      * @param project
      *            MavenProject
      * @return Classloader
@@ -108,8 +116,28 @@ public class RuntimeConfig {
         this.test = test;
     }
 
-    public String[] getAllRules() {
-        return allRules;
+    public ArrayList<String> getActiveRules() {
+        return allActiveRules;
+    }
+
+    public String[] getViadeeRules() {
+        return viadeeRules;
+    }
+
+    public void addActiveRules(Map<String, Rule> rules) {
+        for (Map.Entry<String, Rule> entry : rules.entrySet()) {
+            Rule rule = entry.getValue();
+            if (rule.isActive() && !rule.getName().equals("HasParentRuleSet"))
+                allActiveRules.add(rule.getName());
+        }
+    }
+
+    public void setApplicationContext(ApplicationContext ctx) {
+        this.ctx = ctx;
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return ctx;
     }
 
 }

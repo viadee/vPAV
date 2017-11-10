@@ -50,6 +50,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -94,7 +95,7 @@ public class NoExpressionCheckerTest {
     public void testTaskWithoutExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoExpressionChecker_WithoutExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, PATH);
+        checker = new NoExpressionChecker(rule, new BPMNScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -126,7 +127,7 @@ public class NoExpressionCheckerTest {
     public void testTaskWithExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoExpressionChecker_WithExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, PATH);
+        checker = new NoExpressionChecker(rule, new BPMNScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -158,7 +159,7 @@ public class NoExpressionCheckerTest {
     public void testEventsWithExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoExpressionChecker_EventsWithExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, PATH);
+        checker = new NoExpressionChecker(rule, new BPMNScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -190,7 +191,7 @@ public class NoExpressionCheckerTest {
     public void testSequenceFlowWithExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoExpressionChecker_SequenceFlowWithExpression.bpmn";
-        checker = new NoExpressionChecker(rule, PATH);
+        checker = new NoExpressionChecker(rule, new BPMNScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 

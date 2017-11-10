@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -44,8 +45,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class ElementIdConventionChecker extends AbstractElementChecker {
 
-    public ElementIdConventionChecker(final Rule rule, final String path) {
-        super(rule, path);
+    public ElementIdConventionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+        super(rule, bpmnScanner);
     }
 
     /**
@@ -64,7 +65,7 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
 
         if (elementConventions != null && !elementConventions.isEmpty() && elementId != null) {
             for (final ElementConvention convention : elementConventions) {
-                final Pattern pattern = Pattern.compile(convention.getPattern());
+                final Pattern pattern = Pattern.compile(convention.getPattern().trim());
                 Matcher matcher = pattern.matcher(elementId);
                 String bpmnInstance = convention.getName();
                 if (!matcher.matches()

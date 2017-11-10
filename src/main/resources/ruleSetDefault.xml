@@ -4,8 +4,11 @@
 		<state>true</state>
 	</rule>
 	<rule>
-		<name>XorNamingConventionChecker</name>
+		<name>XorConventionChecker</name>
 		<state>true</state>
+		<settings>
+			<setting name="requiredDefault">false</setting>
+		</settings>
 		<elementConventions>
 			<elementConvention>
 				<name>xorGateway</name>
@@ -46,7 +49,7 @@
 		<name>VersioningChecker</name>
 		<state>false</state>
 		<settings>
-			<setting name="versioningSchemaClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)
+			<setting name="versioningSchemeClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)
 			</setting>
 		</settings>
 	</rule>

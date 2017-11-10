@@ -29,11 +29,8 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -41,7 +38,6 @@ import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
 import org.camunda.bpm.model.bpmn.instance.SendTask;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.UserTask;
-import org.xml.sax.SAXException;
 
 import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
@@ -95,8 +91,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
     private final String superClass_abstBpmnActBeh = "AbstractBpmnActivityBehavior";
 
-    public JavaDelegateChecker(final Rule rule, final String path) {
-        super(rule, path);
+    public JavaDelegateChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+        super(rule, bpmnScanner);
     }
 
     /**
@@ -110,7 +106,6 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
-        final BPMNScanner scan;
         String implementationAttr = null;
         String implementation = null;
         ArrayList<String> executionDelegate = new ArrayList<String>();
@@ -120,37 +115,31 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         ArrayList<String> taskClass = new ArrayList<String>();
         ArrayList<String> taskExpression = new ArrayList<String>();
 
-        try {
-            scan = new BPMNScanner(path);
-            // read attributes from task
-            if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
-                    || bpmnElement instanceof SendTask))
-                implementationAttr = scan.getImplementation(bpmnElement.getId());
+        // read attributes from task
+        if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
+                || bpmnElement instanceof SendTask))
+            implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
 
-            if (bpmnElement instanceof UserTask) {
-                taskDelegate = scan.getListener(bpmnElement.getId(), attr_del, c_taskList);
-                taskClass = scan.getListener(bpmnElement.getId(), attr_class, c_taskList);
-                taskExpression = scan.getListener(bpmnElement.getId(), attr_ex, c_taskList);
-            }
-
-            if (bpmnElement.getElementType().getTypeName()
-                    .equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT)
-                    || bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)) {
-                final String tempImp = scan.getEventImplementation(bpmnElement.getId());
-                if (tempImp != null && tempImp.contains("=")) {
-                    implementationAttr = tempImp.substring(0, tempImp.indexOf("=")).trim();
-                    implementation = tempImp.substring(tempImp.indexOf("=") + 1, tempImp.length()).replace("\"", "")
-                            .trim();
-                }
-            }
-
-            executionDelegate = scan.getListener(bpmnElement.getId(), attr_del, c_executionList);
-            executionClass = scan.getListener(bpmnElement.getId(), attr_class, c_executionList);
-            executionExpression = scan.getListener(bpmnElement.getId(), attr_ex, c_executionList);
-
-        } catch (SAXException | IOException | ParserConfigurationException e) {
-            e.printStackTrace();
+        if (bpmnElement instanceof UserTask) {
+            taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), attr_del, c_taskList);
+            taskClass = bpmnScanner.getListener(bpmnElement.getId(), attr_class, c_taskList);
+            taskExpression = bpmnScanner.getListener(bpmnElement.getId(), attr_ex, c_taskList);
         }
+
+        if (bpmnElement.getElementType().getTypeName()
+                .equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT)
+                || bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)) {
+            final String tempImp = bpmnScanner.getEventImplementation(bpmnElement.getId());
+            if (tempImp != null && tempImp.contains("=")) {
+                implementationAttr = tempImp.substring(0, tempImp.indexOf("=")).trim();
+                implementation = tempImp.substring(tempImp.indexOf("=") + 1, tempImp.length()).replace("\"", "")
+                        .trim();
+            }
+        }
+
+        executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), attr_del, c_executionList);
+        executionClass = bpmnScanner.getListener(bpmnElement.getId(), attr_class, c_executionList);
+        executionExpression = bpmnScanner.getListener(bpmnElement.getId(), attr_ex, c_executionList);
 
         final String classAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                 attr_class);
@@ -235,7 +224,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 if (dmnAttr == null && classAttr == null && delegateExprAttr == null
                         && exprAttr == null && typeAttr == null) {
                     // No technical attributes have been added
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
                             "task '" + CheckName.checkName(bpmnElement) + "' with no code reference yet"));
@@ -247,7 +236,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 || bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)) {
 
             if (implementationAttr != null && implementationAttr.equals(impl)) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
                         bpmnElement.getElementType().getTypeName() + " '" + bpmnElement.getAttributeValue("id")

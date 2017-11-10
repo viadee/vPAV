@@ -1,22 +1,31 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH All rights reserved.
+ * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
- * distribution. 3. All advertising materials mentioning features or use of this software must display the following
- * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
- * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
- * products derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *    This product includes software developed by the viadee Unternehmensberatung GmbH.
+ * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
+ *    names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
- * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 
@@ -208,16 +217,9 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      * @return return_implementation contains implementation
      */
-    public String getImplementation(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public String getImplementation(String id) {
         // List to hold return values
         String return_implementation = null;
 
@@ -292,16 +294,9 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      * @return return_implementation contains implementation
      */
-    public String getEventImplementation(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public String getEventImplementation(String id) {
         // List to hold return values
         String return_implementation = null;
 
@@ -375,15 +370,8 @@ public class BPMNScanner {
      * @param extType
      *            Type of Listener
      * @return value of Listener
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      */
-    public ArrayList<String> getListener(String id, String listType, String extType)
-            throws SAXException, IOException, ParserConfigurationException {
+    public ArrayList<String> getListener(String id, String listType, String extType) {
 
         // list to hold return values
         ArrayList<String> returnAttrList = new ArrayList<String>();
@@ -446,13 +434,9 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
      * @return scriptPlaces contains script type
      */
-    public ArrayList<String> getScriptTypes(String id) throws SAXException, IOException {
+    public ArrayList<String> getScriptTypes(String id) {
         // bool to hold return values
         ArrayList<String> return_scriptType = new ArrayList<String>();
 
@@ -505,15 +489,8 @@ public class BPMNScanner {
      * @param id
      *            id of the element
      * @return boolean has condition Expression
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      */
-    public boolean hasScriptInCondExp(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public boolean hasScriptInCondExp(String id) {
         // List for all Task elements
         NodeList nodeList = null;
 
@@ -569,17 +546,10 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      * @return gateway contains script type
      *
      */
-    public String getXorGateWays(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public String getXorGateWays(String id) {
         final NodeList nodeList;
 
         String gateway = "";
@@ -615,15 +585,9 @@ public class BPMNScanner {
      *
      * @param id
      *            id of bpmn element
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      * @return outgoing number of outgoing
      */
-    public int getOutgoing(String id) throws SAXException, IOException, ParserConfigurationException {
+    public int getOutgoing(String id) {
         final NodeList nodeList;
         String out = "";
         int outgoing = 0;
@@ -669,15 +633,8 @@ public class BPMNScanner {
      * @param id
      *            id of bpmn element
      * @return ArrayList of outgoing Nodes
-     * @throws SAXException
-     *             possible exception while process xml
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
      */
-    public ArrayList<Node> getOutgoingEdges(String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public ArrayList<Node> getOutgoingEdges(String id) {
 
         ArrayList<Node> outgoingEdges = new ArrayList<Node>();
         NodeList nodeList = null;
@@ -755,15 +712,8 @@ public class BPMNScanner {
      * @param id
      *            id of bpmn element
      * @return Map with timerEventDefinition-Node and his child
-     * @throws ParserConfigurationException
-     *             possible exception if file could not be parsed
-     * @throws IOException
-     *             possible exception if file not found
-     * @throws SAXException
-     *             possible exception while process xml
      */
-    public Map<Element, Element> getTimerImplementation(final String id)
-            throws SAXException, IOException, ParserConfigurationException {
+    public Map<Element, Element> getTimerImplementation(final String id) {
 
         // List for all Task elements
         ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
@@ -830,6 +780,7 @@ public class BPMNScanner {
      * Retrieve the message name of a given receiveTask
      *
      * @param messageRef
+     *            id of message
      * @return messageName
      */
     public String getMessageName(String messageRef) {
@@ -870,7 +821,14 @@ public class BPMNScanner {
         return c_exp;
     }
 
-    public ArrayList<String> getOutputVariables(String id) throws SAXException, IOException {
+    /**
+     * get List of output variables
+     * 
+     * @param id
+     *            id of the element
+     * @return outputVariables
+     */
+    public ArrayList<String> getOutputVariables(String id) {
         // List for all Task elements
         ArrayList<String> listVariables = new ArrayList<String>();
 

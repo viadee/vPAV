@@ -96,7 +96,7 @@ public abstract class AbstractRunner {
         createIssues(rules);
 
         // 5
-        filteredIssues = filterIssues(issues);
+        removeIgnoredIssues();
 
         // 6
         writeOutput(filteredIssues);
@@ -136,6 +136,7 @@ public abstract class AbstractRunner {
                 rules = new XmlConfigReader().read(ConstantsConfig.RULESETDEFAULT);
             }
             ruleSetOutputWriter.write(rules);
+            RuntimeConfig.getInstance().addActiveRules(rules);
 
         } catch (final ConfigReaderException | OutputWriterException e) {
             throw new RuntimeException("Config file could not be read or written");
@@ -147,7 +148,7 @@ public abstract class AbstractRunner {
 
     /**
      * merges ruleSets according to inheritance hierarchy (Deactivated < global < default < local)
-     * 
+     *
      * @param parentRules
      *            Basis RuleSet which will be overwritten
      * @param childRules
@@ -166,7 +167,7 @@ public abstract class AbstractRunner {
 
     /**
      * Initializes the fileScanner with the current set of rules
-     * 
+     *
      * @param rules
      *            Map of rules
      */
@@ -185,7 +186,7 @@ public abstract class AbstractRunner {
     /**
      * Creates the list of issues found for a given model and ruleSet Throws a RuntimeException if errors are found, so
      * automated builds in a CI/CD pipeline will fail
-     * 
+     *
      * @param rules
      *            Map of rules
      * @throws RuntimeException
@@ -197,7 +198,7 @@ public abstract class AbstractRunner {
 
     /**
      * Removes whitelisted issues from the list of issues found
-     * 
+     *
      * @throws RuntimeException
      *             Ignored issues couldn't be read successfully
      */
@@ -257,7 +258,7 @@ public abstract class AbstractRunner {
 
     /**
      * Create vPAV folder
-     * 
+     *
      */
     private static void createvPAVFolder() {
         File vPavDir = new File(ConstantsConfig.VALIDATION_FOLDER);
@@ -312,7 +313,7 @@ public abstract class AbstractRunner {
 
     /**
      * Delete files from destinations
-     * 
+     *
      * @param destinations
      *            List of destinations who will be deleted
      */
@@ -325,7 +326,7 @@ public abstract class AbstractRunner {
 
     /**
      * Copies all necessary files and deletes outputFiles
-     * 
+     *
      * @throws RuntimeException
      *             Files couldn't be copied
      */
@@ -342,7 +343,7 @@ public abstract class AbstractRunner {
 
     /**
      * Creates ArrayList to hold output files
-     * 
+     *
      * @return ArrayList<String> allFiles
      */
     private static ArrayList<String> createAllOutputFilesArray() {
@@ -364,6 +365,7 @@ public abstract class AbstractRunner {
         allFiles.add("error.png");
         allFiles.add("warning.png");
         allFiles.add("info.png");
+        allFiles.add("success.png");
 
         allFiles.add("validationResult.html");
 
@@ -372,7 +374,7 @@ public abstract class AbstractRunner {
 
     /**
      * Creates Map for files and corresponding folders
-     * 
+     *
      * @return Map<String, String> fMap
      */
     private static Map<String, String> createFileFolderMapping() {
@@ -394,6 +396,7 @@ public abstract class AbstractRunner {
         fMap.put("error.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("warning.png", ConstantsConfig.IMG_FOLDER);
         fMap.put("info.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("success.png", ConstantsConfig.IMG_FOLDER);
 
         fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
 
@@ -402,7 +405,7 @@ public abstract class AbstractRunner {
 
     /**
      * Copies files to vPAV folder
-     * 
+     *
      * @param file
      *            File who will be copied to vPAV folder
      * @throws RuntimeException

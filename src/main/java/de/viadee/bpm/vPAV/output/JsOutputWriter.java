@@ -37,6 +37,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,8 +47,10 @@ import com.google.gson.JsonObject;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
@@ -55,13 +58,17 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  */
 public class JsOutputWriter implements IssueOutputWriter {
 
+    private final String basePath = "src\\main\\resources\\";
+
     /**
      * Writes the output as JavaScript to the vPAV output folder
      */
     @Override
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
-        final String json = transformToJsonDatastructure(issues);
+        final String json = transformToJsonDatastructure(issues, "elementsToMark");
+        final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues), "noIssuesElements");
         final String bpmn = transformToXMLDatastructure();
+
         if (json != null && !json.isEmpty()) {
             try {
                 final FileWriter file = new FileWriter(ConstantsConfig.VALIDATION_JS_MODEL_OUTPUT);
@@ -73,10 +80,50 @@ public class JsOutputWriter implements IssueOutputWriter {
                 osWriter.write(json);
                 osWriter.close();
 
+                final OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
+                        new FileOutputStream(ConstantsConfig.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8);
+                osWriterSuccess.write(json_noIssues);
+                osWriterSuccess.close();
+
             } catch (final IOException ex) {
                 throw new OutputWriterException("js output couldn't be written");
             }
         }
+    }
+
+    /**
+     * Check all checkers for successful verification
+     * 
+     * @param issues
+     *            list of all issues
+     * @return list with checkers without issues
+     */
+    private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
+        Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
+
+        for (final String bpmnFilename : AbstractRunner.getModelPath()) {
+            Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
+            modelIssues.addAll(issues);
+
+            for (CheckerIssue issue : issues) {
+                if (!issue.getBpmnFile().equals(basePath + bpmnFilename))
+                    modelIssues.remove(issue);
+            }
+
+            for (final String ruleName : RuntimeConfig.getInstance().getActiveRules()) {
+                Collection<CheckerIssue> ruleIssues = new ArrayList<CheckerIssue>();
+                ruleIssues.addAll(modelIssues);
+                for (CheckerIssue issue : modelIssues) {
+                    if (!issue.getRuleName().equals(ruleName))
+                        ruleIssues.remove(issue);
+                }
+                if (ruleIssues.isEmpty())
+                    newIssues.add(new CheckerIssue(ruleName, CriticalityEnum.SUCCESS, (basePath + bpmnFilename), null,
+                            "", "", null, null, null, "No issues found"));
+            }
+        }
+
+        return newIssues;
     }
 
     /**
@@ -142,7 +189,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues) {
+    private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
         final JsonArray jsonIssues = new JsonArray();
         if (issues != null && issues.size() > 0) {
             for (final CheckerIssue issue : issues) {
@@ -180,6 +227,6 @@ public class JsOutputWriter implements IssueOutputWriter {
                 jsonIssues.add(obj);
             }
         }
-        return ("var elementsToMark = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+        return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
     }
 }
