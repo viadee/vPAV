@@ -57,7 +57,15 @@ public class BeanMappingGenerator {
             if (!beanName.startsWith("org.springframework")) {
                 final Object obj = ctx.getBean(beanName);
                 if (obj != null) {
-                    beanNameToClassMap.put(beanName, obj.getClass().getName());
+                    if (obj.getClass().getName().contains("$$")) {
+                        String name = obj.getClass().getName();
+                        while (name.contains("$$")) {
+                            name = name.substring(0, name.lastIndexOf("$$"));
+                        }
+                        beanNameToClassMap.put(beanName, name);
+                    } else {
+                        beanNameToClassMap.put(beanName, obj.getClass().getName());
+                    }
                 }
             }
         }
