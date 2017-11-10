@@ -83,7 +83,7 @@ public final class ConstantsConfig {
 
     public static final String LOCATION = "location";
 
-    public static final String VERSIONINGSCHEMEDIRECTORY = "versioningSchemeDirectory";
+    public static final String VERSIONINGSCHEMEPACKAGE = "versioningSchemePackage";
 
     public static final String VERSIONINGSCHEMECLASS = "versioningSchemeClass";
 

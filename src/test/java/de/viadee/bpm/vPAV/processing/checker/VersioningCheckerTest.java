@@ -42,10 +42,13 @@ import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -95,17 +98,20 @@ public class VersioningCheckerTest {
     }
 
     /**
-     * Case: test versioning for script
+     * Case: test versioning for directory based versioned java classes
      */
     @Test
-    public void testScriptVersioning() {
-        final String PATH = BASE_PATH + "VersioningCheckerTest_ScriptVersioning.bpmn";
+    public void testDirBasedJavaClassVersioning() {
+        final String PATH = BASE_PATH + "VersioningCheckerTest_DirBasedJavaClassVersioning.bpmn";
 
         final Rule rule = new Rule("VersioningChecker", true, null, null, null);
 
+        FileScanner.setIsDirectory(true);
+
         // Versions
         final Collection<String> resourcesNewestVersions = new ArrayList<String>();
-        resourcesNewestVersions.add("de/test/testScript_1_2.groovy");
+
+        resourcesNewestVersions.add("de\\viadee\\bpm\\v18_300\\test");
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -113,11 +119,20 @@ public class VersioningCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
-
         final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
-        final Collection<CheckerIssue> issues = checker.check(element);
-        assertEquals(1, issues.size());
+
+        // parse bpmn model
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement);
+            issues.addAll(checker.check(element));
+        }
+
+        if (issues.size() != 1) {
+            Assert.fail("Model should generate exactly one issue");
+        }
+
     }
 
     /**
@@ -141,6 +156,32 @@ public class VersioningCheckerTest {
         final Map<String, String> beanMapping = new HashMap<String, String>();
         beanMapping.put("myBean_1_1", "de.test.TestDelegate_1_1");
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ServiceTask> baseElements = modelInstance
+                .getModelElementsByType(ServiceTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
+        final Collection<CheckerIssue> issues = checker.check(element);
+        assertEquals(1, issues.size());
+    }
+
+    /**
+     * Case: test versioning for script
+     */
+    @Test
+    public void testScriptVersioning() {
+        final String PATH = BASE_PATH + "VersioningCheckerTest_ScriptVersioning.bpmn";
+
+        final Rule rule = new Rule("VersioningChecker", true, null, null, null);
+
+        // Versions
+        final Collection<String> resourcesNewestVersions = new ArrayList<String>();
+        resourcesNewestVersions.add("de/test/testScript_1_2.groovy");
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
