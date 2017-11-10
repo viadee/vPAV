@@ -34,7 +34,7 @@ Alternatively, if you use a package-based versioning scheme, the rule should be 
  </rule>
 ```
 The setting "versioningSchemePackage" includes an exemplary regular expression that matches package-based versioning, e.g.
-de.viadee.package.v10_20.example. This versioning scheme would be identified and in comparison, de.viadee.package.v12_20.example would be tagged as the newer version. This scheme is configurable as you desire.
+de.viadee.package.v10_19.example. This versioning scheme would be identified and in comparison, de.viadee.package.v12_20.example would be tagged as the newer version. This scheme is configurable as you desire. Beware, that as of now, the number of digits have to match and you need to fill up numbers with preceeding zeros.
 
 Note, that **only one versioning scheme** can be used.
 
