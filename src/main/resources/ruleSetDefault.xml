@@ -35,14 +35,18 @@
 		<state>true</state>
 	</rule>
 	<rule>
+		<name>FieldInjectionChecker</name>
+		<state>false</state>
+	</rule>
+	<rule>
 		<name>EmbeddedGroovyScriptChecker</name>
 		<state>true</state>
 	</rule>
 	<rule>
 		<name>NoExpressionChecker</name>
-		<state>true</state>	
+		<state>true</state>
 		<settings>
-			<setting name ="ServiceTask"></setting>
+			<setting name="ServiceTask"></setting>
 		</settings>
 	</rule>
 	<rule>

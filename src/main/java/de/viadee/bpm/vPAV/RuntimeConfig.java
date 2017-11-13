@@ -55,7 +55,7 @@ public class RuntimeConfig {
             "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
             "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
-            "MessageEventChecker" };
+            "MessageEventChecker", "FieldInjectionChecker" };
 
     private ArrayList<String> allActiveRules = new ArrayList<>();
 
