@@ -90,8 +90,6 @@ public class FileScanner {
 
     private static boolean isDirectory = false;
 
-    private static boolean isActive = false;
-
     public static Logger logger = Logger.getLogger(FileScanner.class.getName());
 
     public FileScanner(final Map<String, Rule> rules) {
@@ -354,7 +352,7 @@ public class FileScanner {
         final Map<String, String> newestVersionsPathMap = new HashMap<String, String>();
         final Map<String, String> newestVersionsMap = new HashMap<String, String>();
 
-        if (versionedFiles != null) {
+        if (versionedFiles != null && versioningSchema != null) {
             for (final String versionedFile : versionedFiles) {
                 final Pattern pattern = Pattern.compile(versioningSchema);
                 final Matcher matcher = pattern.matcher(versionedFile);
@@ -431,12 +429,12 @@ public class FileScanner {
             Setting setting = null;
             final Map<String, Setting> settings = rule.getSettings();
             if (settings.containsKey(ConstantsConfig.VERSIONINGSCHEMECLASS)
-                    && !settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEDIRECTORY)) {
+                    && !settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEPACKAGE)) {
                 setting = settings.get(ConstantsConfig.VERSIONINGSCHEMECLASS);
                 isDirectory = false;
             } else if (!settings.containsKey(ConstantsConfig.VERSIONINGSCHEMECLASS)
-                    && settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEDIRECTORY)) {
-                setting = settings.get(ConstantsConfig.VERSIONINGSCHEMEDIRECTORY);
+                    && settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEPACKAGE)) {
+                setting = settings.get(ConstantsConfig.VERSIONINGSCHEMEPACKAGE);
                 isDirectory = true;
             }
             if (setting == null) {
@@ -458,5 +456,9 @@ public class FileScanner {
 
     public static boolean getIsDirectory() {
         return isDirectory;
+    }
+
+    public static void setIsDirectory(boolean isDirectory) {
+        FileScanner.isDirectory = isDirectory;
     }
 }
