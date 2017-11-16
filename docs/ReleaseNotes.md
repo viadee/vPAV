@@ -4,11 +4,11 @@
 
 ### Features
 **vPAV-139** Added success stories to output  
-**vPAV-141** JavaDelegateChecker able to work with Mockito proxies 
+**vPAV-141** JavaDelegateChecker able to work with Mockito proxies   
 **vPAV-124** Check forms for variables  
 **vPAV-144** HTML output: button "Mark all Issues"  
-**vPAV-145** Create constructor of external checker dynamically
-**vPAV-146** Funtionality of MessageEventChecker extended 
+**vPAV-145** Create constructor of external checker dynamically  
+**vPAV-146** Funtionality of MessageEventChecker extended  
 **vPAV-148** Default path for XOR-Gateway as best practise
 
 ### Fixes
