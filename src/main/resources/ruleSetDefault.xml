@@ -35,6 +35,10 @@
 		<state>true</state>
 	</rule>
 	<rule>
+		<name>BoundaryErrorChecker</name>
+		<state>true</state>
+	</rule>
+	<rule>
 		<name>FieldInjectionChecker</name>
 		<state>false</state>
 	</rule>
