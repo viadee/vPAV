@@ -268,22 +268,7 @@
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
 					<source>1.8</source>
 					<target>1.7</target>
-				</configuration>
-				<executions>
-					<execution>
-						<id>mojo-descriptor</id>
-						<goals>
-							<goal>descriptor</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>help-goal</id>
-						<goals>
-							<goal>helpmojo</goal>
-						</goals>
-						<phase>process-classes</phase>
-					</execution>
-				</executions>
+				</configuration>				
 			</plugin>
 			<plugin>
 				<groupId>com.mycila</groupId>
