@@ -31,7 +31,7 @@ Consistency checks are performed by individual modules called checkers, which se
 |[NoExpressionChecker](NoExpressionChecker.md)                                   | Are expressions used against common best-practices?                                        | Done         |
 |[MessageEventChecker](MessageEventChecker.md)                                   | Are MessageEvents referencing messages and do they provide message names?                                  | Done         |
 |[BoundaryErrorChecker](BoundaryErrorChecker.md)                                   | Do tasks with attached BoundaryErrorEvents use the correct ErrorCode and do the corresponding classes exist?                                  | Done         |
-|[ExtensionChecker](ExtensionCecker.md)                                   | Do tasks using key-value pairs in the extension panel fit into a desired pattern?                                  | Done         |
+|[ExtensionChecker](ExtensionChecker.md)                                   | Do tasks using key-value pairs in the extension panel fit into a desired pattern?                                  | Done         |
 
 
 
