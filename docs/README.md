@@ -1,8 +1,7 @@
 # viadee Process Application Validator (vPAV)
 
 The tool checks Camunda projects for consistency and discovers errors in process-driven applications.
-Called as a Maven plugin or JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the sourcecode of an underlying java project, 
-such as a delegate reference to a non-existing java class or a non-existing Spring bean.
+Called as JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the sourcecode of an underlying java project, such as a delegate reference to a non-existing java class or a non-existing Spring bean.
 
 Find a list of the consistency checks below.
 
