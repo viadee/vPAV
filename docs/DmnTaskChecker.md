@@ -2,6 +2,9 @@ DMN Task Checker
 =================================
 The DMN Task Checker processes BPMN models and checks whether a BusinessRuleTask with DMN implementation references a DMN.
 
+- No DMN referenced
+- Wrong DMN referenced
+
 
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
