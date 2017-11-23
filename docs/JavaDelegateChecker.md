@@ -2,9 +2,12 @@ Java Delegate Checker
 =================================
 The Java Delegate Checker processes BPMN models and checks, whether the following conditions apply to 
 Service Tasks, Send Tasks, Receive Tasks, Script Tasks or Business Rule Tasks:
+- Wrong reference to Java Class
+- Wrong reference in Bean mapping
+- Wrong or no interfaces (Needs to be *JavaDelegate*, *SignallableActivityBehavior*, *AbstractBpmnActivityBehavior*)
+- Interface *ActivityBehaviour* should not be used
+- No reference to a Java Class or Delegate (Bean)
 - No implementation specified
-- Class not found, although specified as implemented 
-- Class doesn't implement the *JavaDelegate* or *SignallableActivityBehavior* interface or doesn't extends the *AbstractBpmnActivityBehavior* class
 
 All Elements are also check on their ExecutionListener:
 - No implementation specified

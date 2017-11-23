@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.viadee</groupId>
 	<artifactId>viadeeProcessApplicationValidator</artifactId>
-	<version>2.3.0</version>
+	<version>2.4.0-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 
 	<name>viadee Process Application Validator - Maven Plugin</name>
@@ -268,22 +268,7 @@
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
 					<source>1.8</source>
 					<target>1.7</target>
-				</configuration>
-				<executions>
-					<execution>
-						<id>mojo-descriptor</id>
-						<goals>
-							<goal>descriptor</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>help-goal</id>
-						<goals>
-							<goal>helpmojo</goal>
-						</goals>
-						<phase>process-classes</phase>
-					</execution>
-				</executions>
+				</configuration>				
 			</plugin>
 			<plugin>
 				<groupId>com.mycila</groupId>

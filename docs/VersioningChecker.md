@@ -4,6 +4,9 @@ The Versioning Checker checks references in Service Tasks, Script Tasks, Busines
 to the declaration of a versioned java implementation.
 When a versioned implementation is referenced, it is checked whether it is up-to-date.
 
+- No version
+- Outdated version
+
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
 - Classes or packages have to be versioned

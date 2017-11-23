@@ -74,6 +74,8 @@ public class BPMNScanner {
 
     private final String message_one = "bpmn:message";
 
+    private final String error_one = "bpmn:error";
+
     // -----------------------
 
     private final String businessRuleTask_two = "bpmn2:businessRuleTask";
@@ -101,6 +103,8 @@ public class BPMNScanner {
     private final String extElements_two = "bpmn2:extensionElements";
 
     private final String message_two = "bpmn2:message";
+
+    private final String error_two = "bpmn2:error";
 
     // -----------------------
 
@@ -130,6 +134,8 @@ public class BPMNScanner {
 
     private final String message_three = "message";
 
+    private final String error_three = "error";
+
     // ------------------------
 
     private final String scriptTag = "camunda:script";
@@ -146,9 +152,19 @@ public class BPMNScanner {
 
     private final String c_outPar = "camunda:outputParameter";
 
+    private final String c_field = "camunda:field";
+
+    private final String c_property = "camunda:property";
+
+    private final String errorCodeVar = "camunda:errorCodeVariable";
+
+    private final String attachedToRef = "attachedToRef";
+
     private final String imp = "implementation";
 
     private final String timerEventDefinition = "timerEventDefinition";
+
+    private final String errorEventDefinition = "errorEventDefinition";
 
     private final String condExp = "conditionExpression";
 
@@ -287,6 +303,63 @@ public class BPMNScanner {
             }
         }
         return return_implementation;
+    }
+
+    /**
+     *
+     * @param id
+     *            id of bpmnElement
+     * @param implementation
+     *            DelegateExpression/Java Class
+     * @return implementationReference
+     */
+    public String getImplementationReference(String id, String implementation) {
+        String implementationReference = "";
+
+        // List for all Task elements
+        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+
+        switch (model_Version) {
+            case V1:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_one));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_one));
+                listNodeList.add(doc.getElementsByTagName(sendTask_one));
+                break;
+            case V2:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_two));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_two));
+                listNodeList.add(doc.getElementsByTagName(sendTask_two));
+                break;
+            case V3:
+                listNodeList.add(doc.getElementsByTagName(businessRuleTask_three));
+                listNodeList.add(doc.getElementsByTagName(serviceTask_three));
+                listNodeList.add(doc.getElementsByTagName(sendTask_three));
+                break;
+            default:
+                listNodeList = null;
+        }
+
+        // iterate over list<NodeList> and check each NodeList (BRTask,
+        // ServiceTask and SendTask)
+        for (final NodeList list : listNodeList) {
+            // iterate over list and check child of each node
+            for (int i = 0; i < list.getLength(); i++) {
+                Element Task_Element = (Element) list.item(i);
+
+                // check if the ids are corresponding
+                if (id.equals(Task_Element.getAttribute("id"))) {
+
+                    // check for implementation reference
+                    if (implementation.equals(c_class)) {
+                        implementationReference = Task_Element.getAttribute(c_class);
+                    } else if (implementation.equals(c_dexp)) {
+                        implementationReference = Task_Element.getAttribute(c_dexp);
+                    }
+                }
+            }
+        }
+
+        return implementationReference;
     }
 
     /**
@@ -823,7 +896,7 @@ public class BPMNScanner {
 
     /**
      * get List of output variables
-     * 
+     *
      * @param id
      *            id of the element
      * @return outputVariables
@@ -845,5 +918,259 @@ public class BPMNScanner {
 
         }
         return listVariables;
+    }
+
+    /**
+     * get value of expression
+     *
+     * @param id
+     *            id from element
+     * @return value of expression
+     */
+    public ArrayList<String> getFieldInjectionExpression(String id) {
+        ArrayList<String> varNames = new ArrayList<String>();
+        NodeList nodeList = doc.getElementsByTagName(c_field);
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (idMatch(node, id)) {
+                for (int y = 0; y < node.getChildNodes().getLength(); y++) {
+                    if (node.getChildNodes().item(y).getNodeName().equals(c_exp)) {
+                        varNames.add(node.getChildNodes().item(y).getTextContent());
+                    }
+                }
+            }
+        }
+        return varNames;
+    }
+
+    /**
+     * get names of variable in fieldInjection
+     *
+     * @param id
+     *            id from element
+     * @return names of variable
+     */
+    public ArrayList<String> getFieldInjectionVarName(String id) {
+        ArrayList<String> varNames = new ArrayList<String>();
+        NodeList nodeList = doc.getElementsByTagName(c_field);
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (idMatch(node, id))
+                for (int y = 0; y < node.getAttributes().getLength(); y++) {
+                    if (node.getAttributes().item(y).getNodeName().equals("name"))
+                        varNames.add(node.getAttributes().item(y).getNodeValue());
+                }
+        }
+        return varNames;
+    }
+
+    /**
+     * get errorEventDefinition
+     *
+     * @param id
+     *            id from element
+     * @return errorEvent
+     */
+    public Map<String, String> getErrorEvent(String id) {
+
+        // List for all Task elements
+        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+
+        switch (model_Version) {
+            case V1:
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_one));
+                break;
+            case V2:
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_two));
+                break;
+            case V3:
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_three));
+                break;
+            default:
+                listNodeList = null;
+
+        }
+
+        final Map<String, String> boundaryEventList = new HashMap<>();
+
+        // iterate over list<NodeList>
+        for (final NodeList list : listNodeList) {
+            for (int i = 0; i < list.getLength(); i++) {
+                final Element Task_Element = (Element) list.item(i);
+
+                // check whether a node matches with the provided id
+                if (Task_Element.getAttribute("id").equals(id)) {
+
+                    final NodeList childNodes = Task_Element.getChildNodes();
+                    for (int x = 0; x < childNodes.getLength(); x++) {
+
+                        // check if an event consists of a errorEventDefinition tag
+                        if (childNodes.item(x).getLocalName() != null
+                                && childNodes.item(x).getLocalName().equals(errorEventDefinition)) {
+
+                            final Element Task_Element2 = (Element) childNodes.item(x);
+                            boundaryEventList.put(Task_Element2.getAttribute("errorRef"),
+                                    Task_Element2.getAttribute("camunda:errorMessageVariable"));
+
+                        }
+                    }
+                }
+            }
+        }
+        return boundaryEventList;
+    }
+
+    /**
+     * get errorDefinition
+     *
+     * @param id
+     *            id from element
+     * @return Map with errorName and errorCode
+     */
+    public Map<String, String> getErrorDef(String id) {
+
+        NodeList nodeList = null;
+
+        switch (model_Version) {
+            case V1:
+                nodeList = doc.getElementsByTagName(error_one);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(error_two);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(error_three);
+                break;
+            default:
+                break;
+        }
+
+        final Map<String, String> errorDef = new HashMap<String, String>();
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element Task_Element = (Element) nodeList.item(i);
+
+            // check if the ids are corresponding
+            if (id.equals(Task_Element.getAttribute("id"))) {
+                errorDef.put(Task_Element.getAttribute("name"), Task_Element.getAttribute("errorCode"));
+            }
+        }
+        return errorDef;
+    }
+
+    /**
+     * get errorCodeVariable
+     *
+     * @param id
+     *            id from element
+     * @return String with errorCodeVariable
+     */
+    public String getErrorCodeVar(String id) {
+        // List for all Task elements
+        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+
+        switch (model_Version) {
+            case V1:
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_one));
+                break;
+            case V2:
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_two));
+                break;
+            case V3:
+                listNodeList.add(doc.getElementsByTagName(boundaryEvent_three));
+                break;
+            default:
+                listNodeList = null;
+
+        }
+
+        String getErrorCodeVar = "";
+
+        // iterate over list<NodeList>
+        for (final NodeList list : listNodeList) {
+            for (int i = 0; i < list.getLength(); i++) {
+                final Element Task_Element = (Element) list.item(i);
+
+                // check whether a node matches with the provided id
+                if (Task_Element.getAttribute("id").equals(id)) {
+
+                    final NodeList childNodes = Task_Element.getChildNodes();
+                    for (int x = 0; x < childNodes.getLength(); x++) {
+
+                        // check if an event consists of a errorEventDefinition tag
+                        if (childNodes.item(x).getLocalName() != null
+                                && childNodes.item(x).getLocalName().equals(errorEventDefinition)) {
+                            final Element Task_Element2 = (Element) childNodes.item(x);
+                            getErrorCodeVar = Task_Element2.getAttribute(errorCodeVar);
+                        }
+                    }
+                }
+            }
+        }
+        return getErrorCodeVar;
+    }
+
+    /**
+     *
+     * @param id
+     *            id of boundaryErrorEvent
+     * @return attachedToTask
+     */
+    public String getErrorEventMapping(String id) {
+
+        String attachedToTask = "";
+        NodeList nodeList = null;
+
+        switch (model_Version) {
+            case V1:
+                nodeList = doc.getElementsByTagName(boundaryEvent_one);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(boundaryEvent_two);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(boundaryEvent_three);
+                break;
+            default:
+                break;
+        }
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element Task_Element = (Element) nodeList.item(i);
+
+            // check if the ids are corresponding
+            if (id.equals(Task_Element.getAttribute("id"))) {
+                attachedToTask = Task_Element.getAttribute(attachedToRef);
+            }
+        }
+
+        return attachedToTask;
+    }
+
+    /**
+     *
+     * @param id
+     *            id of bpmn element
+     * @return map with key value pair of given element
+     */
+    public Map<String, String> getKeyPairs(final String id) {
+
+        final Map<String, String> keyPairs = new HashMap<String, String>();
+
+        final NodeList nodeList = doc.getElementsByTagName(c_property);
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+
+            // Due to the static nesting of nodes, we can check the third parent node whether the id are corresponding
+            Element parent_element = (Element) nodeList.item(i).getParentNode().getParentNode().getParentNode();
+            if (parent_element.getAttribute("id").equals(id)) {
+                Element extension_node = (Element) nodeList.item(i);
+                keyPairs.put(extension_node.getAttribute("name"), extension_node.getAttribute("value"));
+            }
+        }
+
+        return keyPairs;
     }
 }

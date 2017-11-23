@@ -2,6 +2,10 @@ No Script Checker
 ================================= 
 The No Script Checker processes BPMN models and checks whether there is a script in the model.
 
+- ScriptTask
+- Script in Listener
+- Script in Input/Output
+
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
 

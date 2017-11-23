@@ -57,6 +57,7 @@ import org.camunda.bpm.model.bpmn.instance.SubProcess;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -85,16 +86,20 @@ public class ElementGraphBuilder {
 
     private Map<String, Collection<String>> processIdToVariables;
 
-    public ElementGraphBuilder() {
+    private BPMNScanner bpmnScanner;
+
+    public ElementGraphBuilder(BPMNScanner bpmnScanner) {
+        this.bpmnScanner = bpmnScanner;
     }
 
     public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
             final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
-            final Map<String, Collection<String>> processIdToVariables) {
+            final Map<String, Collection<String>> processIdToVariables, BPMNScanner bpmnScanner) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.processIdToPathMap = processIdToPathMap;
         this.messageIdToVariables = messageIdToVariables;
         this.processIdToVariables = processIdToVariables;
+        this.bpmnScanner = bpmnScanner;
     }
 
     /**
@@ -143,8 +148,8 @@ public class ElementGraphBuilder {
                 // initialize element
                 final BpmnElement node = new BpmnElement(processdefinition, element);
                 // examine process variables and save it with access operation
-                final Map<String, ProcessVariable> variables = new ProcessVariableReader(decisionRefToPathMap)
-                        .getVariablesFromElement(node);
+                final Map<String, ProcessVariable> variables = new ProcessVariableReader(decisionRefToPathMap,
+                        bpmnScanner).getVariablesFromElement(node);
                 // examine process variables for element and set it
                 node.setProcessVariables(variables);
 
@@ -364,7 +369,7 @@ public class ElementGraphBuilder {
             // add elements of the sub process as nodes
             final BpmnElement node = new BpmnElement(processdefinitionPath, subElement);
             // determine process variables with operations
-            final Map<String, ProcessVariable> variables = new ProcessVariableReader(decisionRefToPathMap)
+            final Map<String, ProcessVariable> variables = new ProcessVariableReader(decisionRefToPathMap, bpmnScanner)
                     .getVariablesFromElement(node);
             // set process variables for the node
             node.setProcessVariables(variables);
@@ -533,7 +538,7 @@ public class ElementGraphBuilder {
 
         // transform process into data flow
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap,
-                processIdToPathMap, messageIdToVariables, processIdToVariables);
+                processIdToPathMap, messageIdToVariables, processIdToVariables, bpmnScanner);
         final Collection<IGraph> subgraphs = graphBuilder.createProcessGraph(submodel, callActivityPath,
                 calledElementHierarchy);
         return subgraphs;

@@ -1,5 +1,24 @@
 # Release notes
 
+## 2.3.0-SNAPSHOT
+
+### Features
+**vPAV-139** Added success stories to output  
+**vPAV-141** JavaDelegateChecker able to work with Mockito proxies   
+**vPAV-124** Check forms for variables  
+**vPAV-144** HTML output: button "Mark all Issues"  
+**vPAV-145** Create constructor of external checker dynamically  
+**vPAV-146** Functionality of MessageEventChecker extended  
+**vPAV-148** Default path for XOR-Gateway as best practise
+
+### Fixes
+**vPAV-154** XorConventionChecker redirection on documentation fixed
+
+### Misc
+**vPAV-67** Refactoring of CheckerFactory + Checker  
+**vPAV-147** Refactoring BPMNScanner  
+**vPAV-151** Cleaned up internal docu
+
 ## 2.2.3-SNAPSHOT
 
 ### Features
@@ -8,25 +27,25 @@
 **vPAV-129** Classloader could not find files  
 
 ### Misc
-**VPAV-34** Blogpost on https://blog.camunda.org/  
-**VPAV-104** Grooming: Formal estimation of backlog items  
-**VPAV-134** Cleaned up Glasbruchprozess for testing/presentation purposes  
-**VPAV-122** Stopped support as Maven-Plugin  
+**vPAV-34** Blogpost on https://blog.camunda.org/  
+**vPAV-104** Grooming: Formal estimation of backlog items  
+**vPAV-134** Cleaned up Glasbruchprozess for testing/presentation purposes  
+**vPAV-122** Stopped support as Maven-Plugin  
 
 ## 2.2.2-SNAPSHOT
 
 ### Features
-**VPAV-133** MessageEvents now checked for field "Implementation"  
+**vPAV-133** MessageEvents now checked for field "Implementation"  
 
 ### Fixes
-**VPAV-128** Variables in messages and processes could not be found  
-**VPAV-123** NullPointer if no message is specified in MessageEvents  
-**VPAV-130** Fix ProcessVariablesModelChecker  
+**vPAV-128** Variables in messages and processes could not be found  
+**vPAV-123** NullPointer if no message is specified in MessageEvents  
+**vPAV-130** Fix ProcessVariablesModelChecker  
 
 ### Misc
-**VPAV-131** Improve documentation with JavaDoc   
-**VPAV-132** Check code coverage  
-**VPAV-101** Translation to english  
+**vPAV-131** Improve documentation with JavaDoc   
+**vPAV-132** Check code coverage  
+**vPAV-101** Translation to english  
 
 ## 2.2.1-SNAPSHOT
 

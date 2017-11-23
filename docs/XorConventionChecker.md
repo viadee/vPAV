@@ -2,6 +2,10 @@ XOR Convention Checker
 =================================
 The XOR Convention Checker processes BPMN models and checks XOR gateways on predefined naming conventions and an existing default-path.
 
+- Naming of splitting XOR gateway is incorrect
+- Outgoing edges of splitting XOR gateway are not or incorrectly named
+- Default path is not specified
+
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
 

@@ -32,6 +32,7 @@ package de.viadee.bpm.vPAV;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -41,10 +42,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -75,9 +79,13 @@ public class OuterProcessVariablesTest {
 
     /**
      * checks outer variables set on process start by key
+     * 
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
     @Test
-    public void testStartProcessByKey() {
+    public void testStartProcessByKey() throws ParserConfigurationException, SAXException, IOException {
         //// Given...
         final String PATH = BASE_PATH + "OuterProcessVariablesTest_StartProcessByKey.bpmn";
         final File processdefinition = new File(PATH);
@@ -88,7 +96,7 @@ public class OuterProcessVariablesTest {
 
         //// When...
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null,
-                processIdToVariables);
+                processIdToVariables, new BPMNScanner(PATH));
         // create data flow graphs
         graphBuilder.createProcessGraph(modelInstance, processdefinition.getPath(), new ArrayList<String>());
 
@@ -106,9 +114,13 @@ public class OuterProcessVariablesTest {
 
     /**
      * checks outer process variables set on process start by message and message correlation
+     * 
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
     @Test
-    public void testMessageCorrelation() {
+    public void testMessageCorrelation() throws ParserConfigurationException, SAXException, IOException {
         /// Given
         final String PATH = BASE_PATH + "OuterProcessVariablesTest_MessageCorrelation.bpmn";
         final File processdefinition = new File(PATH);
@@ -122,7 +134,7 @@ public class OuterProcessVariablesTest {
 
         /// When
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null,
-                messageIdToVariables, null);
+                messageIdToVariables, null, new BPMNScanner(PATH));
         // create data flow graphs
         graphBuilder.createProcessGraph(modelInstance, processdefinition.getPath(), new ArrayList<String>());
 

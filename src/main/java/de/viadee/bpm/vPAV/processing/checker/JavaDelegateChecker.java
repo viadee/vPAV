@@ -89,6 +89,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
     private final String interface_SigActBeh = "SignallableActivityBehavior";
 
+    private final String interface_ActBeh = "ActivityBehavior";
+
     private final String superClass_abstBpmnActBeh = "AbstractBpmnActivityBehavior";
 
     public JavaDelegateChecker(final Rule rule, final BPMNScanner bpmnScanner) {
@@ -409,8 +411,18 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             for (final Class<?> _interface : interfaces) {
                 if (!listener) {
                     if (_interface.getName().contains(interface_del)
-                            || _interface.getName().contains(interface_SigActBeh)) {
+                            || _interface.getName().contains(interface_SigActBeh)
+                            || _interface.getName().contains(interface_ActBeh)) {
                         interfaceImplemented = true;
+                        if (_interface.getName().contains(interface_ActBeh)
+                                && !_interface.getName().contains(interface_SigActBeh)) {
+                            // ActivityBehavior is not a very good practice and should be avoided as much as possible
+                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.INFO,
+                                    element.getProcessdefinition(), classPath, bpmnElement.getAttributeValue("id"),
+                                    bpmnElement.getAttributeValue("name"), null, null, null,
+                                    "class '" + clazz.getSimpleName() + "' " + location
+                                            + "implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible"));
+                        }
                     }
                 } else {
                     if (taskListener && _interface.getName().contains(interface_taskList)) {

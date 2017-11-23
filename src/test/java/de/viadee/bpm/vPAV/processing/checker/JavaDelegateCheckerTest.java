@@ -397,4 +397,37 @@ public class JavaDelegateCheckerTest {
                     issues.iterator().next().getMessage());
         }
     }
+
+    /**
+     * Case: implements the interface ActivityBehavior
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+    @Test
+    public void testInterfaceActivityBehavior()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "JavaDelegateCheckerTest_InterfaceActivityBehavior.bpmn";
+        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ServiceTask> baseElements = modelInstance
+                .getModelElementsByType(ServiceTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final Collection<CheckerIssue> issues = checker.check(element);
+
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        } else {
+            Assert.assertEquals(
+                    "class 'DelegateWithInterfaceActivityBehavior' implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
+                    issues.iterator().next().getMessage());
+        }
+    }
 }

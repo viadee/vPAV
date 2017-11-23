@@ -2,6 +2,11 @@ No Expression Checker
 ================================= 
 The No Expression Checker processes BPMN models and checks whether there are expressions used against common best-practices in the model.
 
+- Expression in TaskListener
+- Expression in ExecutionListener
+- Expression in Implementation
+- Expression in MessageEndEvent
+
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
 

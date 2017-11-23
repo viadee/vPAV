@@ -30,6 +30,7 @@
 package de.viadee.bpm.vPAV.processing.model.graph;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -38,6 +39,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -50,7 +53,9 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -77,9 +82,13 @@ public class ComplexModelTest {
      * Case: Check complex model for invalid paths
      * 
      * Included: * sub processes * boundary events * java delegate * spring bean * DMN model
+     * 
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
     @Test
-    public void testGraphOnComplexModel() {
+    public void testGraphOnComplexModel() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
         final File processdefinition = new File(PATH);
 
@@ -99,7 +108,8 @@ public class ComplexModelTest {
 
         long startTime = System.currentTimeMillis();
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, null, null, null);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, null, null, null,
+                new BPMNScanner(PATH));
         // create data flow graphs
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
                 processdefinition.getPath(), new ArrayList<String>());

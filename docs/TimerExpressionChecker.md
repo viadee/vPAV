@@ -2,6 +2,10 @@ Timer Expression Checker
 =================================
 The Timer Expression Checker processes BPMN models and checks if time events follow the ISO 8601 scheme.
 
+- No TimerDefinitionType
+- No TimeDefinition
+- Wrong TimeDefinition (against ISO8601 or CRON)
+
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
 
