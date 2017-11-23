@@ -2,6 +2,10 @@ MessageEventChecker
 =================================
 The MessageEvent Checker processes BPMN models and checks whether a MessageEvent refers to a concrete message and names it accordingly 
 
+- No message in ReceiveTask
+- No message in IntermediateMessageCatchEvent
+- No message name in IntermediateMessageCatchEvent
+- No message in MessageEndEvent
 
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
