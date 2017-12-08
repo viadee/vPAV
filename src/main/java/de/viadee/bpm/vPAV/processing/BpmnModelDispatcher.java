@@ -45,6 +45,8 @@ import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.JsOutputWriter;
+import de.viadee.bpm.vPAV.output.OutputWriterException;
 import de.viadee.bpm.vPAV.processing.checker.CheckerFactory;
 import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
 import de.viadee.bpm.vPAV.processing.checker.ModelChecker;
@@ -145,6 +147,15 @@ public class BpmnModelDispatcher {
             for (final ElementChecker checker : checkerCollection) {
                 issues.addAll(checker.check(element));
             }
+
+        }
+
+        // write js with processvariables
+        JsOutputWriter jWriter = new JsOutputWriter();
+        try {
+            jWriter.writeVars(baseElements, graphBuilder, processdefinition);
+        } catch (OutputWriterException e) {
+            e.printStackTrace();
         }
 
         return issues;

@@ -40,6 +40,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -48,9 +51,12 @@ import com.google.gson.JsonObject;
 import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
@@ -89,6 +95,110 @@ public class JsOutputWriter implements IssueOutputWriter {
                 throw new OutputWriterException("js output couldn't be written");
             }
         }
+    }
+
+    /**
+     * write javascript file with elements which have variables
+     * 
+     * @param baseElements
+     * @param graphBuilder
+     * @param processdefinition
+     * @throws OutputWriterException
+     */
+    public void writeVars(Collection<BaseElement> baseElements, ElementGraphBuilder graphBuilder,
+            File processdefinition) throws OutputWriterException {
+        String modelVariables = "";
+
+        // add infos for specific processdefinition
+        try {
+            FileWriter writer = new FileWriter(ConstantsConfig.VALIDATION_JS_TMP, true);
+            for (final BaseElement baseElement : baseElements) {
+                BpmnElement element = graphBuilder.getElement(baseElement.getId());
+                if (element == null) {
+                    // if element is not in the data flow graph, create it.
+                    element = new BpmnElement(processdefinition.getPath(), baseElement);
+                }
+                modelVariables += (transformToString(element));
+            }
+            writer.write(modelVariables);
+            writer.close();
+        } catch (IOException e) {
+            throw new OutputWriterException("js variables output couldn't be written");
+        }
+    }
+
+    /**
+     * Finish the javascript file for processvariables
+     */
+    public static void finish() {
+        String jsFile = "var proz_vars = [\n";
+        if (new File(ConstantsConfig.VALIDATION_JS_TMP).exists()) {
+            try {
+                // add file content
+                byte[] encoded = Files.readAllBytes(Paths.get(ConstantsConfig.VALIDATION_JS_TMP));
+                jsFile += new String(encoded, "UTF-8");
+
+                // remove last ','
+                jsFile = (jsFile.length() > 1 ? jsFile.substring(0, jsFile.lastIndexOf(','))
+                        : jsFile);
+
+                // add end '];'
+                jsFile += "];";
+
+                // delete files
+                new File(ConstantsConfig.VALIDATION_JS_TMP).delete();
+                if (new File(ConstantsConfig.VALIDATION_JS_PROCESSVARIABLES).exists())
+                    new File(ConstantsConfig.VALIDATION_JS_PROCESSVARIABLES).delete();
+
+                FileWriter writer = new FileWriter(ConstantsConfig.VALIDATION_JS_PROCESSVARIABLES, false);
+                // write file to target
+                writer.write(jsFile);
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String transformToString(BpmnElement element) {
+        String elementString = "";
+        String read = "";
+        String write = "";
+        String delete = "";
+        if (!element.getProcessVariables().isEmpty()) {
+            // elementID
+            elementString += "{\n\"elementId\" : \"" + element.getBaseElement().getId() + "\",\n";
+            // bpmnFile
+            elementString += "\"bpmnFile\" : \"" + replace(File.separator, "\\\\", element.getProcessdefinition())
+                    + "\",\n";
+            // element Name
+            if (element.getBaseElement().getAttributeValue("name") != null)
+                elementString += "\"elementName\" : \""
+                        + element.getBaseElement().getAttributeValue("name").trim().replace('\n', ' ')
+                        + "\",\n";
+
+            for (Map.Entry<String, ProcessVariable> entry : element.getProcessVariables().entrySet()) {
+                entry.getValue().getOperation();
+                if (entry.getValue().getOperation().equals(VariableOperation.READ))
+                    read += "\"" + entry.getValue().getName() + "\",";
+                if (entry.getValue().getOperation().equals(VariableOperation.WRITE))
+                    write += "\"" + entry.getValue().getName() + "\",";
+                if (entry.getValue().getOperation().equals(VariableOperation.DELETE))
+                    delete += "\"" + entry.getValue().getName() + "\",";
+            }
+            // red
+            elementString += "\"read\" : [" + (read.length() > 1 ? read.substring(0, read.length() - 1) : read)
+                    + "],\n";
+            // write
+            elementString += "\"write\" : [" + (write.length() > 1 ? write.substring(0, write.length() - 1) : write)
+                    + "],\n";
+            // delete
+            elementString += "\"delete\" : ["
+                    + (delete.length() > 1 ? delete.substring(0, delete.length() - 1) : delete) + "]\n";
+            // end
+            elementString += "},\n\n";
+        }
+        return elementString;
     }
 
     /**
