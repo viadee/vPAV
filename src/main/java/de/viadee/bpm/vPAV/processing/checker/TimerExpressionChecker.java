@@ -180,8 +180,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 
                         if (!isCron && hasRepeatingIntervals && !isDur) {
                             try {
-                                IsoRecurrence<MomentInterval> ir = IsoRecurrence
-                                        .parseMomentIntervals(timerDefinition);
+                                IsoRecurrence.parseMomentIntervals(timerDefinition);
                             } catch (ParseException ex) {
                                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
