@@ -138,7 +138,6 @@ public class OuterProcessVariablesScanner {
      *            Name of file
      * @return methodBody returns methodBody
      */
-    @SuppressWarnings("deprecation")
     private String readResourceFile(final String filePath) {
         String methodBody = "";
 
