@@ -134,9 +134,11 @@ public final class CheckerFactory {
             fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
                     + "." + rule.getValue().getName().trim();
         }
-        if (fullyQualifiedName.isEmpty() && rule.getValue().isActive())
+        if (fullyQualifiedName.isEmpty() && rule.getValue().isActive()) {
             logger.warning("Checker '" + rule.getValue().getName()
                     + "' not found. Please add setting for external_location in ruleSet.xml.");
+            rule.getValue().deactivate();
+        }
         return fullyQualifiedName;
     }
 }
