@@ -95,7 +95,8 @@ public class XorConventionChecker extends AbstractElementChecker {
                 final String taskName = bpmnElement.getAttributeValue("name");
                 if (taskName != null && taskName.trim().length() > 0) {
                     final Pattern pattern = Pattern.compile(patternString);
-                    Matcher matcher = pattern.matcher(taskName);
+                    final String taskNameClean = taskName.replaceAll("\n", "").replaceAll("\r", "");
+                    Matcher matcher = pattern.matcher(taskNameClean);
 
                     if (!matcher.matches()) {
                         issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
