@@ -165,12 +165,6 @@
 			<artifactId>time4j-range</artifactId>
 			<version>4.32</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-		<dependency>
-			<groupId>org.jsoup</groupId>
-			<artifactId>jsoup</artifactId>
-			<version>1.11.2</version>
-		</dependency>
 
 	</dependencies>
 
