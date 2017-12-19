@@ -1,4 +1,5 @@
 # viadee Process Application Validator (vPAV)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.viadee/viadeeProcessApplicationValidator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.viadee/viadeeProcessApplicationValidator) [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=master)](https://travis-ci.org/viadee/vPAV)
 
 The tool checks Camunda projects for consistency and discovers errors in process-driven applications.
 Called as JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the sourcecode of an underlying java project, such as a delegate reference to a non-existing java class or a non-existing Spring bean.
