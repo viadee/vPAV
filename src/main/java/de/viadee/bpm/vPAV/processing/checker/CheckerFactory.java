@@ -129,9 +129,15 @@ public final class CheckerFactory {
         if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getKey())
                 && rule.getValue().isActive()) {
             fullyQualifiedName = internLocation + rule.getValue().getName().trim();
-        } else if (rule.getValue().isActive() && rule.getValue().getSettings().containsKey(externLocation)) {
+        } else if (rule.getValue().isActive() && rule.getValue().getSettings() != null
+                && rule.getValue().getSettings().containsKey(externLocation)) {
             fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
                     + "." + rule.getValue().getName().trim();
+        }
+        if (fullyQualifiedName.isEmpty() && rule.getValue().isActive()) {
+            logger.warning("Checker '" + rule.getValue().getName()
+                    + "' not found. Please add setting for external_location in ruleSet.xml.");
+            rule.getValue().deactivate();
         }
         return fullyQualifiedName;
     }

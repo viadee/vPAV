@@ -95,7 +95,8 @@ public class XorConventionChecker extends AbstractElementChecker {
                 final String taskName = bpmnElement.getAttributeValue("name");
                 if (taskName != null && taskName.trim().length() > 0) {
                     final Pattern pattern = Pattern.compile(patternString);
-                    Matcher matcher = pattern.matcher(taskName);
+                    final String taskNameClean = taskName.replaceAll("\n", "").replaceAll("\r", "");
+                    Matcher matcher = pattern.matcher(taskNameClean);
 
                     if (!matcher.matches()) {
                         issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
@@ -112,14 +113,15 @@ public class XorConventionChecker extends AbstractElementChecker {
 
                 // TODO: dont use indices
                 final ArrayList<Node> edges = bpmnScanner.getOutgoingEdges(bpmnElement.getId());
-                final String patternString2 = elementConventions.get(1).getPattern().trim();
+                final String patternStringEdge = elementConventions.get(1).getPattern().trim();
 
                 for (int i = 0; i < edges.size(); i++) {
                     Element Task_Element = (Element) edges.get(i);
                     final String edgeName = Task_Element.getAttribute("name");
                     if (edgeName != null && edgeName.trim().length() > 0) {
-                        final Pattern pattern = Pattern.compile(patternString2);
-                        Matcher matcher = pattern.matcher(edgeName);
+                        final Pattern pattern = Pattern.compile(patternStringEdge);
+                        final String edgeNameClean = edgeName.replaceAll("\n", "").replaceAll("\r", "");
+                        Matcher matcher = pattern.matcher(edgeNameClean);
                         if (!matcher.matches()) {
                             issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                                     element.getProcessdefinition(), null, Task_Element.getAttribute("id"),

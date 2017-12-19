@@ -119,6 +119,7 @@ public class ComplexModelTest {
         long startTime2 = System.currentTimeMillis();
 
         // calculate invalid paths based on data flow graphs
+        @SuppressWarnings("unused")
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
                 .createInvalidPaths(graphCollection);
 

@@ -523,6 +523,7 @@ public abstract class AbstractRunner {
             issues.addAll(checkModel(rules, pathToModel, fileScanner,
                     variableScanner));
         }
+        JsOutputWriter.finish();
         return issues;
     }
 

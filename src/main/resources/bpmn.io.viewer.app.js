@@ -455,6 +455,8 @@ function initDiagram(diagramXML, issue_id, path_nr, func, success) {
 function setUeberschrift(name) {
     subName = name.substr(0, name.length - 5);
     document.querySelector("#modell").innerHTML = "Consistency check: " + subName;
+    var mDownload = document.getElementById("model_download");
+    mDownload.setAttribute("href", "../../src/main/resources/" + name);
     setFocus(name);
 }
 
