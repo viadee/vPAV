@@ -18,7 +18,7 @@
 **vPAV-135** Added FieldInjectionChecker
 
 ### Fixes
-**vPAV-155** Added warning for interface ActivityBehavior
+**vPAV-155** Added warning for interface ActivityBehavior  
 **vPAV-136** Added check for expressions in FieldInjectionChecker
 
 ### Misc
