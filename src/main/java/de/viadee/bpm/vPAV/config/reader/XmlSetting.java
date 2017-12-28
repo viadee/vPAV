@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 @XmlRootElement(name = "setting")
-@XmlType(propOrder = { "name", "script", "value" })
+@XmlType(propOrder = { "name", "script", "type", "value" })
 public class XmlSetting {
 
     private String name;
@@ -44,13 +44,16 @@ public class XmlSetting {
 
     private String script;
 
+    private String type;
+
     public XmlSetting() {
     }
 
-    public XmlSetting(final String name, final String script, final String value) {
+    public XmlSetting(final String name, final String script, final String type, final String value) {
         super();
         this.name = name;
         this.value = value;
+        this.type = type;
         this.script = script;
     }
 
@@ -62,6 +65,11 @@ public class XmlSetting {
     @XmlAttribute(name = "script", required = false)
     public String getScript() {
         return script;
+    }
+
+    @XmlAttribute(name = "type", required = false)
+    public String getType() {
+        return type;
     }
 
     @XmlValue
@@ -79,5 +87,9 @@ public class XmlSetting {
 
     public void setScript(final String script) {
         this.script = script;
+    }
+
+    public void setType(final String type) {
+        this.type = type;
     }
 }

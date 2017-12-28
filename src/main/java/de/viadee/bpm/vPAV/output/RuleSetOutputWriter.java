@@ -142,13 +142,15 @@ public class RuleSetOutputWriter {
             Collection<XmlSetting> xSettings = new ArrayList<XmlSetting>();
             for (Map.Entry<String, Setting> sEntry : rule.getSettings().entrySet()) {
                 Setting s = sEntry.getValue();
-                if (!sEntry.getValue().getScriptPlaces().isEmpty()) {
-                    for (String place : sEntry.getValue().getScriptPlaces()) {
-                        XmlSetting xmlSetting = new XmlSetting(s.getName(), place, s.getValue());
-                        xSettings.add(xmlSetting);
+                if (!sEntry.getValue().getScriptPlaces().isEmpty() || !sEntry.getValue().getScriptPlaces().isEmpty()) {
+                    if (!sEntry.getValue().getScriptPlaces().isEmpty()) {
+                        for (String place : sEntry.getValue().getScriptPlaces()) {
+                            XmlSetting xmlSetting = new XmlSetting(s.getName(), place, s.getType(), s.getValue());
+                            xSettings.add(xmlSetting);
+                        }
                     }
                 } else {
-                    XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getValue());
+                    XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getValue());
                     xSettings.add(xmlSetting);
                 }
             }

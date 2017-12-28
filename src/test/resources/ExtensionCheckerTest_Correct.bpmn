@@ -8,12 +8,12 @@
       <bpmn:incoming>SequenceFlow_1k5clqq</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0assw4c" sourceRef="StartEvent_1" targetRef="Task_13x8n5d" />
-    <bpmn:sequenceFlow id="SequenceFlow_1k5clqq" sourceRef="Task_13x8n5d" targetRef="EndEvent_1c6ugsu">
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1k5clqq" sourceRef="Task_13x8n5d" targetRef="EndEvent_1c6ugsu" />
     <bpmn:serviceTask id="Task_13x8n5d">
       <bpmn:extensionElements>
         <camunda:properties>
-          <camunda:property name="CALLBACK_TIMEOUT" value="180" />
+          <camunda:property name="SETTING1" value="180" />
+          <camunda:property name="SETTING2" value="90" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0assw4c</bpmn:incoming>

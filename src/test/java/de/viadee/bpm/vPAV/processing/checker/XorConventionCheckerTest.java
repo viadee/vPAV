@@ -278,7 +278,7 @@ public class XorConventionCheckerTest {
         elementConventions.add(elementConvention);
         elementConventions.add(elementConvention2);
 
-        Setting s = new Setting("requiredDefault", null, "true");
+        Setting s = new Setting("requiredDefault", null, null, "true");
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         settings.put("requiredDefault", s);
         final Rule ruleDefault = new Rule("XorConventionChecker", true, settings, elementConventions, null);

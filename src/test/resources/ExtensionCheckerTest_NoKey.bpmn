@@ -12,7 +12,7 @@
     <bpmn:serviceTask id="Task_32faw4">
       <bpmn:extensionElements>
         <camunda:properties>
-          <camunda:property value="Test" />
+          <camunda:property value="180" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0assw4c</bpmn:incoming>

@@ -174,7 +174,7 @@ public class ExtensionCheckerTest {
             issues.addAll(checker.check(element));
         }
 
-        if (issues.size() != 1) {
+        if (issues.size() != 2) {
             Assert.fail("Wrong value pair should generate an issue");
         }
     }
@@ -187,8 +187,11 @@ public class ExtensionCheckerTest {
     private static Rule createRule() {
 
         final Map<String, Setting> settings = new HashMap<String, Setting>();
-        final Setting setting = new Setting(null, null, "\\d+");
-        settings.put("CALLBACK_TIMEOUT", setting);
+        final Setting setting = new Setting("SETTING1", null, "ServiceTask", "\\d+");
+        final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", "\\d+");
+
+        settings.put("SETTING1", setting);
+        settings.put("SETTING2", setting1);
 
         final Rule rule = new Rule("ExtensionChecker", true, settings, null, null);
 

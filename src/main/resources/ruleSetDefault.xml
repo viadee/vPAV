@@ -9,7 +9,7 @@
 		<name>ExtensionChecker</name>
 		<state>true</state>
 		<settings>
-			<setting name="CALLBACK_TIMEOUT">\d+</setting>
+			<setting name="CALLBACK_TIMEOUT" type="ServiceTask">\d+</setting>
 		</settings>
 	</rule>
 	<rule>
