@@ -41,6 +41,8 @@ public class Setting {
 
     private String type;
 
+    private String id;
+
     /**
      *
      * @param name
@@ -48,15 +50,19 @@ public class Setting {
      * @param scriptPlace
      *            Allowed places for scripts
      * @param type
-     *            Type of Task
+     *            Type of task
      * @param value
      *            Value of setting
+     * @param id
+     *            Id of certain task
      */
-    public Setting(final String name, final String scriptPlace, final String type, final String value) {
+    public Setting(final String name, final String scriptPlace, final String type, final String id,
+            final String value) {
         super();
         this.name = name;
         this.value = value;
         this.type = type;
+        this.id = id;
         if (scriptPlace != null)
             scriptPlaces.add(scriptPlace);
     }
@@ -73,8 +79,8 @@ public class Setting {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getId() {
+        return id;
     }
 
     public ArrayList<String> getScriptPlaces() {

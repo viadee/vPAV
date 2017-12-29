@@ -144,7 +144,8 @@ public class VersioningCheckerTest {
 
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         settings.put("versioningSchemaClass",
-                new Setting("versioningSchemaClass", null, null, "([^_]*)_{1}([0-9][_][0-9]{1})\\.(java|groovy)"));
+                new Setting("versioningSchemaClass", null, null, null,
+                        "([^_]*)_{1}([0-9][_][0-9]{1})\\.(java|groovy)"));
 
         final Rule rule = new Rule("VersioningChecker", true, settings, null, null);
 

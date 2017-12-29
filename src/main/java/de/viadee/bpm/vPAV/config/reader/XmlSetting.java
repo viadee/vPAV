@@ -46,15 +46,18 @@ public class XmlSetting {
 
     private String type;
 
+    private String id;
+
     public XmlSetting() {
     }
 
-    public XmlSetting(final String name, final String script, final String type, final String value) {
+    public XmlSetting(final String name, final String script, final String type, final String id, final String value) {
         super();
         this.name = name;
         this.value = value;
         this.type = type;
         this.script = script;
+        this.id = id;
     }
 
     @XmlAttribute(name = "name", required = true)
@@ -70,6 +73,11 @@ public class XmlSetting {
     @XmlAttribute(name = "type", required = false)
     public String getType() {
         return type;
+    }
+
+    @XmlAttribute(name = "id", required = false)
+    public String getId() {
+        return id;
     }
 
     @XmlValue
@@ -91,5 +99,9 @@ public class XmlSetting {
 
     public void setType(final String type) {
         this.type = type;
+    }
+
+    public void setId(final String id) {
+        this.id = id;
     }
 }

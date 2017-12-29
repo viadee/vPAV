@@ -187,8 +187,8 @@ public class ExtensionCheckerTest {
     private static Rule createRule() {
 
         final Map<String, Setting> settings = new HashMap<String, Setting>();
-        final Setting setting = new Setting("SETTING1", null, "ServiceTask", "\\d+");
-        final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", "\\d+");
+        final Setting setting = new Setting("SETTING1", null, "ServiceTask", null, "\\d+");
+        final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, "\\d+");
 
         settings.put("SETTING1", setting);
         settings.put("SETTING2", setting1);

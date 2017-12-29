@@ -97,4 +97,7 @@ public final class ConstantsConfig {
 
     public static final String GROOVY = "groovy";
 
+    private ConstantsConfig() {
+    }
+
 }

@@ -42,6 +42,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -87,6 +89,8 @@ public class FileScanner {
 
     private static boolean isDirectory = false;
 
+    private static final Logger LOGGER = Logger.getLogger(FileScanner.class.getName());
+
     public FileScanner(final Map<String, Rule> rules) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
@@ -112,7 +116,7 @@ public class FileScanner {
         try {
             versioningScheme = loadVersioningScheme(rules);
         } catch (ConfigItemNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Versioning Scheme could not be loaded.", e);
         }
 
         // get file paths of java files

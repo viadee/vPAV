@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -59,8 +58,6 @@ public class BPMNScanner {
     private enum ModelVersionEnum {
         V1, V2, V3
     }
-
-    public static Logger logger = Logger.getLogger(BPMNScanner.class.getName());
 
     /**
      * The Camunda API's method "getimplementation" doesn't return the correct Implementation, so the we have to scan

@@ -81,7 +81,7 @@ public abstract class AbstractRunner {
     /**
      * Main method which represents lifecycle of the validation process Calls main functions
      */
-    public static void run_vPAV() {
+    public static void viadeeProcessApplicationValidator() {
 
         // 1
         final Map<String, Rule> rules = readConfig();
