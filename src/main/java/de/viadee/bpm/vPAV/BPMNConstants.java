@@ -1,35 +1,29 @@
 /**
- * Copyright © 2017, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright © 2017, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
+ * distribution. 3. All advertising materials mentioning features or use of this software must display the following
+ * acknowledgement: This product includes software developed by the viadee Unternehmensberatung GmbH. 4. Neither the
+ * name of the viadee Unternehmensberatung GmbH nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
 
 public class BPMNConstants {
+
+    private BPMNConstants() {
+    }
 
     public static final String BPMN_DEFINITIONS = "bpmn:definitions";
 
@@ -147,9 +141,9 @@ public class BPMNConstants {
 
     public static final String CAMUNDA_ERRORCODEVAR = "camunda:errorCodeVariable";
 
-    public final static String CAMUNDA_EXECUTIONLISTENER = "camunda:executionListener";
+    public static final String CAMUNDA_EXECUTIONLISTENER = "camunda:executionListener";
 
-    public final static String CAMUNDA_TASKLISTENER = "camunda:taskListener";
+    public static final String CAMUNDA_TASKLISTENER = "camunda:taskListener";
 
     public static final String ATTACHED_TO_REF = "attachedToRef";
 
@@ -163,18 +157,18 @@ public class BPMNConstants {
 
     public static final String LANG = "language";
 
-    public final static String EXTERN_LOCATION = "external_Location";
+    public static final String EXTERN_LOCATION = "external_Location";
 
-    public final static String INTERN_LOCATION = "de.viadee.bpm.vPAV.processing.checker.";
+    public static final String INTERN_LOCATION = "de.viadee.bpm.vPAV.processing.checker.";
 
-    public final static String ATTR_CLASS = "class";
+    public static final String ATTR_CLASS = "class";
 
-    public final static String ATTR_DEL = "delegateExpression";
+    public static final String ATTR_DEL = "delegateExpression";
 
-    public final static String ATTR_EX = "expression";
+    public static final String ATTR_EX = "expression";
 
-    public final static String FIXED_VALUE = "org.camunda.bpm.engine.impl.el.FixedValue";
+    public static final String FIXED_VALUE = "org.camunda.bpm.engine.impl.el.FixedValue";
 
-    public final static String EXPRESSION = "org.camunda.bpm.engine.delegate.Expression";
+    public static final String EXPRESSION = "org.camunda.bpm.engine.delegate.Expression";
 
 }
