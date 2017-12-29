@@ -63,6 +63,9 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  */
 public class BpmnModelDispatcher {
 
+    private BpmnModelDispatcher() {
+    }
+
     /**
      * The BpmnModelDispatcher reads a model and creates a collection of all elements. Iterates through collection and
      * checks each element for validity Additionally a graph is created to check for invalid paths.

@@ -42,7 +42,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,13 +83,9 @@ public class FileScanner {
 
     private Map<String, String> processIdToPathMap;
 
-    private final String targetClassFolder = "target/classes";
-
     private static String scheme = null;
 
     private static boolean isDirectory = false;
-
-    public static Logger logger = Logger.getLogger(FileScanner.class.getName());
 
     public FileScanner(final Map<String, Rule> rules) {
 
@@ -136,15 +131,13 @@ public class FileScanner {
         // retrieve all jars during runtime and pass them to get class files
 
         for (URL url : urls) {
-            if (url.getFile().contains(targetClassFolder)) {
+            if (url.getFile().contains(ConstantsConfig.TARGET_CLASS_FOLDER)) {
                 File f = new File(url.getFile());
-                if (!isDirectory) {
-                    if (f.exists()) {
-                        files = (LinkedList<File>) FileUtils.listFiles(f,
-                                TrueFileFilter.INSTANCE,
-                                TrueFileFilter.INSTANCE);
-                        addResources(files);
-                    }
+                if (!isDirectory && f.exists()) {
+                    files = (LinkedList<File>) FileUtils.listFiles(f,
+                            TrueFileFilter.INSTANCE,
+                            TrueFileFilter.INSTANCE);
+                    addResources(files);
                 } else {
                     files = (LinkedList<File>) FileUtils.listFilesAndDirs(f,
                             DirectoryFileFilter.INSTANCE,

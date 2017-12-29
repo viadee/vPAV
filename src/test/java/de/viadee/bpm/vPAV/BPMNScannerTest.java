@@ -63,7 +63,7 @@ public class BPMNScannerTest {
     @Test
     public void testModelVersionV1() throws SAXException, IOException, ParserConfigurationException {
         final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
-        final String impClass = "camunda:class";
+        final String impClass = "camunda:delegateExpression";
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -90,7 +90,7 @@ public class BPMNScannerTest {
     @Test
     public void testModelVersionV2() throws SAXException, IOException, ParserConfigurationException {
         final String PATH = BASE_PATH + "BPMN_Model_Version_V2.bpmn";
-        final String impEx = "camunda:expression";
+        final String impEx = "camunda:class";
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -117,7 +117,7 @@ public class BPMNScannerTest {
     @Test
     public void testModelVersionV3() throws SAXException, IOException, ParserConfigurationException {
         final String PATH = BASE_PATH + "BPMN_Model_Version_V3.bpmn";
-        final String impDel = "camunda:delegateExpression";
+        final String impDel = "camunda:expression";
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -143,7 +143,7 @@ public class BPMNScannerTest {
      */
     @Test
     public void testGetScriptType() throws SAXException, IOException, ParserConfigurationException {
-        final String PATH = BASE_PATH + "BPMN_Model_Version_V3.bpmn";
+        final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
         final String scriptType = "inputParameter";
 
         // parse bpmn model

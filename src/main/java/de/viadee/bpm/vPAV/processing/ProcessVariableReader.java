@@ -44,7 +44,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.el.ELException;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
@@ -80,7 +79,6 @@ import org.camunda.bpm.model.dmn.instance.InputExpression;
 import org.camunda.bpm.model.dmn.instance.Output;
 import org.camunda.bpm.model.dmn.instance.Text;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
-import org.xml.sax.SAXException;
 
 import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
@@ -103,13 +101,13 @@ public final class ProcessVariableReader {
 
     private final Map<String, String> decisionRefToPathMap;
 
-    private final BPMNScanner scanner;
+    private final BPMNScanner bpmnScanner;
 
-    public static Logger logger = Logger.getLogger(ProcessVariableReader.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(ProcessVariableReader.class.getName());
 
     public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, BPMNScanner scanner) {
         this.decisionRefToPathMap = decisionRefToPathMap;
-        this.scanner = scanner;
+        this.bpmnScanner = scanner;
     }
 
     /**
@@ -151,20 +149,14 @@ public final class ProcessVariableReader {
         if (scopeElement != null) {
             scopeElementId = scopeElement.getAttributeValue("id");
         }
-        try {
-            BPMNScanner scanner = new BPMNScanner(element.getProcessdefinition());
 
-            ArrayList<String> outVar = scanner.getOutputVariables(element.getBaseElement().getId());
+        ArrayList<String> outVar = bpmnScanner.getOutputVariables(element.getBaseElement().getId());
 
-            for (String name : outVar)
-                processVariables.put(name,
-                        new ProcessVariable(name, element, ElementChapter.InputOutput,
-                                KnownElementFieldType.OutputParameter,
-                                element.getProcessdefinition(), VariableOperation.WRITE, scopeElementId));
-
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
-        }
+        for (String name : outVar)
+            processVariables.put(name,
+                    new ProcessVariable(name, element, ElementChapter.InputOutput,
+                            KnownElementFieldType.OutputParameter,
+                            element.getProcessdefinition(), VariableOperation.WRITE, scopeElementId));
 
         return processVariables;
     }
@@ -235,7 +227,7 @@ public final class ProcessVariableReader {
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
-                    && script.getCamundaScriptFormat().equals("groovy")) {
+                    && script.getCamundaScriptFormat().equals(ConstantsConfig.GROOVY)) {
                 // inline script or external file?
                 final String inlineScript = script.getTextContent();
                 if (inlineScript != null && inlineScript.trim().length() > 0) {
@@ -286,7 +278,7 @@ public final class ProcessVariableReader {
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
-                    && script.getCamundaScriptFormat().equals("groovy")) {
+                    && script.getCamundaScriptFormat().equals(ConstantsConfig.GROOVY)) {
                 // inline script or external file?
                 final String inlineScript = script.getTextContent();
                 if (inlineScript != null && inlineScript.trim().length() > 0) {
@@ -395,7 +387,7 @@ public final class ProcessVariableReader {
             }
             final ConditionExpression expression = flow.getConditionExpression();
             if (expression != null) {
-                if (expression.getLanguage() != null && expression.getLanguage().equals("groovy")) {
+                if (expression.getLanguage() != null && expression.getLanguage().equals(ConstantsConfig.GROOVY)) {
                     // inline script or external file?
                     final String inlineScript = expression.getTextContent();
                     if (inlineScript != null && inlineScript.trim().length() > 0) {
@@ -452,7 +444,7 @@ public final class ProcessVariableReader {
                         ElementChapter.Details, KnownElementFieldType.DelegateExpression, scopeId));
             }
 
-            final ArrayList<String> t_fieldInjectionExpressions = scanner
+            final ArrayList<String> t_fieldInjectionExpressions = bpmnScanner
                     .getFieldInjectionExpression(baseElement.getId());
             if (t_fieldInjectionExpressions != null && !t_fieldInjectionExpressions.isEmpty()) {
                 for (String t_fieldInjectionExpression : t_fieldInjectionExpressions)
@@ -510,7 +502,7 @@ public final class ProcessVariableReader {
         } else if (baseElement instanceof ScriptTask) {
             // Examine script task for process variables
             final ScriptTask scriptTask = (ScriptTask) baseElement;
-            if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals("groovy")) {
+            if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals(ConstantsConfig.GROOVY)) {
                 // inline script or external file?
                 final Script script = scriptTask.getScript();
                 if (script != null && script.getTextContent() != null
@@ -661,21 +653,21 @@ public final class ProcessVariableReader {
         Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
         if (fileName != null && fileName.trim().length() > 0) {
             try {
-                final DirectoryScanner scanner = new DirectoryScanner();
+                final DirectoryScanner directoryScanner = new DirectoryScanner();
 
                 if (RuntimeConfig.getInstance().isTest()) {
                     if (fileName.endsWith(".java"))
-                        scanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
+                        directoryScanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
                     else
-                        scanner.setBasedir(ConstantsConfig.TEST_BASEPATH);
+                        directoryScanner.setBasedir(ConstantsConfig.TEST_BASEPATH);
                 } else {
                     if (fileName.endsWith(".java"))
-                        scanner.setBasedir(ConstantsConfig.JAVAPATH);
+                        directoryScanner.setBasedir(ConstantsConfig.JAVAPATH);
                     else
-                        scanner.setBasedir(ConstantsConfig.BASEPATH);
+                        directoryScanner.setBasedir(ConstantsConfig.BASEPATH);
                 }
 
-                Resource s = scanner.getResource(fileName);
+                Resource s = directoryScanner.getResource(fileName);
 
                 if (s.isExists()) {
 
@@ -685,7 +677,7 @@ public final class ProcessVariableReader {
                     variables = searchProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId,
                             methodBody);
                 } else {
-                    logger.warning("Class " + fileName + " does not exist");
+                    LOGGER.warning("Class " + fileName + " does not exist");
                 }
             } catch (final IOException ex) {
                 throw new RuntimeException(
