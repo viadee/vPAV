@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,30 @@ public class Setting {
 
     private ArrayList<String> scriptPlaces = new ArrayList<String>();
 
-    public Setting(final String name, final String scriptPlace, final String value) {
+    private String type;
+
+    private String id;
+
+    /**
+     *
+     * @param name
+     *            Name of the setting
+     * @param scriptPlace
+     *            Allowed places for scripts
+     * @param type
+     *            Type of task
+     * @param value
+     *            Value of setting
+     * @param id
+     *            Id of certain task
+     */
+    public Setting(final String name, final String scriptPlace, final String type, final String id,
+            final String value) {
         super();
         this.name = name;
         this.value = value;
+        this.type = type;
+        this.id = id;
         if (scriptPlace != null)
             scriptPlaces.add(scriptPlace);
     }
@@ -53,6 +73,14 @@ public class Setting {
 
     public String getValue() {
         return value;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public ArrayList<String> getScriptPlaces() {

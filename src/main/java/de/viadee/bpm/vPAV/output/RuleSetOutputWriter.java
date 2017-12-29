@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -142,13 +142,15 @@ public class RuleSetOutputWriter {
             Collection<XmlSetting> xSettings = new ArrayList<XmlSetting>();
             for (Map.Entry<String, Setting> sEntry : rule.getSettings().entrySet()) {
                 Setting s = sEntry.getValue();
+
                 if (!sEntry.getValue().getScriptPlaces().isEmpty()) {
                     for (String place : sEntry.getValue().getScriptPlaces()) {
-                        XmlSetting xmlSetting = new XmlSetting(s.getName(), place, s.getValue());
+                        XmlSetting xmlSetting = new XmlSetting(s.getName(), place, s.getType(), s.getId(),
+                                s.getValue());
                         xSettings.add(xmlSetting);
                     }
                 } else {
-                    XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getValue());
+                    XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getId(), s.getValue());
                     xSettings.add(xmlSetting);
                 }
             }

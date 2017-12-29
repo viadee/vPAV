@@ -1,5 +1,30 @@
 # Release notes
 
+
+## 2.4.1-SNAPSHOT
+
+### Features
+**vPAV-161** Added possibility for downloading the model
+
+### Fixes
+**vPAV-157** Fixed HTML output bug
+
+### Misc
+**vPAV-158** Cleaned internal maven warnings
+
+## 2.4.0-SNAPSHOT
+
+### Features
+**vPAV-135** Added FieldInjectionChecker
+
+### Fixes
+**vPAV-155** Added warning for interface ActivityBehavior  
+**vPAV-136** Added check for expressions in FieldInjectionChecker
+
+### Misc
+**vPAV-100** Added more documentation  
+**vPAV-149** Check test coverage
+
 ## 2.3.0-SNAPSHOT
 
 ### Features

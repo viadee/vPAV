@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,7 +148,9 @@ public final class XmlConfigReader implements ConfigReader {
                 for (final XmlSetting xmlSetting : xmlSettings) {
                     if (!settings.containsKey(xmlSetting.getName())) {
                         settings.put(xmlSetting.getName(),
-                                new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getValue()));
+                                new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getType(),
+                                        xmlSetting.getId(),
+                                        xmlSetting.getValue()));
                     } else {
                         settings.get(xmlSetting.getName()).addScriptPlace(xmlSetting.getScript());
                     }

@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@ import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
+import de.viadee.bpm.vPAV.BPMNConstants;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -59,25 +60,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class FieldInjectionChecker extends AbstractElementChecker {
 
-    private final String attr_class = "class";
-
-    private final String attr_del = "delegateExpression";
-
-    private final String c_executionList = "camunda:executionListener";
-
-    private final String c_class = "camunda:class";
-
-    private final String c_del = "camunda:delegateExpression";
-
-    private final String c_taskList = "camunda:taskListener";
-
-    private final String attr_ex = "expression";
-
-    private final String fixedValue = "org.camunda.bpm.engine.impl.el.FixedValue";
-
-    private final String expression = "org.camunda.bpm.engine.delegate.Expression";
-
-    public static Logger logger = Logger.getLogger(FieldInjectionChecker.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FieldInjectionChecker.class.getName());
 
     public FieldInjectionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
         super(rule, bpmnScanner);
@@ -108,26 +91,32 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
 
         if (bpmnElement instanceof UserTask) {
-            taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), attr_del, c_taskList);
-            taskClass = bpmnScanner.getListener(bpmnElement.getId(), attr_class, c_taskList);
-            taskExpression = bpmnScanner.getListener(bpmnElement.getId(), attr_ex, c_taskList);
+            taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), BPMNConstants.ATTR_DEL,
+                    BPMNConstants.CAMUNDA_TASKLISTENER);
+            taskClass = bpmnScanner.getListener(bpmnElement.getId(), BPMNConstants.ATTR_CLASS,
+                    BPMNConstants.CAMUNDA_TASKLISTENER);
+            taskExpression = bpmnScanner.getListener(bpmnElement.getId(), BPMNConstants.ATTR_EX,
+                    BPMNConstants.CAMUNDA_TASKLISTENER);
         }
 
-        executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), attr_del, c_executionList);
-        executionClass = bpmnScanner.getListener(bpmnElement.getId(), attr_class, c_executionList);
-        executionExpression = bpmnScanner.getListener(bpmnElement.getId(), attr_ex, c_executionList);
+        executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), BPMNConstants.CAMUNDA_EXECUTIONLISTENER,
+                BPMNConstants.CAMUNDA_EXECUTIONLISTENER);
+        executionClass = bpmnScanner.getListener(bpmnElement.getId(), BPMNConstants.ATTR_CLASS,
+                BPMNConstants.CAMUNDA_EXECUTIONLISTENER);
+        executionExpression = bpmnScanner.getListener(bpmnElement.getId(), BPMNConstants.ATTR_EX,
+                BPMNConstants.CAMUNDA_EXECUTIONLISTENER);
 
         final ArrayList<String> fieldInjectionVarNames = bpmnScanner.getFieldInjectionVarName(bpmnElement.getId());
         final String classAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                attr_class);
+                BPMNConstants.ATTR_CLASS);
         final String delegateExprAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                attr_del);
+                BPMNConstants.ATTR_DEL);
 
         if (implementationAttr != null && !fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null
                 && (bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
                         || bpmnElement instanceof SendTask)) {
             // check if class is correct
-            if (implementationAttr.equals(c_class)) {
+            if (implementationAttr.equals(BPMNConstants.CAMUNDA_CLASS)) {
                 if (classAttr == null || classAttr.trim().length() == 0) {
                 } else {
                     for (String fieldInjectionVarName : fieldInjectionVarNames)
@@ -136,7 +125,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             }
 
             // check if delegateExpression is correct
-            else if (implementationAttr.equals(c_del)) {
+            else if (implementationAttr.equals(BPMNConstants.CAMUNDA_DEXPRESSION)) {
                 if (delegateExprAttr == null || delegateExprAttr.trim().length() == 0) {
                     // no delegateExpression has been configured
                 } else {
@@ -204,7 +193,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
         }
 
         // delegateExpression
-        if (aDelegate != null && aDelegate.size() > 0) {
+        if (aDelegate != null && !aDelegate.isEmpty()) {
             for (String eDel : aDelegate) {
                 if (eDel == null || eDel.trim().length() == 0) {
                     // no delegateExpression has been configured
@@ -260,8 +249,8 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             try {
                 Field field = clazz.getDeclaredField(varName);
 
-                if (!field.getType().getName().equals(fixedValue)
-                        && !field.getType().getName().equals(expression))
+                if (!field.getType().getName().equals(BPMNConstants.FIXED_VALUE)
+                        && !field.getType().getName().equals(BPMNConstants.EXPRESSION))
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), classPath, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
@@ -294,7 +283,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             }
 
         } catch (final ClassNotFoundException e) {
-            logger.warning("Class " + className + " does not exist");
+            LOGGER.warning("Class " + className + " does not exist");
         }
 
         return issues;

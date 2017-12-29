@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,6 +103,38 @@ public class MessageEventCheckerTest {
 
         if (issues.size() > 0) {
             Assert.fail("correct model generates an issue");
+        }
+    }
+
+    /**
+     * Case: StartEvent has been set with message and expression
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+    @Test
+    public void testStartEventWithExpression() throws ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "MessageEventChecker_testStartEventWithExpression.bpmn";
+        checker = new MessageEventChecker(rule, new BPMNScanner(PATH));
+
+        // parse bpmn model
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
+
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement);
+            issues.addAll(checker.check(element));
+        }
+
+        if (issues.size() != 1) {
+            Assert.fail("model should generate an issue");
         }
     }
 

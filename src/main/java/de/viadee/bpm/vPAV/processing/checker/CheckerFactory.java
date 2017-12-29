@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
+import de.viadee.bpm.vPAV.BPMNConstants;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -51,13 +52,7 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
  */
 public final class CheckerFactory {
 
-    public static String implementation;
-
-    private final static String externLocation = "external_Location";
-
-    private final static String internLocation = "de.viadee.bpm.vPAV.processing.checker.";
-
-    private static Logger logger = Logger.getLogger(CheckerFactory.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CheckerFactory.class.getName());
 
     /**
      * create checkers
@@ -109,7 +104,7 @@ public final class CheckerFactory {
                 } catch (NoSuchMethodException | SecurityException | ClassNotFoundException
                         | InstantiationException | IllegalAccessException | IllegalArgumentException
                         | InvocationTargetException e) {
-                    logger.warning("Class " + fullyQualifiedName + " not found or couldn't be instantiated");
+                    LOGGER.warning("Class " + fullyQualifiedName + " not found or couldn't be instantiated");
                     rule.getValue().deactivate();
                 }
             }
@@ -119,7 +114,7 @@ public final class CheckerFactory {
 
     /**
      * get the fullyQualifiedName of the rule
-     * 
+     *
      * @param rule
      *            Rule in Map
      * @return fullyQualifiedName
@@ -128,14 +123,14 @@ public final class CheckerFactory {
         String fullyQualifiedName = "";
         if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getKey())
                 && rule.getValue().isActive()) {
-            fullyQualifiedName = internLocation + rule.getValue().getName().trim();
+            fullyQualifiedName = BPMNConstants.INTERN_LOCATION + rule.getValue().getName().trim();
         } else if (rule.getValue().isActive() && rule.getValue().getSettings() != null
-                && rule.getValue().getSettings().containsKey(externLocation)) {
-            fullyQualifiedName = rule.getValue().getSettings().get(externLocation).getValue()
+                && rule.getValue().getSettings().containsKey(BPMNConstants.EXTERN_LOCATION)) {
+            fullyQualifiedName = rule.getValue().getSettings().get(BPMNConstants.EXTERN_LOCATION).getValue()
                     + "." + rule.getValue().getName().trim();
         }
         if (fullyQualifiedName.isEmpty() && rule.getValue().isActive()) {
-            logger.warning("Checker '" + rule.getValue().getName()
+            LOGGER.warning("Checker '" + rule.getValue().getName()
                     + "' not found. Please add setting for external_location in ruleSet.xml.");
             rule.getValue().deactivate();
         }

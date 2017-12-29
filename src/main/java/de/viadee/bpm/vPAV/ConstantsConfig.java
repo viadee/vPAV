@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,10 +85,19 @@ public final class ConstantsConfig {
 
     public static final String TEST_BASEPATH = "src/test/resources/";
 
+    public static final String JS_BASEPATH = "src\\main\\resources\\";
+
+    public static final String TARGET_CLASS_FOLDER = "target/classes";
+
     public static final String LOCATION = "location";
 
     public static final String VERSIONINGSCHEMEPACKAGE = "versioningSchemePackage";
 
     public static final String VERSIONINGSCHEMECLASS = "versioningSchemeClass";
+
+    public static final String GROOVY = "groovy";
+
+    private ConstantsConfig() {
+    }
 
 }

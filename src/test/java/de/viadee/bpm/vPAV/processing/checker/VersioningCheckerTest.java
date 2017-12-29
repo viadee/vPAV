@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,7 +144,8 @@ public class VersioningCheckerTest {
 
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         settings.put("versioningSchemaClass",
-                new Setting("versioningSchemaClass", null, "([^_]*)_{1}([0-9][_][0-9]{1})\\.(java|groovy)"));
+                new Setting("versioningSchemaClass", null, null, null,
+                        "([^_]*)_{1}([0-9][_][0-9]{1})\\.(java|groovy)"));
 
         final Rule rule = new Rule("VersioningChecker", true, settings, null, null);
 

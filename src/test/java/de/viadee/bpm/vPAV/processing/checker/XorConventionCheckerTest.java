@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -278,7 +278,7 @@ public class XorConventionCheckerTest {
         elementConventions.add(elementConvention);
         elementConventions.add(elementConvention2);
 
-        Setting s = new Setting("requiredDefault", null, "true");
+        Setting s = new Setting("requiredDefault", null, null, null, "true");
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         settings.put("requiredDefault", s);
         final Rule ruleDefault = new Rule("XorConventionChecker", true, settings, elementConventions, null);

@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ public abstract class AbstractRunner {
     /**
      * Main method which represents lifecycle of the validation process Calls main functions
      */
-    public static void run_vPAV() {
+    public static void viadeeProcessApplicationValidator() {
 
         // 1
         final Map<String, Rule> rules = readConfig();

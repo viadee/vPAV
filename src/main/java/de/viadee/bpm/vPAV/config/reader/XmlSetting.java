@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 @XmlRootElement(name = "setting")
-@XmlType(propOrder = { "name", "script", "value" })
+@XmlType(propOrder = { "name", "script", "type", "value" })
 public class XmlSetting {
 
     private String name;
@@ -44,14 +44,20 @@ public class XmlSetting {
 
     private String script;
 
+    private String type;
+
+    private String id;
+
     public XmlSetting() {
     }
 
-    public XmlSetting(final String name, final String script, final String value) {
+    public XmlSetting(final String name, final String script, final String type, final String id, final String value) {
         super();
         this.name = name;
         this.value = value;
+        this.type = type;
         this.script = script;
+        this.id = id;
     }
 
     @XmlAttribute(name = "name", required = true)
@@ -62,6 +68,16 @@ public class XmlSetting {
     @XmlAttribute(name = "script", required = false)
     public String getScript() {
         return script;
+    }
+
+    @XmlAttribute(name = "type", required = false)
+    public String getType() {
+        return type;
+    }
+
+    @XmlAttribute(name = "id", required = false)
+    public String getId() {
+        return id;
     }
 
     @XmlValue
@@ -79,5 +95,13 @@ public class XmlSetting {
 
     public void setScript(final String script) {
         this.script = script;
+    }
+
+    public void setType(final String type) {
+        this.type = type;
+    }
+
+    public void setId(final String id) {
+        this.id = id;
     }
 }

@@ -12,7 +12,8 @@
     <bpmn:serviceTask id="Task_26x8g8d">
       <bpmn:extensionElements>
         <camunda:properties>
-          <camunda:property name="CALLBACK_TIMEOUT" value="Test" />
+          <camunda:property name="SETTING1" value="Test" />
+          <camunda:property name="SETTING2" value="90" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0assw4c</bpmn:incoming>

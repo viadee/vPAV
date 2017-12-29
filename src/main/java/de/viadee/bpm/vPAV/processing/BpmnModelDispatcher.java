@@ -1,5 +1,5 @@
 /**
- * Copyright � 2017, viadee Unternehmensberatung GmbH
+ * Copyright © 2017, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,9 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  *
  */
 public class BpmnModelDispatcher {
+
+    private BpmnModelDispatcher() {
+    }
 
     /**
      * The BpmnModelDispatcher reads a model and creates a collection of all elements. Iterates through collection and
