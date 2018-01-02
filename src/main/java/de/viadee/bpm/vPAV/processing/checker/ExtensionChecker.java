@@ -111,10 +111,12 @@ public class ExtensionChecker extends AbstractElementChecker {
 
                     // If no task ID is specified, check all elements
                     if (setting.getId() == null) {
-
-                        checkWithoutId(keyPairs, bpmnElement, element, issues, setting);
+                        // Check correctness of value
+                        checkValue(keyPairs, bpmnElement, element, issues, setting);
                     } else {
-                        checkWithoutId(keyPairs, bpmnElement, element, issues, setting);
+                        if (setting.getId() != null && setting.getId().equals(bpmnElement.getAttributeValue("id"))) {
+                            checkValue(keyPairs, bpmnElement, element, issues, setting);
+                        }
                     }
                 } else {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
@@ -129,51 +131,6 @@ public class ExtensionChecker extends AbstractElementChecker {
         }
 
         return issues;
-    }
-
-    /**
-     * Checks elements based on type
-     *
-     * @param setting
-     *            Concrete setting
-     * @param keyPairs
-     *            Extension key pairs
-     * @param bpmnElement
-     *            BpmnElement
-     * @param element
-     *            Element
-     * @param issues
-     *            CheckerIssues
-     */
-    private void checkWithoutId(final Map<String, String> keyPairs, final BaseElement bpmnElement,
-            final BpmnElement element, final Collection<CheckerIssue> issues, Setting setting) {
-
-        // Check correctness of value
-        if (keyPairs.get(setting.getName()) != null && !keyPairs.get(setting.getName()).isEmpty()) {
-
-            final String patternString = setting.getValue();
-            final Pattern pattern = Pattern.compile(patternString);
-            Matcher matcher = pattern.matcher(keyPairs.get(setting.getName()));
-
-            // if predefined value of a key-value pair does not fit a given regex (e.g. digits for
-            // timeout)
-            if (!matcher.matches()) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue("id"),
-                        bpmnElement.getAttributeValue("name"), null, null, null,
-                        "Key-Value pair of '" + CheckName.checkName(bpmnElement)
-                                + "' does not fit the configured setting of the rule set. Check the extension with key '"
-                                + setting.getName() + "'."));
-            }
-        } else {
-            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                    element.getProcessdefinition(), null,
-                    bpmnElement.getAttributeValue("id"),
-                    bpmnElement.getAttributeValue("name"), null, null, null,
-                    "Value of '" + CheckName.checkName(bpmnElement)
-                            + "' is empty. Check whether ruleset and model are congruent."));
-        }
     }
 
     /**
@@ -204,18 +161,60 @@ public class ExtensionChecker extends AbstractElementChecker {
 
                     // If no task ID is specified, check all elements
                     if (setting.getId() == null) {
-
-                        checkWithoutId(keyPairs, bpmnElement, element, issues, setting);
-
-                        // Check a task specified by ID
+                        checkValue(keyPairs, bpmnElement, element, issues, setting);
                     } else {
-                        checkWithoutId(keyPairs, bpmnElement, element, issues, setting);
+                        if (setting.getId() != null && setting.getId().equals(bpmnElement.getAttributeValue("id"))) {
+                            checkValue(keyPairs, bpmnElement, element, issues, setting);
+                        }
                     }
                 }
             }
         }
 
         return issues;
+    }
+
+    /**
+     * Checks the value of a given key-value pair
+     *
+     * @param setting
+     *            Certain setting out of all settings
+     * @param keyPairs
+     *            Extension key pairs
+     * @param bpmnElement
+     *            BpmnElement
+     * @param element
+     *            Element
+     * @param issues
+     *            List of Issues
+     */
+    private void checkValue(final Map<String, String> keyPairs, final BaseElement bpmnElement,
+            final BpmnElement element, final Collection<CheckerIssue> issues, Setting setting) {
+        if (keyPairs.get(setting.getName()) != null && !keyPairs.get(setting.getName()).isEmpty()) {
+
+            final String patternString = setting.getValue();
+            final Pattern pattern = Pattern.compile(patternString);
+            Matcher matcher = pattern.matcher(keyPairs.get(setting.getName()));
+
+            // if predefined value of a key-value pair does not fit a given regex (e.g. digits for
+            // timeout)
+            if (!matcher.matches()) {
+                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        element.getProcessdefinition(), null,
+                        bpmnElement.getAttributeValue("id"),
+                        bpmnElement.getAttributeValue("name"), null, null, null,
+                        "Key-Value pair of '" + CheckName.checkName(bpmnElement)
+                                + "' does not fit the configured setting of the rule set. Check the extension with key '"
+                                + setting.getName() + "'."));
+            }
+        } else {
+            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                    element.getProcessdefinition(), null,
+                    bpmnElement.getAttributeValue("id"),
+                    bpmnElement.getAttributeValue("name"), null, null, null,
+                    "Value of '" + CheckName.checkName(bpmnElement)
+                            + "' is empty. Check whether ruleset and model are congruent."));
+        }
     }
 
 }

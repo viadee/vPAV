@@ -32,6 +32,11 @@ package de.viadee.bpm.vPAV.processing;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.w3c.dom.Element;
 
+/**
+ *
+ * Utility class to check names and return names/ids
+ *
+ */
 public class CheckName {
 
     /**

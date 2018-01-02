@@ -22,7 +22,7 @@
     <bpmn:serviceTask id="Task_11s777l">
       <bpmn:extensionElements>
         <camunda:properties>
-          <camunda:property name="Test" />
+          <camunda:property name="SETTING1" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1k5clqq</bpmn:incoming>
