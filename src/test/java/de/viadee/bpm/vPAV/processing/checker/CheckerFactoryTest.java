@@ -67,7 +67,7 @@ public class CheckerFactoryTest {
 
     private static ClassLoader cl;
 
-    private final static Setting setting = new Setting("WrongChecker", null, null, null,
+    private final static Setting setting = new Setting("WrongChecker", null, null, null, false,
             "de.viadee.vPAV_checker_plugin");
 
     private static Map<String, Setting> settings = new HashMap<String, Setting>();

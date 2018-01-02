@@ -149,7 +149,7 @@ public final class XmlConfigReader implements ConfigReader {
                     if (!settings.containsKey(xmlSetting.getName())) {
                         settings.put(xmlSetting.getName(),
                                 new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getType(),
-                                        xmlSetting.getId(),
+                                        xmlSetting.getId(), xmlSetting.getRequired(),
                                         xmlSetting.getValue()));
                     } else {
                         settings.get(xmlSetting.getName()).addScriptPlace(xmlSetting.getScript());

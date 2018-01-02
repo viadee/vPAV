@@ -20,11 +20,6 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1t0qyxl" sourceRef="Task_11s777l" targetRef="EndEvent_1c6ugsu" />
     <bpmn:serviceTask id="Task_11s777l">
-      <bpmn:extensionElements>
-        <camunda:properties>
-          <camunda:property name="Test" />
-        </camunda:properties>
-      </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1k5clqq</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1t0qyxl</bpmn:outgoing>
     </bpmn:serviceTask>

@@ -146,11 +146,13 @@ public class RuleSetOutputWriter {
                 if (!sEntry.getValue().getScriptPlaces().isEmpty()) {
                     for (String place : sEntry.getValue().getScriptPlaces()) {
                         XmlSetting xmlSetting = new XmlSetting(s.getName(), place, s.getType(), s.getId(),
+                                s.getRequired(),
                                 s.getValue());
                         xSettings.add(xmlSetting);
                     }
                 } else {
-                    XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getId(), s.getValue());
+                    XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getId(), s.getRequired(),
+                            s.getValue());
                     xSettings.add(xmlSetting);
                 }
             }

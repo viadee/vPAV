@@ -43,6 +43,8 @@ public class Setting {
 
     private String id;
 
+    private boolean required;
+
     /**
      *
      * @param name
@@ -55,14 +57,17 @@ public class Setting {
      *            Value of setting
      * @param id
      *            Id of certain task
+     * @param required
+     *            Boolean to specify the explicit need for a certain extension key
      */
     public Setting(final String name, final String scriptPlace, final String type, final String id,
-            final String value) {
+            final boolean required, final String value) {
         super();
         this.name = name;
         this.value = value;
         this.type = type;
         this.id = id;
+        this.required = required;
         if (scriptPlace != null)
             scriptPlaces.add(scriptPlace);
     }
@@ -81,6 +86,10 @@ public class Setting {
 
     public String getId() {
         return id;
+    }
+
+    public boolean getRequired() {
+        return required;
     }
 
     public ArrayList<String> getScriptPlaces() {

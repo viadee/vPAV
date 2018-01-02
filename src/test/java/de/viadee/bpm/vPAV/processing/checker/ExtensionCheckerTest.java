@@ -147,6 +147,39 @@ public class ExtensionCheckerTest {
     }
 
     /**
+     * Case: Extension Key-pair in task is missing a value
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+
+    @Test
+    public void testExtensionChecker_NoValue()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "ExtensionCheckerTest_NoValue.bpmn";
+        checker = new ExtensionChecker(createRule(), new BPMNScanner(PATH));
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
+
+        for (BaseElement event : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, event);
+            issues.addAll(checker.check(element));
+        }
+
+        if (issues.size() != 1) {
+            Assert.fail("Wrong value pair should generate an issue");
+        }
+    }
+
+    /**
      * Case: Extension Key-pair in task is missing the key
      *
      * @throws IOException
@@ -180,6 +213,72 @@ public class ExtensionCheckerTest {
     }
 
     /**
+     * Case: Check extension Key-pair for specified task
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+
+    @Test
+    public void testExtensionChecker_WithId()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "ExtensionCheckerTest_WithId.bpmn";
+        checker = new ExtensionChecker(createRule2(), new BPMNScanner(PATH));
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
+
+        for (BaseElement event : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, event);
+            issues.addAll(checker.check(element));
+        }
+
+        if (issues.size() != 1) {
+            Assert.fail("Wrong value pair should generate an issue");
+        }
+    }
+
+    /**
+     * Case: Check extension Key-pair for specified task
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+
+    @Test
+    public void testExtensionChecker_NoRequiredAttribute()
+            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "ExtensionCheckerTest_NoRequiredAttribute.bpmn";
+        checker = new ExtensionChecker(createRule3(), new BPMNScanner(PATH));
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
+
+        for (BaseElement event : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, event);
+            issues.addAll(checker.check(element));
+        }
+
+        if (issues.size() != 3) {
+            Assert.fail("Wrong value pair should generate an issue");
+        }
+    }
+
+    /**
      * Creates rule configuration
      *
      * @return rule
@@ -187,8 +286,46 @@ public class ExtensionCheckerTest {
     private static Rule createRule() {
 
         final Map<String, Setting> settings = new HashMap<String, Setting>();
-        final Setting setting = new Setting("SETTING1", null, "ServiceTask", null, "\\d+");
-        final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, "\\d+");
+        final Setting setting = new Setting("SETTING1", null, "ServiceTask", null, true, "\\d+");
+        final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, true, "\\d+");
+
+        settings.put("SETTING1", setting);
+        settings.put("SETTING2", setting1);
+
+        final Rule rule = new Rule("ExtensionChecker", true, settings, null, null);
+
+        return rule;
+    }
+
+    /**
+     * Creates second rule configuration
+     *
+     * @return rule
+     */
+    private static Rule createRule2() {
+
+        final Map<String, Setting> settings = new HashMap<String, Setting>();
+        final Setting setting = new Setting("SETTING1", null, "ServiceTask", "Task_26x8g8d", false, "\\d+");
+        final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, false, "\\d+");
+
+        settings.put("SETTING1", setting);
+        settings.put("SETTING2", setting1);
+
+        final Rule rule = new Rule("ExtensionChecker", true, settings, null, null);
+
+        return rule;
+    }
+
+    /**
+     * Creates third rule configuration
+     *
+     * @return rule
+     */
+    private static Rule createRule3() {
+
+        final Map<String, Setting> settings = new HashMap<String, Setting>();
+        final Setting setting = new Setting("SETTING1", null, "ServiceTask", null, false, "\\d+");
+        final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, true, "\\d+");
 
         settings.put("SETTING1", setting);
         settings.put("SETTING2", setting1);
