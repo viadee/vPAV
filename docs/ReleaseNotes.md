@@ -1,5 +1,20 @@
 # Release notes
 
+## 2.4.2-SNAPSHOT
+
+### Features
+**vPAV-69** Added ExtensionChecker  
+**vPAV-156** Added check for expressions in MessageStartEvents
+
+### Fixes
+**vPAV-179** Fixed bug, where wordwrap lead to false positive   
+**vPAV-178** Fixed sample project for showcasing purpose
+
+### Misc
+**vPAV-169** Added JUnit test with external checker  
+**vPAV-166** Added GitHub analysis of repository  
+**vPAV-159** Added SonarQube analysis  
+**vPAV-162** Added more detailed description for whitglisting issues  
 
 ## 2.4.1-SNAPSHOT
 
