@@ -46,6 +46,7 @@ import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.camunda.bpm.model.bpmn.instance.UserTask;
 
+import de.viadee.bpm.vPAV.BPMNConstants;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -79,7 +80,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             // read attributes from task
             final String implementationAttr = bpmnScanner.getImplementation(baseElement.getId());
 
-            if (implementationAttr != null && implementationAttr.equals(bpmnScanner.getC_exp())
+            if (implementationAttr != null && implementationAttr.equals(BPMNConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
@@ -107,7 +108,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             // read attributes from event
             final String implementationAttrEvent = bpmnScanner.getEventImplementation(baseElement.getId());
 
-            if (implementationAttrEvent != null && implementationAttrEvent.contains(bpmnScanner.getC_exp())
+            if (implementationAttrEvent != null && implementationAttrEvent.contains(BPMNConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),

@@ -52,7 +52,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
         RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        run_vPAV();
+        viadeeProcessApplicationValidator();
 
         return AbstractRunner.getfilteredIssues();
     }
@@ -69,7 +69,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
         RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        run_vPAV();
+        viadeeProcessApplicationValidator();
 
         return filterErrors(AbstractRunner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
@@ -82,7 +82,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
     public static Collection<CheckerIssue> findModelInconsistencies() {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        run_vPAV();
+        viadeeProcessApplicationValidator();
 
         return AbstractRunner.getfilteredIssues();
     }
@@ -95,7 +95,7 @@ public class ProcessApplicationValidator extends AbstractRunner {
     public static Collection<CheckerIssue> findModelErrors() {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        run_vPAV();
+        viadeeProcessApplicationValidator();
 
         return filterErrors(AbstractRunner.getfilteredIssues(), CriticalityEnum.ERROR);
     }

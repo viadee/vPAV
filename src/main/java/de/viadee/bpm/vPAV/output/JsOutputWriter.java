@@ -64,8 +64,6 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  */
 public class JsOutputWriter implements IssueOutputWriter {
 
-    private final String basePath = "src\\main\\resources\\";
-
     /**
      * Writes the output as JavaScript to the vPAV output folder
      */
@@ -99,7 +97,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
     /**
      * write javascript file with elements which have variables
-     * 
+     *
      * @param baseElements
      *            Collection of baseelements
      * @param graphBuilder
@@ -207,7 +205,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
     /**
      * Check all checkers for successful verification
-     * 
+     *
      * @param issues
      *            list of all issues
      * @return list with checkers without issues
@@ -220,7 +218,7 @@ public class JsOutputWriter implements IssueOutputWriter {
             modelIssues.addAll(issues);
 
             for (CheckerIssue issue : issues) {
-                if (!issue.getBpmnFile().equals(basePath + bpmnFilename))
+                if (!issue.getBpmnFile().equals(ConstantsConfig.JS_BASEPATH + bpmnFilename))
                     modelIssues.remove(issue);
             }
 
@@ -232,7 +230,8 @@ public class JsOutputWriter implements IssueOutputWriter {
                         ruleIssues.remove(issue);
                 }
                 if (ruleIssues.isEmpty())
-                    newIssues.add(new CheckerIssue(ruleName, CriticalityEnum.SUCCESS, (basePath + bpmnFilename), null,
+                    newIssues.add(new CheckerIssue(ruleName, CriticalityEnum.SUCCESS,
+                            (ConstantsConfig.JS_BASEPATH + bpmnFilename), null,
                             "", "", null, null, null, "No issues found"));
             }
         }
@@ -242,7 +241,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
     /**
      * Transforms the path and filename to XML
-     * 
+     *
      * @return output
      * @throws OutputWriterException
      */

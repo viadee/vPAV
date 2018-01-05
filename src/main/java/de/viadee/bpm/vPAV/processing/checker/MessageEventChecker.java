@@ -80,12 +80,28 @@ public class MessageEventChecker extends AbstractElementChecker {
                 for (MessageEventDefinition eventDef : messageEventDefinitions) {
                     if (eventDef != null) {
                         final Message message = eventDef.getMessage();
-                        if (message == null || message.getName() == null || message.getName().isEmpty()) {
+                        if (message == null) {
                             issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
                                     element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                                     baseElement.getAttributeValue("name"), null, null, null,
                                     "No message has been specified for '" + CheckName.checkName(baseElement)
                                             + "'."));
+                        } else {
+                            if (message.getName() == null || message.getName().isEmpty()) {
+                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
+                                        baseElement.getAttributeValue("name"), null, null, null,
+                                        "No message name has been specified for '" + CheckName.checkName(baseElement)
+                                                + "'."));
+                            } else {
+                                if (message.getName().contains("{") || message.getName().contains("}")) {
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                            element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
+                                            baseElement.getAttributeValue("name"), null, null, null,
+                                            "Usage of expressions in MessageStartEvent"
+                                                    + CheckName.checkName(baseElement) + "are not allowed"));
+                                }
+                            }
                         }
                     }
                 }

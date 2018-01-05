@@ -67,7 +67,7 @@ public class CheckerFactoryTest {
 
     private static ClassLoader cl;
 
-    private final static Setting setting = new Setting("WrongChecker", null,
+    private final static Setting setting = new Setting("WrongChecker", null, null, null, false,
             "de.viadee.vPAV_checker_plugin");
 
     private static Map<String, Setting> settings = new HashMap<String, Setting>();
@@ -88,7 +88,7 @@ public class CheckerFactoryTest {
 
     /**
      * Test correct viadee checker 'JavaDelegateChecker'
-     * 
+     *
      * @throws ConfigItemNotFoundException
      * @throws ParserConfigurationException
      * @throws SAXException
@@ -111,7 +111,7 @@ public class CheckerFactoryTest {
 
     /**
      * Test wrong internal checker
-     * 
+     *
      * @throws ConfigItemNotFoundException
      * @throws ParserConfigurationException
      * @throws SAXException
@@ -134,7 +134,7 @@ public class CheckerFactoryTest {
 
     /**
      * Test wrong external Checker
-     * 
+     *
      * @throws ConfigItemNotFoundException
      * @throws ParserConfigurationException
      * @throws SAXException

@@ -107,6 +107,38 @@ public class MessageEventCheckerTest {
     }
 
     /**
+     * Case: StartEvent has been set with message and expression
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws XPathExpressionException
+     */
+    @Test
+    public void testStartEventWithExpression() throws ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "MessageEventChecker_testStartEventWithExpression.bpmn";
+        checker = new MessageEventChecker(rule, new BPMNScanner(PATH));
+
+        // parse bpmn model
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
+
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement);
+            issues.addAll(checker.check(element));
+        }
+
+        if (issues.size() != 1) {
+            Assert.fail("model should generate an issue");
+        }
+    }
+
+    /**
      * Case: EndEvent has been set with wrong message
      *
      * @throws IOException
