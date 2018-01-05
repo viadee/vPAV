@@ -47,6 +47,7 @@ import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
+import de.viadee.bpm.vPAV.BPMNConstants;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -60,10 +61,6 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
     private static Logger logger = Logger.getLogger(BoundaryErrorChecker.class.getName());
 
-    private final String camunda_class = "camunda:class";
-
-    private final String camunda_dexp = "camunda:delegateExpression";
-
     public BoundaryErrorChecker(final Rule rule, BPMNScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
@@ -74,94 +71,100 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
 
-        if (bpmnElement.getElementType().getTypeName()
-                .equals(BpmnModelConstants.BPMN_ELEMENT_BOUNDARY_EVENT)) {
+        String mappedTaskId = null;
+        String implementation = null;
+        String implementationRef = null;
 
-            final Map<String, String> errorEventDef = bpmnScanner.getErrorEvent(bpmnElement.getId());
+        // Grab only boundaryEvents
+        if (bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_BOUNDARY_EVENT)) {
 
             // Map<String, String> errorEventDef -> "errorRef" , "camunda:errorMessageVariable"
-            for (Map.Entry<String, String> entry : errorEventDef.entrySet()) {
+            final Map<String, String> errorEventDef = bpmnScanner.getErrorEvent(bpmnElement.getId());
 
-                // If no ID is returned, create issue
-                if (entry.getKey() == null || entry.getKey().isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                            bpmnElement.getAttributeValue("name"), null, null, null,
-                            "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                    + "' with no error specifications"));
-                    continue;
-                }
+            // Check if boundaryEvent consists of an errorEventDefinition
+            if (errorEventDef.size() != 0) {
+                mappedTaskId = bpmnScanner.getErrorEventMapping(bpmnElement.getId());
+                implementation = bpmnScanner.getImplementation(mappedTaskId);
+                implementationRef = bpmnScanner.getImplementationReference(mappedTaskId,
+                        implementation);
 
-                // If ID of error gets returned, we check for the contents of the error
-                else if (entry.getKey() != null && !entry.getKey().isEmpty()) {
+                // No error has been referenced
+                if (errorEventDef.entrySet().iterator().next().getKey() == null
+                        || errorEventDef.entrySet().iterator().next().getKey().isEmpty()) {
+                    final String errorCode = bpmnScanner.getErrorCodeVar(bpmnElement.getId());
+                    if (errorCode == null || errorCode.isEmpty()) {
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
+                                        + "' with no errorCodeVariable specified"));
+                    } else {
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
+                                        + "' with no error referenced"));
+                    }
+                } else {
 
-                    // Map<String, String> errorDef -> "name" , "errorCode"
-                    final Map<String, String> errorDef = bpmnScanner.getErrorDef(entry.getKey());
+                    // Error reference could be resolved, retrieve errorDefinition
+                    final Map<String, String> errorDef = bpmnScanner
+                            .getErrorDef(errorEventDef.entrySet().iterator().next().getKey());
 
-                    for (Map.Entry<String, String> errorDefEntry : errorDef.entrySet()) {
-                        if (errorDefEntry.getKey() == null || errorDefEntry.getKey().isEmpty()) {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                    bpmnElement.getAttributeValue("name"), null, null, null,
-                                    "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                            + "' with no ErrorName"));
-                        }
-                        // ErrorCode
-                        if (errorDefEntry.getValue() != null && !errorDefEntry.getValue().isEmpty()) {
-                            final String mappedTaskId = bpmnScanner.getErrorEventMapping(bpmnElement.getId());
-                            final String implementation = bpmnScanner.getImplementation(mappedTaskId);
-                            final String implementationRef = bpmnScanner.getImplementationReference(mappedTaskId,
-                                    implementation);
+                    // No errorCode has been specified
+                    if (errorDef.entrySet().iterator().next().getValue() == null
+                            || errorDef.entrySet().iterator().next().getValue().isEmpty()) {
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
+                                        + "' does not provide an ErrorCode"));
 
-                            if (implementation != null && !implementation.isEmpty()) {
-                                if (implementation.equals(camunda_class)) {
-                                    if (!readResourceFile(implementationRef, errorDefEntry.getValue())) {
-                                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                                element.getProcessdefinition(), null,
-                                                bpmnElement.getAttributeValue("id"),
-                                                bpmnElement.getAttributeValue("name"), null, null, null,
-                                                "ErrorCode of '" + CheckName.checkName(bpmnElement)
-                                                        + "' does not match with throwing declaration of class '"
-                                                        + implementationRef + "'"));
-                                    }
-                                } else if (implementation.equals(camunda_dexp)) {
-                                    // check validity of a bean
-                                    checkBeanMapping(element, issues, bpmnElement, errorDefEntry, implementationRef);
+                    } else {
+                        if (implementation != null) {
+                            // Check the BeanMapping to resolve delegate expression
+                            if (implementation.equals(BPMNConstants.CAMUNDA_DEXPRESSION)) {
+                                checkBeanMapping(element, issues, bpmnElement,
+                                        errorDef.entrySet().iterator().next().getValue(), implementationRef);
 
+                                // Check the directly referenced class
+                            } else if (implementation.equals(BPMNConstants.CAMUNDA_CLASS)) {
+                                if (!readResourceFile(implementationRef,
+                                        errorDef.entrySet().iterator().next().getValue())) {
+                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                            element.getProcessdefinition(), null,
+                                            bpmnElement.getAttributeValue("id"),
+                                            bpmnElement.getAttributeValue("name"), null, null, null,
+                                            "ErrorCode of '" + CheckName.checkName(bpmnElement)
+                                                    + "' does not match with throwing declaration of class '"
+                                                    + implementationRef + "'"));
                                 }
-
                             }
-
-                        } else if (errorDefEntry.getValue() == null || errorDefEntry.getValue().isEmpty()) {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                    bpmnElement.getAttributeValue("name"), null, null, null,
-                                    "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                            + "' with no ErrorCode"));
                         }
                     }
-                }
 
-                // No ErrorMessageVariable has been specified
-                if (entry.getValue() == null || entry.getValue().isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                            bpmnElement.getAttributeValue("name"), null, null, null,
-                            "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                    + "' with no ErrorMessageVariable"));
-                }
-            }
+                    // No errorName has been specified
+                    if (errorDef.entrySet().iterator().next().getKey() == null
+                            || errorDef.entrySet().iterator().next().getKey().isEmpty()) {
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
+                                        + "' does not provide an ErrorName"));
+                    }
 
-            // No ErrorCodeVariable has been specified
-            final String errorCode = bpmnScanner.getErrorCodeVar(bpmnElement.getId());
-            if (errorCode == null || errorCode.isEmpty()) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                        bpmnElement.getAttributeValue("name"), null, null, null,
-                        "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement) + "' with no ErrorCodeVariable"));
+                    // No ErrorMessageVariable has been specified
+                    if (errorEventDef.entrySet().iterator().next().getValue() == null
+                            || errorEventDef.entrySet().iterator().next().getValue().isEmpty()) {
+                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
+                                        + "' with no ErrorMessageVariable"));
+                    }
+                }
             }
         }
-
         return issues;
     }
 
@@ -176,7 +179,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      * @param implementationRef
      */
     private void checkBeanMapping(BpmnElement element, final Collection<CheckerIssue> issues,
-            final BaseElement bpmnElement, Map.Entry<String, String> errorDefEntry, final String implementationRef) {
+            final BaseElement bpmnElement, final String errorDefEntry, final String implementationRef) {
         if (RuntimeConfig.getInstance().getBeanMapping() != null) {
             final TreeBuilder treeBuilder = new Builder();
             final Tree tree = treeBuilder.build(implementationRef);
@@ -189,7 +192,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     // correct beanmapping was found -> check if class exists
                     if (classFile != null && classFile.trim().length() > 0) {
                         if (checkClassFile(classFile)) {
-                            if (!readResourceFile(classFile, errorDefEntry.getValue())) {
+                            if (!readResourceFile(classFile, errorDefEntry)) {
                                 issues.add(new CheckerIssue(rule.getName(),
                                         CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null,
@@ -318,7 +321,6 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
             RuntimeConfig.getInstance().getClassLoader().loadClass(className);
         } catch (final ClassNotFoundException e) {
             return false;
-
         }
         return true;
     }

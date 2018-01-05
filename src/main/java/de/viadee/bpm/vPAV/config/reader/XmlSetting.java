@@ -56,6 +56,7 @@ public class XmlSetting {
     public XmlSetting(final String name, final String script, final String type, final String id,
             final boolean required, final String value) {
         super();
+        this.required = required;
         this.name = name;
         this.value = value;
         this.type = type;

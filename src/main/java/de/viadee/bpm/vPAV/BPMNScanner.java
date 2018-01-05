@@ -463,9 +463,9 @@ public class BPMNScanner {
         }
 
         for (int i = 0; i < nodeList.getLength(); i++) {
-            Element sequence_Element = (Element) nodeList.item(i);
-            if (sequence_Element.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
-                return hasCondExp(sequence_Element);
+            Element sequenceElement = (Element) nodeList.item(i);
+            if (sequenceElement.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
+                return hasCondExp(sequenceElement);
             }
         }
 
@@ -799,7 +799,7 @@ public class BPMNScanner {
 
     /**
      * get Values of outputParameters
-     * 
+     *
      * @param id
      *            element id
      * @return ArrayList of String
@@ -812,7 +812,7 @@ public class BPMNScanner {
 
     /**
      * get List of in or Out variables value
-     * 
+     *
      * @param id
      *            id of the element
      * @param inOut
@@ -954,9 +954,9 @@ public class BPMNScanner {
                         // check if an event consists of a errorEventDefinition tag
                         if (childNodes.item(x).getLocalName() != null
                                 && childNodes.item(x).getLocalName().equals(BPMNConstants.ERROREVENTDEFINITION)) {
-                            final Element Task_Element2 = (Element) childNodes.item(x);
-                            boundaryEventList.put(Task_Element2.getAttribute(BPMNConstants.ATTR_ERRORREF),
-                                    Task_Element2.getAttribute(BPMNConstants.CAMUNDA_ERRORCODEMESSVAR));
+                            final Element taskElement2 = (Element) childNodes.item(x);
+                            boundaryEventList.put(taskElement2.getAttribute(BPMNConstants.ATTR_ERRORREF),
+                                    taskElement2.getAttribute(BPMNConstants.CAMUNDA_ERRORCODEMESSVAR));
 
                         }
                     }
@@ -1048,8 +1048,8 @@ public class BPMNScanner {
                         // check if an event consists of a errorEventDefinition tag
                         if (childNodes.item(x).getLocalName() != null
                                 && childNodes.item(x).getLocalName().equals(BPMNConstants.ERROREVENTDEFINITION)) {
-                            final Element Task_Element2 = (Element) childNodes.item(x);
-                            getErrorCodeVar = Task_Element2.getAttribute(BPMNConstants.CAMUNDA_ERRORCODEVAR);
+                            final Element taskElement2 = (Element) childNodes.item(x);
+                            getErrorCodeVar = taskElement2.getAttribute(BPMNConstants.CAMUNDA_ERRORCODEVAR);
                         }
                     }
                 }
