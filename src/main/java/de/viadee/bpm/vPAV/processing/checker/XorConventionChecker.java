@@ -102,7 +102,8 @@ public class XorConventionChecker extends AbstractElementChecker {
                         issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                                 element.getProcessdefinition(), null, bpmnElement.getId(),
                                 bpmnElement.getAttributeValue("name"), null, null, null, "xor gateway name '"
-                                        + CheckName.checkName(bpmnElement) + "' is against the naming convention"));
+                                        + CheckName.checkName(bpmnElement) + "' is against the naming convention",
+                                elementConventions.get(0).getDescription()));
                     }
                 } else {
                     issues.add(
@@ -128,7 +129,8 @@ public class XorConventionChecker extends AbstractElementChecker {
                                     Task_Element.getAttribute("name"), null, null, null,
                                     "outgoing edges of xor gateway '"
                                             + CheckName.checkName(bpmnElement)
-                                            + "' are against the naming convention"));
+                                            + "' are against the naming convention"
+                                            + elementConventions.get(1).getDescription()));
                         }
                     } else {
                         issues.add(

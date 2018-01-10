@@ -127,7 +127,7 @@ public class TaskNamingConventionCheckerTest {
 
         final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
-        final ElementConvention elementConvention = new ElementConvention("convention", null,
+        final ElementConvention elementConvention = new ElementConvention("convention", null, null,
                 "[A-ZÄÖÜ][a-zäöü\\-\\s]+");
         elementConventions.add(elementConvention);
 

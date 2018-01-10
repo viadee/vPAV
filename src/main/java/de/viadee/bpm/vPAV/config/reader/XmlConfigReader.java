@@ -87,8 +87,9 @@ public final class XmlConfigReader implements ConfigReader {
         final Map<String, Rule> rules = new HashMap<String, Rule>();
 
         for (String name : RuntimeConfig.getInstance().getViadeeRules())
-            rules.put(name, new Rule(name, false, new HashMap<String, Setting>(), new ArrayList<ElementConvention>(),
-                    new ArrayList<ModelConvention>()));
+            rules.put(name,
+                    new Rule(name, false, new HashMap<String, Setting>(), new ArrayList<ElementConvention>(),
+                            new ArrayList<ModelConvention>()));
 
         return rules;
     }
@@ -127,7 +128,8 @@ public final class XmlConfigReader implements ConfigReader {
                                 "RegEx (" + xmlElementConvention.getPattern() + ") of " + name + " ("
                                         + xmlElementConvention.getName() + ") is incorrect");
                     elementConventions.add(new ElementConvention(xmlElementConvention.getName(),
-                            elementFieldTypes, xmlElementConvention.getPattern()));
+                            elementFieldTypes, xmlElementConvention.getDescription(),
+                            xmlElementConvention.getPattern()));
                 }
             }
             final Collection<XmlModelConvention> xmlModelConventions = rule.getModelConventions();

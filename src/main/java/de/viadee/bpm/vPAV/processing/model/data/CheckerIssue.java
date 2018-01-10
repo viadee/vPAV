@@ -63,6 +63,8 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     private String message;
 
+    private String description;
+
     /**
      * CheckerIssue
      * 
@@ -102,6 +104,24 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.elementId = elementId;
         this.elementName = elementName;
         this.message = message;
+    }
+
+    public CheckerIssue(final String ruleName, final CriticalityEnum classification,
+            final String bpmnFile, final String resourceFile, final String elementId,
+            final String elementName, final String variable, final Anomaly anomaly,
+            final List<Path> invalidPaths, final String message, final String description) {
+        super();
+        this.ruleName = ruleName;
+        this.variable = variable;
+        this.anomaly = anomaly;
+        this.invalidPaths = invalidPaths;
+        this.classification = classification;
+        this.bpmnFile = bpmnFile;
+        this.resourceFile = resourceFile;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.message = message;
+        this.description = description;
     }
 
     public String getId() {
@@ -149,6 +169,10 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         return message;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public void setClassification(final CriticalityEnum classification) {
         this.classification = classification;
     }
@@ -167,6 +191,10 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     public void setMessage(final String message) {
         this.message = message;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
     public static String getMD5(String input) {

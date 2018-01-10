@@ -34,50 +34,63 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "elementConvention")
-@XmlType(propOrder = { "name", "elementFieldTypes", "pattern" })
+@XmlType(propOrder = { "name", "elementFieldTypes", "description", "pattern" })
 public class XmlElementConvention {
 
-  private String name;
+    private String name;
 
-  private XmlElementFieldTypes elementFieldTypes;
+    private XmlElementFieldTypes elementFieldTypes;
 
-  private String pattern;
+    private String description;
 
-  public XmlElementConvention() {
-  }
+    private String pattern;
 
-  public XmlElementConvention(final String name, final XmlElementFieldTypes elementFieldTypes,
-      final String pattern) {
-    super();
-    this.name = name;
-    this.elementFieldTypes = elementFieldTypes;
-    this.pattern = pattern;
-  }
+    public XmlElementConvention() {
+    }
 
-  @XmlElement(name = "name", required = true)
-  public String getName() {
-    return name;
-  }
+    public XmlElementConvention(final String name, final XmlElementFieldTypes elementFieldTypes,
+            final String description,
+            final String pattern) {
+        super();
+        this.name = name;
+        this.elementFieldTypes = elementFieldTypes;
+        this.description = description;
+        this.pattern = pattern;
+    }
 
-  public void setName(final String name) {
-    this.name = name;
-  }
+    @XmlElement(name = "name", required = true)
+    public String getName() {
+        return name;
+    }
 
-  @XmlElement(name = "elementFieldTypes", required = false)
-  public XmlElementFieldTypes getElementFieldTypes() {
-    return elementFieldTypes;
-  }
+    public void setName(final String name) {
+        this.name = name;
+    }
 
-  public void setElementFieldTypes(final XmlElementFieldTypes elementFieldTypes) {
-    this.elementFieldTypes = elementFieldTypes;
-  }
+    @XmlElement(name = "elementFieldTypes", required = false)
+    public XmlElementFieldTypes getElementFieldTypes() {
+        return elementFieldTypes;
+    }
 
-  @XmlElement(name = "pattern", required = true)
-  public String getPattern() {
-    return pattern;
-  }
+    public void setElementFieldTypes(final XmlElementFieldTypes elementFieldTypes) {
+        this.elementFieldTypes = elementFieldTypes;
+    }
 
-  public void setPattern(final String pattern) {
-    this.pattern = pattern;
-  }
+    @XmlElement(name = "description", required = false)
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    @XmlElement(name = "pattern", required = true)
+    public String getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(final String pattern) {
+        this.pattern = pattern;
+    }
 }

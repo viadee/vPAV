@@ -77,7 +77,8 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getId(),
                             baseElement.getAttributeValue("name"), null, null, null,
-                            "task name '" + taskName + "' is against the naming convention"));
+                            "task name '" + taskName + "' is against the naming convention",
+                            elementConventions.iterator().next().getDescription()));
                 }
             } else {
                 issues.add(

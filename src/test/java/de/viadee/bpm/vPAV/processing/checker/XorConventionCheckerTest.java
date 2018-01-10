@@ -248,10 +248,10 @@ public class XorConventionCheckerTest {
 
         final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
-        final ElementConvention elementConvention = new ElementConvention("convention", null,
+        final ElementConvention elementConvention = new ElementConvention("convention", null, null,
                 "[A-ZÄÖÜ][a-zäöü]*\\?{1}");
 
-        final ElementConvention elementConvention2 = new ElementConvention("convention2", null,
+        final ElementConvention elementConvention2 = new ElementConvention("convention2", null, null,
                 "[A-ZÄÖÜ][a-zäöü]*");
         elementConventions.add(elementConvention);
         elementConventions.add(elementConvention2);
@@ -270,10 +270,10 @@ public class XorConventionCheckerTest {
 
         final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
-        final ElementConvention elementConvention = new ElementConvention("convention", null,
+        final ElementConvention elementConvention = new ElementConvention("convention", null, null,
                 "[A-ZÄÖÜ][a-zäöü]*\\?{1}");
 
-        final ElementConvention elementConvention2 = new ElementConvention("convention2", null,
+        final ElementConvention elementConvention2 = new ElementConvention("convention2", null, null,
                 "[A-ZÄÖÜ][a-zäöü]*");
         elementConventions.add(elementConvention);
         elementConventions.add(elementConvention2);

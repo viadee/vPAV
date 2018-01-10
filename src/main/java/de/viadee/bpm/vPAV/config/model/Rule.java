@@ -44,7 +44,8 @@ public class Rule {
 
     private Collection<ModelConvention> modelConventions;
 
-    public Rule(final String name, final boolean isActive, final Map<String, Setting> settings,
+    public Rule(final String name, final boolean isActive,
+            final Map<String, Setting> settings,
             final Collection<ElementConvention> elementConventions,
             final Collection<ModelConvention> modelConventions) {
         super();

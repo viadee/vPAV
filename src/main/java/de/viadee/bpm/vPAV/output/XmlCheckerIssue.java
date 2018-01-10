@@ -38,149 +38,162 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "issue")
 @XmlType(propOrder = { "id", "ruleName", "bpmnFile", "resourceFile", "classification", "elementId",
-    "elementName", "variable", "anomaly", "paths", "message" })
+        "elementName", "variable", "anomaly", "paths", "message", "description" })
 public class XmlCheckerIssue {
 
-  private String id;
+    private String id;
 
-  private String ruleName;
+    private String ruleName;
 
-  private String bpmnFile;
+    private String bpmnFile;
 
-  private String resourceFile;
+    private String resourceFile;
 
-  private String variable;
+    private String variable;
 
-  private String anomaly;
+    private String anomaly;
 
-  private List<XmlPath> paths;
+    private List<XmlPath> paths;
 
-  private String classification;
+    private String classification;
 
-  private String elementId;
+    private String elementId;
 
-  private String elementName;
+    private String elementName;
 
-  private String message;
+    private String message;
 
-  public XmlCheckerIssue() {
-  }
+    private String description;
 
-  public XmlCheckerIssue(final String id, final String ruleName, final String classification,
-      final String bpmnFile, final String resourceFile, final String elementId,
-      final String elementName, final String message, final String variable, final String anomaly,
-      final List<XmlPath> invalidPaths) {
-    super();
-    this.id = id;
-    this.ruleName = ruleName;
-    this.classification = classification;
-    this.bpmnFile = bpmnFile;
-    this.resourceFile = resourceFile;
-    this.elementId = elementId;
-    this.elementName = elementName;
-    this.message = message;
-    this.variable = variable;
-    this.anomaly = anomaly;
-    this.paths = invalidPaths;
-  }
+    public XmlCheckerIssue() {
+    }
 
-  @XmlElement(name = "id", required = true)
-  public String getId() {
-    return id;
-  }
+    public XmlCheckerIssue(final String id, final String ruleName, final String classification,
+            final String bpmnFile, final String resourceFile, final String elementId,
+            final String elementName, final String message, final String description, final String variable,
+            final String anomaly,
+            final List<XmlPath> invalidPaths) {
+        super();
+        this.id = id;
+        this.ruleName = ruleName;
+        this.classification = classification;
+        this.bpmnFile = bpmnFile;
+        this.resourceFile = resourceFile;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.message = message;
+        this.variable = variable;
+        this.anomaly = anomaly;
+        this.paths = invalidPaths;
+        this.description = description;
+    }
 
-  @XmlElement(name = "ruleName", required = true)
-  public String getRuleName() {
-    return ruleName;
-  }
+    @XmlElement(name = "id", required = true)
+    public String getId() {
+        return id;
+    }
 
-  @XmlElement(name = "resourceFile", required = false)
-  public String getResourceFile() {
-    return resourceFile;
-  }
+    @XmlElement(name = "ruleName", required = true)
+    public String getRuleName() {
+        return ruleName;
+    }
 
-  @XmlElement(name = "variable", required = false)
-  public String getVariable() {
-    return variable;
-  }
+    @XmlElement(name = "resourceFile", required = false)
+    public String getResourceFile() {
+        return resourceFile;
+    }
 
-  @XmlElement(name = "anomaly", required = false)
-  public String getAnomaly() {
-    return anomaly;
-  }
+    @XmlElement(name = "variable", required = false)
+    public String getVariable() {
+        return variable;
+    }
 
-  @XmlElementWrapper(name = "paths")
-  @XmlElement(name = "path", required = false)
-  public List<XmlPath> getPaths() {
-    return paths;
-  }
+    @XmlElement(name = "anomaly", required = false)
+    public String getAnomaly() {
+        return anomaly;
+    }
 
-  @XmlElement(name = "classification", required = true)
-  public String getClassification() {
-    return classification;
-  }
+    @XmlElementWrapper(name = "paths")
+    @XmlElement(name = "path", required = false)
+    public List<XmlPath> getPaths() {
+        return paths;
+    }
 
-  @XmlElement(name = "bpmnFile", required = true)
-  public String getBpmnFile() {
-    return bpmnFile;
-  }
+    @XmlElement(name = "classification", required = true)
+    public String getClassification() {
+        return classification;
+    }
 
-  @XmlElement(name = "elementId", required = true)
-  public String getElementId() {
-    return elementId;
-  }
+    @XmlElement(name = "bpmnFile", required = true)
+    public String getBpmnFile() {
+        return bpmnFile;
+    }
 
-  @XmlElement(name = "elementName", required = false)
-  public String getElementName() {
-    return elementName;
-  }
+    @XmlElement(name = "elementId", required = true)
+    public String getElementId() {
+        return elementId;
+    }
 
-  @XmlElement(name = "message", required = true)
-  public String getMessage() {
-    return message;
-  }
+    @XmlElement(name = "elementName", required = false)
+    public String getElementName() {
+        return elementName;
+    }
 
-  public void setClassification(String classification) {
-    this.classification = classification;
-  }
+    @XmlElement(name = "message", required = true)
+    public String getMessage() {
+        return message;
+    }
 
-  public void setBpmnFile(String bpmnFile) {
-    this.bpmnFile = bpmnFile;
-  }
+    @XmlElement(name = "description", required = false)
+    public String getDescription() {
+        return description;
+    }
 
-  public void setElementId(String elementId) {
-    this.elementId = elementId;
-  }
+    public void setClassification(String classification) {
+        this.classification = classification;
+    }
 
-  public void setElementName(String elementName) {
-    this.elementName = elementName;
-  }
+    public void setBpmnFile(String bpmnFile) {
+        this.bpmnFile = bpmnFile;
+    }
 
-  public void setMessage(String message) {
-    this.message = message;
-  }
+    public void setElementId(String elementId) {
+        this.elementId = elementId;
+    }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public void setElementName(String elementName) {
+        this.elementName = elementName;
+    }
 
-  public void setRuleName(String ruleName) {
-    this.ruleName = ruleName;
-  }
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-  public void setResourceFile(String resourceFile) {
-    this.resourceFile = resourceFile;
-  }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-  public void setVariable(String variable) {
-    this.variable = variable;
-  }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-  public void setAnomaly(String anomaly) {
-    this.anomaly = anomaly;
-  }
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
+    }
 
-  public void setPaths(List<XmlPath> paths) {
-    this.paths = paths;
-  }
+    public void setResourceFile(String resourceFile) {
+        this.resourceFile = resourceFile;
+    }
+
+    public void setVariable(String variable) {
+        this.variable = variable;
+    }
+
+    public void setAnomaly(String anomaly) {
+        this.anomaly = anomaly;
+    }
+
+    public void setPaths(List<XmlPath> paths) {
+        this.paths = paths;
+    }
 }

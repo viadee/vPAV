@@ -129,11 +129,11 @@ public class RuleSetOutputWriter {
                     XmlElementFieldTypes xmlElFieTy = new XmlElementFieldTypes(cElFieTy,
                             ElCon.getElementFieldTypes().isExcluded());
                     XmlElementConvention xmlElCon = new XmlElementConvention(ElCon.getName(), xmlElFieTy,
-                            ElCon.getPattern());
+                            ElCon.getDescription(), ElCon.getPattern());
                     xElementConventions.add(xmlElCon);
                 } else {
                     XmlElementConvention xmlElCon = new XmlElementConvention(ElCon.getName(), null,
-                            ElCon.getPattern());
+                            ElCon.getDescription(), ElCon.getPattern());
                     xElementConventions.add(xmlElCon);
                 }
             }
@@ -158,7 +158,8 @@ public class RuleSetOutputWriter {
             }
 
             // create xmlRule
-            XmlRule xRule = new XmlRule(rule.getName(), rule.isActive(), xSettings.isEmpty() ? null : xSettings,
+            XmlRule xRule = new XmlRule(rule.getName(), rule.isActive(),
+                    xSettings.isEmpty() ? null : xSettings,
                     xElementConventions.isEmpty() ? null : xElementConventions,
                     xModelConventions.isEmpty() ? null : xModelConventions);
 

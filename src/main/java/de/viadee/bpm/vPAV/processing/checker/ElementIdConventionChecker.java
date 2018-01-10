@@ -74,7 +74,7 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
                     issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getId(),
                             baseElement.getAttributeValue("name"), null, null, null,
-                            "ID '" + elementId + "' is against the naming convention"));
+                            "ID '" + elementId + "' is against the naming convention", convention.getDescription()));
                 }
             }
         }
