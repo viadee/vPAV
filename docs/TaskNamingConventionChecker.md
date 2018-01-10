@@ -14,12 +14,18 @@ The rule should be configured as follows:
     <elementConventions>
         <elementConvention>
             <name>convention</name>
+            <description>taskname has to start with a capital letter followed by letters,hyphens or spaces</description>
             <pattern>[A-ZÄÖÜ][a-zäöü\\\-\\\s]+</pattern>
         </elementConvention>
     </elementConventions>
 </rule>
 
 ```
+
+An element convention consists of:
+- a `name`
+- a regular expression for the naming convention (`pattern`)
+- a `description` to describe the convention (optional)
 
 ## Error messages
 **task name must be specified**
