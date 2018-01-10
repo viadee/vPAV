@@ -24,6 +24,7 @@ The rule should be configured as follows:
           <elementFieldType>DMN</elementFieldType>
           <elementFieldType>DelegateExpression</elementFieldType>
         </elementFieldTypes>
+        <description>Variable has to start with "int_"</description>
         <pattern>int_[a-zA-Z]+</pattern>
       </elementConvention>
       <elementConvention>
@@ -35,6 +36,7 @@ The rule should be configured as follows:
           <elementFieldType>DMN</elementFieldType>
           <elementFieldType>DelegateExpression</elementFieldType>
         </elementFieldTypes>
+        <description>Variable has to start with "ext_"</description>
         <pattern>ext_[a-zA-Z]+</pattern>
       </elementConvention>
     </elementConventions>
@@ -48,6 +50,7 @@ An element convention consists of:
 - a `name`
 - an `elementFieldType` to be analyzed
 - a regular expression for the naming convention (`pattern`)
+- a `description` to describe the convention
 
 The attribute `excluded = "true"` means that all element field types, except those that are stored, should be checked.
 
