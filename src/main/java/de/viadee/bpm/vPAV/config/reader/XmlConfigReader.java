@@ -112,7 +112,7 @@ public final class XmlConfigReader implements ConfigReader {
             if (name == null)
                 throw new ConfigReaderException("rule name is not set");
             final boolean state = rule.isState();
-            final String ruleDescription = rule.getRuleDescription();
+            final String ruleDescription = rule.getDescription();
             final Collection<XmlElementConvention> xmlElementConventions = rule.getElementConventions();
             final ArrayList<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
             if (xmlElementConventions != null) {
@@ -129,7 +129,7 @@ public final class XmlConfigReader implements ConfigReader {
                                 "RegEx (" + xmlElementConvention.getPattern() + ") of " + name + " ("
                                         + xmlElementConvention.getName() + ") is incorrect");
                     elementConventions.add(new ElementConvention(xmlElementConvention.getName(),
-                            elementFieldTypes, xmlElementConvention.getElementDescription(),
+                            elementFieldTypes, xmlElementConvention.getDescription(),
                             xmlElementConvention.getPattern()));
                 }
             }
