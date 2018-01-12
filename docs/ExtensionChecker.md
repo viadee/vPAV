@@ -14,14 +14,20 @@ The rule should be configured as follows:
 	<settings>
 		<setting name="TIMEOUT" type="ServiceTask" required="false">\d+</setting>
 	</settings>
+	<modelConventions>
+		<modelConvention type="ServiceTask" />
+		<modelConvention type="ScriptTask" />
+		<modelConvention type="BusinessRuleTask" />
+	</modelConventions>
 </rule>
 
 ```
-By setting the name "TIMEOUT" and the value to "\d+", the extension panel of all elements of the specified type will be looked through for this very key-value pair. 
-This ensures, that a number with at least one digit is present, otherwise an issue will be created. 
-The attribute "required" is used to make sure, that the setting specified in the ruleset will be enforced, meaning it has to find a match, otherwise this will break your build. If "required" is set to false, it will check all elements for a matching key. If it finds a corresponding key, it will be evaluated with the specified regex. Not finding the key will not result in breaking your build.
+The rule for the ExtensionChecker consists of settings and modelConventions. By specifying the modelConventions, you create a whitelist of elements to include (mandatory for the checker to work, won't find issues otherwise) in the check.
 
-The settings can consist of more than one setting, allowing the extension panel to have more than one key-value pair. Due to the value being used as regex, it can check for matching strings, chars or numbers.
+By setting the attributes, you can configure the checker according to your needs. The attribute name is mandatory and acts as the key to be matched in the extension panel. If found, it will be checked if the value complies with the regex specified in the ruleSet (configurable Regex).  
+The attributes "type" and "id" are used to distinguish tasks. By using "type", all tasks of the specified type will be checked and by using "id", only a certain task is checked. Please be aware that you **can not used both attributes** and have to opt for one or none. By not naming both attributes, the checker will search through all whitelisted elements looking for the key-value pair.  
+Lastly, the attribute "required" specifies the way the check is done. If set to "true", it is mandatory that your model implements
+a key-value extension pair for the specified id or task types (or none). If set to "false", it will look through the model and only validate the extension pair, if the keys match. 
 
 ## Error messages
 **Key-Value pair of 'Task_123' could not be resolved due to incorrect or missing key.**
