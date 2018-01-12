@@ -97,7 +97,7 @@ public class CheckerFactoryTest {
     @Test
     public void testCorrectInternalChecker()
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
-        Rule rule = new Rule("JavaDelegateChecker", true, null, null, null);
+        Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
         rules.put("JavaDelegateChecker", rule);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
         final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
@@ -120,7 +120,7 @@ public class CheckerFactoryTest {
     @Test
     public void testIncorrectInternalChecker()
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
-        Rule rule = new Rule("WrongChecker", true, null, null, null);
+        Rule rule = new Rule("WrongChecker", true, null, null, null, null);
         rules.put("WrongChecker", rule);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
         final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
@@ -144,7 +144,7 @@ public class CheckerFactoryTest {
     public void testIncorrectExternalChecker()
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
         settings.put("external_Location", setting);
-        Rule rule = new Rule("WrongChecker", true, settings, null, null);
+        Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
         rules.put("WrongChecker", rule);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
         final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);

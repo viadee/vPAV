@@ -187,6 +187,9 @@ function addCountOverlay(overlays, bpmnFile) {
                             var dCardElementDescription = document.createElement("p");
                             dCardElementDescription.setAttribute("class", "card-elementDescription");
 
+                            var dCardRuleDescription = document.createElement("p");
+                            dCardRuleDescription.setAttribute("class", "card-ruleDescription");
+
 
                             var oImg = document.createElement("img");
                             oImg.setAttribute('src', 'img/' + issue.classification + '.png');
@@ -196,11 +199,14 @@ function addCountOverlay(overlays, bpmnFile) {
 
                             dCardTitle.innerHTML = issue.ruleName;
                             dCardTitle.appendChild(oImg);
-                            dCardText.innerHTML =  "<h6><b>Issue message:</b></h6> " + issue.message;
-                            dCardElementDescription.innerHTML = "<h6><b>Element description:</b></h6> " + issue.elementDescription;
+                            dCardText.innerHTML =  "<h6><b>Issue message</b></h6> " + issue.message;
+                            dCardRuleDescription.innerHTML = "<h6><b>Rule description</b></h6> " + issue.ruleDescription;
+                            dCardElementDescription.innerHTML = "<h6><b>Element description</b></h6> " + issue.elementDescription;
 
                             dCard.appendChild(dCardTitle);
                             dCardBody.appendChild(dCardText);
+                            if(issue.ruleDescription)
+                                dCardBody.appendChild(dCardRuleDescription);
                             if(issue.elementDescription)
                                 dCardBody.appendChild(dCardElementDescription);
                             dCard.appendChild(dCardBody);

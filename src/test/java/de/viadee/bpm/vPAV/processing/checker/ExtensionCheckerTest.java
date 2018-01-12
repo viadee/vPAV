@@ -295,7 +295,7 @@ public class ExtensionCheckerTest {
         settings.put("SETTING1", setting);
         settings.put("SETTING2", setting1);
 
-        final Rule rule = new Rule("ExtensionChecker", true, settings, null, modelConventions);
+        final Rule rule = new Rule("ExtensionChecker", true, null, settings, null, modelConventions);
 
         return rule;
     }
@@ -316,7 +316,7 @@ public class ExtensionCheckerTest {
         settings.put("SETTING1", setting);
         settings.put("SETTING2", setting1);
 
-        final Rule rule = new Rule("ExtensionChecker", true, settings, null, modelConventions);
+        final Rule rule = new Rule("ExtensionChecker", true, null, settings, null, modelConventions);
 
         return rule;
     }
@@ -337,7 +337,7 @@ public class ExtensionCheckerTest {
         settings.put("SETTING1", setting);
         settings.put("SETTING2", setting1);
 
-        final Rule rule = new Rule("ExtensionChecker", true, settings, null, modelConventions);
+        final Rule rule = new Rule("ExtensionChecker", true, null, settings, null, modelConventions);
 
         return rule;
     }

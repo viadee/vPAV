@@ -131,7 +131,7 @@ public class TaskNamingConventionCheckerTest {
                 "[A-ZÄÖÜ][a-zäöü\\-\\s]+");
         elementConventions.add(elementConvention);
 
-        final Rule rule = new Rule("TaskNamingConventionChecker", true, null, elementConventions, null);
+        final Rule rule = new Rule("TaskNamingConventionChecker", true, null, null, elementConventions, null);
 
         return rule;
     }

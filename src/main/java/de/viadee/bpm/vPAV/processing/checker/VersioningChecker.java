@@ -346,10 +346,10 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
         if (resourcePath != null) {
             if (!resourcesNewestVersions.contains(resourcePath)) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), resourcePath, element.getBaseElement().getId(),
                         element.getBaseElement().getAttributeValue("name"), null, null, null,
-                        "script reference is deprecated or file with version doesn't exist"));
+                        "script reference is deprecated or file with version doesn't exist", null));
             }
         }
     }
@@ -365,12 +365,13 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
         final String beanReference = findBeanReferenceInExpression(expression, element, issues);
         if (beanReference != null && !resourcesNewestVersions.contains(beanReference)) {
-            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                     element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
                     element.getBaseElement().getAttributeValue("name"), null, null, null,
                     "bean reference '" + beanReference
                             + "' is deprecated or file with version does not exist for bean '"
-                            + expression + "'"));
+                            + expression + "'",
+                    null));
         }
     }
 
@@ -390,11 +391,12 @@ public class VersioningChecker extends AbstractElementChecker {
             beanReference = beanReference.substring(0, beanReference.lastIndexOf("\\"));
 
             if (!resourcesNewestVersions.contains(beanReference)) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
                         element.getBaseElement().getAttributeValue("name"), null, null, null,
                         "bean reference is deprecated for '"
-                                + beanReference + "'."));
+                                + beanReference + "'.",
+                        null));
             }
         }
     }
@@ -411,18 +413,20 @@ public class VersioningChecker extends AbstractElementChecker {
         if (javaReference != null) {
             if (!resourcesNewestVersions.contains(javaReference)) {
                 if (element.getBaseElement().getId() == null) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), javaReference,
                             element.getBaseElement().getParentElement().getAttributeValue("id"),
                             element.getBaseElement().getParentElement().getAttributeValue("name"), null, null, null,
                             "class reference is deprecated or file with version does not exist for class '"
-                                    + javaReference + "'"));
+                                    + javaReference + "'",
+                            null));
                 } else {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
                             element.getBaseElement().getAttributeValue("name"), null, null, null,
                             "class reference is deprecated or file with version does not exist for class '"
-                                    + javaReference + "'"));
+                                    + javaReference + "'",
+                            null));
                 }
             }
         }
@@ -442,11 +446,12 @@ public class VersioningChecker extends AbstractElementChecker {
             javaReference = javaReference.substring(0, javaReference.lastIndexOf("\\"));
 
             if (!resourcesNewestVersions.contains(javaReference)) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
                         element.getBaseElement().getAttributeValue("name"), null, null, null,
                         "class reference is deprecated for '"
-                                + javaReference + "'."));
+                                + javaReference + "'.",
+                        null));
             }
         }
     }

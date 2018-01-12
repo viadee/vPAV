@@ -256,7 +256,7 @@ public class XorConventionCheckerTest {
         elementConventions.add(elementConvention);
         elementConventions.add(elementConvention2);
 
-        final Rule rule = new Rule("XorConventionChecker", true, null, elementConventions, null);
+        final Rule rule = new Rule("XorConventionChecker", true, null, null, elementConventions, null);
 
         return rule;
     }
@@ -281,7 +281,7 @@ public class XorConventionCheckerTest {
         Setting s = new Setting("requiredDefault", null, null, null, false, "true");
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         settings.put("requiredDefault", s);
-        final Rule ruleDefault = new Rule("XorConventionChecker", true, settings, elementConventions, null);
+        final Rule ruleDefault = new Rule("XorConventionChecker", true, null, settings, elementConventions, null);
 
         return ruleDefault;
     }

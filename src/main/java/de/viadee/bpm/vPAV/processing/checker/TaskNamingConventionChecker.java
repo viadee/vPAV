@@ -74,7 +74,7 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
                 final Pattern pattern = Pattern.compile(patternString);
                 Matcher matcher = pattern.matcher(taskName);
                 if (!matcher.matches()) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getId(),
                             baseElement.getAttributeValue("name"), null, null, null,
                             "task name '" + taskName + "' is against the naming convention",
@@ -82,9 +82,10 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
                 }
             } else {
                 issues.add(
-                        new CheckerIssue(rule.getName(), CriticalityEnum.WARNING, element.getProcessdefinition(),
+                        new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
+                                element.getProcessdefinition(),
                                 null, baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                                "task name must be specified"));
+                                "task name must be specified", null));
             }
         }
         return issues;

@@ -116,9 +116,10 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
                     issues.add(issueInvalidScript);
             } else {
                 if (scriptTask.getCamundaResource() == null) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                            bpmnFile, null,
                             baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                            "there is an empty script reference"));
+                            "there is an empty script reference", null));
                 }
             }
         }
@@ -211,13 +212,15 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
             shell.evaluate(scriptText);
         } catch (final CompilationFailedException | MissingPropertyException ex) {
             if (ex instanceof CompilationFailedException) {
-                return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+                return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile,
+                        null,
                         baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                        ex.getMessage());
+                        ex.getMessage(), null);
             } else {
-                return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+                return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile,
+                        null,
                         baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                        "GroovyScript could not be evaluated. '" + ex.getMessage() + "'");
+                        "GroovyScript could not be evaluated. '" + ex.getMessage() + "'", null);
             }
 
         }
@@ -237,9 +240,9 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
             final String scriptFormat, final String script) {
 
         if (scriptFormat != null && (script == null || script.isEmpty())) {
-            return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+            return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile, null,
                     baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                    "there is no script content for given script format");
+                    "there is no script content for given script format", null);
         }
         return null;
     }
@@ -257,9 +260,9 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
             final String scriptFormat, final String script) {
 
         if (scriptFormat == null && script != null) {
-            return new CheckerIssue(rule.getName(), CriticalityEnum.ERROR, bpmnFile, null,
+            return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile, null,
                     baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                    "there is no script format for given script");
+                    "there is no script format for given script", null);
         }
         return null;
     }

@@ -122,13 +122,15 @@ public class ExtensionChecker extends AbstractElementChecker {
                         if (setting.getName() != null && keyPairs.containsKey(setting.getName())) {
                             checkValue(keyPairs, bpmnElement, element, issues, setting);
                         } else {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null,
-                                    bpmnElement.getAttributeValue("id"),
-                                    bpmnElement.getAttributeValue("name"), null, null, null,
-                                    "Key of '" + CheckName.checkName(bpmnElement)
-                                            + "' could not be resolved. The ruleset specifies the use of key '"
-                                            + setting.getName() + "'."));
+                            issues.add(
+                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                                            element.getProcessdefinition(), null,
+                                            bpmnElement.getAttributeValue("id"),
+                                            bpmnElement.getAttributeValue("name"), null, null, null,
+                                            "Key of '" + CheckName.checkName(bpmnElement)
+                                                    + "' could not be resolved. The ruleset specifies the use of key '"
+                                                    + setting.getName() + "'.",
+                                            null));
                         }
                     }
                 } else {
@@ -231,21 +233,23 @@ public class ExtensionChecker extends AbstractElementChecker {
             // if predefined value of a key-value pair does not fit a given regex (e.g. digits for
             // timeout)
             if (!matcher.matches()) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null,
                         bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
                         "Key-Value pair of '" + CheckName.checkName(bpmnElement)
                                 + "' does not fit the configured setting of the rule set. Check the extension with key '"
-                                + setting.getName() + "'."));
+                                + setting.getName() + "'.",
+                        null));
             }
         } else {
-            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                     element.getProcessdefinition(), null,
                     bpmnElement.getAttributeValue("id"),
                     bpmnElement.getAttributeValue("name"), null, null, null,
                     "Value of '" + CheckName.checkName(bpmnElement)
-                            + "' is empty. Check whether ruleset and model are congruent."));
+                            + "' is empty. Check whether ruleset and model are congruent.",
+                    null));
         }
     }
 

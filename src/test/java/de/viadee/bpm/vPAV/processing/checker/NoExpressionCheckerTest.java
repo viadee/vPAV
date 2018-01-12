@@ -71,7 +71,7 @@ public class NoExpressionCheckerTest {
 
     private static Map<String, Setting> setting = new HashMap<String, Setting>();
 
-    private final Rule rule = new Rule("NoExpressionChecker", true, setting, null, null);
+    private final Rule rule = new Rule("NoExpressionChecker", true, null, setting, null, null);
 
     @BeforeClass
     public static void setup() throws MalformedURLException {

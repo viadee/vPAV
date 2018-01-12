@@ -81,25 +81,31 @@ public class MessageEventChecker extends AbstractElementChecker {
                     if (eventDef != null) {
                         final Message message = eventDef.getMessage();
                         if (message == null) {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                                    baseElement.getAttributeValue("name"), null, null, null,
-                                    "No message has been specified for '" + CheckName.checkName(baseElement)
-                                            + "'."));
+                            issues.add(
+                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                                            element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
+                                            baseElement.getAttributeValue("name"), null, null, null,
+                                            "No message has been specified for '" + CheckName.checkName(baseElement)
+                                                    + "'.",
+                                            null));
                         } else {
                             if (message.getName() == null || message.getName().isEmpty()) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                        CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "No message name has been specified for '" + CheckName.checkName(baseElement)
-                                                + "'."));
+                                                + "'.",
+                                        null));
                             } else {
                                 if (message.getName().contains("{") || message.getName().contains("}")) {
-                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                            CriticalityEnum.ERROR,
                                             element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                                             baseElement.getAttributeValue("name"), null, null, null,
                                             "Usage of expressions in MessageStartEvent"
-                                                    + CheckName.checkName(baseElement) + "are not allowed"));
+                                                    + CheckName.checkName(baseElement) + "are not allowed",
+                                            null));
                                 }
                             }
                         }
@@ -110,19 +116,21 @@ public class MessageEventChecker extends AbstractElementChecker {
 
             if (baseElement.getAttributeValue("messageRef") == null
                     || baseElement.getAttributeValue("messageRef").isEmpty()) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "No message has been specified for '" + CheckName.checkName(baseElement)
-                                + "'."));
+                                + "'.",
+                        null));
             } else {
                 if (bpmnScanner.getMessageName(baseElement.getAttributeValue("messageRef")) == null
                         || bpmnScanner.getMessageName(baseElement.getAttributeValue("messageRef")).isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
                             "No message name has been specified for '" + CheckName.checkName(baseElement)
-                                    + "'."));
+                                    + "'.",
+                            null));
                 }
             }
         }
