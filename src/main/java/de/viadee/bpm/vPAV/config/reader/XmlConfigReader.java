@@ -88,7 +88,7 @@ public final class XmlConfigReader implements ConfigReader {
 
         for (String name : RuntimeConfig.getInstance().getViadeeRules())
             rules.put(name,
-                    new Rule(name, false, new HashMap<String, Setting>(), new ArrayList<ElementConvention>(),
+                    new Rule(name, false, null, new HashMap<String, Setting>(), new ArrayList<ElementConvention>(),
                             new ArrayList<ModelConvention>()));
 
         return rules;
@@ -112,6 +112,7 @@ public final class XmlConfigReader implements ConfigReader {
             if (name == null)
                 throw new ConfigReaderException("rule name is not set");
             final boolean state = rule.isState();
+            final String ruleDescription = rule.getRuleDescription();
             final Collection<XmlElementConvention> xmlElementConventions = rule.getElementConventions();
             final ArrayList<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
             if (xmlElementConventions != null) {
@@ -128,7 +129,7 @@ public final class XmlConfigReader implements ConfigReader {
                                 "RegEx (" + xmlElementConvention.getPattern() + ") of " + name + " ("
                                         + xmlElementConvention.getName() + ") is incorrect");
                     elementConventions.add(new ElementConvention(xmlElementConvention.getName(),
-                            elementFieldTypes, xmlElementConvention.getDescription(),
+                            elementFieldTypes, xmlElementConvention.getElementDescription(),
                             xmlElementConvention.getPattern()));
                 }
             }
@@ -153,7 +154,7 @@ public final class XmlConfigReader implements ConfigReader {
                     }
                 }
             }
-            rules.put(name, new Rule(name, state, settings, elementConventions, modelConventions));
+            rules.put(name, new Rule(name, state, ruleDescription, settings, elementConventions, modelConventions));
         }
 
         return rules;

@@ -39,18 +39,22 @@ public class Rule {
 
     private boolean isActive;
 
+    private String ruleDescription;
+
     private Map<String, Setting> settings;
 
     private Collection<ElementConvention> elementConventions;
 
     private ArrayList<ModelConvention> modelConventions;
 
-    public Rule(final String name, final boolean isActive, final Map<String, Setting> settings,
+    public Rule(final String name, final boolean isActive, final String ruleDescription,
+            final Map<String, Setting> settings,
             final Collection<ElementConvention> elementConventions,
             final ArrayList<ModelConvention> modelConventions) {
         super();
         this.name = name;
         this.isActive = isActive;
+        this.ruleDescription = ruleDescription;
         this.settings = settings;
         this.elementConventions = elementConventions;
         this.modelConventions = modelConventions;
@@ -62,6 +66,10 @@ public class Rule {
 
     public boolean isActive() {
         return isActive;
+    }
+
+    public String getRuleDescription() {
+        return ruleDescription;
     }
 
     public Map<String, Setting> getSettings() {

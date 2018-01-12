@@ -37,10 +37,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "rule")
-@XmlType(propOrder = { "name", "state", "settings", "elementConventions", "modelConventions" })
+@XmlType(propOrder = { "name", "state", "ruleDescription", "settings", "elementConventions", "modelConventions" })
 public class XmlRule {
 
     private String name;
+
+    private String ruleDescription;
 
     private boolean state;
 
@@ -53,12 +55,13 @@ public class XmlRule {
     public XmlRule() {
     }
 
-    public XmlRule(String name, boolean state, final Collection<XmlSetting> settings,
+    public XmlRule(String name, boolean state, String ruleDescription, final Collection<XmlSetting> settings,
             final Collection<XmlElementConvention> elementConventions,
             final Collection<XmlModelConvention> modelConventions) {
         super();
         this.name = name;
         this.state = state;
+        this.ruleDescription = ruleDescription;
         this.settings = settings;
         this.elementConventions = elementConventions;
         this.modelConventions = modelConventions;
@@ -80,6 +83,15 @@ public class XmlRule {
 
     public void setState(boolean state) {
         this.state = state;
+    }
+
+    @XmlElement(name = "ruleDescription", required = false)
+    public String getRuleDescription() {
+        return ruleDescription;
+    }
+
+    public void setRuleDescription(String ruleDescription) {
+        this.ruleDescription = ruleDescription;
     }
 
     @XmlElementWrapper(name = "settings")

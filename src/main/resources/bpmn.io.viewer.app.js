@@ -184,8 +184,11 @@ function addCountOverlay(overlays, bpmnFile) {
                             var dCardText = document.createElement("p");
                             dCardText.setAttribute("class", "card-text");
 
-                            var dCardDescription = document.createElement("p");
-                            dCardDescription.setAttribute("class", "card-description");
+                            var dCardElementDescription = document.createElement("p");
+                            dCardElementDescription.setAttribute("class", "card-elementDescription");
+
+                            var dCardRuleDescription = document.createElement("p");
+                            dCardRuleDescription.setAttribute("class", "card-ruleDescription");
 
 
                             var oImg = document.createElement("img");
@@ -196,13 +199,16 @@ function addCountOverlay(overlays, bpmnFile) {
 
                             dCardTitle.innerHTML = issue.ruleName;
                             dCardTitle.appendChild(oImg);
-                            dCardText.innerHTML = issue.message;
-                            dCardDescription.innerHTML = "<h6><b>Description:</b></h6> " + issue.description;
+                            dCardText.innerHTML =  "<h6><b>Issue message</b></h6> " + issue.message;
+                            dCardRuleDescription.innerHTML = "<h6><b>Rule description</b></h6> " + issue.ruleDescription;
+                            dCardElementDescription.innerHTML = "<h6><b>Element description</b></h6> " + issue.elementDescription;
 
                             dCard.appendChild(dCardTitle);
                             dCardBody.appendChild(dCardText);
-                            if(issue.description)
-                                dCardBody.appendChild(dCardDescription);
+                            if(issue.ruleDescription)
+                                dCardBody.appendChild(dCardRuleDescription);
+                            if(issue.elementDescription)
+                                dCardBody.appendChild(dCardElementDescription);
                             dCard.appendChild(dCardBody);
 
                             dialogContent.appendChild(dCard);

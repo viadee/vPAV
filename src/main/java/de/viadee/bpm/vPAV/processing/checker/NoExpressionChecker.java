@@ -82,11 +82,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             if (implementationAttr != null && implementationAttr.equals(BPMNConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expressions in '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
 
             // get the execution listener
@@ -95,11 +96,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             if (!listener.isEmpty() && listener.size() > 0
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
 
         } else if (baseElement instanceof IntermediateThrowEvent
@@ -110,11 +112,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             if (implementationAttrEvent != null && implementationAttrEvent.contains(BPMNConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expression in event '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
 
             // get the execution listener
@@ -123,11 +126,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             if (!listener.isEmpty() && listener.size() > 0
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
 
         } else if (baseElement instanceof SequenceFlow) {
@@ -137,11 +141,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
                     "camunda:executionListener");
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
 
         } else if (baseElement instanceof ExclusiveGateway) {
@@ -150,11 +155,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
                     "camunda:executionListener");
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
         } else if (baseElement instanceof UserTask) {
             // get the execution listener
@@ -162,11 +168,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
                     "camunda:executionListener");
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
 
             // get the task listener
@@ -174,11 +181,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
                     "camunda:taskListener");
             if (!taskListener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
 
         } else if (baseElement instanceof ManualTask) {
@@ -187,11 +195,12 @@ public class NoExpressionChecker extends AbstractElementChecker {
                     "camunda:executionListener");
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
                         baseElement.getAttributeValue("name"), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                                + "' is against best practices.",
+                        null));
             }
         }
 

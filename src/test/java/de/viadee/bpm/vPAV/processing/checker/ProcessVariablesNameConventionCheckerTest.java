@@ -194,7 +194,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         elementConventions.add(internalElementConvention);
         elementConventions.add(externalElementConvention);
 
-        final Rule rule = new Rule("ProcessVariablesNameConventionChecker", true, null,
+        final Rule rule = new Rule("ProcessVariablesNameConventionChecker", true, null, null,
                 elementConventions, null);
 
         return rule;

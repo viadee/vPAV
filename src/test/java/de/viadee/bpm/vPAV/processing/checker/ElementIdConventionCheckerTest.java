@@ -156,7 +156,7 @@ public class ElementIdConventionCheckerTest {
         elementConventions.add(elementConventionService);
         elementConventions.add(elementConventionUser);
 
-        final Rule rule = new Rule("ElementIdConventionChecker", true, null, elementConventions, null);
+        final Rule rule = new Rule("ElementIdConventionChecker", true, null, null, elementConventions, null);
 
         return rule;
     }

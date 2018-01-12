@@ -158,7 +158,7 @@ public class RuleSetOutputWriter {
             }
 
             // create xmlRule
-            XmlRule xRule = new XmlRule(rule.getName(), rule.isActive(),
+            XmlRule xRule = new XmlRule(rule.getName(), rule.isActive(), rule.getRuleDescription(),
                     xSettings.isEmpty() ? null : xSettings,
                     xElementConventions.isEmpty() ? null : xElementConventions,
                     xModelConventions.isEmpty() ? null : xModelConventions);

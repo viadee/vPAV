@@ -93,17 +93,19 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                         || errorEventDef.entrySet().iterator().next().getKey().isEmpty()) {
                     final String errorCode = bpmnScanner.getErrorCodeVar(bpmnElement.getId());
                     if (errorCode == null || errorCode.isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                                 element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no errorCodeVariable specified"));
+                                        + "' with no errorCodeVariable specified",
+                                null));
                     } else {
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                                 element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no error referenced"));
+                                        + "' with no error referenced",
+                                null));
                     }
                 } else {
 
@@ -114,11 +116,12 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     // No errorCode has been specified
                     if (errorDef.entrySet().iterator().next().getValue() == null
                             || errorDef.entrySet().iterator().next().getValue().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                                 element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' does not provide an ErrorCode"));
+                                        + "' does not provide an ErrorCode",
+                                null));
 
                     } else {
                         if (implementation != null) {
@@ -131,13 +134,15 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                             } else if (implementation.equals(BPMNConstants.CAMUNDA_CLASS)) {
                                 if (!readResourceFile(implementationRef,
                                         errorDef.entrySet().iterator().next().getValue())) {
-                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                            CriticalityEnum.ERROR,
                                             element.getProcessdefinition(), null,
                                             bpmnElement.getAttributeValue("id"),
                                             bpmnElement.getAttributeValue("name"), null, null, null,
                                             "ErrorCode of '" + CheckName.checkName(bpmnElement)
                                                     + "' does not match with throwing declaration of class '"
-                                                    + implementationRef + "'"));
+                                                    + implementationRef + "'",
+                                            null));
                                 }
                             }
                         }
@@ -146,21 +151,23 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     // No errorName has been specified
                     if (errorDef.entrySet().iterator().next().getKey() == null
                             || errorDef.entrySet().iterator().next().getKey().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                                 element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' does not provide an ErrorName"));
+                                        + "' does not provide an ErrorName",
+                                null));
                     }
 
                     // No ErrorMessageVariable has been specified
                     if (errorEventDef.entrySet().iterator().next().getValue() == null
                             || errorEventDef.entrySet().iterator().next().getValue().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                                 element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no ErrorMessageVariable"));
+                                        + "' with no ErrorMessageVariable",
+                                null));
                     }
                 }
             }
@@ -193,7 +200,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (classFile != null && classFile.trim().length() > 0) {
                         if (checkClassFile(classFile)) {
                             if (!readResourceFile(classFile, errorDefEntry)) {
-                                issues.add(new CheckerIssue(rule.getName(),
+                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
                                         CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null,
                                         bpmnElement.getAttributeValue("id"),
@@ -201,38 +208,41 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                                         null,
                                         "ErrorCode of '" + CheckName.checkName(bpmnElement)
                                                 + "' does not match with throwing declaration of bean '"
-                                                + node.getName() + "'"));
+                                                + node.getName() + "'",
+                                        null));
                             }
                         } else {
-                            issues.add(new CheckerIssue(rule.getName(),
+                            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
                                     CriticalityEnum.ERROR,
                                     element.getProcessdefinition(), null,
                                     bpmnElement.getAttributeValue("id"),
                                     bpmnElement.getAttributeValue("name"), null, null,
                                     null,
-                                    "Corresponding class of associated task could not be loaded or found."));
+                                    "Corresponding class of associated task could not be loaded or found.", null));
                         }
                     } else {
                         // incorrect beanmapping
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                                 element.getProcessdefinition(), null,
                                 bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
                                 "Due to incorrect beanmapping for delegate expression: '"
                                         + implementationRef
-                                        + "' the BoundaryErrorEvent can not be linked to class."));
+                                        + "' the BoundaryErrorEvent can not be linked to class.",
+                                null));
                     }
                 }
             }
         } else {
             if (!checkClassFile(implementationRef)) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null,
                         bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
                         "Class for '" + implementationRef
                                 + "' could not be found and therefore not linked to BoundaryErrorEvent '"
-                                + CheckName.checkName(bpmnElement) + "'."));
+                                + CheckName.checkName(bpmnElement) + "'.",
+                        null));
             }
         }
     }

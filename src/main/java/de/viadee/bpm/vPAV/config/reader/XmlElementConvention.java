@@ -34,14 +34,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "elementConvention")
-@XmlType(propOrder = { "name", "elementFieldTypes", "description", "pattern" })
+@XmlType(propOrder = { "name", "elementFieldTypes", "elementDescription", "pattern" })
 public class XmlElementConvention {
 
     private String name;
 
     private XmlElementFieldTypes elementFieldTypes;
 
-    private String description;
+    private String elementDescription;
 
     private String pattern;
 
@@ -49,12 +49,12 @@ public class XmlElementConvention {
     }
 
     public XmlElementConvention(final String name, final XmlElementFieldTypes elementFieldTypes,
-            final String description,
+            final String elementDescription,
             final String pattern) {
         super();
         this.name = name;
         this.elementFieldTypes = elementFieldTypes;
-        this.description = description;
+        this.elementDescription = elementDescription;
         this.pattern = pattern;
     }
 
@@ -76,13 +76,13 @@ public class XmlElementConvention {
         this.elementFieldTypes = elementFieldTypes;
     }
 
-    @XmlElement(name = "description", required = false)
-    public String getDescription() {
-        return description;
+    @XmlElement(name = "elementDescription", required = false)
+    public String getElementDescription() {
+        return elementDescription;
     }
 
-    public void setDescription(final String description) {
-        this.description = description;
+    public void setElementDescription(final String elementDescription) {
+        this.elementDescription = elementDescription;
     }
 
     @XmlElement(name = "pattern", required = true)

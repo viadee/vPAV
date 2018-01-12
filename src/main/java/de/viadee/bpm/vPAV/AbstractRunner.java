@@ -71,8 +71,6 @@ public abstract class AbstractRunner {
 
     private static boolean isMisconfigured = false;
 
-    private static boolean idFound = false;
-
     /**
      * Main method which represents lifecycle of the validation process Calls main functions
      */
@@ -519,7 +517,6 @@ public abstract class AbstractRunner {
                     variableScanner));
         }
         checkMisconfiguration();
-        checkIdFound();
         JsOutputWriter.finish();
         return issues;
     }
@@ -583,13 +580,6 @@ public abstract class AbstractRunner {
                     "Misconfiguration of rule for ExtensionChecker. Please provide either tasktype or a specific ID of an element.");
     }
 
-    private static void checkIdFound() {
-        if (!getIdFound()) {
-            logger.warning(
-                    "Specified ID could not be found in model.");
-        }
-    }
-
     /**
      * Add ignored issue
      *
@@ -625,15 +615,6 @@ public abstract class AbstractRunner {
 
     public static void setIsMisconfigured(boolean isMisconfigured) {
         AbstractRunner.isMisconfigured = isMisconfigured;
-    }
-
-    public static boolean getIdFound() {
-        return idFound;
-    }
-
-    public static void setIdFound(boolean idFound) {
-        AbstractRunner.idFound = idFound;
-
     }
 
 }
