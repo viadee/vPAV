@@ -185,16 +185,16 @@ public class ProcessVariablesNameConventionCheckerTest {
         final ElementFieldTypes internalTypes = new ElementFieldTypes(fieldTypeNames, true);
 
         final ElementConvention internalElementConvention = new ElementConvention("internal",
-                internalTypes, "int_[a-zA-Z]+");
+                internalTypes, null, "int_[a-zA-Z]+");
 
         final ElementFieldTypes externalTypes = new ElementFieldTypes(fieldTypeNames, false);
 
         final ElementConvention externalElementConvention = new ElementConvention("external",
-                externalTypes, "ext_[a-zA-Z]+");
+                externalTypes, null, "ext_[a-zA-Z]+");
         elementConventions.add(internalElementConvention);
         elementConventions.add(externalElementConvention);
 
-        final Rule rule = new Rule("ProcessVariablesNameConventionChecker", true, null,
+        final Rule rule = new Rule("ProcessVariablesNameConventionChecker", true, null, null,
                 elementConventions, null);
 
         return rule;

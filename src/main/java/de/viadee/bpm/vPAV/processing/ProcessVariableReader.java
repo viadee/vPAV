@@ -128,7 +128,7 @@ public final class ProcessVariableReader {
         // 3) Search variables in ExtensionElements
         processVariables.putAll(searchExtensionsElements(element));
         // 4) Search variables in Output Parameters
-        processVariables.putAll(getVariablesFromOutput(element));
+        processVariables.putAll(getVariablesFromParameters(element));
 
         return processVariables;
     }
@@ -140,7 +140,7 @@ public final class ProcessVariableReader {
      * @return Map of ProcessVariable
      *
      */
-    private Map<String, ProcessVariable> getVariablesFromOutput(BpmnElement element) {
+    private Map<String, ProcessVariable> getVariablesFromParameters(BpmnElement element) {
         final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
         final BaseElement baseElement = element.getBaseElement();
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
@@ -151,6 +151,29 @@ public final class ProcessVariableReader {
         }
 
         ArrayList<String> outVar = bpmnScanner.getOutputVariables(element.getBaseElement().getId());
+        ArrayList<String> inVar = bpmnScanner.getInputVariables(element.getBaseElement().getId());
+        ArrayList<String> varValues = bpmnScanner.getInOutputVariablesValue(element.getBaseElement().getId());
+
+        // save output variables
+        for (String name : outVar) {
+            processVariables.put(name,
+                    new ProcessVariable(name, element, ElementChapter.InputOutput,
+                            KnownElementFieldType.OutputParameter,
+                            element.getProcessdefinition(), VariableOperation.WRITE, scopeElementId));
+        }
+
+        ArrayList<String> varValueClean = new ArrayList<String>();
+        for (String expression : varValues) {
+            varValueClean.addAll(checkExpressionForReadVariable(expression, element));
+        }
+        varValueClean.removeAll(inVar);
+
+        // add all processVariables to List
+        for (String var : varValueClean) {
+            processVariables.put(var, new ProcessVariable(var, element, ElementChapter.InputOutput,
+                    KnownElementFieldType.OutputParameter, element.getProcessdefinition(), VariableOperation.READ,
+                    scopeElementId));
+        }
 
         for (String name : outVar)
             processVariables.put(name,
@@ -925,6 +948,30 @@ public final class ProcessVariableReader {
             throw new ProcessingException("el expression " + expression + " in "
                     + element.getProcessdefinition() + ", element ID: " + element.getBaseElement().getId()
                     + ", Type: " + fieldType.getDescription() + " couldn't be parsed", e);
+        }
+
+        return variables;
+    }
+
+    private ArrayList<String> checkExpressionForReadVariable(final String expression, final BpmnElement element) {
+        final ArrayList<String> variables = new ArrayList<String>();
+        try {
+            // remove object name from method calls, otherwise the method arguments could not be found
+            final String filteredExpression = expression.replaceAll("[\\w]+\\.", "");
+            final TreeBuilder treeBuilder = new Builder();
+            final Tree tree = treeBuilder.build(filteredExpression);
+
+            final Iterable<IdentifierNode> identifierNodes = tree.getIdentifierNodes();
+            for (final IdentifierNode node : identifierNodes) {
+                // checks, if found variable is a bean
+                if (isBean(node.getName()) == null) {
+                    variables.add(node.getName());
+                }
+            }
+        } catch (final ELException e) {
+            throw new ProcessingException("el expression " + expression + " in "
+                    + element.getProcessdefinition() + ", element ID: " + element.getBaseElement().getId()
+                    + ", Type: " + KnownElementFieldType.Expression + " couldn't be parsed", e);
         }
 
         return variables;

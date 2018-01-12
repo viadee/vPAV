@@ -248,15 +248,15 @@ public class XorConventionCheckerTest {
 
         final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
-        final ElementConvention elementConvention = new ElementConvention("convention", null,
+        final ElementConvention elementConvention = new ElementConvention("convention", null, null,
                 "[A-ZÄÖÜ][a-zäöü]*\\?{1}");
 
-        final ElementConvention elementConvention2 = new ElementConvention("convention2", null,
+        final ElementConvention elementConvention2 = new ElementConvention("convention2", null, null,
                 "[A-ZÄÖÜ][a-zäöü]*");
         elementConventions.add(elementConvention);
         elementConventions.add(elementConvention2);
 
-        final Rule rule = new Rule("XorConventionChecker", true, null, elementConventions, null);
+        final Rule rule = new Rule("XorConventionChecker", true, null, null, elementConventions, null);
 
         return rule;
     }
@@ -270,18 +270,18 @@ public class XorConventionCheckerTest {
 
         final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
-        final ElementConvention elementConvention = new ElementConvention("convention", null,
+        final ElementConvention elementConvention = new ElementConvention("convention", null, null,
                 "[A-ZÄÖÜ][a-zäöü]*\\?{1}");
 
-        final ElementConvention elementConvention2 = new ElementConvention("convention2", null,
+        final ElementConvention elementConvention2 = new ElementConvention("convention2", null, null,
                 "[A-ZÄÖÜ][a-zäöü]*");
         elementConventions.add(elementConvention);
         elementConventions.add(elementConvention2);
 
-        Setting s = new Setting("requiredDefault", null, null, null, "true");
+        Setting s = new Setting("requiredDefault", null, null, null, false, "true");
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         settings.put("requiredDefault", s);
-        final Rule ruleDefault = new Rule("XorConventionChecker", true, settings, elementConventions, null);
+        final Rule ruleDefault = new Rule("XorConventionChecker", true, null, settings, elementConventions, null);
 
         return ruleDefault;
     }

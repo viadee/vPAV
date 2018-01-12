@@ -67,7 +67,7 @@ public class JavaDelegateCheckerTest {
 
     private static ClassLoader cl;
 
-    private final Rule rule = new Rule("JavaDelegateChecker", true, null, null, null);
+    private final Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
 
     @BeforeClass
     public static void setup() throws MalformedURLException {

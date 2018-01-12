@@ -82,32 +82,35 @@ public class NoScriptChecker extends AbstractElementChecker {
             if (scriptTypes != null && !scriptTypes.isEmpty()) {
                 if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
                     for (String place : scriptTypes)
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                                 element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
                                 "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                        + place + "' script"));
+                                        + place + "' script",
+                                null));
                 } else {
                     ArrayList<String> allowedPlaces = settings
                             .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         for (String scriptType : scriptTypes)
                             if (!allowedPlaces.contains(scriptType))
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                        CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                         bpmnElement.getAttributeValue("name"), null, null, null,
                                         "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                                + scriptType + "' script"));
+                                                + scriptType + "' script",
+                                        null));
 
                 }
             }
 
             // ScriptTask
             if (bpmnElement instanceof ScriptTask && !settings.containsKey(scriptTask)) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
-                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
+                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed", null));
             }
 
             // Check SequenceFlow on script in conditionExpression
@@ -117,18 +120,21 @@ public class NoScriptChecker extends AbstractElementChecker {
                     ArrayList<String> allowedPlaces = settings.get(sequenceFlow).getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         if (!allowedPlaces.contains("conditionExpression") && scriptCondExp)
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                    bpmnElement.getAttributeValue("name"), null, null, null,
-                                    "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                            + "' with script in condition Expression"));
+                            issues.add(
+                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
+                                            bpmnElement.getAttributeValue("name"), null, null, null,
+                                            "SequenceFlow '" + CheckName.checkName(bpmnElement)
+                                                    + "' with script in condition Expression",
+                                            null));
                 } else {
                     if (scriptCondExp) {
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                                 element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
                                 "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                        + "' with script in condition Expression"));
+                                        + "' with script in condition Expression",
+                                null));
                     }
                 }
             }

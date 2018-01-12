@@ -1,36 +1,42 @@
 //mark all nodes with issues
 function markNodes(canvas, bpmnFile) {
+
     for (id in elementsToMark) {
-        if ((elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) && (elementsToMark[id].elementId != "")) {
-            if (elementsToMark[id].ruleName == "VersioningChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'VersioningChecker');
-            } else if (elementsToMark[id].ruleName == "ProcessVariablesNameConventionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'ProcessVariablesNameConventionChecker');
-            } else if (elementsToMark[id].ruleName == "JavaDelegateChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'JavaDelegateChecker');
-            } else if (elementsToMark[id].ruleName == "EmbeddedGroovyScriptChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'EmbeddedGroovyScriptChecker');
-            } else if (elementsToMark[id].ruleName == "DmnTaskChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'DmnTaskChecker');
-            } else if (elementsToMark[id].ruleName == "ProcessVariablesModelChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'ProcessVariablesModelChecker');
-            } else if (elementsToMark[id].ruleName == "TaskNamingConventionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'TaskNamingConventionChecker');
-            } else if (elementsToMark[id].ruleName == "NoScriptChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'NoScriptChecker');
-            } else if (elementsToMark[id].ruleName == "XorConventionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'XorConventionChecker');
-            } else if (elementsToMark[id].ruleName == "ElementIdConventionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'ElementIdConventionChecker');
-            } else if (elementsToMark[id].ruleName == "TimerExpressionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'TimerExpressionChecker');
-            } else if (elementsToMark[id].ruleName == "NoExpressionChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'NoExpressionChecker');
-            } else if (elementsToMark[id].ruleName == "MessageEventChecker") {
-                canvas.addMarker(elementsToMark[id].elementId, 'MessageEventChecker');
-            } else {
-                canvas.addMarker(elementsToMark[id].elementId, 'new');
+        try {
+            if ((elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) && (elementsToMark[id].elementId != "")) {
+                if (elementsToMark[id].ruleName == "VersioningChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'VersioningChecker');
+                } else if (elementsToMark[id].ruleName == "ProcessVariablesNameConventionChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'ProcessVariablesNameConventionChecker');
+                } else if (elementsToMark[id].ruleName == "JavaDelegateChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'JavaDelegateChecker');
+                } else if (elementsToMark[id].ruleName == "EmbeddedGroovyScriptChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'EmbeddedGroovyScriptChecker');
+                } else if (elementsToMark[id].ruleName == "DmnTaskChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'DmnTaskChecker');
+                } else if (elementsToMark[id].ruleName == "ProcessVariablesModelChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'ProcessVariablesModelChecker');
+                } else if (elementsToMark[id].ruleName == "TaskNamingConventionChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'TaskNamingConventionChecker');
+                } else if (elementsToMark[id].ruleName == "NoScriptChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'NoScriptChecker');
+                } else if (elementsToMark[id].ruleName == "XorConventionChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'XorConventionChecker');
+                } else if (elementsToMark[id].ruleName == "ElementIdConventionChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'ElementIdConventionChecker');
+                } else if (elementsToMark[id].ruleName == "TimerExpressionChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'TimerExpressionChecker');
+                } else if (elementsToMark[id].ruleName == "NoExpressionChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'NoExpressionChecker');
+                } else if (elementsToMark[id].ruleName == "MessageEventChecker") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'MessageEventChecker');
+                } else {
+                    canvas.addMarker(elementsToMark[id].elementId, 'new');
+                }
             }
+
+        } catch (err) {
+            console.log("element not found");
         }
     }
 }
@@ -71,7 +77,11 @@ function markPath(canvas, id, pos, model) {
 //mark one element
 function markElement(canvas, id, model) {
     activateButtonAllIssues(model);
-    canvas.addMarker(id, 'oneElement');
+    try {
+        canvas.addMarker(id, 'oneElement');
+    } catch (err) {
+        console.log("element not found");
+    }
 }
 
 //create issue count on each node
@@ -140,69 +150,85 @@ function addCountOverlay(overlays, bpmnFile) {
 
     //Add Overlays
     for (id in issues) {
-        var overlayHtml = document.createElement("span");
-        overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
-        overlayHtml.setAttribute("type", "button");
-        overlayHtml.setAttribute("data-toggle", "bmodal");
-        overlayHtml.setAttribute("data-target", "#issueModal");
-        overlayHtml.setAttribute("title", "issues");
-        overlayHtml.innerHTML = issues[id].anz;
+        try {
+            var overlayHtml = document.createElement("span");
+            overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
+            overlayHtml.setAttribute("type", "button");
+            overlayHtml.setAttribute("data-toggle", "bmodal");
+            overlayHtml.setAttribute("data-target", "#issueModal");
+            overlayHtml.setAttribute("title", "issues");
+            overlayHtml.innerHTML = issues[id].anz;
 
-        // add DialogMessage
-        function clickOverlay(id) {
-            //clear dialog
-            const dialogContent = document.querySelector(".modal-body");
-            while (dialogContent.hasChildNodes()) {
-                dialogContent.removeChild(dialogContent.lastChild);
-            }
-            if (issues[id].i.elementId != "") {
-                var eId = issues[id].i.elementId;
-                for (y in issues) {
-                    if (issues[y].i.elementId == eId) {
-                        var issue = issues[y].i;
+            // add DialogMessage
+            function clickOverlay(id) {
+                //clear dialog
+                const dialogContent = document.querySelector(".modal-body");
+                while (dialogContent.hasChildNodes()) {
+                    dialogContent.removeChild(dialogContent.lastChild);
+                }
+                if (issues[id].i.elementId != "") {
+                    var eId = issues[id].i.elementId;
+                    for (y in issues) {
+                        if (issues[y].i.elementId == eId) {
+                            var issue = issues[y].i;
 
-                        var dCard = document.createElement("div");
-                        dCard.setAttribute("class", "card bg-light mb-3");
+                            var dCard = document.createElement("div");
+                            dCard.setAttribute("class", "card bg-light mb-3");
 
-                        var dCardBody = document.createElement("div");
-                        dCardBody.setAttribute("class", "card-body");
+                            var dCardBody = document.createElement("div");
+                            dCardBody.setAttribute("class", "card-body");
 
-                        var dCardTitle = document.createElement("h5");
-                        dCardTitle.setAttribute("class", "card-header");
+                            var dCardTitle = document.createElement("h5");
+                            dCardTitle.setAttribute("class", "card-header");
 
-                        var dCardText = document.createElement("p");
-                        dCardText.setAttribute("class", "card-text");
+                            var dCardText = document.createElement("p");
+                            dCardText.setAttribute("class", "card-text");
+
+                            var dCardElementDescription = document.createElement("p");
+                            dCardElementDescription.setAttribute("class", "card-elementDescription");
+
+                            var dCardRuleDescription = document.createElement("p");
+                            dCardRuleDescription.setAttribute("class", "card-ruleDescription");
 
 
-                        var oImg = document.createElement("img");
-                        oImg.setAttribute('src', 'img/' + issue.classification + '.png');
-                        oImg.setAttribute('alt', 'issue.classification');
-                        oImg.setAttribute('class', 'float-left mr-2');
-                        oImg.setAttribute("title", issue.classification);
+                            var oImg = document.createElement("img");
+                            oImg.setAttribute('src', 'img/' + issue.classification + '.png');
+                            oImg.setAttribute('alt', 'issue.classification');
+                            oImg.setAttribute('class', 'float-left mr-2');
+                            oImg.setAttribute("title", issue.classification);
 
-                        dCardTitle.innerHTML = issue.ruleName;
-                        dCardTitle.appendChild(oImg);
-                        dCardText.innerHTML = issue.message;
+                            dCardTitle.innerHTML = issue.ruleName;
+                            dCardTitle.appendChild(oImg);
+                            dCardText.innerHTML =  "<h6><b>Issue message</b></h6> " + issue.message;
+                            dCardRuleDescription.innerHTML = "<h6><b>Rule description</b></h6> " + issue.ruleDescription;
+                            dCardElementDescription.innerHTML = "<h6><b>Element description</b></h6> " + issue.elementDescription;
 
-                        dCard.appendChild(dCardTitle);
-                        dCardBody.appendChild(dCardText);
-                        dCard.appendChild(dCardBody);
+                            dCard.appendChild(dCardTitle);
+                            dCardBody.appendChild(dCardText);
+                            if(issue.ruleDescription)
+                                dCardBody.appendChild(dCardRuleDescription);
+                            if(issue.elementDescription)
+                                dCardBody.appendChild(dCardElementDescription);
+                            dCard.appendChild(dCardBody);
 
-                        dialogContent.appendChild(dCard);
+                            dialogContent.appendChild(dCard);
+                        }
                     }
                 }
+                toggleDialog('show');
             }
-            toggleDialog('show');
+
+            overlayHtml.onclick = (function () {
+                var currentId = id;
+                return function () {
+                    clickOverlay(currentId);
+                };
+
+            })();
+            attachOverlay();
+        } catch (err) {
+            console.log("element not found");
         }
-
-        overlayHtml.onclick = (function () {
-            var currentId = id;
-            return function () {
-                clickOverlay(currentId);
-            };
-
-        })();
-        attachOverlay();
     }
 
     function attachOverlay(r) {
@@ -402,6 +428,15 @@ function initDiagram(diagramXML, issue_id, path_nr, func, success) {
             canvas.zoom('fit-viewport');
             setUeberschrift(diagramXML.name);
             if (countIssues(diagramXML.name, elementsToMark) > 0) {
+                //createTable
+                if (success)
+                    createTable(diagramXML.name, noIssuesElements);
+                else
+                    createTable(diagramXML.name, elementsToMark);
+                tableVisible(true);
+                createFooter();
+
+                //MarkElements
                 if (func == 0 || func == null) {
                     markNodes(canvas, diagramXML.name);
                     addCountOverlay(overlays, diagramXML.name);
@@ -410,12 +445,6 @@ function initDiagram(diagramXML, issue_id, path_nr, func, success) {
                 } else if (func == 2) {
                     markElement(canvas, issue_id, diagramXML.name);
                 }
-                if (success)
-                    createTable(diagramXML.name, noIssuesElements);
-                else
-                    createTable(diagramXML.name, elementsToMark);
-                tableVisible(true);
-                createFooter();
             } else {
                 document.getElementById("success").setAttribute("class", "btn btn-viadee mt-2 collapse");
                 createTable(diagramXML.name, noIssuesElements);
@@ -492,7 +521,7 @@ function toggleDialog(sh) {
 // List all ProcessInstances
 (function () {
     var first = true;
-    for (var id = 0; id <= diagramXMLSource.length -1; id++) {
+    for (var id = 0; id <= diagramXMLSource.length - 1; id++) {
         model = diagramXMLSource[id];
         var ul = document.getElementById("linkList");
         var li = document.createElement("li");
@@ -546,7 +575,7 @@ function selectModel(name, issue_id, path_nr, func, path) {
     const footer = document.querySelector("footer");
     if (!(footer === null))
         footer.parentNode.removeChild(footer);
-    for (var id = 0; id <= diagramXMLSource.length -1; id++) {
+    for (var id = 0; id <= diagramXMLSource.length - 1; id++) {
         var a = document.getElementById(diagramXMLSource[id].name);
         a.setAttribute("class", "nav-link");
         if (diagramXMLSource[id].name === name) {

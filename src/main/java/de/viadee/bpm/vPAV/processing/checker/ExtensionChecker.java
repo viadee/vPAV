@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
+import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -52,124 +53,204 @@ public class ExtensionChecker extends AbstractElementChecker {
         super(rule, bpmnScanner);
     }
 
+    // TODO: falls id nicht gefunden -> logger warning
+
     @Override
     public Collection<CheckerIssue> check(BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final ArrayList<Setting> set = new ArrayList<Setting>();
         final BaseElement bpmnElement = element.getBaseElement();
-        final Map<String, String> keyPairs = new HashMap<String, String>();
-
         final Map<String, Setting> settings = rule.getSettings();
+        final ArrayList<String> whiteList = rule.getWhiteList();
+
+        final Map<String, String> keyPairs = new HashMap<String, String>();
+        final ArrayList<Setting> optionalSettings = new ArrayList<Setting>();
+        final ArrayList<Setting> mandatorySettings = new ArrayList<Setting>();
 
         // Retrieve extension key pair from bpmn model
         keyPairs.putAll(bpmnScanner.getKeyPairs(bpmnElement.getId()));
 
+        // Create ArrayList for easier manipulation
         for (Map.Entry<String, Setting> settingsEntry : settings.entrySet()) {
-            set.add(settingsEntry.getValue());
+            if (settingsEntry.getValue().getRequired()) {
+                mandatorySettings.add(settingsEntry.getValue());
+            } else {
+                optionalSettings.add(settingsEntry.getValue());
+            }
         }
 
-        // Iterate over each setting specified in the ruleSet
-        for (Setting setting : set) {
+        if (whiteList.contains(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
+            // Check for all mandatory extension pairs according to ruleset
+            issues.addAll(checkManExtension(whiteList, mandatorySettings, keyPairs, bpmnElement, element));
+            // Check for all optional extension pairs
+            issues.addAll(checkOptExtension(whiteList, optionalSettings, keyPairs, bpmnElement, element));
+        }
 
-            // If specified task type and element type match -> proceed
-            if (setting.getType() != null
-                    && setting.getType().equals(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
+        return issues;
 
-                if (!keyPairs.isEmpty()) {
+    }
 
-                    // Iterate over key pairs
-                    for (Map.Entry<String, String> entry : keyPairs.entrySet()) {
+    /**
+     * Checks all elements for mandatory settings
+     *
+     * @param settings
+     *            Mandatory settings as specified by ruleset
+     * @param keyPairs
+     *            Extension key pairs
+     * @param bpmnElement
+     *            BpmnElement
+     * @param element
+     *            Element
+     * @return
+     */
+    private Collection<CheckerIssue> checkManExtension(final ArrayList<String> whiteList,
+            final ArrayList<Setting> settings,
+            final Map<String, String> keyPairs, final BaseElement bpmnElement, final BpmnElement element) {
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-                        final String key = entry.getKey();
-                        final String value = entry.getValue();
+        for (Setting setting : settings) {
 
-                        if (key != null && !key.isEmpty()) {
+            // Check whether rule for ExtensionChecker is misconfigured
+            if (!checkMisconfiguration(setting)) {
 
-                            // If name specified in ruleSet does not match with name specified in model
-                            if (!containsKey(set, key)) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        bpmnElement.getAttributeValue("id"),
-                                        bpmnElement.getAttributeValue("name"), null, null, null,
-                                        "Key of '" + CheckName.checkName(bpmnElement)
-                                                + "' could not be resolved. Check whether ruleset and model are congruent."));
-                                continue;
-                            } else {
+                // Type is specified in ruleSet
+                if (setting.getType() != null) {
 
-                                if (value != null && !value.isEmpty()) {
-                                    final String patternString = settings.get(key).getValue();
-                                    final Pattern pattern = Pattern.compile(patternString);
-                                    Matcher matcher = pattern.matcher(value);
+                    // Check whether specified type equals name of bpmnElement
+                    if (setting.getType().equals(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
 
-                                    // if predefined value of a key-value pair does not fit a given regex
-                                    // (e.g. digits for timeout)
-                                    if (!matcher.matches()) {
-                                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                                element.getProcessdefinition(), null,
-                                                bpmnElement.getAttributeValue("id"),
-                                                bpmnElement.getAttributeValue("name"), null, null, null,
-                                                "Key-Value pair of '" + CheckName.checkName(bpmnElement)
-                                                        + "' does not fit the configured setting of the rule set. Check the extension with key '"
-                                                        + setting.getName() + "'."));
-                                        keyPairs.remove(key);
-                                        break;
-                                    }
-                                } else {
-                                    // If value is empty
-                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        // Check whether the key specified in the settings is contained in the model
+                        if (setting.getName() != null && keyPairs.containsKey(setting.getName())) {
+                            checkValue(keyPairs, bpmnElement, element, issues, setting);
+                        } else {
+                            issues.add(
+                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                                             element.getProcessdefinition(), null,
                                             bpmnElement.getAttributeValue("id"),
                                             bpmnElement.getAttributeValue("name"), null, null, null,
-                                            "Value of '" + CheckName.checkName(bpmnElement)
-                                                    + "' is empty. Check whether ruleset and model are congruent."));
-                                    keyPairs.remove(key);
-                                    break;
-                                }
-
-                            }
-                            // No key specified in the model
-                        } else {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                    bpmnElement.getAttributeValue("name"), null, null, null,
-                                    "The model does not consist of a key for '"
-                                            + CheckName.checkName(bpmnElement)
-                                            + "'. Please specify a key matching the ruleset."));
-                            keyPairs.remove(key);
-                            break;
+                                            "Key of '" + CheckName.checkName(bpmnElement)
+                                                    + "' could not be resolved. The ruleset specifies the use of key '"
+                                                    + setting.getName() + "'.",
+                                            null));
                         }
                     }
-                    // No key and no value specified in the model
                 } else {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                            bpmnElement.getAttributeValue("name"), null, null, null,
-                            "The ruleset specifies the use of an extension for '"
-                                    + CheckName.checkName(bpmnElement)
-                                    + "'."));
+                    // Check based on ID
+                    if (setting.getId() != null
+                            && setting.getId().equals(bpmnElement.getAttributeValue("id"))) {
+                        checkValue(keyPairs, bpmnElement, element, issues, setting);
+                    }
                 }
             }
-            continue;
         }
+
         return issues;
     }
 
     /**
-     * Checks if the list of settings contains a key and returns boolean value
+     * Checks all elements with optional settings
      *
      * @param settings
-     *            List of all settings
-     * @param key
-     *            Key extracted from bpmn model
-     * @return True/false dependend on whether element is contained in list
+     *            Mandatory settings as specified by ruleset
+     * @param keyPairs
+     *            Extension key pairs
+     * @param bpmnElement
+     *            BpmnElement
+     * @param element
+     *            Element
+     * @return
      */
-    public static boolean containsKey(ArrayList<Setting> settings, String key) {
+    private Collection<CheckerIssue> checkOptExtension(final ArrayList<String> whiteList,
+            final ArrayList<Setting> settings,
+            final Map<String, String> keyPairs, final BaseElement bpmnElement, final BpmnElement element) {
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
         for (Setting setting : settings) {
-            if (setting.getName().equals(key)) {
-                return true;
+
+            checkMisconfiguration(setting);
+
+            // Check if specified type equals
+            if (setting.getType() != null
+                    && setting.getType().equals(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
+
+                // Check whether the key specified in the settings is contained in the model
+                if (setting.getName() != null && keyPairs.containsKey(setting.getName())) {
+
+                    // If no task ID is specified, check all elements
+                    if (setting.getId() == null) {
+                        checkValue(keyPairs, bpmnElement, element, issues, setting);
+                    } else {
+                        if (setting.getId() != null && setting.getId().equals(bpmnElement.getAttributeValue("id"))) {
+                            checkValue(keyPairs, bpmnElement, element, issues, setting);
+                        }
+                    }
+                }
             }
         }
-        return false;
+
+        return issues;
+    }
+
+    /**
+     * Checks whether a misconfiguration of the ruleSet.xml occured
+     *
+     * @param setting
+     *            Certain setting out of all settings
+     */
+    private boolean checkMisconfiguration(Setting setting) {
+
+        boolean misconfigured = false;
+
+        if (setting.getType() != null && setting.getId() != null) {
+            misconfigured = true;
+            AbstractRunner.setMisconfigured(misconfigured);
+            return misconfigured;
+        }
+        return misconfigured;
+    }
+
+    /**
+     * Checks the value of a given key-value pair
+     *
+     * @param setting
+     *            Certain setting out of all settings
+     * @param keyPairs
+     *            Extension key pairs
+     * @param bpmnElement
+     *            BpmnElement
+     * @param element
+     *            Element
+     * @param issues
+     *            List of Issues
+     */
+    private void checkValue(final Map<String, String> keyPairs, final BaseElement bpmnElement,
+            final BpmnElement element, final Collection<CheckerIssue> issues, Setting setting) {
+        if (keyPairs.get(setting.getName()) != null && !keyPairs.get(setting.getName()).isEmpty()) {
+
+            final String patternString = setting.getValue();
+            final Pattern pattern = Pattern.compile(patternString);
+            Matcher matcher = pattern.matcher(keyPairs.get(setting.getName()));
+
+            // if predefined value of a key-value pair does not fit a given regex (e.g. digits for
+            // timeout)
+            if (!matcher.matches()) {
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                        element.getProcessdefinition(), null,
+                        bpmnElement.getAttributeValue("id"),
+                        bpmnElement.getAttributeValue("name"), null, null, null,
+                        "Key-Value pair of '" + CheckName.checkName(bpmnElement)
+                                + "' does not fit the configured setting of the rule set. Check the extension with key '"
+                                + setting.getName() + "'.",
+                        null));
+            }
+        } else {
+            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                    element.getProcessdefinition(), null,
+                    bpmnElement.getAttributeValue("id"),
+                    bpmnElement.getAttributeValue("name"), null, null, null,
+                    "Value of '" + CheckName.checkName(bpmnElement)
+                            + "' is empty. Check whether ruleset and model are congruent.",
+                    null));
+        }
     }
 
 }

@@ -148,15 +148,15 @@ public class ElementIdConventionCheckerTest {
 
         final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
-        final ElementConvention elementConventionService = new ElementConvention("ServiceTask", null,
+        final ElementConvention elementConventionService = new ElementConvention("ServiceTask", null, null,
                 "serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*");
-        final ElementConvention elementConventionUser = new ElementConvention("UserTask", null,
+        final ElementConvention elementConventionUser = new ElementConvention("UserTask", null, null,
                 "userTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*");
 
         elementConventions.add(elementConventionService);
         elementConventions.add(elementConventionUser);
 
-        final Rule rule = new Rule("ElementIdConventionChecker", true, null, elementConventions, null);
+        final Rule rule = new Rule("ElementIdConventionChecker", true, null, null, elementConventions, null);
 
         return rule;
     }

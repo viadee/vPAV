@@ -21,10 +21,12 @@
 		<elementConventions>
 			<elementConvention>
 				<name>xorGateway</name>
+				<description>gateway name has to end with an question mark</description>
 				<pattern>.*\?</pattern>
 			</elementConvention>
 			<elementConvention>
 				<name>edges</name>
+				<description>gateway edge has to be named</description>
 				<pattern>.*</pattern>
 			</elementConvention>
 		</elementConventions>
@@ -59,7 +61,7 @@
 		<name>NoExpressionChecker</name>
 		<state>true</state>
 		<settings>
-			<setting name="ServiceTask"></setting>
+			<setting name="ServiceTask" />
 		</settings>
 	</rule>
 	<rule>
@@ -91,6 +93,7 @@
 					<elementFieldType>DMN</elementFieldType>
 					<elementFieldType>DelegateExpression</elementFieldType>
 				</elementFieldTypes>
+				<description>Variable has to start with "int_"</description>
 				<pattern>int_[a-zA-Z]+</pattern>
 			</elementConvention>
 			<elementConvention>
@@ -102,6 +105,7 @@
 					<elementFieldType>DMN</elementFieldType>
 					<elementFieldType>DelegateExpression</elementFieldType>
 				</elementFieldTypes>
+				<description>Variable has to start with "ext_"</description>
 				<pattern>ext_[a-zA-Z]+</pattern>
 			</elementConvention>
 		</elementConventions>
@@ -112,6 +116,8 @@
 		<elementConventions>
 			<elementConvention>
 				<name>convention</name>
+				<description>taskname has to start with a capital letter followed by
+					letters,hyphens or spaces</description>
 				<pattern>[A-ZÄÖÜ][a-zäöü\\\-\\\s]+</pattern>
 			</elementConvention>
 		</elementConventions>
@@ -122,6 +128,8 @@
 		<elementConventions>
 			<elementConvention>
 				<name>ServiceTask</name>
+				<description>ServiceTask has to starts with "serviceTask" followed by at least two
+					words starting with a capital letter</description>
 				<pattern>serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*
 				</pattern>
 			</elementConvention>

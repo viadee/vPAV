@@ -251,16 +251,16 @@ public class FieldInjectionChecker extends AbstractElementChecker {
 
                 if (!field.getType().getName().equals(BPMNConstants.FIXED_VALUE)
                         && !field.getType().getName().equals(BPMNConstants.EXPRESSION))
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), classPath, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "the type of the variable '" + varName + "' is incorrect"));
+                            "the type of the variable '" + varName + "' is incorrect", null));
 
                 if (!Modifier.isPublic(field.getModifiers()))
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), classPath, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "the variable '" + varName + "' should be public"));
+                            "the variable '" + varName + "' should be public", null));
 
                 Method[] methods = clazz.getMethods();
                 boolean hasMethod = false;
@@ -270,16 +270,17 @@ public class FieldInjectionChecker extends AbstractElementChecker {
                 }
 
                 if (!hasMethod)
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), classPath, bpmnElement.getAttributeValue("id"),
                             bpmnElement.getAttributeValue("name"), null, null, null,
-                            "no setter found for variable '" + varName + "'"));
+                            "no setter found for variable '" + varName + "'", null));
 
             } catch (NoSuchFieldException | SecurityException e) {
-                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), classPath, bpmnElement.getAttributeValue("id"),
                         bpmnElement.getAttributeValue("name"), null, null, null,
-                        "class '" + clazz.getSimpleName() + "' does not declared the variable '" + varName + "'"));
+                        "class '" + clazz.getSimpleName() + "' does not declared the variable '" + varName + "'",
+                        null));
             }
 
         } catch (final ClassNotFoundException e) {

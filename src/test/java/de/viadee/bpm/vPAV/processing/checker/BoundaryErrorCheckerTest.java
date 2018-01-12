@@ -64,7 +64,7 @@ public class BoundaryErrorCheckerTest {
 
     private static ClassLoader cl;
 
-    private final Rule rule = new Rule("BoundaryErrorChecker", true, null, null, null);
+    private final Rule rule = new Rule("BoundaryErrorChecker", true, null, null, null, null);
 
     @BeforeClass
     public static void setup() throws MalformedURLException {

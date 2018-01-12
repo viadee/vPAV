@@ -218,7 +218,8 @@ public class JsOutputWriter implements IssueOutputWriter {
             modelIssues.addAll(issues);
 
             for (CheckerIssue issue : issues) {
-                if (!issue.getBpmnFile().equals(ConstantsConfig.JS_BASEPATH + bpmnFilename))
+                String prettyBpmnFilename = replace(File.separator, "\\", issue.getBpmnFile());
+                if (!prettyBpmnFilename.equals(ConstantsConfig.JS_BASEPATH + bpmnFilename))
                     modelIssues.remove(issue);
             }
 
@@ -230,9 +231,9 @@ public class JsOutputWriter implements IssueOutputWriter {
                         ruleIssues.remove(issue);
                 }
                 if (ruleIssues.isEmpty())
-                    newIssues.add(new CheckerIssue(ruleName, CriticalityEnum.SUCCESS,
+                    newIssues.add(new CheckerIssue(ruleName, null, CriticalityEnum.SUCCESS,
                             (ConstantsConfig.JS_BASEPATH + bpmnFilename), null,
-                            "", "", null, null, null, "No issues found"));
+                            "", "", null, null, null, "No issues found", null));
             }
         }
 
@@ -310,6 +311,7 @@ public class JsOutputWriter implements IssueOutputWriter {
                 obj.addProperty("id", issue.getId());
                 obj.addProperty("bpmnFile", replace(File.separator, "\\", issue.getBpmnFile()));
                 obj.addProperty("ruleName", issue.getRuleName());
+                obj.addProperty("ruleDescription", issue.getRuleDescription());
                 obj.addProperty("elementId", issue.getElementId());
                 obj.addProperty("elementName", issue.getElementName());
                 obj.addProperty("classification", issue.getClassification().name());
@@ -337,6 +339,7 @@ public class JsOutputWriter implements IssueOutputWriter {
                 }
                 obj.add("paths", jsonPaths);
                 obj.addProperty("message", issue.getMessage());
+                obj.addProperty("elementDescription", issue.getElementDescription());
                 jsonIssues.add(obj);
             }
         }

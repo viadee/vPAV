@@ -108,11 +108,13 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                         try {
                             DatatypeConverter.parseDateTime(timerDefinition);
                         } catch (Exception e) {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
-                                    baseElement.getAttributeValue("name"), null, null, null,
-                                    "time event '" + CheckName.checkTimer(entry.getKey())
-                                            + "' does not follow the ISO 8601 scheme for timeDates."));
+                            issues.add(
+                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                                            element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
+                                            baseElement.getAttributeValue("name"), null, null, null,
+                                            "time event '" + CheckName.checkTimer(entry.getKey())
+                                                    + "' does not follow the ISO 8601 scheme for timeDates.",
+                                            null));
                         }
                     }
                     // timeDuration
@@ -121,11 +123,13 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                         try {
                             DatatypeFactory.newInstance().newDuration(timerDefinition);
                         } catch (Exception e) {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
-                                    baseElement.getAttributeValue("name"), null, null, null,
-                                    "time event '" + CheckName.checkTimer(entry.getKey())
-                                            + "' does not follow the ISO 8601 scheme for timeDuration."));
+                            issues.add(
+                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                                            element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
+                                            baseElement.getAttributeValue("name"), null, null, null,
+                                            "time event '" + CheckName.checkTimer(entry.getKey())
+                                                    + "' does not follow the ISO 8601 scheme for timeDuration.",
+                                            null));
                         }
                     }
                     // timeCycle
@@ -158,11 +162,13 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                 Cron cronJob = cronParser.parse(timerDefinition);
                                 cronJob.validate();
                             } catch (IllegalArgumentException e) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                        CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the scheme for CRON jobs."));
+                                                + "' does not follow the scheme for CRON jobs.",
+                                        null));
                             }
                         }
 
@@ -170,11 +176,13 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             try {
                                 MomentInterval.parseISO(timerDefinition);
                             } catch (ParseException e) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                        CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the ISO 8601 scheme for intervals."));
+                                                + "' does not follow the ISO 8601 scheme for intervals.",
+                                        null));
                             }
                         }
 
@@ -182,11 +190,13 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             try {
                                 IsoRecurrence.parseMomentIntervals(timerDefinition);
                             } catch (ParseException ex) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                        CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the ISO 8601 scheme for repeating intervals."));
+                                                + "' does not follow the ISO 8601 scheme for repeating intervals.",
+                                        null));
                             }
                         }
 
@@ -194,29 +204,33 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             try {
                                 DatatypeFactory.newInstance().newDuration(timerDefinition);
                             } catch (Exception ex) {
-                                issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                        CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                                         baseElement.getAttributeValue("name"), null, null, null,
                                         "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the ISO 8601 scheme for durations as interval."));
+                                                + "' does not follow the ISO 8601 scheme for durations as interval.",
+                                        null));
                             }
                         }
                     }
 
                 } else if (entry.getValue() == null || entry.getValue().getLocalName() == null
                         || entry.getValue().getLocalName().isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
                             "time event '" + CheckName.checkTimer(entry.getKey())
-                                    + "' has no timer definition type specified "));
+                                    + "' has no timer definition type specified ",
+                            null));
 
                 } else if (timerDefinition == null || timerDefinition.trim().isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, entry.getKey().getAttribute("id"),
                             baseElement.getAttributeValue("name"), null, null, null,
                             "time event '" + CheckName.checkTimer(entry.getKey())
-                                    + "' has no timer definition specified "));
+                                    + "' has no timer definition specified ",
+                            null));
                 }
             }
         }

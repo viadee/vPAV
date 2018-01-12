@@ -78,6 +78,8 @@ public abstract class AbstractRunner {
 
     private static boolean isExecuted = false;
 
+    private static boolean isMisconfigured = false;
+
     /**
      * Main method which represents lifecycle of the validation process Calls main functions
      */
@@ -523,6 +525,7 @@ public abstract class AbstractRunner {
             issues.addAll(checkModel(rules, pathToModel, fileScanner,
                     variableScanner));
         }
+        checkMisconfiguration();
         JsOutputWriter.finish();
         return issues;
     }
@@ -577,6 +580,16 @@ public abstract class AbstractRunner {
     }
 
     /**
+     * Checks whether a misconfiguration of the ruleSet.xml occured
+     *
+     */
+    private static void checkMisconfiguration() {
+        if (isMisconfigured())
+            logger.warning(
+                    "Misconfiguration of rule for ExtensionChecker. Please provide either tasktype or a specific ID of an element.");
+    }
+
+    /**
      * Add ignored issue
      *
      * @param issues
@@ -603,6 +616,14 @@ public abstract class AbstractRunner {
 
     public static void setExecuted(boolean isExecuted) {
         AbstractRunner.isExecuted = isExecuted;
+    }
+
+    public static boolean isMisconfigured() {
+        return isMisconfigured;
+    }
+
+    public static void setMisconfigured(boolean isMisconfigured) {
+        AbstractRunner.isMisconfigured = isMisconfigured;
     }
 
 }

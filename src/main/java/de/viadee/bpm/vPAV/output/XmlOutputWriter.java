@@ -115,10 +115,10 @@ public class XmlOutputWriter implements IssueOutputWriter {
                 }
             }
             final String elementName = issue.getElementName();
-            xmlIssues.addIssue(new XmlCheckerIssue(issue.getId(), issue.getRuleName(),
+            xmlIssues.addIssue(new XmlCheckerIssue(issue.getId(), issue.getRuleName(), issue.getRuleDescription(),
                     issue.getClassification().name(), issue.getBpmnFile(), issue.getResourceFile(),
                     issue.getElementId(), elementName == null ? null : elementName.replace("\n", ""),
-                    issue.getMessage(), issue.getVariable(),
+                    issue.getMessage(), issue.getElementDescription(), issue.getVariable(),
                     issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription(),
                     xmlPaths.isEmpty() ? null : xmlPaths));
         }

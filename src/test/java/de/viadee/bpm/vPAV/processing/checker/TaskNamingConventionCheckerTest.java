@@ -127,11 +127,11 @@ public class TaskNamingConventionCheckerTest {
 
         final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
-        final ElementConvention elementConvention = new ElementConvention("convention", null,
+        final ElementConvention elementConvention = new ElementConvention("convention", null, null,
                 "[A-ZÄÖÜ][a-zäöü\\-\\s]+");
         elementConventions.add(elementConvention);
 
-        final Rule rule = new Rule("TaskNamingConventionChecker", true, null, elementConventions, null);
+        final Rule rule = new Rule("TaskNamingConventionChecker", true, null, null, elementConventions, null);
 
         return rule;
     }

@@ -75,10 +75,10 @@ public class DmnTaskChecker extends AbstractElementChecker {
                 if (implementationAttr.equals("camunda:decisionRef")) {
                     if (dmnAttr == null || dmnAttr.trim().length() == 0) {
                         // Error, because no delegateExpression has been configured
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                                 element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
                                 bpmnElement.getAttributeValue("name"), null, null, null,
-                                "task " + CheckName.checkName(bpmnElement) + " with no dmn reference"));
+                                "task " + CheckName.checkName(bpmnElement) + " with no dmn reference", null));
                     } else {
                         issues.addAll(checkDMNFile(element, dmnAttr));
                     }
@@ -108,10 +108,10 @@ public class DmnTaskChecker extends AbstractElementChecker {
 
         if (urlDMN == null) {
             // Throws an error, if the class was not found
-            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                     element.getProcessdefinition(), dmnPath, bpmnElement.getAttributeValue("id"),
                     bpmnElement.getAttributeValue("name"), null, null, null,
-                    "dmn file for task " + CheckName.checkName(bpmnElement) + " not found"));
+                    "dmn file for task " + CheckName.checkName(bpmnElement) + " not found", null));
         }
         return issues;
     }

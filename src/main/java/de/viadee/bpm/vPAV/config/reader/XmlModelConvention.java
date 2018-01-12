@@ -29,42 +29,30 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "modelConvention")
-@XmlType(propOrder = { "name", "pattern" })
+@XmlType(propOrder = { "type" })
 public class XmlModelConvention {
 
-  private String name;
+    private String type;
 
-  private String pattern;
+    public XmlModelConvention() {
+    }
 
-  public XmlModelConvention() {
-  }
+    public XmlModelConvention(final String type) {
+        super();
+        this.type = type;
+    }
 
-  public XmlModelConvention(final String name, final String pattern) {
-    super();
-    this.name = name;
-    this.pattern = pattern;
-  }
+    @XmlAttribute(name = "type", required = true)
+    public String getType() {
+        return type;
+    }
 
-  @XmlElement(name = "name", required = true)
-  public String getName() {
-    return name;
-  }
-
-  public void setName(final String name) {
-    this.name = name;
-  }
-
-  @XmlElement(name = "pattern", required = true)
-  public String getPattern() {
-    return pattern;
-  }
-
-  public void setPattern(final String pattern) {
-    this.pattern = pattern;
-  }
+    public void setType(final String type) {
+        this.type = type;
+    }
 }

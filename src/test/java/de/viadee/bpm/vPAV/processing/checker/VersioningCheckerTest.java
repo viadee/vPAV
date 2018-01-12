@@ -78,7 +78,7 @@ public class VersioningCheckerTest {
     public void testJavaClassVersioning() {
         final String PATH = BASE_PATH + "VersioningCheckerTest_JavaClassVersioning.bpmn";
 
-        final Rule rule = new Rule("VersioningChecker", true, null, null, null);
+        final Rule rule = new Rule("VersioningChecker", true, null, null, null, null);
 
         // Versions
         final Collection<String> resourcesNewestVersions = new ArrayList<String>();
@@ -104,7 +104,7 @@ public class VersioningCheckerTest {
     public void testDirBasedJavaClassVersioning() {
         final String PATH = BASE_PATH + "VersioningCheckerTest_DirBasedJavaClassVersioning.bpmn";
 
-        final Rule rule = new Rule("VersioningChecker", true, null, null, null);
+        final Rule rule = new Rule("VersioningChecker", true, null, null, null, null);
 
         FileScanner.setIsDirectory(true);
 
@@ -144,10 +144,10 @@ public class VersioningCheckerTest {
 
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         settings.put("versioningSchemaClass",
-                new Setting("versioningSchemaClass", null, null, null,
+                new Setting("versioningSchemaClass", null, null, null, false,
                         "([^_]*)_{1}([0-9][_][0-9]{1})\\.(java|groovy)"));
 
-        final Rule rule = new Rule("VersioningChecker", true, settings, null, null);
+        final Rule rule = new Rule("VersioningChecker", true, null, settings, null, null);
 
         // Versions
         final Collection<String> resourcesNewestVersions = new ArrayList<String>();
@@ -178,7 +178,7 @@ public class VersioningCheckerTest {
     public void testScriptVersioning() {
         final String PATH = BASE_PATH + "VersioningCheckerTest_ScriptVersioning.bpmn";
 
-        final Rule rule = new Rule("VersioningChecker", true, null, null, null);
+        final Rule rule = new Rule("VersioningChecker", true, null, null, null, null);
 
         // Versions
         final Collection<String> resourcesNewestVersions = new ArrayList<String>();

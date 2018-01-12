@@ -67,7 +67,7 @@ public class CheckerFactoryTest {
 
     private static ClassLoader cl;
 
-    private final static Setting setting = new Setting("WrongChecker", null, null, null,
+    private final static Setting setting = new Setting("WrongChecker", null, null, null, false,
             "de.viadee.vPAV_checker_plugin");
 
     private static Map<String, Setting> settings = new HashMap<String, Setting>();
@@ -97,7 +97,7 @@ public class CheckerFactoryTest {
     @Test
     public void testCorrectInternalChecker()
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
-        Rule rule = new Rule("JavaDelegateChecker", true, null, null, null);
+        Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
         rules.put("JavaDelegateChecker", rule);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
         final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
@@ -120,7 +120,7 @@ public class CheckerFactoryTest {
     @Test
     public void testIncorrectInternalChecker()
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
-        Rule rule = new Rule("WrongChecker", true, null, null, null);
+        Rule rule = new Rule("WrongChecker", true, null, null, null, null);
         rules.put("WrongChecker", rule);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
         final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
@@ -144,7 +144,7 @@ public class CheckerFactoryTest {
     public void testIncorrectExternalChecker()
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
         settings.put("external_Location", setting);
-        Rule rule = new Rule("WrongChecker", true, settings, null, null);
+        Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
         rules.put("WrongChecker", rule);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
         final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);

@@ -70,7 +70,8 @@ public class ProcessVariablesModelChecker implements ModelChecker {
             final ProcessVariable var = anomaly.getVariable();
             if (paths != null) {
                 if (anomaly.getAnomaly() == Anomaly.DD) {
-                    issues.add(new CheckerIssue(rule.getName(), determineCriticality(anomaly.getAnomaly()),
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                            determineCriticality(anomaly.getAnomaly()),
                             var.getElement().getProcessdefinition(), var.getResourceFilePath(),
                             var.getElement().getBaseElement().getId(),
                             var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
@@ -78,9 +79,11 @@ public class ProcessVariablesModelChecker implements ModelChecker {
                             "process variable (" + var.getName() + ") will be overwritten in activity '"
                                     + var.getElement().getBaseElement().getAttributeValue("name")
                                     + "' without use. (compare model: "
-                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
+                            null));
                 } else if (anomaly.getAnomaly() == Anomaly.DU) {
-                    issues.add(new CheckerIssue(rule.getName(), determineCriticality(anomaly.getAnomaly()),
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                            determineCriticality(anomaly.getAnomaly()),
                             var.getElement().getProcessdefinition(), var.getResourceFilePath(),
                             var.getElement().getBaseElement().getId(),
                             var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
@@ -88,9 +91,11 @@ public class ProcessVariablesModelChecker implements ModelChecker {
                             "process variable (" + var.getName() + ") will be deleted in activity '"
                                     + var.getElement().getBaseElement().getAttributeValue("name")
                                     + "' without use. (compare model: "
-                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
+                            null));
                 } else if (anomaly.getAnomaly() == Anomaly.UR) {
-                    issues.add(new CheckerIssue(rule.getName(), determineCriticality(anomaly.getAnomaly()),
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                            determineCriticality(anomaly.getAnomaly()),
                             var.getElement().getProcessdefinition(), var.getResourceFilePath(),
                             var.getElement().getBaseElement().getId(),
                             var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
@@ -98,7 +103,8 @@ public class ProcessVariablesModelChecker implements ModelChecker {
                             "there is a read access to variable (" + var.getName() + ") in activity '"
                                     + var.getElement().getBaseElement().getAttributeValue("name")
                                     + "', but no value has been set before. (compare model: "
-                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
+                            null));
                 }
             }
         }

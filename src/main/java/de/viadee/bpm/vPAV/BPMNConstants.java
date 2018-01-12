@@ -125,6 +125,10 @@ public class BPMNConstants {
 
     public static final String ERROR = "error";
 
+    public static final String PROCESS = "process";
+
+    public static final String MESSAGEEVENTDEFINITION = "messageEventDefinition";
+
     // ------------------------
 
     public static final String SCRIPT_TAG = "camunda:script";
@@ -141,15 +145,27 @@ public class BPMNConstants {
 
     public static final String CAMUNDA_OUTPAR = "camunda:outputParameter";
 
+    public static final String CAMUNDA_INPAR = "camunda:inputParameter";
+
     public static final String CAMUNDA_FIELD = "camunda:field";
 
     public static final String CAMUNDA_PROPERTY = "camunda:property";
 
     public static final String CAMUNDA_ERRORCODEVAR = "camunda:errorCodeVariable";
 
+    public static final String CAMUNDA_ERRORCODEMESSVAR = "camunda:errorMessageVariable";
+
     public static final String CAMUNDA_EXECUTIONLISTENER = "camunda:executionListener";
 
     public static final String CAMUNDA_TASKLISTENER = "camunda:taskListener";
+
+    public static final String CAMUNDA_LIST = "camunda:list";
+
+    public static final String CAMUNDA_VALUE = "camunda:value";
+
+    public static final String CAMUNDA_MAP = "camunda:map";
+
+    public static final String CAMUNDA_ENTRY = "camunda:entry";
 
     public static final String ATTACHED_TO_REF = "attachedToRef";
 
@@ -172,6 +188,16 @@ public class BPMNConstants {
     public static final String ATTR_DEL = "delegateExpression";
 
     public static final String ATTR_EX = "expression";
+
+    public static final String ATTR_ID = "id";
+
+    public static final String ATTR_NAME = "name";
+
+    public static final String ATTR_VALUE = "value";
+
+    public static final String ATTR_ERRORREF = "errorRef";
+
+    public static final String ATTR_ERRORCODE = "errorCode";
 
     public static final String FIXED_VALUE = "org.camunda.bpm.engine.impl.el.FixedValue";
 

@@ -100,14 +100,16 @@ public class ProcessVariablesNameConventionChecker extends AbstractElementChecke
                                 final Matcher patternMatcher = pattern.matcher(variable.getName());
                                 if (!patternMatcher.matches()) {
                                     final BaseElement baseElement = element.getBaseElement();
-                                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
+                                            CriticalityEnum.WARNING,
                                             element.getProcessdefinition(), variable.getResourceFilePath(),
                                             baseElement.getId(), baseElement.getAttributeValue("name"),
                                             variable.getName(), null, null,
                                             "process variable (" + variable.getName()
                                                     + ") is against the naming convention " + convention.getName()
                                                     + " (compare model: " + variable.getChapter() + ", "
-                                                    + variable.getFieldType().getDescription() + ")"));
+                                                    + variable.getFieldType().getDescription() + ")",
+                                            convention.getDescription()));
                                 }
                             }
                         }

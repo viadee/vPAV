@@ -71,10 +71,10 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
                 if (!matcher.matches()
                         && baseElement.getElementType().getInstanceType().getSimpleName().toLowerCase()
                                 .equals(bpmnInstance.toLowerCase())) {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getId(),
                             baseElement.getAttributeValue("name"), null, null, null,
-                            "ID '" + elementId + "' is against the naming convention"));
+                            "ID '" + elementId + "' is against the naming convention", convention.getDescription()));
                 }
             }
         }

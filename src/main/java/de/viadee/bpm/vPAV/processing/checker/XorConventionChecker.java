@@ -77,10 +77,11 @@ public class XorConventionChecker extends AbstractElementChecker {
                 if (settings != null && settings.containsKey("requiredDefault")
                         && settings.get("requiredDefault").getValue().equals("true")
                         && bpmnElement.getAttributeValue("default") == null)
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, bpmnElement.getId(),
                             bpmnElement.getAttributeValue("name"), null, null, null, "xor gateway '"
-                                    + CheckName.checkName(bpmnElement) + "' has no default path"));
+                                    + CheckName.checkName(bpmnElement) + "' has no default path",
+                            null));
 
                 final ArrayList<ElementConvention> elementConventions = (ArrayList<ElementConvention>) rule
                         .getElementConventions();
@@ -99,16 +100,18 @@ public class XorConventionChecker extends AbstractElementChecker {
                     Matcher matcher = pattern.matcher(taskNameClean);
 
                     if (!matcher.matches()) {
-                        issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                                 element.getProcessdefinition(), null, bpmnElement.getId(),
                                 bpmnElement.getAttributeValue("name"), null, null, null, "xor gateway name '"
-                                        + CheckName.checkName(bpmnElement) + "' is against the naming convention"));
+                                        + CheckName.checkName(bpmnElement) + "' is against the naming convention",
+                                elementConventions.get(0).getDescription()));
                     }
                 } else {
                     issues.add(
-                            new CheckerIssue(rule.getName(), CriticalityEnum.WARNING, element.getProcessdefinition(),
+                            new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
+                                    element.getProcessdefinition(),
                                     null, bpmnElement.getId(), bpmnElement.getAttributeValue("name"), null, null,
-                                    null, "xor gateway name must be specified"));
+                                    null, "xor gateway name must be specified", null));
                 }
 
                 // TODO: dont use indices
@@ -123,26 +126,25 @@ public class XorConventionChecker extends AbstractElementChecker {
                         final String edgeNameClean = edgeName.replaceAll("\n", "").replaceAll("\r", "");
                         Matcher matcher = pattern.matcher(edgeNameClean);
                         if (!matcher.matches()) {
-                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
-                                    element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
-                                    Task_Element.getAttribute("name"), null, null, null,
-                                    "outgoing edges of xor gateway '"
-                                            + CheckName.checkName(bpmnElement)
-                                            + "' are against the naming convention"));
+                            issues.add(
+                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
+                                            element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
+                                            Task_Element.getAttribute("name"), null, null, null,
+                                            "outgoing edges of xor gateway '"
+                                                    + CheckName.checkName(bpmnElement)
+                                                    + "' are against the naming convention",
+                                            elementConventions.get(1).getDescription()));
                         }
                     } else {
                         issues.add(
-                                new CheckerIssue(rule.getName(), CriticalityEnum.WARNING,
+                                new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                                         element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
                                         Task_Element.getAttribute("name"), null, null, null,
-                                        "outgoing edges of xor gateway need to be named"));
+                                        "outgoing edges of xor gateway need to be named", null));
                     }
                 }
-
             }
-
         }
         return issues;
     }
-
 }

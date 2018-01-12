@@ -21,10 +21,12 @@ The rule should be configured as follows:
 	<elementConventions>
 		<elementConvention>
 			<name>convention</name>
+			<description>gateway name has to end with an question mark</description>
 			<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
 		</elementConvention>
 		<elementConvention>
 			<name>convention2</name>
+			<description>gateway edge has to be named</description>
 			<pattern>[A-ZÄÖÜ][a-zäöü]*</pattern>
 		</elementConvention>
 	</elementConventions>
@@ -35,6 +37,11 @@ The setting allows you to configure whether a default path is required.
 The pattern can be any regular expression and is useful to enforce naming conventions.  
 "convention" refers to the naming convention of xor gateways themselves.  
 "convention2" refers to the outgoing edges of a xor gateway.
+
+An element convention consists of:
+- a `name`
+- a regular expression for the naming convention (`pattern`)
+- a `description` to describe the convention (optional)
 
 ## Error messages:
 **Naming convention of XOR gate '%gatewayName%' not correct.**
