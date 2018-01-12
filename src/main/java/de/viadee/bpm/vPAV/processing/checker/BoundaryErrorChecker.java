@@ -272,6 +272,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
                     final String methodBody = IOUtils.toString(resource);
                     return validateContent(methodBody, errorCode);
+                    // CompilationUnit compilationUnit = JavaParser.parse(methodBody);
+                    // compilationUnit.getComments();
+
                 } else {
                     logger.warning("Class " + fileName + " could not be read or does not exist");
                 }

@@ -69,6 +69,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.github.javaparser</groupId>
+			<artifactId>javaparser-core</artifactId>
+			<version>3.5.8</version>
+		</dependency>
+		<dependency>
 			<groupId>com.cronutils</groupId>
 			<artifactId>cron-utils</artifactId>
 			<version>7.0.0</version>
@@ -262,7 +267,7 @@
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
 					<source>1.8</source>
 					<target>1.8</target>
-				</configuration>				
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.mycila</groupId>

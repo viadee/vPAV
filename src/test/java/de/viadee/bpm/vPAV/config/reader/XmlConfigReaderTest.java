@@ -133,17 +133,4 @@ public class XmlConfigReaderTest {
         reader.read("ruleSetIncorrect.xml");
 
     }
-
-    /**
-     * Test loading a config file with incorrect RegEx
-     *
-     *
-     */
-    @Test(expected = ConfigReaderException.class)
-    public void testLoadingIncorrectRegExXMLConfigFile() throws ConfigReaderException {
-        // Given
-        XmlConfigReader reader = new XmlConfigReader();
-
-        reader.read("ruleSetIncorrectRegEx.xml");
-    }
 }

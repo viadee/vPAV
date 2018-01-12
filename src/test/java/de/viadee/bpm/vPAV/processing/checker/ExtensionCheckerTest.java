@@ -52,6 +52,7 @@ import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.ModelConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -285,6 +286,8 @@ public class ExtensionCheckerTest {
      */
     private static Rule createRule() {
 
+        final ArrayList<ModelConvention> modelConventions = createModelConventions();
+
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         final Setting setting = new Setting("SETTING1", null, "ServiceTask", null, true, "\\d+");
         final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, true, "\\d+");
@@ -292,7 +295,7 @@ public class ExtensionCheckerTest {
         settings.put("SETTING1", setting);
         settings.put("SETTING2", setting1);
 
-        final Rule rule = new Rule("ExtensionChecker", true, settings, null, null);
+        final Rule rule = new Rule("ExtensionChecker", true, settings, null, modelConventions);
 
         return rule;
     }
@@ -304,6 +307,8 @@ public class ExtensionCheckerTest {
      */
     private static Rule createRule2() {
 
+        final ArrayList<ModelConvention> modelConventions = createModelConventions();
+
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         final Setting setting = new Setting("SETTING1", null, "ServiceTask", "Task_26x8g8d", false, "\\d+");
         final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, false, "\\d+");
@@ -311,7 +316,7 @@ public class ExtensionCheckerTest {
         settings.put("SETTING1", setting);
         settings.put("SETTING2", setting1);
 
-        final Rule rule = new Rule("ExtensionChecker", true, settings, null, null);
+        final Rule rule = new Rule("ExtensionChecker", true, settings, null, modelConventions);
 
         return rule;
     }
@@ -323,6 +328,8 @@ public class ExtensionCheckerTest {
      */
     private static Rule createRule3() {
 
+        final ArrayList<ModelConvention> modelConventions = createModelConventions();
+
         final Map<String, Setting> settings = new HashMap<String, Setting>();
         final Setting setting = new Setting("SETTING1", null, "ServiceTask", null, false, "\\d+");
         final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, true, "\\d+");
@@ -330,9 +337,26 @@ public class ExtensionCheckerTest {
         settings.put("SETTING1", setting);
         settings.put("SETTING2", setting1);
 
-        final Rule rule = new Rule("ExtensionChecker", true, settings, null, null);
+        final Rule rule = new Rule("ExtensionChecker", true, settings, null, modelConventions);
 
         return rule;
+    }
+
+    /**
+     * Creates model conventions
+     *
+     * @return modelConventions
+     */
+    private static ArrayList<ModelConvention> createModelConventions() {
+        final ArrayList<ModelConvention> modelConventions = new ArrayList<ModelConvention>();
+        final ModelConvention modelConvention1 = new ModelConvention("ServiceTask");
+        final ModelConvention modelConvention2 = new ModelConvention("BusinessRuleTask");
+        final ModelConvention modelConvention3 = new ModelConvention("SkriptTask");
+
+        modelConventions.add(modelConvention1);
+        modelConventions.add(modelConvention2);
+        modelConventions.add(modelConvention3);
+        return modelConventions;
     }
 
 }

@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
+import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BPMNScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -52,11 +53,14 @@ public class ExtensionChecker extends AbstractElementChecker {
         super(rule, bpmnScanner);
     }
 
+    // TODO: falls id nicht gefunden -> logger warning
+
     @Override
     public Collection<CheckerIssue> check(BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
         final Map<String, Setting> settings = rule.getSettings();
+        final ArrayList<String> whiteList = rule.getWhiteList();
 
         final Map<String, String> keyPairs = new HashMap<String, String>();
         final ArrayList<Setting> optionalSettings = new ArrayList<Setting>();
@@ -74,10 +78,12 @@ public class ExtensionChecker extends AbstractElementChecker {
             }
         }
 
-        // Check for all mandatory extension pairs according to ruleset
-        issues.addAll(checkManExtension(mandatorySettings, keyPairs, bpmnElement, element));
-        // Check for all optional extension pairs
-        issues.addAll(checkOptExtension(optionalSettings, keyPairs, bpmnElement, element));
+        if (whiteList.contains(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
+            // Check for all mandatory extension pairs according to ruleset
+            issues.addAll(checkManExtension(whiteList, mandatorySettings, keyPairs, bpmnElement, element));
+            // Check for all optional extension pairs
+            issues.addAll(checkOptExtension(whiteList, optionalSettings, keyPairs, bpmnElement, element));
+        }
 
         return issues;
 
@@ -96,36 +102,41 @@ public class ExtensionChecker extends AbstractElementChecker {
      *            Element
      * @return
      */
-    private Collection<CheckerIssue> checkManExtension(final ArrayList<Setting> settings,
+    private Collection<CheckerIssue> checkManExtension(final ArrayList<String> whiteList,
+            final ArrayList<Setting> settings,
             final Map<String, String> keyPairs, final BaseElement bpmnElement, final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         for (Setting setting : settings) {
 
-            // Check if specified type equals
-            if (setting.getType() != null
-                    && setting.getType().equals(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
+            // Check whether rule for ExtensionChecker is misconfigured
+            if (!checkMisconfiguration(setting)) {
 
-                // Check whether the key specified in the settings is contained in the model
-                if (setting.getName() != null && keyPairs.containsKey(setting.getName())) {
+                // Type is specified in ruleSet
+                if (setting.getType() != null) {
 
-                    // If no task ID is specified, check all elements
-                    if (setting.getId() == null) {
-                        // Check correctness of value
-                        checkValue(keyPairs, bpmnElement, element, issues, setting);
-                    } else {
-                        if (setting.getId() != null && setting.getId().equals(bpmnElement.getAttributeValue("id"))) {
+                    // Check whether specified type equals name of bpmnElement
+                    if (setting.getType().equals(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
+
+                        // Check whether the key specified in the settings is contained in the model
+                        if (setting.getName() != null && keyPairs.containsKey(setting.getName())) {
                             checkValue(keyPairs, bpmnElement, element, issues, setting);
+                        } else {
+                            issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
+                                    element.getProcessdefinition(), null,
+                                    bpmnElement.getAttributeValue("id"),
+                                    bpmnElement.getAttributeValue("name"), null, null, null,
+                                    "Key of '" + CheckName.checkName(bpmnElement)
+                                            + "' could not be resolved. The ruleset specifies the use of key '"
+                                            + setting.getName() + "'."));
                         }
                     }
                 } else {
-                    issues.add(new CheckerIssue(rule.getName(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            bpmnElement.getAttributeValue("id"),
-                            bpmnElement.getAttributeValue("name"), null, null, null,
-                            "Key of '" + CheckName.checkName(bpmnElement)
-                                    + "' could not be resolved. The ruleset specifies the use of key '"
-                                    + setting.getName() + "'."));
+                    // Check based on ID
+                    if (setting.getId() != null
+                            && setting.getId().equals(bpmnElement.getAttributeValue("id"))) {
+                        checkValue(keyPairs, bpmnElement, element, issues, setting);
+                    }
                 }
             }
         }
@@ -146,11 +157,14 @@ public class ExtensionChecker extends AbstractElementChecker {
      *            Element
      * @return
      */
-    private Collection<CheckerIssue> checkOptExtension(final ArrayList<Setting> settings,
+    private Collection<CheckerIssue> checkOptExtension(final ArrayList<String> whiteList,
+            final ArrayList<Setting> settings,
             final Map<String, String> keyPairs, final BaseElement bpmnElement, final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         for (Setting setting : settings) {
+
+            checkMisconfiguration(setting);
 
             // Check if specified type equals
             if (setting.getType() != null
@@ -172,6 +186,24 @@ public class ExtensionChecker extends AbstractElementChecker {
         }
 
         return issues;
+    }
+
+    /**
+     * Checks whether a misconfiguration of the ruleSet.xml occured
+     *
+     * @param setting
+     *            Certain setting out of all settings
+     */
+    private boolean checkMisconfiguration(Setting setting) {
+
+        boolean misconfigured = false;
+
+        if (setting.getType() != null && setting.getId() != null) {
+            misconfigured = true;
+            AbstractRunner.setMisconfigured(misconfigured);
+            return misconfigured;
+        }
+        return misconfigured;
     }
 
     /**

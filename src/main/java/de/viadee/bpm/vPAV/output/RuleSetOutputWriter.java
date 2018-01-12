@@ -115,25 +115,25 @@ public class RuleSetOutputWriter {
 
             // Get XmlModelConventions
             Collection<XmlModelConvention> xModelConventions = new ArrayList<XmlModelConvention>();
-            for (ModelConvention ModCon : rule.getModelConventions()) {
-                XmlModelConvention xmlMoCon = new XmlModelConvention(ModCon.getName(), ModCon.getPattern());
+            for (ModelConvention modCon : rule.getModelConventions()) {
+                XmlModelConvention xmlMoCon = new XmlModelConvention(modCon.getType());
                 xModelConventions.add(xmlMoCon);
             }
 
             // Get XmlElementConvention
             Collection<XmlElementConvention> xElementConventions = new ArrayList<XmlElementConvention>();
-            for (ElementConvention ElCon : rule.getElementConventions()) {
-                ElementFieldTypes eFT = ElCon.getElementFieldTypes();
+            for (ElementConvention elCon : rule.getElementConventions()) {
+                ElementFieldTypes eFT = elCon.getElementFieldTypes();
                 if (eFT != null) {
                     Collection<String> cElFieTy = eFT.getElementFieldTypes();
                     XmlElementFieldTypes xmlElFieTy = new XmlElementFieldTypes(cElFieTy,
-                            ElCon.getElementFieldTypes().isExcluded());
-                    XmlElementConvention xmlElCon = new XmlElementConvention(ElCon.getName(), xmlElFieTy,
-                            ElCon.getDescription(), ElCon.getPattern());
+                            elCon.getElementFieldTypes().isExcluded());
+                    XmlElementConvention xmlElCon = new XmlElementConvention(elCon.getName(), xmlElFieTy,
+                            elCon.getDescription(), elCon.getPattern());
                     xElementConventions.add(xmlElCon);
                 } else {
-                    XmlElementConvention xmlElCon = new XmlElementConvention(ElCon.getName(), null,
-                            ElCon.getDescription(), ElCon.getPattern());
+                    XmlElementConvention xmlElCon = new XmlElementConvention(elCon.getName(), null,
+                            elCon.getDescription(), elCon.getPattern());
                     xElementConventions.add(xmlElCon);
                 }
             }

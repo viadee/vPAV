@@ -113,7 +113,7 @@ public final class XmlConfigReader implements ConfigReader {
                 throw new ConfigReaderException("rule name is not set");
             final boolean state = rule.isState();
             final Collection<XmlElementConvention> xmlElementConventions = rule.getElementConventions();
-            final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+            final ArrayList<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
             if (xmlElementConventions != null) {
                 for (final XmlElementConvention xmlElementConvention : xmlElementConventions) {
                     final XmlElementFieldTypes xmlElementFieldTypes = xmlElementConvention
@@ -133,15 +133,10 @@ public final class XmlConfigReader implements ConfigReader {
                 }
             }
             final Collection<XmlModelConvention> xmlModelConventions = rule.getModelConventions();
-            final Collection<ModelConvention> modelConventions = new ArrayList<ModelConvention>();
+            final ArrayList<ModelConvention> modelConventions = new ArrayList<ModelConvention>();
             if (xmlModelConventions != null) {
                 for (final XmlModelConvention xmlModelConvention : xmlModelConventions) {
-                    if (!checkRegEx(xmlModelConvention.getPattern()))
-                        throw new ConfigReaderException(
-                                "RegEx (" + xmlModelConvention.getPattern() + ") of " + name + " ("
-                                        + xmlModelConvention.getName() + ") is incorrect");
-                    modelConventions.add(
-                            new ModelConvention(xmlModelConvention.getName(), xmlModelConvention.getPattern()));
+                    modelConventions.add(new ModelConvention(xmlModelConvention.getType()));
                 }
             }
             final Collection<XmlSetting> xmlSettings = rule.getSettings();

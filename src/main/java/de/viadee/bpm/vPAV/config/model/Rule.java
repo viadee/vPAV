@@ -29,6 +29,7 @@
  */
 package de.viadee.bpm.vPAV.config.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -42,12 +43,11 @@ public class Rule {
 
     private Collection<ElementConvention> elementConventions;
 
-    private Collection<ModelConvention> modelConventions;
+    private ArrayList<ModelConvention> modelConventions;
 
-    public Rule(final String name, final boolean isActive,
-            final Map<String, Setting> settings,
+    public Rule(final String name, final boolean isActive, final Map<String, Setting> settings,
             final Collection<ElementConvention> elementConventions,
-            final Collection<ModelConvention> modelConventions) {
+            final ArrayList<ModelConvention> modelConventions) {
         super();
         this.name = name;
         this.isActive = isActive;
@@ -72,8 +72,18 @@ public class Rule {
         return elementConventions;
     }
 
-    public Collection<ModelConvention> getModelConventions() {
+    public ArrayList<ModelConvention> getModelConventions() {
         return modelConventions;
+    }
+
+    public ArrayList<String> getWhiteList() {
+        final ArrayList<String> whiteList = new ArrayList<String>();
+        for (ModelConvention modelConvention : modelConventions) {
+            if (modelConvention.getType() != null) {
+                whiteList.add(modelConvention.getType());
+            }
+        }
+        return whiteList;
     }
 
     public void deactivate() {
