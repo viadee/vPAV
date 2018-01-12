@@ -21,12 +21,12 @@
 		<elementConventions>
 			<elementConvention>
 				<name>xorGateway</name>
-				<description>gateway name has to end with an question mark</description>
+				<elementDescription>gateway name has to end with an question mark</elementDescription>
 				<pattern>.*\?</pattern>
 			</elementConvention>
 			<elementConvention>
 				<name>edges</name>
-				<description>gateway edge has to be named</description>
+				<elementDescription>gateway edge has to be named</elementDescription>
 				<pattern>.*</pattern>
 			</elementConvention>
 		</elementConventions>
@@ -93,7 +93,7 @@
 					<elementFieldType>DMN</elementFieldType>
 					<elementFieldType>DelegateExpression</elementFieldType>
 				</elementFieldTypes>
-				<description>Variable has to start with "int_"</description>
+				<elementDescription>Variable has to start with "int_"</elementDescription>
 				<pattern>int_[a-zA-Z]+</pattern>
 			</elementConvention>
 			<elementConvention>
@@ -105,7 +105,7 @@
 					<elementFieldType>DMN</elementFieldType>
 					<elementFieldType>DelegateExpression</elementFieldType>
 				</elementFieldTypes>
-				<description>Variable has to start with "ext_"</description>
+				<elementDescription>Variable has to start with "ext_"</elementDescription>
 				<pattern>ext_[a-zA-Z]+</pattern>
 			</elementConvention>
 		</elementConventions>
@@ -128,8 +128,8 @@
 		<elementConventions>
 			<elementConvention>
 				<name>ServiceTask</name>
-				<description>ServiceTask has to starts with "serviceTask" followed by at least two
-					words starting with a capital letter</description>
+				<elementDescription>ServiceTask has to starts with "serviceTask" followed by at least two
+					words starting with a capital letter</elementDescription>
 				<pattern>serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*
 				</pattern>
 			</elementConvention>
