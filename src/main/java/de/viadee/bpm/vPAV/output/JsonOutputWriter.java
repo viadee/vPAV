@@ -109,7 +109,7 @@ public class JsonOutputWriter implements IssueOutputWriter {
                 }
                 obj.add("paths", jsonPaths);
                 obj.addProperty("message", issue.getMessage());
-                obj.addProperty("description", issue.getDescription());
+                obj.addProperty("elementDescription", issue.getDescription());
                 jsonIssues.add(obj);
             }
         }

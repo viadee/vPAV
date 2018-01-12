@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "issue")
 @XmlType(propOrder = { "id", "ruleName", "bpmnFile", "resourceFile", "classification", "elementId",
-        "elementName", "variable", "anomaly", "paths", "message", "description" })
+        "elementName", "variable", "anomaly", "paths", "message", "elementDescription" })
 public class XmlCheckerIssue {
 
     private String id;
@@ -63,14 +63,14 @@ public class XmlCheckerIssue {
 
     private String message;
 
-    private String description;
+    private String elementDescription;
 
     public XmlCheckerIssue() {
     }
 
     public XmlCheckerIssue(final String id, final String ruleName, final String classification,
             final String bpmnFile, final String resourceFile, final String elementId,
-            final String elementName, final String message, final String description, final String variable,
+            final String elementName, final String message, final String elementDescription, final String variable,
             final String anomaly,
             final List<XmlPath> invalidPaths) {
         super();
@@ -85,7 +85,7 @@ public class XmlCheckerIssue {
         this.variable = variable;
         this.anomaly = anomaly;
         this.paths = invalidPaths;
-        this.description = description;
+        this.elementDescription = elementDescription;
     }
 
     @XmlElement(name = "id", required = true)
@@ -144,9 +144,9 @@ public class XmlCheckerIssue {
         return message;
     }
 
-    @XmlElement(name = "description", required = false)
-    public String getDescription() {
-        return description;
+    @XmlElement(name = "elementDescription", required = false)
+    public String getElementDescription() {
+        return elementDescription;
     }
 
     public void setClassification(String classification) {
@@ -169,8 +169,8 @@ public class XmlCheckerIssue {
         this.message = message;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setElementDescription(String elementDescription) {
+        this.elementDescription = elementDescription;
     }
 
     public void setId(String id) {
