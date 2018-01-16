@@ -582,6 +582,43 @@ public class BPMNScanner {
     }
 
     /**
+     * get sequenceFlow attributes such as sourceRef and targetRef
+     *
+     * @param id
+     *            id of bpmn element
+     * @return ArrayList of outgoing Nodes
+     */
+    public ArrayList<String> getSequenceFlowDef(String id) {
+
+        final ArrayList<String> references = new ArrayList<>();
+
+        NodeList nodeList = null;
+
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BPMNConstants.SEQUENCE);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_SEQUENCE);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_SEQUENCE);
+                break;
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element taskElement = (Element) nodeList.item(i);
+
+            // check if the ids are corresponding and retrieve the attributes for target and source reference
+            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
+                references.add(taskElement.getAttribute(BPMNConstants.SOURCEREF));
+                references.add(taskElement.getAttribute(BPMNConstants.TARGETREF));
+            }
+        }
+        return references;
+    }
+
+    /**
      * check xor gateways for outgoing edges
      *
      * @param id

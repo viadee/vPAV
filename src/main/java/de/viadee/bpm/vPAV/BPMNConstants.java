@@ -31,70 +31,6 @@ package de.viadee.bpm.vPAV;
 
 public class BPMNConstants {
 
-    public static final String BPMN_DEFINITIONS = "bpmn:definitions";
-
-    public static final String BPMN_BUSINESSRULETASK = "bpmn:businessRuleTask";
-
-    public static final String BPMN_SERVICETASK = "bpmn:serviceTask";
-
-    public static final String BPMN_SENDTASK = "bpmn:sendTask";
-
-    public static final String BPMN_GATEWAY = "bpmn:exclusiveGateway";
-
-    public static final String BPMN_OUT = "bpmn:outgoing";
-
-    public static final String BPMN_SEQUENCE = "bpmn:sequenceFlow";
-
-    public static final String BPMN_INTERMEDIATECATCHEVENT = "bpmn:intermediateCatchEvent";
-
-    public static final String BPMN_INTERMEDIATETHROWEVENT = "bpmn:intermediateThrowEvent";
-
-    public static final String BPMN_STARTEVENT = "bpmn:startEvent";
-
-    public static final String BPMN_BOUNDARYEVENT = "bpmn:boundaryEvent";
-
-    public static final String BPMN_ENDEVENT = "bpmn:endEvent";
-
-    public static final String BPMN_EXTELEMENTS = "bpmn:extensionElements";
-
-    public static final String BPMN_MESSAGE = "bpmn:message";
-
-    public static final String BPMN_ERROR = "bpmn:error";
-
-    // -----------------------
-
-    public static final String BPMN2_DEFINITIONS = "bpmn2:definitions";
-
-    public static final String BPMN2_BUSINESSRULETASK = "bpmn2:businessRuleTask";
-
-    public static final String BPMN2_SERVICETASK = "bpmn2:serviceTask";
-
-    public static final String BPMN2_SENDTASK = "bpmn2:sendTask";
-
-    public static final String BPMN2_GATEWAY = "bpmn2:exclusiveGateway";
-
-    public static final String BPMN2_OUT = "bpmn2:outgoing";
-
-    public static final String BPMN2_SEQUENCE = "bpmn2:sequenceFlow";
-
-    public static final String BPMN2_INTERMEDIATECATCHEVENT = "bpmn2:intermediateCatchEvent";
-
-    public static final String BPMN2_INTERMEDIATETHROWEVENT = "bpmn2:intermediateThrowEvent";
-
-    public static final String BPMN2_STARTEVENT = "bpmn2:startEvent";
-
-    public static final String BPMN2_BOUNDARYEVENT = "bpmn2:boundaryEvent";
-
-    public static final String BPMN2_ENDEVENT = "bpmn2:endEvent";
-
-    public static final String BPMN2_EXTELEMENTS = "bpmn2:extensionElements";
-
-    public static final String BPMN2_MESSAGE = "bpmn2:message";
-
-    public static final String BPMN2_ERROR = "bpmn2:error";
-
-    // -----------------------
-
     public static final String DEFINITIONS = "definitions";
 
     public static final String BUSINESSRULETASK = "businessRuleTask";
@@ -106,6 +42,8 @@ public class BPMNConstants {
     public static final String GATEWAY = "exclusiveGateway";
 
     public static final String OUT = "outgoing";
+
+    public static final String IN = "incoming";
 
     public static final String SEQUENCE = "sequenceFlow";
 
@@ -130,6 +68,78 @@ public class BPMNConstants {
     public static final String MESSAGEEVENTDEFINITION = "messageEventDefinition";
 
     // ------------------------
+
+    public static final String BPMN_DEFINITIONS = "bpmn:definitions";
+
+    public static final String BPMN_BUSINESSRULETASK = "bpmn:businessRuleTask";
+
+    public static final String BPMN_SERVICETASK = "bpmn:serviceTask";
+
+    public static final String BPMN_SENDTASK = "bpmn:sendTask";
+
+    public static final String BPMN_GATEWAY = "bpmn:exclusiveGateway";
+
+    public static final String BPMN_OUT = "bpmn:outgoing";
+
+    public static final String BPMN_IN = "bpmn:incoming";
+
+    public static final String BPMN_SEQUENCE = "bpmn:sequenceFlow";
+
+    public static final String BPMN_INTERMEDIATECATCHEVENT = "bpmn:intermediateCatchEvent";
+
+    public static final String BPMN_INTERMEDIATETHROWEVENT = "bpmn:intermediateThrowEvent";
+
+    public static final String BPMN_STARTEVENT = "bpmn:startEvent";
+
+    public static final String BPMN_BOUNDARYEVENT = "bpmn:boundaryEvent";
+
+    public static final String BPMN_ENDEVENT = "bpmn:endEvent";
+
+    public static final String BPMN_EXTELEMENTS = "bpmn:extensionElements";
+
+    public static final String BPMN_MESSAGE = "bpmn:message";
+
+    public static final String BPMN_ERROR = "bpmn:error";
+
+    public static final String BPMN_PROCESS = "bpmn:process";
+
+    // -----------------------
+
+    public static final String BPMN2_DEFINITIONS = "bpmn2:definitions";
+
+    public static final String BPMN2_BUSINESSRULETASK = "bpmn2:businessRuleTask";
+
+    public static final String BPMN2_SERVICETASK = "bpmn2:serviceTask";
+
+    public static final String BPMN2_SENDTASK = "bpmn2:sendTask";
+
+    public static final String BPMN2_GATEWAY = "bpmn2:exclusiveGateway";
+
+    public static final String BPMN2_OUT = "bpmn2:outgoing";
+
+    public static final String BPMN2_IN = "bpmn2:incoming";
+
+    public static final String BPMN2_SEQUENCE = "bpmn2:sequenceFlow";
+
+    public static final String BPMN2_INTERMEDIATECATCHEVENT = "bpmn2:intermediateCatchEvent";
+
+    public static final String BPMN2_INTERMEDIATETHROWEVENT = "bpmn2:intermediateThrowEvent";
+
+    public static final String BPMN2_STARTEVENT = "bpmn2:startEvent";
+
+    public static final String BPMN2_BOUNDARYEVENT = "bpmn2:boundaryEvent";
+
+    public static final String BPMN2_ENDEVENT = "bpmn2:endEvent";
+
+    public static final String BPMN2_EXTELEMENTS = "bpmn2:extensionElements";
+
+    public static final String BPMN2_MESSAGE = "bpmn2:message";
+
+    public static final String BPMN2_ERROR = "bpmn2:error";
+
+    public static final String BPMN2_PROCESS = "bpmn2:process";
+
+    // -----------------------
 
     public static final String SCRIPT_TAG = "camunda:script";
 
@@ -176,6 +186,10 @@ public class BPMNConstants {
     public static final String ERROREVENTDEFINITION = "errorEventDefinition";
 
     public static final String CONDEXP = "conditionExpression";
+
+    public static final String SOURCEREF = "sourceRef";
+
+    public static final String TARGETREF = "targetRef";
 
     public static final String LANG = "language";
 

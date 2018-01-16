@@ -76,7 +76,7 @@ public abstract class AbstractRunner {
 
     private static ArrayList<String> allOutputFilesArray = createAllOutputFilesArray();
 
-    private static boolean isExecuted = false;
+    private static Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
 
     private static boolean isMisconfigured = false;
 
@@ -524,6 +524,7 @@ public abstract class AbstractRunner {
         for (final String pathToModel : fileScanner.getProcessdefinitions()) {
             issues.addAll(checkModel(rules, pathToModel, fileScanner,
                     variableScanner));
+            AbstractRunner.resetSequenceFlowList();
         }
         checkMisconfiguration();
         JsOutputWriter.finish();
@@ -610,20 +611,24 @@ public abstract class AbstractRunner {
         return filteredIssues;
     }
 
-    public static boolean isExecuted() {
-        return isExecuted;
-    }
-
-    public static void setExecuted(boolean isExecuted) {
-        AbstractRunner.isExecuted = isExecuted;
-    }
-
     public static boolean getIsMisconfigured() {
         return isMisconfigured;
     }
 
     public static void setIsMisconfigured(boolean isMisconfigured) {
         AbstractRunner.isMisconfigured = isMisconfigured;
+    }
+
+    public static Map<String, ArrayList<String>> getSequenceFlowList() {
+        return sequenceFlowList;
+    }
+
+    public static void addToSequenceFlowList(String id, ArrayList<String> sequenceFlowList) {
+        AbstractRunner.sequenceFlowList.put(id, sequenceFlowList);
+    }
+
+    public static void resetSequenceFlowList() {
+        AbstractRunner.sequenceFlowList.clear();
     }
 
 }
