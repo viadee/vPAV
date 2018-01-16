@@ -65,11 +65,12 @@ public class OverlapChecker extends AbstractElementChecker {
 
             final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
 
-            if (!AbstractRunner.getSequenceFlowList().containsKey(bpmnElement.getId())) {
+            if (AbstractRunner.getSequenceFlowList().isEmpty()) {
                 AbstractRunner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
             }
 
             for (Map.Entry<String, ArrayList<String>> entry : AbstractRunner.getSequenceFlowList().entrySet()) {
+                // Check whether targetRef & sourceRef of current item exist in global list
                 if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                             element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
@@ -77,8 +78,14 @@ public class OverlapChecker extends AbstractElementChecker {
                             "Multiple SequenceFlows detected. Delete " + CheckName.checkName(bpmnElement)
                                     + " with identical source and target",
                             null));
+                    return issues;
                 }
             }
+
+            if (!AbstractRunner.getSequenceFlowList().containsKey(bpmnElement.getId())) {
+                AbstractRunner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            }
+
         }
 
         return issues;
