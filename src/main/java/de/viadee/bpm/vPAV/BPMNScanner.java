@@ -768,47 +768,6 @@ public class BPMNScanner {
     }
 
     /**
-     * Retrieve the message name of a given receiveTask
-     *
-     * @param messageRef
-     *            id of message
-     * @return messageName
-     */
-    public String getMessageName(String messageRef) {
-        // List for all messages
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-        String messageName = "";
-
-        switch (modelVersion) {
-            case V1:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.MESSAGE));
-                break;
-            case V2:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_MESSAGE));
-                break;
-            case V3:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_MESSAGE));
-                break;
-            default:
-                listNodeList = null;
-        }
-
-        for (NodeList list : listNodeList) {
-            for (int i = 0; i < list.getLength(); i++) {
-
-                final Element taskElement = (Element) list.item(i);
-
-                // check whether a node matches with the provided id
-                if (taskElement.getAttribute(BPMNConstants.ATTR_ID).equals(messageRef)) {
-                    messageName = taskElement.getAttribute(BPMNConstants.ATTR_NAME);
-                }
-            }
-        }
-        return messageName;
-
-    }
-
-    /**
      * get List of output variables
      *
      * @param id
@@ -1157,5 +1116,175 @@ public class BPMNScanner {
         }
 
         return keyPairs;
+    }
+
+    public ArrayList<String> getSignalRefs(String id) {
+        return getModelRefs(id, BPMNConstants.SIGNALEVENTDEFINITION, BPMNConstants.ATTR_SIGNALREF);
+    }
+
+    public ArrayList<String> getMessageRefs(String id) {
+        ArrayList<String> messageRefs = getModelRefs(id, BPMNConstants.MESSAGEEVENTDEFINITION,
+                BPMNConstants.ATTR_MESSAGEREF);
+        messageRefs.addAll(getMessageRefFromReceiveTask(id));
+        return messageRefs;
+    }
+
+    private ArrayList<String> getMessageRefFromReceiveTask(String id) {
+        ArrayList<String> messageRefs = new ArrayList<String>();
+        NodeList nodeList = null;
+
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BPMNConstants.RECEIVETASK);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_RECEIVETASK);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_RECEIVETASK);
+                break;
+            default:
+                break;
+        }
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element taskElement = (Element) nodeList.item(i);
+            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID)))
+                messageRefs.add(taskElement.getAttribute(BPMNConstants.ATTR_MESSAGEREF));
+        }
+        return messageRefs;
+    }
+
+    private ArrayList<String> getModelRefs(String id, String eventDefinition, String attrRef) {
+        ArrayList<String> refs = new ArrayList<String>();
+
+        switch (modelVersion) {
+            case V1:
+                refs.addAll(getRefs(id, BPMNConstants.BOUNDARYEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.INTERMEDIATECATCHEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.INTERMEDIATETHROWEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.STARTEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.ENDEVENT, eventDefinition, attrRef));
+                break;
+            case V2:
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_BOUNDARYEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_INTERMEDIATECATCHEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_INTERMEDIATETHROWEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_STARTEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_ENDEVENT, eventDefinition, attrRef));
+                break;
+            case V3:
+                refs.addAll(getRefs(id, BPMNConstants.BPMN2_BOUNDARYEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_INTERMEDIATECATCHEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_INTERMEDIATETHROWEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_STARTEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BPMNConstants.BPMN_ENDEVENT, eventDefinition, attrRef));
+                break;
+            default:
+                break;
+        }
+
+        return refs;
+    }
+
+    private ArrayList<String> getRefs(String id, String tag, String eventDefinition, String attrRef) {
+        ArrayList<String> signalRefs = new ArrayList<String>();
+        NodeList nodeList = null;
+
+        nodeList = doc.getElementsByTagName(tag);
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element taskElement = (Element) nodeList.item(i);
+
+            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
+                if (nodeList.item(i).hasChildNodes()) {
+                    NodeList boundaryChilds = nodeList.item(i).getChildNodes();
+                    for (int x = 0; x < boundaryChilds.getLength(); x++) {
+                        if (boundaryChilds.item(x).getLocalName() != null
+                                && boundaryChilds.item(x).getLocalName().equals(eventDefinition)) {
+                            Element boundaryChild = (Element) boundaryChilds.item(x);
+                            signalRefs.add(boundaryChild.getAttribute(attrRef));
+                        }
+                    }
+                }
+            }
+        }
+        return signalRefs;
+    }
+
+    /**
+     * Retrieve the message name
+     *
+     * @param messageRef
+     *            id of message
+     * @return messageName
+     */
+    public String getMessageName(String messageRef) {
+        NodeList nodeList = null;
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BPMNConstants.MESSAGE);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_MESSAGE);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_MESSAGE);
+                break;
+            default:
+                break;
+        }
+        return getName(nodeList, messageRef);
+    }
+
+    /**
+     * Retrieve the signal name
+     *
+     * @param signalRef
+     *            id of signal
+     * @return signalName
+     */
+    public String getSignalName(String signalRef) {
+        NodeList nodeList = null;
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BPMNConstants.SIGNAL);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_SIGNAL);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_SIGNAL);
+                break;
+            default:
+                break;
+        }
+        return getName(nodeList, signalRef);
+    }
+
+    /**
+     * return attribute name of element
+     * 
+     * @param nodeList
+     *            list of nodes to check
+     * @param id
+     *            element id
+     * @return name
+     */
+    private String getName(NodeList nodeList, String id) {
+        String name = "";
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element taskElement = (Element) nodeList.item(i);
+
+            // check if the ids are corresponding
+            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
+                name = taskElement.getAttribute(BPMNConstants.ATTR_NAME);
+            }
+        }
+        return name;
     }
 }

@@ -43,7 +43,9 @@ public enum KnownElementFieldType {
                                                             "Due Date"), FollowUpDate("Follow Up Date"), DMN(
                                                                     "DMN"), CamundaIn("Camunda:In"), CamundaOut(
                                                                             "Camunda:Out"), OutputParameter(
-                                                                                    "Output Parameters");
+                                                                                    "Output Parameters"), Signal(
+                                                                                            "Signal Name"), Message(
+                                                                                                    "Message Name");
 
     private String description;
 

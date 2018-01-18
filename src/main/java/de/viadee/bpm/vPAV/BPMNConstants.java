@@ -67,6 +67,12 @@ public class BPMNConstants {
 
     public static final String MESSAGEEVENTDEFINITION = "messageEventDefinition";
 
+    public static final String SIGNALEVENTDEFINITION = "signalEventDefinition";
+
+    public static final String SIGNAL = "signal";
+
+    public static final String RECEIVETASK = "receiveTask";
+
     // ------------------------
 
     public static final String BPMN_DEFINITIONS = "bpmn:definitions";
@@ -103,6 +109,10 @@ public class BPMNConstants {
 
     public static final String BPMN_PROCESS = "bpmn:process";
 
+    public static final String BPMN_SIGNAL = "bpmn:signal";
+
+    public static final String BPMN_RECEIVETASK = "bpmn:receiveTask";
+
     // -----------------------
 
     public static final String BPMN2_DEFINITIONS = "bpmn2:definitions";
@@ -138,6 +148,10 @@ public class BPMNConstants {
     public static final String BPMN2_ERROR = "bpmn2:error";
 
     public static final String BPMN2_PROCESS = "bpmn2:process";
+
+    public static final String BPMN2_SIGNAL = "bpmn2:signal";
+
+    public static final String BPMN2_RECEIVETASK = "bpmn2:receiveTask";
 
     // -----------------------
 
@@ -212,6 +226,10 @@ public class BPMNConstants {
     public static final String ATTR_ERRORREF = "errorRef";
 
     public static final String ATTR_ERRORCODE = "errorCode";
+
+    public static final String ATTR_SIGNALREF = "signalRef";
+
+    public static final String ATTR_MESSAGEREF = "messageRef";
 
     public static final String FIXED_VALUE = "org.camunda.bpm.engine.impl.el.FixedValue";
 

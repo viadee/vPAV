@@ -127,10 +127,73 @@ public final class ProcessVariableReader {
         processVariables.putAll(searchVariablesFromSequenceFlow(element));
         // 3) Search variables in ExtensionElements
         processVariables.putAll(searchExtensionsElements(element));
-        // 4) Search variables in Output Parameters
+        // 4) Search variables in In/Output Parameters
         processVariables.putAll(getVariablesFromParameters(element));
+        // 5) Search variables in Signal and Messagenames
+        processVariables.putAll(getVariablesFromNames(element));
 
         return processVariables;
+    }
+
+    private Map<String, ProcessVariable> getVariablesFromNames(BpmnElement element) {
+        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final BaseElement baseElement = element.getBaseElement();
+        final BpmnModelElementInstance scopeElement = baseElement.getScope();
+
+        String scopeElementId = null;
+        if (scopeElement != null) {
+            scopeElementId = scopeElement.getAttributeValue("id");
+        }
+
+        ArrayList<String> signalRefs = bpmnScanner.getSignalRefs(element.getBaseElement().getId());
+        ArrayList<String> messagesRefs = bpmnScanner.getMessageRefs(element.getBaseElement().getId());
+
+        ArrayList<String> signalVariables = getSignalVariables(signalRefs, element);
+        ArrayList<String> messageVariables = getMessageVariables(messagesRefs, element);
+
+        for (String variable : messageVariables) {
+            processVariables.put(variable, new ProcessVariable(variable, element, ElementChapter.General,
+                    KnownElementFieldType.Message, element.getProcessdefinition(), VariableOperation.READ,
+                    scopeElementId));
+        }
+
+        for (String variable : signalVariables) {
+            processVariables.put(variable, new ProcessVariable(variable, element, ElementChapter.General,
+                    KnownElementFieldType.Signal, element.getProcessdefinition(), VariableOperation.READ,
+                    scopeElementId));
+        }
+
+        return processVariables;
+    }
+
+    private ArrayList<String> getSignalVariables(ArrayList<String> signalRefs, BpmnElement element) {
+        ArrayList<String> names = new ArrayList<String>();
+
+        for (String signalID : signalRefs) {
+            names.add(bpmnScanner.getSignalName(signalID));
+        }
+
+        ArrayList<String> variables = new ArrayList<String>();
+        for (String signalName : names) {
+            variables.addAll(checkExpressionForReadVariable(signalName, element));
+        }
+
+        return variables;
+    }
+
+    private ArrayList<String> getMessageVariables(ArrayList<String> messageRefs, BpmnElement element) {
+        ArrayList<String> names = new ArrayList<String>();
+
+        for (String messageID : messageRefs) {
+            names.add(bpmnScanner.getMessageName(messageID));
+        }
+
+        ArrayList<String> variables = new ArrayList<String>();
+        for (String messageName : names) {
+            variables.addAll(checkExpressionForReadVariable(messageName, element));
+        }
+
+        return variables;
     }
 
     /**
