@@ -45,6 +45,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -285,7 +286,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
     private CheckerIssue checkInvalidScriptContent(final String bpmnFile,
             final BaseElement baseElement, final String scriptFormat, final String script) {
 
-        if (scriptFormat != null && scriptFormat.toLowerCase().equals("groovy") && script != null) {
+        if (scriptFormat != null && scriptFormat.toLowerCase().equals(ConfigConstants.GROOVY) && script != null) {
             return parseGroovyCode(bpmnFile, baseElement, script);
         }
         return null;

@@ -32,6 +32,8 @@ package de.viadee.bpm.vPAV.processing;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.w3c.dom.Element;
 
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
+
 /**
  *
  * Utility class to check names and return names/ids
@@ -48,10 +50,10 @@ public class CheckName {
      */
     public static String checkName(final BaseElement baseElement) {
 
-        String identifier = baseElement.getAttributeValue("name");
+        String identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_NAME);
 
         if (identifier == null || identifier == "") {
-            identifier = baseElement.getAttributeValue("id");
+            identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
 
         return identifier;
@@ -66,10 +68,10 @@ public class CheckName {
      */
     public static String checkTimer(final Element element) {
 
-        String identifier = element.getAttribute("name");
+        String identifier = element.getAttribute(BpmnConstants.ATTR_NAME);
 
         if (identifier == null || identifier == "") {
-            identifier = element.getAttribute("id");
+            identifier = element.getAttribute(BpmnConstants.ATTR_ID);
         }
 
         return identifier;

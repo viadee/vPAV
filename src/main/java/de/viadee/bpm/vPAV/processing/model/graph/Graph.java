@@ -44,6 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -202,13 +205,13 @@ public class Graph implements IGraph {
         currentPath.add(startNode);
 
         final boolean isGateway = startNode.getBaseElement().getElementType().getBaseType()
-                .getTypeName().equals("gateway");
+                .getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_GATEWAY);
         final boolean isNodeParallelGateway = startNode.getBaseElement().getElementType().getTypeName()
-                .equals("parallelGateway");
+                .equals(BpmnModelConstants.BPMN_ELEMENT_PARALLEL_GATEWAY);
         final boolean isEndEvent = startNode.getBaseElement().getElementType().getTypeName()
-                .equals("endEvent")
+                .equals(BpmnConstants.ENDEVENT)
                 && startNode.getBaseElement().getParentElement().getElementType().getTypeName()
-                        .equals("process");
+                        .equals(BpmnConstants.PROCESS);
 
         final List<Edge> predecessorEdges = this.adjacencyListPredecessor.get(startNode);
         Map<String, InOutState> outSuccessors = new HashMap<String, InOutState>();
@@ -358,9 +361,9 @@ public class Graph implements IGraph {
         // go back to the node, where the variable was deleted
         // or go back to the start
         if (anomaly.getAnomaly() == Anomaly.UR && (variableDeleted(anomaly, in, out)
-                || ((startNode.getBaseElement().getElementType().getTypeName().equals("startEvent")
+                || ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)
                         && startNode.getBaseElement().getParentElement().getElementType().getTypeName()
-                                .equals("process"))))) {
+                                .equals(BpmnConstants.PROCESS))))) {
 
             final List<BpmnElement> newPath = new ArrayList<BpmnElement>(currentPath);
             invalidPaths.add(new Path(newPath));

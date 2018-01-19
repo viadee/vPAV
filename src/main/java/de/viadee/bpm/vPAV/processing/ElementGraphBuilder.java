@@ -39,6 +39,7 @@ import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.Activity;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
@@ -59,6 +60,7 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -155,18 +157,20 @@ public class ElementGraphBuilder {
 
                 // mention element
                 elementMap.put(element.getId(), node);
-                if (element.getElementType().getBaseType().getBaseType().getTypeName().equals("event")) {
+                if (element.getElementType().getBaseType().getBaseType().getTypeName()
+                        .equals(BpmnModelConstants.BPMN_ELEMENT_EVENT)) {
                     // add variables for message event (set by outer class)
                     addProcessVariablesForMessageName(element, node);
                 }
-                if (element.getElementType().getTypeName().equals("startEvent")) {
+                if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
                     // add process variables for start event, which set by call startProcessInstanceByKey
-                    final String processId = node.getBaseElement().getParentElement().getAttributeValue("id");
+                    final String processId = node.getBaseElement().getParentElement()
+                            .getAttributeValue(BpmnConstants.ATTR_ID);
                     addProcessVariablesByStartForProcessId(node, processId);
 
                     graph.addStartNode(node);
                 }
-                if (element.getElementType().getTypeName().equals("endEvent")) {
+                if (element.getElementType().getTypeName().equals(BpmnConstants.ENDEVENT)) {
                     graph.addEndNode(node);
                 }
                 // save process elements as a node
@@ -452,10 +456,10 @@ public class ElementGraphBuilder {
             final BpmnModelInstance modelInstance, final CallActivity callActivity, final IGraph graph) {
 
         final ParallelGateway element1 = modelInstance.newInstance(ParallelGateway.class);
-        element1.setAttributeValue("id", "_gw_in", true);
+        element1.setAttributeValue(BpmnConstants.ATTR_ID, "_gw_in", true);
 
         final ParallelGateway element2 = modelInstance.newInstance(ParallelGateway.class);
-        element2.setAttributeValue("id", "_gw_out", true);
+        element2.setAttributeValue(BpmnConstants.ATTR_ID, "_gw_out", true);
 
         final List<BpmnElement> elements = new ArrayList<BpmnElement>();
         final BpmnElement parallelGateway1 = new BpmnElement(null, element1);

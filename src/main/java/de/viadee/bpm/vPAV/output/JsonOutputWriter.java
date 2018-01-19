@@ -40,6 +40,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -79,16 +80,16 @@ public class JsonOutputWriter implements IssueOutputWriter {
         if (issues != null && issues.size() > 0) {
             for (final CheckerIssue issue : issues) {
                 final JsonObject obj = new JsonObject();
-                obj.addProperty("id", issue.getId());
-                obj.addProperty("bpmnFile", issue.getBpmnFile());
-                obj.addProperty("ruleName", issue.getRuleName());
-                obj.addProperty("ruleDescription", issue.getRuleDescription());
-                obj.addProperty("elementId", issue.getElementId());
-                obj.addProperty("elementName", issue.getElementName());
-                obj.addProperty("classification", issue.getClassification().name());
-                obj.addProperty("resourceFile", issue.getResourceFile());
-                obj.addProperty("variable", issue.getVariable());
-                obj.addProperty("anomaly",
+                obj.addProperty(BpmnConstants.VPAV_ID, issue.getId());
+                obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, issue.getBpmnFile());
+                obj.addProperty(BpmnConstants.VPAV_RULE_NAME, issue.getRuleName());
+                obj.addProperty(BpmnConstants.VPAV_RULE_DESCRIPTION, issue.getRuleDescription());
+                obj.addProperty(BpmnConstants.VPAV_ELEMENT_ID, issue.getElementId());
+                obj.addProperty(BpmnConstants.VPAV_ELEMENT_NAME, issue.getElementName());
+                obj.addProperty(BpmnConstants.VPAV_CLASSIFICATION, issue.getClassification().name());
+                obj.addProperty(BpmnConstants.VPAV_RESOURCE_FILE, issue.getResourceFile());
+                obj.addProperty(BpmnConstants.VPAV_VARIABLE, issue.getVariable());
+                obj.addProperty(BpmnConstants.VPAV_ANOMALY,
                         issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription());
                 final JsonArray jsonPaths = new JsonArray();
                 final List<Path> paths = issue.getInvalidPaths();
@@ -99,18 +100,18 @@ public class JsonOutputWriter implements IssueOutputWriter {
                         for (BpmnElement element : elements) {
                             final JsonObject jsonElement = new JsonObject();
                             final String id = element.getBaseElement().getId();
-                            final String name = element.getBaseElement().getAttributeValue("name");
-                            jsonElement.addProperty("elementId", id);
-                            jsonElement.addProperty("elementName",
+                            final String name = element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
+                            jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_ID, id);
+                            jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_NAME,
                                     name == null ? null : name.replaceAll("\n", ""));
                             jsonPath.add(jsonElement);
                         }
                         jsonPaths.add(jsonPath);
                     }
                 }
-                obj.add("paths", jsonPaths);
-                obj.addProperty("message", issue.getMessage());
-                obj.addProperty("elementDescription", issue.getElementDescription());
+                obj.add(BpmnConstants.VPAV_PATHS, jsonPaths);
+                obj.addProperty(BpmnConstants.VPAV_MESSAGE, issue.getMessage());
+                obj.addProperty(BpmnConstants.VPAV_ELEMENT_DESCRIPTION, issue.getElementDescription());
                 jsonIssues.add(obj);
             }
         }

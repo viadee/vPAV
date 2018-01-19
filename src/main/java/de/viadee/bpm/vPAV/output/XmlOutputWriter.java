@@ -43,6 +43,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -104,7 +105,7 @@ public class XmlOutputWriter implements IssueOutputWriter {
                     List<BpmnElement> elements = path.getElements();
                     List<XmlPathElement> pathElements = new ArrayList<XmlPathElement>();
                     for (final BpmnElement element : elements) {
-                        String elementName = element.getBaseElement().getAttributeValue("name");
+                        String elementName = element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
                         if (elementName != null) {
                             // filter newlines
                             elementName = elementName.replace("\n", "");

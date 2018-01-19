@@ -86,6 +86,7 @@ import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -142,7 +143,7 @@ public final class ProcessVariableReader {
 
         String scopeElementId = null;
         if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue("id");
+            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
 
         ArrayList<String> signalRefs = bpmnScanner.getSignalRefs(element.getBaseElement().getId());
@@ -210,7 +211,7 @@ public final class ProcessVariableReader {
 
         String scopeElementId = null;
         if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue("id");
+            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
 
         ArrayList<String> outVar = bpmnScanner.getOutputVariables(element.getBaseElement().getId());
@@ -260,7 +261,7 @@ public final class ProcessVariableReader {
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
         String scopeElementId = null;
         if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue("id");
+            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
         final ExtensionElements extensionElements = baseElement.getExtensionElements();
         if (extensionElements != null) {
@@ -469,7 +470,7 @@ public final class ProcessVariableReader {
             BpmnModelElementInstance scopeElement = flow.getScope();
             String scopeId = null;
             if (scopeElement != null) {
-                scopeId = scopeElement.getAttributeValue("id");
+                scopeId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
             }
             final ConditionExpression expression = flow.getConditionExpression();
             if (expression != null) {
@@ -511,12 +512,12 @@ public final class ProcessVariableReader {
         BpmnModelElementInstance scopeElement = baseElement.getScope();
         String scopeId = null;
         if (scopeElement != null) {
-            scopeId = scopeElement.getAttributeValue("id");
+            scopeId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
         if (baseElement instanceof ServiceTask || baseElement instanceof SendTask
                 || baseElement instanceof BusinessRuleTask) {
             final String t_expression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    "expression");
+                    BpmnConstants.ATTR_EX);
             if (t_expression != null) {
 
                 processVariables.putAll(findVariablesInExpression(t_expression, element,
@@ -524,7 +525,7 @@ public final class ProcessVariableReader {
             }
 
             final String t_delegateExpression = baseElement
-                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "delegateExpression");
+                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_DEL);
             if (t_delegateExpression != null) {
                 processVariables.putAll(findVariablesInExpression(t_delegateExpression, element,
                         ElementChapter.Details, KnownElementFieldType.DelegateExpression, scopeId));
@@ -539,19 +540,19 @@ public final class ProcessVariableReader {
             }
 
             final String t_resultVariable = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    "resultVariable");
+                    BpmnConstants.RESULT_VARIABLE);
             if (t_resultVariable != null && t_resultVariable.trim().length() > 0) {
                 processVariables.put(t_resultVariable,
                         new ProcessVariable(t_resultVariable, element, ElementChapter.Details,
                                 KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId));
             }
             processVariables.putAll(getVariablesFromJavaDelegate(
-                    baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "class"), element,
+                    baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS), element,
                     ElementChapter.Details, KnownElementFieldType.Class, scopeId));
 
             if (baseElement instanceof BusinessRuleTask) {
                 final String t_decisionRef = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                        "decisionRef");
+                        BpmnConstants.DECISIONREF);
                 if (t_decisionRef != null && t_decisionRef.trim().length() > 0
                         && decisionRefToPathMap != null) {
                     final String fileName = decisionRefToPathMap.get(t_decisionRef);
@@ -617,7 +618,7 @@ public final class ProcessVariableReader {
                         ElementChapter.Details, KnownElementFieldType.CalledElement, scopeId));
             }
             final String caseRef = callActivity.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    "caseRef");
+                    BpmnConstants.CASEREF);
             if (caseRef != null && caseRef.trim().length() > 0) {
                 processVariables.putAll(findVariablesInExpression(caseRef, element, ElementChapter.Details,
                         KnownElementFieldType.CaseRef, scopeId));
@@ -644,20 +645,20 @@ public final class ProcessVariableReader {
         BpmnModelElementInstance scopeElement = baseElement.getScope();
         String scopeId = null;
         if (scopeElement != null) {
-            scopeId = scopeElement.getAttributeValue("id");
+            scopeId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
         final ModelElementInstance loopCharacteristics = baseElement
                 .getUniqueChildElementByType(LoopCharacteristics.class);
         if (loopCharacteristics != null) {
             final String collectionName = loopCharacteristics
-                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "collection");
+                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.COLLECTION);
             if (collectionName != null && collectionName.trim().length() > 0) {
                 processVariables.put(collectionName,
                         new ProcessVariable(collectionName, element, ElementChapter.MultiInstance,
                                 KnownElementFieldType.CollectionElement, null, VariableOperation.READ, scopeId));
             }
             final String elementVariable = loopCharacteristics
-                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "elementVariable");
+                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ELEMENT_VARIABLE);
             if (elementVariable != null && elementVariable.trim().length() > 0) {
                 processVariables.put(elementVariable,
                         new ProcessVariable(elementVariable, element, ElementChapter.MultiInstance,

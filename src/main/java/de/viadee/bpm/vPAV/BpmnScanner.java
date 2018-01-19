@@ -443,7 +443,7 @@ public class BpmnScanner {
 
         for (int i = 0; i < nodeList.getLength(); i++) {
             Element startEvent = (Element) nodeList.item(i);
-            if (id.equals(startEvent.getAttribute("id"))) {
+            if (id.equals(startEvent.getAttribute(BpmnConstants.ATTR_ID))) {
                 return isSubprocess(startEvent);
             }
         }

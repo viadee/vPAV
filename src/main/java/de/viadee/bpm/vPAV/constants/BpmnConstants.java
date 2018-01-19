@@ -193,6 +193,8 @@ public class BpmnConstants {
 
     public static final String CAMUNDA_ENTRY = "camunda:entry";
 
+    public static final String RESULT_VARIABLE = "resultVariable";
+
     public static final String ATTACHED_TO_REF = "attachedToRef";
 
     public static final String IMPLEMENTATION = "implementation";
@@ -206,6 +208,10 @@ public class BpmnConstants {
     public static final String SOURCEREF = "sourceRef";
 
     public static final String TARGETREF = "targetRef";
+
+    public static final String DECISIONREF = "decisionRef";
+
+    public static final String CASEREF = "caseRef";
 
     public static final String LANG = "language";
 
@@ -237,11 +243,27 @@ public class BpmnConstants {
 
     public static final String REQUIRED_DEFAULT = "requiredDefault";
 
+    public static final String COLLECTION = "collection";
+
+    public static final String ELEMENT_VARIABLE = "elementVariable";
+
+    public static final String SIMPLE_NAME_PROCESS = "Process";
+
+    public static final String SIMPLE_NAME_SUB_PROCESS = "SubProcess";
+
+    public static final String SIMPLE_NAME_SCRIPT_TASK = "ScriptTask";
+
+    public static final String SIMPLE_NAME_SEQUENCE_FLOW = "SequenceFlow";
+
     public static final String FIXED_VALUE = "org.camunda.bpm.engine.impl.el.FixedValue";
 
     public static final String EXPRESSION = "org.camunda.bpm.engine.delegate.Expression";
 
     public static final String COND_EXP = "conditionExpression";
+
+    public static final String TASK_LISTENER = "taskListener";
+
+    public static final String EXECUTION_LISTENER = "taskListener";
 
     public static final String INTERFACE_DEL = "JavaDelegate";
 
@@ -254,6 +276,36 @@ public class BpmnConstants {
     public static final String INTERFACE_ACTIVITY_BEHAVIOUR = "ActivityBehavior";
 
     public static final String SUPERCLASS_ABSTRACT_BPMN_ACTIVITY_BEHAVIOR = "AbstractBpmnActivityBehavior";
+
+    public static final String VPAV_ID = "id";
+
+    public static final String VPAV_BPMN_FILE = "bpmnFile";
+
+    public static final String VPAV_RULE_NAME = "ruleName";
+
+    public static final String VPAV_RULE_DESCRIPTION = "ruleDescription";
+
+    public static final String VPAV_ELEMENT_ID = "elementId";
+
+    public static final String VPAV_ELEMENT_NAME = "elementName";
+
+    public static final String VPAV_CLASSIFICATION = "classification";
+
+    public static final String VPAV_RESOURCE_FILE = "resourceFile";
+
+    public static final String VPAV_VARIABLE = "variable";
+
+    public static final String VPAV_ANOMALY = "anomaly";
+
+    public static final String VPAV_PATHS = "paths";
+
+    public static final String VPAV_MESSAGE = "message";
+
+    public static final String VPAV_ELEMENT_DESCRIPTION = "elementDescription";
+
+    public static final String VPAV_ELEMENTS_TO_MARK = "elementsToMark";
+
+    public static final String VPAV_NO_ISSUES_ELEMENTS = "noIssuesElements";
 
     private BpmnConstants() {
     }

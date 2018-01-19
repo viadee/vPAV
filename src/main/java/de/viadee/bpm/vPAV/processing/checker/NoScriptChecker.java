@@ -50,14 +50,6 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoScriptChecker extends AbstractElementChecker {
 
-    private final String process = "Process";
-
-    private final String subProcess = "SubProcess";
-
-    private final String scriptTask = "ScriptTask";
-
-    private final String sequenceFlow = "SequenceFlow";
-
     public NoScriptChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
@@ -75,8 +67,10 @@ public class NoScriptChecker extends AbstractElementChecker {
         final BaseElement bpmnElement = element.getBaseElement();
 
         if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)
-                && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(process)
-                && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(subProcess)) {
+                && !bpmnElement.getElementType().getInstanceType().getSimpleName()
+                        .equals(BpmnConstants.SIMPLE_NAME_PROCESS)
+                && !bpmnElement.getElementType().getInstanceType().getSimpleName()
+                        .equals(BpmnConstants.SIMPLE_NAME_SUB_PROCESS)) {
             Map<String, Setting> settings = rule.getSettings();
 
             // Check all Elements with camunda:script tag
@@ -112,7 +106,7 @@ public class NoScriptChecker extends AbstractElementChecker {
             }
 
             // ScriptTask
-            if (bpmnElement instanceof ScriptTask && !settings.containsKey(scriptTask)) {
+            if (bpmnElement instanceof ScriptTask && !settings.containsKey(BpmnConstants.SIMPLE_NAME_SCRIPT_TASK)) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null,
                         bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
@@ -124,8 +118,9 @@ public class NoScriptChecker extends AbstractElementChecker {
             if (bpmnElement instanceof SequenceFlow) {
                 boolean scriptCondExp = bpmnScanner
                         .hasScriptInCondExp(bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID));
-                if (settings.containsKey(sequenceFlow)) {
-                    ArrayList<String> allowedPlaces = settings.get(sequenceFlow).getScriptPlaces();
+                if (settings.containsKey(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)) {
+                    ArrayList<String> allowedPlaces = settings.get(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)
+                            .getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         if (!allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp)
                             issues.add(

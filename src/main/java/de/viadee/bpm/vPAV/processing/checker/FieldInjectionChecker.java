@@ -177,6 +177,22 @@ public class FieldInjectionChecker extends AbstractElementChecker {
         return issues;
     }
 
+    /**
+     *
+     * Check listener for Classes, DelegateExpressions and Expressions
+     *
+     * @param element
+     *            BpmnElement
+     * @param aClass
+     *            Class, can be null
+     * @param aDelegate
+     *            DelegateExpression, can be null
+     * @param aExpression
+     *            Expression, can be null
+     * @param varName
+     *            name of the variable
+     * @return Collection of CheckerIssues
+     */
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
             ArrayList<String> aDelegate, ArrayList<String> aExpression, String varName) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

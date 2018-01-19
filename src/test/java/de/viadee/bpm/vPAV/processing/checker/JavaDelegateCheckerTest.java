@@ -264,7 +264,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class 'TestDelegate2' not found",
+            Assert.assertEquals("class 'TestDelegate2' in camunda:class not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -297,7 +297,7 @@ public class JavaDelegateCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "class 'DelegateWithWrongInterface' does not implement/extends the correct interface/class",
+                    "class 'DelegateWithWrongInterface' in camunda:class does not implement/extends the correct interface/class",
                     issues.iterator().next().getMessage());
         }
     }
@@ -361,7 +361,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class 'TestDelegate2' not found",
+            Assert.assertEquals("class 'TestDelegate2' in camunda:delegateExpression not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -393,7 +393,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class '${testDelegate}' not found",
+            Assert.assertEquals("class '${testDelegate}' in camunda:class not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -426,7 +426,7 @@ public class JavaDelegateCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "class 'DelegateWithInterfaceActivityBehavior' implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
+                    "class 'DelegateWithInterfaceActivityBehavior' in camunda:class implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
                     issues.iterator().next().getMessage());
         }
     }

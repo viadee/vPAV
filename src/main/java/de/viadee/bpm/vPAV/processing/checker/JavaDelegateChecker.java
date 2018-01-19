@@ -300,9 +300,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         final BaseElement bpmnElement = element.getBaseElement();
         String location = "";
         if (taskListener)
-            location = " taskListener";
+            location = BpmnConstants.TASK_LISTENER;
         else
-            location = " executionListener";
+            location = BpmnConstants.EXECUTION_LISTENER;
 
         // classes
         if (aClass == null || aClass.size() > 0) {
@@ -313,7 +313,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                             element.getProcessdefinition(), null,
                             bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                             bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task with no class name in" + location, null));
+                            "task with no class name in " + location, null));
                 } else if (eClass != null) {
                     issues.addAll(checkClassFile(element, eClass, true, taskListener));
                 }
@@ -329,7 +329,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                             element.getProcessdefinition(), null,
                             bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                             bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task with no delegate expression in" + location, null));
+                            "task with no delegate expression in " + location, null));
                 } else if (eDel != null) {
                     // check validity of a bean
                     if (RuntimeConfig.getInstance().getBeanMapping() != null) {
@@ -353,7 +353,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                             bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
                                             null, null,
                                             "Couldn't find correct beanmapping for delegate expression "
-                                                    + eDel + "  in" + location,
+                                                    + eDel + " in " + location,
                                             null));
                                 }
                             }
@@ -386,11 +386,17 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         final BaseElement bpmnElement = element.getBaseElement();
         final String classPath = className.replaceAll("\\.", "/") + ".java";
         String location = "";
-        if (listener)
-            if (taskListener)
-                location = "in taskListener ";
-            else
-                location = "in executionListener ";
+        if (listener) {
+            if (taskListener) {
+                location = BpmnConstants.TASK_LISTENER;
+            } else {
+                location = BpmnConstants.EXECUTION_LISTENER;
+            }
+        }
+
+        if (location.isEmpty()) {
+            location = bpmnScanner.getImplementation(bpmnElement.getAttributeValue(BpmnConstants.ATTR_ID));
+        }
 
         // If a class path has been found, check the correctness
         try {
@@ -421,8 +427,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                     bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                                     bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
                                     null,
-                                    "class '" + clazz.getSimpleName() + "' " + location
-                                            + "implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
+                                    "class '" + clazz.getSimpleName() + "' in " + location
+                                            + " implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
                                     null));
                         }
                     }
@@ -442,8 +448,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                         element.getProcessdefinition(), classPath,
                         bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                         bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "class '" + clazz.getSimpleName() + "' " + location
-                                + "does not implement/extends the correct interface/class",
+                        "class '" + clazz.getSimpleName() + "' in " + location
+                                + " does not implement/extends the correct interface/class",
                         null));
             }
 
@@ -454,8 +460,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                         element.getProcessdefinition(), classPath,
                         bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                         bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "class '" + className.substring(className.lastIndexOf('.') + 1) + "' " + location
-                                + "not found",
+                        "class '" + className.substring(className.lastIndexOf('.') + 1) + "' in " + location
+                                + " not found",
                         null));
             } else {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
