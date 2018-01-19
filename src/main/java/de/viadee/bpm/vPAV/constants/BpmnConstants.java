@@ -65,6 +65,8 @@ public class BpmnConstants {
 
     public static final String PROCESS = "process";
 
+    public static final String SUBPROCESS = "subProcess";
+
     public static final String MESSAGEEVENTDEFINITION = "messageEventDefinition";
 
     public static final String SIGNALEVENTDEFINITION = "signalEventDefinition";
