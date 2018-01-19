@@ -142,7 +142,7 @@ public abstract class AbstractRunner {
             RuntimeConfig.getInstance().addActiveRules(rules);
 
         } catch (final ConfigReaderException | OutputWriterException e) {
-            throw new RuntimeException("Config file could not be read or written");
+            throw new RuntimeException(e);
         }
 
         rules.remove(ConfigConstants.HASPARENTRULESET);
