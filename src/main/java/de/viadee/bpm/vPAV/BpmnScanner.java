@@ -415,6 +415,66 @@ public class BpmnScanner {
     }
 
     /**
+     * Retrieve startevents to check whether any parent node is a subprocess
+     *
+     * @param id
+     *            id of element to check
+     * @return true if id was found
+     */
+    public boolean checkStartEvent(String id) {
+
+        // List for startevents elements
+        NodeList nodeList;
+        boolean isSubprocess = false;
+
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BpmnConstants.STARTEVENT);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_STARTEVENT);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_STARTEVENT);
+                break;
+            default:
+                nodeList = null;
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element startEvent = (Element) nodeList.item(i);
+            if (id.equals(startEvent.getAttribute("id"))) {
+                return isSubprocess(startEvent);
+            }
+        }
+
+        return isSubprocess;
+    }
+
+    /**
+     * Check whether any parent node is a subprocess
+     *
+     * @param e
+     *            Element
+     * @return True if any parent node is a subprocess and false if any parent node is a process
+     */
+    private boolean isSubprocess(Element e) {
+
+        if (e.getParentNode() != null) {
+            if (e.getParentNode().getLocalName() != null
+                    && e.getParentNode().getLocalName().equals(BpmnConstants.SUBPROCESS)) {
+                return true;
+            } else if (e.getParentNode().getLocalName() != null
+                    && e.getParentNode().getLocalName().equals(BpmnConstants.PROCESS)) {
+                return false;
+            }
+            isSubprocess((Element) e.getParentNode());
+        }
+
+        return false;
+    }
+
+    /**
      * Check if any parentnode has the specific id
      *
      * @param n
@@ -1268,7 +1328,7 @@ public class BpmnScanner {
 
     /**
      * return attribute name of element
-     * 
+     *
      * @param nodeList
      *            list of nodes to check
      * @param id
