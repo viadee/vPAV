@@ -43,7 +43,7 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.JsOutputWriter;
 import de.viadee.bpm.vPAV.output.OutputWriterException;
@@ -96,9 +96,9 @@ public class BpmnModelDispatcher {
             throws ConfigItemNotFoundException {
 
         // create BPMNScanner
-        BPMNScanner bpmnScanner;
+        BpmnScanner bpmnScanner;
         try {
-            bpmnScanner = new BPMNScanner(processdefinition.getPath());
+            bpmnScanner = new BpmnScanner(processdefinition.getPath());
         } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new RuntimeException("Model couldn't be parsed");
         }

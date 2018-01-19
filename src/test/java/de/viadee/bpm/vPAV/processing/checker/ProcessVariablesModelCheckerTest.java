@@ -49,7 +49,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
@@ -84,7 +84,7 @@ public class ProcessVariablesModelCheckerTest {
         // parse bpmn model
         modelInstance = Bpmn.readModelFromFile(processdefinition);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BPMNScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
         // create data flow graphs
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
                 processdefinition.getPath(), new ArrayList<String>());

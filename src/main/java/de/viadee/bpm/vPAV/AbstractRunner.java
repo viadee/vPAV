@@ -50,6 +50,7 @@ import java.util.logging.Logger;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
+import de.viadee.bpm.vPAV.constants.ConstantsConfig;
 import de.viadee.bpm.vPAV.output.IssueOutputWriter;
 import de.viadee.bpm.vPAV.output.JsOutputWriter;
 import de.viadee.bpm.vPAV.output.JsonOutputWriter;
@@ -268,7 +269,7 @@ public abstract class AbstractRunner {
         if (!vPavDir.exists()) {
             boolean success = vPavDir.mkdirs();
             if (!success) {
-                throw new RuntimeException("vPav directory does not exist and could not be created");
+                throw new RuntimeException("vPAV directory does not exist and could not be created");
             }
         }
     }
@@ -283,7 +284,7 @@ public abstract class AbstractRunner {
         if (!imgDir.exists()) {
             boolean success = imgDir.mkdirs();
             if (!success) {
-                throw new RuntimeException("vPav/img directory does not exist and could not be created");
+                throw new RuntimeException("vPAV/img directory does not exist and could not be created");
             }
         }
     }
@@ -296,7 +297,7 @@ public abstract class AbstractRunner {
         if (!jsDir.exists()) {
             boolean success = jsDir.mkdirs();
             if (!success)
-                throw new RuntimeException("vPav/js directory does not exist and could not be created");
+                throw new RuntimeException("vPAV/js directory does not exist and could not be created");
         }
     }
 
@@ -308,7 +309,7 @@ public abstract class AbstractRunner {
         if (!cssDir.exists()) {
             boolean success = cssDir.mkdirs();
             if (!success)
-                throw new RuntimeException("vPav/css directory does not exist and could not be created");
+                throw new RuntimeException("vPAV/css directory does not exist and could not be created");
         }
 
     }

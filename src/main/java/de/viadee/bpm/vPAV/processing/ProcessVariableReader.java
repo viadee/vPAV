@@ -84,9 +84,9 @@ import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
-import de.viadee.bpm.vPAV.BPMNScanner;
-import de.viadee.bpm.vPAV.ConstantsConfig;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConstantsConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -101,11 +101,11 @@ public final class ProcessVariableReader {
 
     private final Map<String, String> decisionRefToPathMap;
 
-    private final BPMNScanner bpmnScanner;
+    private final BpmnScanner bpmnScanner;
 
     public static final Logger LOGGER = Logger.getLogger(ProcessVariableReader.class.getName());
 
-    public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, BPMNScanner scanner) {
+    public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, BpmnScanner scanner) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.bpmnScanner = scanner;
     }

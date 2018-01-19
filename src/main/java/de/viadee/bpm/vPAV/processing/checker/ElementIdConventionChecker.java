@@ -34,9 +34,10 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -45,7 +46,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class ElementIdConventionChecker extends AbstractElementChecker {
 
-    public ElementIdConventionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public ElementIdConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -61,7 +62,7 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
 
         final Collection<ElementConvention> elementConventions = rule.getElementConventions();
 
-        final String elementId = baseElement.getAttributeValue("id");
+        final String elementId = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID);
 
         if (elementConventions != null && !elementConventions.isEmpty() && elementId != null) {
             for (final ElementConvention convention : elementConventions) {
@@ -73,7 +74,7 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
                                 .equals(bpmnInstance.toLowerCase())) {
                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getId(),
-                            baseElement.getAttributeValue("name"), null, null, null,
+                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                             "ID '" + elementId + "' is against the naming convention", convention.getDescription()));
                 }
             }

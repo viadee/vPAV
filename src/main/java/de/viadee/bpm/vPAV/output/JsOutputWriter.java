@@ -49,8 +49,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
-import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConstantsConfig;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;

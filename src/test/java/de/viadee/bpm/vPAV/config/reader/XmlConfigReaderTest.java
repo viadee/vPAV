@@ -41,9 +41,9 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.ConstantsConfig;
 
 public class XmlConfigReaderTest {
 

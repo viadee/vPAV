@@ -53,10 +53,12 @@ import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.ConstantsConfig;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -70,9 +72,7 @@ public class VersioningChecker extends AbstractElementChecker {
 
     private Collection<String> resourcesNewestVersions;
 
-    private final String attr_class = "class";
-
-    public VersioningChecker(final Rule rule, final BPMNScanner bpmnScanner,
+    public VersioningChecker(final Rule rule, final BpmnScanner bpmnScanner,
             final Collection<String> resourcesNewestVersions) {
         super(rule, bpmnScanner);
         this.resourcesNewestVersions = resourcesNewestVersions;
@@ -140,7 +140,7 @@ public class VersioningChecker extends AbstractElementChecker {
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
-                    && script.getCamundaScriptFormat().equals("groovy")) {
+                    && script.getCamundaScriptFormat().equals(ConstantsConfig.GROOVY)) {
                 final String resourcePath = getGroovyReference(script.getCamundaResource());
                 prepareScriptWarning(resourcePath, element, issues);
             }
@@ -176,7 +176,7 @@ public class VersioningChecker extends AbstractElementChecker {
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
-                    && script.getCamundaScriptFormat().equals("groovy")) {
+                    && script.getCamundaScriptFormat().equals(ConstantsConfig.GROOVY)) {
                 final String resourcePath = getGroovyReference(script.getCamundaResource());
                 prepareScriptWarning(resourcePath, element, issues);
             }
@@ -197,20 +197,21 @@ public class VersioningChecker extends AbstractElementChecker {
                 || baseElement instanceof BusinessRuleTask) {
             // Class, Expression, Delegate Expression
             final String t_expression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    "expression");
+                    BpmnConstants.ATTR_EX);
             if (t_expression != null) {
                 prepareBeanWarning(t_expression, element, issues);
             }
 
             final String t_delegateExpression = baseElement
-                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, "delegateExpression");
+                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_DEL);
             if (t_delegateExpression != null && !FileScanner.getIsDirectory()) {
                 prepareBeanWarning(t_delegateExpression, element, issues);
             } else if (t_delegateExpression != null && FileScanner.getIsDirectory()) {
                 prepareDirBasedBeanWarning(t_delegateExpression, element, issues);
             }
 
-            final String javaReference = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, attr_class);
+            final String javaReference = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                    BpmnConstants.ATTR_CLASS);
             if (getClassReference(javaReference) != null && !FileScanner.getIsDirectory()) {
                 prepareClassWarning(getClassReference(javaReference), element, issues);
             } else if (javaReference != null && FileScanner.getIsDirectory()) {
@@ -231,7 +232,7 @@ public class VersioningChecker extends AbstractElementChecker {
         final BaseElement baseElement = element.getBaseElement();
         if (baseElement instanceof ScriptTask) {
             final ScriptTask scriptTask = (ScriptTask) baseElement;
-            if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals("groovy")) {
+            if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals(ConstantsConfig.GROOVY)) {
                 // External Resource
                 String resourcePath = scriptTask.getCamundaResource();
                 resourcePath = getGroovyReference(resourcePath);
@@ -348,7 +349,8 @@ public class VersioningChecker extends AbstractElementChecker {
             if (!resourcesNewestVersions.contains(resourcePath)) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), resourcePath, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue("name"), null, null, null,
+                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
+                        null,
                         "script reference is deprecated or file with version doesn't exist", null));
             }
         }
@@ -367,7 +369,8 @@ public class VersioningChecker extends AbstractElementChecker {
         if (beanReference != null && !resourcesNewestVersions.contains(beanReference)) {
             issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                     element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
-                    element.getBaseElement().getAttributeValue("name"), null, null, null,
+                    element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
+                    null,
                     "bean reference '" + beanReference
                             + "' is deprecated or file with version does not exist for bean '"
                             + expression + "'",
@@ -393,7 +396,8 @@ public class VersioningChecker extends AbstractElementChecker {
             if (!resourcesNewestVersions.contains(beanReference)) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue("name"), null, null, null,
+                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
+                        null,
                         "bean reference is deprecated for '"
                                 + beanReference + "'.",
                         null));
@@ -415,15 +419,19 @@ public class VersioningChecker extends AbstractElementChecker {
                 if (element.getBaseElement().getId() == null) {
                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), javaReference,
-                            element.getBaseElement().getParentElement().getAttributeValue("id"),
-                            element.getBaseElement().getParentElement().getAttributeValue("name"), null, null, null,
+                            element.getBaseElement().getParentElement()
+                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                            element.getBaseElement().getParentElement()
+                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                            null, null, null,
                             "class reference is deprecated or file with version does not exist for class '"
                                     + javaReference + "'",
                             null));
                 } else {
                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
-                            element.getBaseElement().getAttributeValue("name"), null, null, null,
+                            element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
+                            null, null,
                             "class reference is deprecated or file with version does not exist for class '"
                                     + javaReference + "'",
                             null));
@@ -448,7 +456,8 @@ public class VersioningChecker extends AbstractElementChecker {
             if (!resourcesNewestVersions.contains(javaReference)) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                         element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue("name"), null, null, null,
+                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
+                        null,
                         "class reference is deprecated for '"
                                 + javaReference + "'.",
                         null));

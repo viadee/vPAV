@@ -49,7 +49,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -87,7 +87,7 @@ public class OverlapCheckerTest {
     public void testModelWithNoOverlap()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "OverlapChecker_Correct.bpmn";
-        checker = new OverlapChecker(rule, new BPMNScanner(PATH));
+        checker = new OverlapChecker(rule, new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -121,7 +121,7 @@ public class OverlapCheckerTest {
     public void testModelWithOverlap()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "OverlapChecker_Wrong.bpmn";
-        checker = new OverlapChecker(rule, new BPMNScanner(PATH));
+        checker = new OverlapChecker(rule, new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 

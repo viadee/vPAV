@@ -50,7 +50,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -96,7 +96,7 @@ public class BoundaryErrorCheckerTest {
     public void testBoundaryErrorEventClass_Correct() throws ParserConfigurationException, SAXException, IOException {
 
         final String PATH = BASE_PATH + "BoundaryErrorEventClass_Correct.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BPMNScanner(PATH));
+        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -129,7 +129,7 @@ public class BoundaryErrorCheckerTest {
     @Test
     public void testBoundaryErrorEventClass_Wrong() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "BoundaryErrorEventClass_Wrong.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BPMNScanner(PATH));
+        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -161,7 +161,7 @@ public class BoundaryErrorCheckerTest {
     @Test
     public void testBoundaryErrorEventBean_Correct() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "BoundaryErrorEventBean_Correct.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BPMNScanner(PATH));
+        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -193,7 +193,7 @@ public class BoundaryErrorCheckerTest {
     @Test
     public void testBoundaryErrorEventBean_Wrong() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "BoundaryErrorEventBean_Wrong.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BPMNScanner(PATH));
+        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

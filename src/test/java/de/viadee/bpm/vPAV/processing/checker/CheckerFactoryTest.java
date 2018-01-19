@@ -50,7 +50,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -104,7 +104,7 @@ public class CheckerFactoryTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
         Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstancesBpmnElement(rules, null, element,
-                new BPMNScanner(PATH));
+                new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should not be empty", !cElChecker.isEmpty());
     }
@@ -127,7 +127,7 @@ public class CheckerFactoryTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
         Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstancesBpmnElement(rules, null, element,
-                new BPMNScanner(PATH));
+                new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
     }
@@ -151,7 +151,7 @@ public class CheckerFactoryTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
         Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstancesBpmnElement(rules, null, element,
-                new BPMNScanner(PATH));
+                new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
     }

@@ -50,7 +50,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ModelConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -94,7 +94,7 @@ public class ExtensionCheckerTest {
     public void testExtensionChecker_Correct()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_Correct.bpmn";
-        checker = new ExtensionChecker(createRule(), new BPMNScanner(PATH));
+        checker = new ExtensionChecker(createRule(), new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -127,7 +127,7 @@ public class ExtensionCheckerTest {
     public void testExtensionChecker_Wrong()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_Wrong.bpmn";
-        checker = new ExtensionChecker(createRule(), new BPMNScanner(PATH));
+        checker = new ExtensionChecker(createRule(), new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -160,7 +160,7 @@ public class ExtensionCheckerTest {
     public void testExtensionChecker_NoValue()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_NoValue.bpmn";
-        checker = new ExtensionChecker(createRule(), new BPMNScanner(PATH));
+        checker = new ExtensionChecker(createRule(), new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -193,7 +193,7 @@ public class ExtensionCheckerTest {
     public void testExtensionChecker_NoKey()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_NoKey.bpmn";
-        checker = new ExtensionChecker(createRule(), new BPMNScanner(PATH));
+        checker = new ExtensionChecker(createRule(), new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -226,7 +226,7 @@ public class ExtensionCheckerTest {
     public void testExtensionChecker_WithId()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_WithId.bpmn";
-        checker = new ExtensionChecker(createRule2(), new BPMNScanner(PATH));
+        checker = new ExtensionChecker(createRule2(), new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -259,7 +259,7 @@ public class ExtensionCheckerTest {
     public void testExtensionChecker_NoRequiredAttribute()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_NoRequiredAttribute.bpmn";
-        checker = new ExtensionChecker(createRule3(), new BPMNScanner(PATH));
+        checker = new ExtensionChecker(createRule3(), new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 

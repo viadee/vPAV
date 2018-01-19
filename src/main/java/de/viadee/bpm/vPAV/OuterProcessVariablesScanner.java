@@ -48,6 +48,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
 
+import de.viadee.bpm.vPAV.constants.ConstantsConfig;
 import groovyjarjarasm.asm.ClassReader;
 import groovyjarjarasm.asm.ClassVisitor;
 import groovyjarjarasm.asm.FieldVisitor;

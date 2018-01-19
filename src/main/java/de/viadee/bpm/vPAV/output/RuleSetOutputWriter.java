@@ -45,7 +45,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.ModelConvention;
@@ -57,6 +56,7 @@ import de.viadee.bpm.vPAV.config.reader.XmlModelConvention;
 import de.viadee.bpm.vPAV.config.reader.XmlRule;
 import de.viadee.bpm.vPAV.config.reader.XmlRuleSet;
 import de.viadee.bpm.vPAV.config.reader.XmlSetting;
+import de.viadee.bpm.vPAV.constants.ConstantsConfig;
 
 /**
  * Ergebnisse aus dem Checker in ein definiertes XML-Format schreiben

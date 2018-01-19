@@ -53,7 +53,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -99,7 +99,7 @@ public class NoScriptCheckerTest {
     public void testModelWithNoScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithoutScript.bpmn";
-        checker = new NoScriptChecker(rule, new BPMNScanner(PATH));
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -128,7 +128,7 @@ public class NoScriptCheckerTest {
     public void testModelWithInputScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithInputScript.bpmn";
-        checker = new NoScriptChecker(rule, new BPMNScanner(PATH));
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -161,7 +161,7 @@ public class NoScriptCheckerTest {
     public void testModelWithOutputScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithOutputScript.bpmn";
-        checker = new NoScriptChecker(rule, new BPMNScanner(PATH));
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -194,7 +194,7 @@ public class NoScriptCheckerTest {
     public void testModelWithExecutionlistenerScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithExecutionlistenerScript.bpmn";
-        checker = new NoScriptChecker(rule, new BPMNScanner(PATH));
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -228,7 +228,7 @@ public class NoScriptCheckerTest {
     public void testModelWithTasklistenerScript()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithTasklistenerScript.bpmn";
-        checker = new NoScriptChecker(rule, new BPMNScanner(PATH));
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -261,7 +261,7 @@ public class NoScriptCheckerTest {
     public void testModelWithScriptTask()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithScriptTask.bpmn";
-        checker = new NoScriptChecker(rule, new BPMNScanner(PATH));
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

@@ -57,7 +57,7 @@ import org.camunda.bpm.model.bpmn.instance.SubProcess;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -86,15 +86,15 @@ public class ElementGraphBuilder {
 
     private Map<String, Collection<String>> processIdToVariables;
 
-    private BPMNScanner bpmnScanner;
+    private BpmnScanner bpmnScanner;
 
-    public ElementGraphBuilder(BPMNScanner bpmnScanner) {
+    public ElementGraphBuilder(BpmnScanner bpmnScanner) {
         this.bpmnScanner = bpmnScanner;
     }
 
     public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
             final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
-            final Map<String, Collection<String>> processIdToVariables, BPMNScanner bpmnScanner) {
+            final Map<String, Collection<String>> processIdToVariables, BpmnScanner bpmnScanner) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.processIdToPathMap = processIdToPathMap;
         this.messageIdToVariables = messageIdToVariables;

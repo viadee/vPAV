@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.Script;
@@ -42,7 +43,7 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaScript;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.codehaus.groovy.control.CompilationFailedException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -58,7 +59,7 @@ import groovy.lang.MissingPropertyException;
  */
 public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
-    public EmbeddedGroovyScriptChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public EmbeddedGroovyScriptChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -118,7 +119,8 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
                 if (scriptTask.getCamundaResource() == null) {
                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                             bpmnFile, null,
-                            baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                            baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                            null, null, null,
                             "there is an empty script reference", null));
                 }
             }
@@ -214,12 +216,14 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
             if (ex instanceof CompilationFailedException) {
                 return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile,
                         null,
-                        baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                        baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                        null, null, null,
                         ex.getMessage(), null);
             } else {
                 return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile,
                         null,
-                        baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                        baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                        null, null, null,
                         "GroovyScript could not be evaluated. '" + ex.getMessage() + "'", null);
             }
 
@@ -241,7 +245,8 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
         if (scriptFormat != null && (script == null || script.isEmpty())) {
             return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile, null,
-                    baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                    baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
+                    null, null,
                     "there is no script content for given script format", null);
         }
         return null;
@@ -261,7 +266,8 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
         if (scriptFormat == null && script != null) {
             return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile, null,
-                    baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                    baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
+                    null, null,
                     "there is no script format for given script", null);
         }
         return null;

@@ -64,6 +64,7 @@ import org.camunda.bpm.model.dmn.instance.Decision;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.ConstantsConfig;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
 

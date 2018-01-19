@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
@@ -74,10 +75,12 @@ public class ProcessVariablesModelChecker implements ModelChecker {
                             determineCriticality(anomaly.getAnomaly()),
                             var.getElement().getProcessdefinition(), var.getResourceFilePath(),
                             var.getElement().getBaseElement().getId(),
-                            var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
+                            var.getElement().getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                            var.getName(),
                             anomaly.getAnomaly(), paths,
                             "process variable (" + var.getName() + ") will be overwritten in activity '"
-                                    + var.getElement().getBaseElement().getAttributeValue("name")
+                                    + var.getElement().getBaseElement()
+                                            .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
                                     + "' without use. (compare model: "
                                     + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
                             null));
@@ -86,10 +89,12 @@ public class ProcessVariablesModelChecker implements ModelChecker {
                             determineCriticality(anomaly.getAnomaly()),
                             var.getElement().getProcessdefinition(), var.getResourceFilePath(),
                             var.getElement().getBaseElement().getId(),
-                            var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
+                            var.getElement().getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                            var.getName(),
                             anomaly.getAnomaly(), paths,
                             "process variable (" + var.getName() + ") will be deleted in activity '"
-                                    + var.getElement().getBaseElement().getAttributeValue("name")
+                                    + var.getElement().getBaseElement()
+                                            .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
                                     + "' without use. (compare model: "
                                     + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
                             null));
@@ -98,10 +103,12 @@ public class ProcessVariablesModelChecker implements ModelChecker {
                             determineCriticality(anomaly.getAnomaly()),
                             var.getElement().getProcessdefinition(), var.getResourceFilePath(),
                             var.getElement().getBaseElement().getId(),
-                            var.getElement().getBaseElement().getAttributeValue("name"), var.getName(),
+                            var.getElement().getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                            var.getName(),
                             anomaly.getAnomaly(), paths,
                             "there is a read access to variable (" + var.getName() + ") in activity '"
-                                    + var.getElement().getBaseElement().getAttributeValue("name")
+                                    + var.getElement().getBaseElement()
+                                            .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
                                     + "', but no value has been set before. (compare model: "
                                     + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
                             null));

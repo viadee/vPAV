@@ -35,15 +35,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ExclusiveGateway;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -52,7 +54,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class XorConventionChecker extends AbstractElementChecker {
 
-    public XorConventionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public XorConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -74,12 +76,13 @@ public class XorConventionChecker extends AbstractElementChecker {
             if (bpmnScanner.getOutgoing(xor_gateway) > 1) {
 
                 // check default path
-                if (settings != null && settings.containsKey("requiredDefault")
-                        && settings.get("requiredDefault").getValue().equals("true")
-                        && bpmnElement.getAttributeValue("default") == null)
+                if (settings != null && settings.containsKey(BpmnConstants.REQUIRED_DEFAULT)
+                        && settings.get(BpmnConstants.REQUIRED_DEFAULT).getValue().equals("true")
+                        && bpmnElement.getAttributeValue(BpmnConstants.DEFAULT) == null)
                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, bpmnElement.getId(),
-                            bpmnElement.getAttributeValue("name"), null, null, null, "xor gateway '"
+                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                            "xor gateway '"
                                     + CheckName.checkName(bpmnElement) + "' has no default path",
                             null));
 
@@ -93,7 +96,7 @@ public class XorConventionChecker extends AbstractElementChecker {
 
                 // TODO: dont use indices
                 final String patternString = elementConventions.get(0).getPattern().trim();
-                final String taskName = bpmnElement.getAttributeValue("name");
+                final String taskName = bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
                 if (taskName != null && taskName.trim().length() > 0) {
                     final Pattern pattern = Pattern.compile(patternString);
                     final String taskNameClean = taskName.replaceAll("\n", "").replaceAll("\r", "");
@@ -102,7 +105,8 @@ public class XorConventionChecker extends AbstractElementChecker {
                     if (!matcher.matches()) {
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                                 element.getProcessdefinition(), null, bpmnElement.getId(),
-                                bpmnElement.getAttributeValue("name"), null, null, null, "xor gateway name '"
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                                "xor gateway name '"
                                         + CheckName.checkName(bpmnElement) + "' is against the naming convention",
                                 elementConventions.get(0).getDescription()));
                     }
@@ -110,7 +114,8 @@ public class XorConventionChecker extends AbstractElementChecker {
                     issues.add(
                             new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                                     element.getProcessdefinition(),
-                                    null, bpmnElement.getId(), bpmnElement.getAttributeValue("name"), null, null,
+                                    null, bpmnElement.getId(),
+                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
                                     null, "xor gateway name must be specified", null));
                 }
 
@@ -120,7 +125,7 @@ public class XorConventionChecker extends AbstractElementChecker {
 
                 for (int i = 0; i < edges.size(); i++) {
                     Element Task_Element = (Element) edges.get(i);
-                    final String edgeName = Task_Element.getAttribute("name");
+                    final String edgeName = Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
                     if (edgeName != null && edgeName.trim().length() > 0) {
                         final Pattern pattern = Pattern.compile(patternStringEdge);
                         final String edgeNameClean = edgeName.replaceAll("\n", "").replaceAll("\r", "");
@@ -128,8 +133,10 @@ public class XorConventionChecker extends AbstractElementChecker {
                         if (!matcher.matches()) {
                             issues.add(
                                     new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                            element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
-                                            Task_Element.getAttribute("name"), null, null, null,
+                                            element.getProcessdefinition(), null,
+                                            Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                            Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
+                                            null, null,
                                             "outgoing edges of xor gateway '"
                                                     + CheckName.checkName(bpmnElement)
                                                     + "' are against the naming convention",
@@ -138,8 +145,10 @@ public class XorConventionChecker extends AbstractElementChecker {
                     } else {
                         issues.add(
                                 new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                        element.getProcessdefinition(), null, Task_Element.getAttribute("id"),
-                                        Task_Element.getAttribute("name"), null, null, null,
+                                        element.getProcessdefinition(), null,
+                                        Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                        Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
+                                        null,
                                         "outgoing edges of xor gateway need to be named", null));
                     }
                 }

@@ -49,7 +49,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -97,7 +97,7 @@ public class FieldInjectionCheckerTest {
     public void testCorrectFieldInjection()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "FieldInjectionCheckerTest_CorrectFieldInjection.bpmn";
-        checker = new FieldInjectionChecker(rule, new BPMNScanner(PATH));
+        checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -126,7 +126,7 @@ public class FieldInjectionCheckerTest {
     public void testWrongTypeOfFieldInjection()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "FieldInjectionCheckerTest_WrongType.bpmn";
-        checker = new FieldInjectionChecker(rule, new BPMNScanner(PATH));
+        checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -155,7 +155,7 @@ public class FieldInjectionCheckerTest {
     public void testNoSetterMethod()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "FieldInjectionCheckerTest_NoSetter.bpmn";
-        checker = new FieldInjectionChecker(rule, new BPMNScanner(PATH));
+        checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

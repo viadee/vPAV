@@ -37,9 +37,10 @@ import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -51,7 +52,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
-    public DmnTaskChecker(final Rule rule, BPMNScanner bpmnScanner) {
+    public DmnTaskChecker(final Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -69,15 +70,16 @@ public class DmnTaskChecker extends AbstractElementChecker {
             final String implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
 
             final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    "decisionRef");
+                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF);
             if (implementationAttr != null) {
                 // check if DMN reference is not empty
-                if (implementationAttr.equals("camunda:decisionRef")) {
+                if (implementationAttr.equals(BpmnConstants.CAMUNDA_DMN)) {
                     if (dmnAttr == null || dmnAttr.trim().length() == 0) {
                         // Error, because no delegateExpression has been configured
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                element.getProcessdefinition(), null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "task " + CheckName.checkName(bpmnElement) + " with no dmn reference", null));
                     } else {
                         issues.addAll(checkDMNFile(element, dmnAttr));
@@ -109,8 +111,9 @@ public class DmnTaskChecker extends AbstractElementChecker {
         if (urlDMN == null) {
             // Throws an error, if the class was not found
             issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                    element.getProcessdefinition(), dmnPath, bpmnElement.getAttributeValue("id"),
-                    bpmnElement.getAttributeValue("name"), null, null, null,
+                    element.getProcessdefinition(), dmnPath,
+                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                     "dmn file for task " + CheckName.checkName(bpmnElement) + " not found", null));
         }
         return issues;

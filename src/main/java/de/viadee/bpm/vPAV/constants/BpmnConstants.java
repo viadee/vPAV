@@ -27,9 +27,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.constants;
 
-public class BPMNConstants {
+public class BpmnConstants {
 
     public static final String DEFINITIONS = "definitions";
 
@@ -231,11 +231,29 @@ public class BPMNConstants {
 
     public static final String ATTR_MESSAGEREF = "messageRef";
 
+    public static final String DEFAULT = "default";
+
+    public static final String REQUIRED_DEFAULT = "requiredDefault";
+
     public static final String FIXED_VALUE = "org.camunda.bpm.engine.impl.el.FixedValue";
 
     public static final String EXPRESSION = "org.camunda.bpm.engine.delegate.Expression";
 
-    private BPMNConstants() {
+    public static final String COND_EXP = "conditionExpression";
+
+    public static final String INTERFACE_DEL = "JavaDelegate";
+
+    public static final String INTERFACE_EXECUTION_LISTENER = "ExecutionListener";
+
+    public static final String INTERFACE_TASK_LISTENER = "TaskListener";
+
+    public static final String INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR = "SignallableActivityBehavior";
+
+    public static final String INTERFACE_ACTIVITY_BEHAVIOUR = "ActivityBehavior";
+
+    public static final String SUPERCLASS_ABSTRACT_BPMN_ACTIVITY_BEHAVIOR = "AbstractBpmnActivityBehavior";
+
+    private BpmnConstants() {
     }
 
 }
