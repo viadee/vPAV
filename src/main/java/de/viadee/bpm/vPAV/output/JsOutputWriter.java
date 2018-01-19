@@ -50,7 +50,7 @@ import com.google.gson.JsonObject;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -75,17 +75,17 @@ public class JsOutputWriter implements IssueOutputWriter {
 
         if (json != null && !json.isEmpty()) {
             try {
-                final FileWriter file = new FileWriter(ConstantsConfig.VALIDATION_JS_MODEL_OUTPUT);
+                final FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT);
                 file.write(bpmn);
                 file.close();
 
                 final OutputStreamWriter osWriter = new OutputStreamWriter(
-                        new FileOutputStream(ConstantsConfig.VALIDATION_JS_OUTPUT), StandardCharsets.UTF_8);
+                        new FileOutputStream(ConfigConstants.VALIDATION_JS_OUTPUT), StandardCharsets.UTF_8);
                 osWriter.write(json);
                 osWriter.close();
 
                 final OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
-                        new FileOutputStream(ConstantsConfig.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8);
+                        new FileOutputStream(ConfigConstants.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8);
                 osWriterSuccess.write(json_noIssues);
                 osWriterSuccess.close();
 
@@ -113,7 +113,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
         // add infos for specific processdefinition
         try {
-            FileWriter writer = new FileWriter(ConstantsConfig.VALIDATION_JS_TMP, true);
+            FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_TMP, true);
             for (final BaseElement baseElement : baseElements) {
                 BpmnElement element = graphBuilder.getElement(baseElement.getId());
                 if (element == null) {
@@ -134,10 +134,10 @@ public class JsOutputWriter implements IssueOutputWriter {
      */
     public static void finish() {
         String jsFile = "var proz_vars = [\n";
-        if (new File(ConstantsConfig.VALIDATION_JS_TMP).exists()) {
+        if (new File(ConfigConstants.VALIDATION_JS_TMP).exists()) {
             try {
                 // add file content
-                byte[] encoded = Files.readAllBytes(Paths.get(ConstantsConfig.VALIDATION_JS_TMP));
+                byte[] encoded = Files.readAllBytes(Paths.get(ConfigConstants.VALIDATION_JS_TMP));
                 jsFile += new String(encoded, "UTF-8");
 
                 // remove last ','
@@ -148,11 +148,11 @@ public class JsOutputWriter implements IssueOutputWriter {
                 jsFile += "];";
 
                 // delete files
-                new File(ConstantsConfig.VALIDATION_JS_TMP).delete();
-                if (new File(ConstantsConfig.VALIDATION_JS_PROCESSVARIABLES).exists())
-                    new File(ConstantsConfig.VALIDATION_JS_PROCESSVARIABLES).delete();
+                new File(ConfigConstants.VALIDATION_JS_TMP).delete();
+                if (new File(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES).exists())
+                    new File(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES).delete();
 
-                FileWriter writer = new FileWriter(ConstantsConfig.VALIDATION_JS_PROCESSVARIABLES, false);
+                FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, false);
                 // write file to target
                 writer.write(jsFile);
                 writer.close();
@@ -219,7 +219,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
             for (CheckerIssue issue : issues) {
                 String prettyBpmnFilename = replace(File.separator, "\\", issue.getBpmnFile());
-                if (!prettyBpmnFilename.equals(ConstantsConfig.JS_BASEPATH + bpmnFilename))
+                if (!prettyBpmnFilename.equals(ConfigConstants.JS_BASEPATH + bpmnFilename))
                     modelIssues.remove(issue);
             }
 
@@ -232,7 +232,7 @@ public class JsOutputWriter implements IssueOutputWriter {
                 }
                 if (ruleIssues.isEmpty())
                     newIssues.add(new CheckerIssue(ruleName, null, CriticalityEnum.SUCCESS,
-                            (ConstantsConfig.JS_BASEPATH + bpmnFilename), null,
+                            (ConfigConstants.JS_BASEPATH + bpmnFilename), null,
                             "", "", null, null, null, "No issues found", null));
             }
         }
@@ -253,7 +253,7 @@ public class JsOutputWriter implements IssueOutputWriter {
             for (final String bpmnFilename : AbstractRunner.getModelPath()) {
                 String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
                 output += "{\"name\":\"" + prettyBpmnFileName + "\",\n \"xml\": \"";
-                output += convertBpmnFile(ConstantsConfig.BASEPATH + bpmnFilename);
+                output += convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename);
                 output += "\"},\n";
             }
         } catch (IOException e) {

@@ -43,7 +43,7 @@ import org.junit.Test;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class XmlConfigReaderTest {
 
@@ -70,7 +70,7 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When
-        Map<String, Rule> result = reader.read(ConstantsConfig.RULESET);
+        Map<String, Rule> result = reader.read(ConfigConstants.RULESET);
 
         // Then
         assertFalse("No rules could be read", result.isEmpty());

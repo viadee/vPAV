@@ -40,7 +40,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -59,7 +59,7 @@ public class JsonOutputWriter implements IssueOutputWriter {
         if (json != null && !json.isEmpty()) {
             try {
                 final OutputStreamWriter osWriter = new OutputStreamWriter(
-                        new FileOutputStream(ConstantsConfig.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8);
+                        new FileOutputStream(ConfigConstants.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8);
                 osWriter.write(json);
                 osWriter.close();
             } catch (final IOException ex) {

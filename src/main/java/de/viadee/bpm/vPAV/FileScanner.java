@@ -64,7 +64,7 @@ import org.camunda.bpm.model.dmn.instance.Decision;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
 
@@ -95,16 +95,16 @@ public class FileScanner {
     public FileScanner(final Map<String, Rule> rules) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
-        scanner.setBasedir(ConstantsConfig.BASEPATH);
+        scanner.setBasedir(ConfigConstants.BASEPATH);
 
         // get file paths of process definitions
-        scanner.setIncludes(new String[] { ConstantsConfig.BPMN_FILE_PATTERN });
+        scanner.setIncludes(new String[] { ConfigConstants.BPMN_FILE_PATTERN });
         scanner.scan();
         processdefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
-        scanner.setBasedir(ConstantsConfig.JAVAPATH);
+        scanner.setBasedir(ConfigConstants.JAVAPATH);
         // get file paths of process definitions
-        scanner.setIncludes(new String[] { ConstantsConfig.JAVA_FILE_PATTERN });
+        scanner.setIncludes(new String[] { ConfigConstants.JAVA_FILE_PATTERN });
         scanner.scan();
         javaResourcesFileInputStream = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
@@ -136,7 +136,7 @@ public class FileScanner {
         // retrieve all jars during runtime and pass them to get class files
 
         for (URL url : urls) {
-            if (url.getFile().contains(ConstantsConfig.TARGET_CLASS_FOLDER)) {
+            if (url.getFile().contains(ConfigConstants.TARGET_CLASS_FOLDER)) {
                 File f = new File(url.getFile());
                 if (!isDirectory && f.exists()) {
                     files = (LinkedList<File>) FileUtils.listFiles(f,
@@ -153,8 +153,8 @@ public class FileScanner {
         }
 
         // get mapping from decision reference to file path
-        scanner.setBasedir(ConstantsConfig.BASEPATH);
-        scanner.setIncludes(new String[] { ConstantsConfig.DMN_FILE_PATTERN });
+        scanner.setBasedir(ConfigConstants.BASEPATH);
+        scanner.setIncludes(new String[] { ConfigConstants.DMN_FILE_PATTERN });
         scanner.scan();
         decisionRefToPathMap = createDmnKeyToPathMap(
                 new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
@@ -163,7 +163,7 @@ public class FileScanner {
         if (rule != null && rule.isActive()) {
             if (versioningScheme != null && !isDirectory) {
                 // also add groovy files to included files
-                scanner.setIncludes(new String[] { ConstantsConfig.SCRIPT_FILE_PATTERN });
+                scanner.setIncludes(new String[] { ConfigConstants.SCRIPT_FILE_PATTERN });
                 scanner.scan();
                 includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
@@ -267,8 +267,8 @@ public class FileScanner {
         for (final String classPathElement : classPathElements) {
             classpathElementUrls.add(new File(classPathElement).toURI().toURL());
         }
-        classpathElementUrls.add(new File(ConstantsConfig.TEST_BASEPATH).toURI().toURL());
-        classpathElementUrls.add(new File(ConstantsConfig.JAVAPATH).toURI().toURL());
+        classpathElementUrls.add(new File(ConfigConstants.TEST_BASEPATH).toURI().toURL());
+        classpathElementUrls.add(new File(ConfigConstants.JAVAPATH).toURI().toURL());
         return new URLClassLoader(classpathElementUrls.toArray(new URL[classpathElementUrls.size()]),
                 Thread.currentThread().getContextClassLoader());
     }
@@ -287,7 +287,7 @@ public class FileScanner {
             // read bpmn file
             BpmnModelInstance modelInstance = null;
             try {
-                modelInstance = Bpmn.readModelFromFile(new File(ConstantsConfig.BASEPATH + path));
+                modelInstance = Bpmn.readModelFromFile(new File(ConfigConstants.BASEPATH + path));
             } catch (final BpmnModelException ex) {
                 throw new RuntimeException("bpmn model couldn't be read", ex);
             }
@@ -320,7 +320,7 @@ public class FileScanner {
             // read dmn file
             DmnModelInstance modelInstance = null;
             try {
-                modelInstance = Dmn.readModelFromFile(new File(ConstantsConfig.BASEPATH + path));
+                modelInstance = Dmn.readModelFromFile(new File(ConfigConstants.BASEPATH + path));
             } catch (final DmnModelException ex) {
                 throw new RuntimeException("dmn model couldn't be read", ex);
             }
@@ -426,13 +426,13 @@ public class FileScanner {
         if (rule != null && rule.isActive()) {
             Setting setting = null;
             final Map<String, Setting> settings = rule.getSettings();
-            if (settings.containsKey(ConstantsConfig.VERSIONINGSCHEMECLASS)
-                    && !settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEPACKAGE)) {
-                setting = settings.get(ConstantsConfig.VERSIONINGSCHEMECLASS);
+            if (settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
+                    && !settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
+                setting = settings.get(ConfigConstants.VERSIONINGSCHEMECLASS);
                 isDirectory = false;
-            } else if (!settings.containsKey(ConstantsConfig.VERSIONINGSCHEMECLASS)
-                    && settings.containsKey(ConstantsConfig.VERSIONINGSCHEMEPACKAGE)) {
-                setting = settings.get(ConstantsConfig.VERSIONINGSCHEMEPACKAGE);
+            } else if (!settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
+                    && settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
+                setting = settings.get(ConfigConstants.VERSIONINGSCHEMEPACKAGE);
                 isDirectory = true;
             }
             if (setting == null) {

@@ -58,7 +58,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -140,7 +140,7 @@ public class VersioningChecker extends AbstractElementChecker {
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
-                    && script.getCamundaScriptFormat().equals(ConstantsConfig.GROOVY)) {
+                    && script.getCamundaScriptFormat().equals(ConfigConstants.GROOVY)) {
                 final String resourcePath = getGroovyReference(script.getCamundaResource());
                 prepareScriptWarning(resourcePath, element, issues);
             }
@@ -176,7 +176,7 @@ public class VersioningChecker extends AbstractElementChecker {
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
-                    && script.getCamundaScriptFormat().equals(ConstantsConfig.GROOVY)) {
+                    && script.getCamundaScriptFormat().equals(ConfigConstants.GROOVY)) {
                 final String resourcePath = getGroovyReference(script.getCamundaResource());
                 prepareScriptWarning(resourcePath, element, issues);
             }
@@ -232,7 +232,7 @@ public class VersioningChecker extends AbstractElementChecker {
         final BaseElement baseElement = element.getBaseElement();
         if (baseElement instanceof ScriptTask) {
             final ScriptTask scriptTask = (ScriptTask) baseElement;
-            if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals(ConstantsConfig.GROOVY)) {
+            if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals(ConfigConstants.GROOVY)) {
                 // External Resource
                 String resourcePath = scriptTask.getCamundaResource();
                 resourcePath = getGroovyReference(resourcePath);

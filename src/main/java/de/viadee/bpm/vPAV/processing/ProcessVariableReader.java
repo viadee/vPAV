@@ -86,7 +86,7 @@ import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -313,7 +313,7 @@ public final class ProcessVariableReader {
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
-                    && script.getCamundaScriptFormat().equals(ConstantsConfig.GROOVY)) {
+                    && script.getCamundaScriptFormat().equals(ConfigConstants.GROOVY)) {
                 // inline script or external file?
                 final String inlineScript = script.getTextContent();
                 if (inlineScript != null && inlineScript.trim().length() > 0) {
@@ -364,7 +364,7 @@ public final class ProcessVariableReader {
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
-                    && script.getCamundaScriptFormat().equals(ConstantsConfig.GROOVY)) {
+                    && script.getCamundaScriptFormat().equals(ConfigConstants.GROOVY)) {
                 // inline script or external file?
                 final String inlineScript = script.getTextContent();
                 if (inlineScript != null && inlineScript.trim().length() > 0) {
@@ -473,7 +473,7 @@ public final class ProcessVariableReader {
             }
             final ConditionExpression expression = flow.getConditionExpression();
             if (expression != null) {
-                if (expression.getLanguage() != null && expression.getLanguage().equals(ConstantsConfig.GROOVY)) {
+                if (expression.getLanguage() != null && expression.getLanguage().equals(ConfigConstants.GROOVY)) {
                     // inline script or external file?
                     final String inlineScript = expression.getTextContent();
                     if (inlineScript != null && inlineScript.trim().length() > 0) {
@@ -588,7 +588,7 @@ public final class ProcessVariableReader {
         } else if (baseElement instanceof ScriptTask) {
             // Examine script task for process variables
             final ScriptTask scriptTask = (ScriptTask) baseElement;
-            if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals(ConstantsConfig.GROOVY)) {
+            if (scriptTask.getScriptFormat() != null && scriptTask.getScriptFormat().equals(ConfigConstants.GROOVY)) {
                 // inline script or external file?
                 final Script script = scriptTask.getScript();
                 if (script != null && script.getTextContent() != null
@@ -743,14 +743,14 @@ public final class ProcessVariableReader {
 
                 if (RuntimeConfig.getInstance().isTest()) {
                     if (fileName.endsWith(".java"))
-                        directoryScanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
+                        directoryScanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
                     else
-                        directoryScanner.setBasedir(ConstantsConfig.TEST_BASEPATH);
+                        directoryScanner.setBasedir(ConfigConstants.TEST_BASEPATH);
                 } else {
                     if (fileName.endsWith(".java"))
-                        directoryScanner.setBasedir(ConstantsConfig.JAVAPATH);
+                        directoryScanner.setBasedir(ConfigConstants.JAVAPATH);
                     else
-                        directoryScanner.setBasedir(ConstantsConfig.BASEPATH);
+                        directoryScanner.setBasedir(ConfigConstants.BASEPATH);
                 }
 
                 Resource s = directoryScanner.getResource(fileName);

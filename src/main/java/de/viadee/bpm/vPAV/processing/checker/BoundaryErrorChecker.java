@@ -51,7 +51,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -273,14 +273,14 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
                 if (RuntimeConfig.getInstance().isTest()) {
                     if (fileName.endsWith(".java"))
-                        scanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
+                        scanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
                     else
-                        scanner.setBasedir(ConstantsConfig.TEST_BASEPATH);
+                        scanner.setBasedir(ConfigConstants.TEST_BASEPATH);
                 } else {
                     if (fileName.endsWith(".java"))
-                        scanner.setBasedir(ConstantsConfig.JAVAPATH);
+                        scanner.setBasedir(ConfigConstants.JAVAPATH);
                     else
-                        scanner.setBasedir(ConstantsConfig.BASEPATH);
+                        scanner.setBasedir(ConfigConstants.BASEPATH);
                 }
 
                 Resource s = scanner.getResource(fileName);

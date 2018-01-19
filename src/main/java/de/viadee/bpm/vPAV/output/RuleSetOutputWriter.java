@@ -56,7 +56,7 @@ import de.viadee.bpm.vPAV.config.reader.XmlModelConvention;
 import de.viadee.bpm.vPAV.config.reader.XmlRule;
 import de.viadee.bpm.vPAV.config.reader.XmlRuleSet;
 import de.viadee.bpm.vPAV.config.reader.XmlSetting;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 /**
  * Ergebnisse aus dem Checker in ein definiertes XML-Format schreiben
@@ -75,13 +75,13 @@ public class RuleSetOutputWriter {
     public void write(Map<String, Rule> rules) throws OutputWriterException {
         Writer writer = null;
 
-        Path path = Paths.get(ConstantsConfig.EFFECTIVE_RULESET);
+        Path path = Paths.get(ConfigConstants.EFFECTIVE_RULESET);
         if (path.toFile().exists())
             path.toFile().delete();
 
         try {
             writer = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(ConstantsConfig.EFFECTIVE_RULESET), "utf-8"));
+                    new OutputStreamWriter(new FileOutputStream(ConfigConstants.EFFECTIVE_RULESET), "utf-8"));
             final JAXBContext context = JAXBContext.newInstance(XmlRuleSet.class);
             final Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);

@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueOutputWriter;
 import de.viadee.bpm.vPAV.output.JsOutputWriter;
 import de.viadee.bpm.vPAV.output.JsonOutputWriter;
@@ -125,18 +125,18 @@ public abstract class AbstractRunner {
         Map<String, Rule> rules = new XmlConfigReader().getDeactivatedRuleSet();
         final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
         try {
-            if (new File(ConstantsConfig.TEST_BASEPATH + ConstantsConfig.RULESET).exists()) {
-                Map<String, Rule> localRule = new XmlConfigReader().read(ConstantsConfig.RULESET);
+            if (new File(ConfigConstants.TEST_BASEPATH + ConfigConstants.RULESET).exists()) {
+                Map<String, Rule> localRule = new XmlConfigReader().read(ConfigConstants.RULESET);
 
-                if (localRule.containsKey(ConstantsConfig.HASPARENTRULESET)
-                        && localRule.get(ConstantsConfig.HASPARENTRULESET).isActive()) {
-                    rules = mergeRuleSet(rules, new XmlConfigReader().read(ConstantsConfig.RULESETPARENT));
+                if (localRule.containsKey(ConfigConstants.HASPARENTRULESET)
+                        && localRule.get(ConfigConstants.HASPARENTRULESET).isActive()) {
+                    rules = mergeRuleSet(rules, new XmlConfigReader().read(ConfigConstants.RULESETPARENT));
                     rules = mergeRuleSet(rules, localRule);
                 } else {
                     rules = mergeRuleSet(rules, localRule);
                 }
             } else {
-                rules = new XmlConfigReader().read(ConstantsConfig.RULESETDEFAULT);
+                rules = new XmlConfigReader().read(ConfigConstants.RULESETDEFAULT);
             }
             ruleSetOutputWriter.write(rules);
             RuntimeConfig.getInstance().addActiveRules(rules);
@@ -145,7 +145,7 @@ public abstract class AbstractRunner {
             throw new RuntimeException("Config file could not be read or written");
         }
 
-        rules.remove(ConstantsConfig.HASPARENTRULESET);
+        rules.remove(ConfigConstants.HASPARENTRULESET);
         return rules;
     }
 
@@ -233,9 +233,9 @@ public abstract class AbstractRunner {
         } else {
             // 6a if no issues, then delete files if exists
             ArrayList<Path> validationFiles = new ArrayList<Path>();
-            validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_JS_OUTPUT));
-            validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_JSON_OUTPUT));
-            validationFiles.add(Paths.get(ConstantsConfig.VALIDATION_XML_OUTPUT));
+            validationFiles.add(Paths.get(ConfigConstants.VALIDATION_JS_OUTPUT));
+            validationFiles.add(Paths.get(ConfigConstants.VALIDATION_JSON_OUTPUT));
+            validationFiles.add(Paths.get(ConfigConstants.VALIDATION_XML_OUTPUT));
             deleteFiles(validationFiles);
             final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
             try {
@@ -264,7 +264,7 @@ public abstract class AbstractRunner {
      *
      */
     private static void createvPAVFolder() {
-        File vPavDir = new File(ConstantsConfig.VALIDATION_FOLDER);
+        File vPavDir = new File(ConfigConstants.VALIDATION_FOLDER);
 
         if (!vPavDir.exists()) {
             boolean success = vPavDir.mkdirs();
@@ -279,7 +279,7 @@ public abstract class AbstractRunner {
      */
     private static void createImgFolder() {
 
-        File imgDir = new File(ConstantsConfig.IMG_FOLDER);
+        File imgDir = new File(ConfigConstants.IMG_FOLDER);
 
         if (!imgDir.exists()) {
             boolean success = imgDir.mkdirs();
@@ -293,7 +293,7 @@ public abstract class AbstractRunner {
      * Make css folder
      */
     private static void createJsFolder() {
-        File jsDir = new File(ConstantsConfig.JS_FOLDER);
+        File jsDir = new File(ConfigConstants.JS_FOLDER);
         if (!jsDir.exists()) {
             boolean success = jsDir.mkdirs();
             if (!success)
@@ -305,7 +305,7 @@ public abstract class AbstractRunner {
      * Make css folder
      */
     private static void createCssFolder() {
-        File cssDir = new File(ConstantsConfig.CSS_FOLDER);
+        File cssDir = new File(ConfigConstants.CSS_FOLDER);
         if (!cssDir.exists()) {
             boolean success = cssDir.mkdirs();
             if (!success)
@@ -382,26 +382,26 @@ public abstract class AbstractRunner {
      */
     private static Map<String, String> createFileFolderMapping() {
         Map<String, String> fMap = new HashMap<String, String>();
-        fMap.put("bootstrap.min.js", ConstantsConfig.JS_FOLDER);
-        fMap.put("bpmn-navigated-viewer.js", ConstantsConfig.JS_FOLDER);
-        fMap.put("bpmn.io.viewer.app.js", ConstantsConfig.JS_FOLDER);
-        fMap.put("jquery-3.2.1.min.js", ConstantsConfig.JS_FOLDER);
-        fMap.put("popper.min.js", ConstantsConfig.JS_FOLDER);
-        fMap.put("infoPOM.js", ConstantsConfig.JS_FOLDER);
+        fMap.put("bootstrap.min.js", ConfigConstants.JS_FOLDER);
+        fMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
+        fMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
+        fMap.put("jquery-3.2.1.min.js", ConfigConstants.JS_FOLDER);
+        fMap.put("popper.min.js", ConfigConstants.JS_FOLDER);
+        fMap.put("infoPOM.js", ConfigConstants.JS_FOLDER);
 
-        fMap.put("bootstrap.min.css", ConstantsConfig.CSS_FOLDER);
-        fMap.put("viadee.css", ConstantsConfig.CSS_FOLDER);
-        fMap.put("MarkerStyle.css", ConstantsConfig.CSS_FOLDER);
+        fMap.put("bootstrap.min.css", ConfigConstants.CSS_FOLDER);
+        fMap.put("viadee.css", ConfigConstants.CSS_FOLDER);
+        fMap.put("MarkerStyle.css", ConfigConstants.CSS_FOLDER);
 
-        fMap.put("vPAV.png", ConstantsConfig.IMG_FOLDER);
-        fMap.put("viadee_Logo.png", ConstantsConfig.IMG_FOLDER);
-        fMap.put("GitHub.png", ConstantsConfig.IMG_FOLDER);
-        fMap.put("error.png", ConstantsConfig.IMG_FOLDER);
-        fMap.put("warning.png", ConstantsConfig.IMG_FOLDER);
-        fMap.put("info.png", ConstantsConfig.IMG_FOLDER);
-        fMap.put("success.png", ConstantsConfig.IMG_FOLDER);
+        fMap.put("vPAV.png", ConfigConstants.IMG_FOLDER);
+        fMap.put("viadee_Logo.png", ConfigConstants.IMG_FOLDER);
+        fMap.put("GitHub.png", ConfigConstants.IMG_FOLDER);
+        fMap.put("error.png", ConfigConstants.IMG_FOLDER);
+        fMap.put("warning.png", ConfigConstants.IMG_FOLDER);
+        fMap.put("info.png", ConfigConstants.IMG_FOLDER);
+        fMap.put("success.png", ConfigConstants.IMG_FOLDER);
 
-        fMap.put("validationResult.html", ConstantsConfig.VALIDATION_FOLDER);
+        fMap.put("validationResult.html", ConfigConstants.VALIDATION_FOLDER);
 
         return fMap;
     }
@@ -459,7 +459,7 @@ public abstract class AbstractRunner {
         final Collection<CheckerIssue> filteredIssues = new ArrayList<CheckerIssue>();
         filteredIssues.addAll(issues);
 
-        final Collection<String> ignoredIssues = collectIgnoredIssues(ConstantsConfig.IGNORE_FILE);
+        final Collection<String> ignoredIssues = collectIgnoredIssues(ConfigConstants.IGNORE_FILE);
         for (final CheckerIssue issue : issues) {
             if (ignoredIssues.contains(issue.getId())) {
                 filteredIssues.remove(issue);
@@ -553,7 +553,7 @@ public abstract class AbstractRunner {
             final OuterProcessVariablesScanner variableScanner) throws RuntimeException {
         Collection<CheckerIssue> modelIssues;
         try {
-            modelIssues = BpmnModelDispatcher.dispatch(new File(ConstantsConfig.BASEPATH + processdef),
+            modelIssues = BpmnModelDispatcher.dispatch(new File(ConfigConstants.BASEPATH + processdef),
                     fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
                     variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
                     fileScanner.getResourcesNewestVersions(), rules);

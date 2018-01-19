@@ -38,7 +38,7 @@ import org.apache.maven.project.MavenProject;
 import org.springframework.context.ApplicationContext;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.constants.ConstantsConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class RuntimeConfig {
 
@@ -129,7 +129,7 @@ public class RuntimeConfig {
     public void addActiveRules(Map<String, Rule> rules) {
         for (Map.Entry<String, Rule> entry : rules.entrySet()) {
             Rule rule = entry.getValue();
-            if (rule.isActive() && !rule.getName().equals(ConstantsConfig.HASPARENTRULESET))
+            if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET))
                 allActiveRules.add(rule.getName());
         }
     }
