@@ -851,7 +851,11 @@ public final class ProcessVariableReader {
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
-        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
+        final String COMMENT_PATTERN = "//.*";
+        final String IMPORT_PATTERN = "import .*";
+        final String PACKAGE_PATTERN = "package .*";
+        final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
+                .replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
 
         // search locations where variables are read
         final Pattern getVariablePatternRuntimeService = Pattern
@@ -895,7 +899,11 @@ public final class ProcessVariableReader {
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
-        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
+        final String COMMENT_PATTERN = "//.*";
+        final String IMPORT_PATTERN = "import .*";
+        final String PACKAGE_PATTERN = "package .*";
+        final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
+                .replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
 
         // search locations where variables are written
         final Pattern setVariablePatternRuntimeService = Pattern
@@ -941,7 +949,11 @@ public final class ProcessVariableReader {
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
-        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
+        final String COMMENT_PATTERN = "//.*";
+        final String IMPORT_PATTERN = "import .*";
+        final String PACKAGE_PATTERN = "package .*";
+        final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
+                .replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
 
         // search locations where variables are removed
         final Pattern removeVariablePatternRuntimeService = Pattern
