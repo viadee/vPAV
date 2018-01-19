@@ -69,7 +69,7 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     /**
      * CheckerIssue
-     * 
+     *
      * @param ruleName
      *            Name of the Rule
      * @param ruleDescription
@@ -112,6 +112,34 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.elementName = elementName;
         this.message = message;
         this.elementDescription = elementDescription;
+    }
+
+    public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
+            final String bpmnFile, final String elementId,
+            final String elementName, final String message, final String elementDescription) {
+        super();
+        this.ruleName = ruleName;
+        this.ruleDescription = ruleDescription;
+        this.classification = classification;
+        this.bpmnFile = bpmnFile;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.message = message;
+        this.elementDescription = elementDescription;
+    }
+
+    public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
+            final String bpmnFile, final String elementId,
+            final String elementName, final String message) {
+        super();
+        this.ruleName = ruleName;
+        this.ruleDescription = ruleDescription;
+        this.classification = classification;
+        this.bpmnFile = bpmnFile;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.message = message;
+
     }
 
     public String getId() {

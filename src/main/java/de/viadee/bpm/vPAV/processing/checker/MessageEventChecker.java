@@ -40,6 +40,7 @@ import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -76,11 +77,10 @@ public class MessageEventChecker extends AbstractElementChecker {
 
             if (baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF) == null
                     || baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF).isEmpty()) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "No message has been specified for '" + CheckName.checkName(baseElement) + "'.", null));
+
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                        "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
+
             } else {
                 if (bpmnScanner.getMessageName(
                         baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF)) == null
@@ -88,12 +88,8 @@ public class MessageEventChecker extends AbstractElementChecker {
                                 .getMessageName(
                                         baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF))
                                 .isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "No message name has been specified for '" + CheckName.checkName(baseElement) + "'.",
-                            null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "No message name has been specified for '" + CheckName.checkName(baseElement) + "'."));
                 }
             }
         } else if (baseElement.getElementType().getTypeName()
@@ -129,39 +125,17 @@ public class MessageEventChecker extends AbstractElementChecker {
                 if (eventDef != null) {
                     final Message message = eventDef.getMessage();
                     if (message == null) {
-                        issues.add(
-                                new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                                        null,
-                                        null, null,
-                                        "No message has been specified for '" + CheckName.checkName(baseElement)
-                                                + "'.",
-                                        null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
                     } else {
                         if (message.getName() == null || message.getName().isEmpty()) {
-                            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                    CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null,
-                                    baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                    baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                    null, null,
-                                    "No message name has been specified for '"
-                                            + CheckName.checkName(baseElement)
-                                            + "'.",
-                                    null));
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    "No message name has been specified for '" + CheckName.checkName(baseElement)
+                                            + "'."));
                         } else if (message.getName().contains("{") || message.getName().contains("}")) {
-                            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                    CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null,
-                                    baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                    baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                    null, null,
-                                    "Usage of expressions in MessageStartEvent "
-                                            + CheckName.checkName(baseElement) + "is not allowed",
-                                    null));
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    "Usage of expressions in MessageStartEvents '"
+                                            + CheckName.checkName(baseElement) + "' is not allowed"));
                         }
                     }
                 }
@@ -189,29 +163,14 @@ public class MessageEventChecker extends AbstractElementChecker {
                 if (eventDef != null) {
                     final Message message = eventDef.getMessage();
                     if (message == null) {
-                        issues.add(
-                                new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                                        null,
-                                        null, null,
-                                        "No message has been specified for '" + CheckName.checkName(baseElement)
-                                                + "'.",
-                                        null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
+
                     } else {
                         if (message.getName() == null || message.getName().isEmpty()) {
-                            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                    CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null,
-                                    baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                    baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                    null, null,
-                                    "No message name has been specified for '"
-                                            + CheckName.checkName(baseElement)
-                                            + "'.",
-                                    null));
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    "No message name has been specified for '" + CheckName.checkName(baseElement)
+                                            + "'."));
                         }
                     }
                 }
