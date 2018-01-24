@@ -247,10 +247,8 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     @Override
     public boolean equals(Object obj) {
         if (obj.getClass() == this.getClass())
-            if (((CheckerIssue) obj).getId() == this.getId())
-                return true;
-            else
-                return false;
-        return false;
+            return true;
+        else
+            return false;
     }
 }
