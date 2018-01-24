@@ -255,10 +255,6 @@ public class BpmnConstants {
 
     public static final String SIMPLE_NAME_SEQUENCE_FLOW = "SequenceFlow";
 
-    public static final String FIXED_VALUE = "org.camunda.bpm.engine.impl.el.FixedValue";
-
-    public static final String EXPRESSION = "org.camunda.bpm.engine.delegate.Expression";
-
     public static final String COND_EXP = "conditionExpression";
 
     public static final String TASK_LISTENER = "taskListener";

@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+import org.camunda.bpm.engine.delegate.Expression;
+import org.camunda.bpm.engine.impl.el.FixedValue;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
@@ -265,8 +267,8 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             try {
                 Field field = clazz.getDeclaredField(varName);
 
-                if (!field.getType().getName().equals(BpmnConstants.FIXED_VALUE)
-                        && !field.getType().getName().equals(BpmnConstants.EXPRESSION))
+                if (!field.getType().isAssignableFrom(FixedValue.class)
+                        && !field.getType().isAssignableFrom(Expression.class))
                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), classPath,
                             bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
