@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -62,6 +63,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  *
  */
 public class BpmnModelDispatcher {
+
+    private static Logger logger = Logger.getLogger(BpmnModelDispatcher.class.getName());
 
     private BpmnModelDispatcher() {
     }
@@ -158,7 +161,7 @@ public class BpmnModelDispatcher {
         try {
             jWriter.writeVars(baseElements, graphBuilder, processdefinition);
         } catch (OutputWriterException e) {
-            e.printStackTrace();
+            logger.warning("Processvariables couldn't be written");
         }
 
         return issues;

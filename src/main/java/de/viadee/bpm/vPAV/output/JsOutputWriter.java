@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
@@ -64,6 +65,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  * Create the JavaScript file for HTML-output; Needs: issues and bpmnFile names
  */
 public class JsOutputWriter implements IssueOutputWriter {
+
+    private static Logger logger = Logger.getLogger(JsOutputWriter.class.getName());
 
     /**
      * Writes the output as JavaScript to the vPAV output folder
@@ -127,12 +130,13 @@ public class JsOutputWriter implements IssueOutputWriter {
             writer.write(modelVariables);
             writer.close();
         } catch (IOException e) {
-            throw new OutputWriterException("js variables output couldn't be written");
+            logger.warning("Processvariables couldn't be written");
         }
     }
 
     /**
      * Finish the javascript file for processvariables
+     *
      */
     public static void finish() {
         String jsFile = "var proz_vars = [\n";
@@ -159,7 +163,7 @@ public class JsOutputWriter implements IssueOutputWriter {
                 writer.write(jsFile);
                 writer.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.warning("Processvariables couldn't be written");
             }
         }
     }
