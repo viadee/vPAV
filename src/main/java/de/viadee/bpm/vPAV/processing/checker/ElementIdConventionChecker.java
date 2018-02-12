@@ -40,6 +40,7 @@ import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -72,9 +73,7 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
                 if (!matcher.matches()
                         && baseElement.getElementType().getInstanceType().getSimpleName().toLowerCase()
                                 .equals(bpmnInstance.toLowerCase())) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), null, baseElement.getId(),
-                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                             "ID '" + elementId + "' is against the naming convention", convention.getDescription()));
                 }
             }

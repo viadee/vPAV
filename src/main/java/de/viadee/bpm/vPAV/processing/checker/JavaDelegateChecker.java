@@ -47,6 +47,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -133,13 +134,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             if (implementationAttr.equals(BpmnConstants.CAMUNDA_CLASS)) {
                 if (classAttr == null || classAttr.trim().length() == 0) {
                     // Error, because no class has been configured
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task '" + bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                    + "' with no java class name. (compare model: Details, Java Class)",
-                            null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "Task '" + bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
+                                    + "' with no java class name. (compare model: Details, Java Class)"));
                 } else {
                     issues.addAll(checkClassFile(element, classAttr, false, false));
                 }
@@ -149,13 +146,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             else if (implementationAttr.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
                 if (delegateExprAttr == null || delegateExprAttr.trim().length() == 0) {
                     // Error, because no delegateExpression has been configured
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task '" + bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                    + "' with no delegate expression. (compare model: Details, Delegate Expression)",
-                            null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "Task '" + bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
+                                    + "' with no delegate expression. (compare model: Details, Delegate Expression)"));
                 } else {
                     // check validity of a bean
                     if (RuntimeConfig.getInstance().getBeanMapping() != null) {
@@ -172,15 +165,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                     issues.addAll(checkClassFile(element, classFile, false, false));
                                 } else {
                                     // incorrect beanmapping
-                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                            CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null,
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
+                                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                             "Couldn't find correct beanmapping for delegate expression: "
-                                                    + delegateExprAttr,
-                                            null));
+                                                    + delegateExprAttr));
                                 }
                             }
                         } else {
@@ -197,13 +184,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             else if (implementationAttr.equals(BpmnConstants.CAMUNDA_EXT)) {
                 if (typeAttr == null || typeAttr.trim().length() == 0) {
                     // Error, because no delegateExpression has been configured
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task '" + bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                    + "' with no external topic",
-                            null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "Task '" + bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
+                                    + "' with no external topic"));
                 }
             }
 
@@ -211,11 +194,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 if (dmnAttr == null && classAttr == null && delegateExprAttr == null
                         && exprAttr == null && typeAttr == null) {
                     // No technical attributes have been added
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task '" + CheckName.checkName(bpmnElement) + "' with no code reference yet", null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "Task '" + CheckName.checkName(bpmnElement) + "' with no code reference yet"));
                 }
         }
 
@@ -224,14 +204,10 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 || bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)) {
 
             if (implementationAttr != null && implementationAttr.equals(BpmnConstants.IMPLEMENTATION)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                         bpmnElement.getElementType().getTypeName() + " '"
                                 + bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID)
-                                + "' has no implementation specified",
-                        null));
+                                + "' has no implementation specified"));
 
             } else if (implementationAttr != null && implementationAttr.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
                 // check validity of a bean
@@ -249,15 +225,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                 issues.addAll(checkClassFile(element, classFile, false, false));
                             } else {
                                 // incorrect beanmapping
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null, null,
+                                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                         "Couldn't find correct beanmapping for delegate expression: "
-                                                + implementation,
-                                        null));
+                                                + implementation));
                             }
                         }
                     } else {
@@ -297,7 +267,6 @@ public class JavaDelegateChecker extends AbstractElementChecker {
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
             ArrayList<String> aDelegate, ArrayList<String> aExpression, boolean taskListener) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement bpmnElement = element.getBaseElement();
         String location = "";
         if (taskListener)
             location = BpmnConstants.TASK_LISTENER;
@@ -309,11 +278,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             for (String eClass : aClass) {
                 if (eClass != null && eClass.trim().length() == 0) {
                     // Error, because no class has been configured
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task with no class name in " + location, null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "Task with no class name in " + location));
                 } else if (eClass != null) {
                     issues.addAll(checkClassFile(element, eClass, true, taskListener));
                 }
@@ -325,11 +291,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             for (String eDel : aDelegate) {
                 if (eDel == null || eDel.trim().length() == 0) {
                     // Error, because no delegateExpression has been configured
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task with no delegate expression in " + location, null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "Task with no delegate expression in " + location));
                 } else if (eDel != null) {
                     // check validity of a bean
                     if (RuntimeConfig.getInstance().getBeanMapping() != null) {
@@ -346,15 +309,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                     issues.addAll(checkClassFile(element, classFile, true, taskListener));
                                 } else {
                                     // incorrect beanmapping
-                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                            CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null,
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
+                                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                             "Couldn't find correct beanmapping for delegate expression "
-                                                    + eDel + " in " + location,
-                                            null));
+                                                    + eDel + " in " + location));
                                 }
                             }
                         } else {
@@ -422,14 +379,10 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                 && !_interface.getName()
                                         .contains(BpmnConstants.INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR)) {
                             // ActivityBehavior is not a very good practice and should be avoided as much as possible
-                            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.INFO,
-                                    element.getProcessdefinition(), classPath,
-                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                                    null,
-                                    "class '" + clazz.getSimpleName() + "' in " + location
-                                            + " implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
-                                    null));
+                            issues.add(
+                                    IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.INFO, classPath, element,
+                                            "Class '" + clazz.getSimpleName() + "' in " + location
+                                                    + " implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible"));
                         }
                     }
                 } else {
@@ -444,31 +397,20 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
             if (interfaceImplemented == false && extendsSuperClass == false) {
                 // class implements not the interface "JavaDelegate"
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), classPath,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "class '" + clazz.getSimpleName() + "' in " + location
-                                + " does not implement/extends the correct interface/class",
-                        null));
+                issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,
+                        "Class '" + clazz.getSimpleName() + "' in " + location
+                                + " does not implement/extends the correct interface/class"));
             }
 
         } catch (final ClassNotFoundException e) {
             // Throws an error, if the class was not found
             if (className == null || !className.isEmpty()) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), classPath,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "class '" + className.substring(className.lastIndexOf('.') + 1) + "' in " + location
-                                + " not found",
-                        null));
+                issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,
+                        "Class '" + className.substring(className.lastIndexOf('.') + 1) + "' in " + location
+                                + " not found"));
             } else {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), classPath,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "class not found for '" + CheckName.checkName(bpmnElement) + "'", null));
+                issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,
+                        "Class not found for '" + CheckName.checkName(bpmnElement) + "'"));
             }
         }
 

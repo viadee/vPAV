@@ -53,6 +53,7 @@ import com.cronutils.parser.CronParser;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -103,15 +104,9 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                         try {
                             DatatypeConverter.parseDateTime(timerDefinition);
                         } catch (Exception e) {
-                            issues.add(
-                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null,
-                                            entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
-                                            "time event '" + CheckName.checkTimer(entry.getKey())
-                                                    + "' does not follow the ISO 8601 scheme for timeDates.",
-                                            null));
+                            issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
+                                    "Time event '" + CheckName.checkTimer(entry.getKey())
+                                            + "' does not follow the ISO 8601 scheme for timeDates."));
                         }
                     }
                     // BpmnModelConstants.BPMN_ELEMENT_TIME_DURATION
@@ -121,15 +116,9 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                         try {
                             DatatypeFactory.newInstance().newDuration(timerDefinition);
                         } catch (Exception e) {
-                            issues.add(
-                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null,
-                                            entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
-                                            "time event '" + CheckName.checkTimer(entry.getKey())
-                                                    + "' does not follow the ISO 8601 scheme for timeDuration.",
-                                            null));
+                            issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
+                                    "Time event '" + CheckName.checkTimer(entry.getKey())
+                                            + "' does not follow the ISO 8601 scheme for timeDuration."));
                         }
                     }
                     // BpmnModelConstants.BPMN_ELEMENT_TIME_CYCLE
@@ -162,15 +151,9 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                                 Cron cronJob = cronParser.parse(timerDefinition);
                                 cronJob.validate();
                             } catch (IllegalArgumentException e) {
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null, null,
-                                        "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the scheme for CRON jobs.",
-                                        null));
+                                issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
+                                        "Time event '" + CheckName.checkTimer(entry.getKey())
+                                                + "' does not follow the scheme for CRON jobs."));
                             }
                         }
 
@@ -178,15 +161,9 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             try {
                                 MomentInterval.parseISO(timerDefinition);
                             } catch (ParseException e) {
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null, null,
-                                        "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the ISO 8601 scheme for intervals.",
-                                        null));
+                                issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
+                                        "Time event '" + CheckName.checkTimer(entry.getKey())
+                                                + "' does not follow the ISO 8601 scheme for intervals."));
                             }
                         }
 
@@ -194,15 +171,9 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             try {
                                 IsoRecurrence.parseMomentIntervals(timerDefinition);
                             } catch (ParseException ex) {
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null, null,
-                                        "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the ISO 8601 scheme for repeating intervals.",
-                                        null));
+                                issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
+                                        "Time event '" + CheckName.checkTimer(entry.getKey())
+                                                + "' does not follow the ISO 8601 scheme for repeating intervals."));
                             }
                         }
 
@@ -210,37 +181,23 @@ public class TimerExpressionChecker extends AbstractElementChecker {
                             try {
                                 DatatypeFactory.newInstance().newDuration(timerDefinition);
                             } catch (Exception ex) {
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null, null,
-                                        "time event '" + CheckName.checkTimer(entry.getKey())
-                                                + "' does not follow the ISO 8601 scheme for durations as interval.",
-                                        null));
+                                issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
+                                        "Time event '" + CheckName.checkTimer(entry.getKey())
+                                                + "' does not follow the ISO 8601 scheme for durations as interval."));
                             }
                         }
                     }
 
                 } else if (entry.getValue() == null || entry.getValue().getLocalName() == null
                         || entry.getValue().getLocalName().isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "time event '" + CheckName.checkTimer(entry.getKey())
-                                    + "' has no timer definition type specified ",
-                            null));
+                    issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
+                            "Time event '" + CheckName.checkTimer(entry.getKey())
+                                    + "' has no timer definition type specified"));
 
                 } else if (timerDefinition == null || timerDefinition.trim().isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "time event '" + CheckName.checkTimer(entry.getKey())
-                                    + "' has no timer definition specified ",
-                            null));
+                    issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
+                            "Time event '" + CheckName.checkTimer(entry.getKey())
+                                    + "' has no timer definition specified"));
                 }
             }
         }

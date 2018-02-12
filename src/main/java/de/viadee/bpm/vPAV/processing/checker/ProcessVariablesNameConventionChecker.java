@@ -34,13 +34,11 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -100,18 +98,14 @@ public class ProcessVariablesNameConventionChecker extends AbstractElementChecke
                             if (isInRange) {
                                 final Matcher patternMatcher = pattern.matcher(variable.getName());
                                 if (!patternMatcher.matches()) {
-                                    final BaseElement baseElement = element.getBaseElement();
-                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                            CriticalityEnum.WARNING,
-                                            element.getProcessdefinition(), variable.getResourceFilePath(),
-                                            baseElement.getId(),
-                                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                                            variable.getName(), null, null,
-                                            "process variable (" + variable.getName()
+                                    issues.add(IssueWriter.createSingleIssue(rule, CriticalityEnum.WARNING, element,
+                                            variable.getResourceFilePath(), variable.getName(),
+                                            "Process variable (" + variable.getName()
                                                     + ") is against the naming convention " + convention.getName()
                                                     + " (compare model: " + variable.getChapter() + ", "
                                                     + variable.getFieldType().getDescription() + ")",
-                                            convention.getDescription()));
+                                            convention));
+
                                 }
                             }
                         }

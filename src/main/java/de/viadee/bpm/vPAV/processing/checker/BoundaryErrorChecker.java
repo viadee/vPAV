@@ -52,6 +52,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -93,21 +94,13 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                         || errorEventDef.entrySet().iterator().next().getKey().isEmpty()) {
                     final String errorCode = bpmnScanner.getErrorCodeVar(bpmnElement.getId());
                     if (errorCode == null || errorCode.isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no errorCodeVariable specified",
-                                null));
+                                        + "' with no errorCodeVariable specified"));
                     } else {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no error referenced",
-                                null));
+                                        + "' with no error referenced"));
                     }
                 } else {
 
@@ -118,14 +111,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     // No errorCode has been specified
                     if (errorDef.entrySet().iterator().next().getValue() == null
                             || errorDef.entrySet().iterator().next().getValue().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' does not provide an ErrorCode",
-                                null));
-
+                                        + "' does not provide an ErrorCode"));
                     } else {
                         if (implementation != null) {
                             // Check the BeanMapping to resolve delegate expression
@@ -137,16 +125,10 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                             } else if (implementation.equals(BpmnConstants.CAMUNDA_CLASS)) {
                                 if (!readResourceFile(implementationRef,
                                         errorDef.entrySet().iterator().next().getValue())) {
-                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                            CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null,
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
+                                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                             "ErrorCode of '" + CheckName.checkName(bpmnElement)
                                                     + "' does not match with throwing declaration of class '"
-                                                    + implementationRef + "'",
-                                            null));
+                                                    + implementationRef + "'"));
                                 }
                             }
                         }
@@ -155,25 +137,17 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     // No errorName has been specified
                     if (errorDef.entrySet().iterator().next().getKey() == null
                             || errorDef.entrySet().iterator().next().getKey().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' does not provide an ErrorName",
-                                null));
+                                        + "' does not provide an ErrorName"));
                     }
 
                     // No ErrorMessageVariable has been specified
                     if (errorEventDef.entrySet().iterator().next().getValue() == null
                             || errorEventDef.entrySet().iterator().next().getValue().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no ErrorMessageVariable",
-                                null));
+                                        + "' with no ErrorMessageVariable"));
                     }
                 }
             }
@@ -206,50 +180,30 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (classFile != null && classFile.trim().length() > 0) {
                         if (checkClassFile(classFile)) {
                             if (!readResourceFile(classFile, errorDefEntry)) {
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null,
-                                        null,
+                                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                         "ErrorCode of '" + CheckName.checkName(bpmnElement)
                                                 + "' does not match with throwing declaration of bean '"
-                                                + node.getName() + "'",
-                                        null));
+                                                + node.getName() + "'"));
                             }
                         } else {
-                            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                    CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null,
-                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                                    null,
-                                    "Corresponding class of associated task could not be loaded or found.", null));
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    "Corresponding class of associated task could not be loaded or found."));
                         }
                     } else {
                         // incorrect beanmapping
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                 "Due to incorrect beanmapping for delegate expression: '"
                                         + implementationRef
-                                        + "' the BoundaryErrorEvent can not be linked to class.",
-                                null));
+                                        + "' the BoundaryErrorEvent can not be linked to class."));
                     }
                 }
             }
         } else {
             if (!checkClassFile(implementationRef)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "Class for '" + implementationRef
+                issues.addAll(
+                        IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, "Class for '" + implementationRef
                                 + "' could not be found and therefore not linked to BoundaryErrorEvent '"
-                                + CheckName.checkName(bpmnElement) + "'.",
-                        null));
+                                + CheckName.checkName(bpmnElement) + "'."));
             }
         }
     }

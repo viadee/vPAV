@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.Script;
@@ -46,6 +45,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -75,14 +75,14 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         final BaseElement baseElement = element.getBaseElement();
-        issues.addAll(checkScriptTask(element.getProcessdefinition(), baseElement));
+        issues.addAll(checkScriptTask(element.getProcessdefinition(), element));
 
         final ExtensionElements extensionElements = baseElement.getExtensionElements();
         if (extensionElements != null) {
             issues.addAll(
-                    checkExecutionListener(element.getProcessdefinition(), baseElement, extensionElements));
+                    checkExecutionListener(element.getProcessdefinition(), element, baseElement, extensionElements));
             issues.addAll(
-                    checkTaskListener(element.getProcessdefinition(), baseElement, extensionElements));
+                    checkTaskListener(element.getProcessdefinition(), element, baseElement, extensionElements));
         }
 
         return issues;
@@ -96,33 +96,31 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
      * @return issues
      */
     private Collection<CheckerIssue> checkScriptTask(final String bpmnFile,
-            final BaseElement baseElement) {
+            final BpmnElement element) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final BaseElement baseElement = element.getBaseElement();
 
         if (baseElement instanceof ScriptTask) {
             final ScriptTask scriptTask = (ScriptTask) baseElement;
             final Script script = scriptTask.getScript();
             if (script != null && scriptTask.getCamundaResource() == null) {
-                final CheckerIssue issueEmptyScript = checkEmptyScriptContent(bpmnFile, baseElement,
+                final CheckerIssue issueEmptyScript = checkEmptyScriptContent(bpmnFile, element, baseElement,
                         scriptTask.getScriptFormat(), script.getTextContent());
                 if (issueEmptyScript != null)
                     issues.add(issueEmptyScript);
-                final CheckerIssue issueEmptyFormat = checkEmptyScriptFormat(bpmnFile, baseElement,
+                final CheckerIssue issueEmptyFormat = checkEmptyScriptFormat(bpmnFile, element, baseElement,
                         scriptTask.getScriptFormat(), script.getTextContent());
                 if (issueEmptyFormat != null)
                     issues.add(issueEmptyFormat);
-                final CheckerIssue issueInvalidScript = checkInvalidScriptContent(bpmnFile, baseElement,
+                final CheckerIssue issueInvalidScript = checkInvalidScriptContent(bpmnFile, element, baseElement,
                         scriptTask.getScriptFormat(), script.getTextContent());
                 if (issueInvalidScript != null)
                     issues.add(issueInvalidScript);
             } else {
                 if (scriptTask.getCamundaResource() == null) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            bpmnFile, null,
-                            baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            null, null, null,
-                            "there is an empty script reference", null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "There is an empty script reference"));
                 }
             }
         }
@@ -138,7 +136,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
      * @param extensionElements
      * @return issues
      */
-    private Collection<CheckerIssue> checkExecutionListener(final String bpmnFile,
+    private Collection<CheckerIssue> checkExecutionListener(final String bpmnFile, final BpmnElement element,
             final BaseElement baseElement, final ExtensionElements extensionElements) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -148,15 +146,15 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
         for (final CamundaExecutionListener listener : listenerList) {
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaResource() == null) {
-                final CheckerIssue issueEmptyScript = checkEmptyScriptContent(bpmnFile, baseElement,
+                final CheckerIssue issueEmptyScript = checkEmptyScriptContent(bpmnFile, element, baseElement,
                         script.getCamundaScriptFormat(), script.getTextContent());
                 if (issueEmptyScript != null)
                     issues.add(issueEmptyScript);
-                final CheckerIssue issueEmptyFormat = checkEmptyScriptFormat(bpmnFile, baseElement,
+                final CheckerIssue issueEmptyFormat = checkEmptyScriptFormat(bpmnFile, element, baseElement,
                         script.getCamundaScriptFormat(), script.getTextContent());
                 if (issueEmptyFormat != null)
                     issues.add(issueEmptyFormat);
-                final CheckerIssue issueInvalidScript = checkInvalidScriptContent(bpmnFile, baseElement,
+                final CheckerIssue issueInvalidScript = checkInvalidScriptContent(bpmnFile, element, baseElement,
                         script.getCamundaScriptFormat(), script.getTextContent());
                 if (issueInvalidScript != null)
                     issues.add(issueInvalidScript);
@@ -173,7 +171,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
      * @param extensionElements
      * @return issues
      */
-    private Collection<CheckerIssue> checkTaskListener(final String bpmnFile,
+    private Collection<CheckerIssue> checkTaskListener(final String bpmnFile, final BpmnElement element,
             final BaseElement baseElement, final ExtensionElements extensionElements) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -183,15 +181,15 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
         for (final CamundaTaskListener listener : listenerList) {
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaResource() == null) {
-                final CheckerIssue issueEmptyScript = checkEmptyScriptContent(bpmnFile, baseElement,
+                final CheckerIssue issueEmptyScript = checkEmptyScriptContent(bpmnFile, element, baseElement,
                         script.getCamundaScriptFormat(), script.getTextContent());
                 if (issueEmptyScript != null)
                     issues.add(issueEmptyScript);
-                final CheckerIssue issueEmptyFormat = checkEmptyScriptFormat(bpmnFile, baseElement,
+                final CheckerIssue issueEmptyFormat = checkEmptyScriptFormat(bpmnFile, element, baseElement,
                         script.getCamundaScriptFormat(), script.getTextContent());
                 if (issueEmptyFormat != null)
                     issues.add(issueEmptyFormat);
-                final CheckerIssue issueInvalidScript = checkInvalidScriptContent(bpmnFile, baseElement,
+                final CheckerIssue issueInvalidScript = checkInvalidScriptContent(bpmnFile, element, baseElement,
                         script.getCamundaScriptFormat(), script.getTextContent());
                 if (issueInvalidScript != null)
                     issues.add(issueInvalidScript);
@@ -208,26 +206,20 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
      * @param scriptText
      * @return CheckerIssue or null
      */
-    private CheckerIssue parseGroovyCode(final String bpmnFile, final BaseElement baseElement,
+    private CheckerIssue parseGroovyCode(final String bpmnFile, final BpmnElement element,
+            final BaseElement baseElement,
             final String scriptText) {
         final GroovyShell shell = new GroovyShell();
         try {
             shell.evaluate(scriptText);
         } catch (final CompilationFailedException | MissingPropertyException ex) {
             if (ex instanceof CompilationFailedException) {
-                return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile,
-                        null,
-                        baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                        null, null, null,
-                        ex.getMessage(), null);
+                return IssueWriter.createSingleIssue(rule, CriticalityEnum.ERROR, element, bpmnFile,
+                        ex.getMessage());
             } else {
-                return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile,
-                        null,
-                        baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                        null, null, null,
-                        "GroovyScript could not be evaluated. '" + ex.getMessage() + "'", null);
+                return IssueWriter.createSingleIssue(rule, CriticalityEnum.ERROR, element, bpmnFile,
+                        "GroovyScript could not be evaluated. '" + ex.getMessage() + "'");
             }
-
         }
         return null;
     }
@@ -241,14 +233,13 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
      * @param script
      * @return CheckerIssue or null
      */
-    private CheckerIssue checkEmptyScriptContent(final String bpmnFile, final BaseElement baseElement,
+    private CheckerIssue checkEmptyScriptContent(final String bpmnFile, final BpmnElement element,
+            final BaseElement baseElement,
             final String scriptFormat, final String script) {
 
         if (scriptFormat != null && (script == null || script.isEmpty())) {
-            return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile, null,
-                    baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                    null, null,
-                    "there is no script content for given script format", null);
+            return IssueWriter.createSingleIssue(rule, CriticalityEnum.ERROR, element, bpmnFile,
+                    "There is no script content for given script format");
         }
         return null;
     }
@@ -262,14 +253,13 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
      * @param script
      * @return CheckerIssue or null
      */
-    private CheckerIssue checkEmptyScriptFormat(final String bpmnFile, final BaseElement baseElement,
+    private CheckerIssue checkEmptyScriptFormat(final String bpmnFile, final BpmnElement element,
+            final BaseElement baseElement,
             final String scriptFormat, final String script) {
 
         if (scriptFormat == null && script != null) {
-            return new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR, bpmnFile, null,
-                    baseElement.getId(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                    null, null,
-                    "there is no script format for given script", null);
+            return IssueWriter.createSingleIssue(rule, CriticalityEnum.ERROR, element, bpmnFile,
+                    "There is no script format for given script");
         }
         return null;
     }
@@ -283,11 +273,11 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
      * @param script
      * @return CheckerIssue or null
      */
-    private CheckerIssue checkInvalidScriptContent(final String bpmnFile,
+    private CheckerIssue checkInvalidScriptContent(final String bpmnFile, final BpmnElement element,
             final BaseElement baseElement, final String scriptFormat, final String script) {
 
         if (scriptFormat != null && scriptFormat.toLowerCase().equals(ConfigConstants.GROOVY) && script != null) {
-            return parseGroovyCode(bpmnFile, baseElement, script);
+            return parseGroovyCode(bpmnFile, element, baseElement, script);
         }
         return null;
     }

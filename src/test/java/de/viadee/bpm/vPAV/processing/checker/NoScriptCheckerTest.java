@@ -144,7 +144,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'inputParameter' script",
+            Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'inputParameter' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -177,7 +177,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'outputParameter' script",
+            Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'outputParameter' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -211,7 +211,7 @@ public class NoScriptCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "task '" + CheckName.checkName(baseElementGate) + "' with 'executionListener' script",
+                    "Task '" + CheckName.checkName(baseElementGate) + "' with 'executionListener' script",
                     issues.iterator().next().getMessage());
         }
     }
@@ -244,7 +244,7 @@ public class NoScriptCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task '" + CheckName.checkName(baseElement) + "' with 'taskListener' script",
+            Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'taskListener' script",
                     issues.iterator().next().getMessage());
         }
     }

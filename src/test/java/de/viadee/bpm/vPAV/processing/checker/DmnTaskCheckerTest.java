@@ -140,7 +140,7 @@ public class DmnTaskCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("task " + CheckName.checkName(baseElement) + " with no dmn reference",
+            Assert.assertEquals("Task " + CheckName.checkName(baseElement) + " with no dmn reference",
                     issues.iterator().next().getMessage());
         }
     }
@@ -175,7 +175,7 @@ public class DmnTaskCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("dmn file for task " + CheckName.checkName(baseElement) + " not found",
+            Assert.assertEquals("Dmn file for task " + CheckName.checkName(baseElement) + " not found",
                     issues.iterator().next().getMessage());
         }
     }

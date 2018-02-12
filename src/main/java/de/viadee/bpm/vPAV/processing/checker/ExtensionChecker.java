@@ -43,6 +43,7 @@ import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -146,14 +147,11 @@ public class ExtensionChecker extends AbstractElementChecker {
                     if (setting.getName() != null && keyPairs.containsKey(setting.getName())) {
                         checkValue(keyPairs, bpmnElement, element, issues, setting, false);
                     } else {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID), null, null, null,
+
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                 "Key of '" + CheckName.checkName(bpmnElement)
                                         + "' could not be resolved. The ruleset specifies the use of key '"
-                                        + setting.getName() + "'.",
-                                null));
+                                        + setting.getName() + "'."));
                     }
                 }
             }
@@ -172,16 +170,11 @@ public class ExtensionChecker extends AbstractElementChecker {
                 if (setting.getName() != null && keyPairs.containsKey(setting.getName())) {
                     checkValue(keyPairs, bpmnElement, element, issues, setting, false);
                 } else {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID), null, null, null,
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                             "Key of '" + CheckName.checkName(bpmnElement)
                                     + "' could not be resolved. The ruleset specifies the use of key '"
-                                    + setting.getName() + "'.",
-                            null));
+                                    + setting.getName() + "'."));
                 }
-
             }
         }
     }
@@ -271,25 +264,16 @@ public class ExtensionChecker extends AbstractElementChecker {
             // if predefined value of a key-value pair does not fit a given regex (e.g. digits for
             // timeout)
             if (!matcher.matches()) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID), null, null, null,
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                         "Key-Value pair of '" + CheckName.checkName(bpmnElement)
                                 + "' does not fit the configured setting of the rule set. Check the extension with key '"
-                                + setting.getName() + "'.",
-                        null));
+                                + setting.getName() + "'."));
             }
         } else {
-
             if (!check) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID), null, null, null,
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                         "Value of '" + CheckName.checkName(bpmnElement)
-                                + "' is empty. Check whether ruleset and model are congruent.",
-                        null));
+                                + "' is empty. Check whether ruleset and model are congruent."));
             }
         }
     }

@@ -59,6 +59,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -347,11 +348,8 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
         if (resourcePath != null) {
             if (!resourcesNewestVersions.contains(resourcePath)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), resourcePath, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                        null,
-                        "script reference is deprecated or file with version doesn't exist", null));
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, resourcePath, element,
+                        "Script reference is deprecated or file with version doesn't exist"));
             }
         }
     }
@@ -367,14 +365,10 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
         final String beanReference = findBeanReferenceInExpression(expression, element, issues);
         if (beanReference != null && !resourcesNewestVersions.contains(beanReference)) {
-            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                    element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
-                    element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                    null,
-                    "bean reference '" + beanReference
+            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
+                    "Bean reference '" + beanReference
                             + "' is deprecated or file with version does not exist for bean '"
-                            + expression + "'",
-                    null));
+                            + expression + "'"));
         }
     }
 

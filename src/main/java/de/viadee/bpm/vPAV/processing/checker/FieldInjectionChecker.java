@@ -53,6 +53,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -259,7 +260,6 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             final String varName) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement bpmnElement = element.getBaseElement();
         final String classPath = className.replaceAll("\\.", "/") + ".java";
 
         try {
@@ -268,20 +268,16 @@ public class FieldInjectionChecker extends AbstractElementChecker {
                 Field field = clazz.getDeclaredField(varName);
 
                 if (!field.getType().isAssignableFrom(FixedValue.class)
-                        && !field.getType().isAssignableFrom(Expression.class))
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), classPath,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "the type of the variable '" + varName + "' is incorrect", null));
+                        && !field.getType().isAssignableFrom(Expression.class)) {
+                    issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
+                            "The type of the variable '" + varName + "' is incorrect"));
+                }
 
-                if (!Modifier.isPublic(field.getModifiers()))
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), classPath,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "the variable '" + varName + "' should be public", null));
+                if (!Modifier.isPublic(field.getModifiers())) {
+                    issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
+                            "The variable '" + varName + "' should be public"));
 
+                }
                 Method[] methods = clazz.getMethods();
                 boolean hasMethod = false;
                 for (Method method : methods) {
@@ -289,20 +285,14 @@ public class FieldInjectionChecker extends AbstractElementChecker {
                         hasMethod = true;
                 }
 
-                if (!hasMethod)
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), classPath,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "no setter found for variable '" + varName + "'", null));
+                if (!hasMethod) {
+                    issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
+                            "No setter found for variable '" + varName + "'"));
+                }
 
             } catch (NoSuchFieldException | SecurityException e) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), classPath,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "class '" + clazz.getSimpleName() + "' does not declared the variable '" + varName + "'",
-                        null));
+                issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
+                        "Class '" + clazz.getSimpleName() + "' does not declare the variable '" + varName + "'"));
             }
 
         } catch (final ClassNotFoundException e) {

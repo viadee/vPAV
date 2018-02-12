@@ -114,6 +114,64 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.elementDescription = elementDescription;
     }
 
+    /**
+     *
+     * @param ruleName
+     * @param ruleDescription
+     * @param classification
+     * @param bpmnFile
+     * @param resourceFile
+     * @param elementId
+     * @param elementName
+     * @param variable
+     * @param anomaly
+     * @param invalidPaths
+     * @param message
+     */
+    public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
+            final String bpmnFile, final String resourceFile, final String elementId,
+            final String elementName, final String variable, final Anomaly anomaly,
+            final List<Path> invalidPaths, final String message) {
+        super();
+        this.ruleName = ruleName;
+        this.ruleDescription = ruleDescription;
+        this.variable = variable;
+        this.anomaly = anomaly;
+        this.invalidPaths = invalidPaths;
+        this.classification = classification;
+        this.bpmnFile = bpmnFile;
+        this.resourceFile = resourceFile;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.message = message;
+    }
+
+    /**
+     *
+     * @param ruleName
+     * @param ruleDescription
+     * @param classification
+     * @param bpmnFile
+     * @param elementId
+     * @param elementName
+     * @param message
+     * @param elementDescription
+     */
+    public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
+            final String bpmnFile, final String resourceFile, final String elementId,
+            final String elementName, final String message, final String elementDescription) {
+        super();
+        this.ruleName = ruleName;
+        this.ruleDescription = ruleDescription;
+        this.classification = classification;
+        this.bpmnFile = bpmnFile;
+        this.resourceFile = resourceFile;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.message = message;
+        this.elementDescription = elementDescription;
+    }
+
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String elementId,
             final String elementName, final String message, final String elementDescription) {
@@ -128,6 +186,16 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.elementDescription = elementDescription;
     }
 
+    /**
+     *
+     * @param ruleName
+     * @param ruleDescription
+     * @param classification
+     * @param bpmnFile
+     * @param elementId
+     * @param elementName
+     * @param message
+     */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String elementId,
             final String elementName, final String message) {
@@ -140,6 +208,56 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.elementName = elementName;
         this.message = message;
 
+    }
+
+    /**
+     *
+     * @param ruleName
+     * @param classification
+     * @param bpmnFile
+     * @param elementId
+     * @param elementName
+     * @param message
+     */
+    public CheckerIssue(final String ruleName, final CriticalityEnum classification,
+            final String bpmnFile, final String elementId,
+            final String elementName, final String message) {
+        super();
+        this.ruleName = ruleName;
+        this.classification = classification;
+        this.bpmnFile = bpmnFile;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.message = message;
+    }
+
+    /**
+     *
+     * @param ruleName
+     * @param ruleDescription
+     * @param classification
+     * @param bpmnFile
+     * @param resourceFile
+     * @param elementId
+     * @param elementName
+     * @param varName
+     * @param message
+     * @param description
+     */
+    public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
+            final String bpmnFile, final String resourceFile, final String elementId, final String elementName,
+            final String varName, final String message, final String description) {
+        super();
+        this.ruleName = ruleName;
+        this.ruleDescription = ruleDescription;
+        this.classification = classification;
+        this.bpmnFile = bpmnFile;
+        this.resourceFile = resourceFile;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.variable = varName;
+        this.message = message;
+        this.elementDescription = description;
     }
 
     public String getId() {
@@ -223,6 +341,11 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.ruleDescription = ruleDescription;
     }
 
+    /**
+     *
+     * @param input
+     * @return
+     */
     public static String getMD5(String input) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");

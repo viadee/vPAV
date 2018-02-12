@@ -38,6 +38,7 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -71,47 +72,34 @@ public class ProcessVariablesModelChecker implements ModelChecker {
             final ProcessVariable var = anomaly.getVariable();
             if (paths != null) {
                 if (anomaly.getAnomaly() == Anomaly.DD) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                            determineCriticality(anomaly.getAnomaly()),
-                            var.getElement().getProcessdefinition(), var.getResourceFilePath(),
-                            var.getElement().getBaseElement().getId(),
-                            var.getElement().getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            var.getName(),
-                            anomaly.getAnomaly(), paths,
-                            "process variable (" + var.getName() + ") will be overwritten in activity '"
-                                    + var.getElement().getBaseElement()
-                                            .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                    + "' without use. (compare model: "
-                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
-                            null));
+                    issues.addAll(
+                            IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+                                    anomaly,
+                                    "Process variable (" + var.getName() + ") will be overwritten in activity '"
+                                            + var.getElement().getBaseElement()
+                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
+                                            + "' without use. (Compare model: "
+                                            + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+
                 } else if (anomaly.getAnomaly() == Anomaly.DU) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                            determineCriticality(anomaly.getAnomaly()),
-                            var.getElement().getProcessdefinition(), var.getResourceFilePath(),
-                            var.getElement().getBaseElement().getId(),
-                            var.getElement().getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            var.getName(),
-                            anomaly.getAnomaly(), paths,
-                            "process variable (" + var.getName() + ") will be deleted in activity '"
-                                    + var.getElement().getBaseElement()
-                                            .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                    + "' without use. (compare model: "
-                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
-                            null));
+                    issues.addAll(
+                            IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+                                    anomaly,
+                                    "Process variable (" + var.getName() + ") will be deleted in activity '"
+                                            + var.getElement().getBaseElement()
+                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
+                                            + "' without use. (Compare model: "
+                                            + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+
                 } else if (anomaly.getAnomaly() == Anomaly.UR) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                            determineCriticality(anomaly.getAnomaly()),
-                            var.getElement().getProcessdefinition(), var.getResourceFilePath(),
-                            var.getElement().getBaseElement().getId(),
-                            var.getElement().getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            var.getName(),
-                            anomaly.getAnomaly(), paths,
-                            "there is a read access to variable (" + var.getName() + ") in activity '"
-                                    + var.getElement().getBaseElement()
-                                            .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                    + "', but no value has been set before. (compare model: "
-                                    + var.getChapter() + ", " + var.getFieldType().getDescription() + ")",
-                            null));
+                    issues.addAll(
+                            IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+                                    anomaly,
+                                    "There is a read access to variable (" + var.getName() + ") in activity '"
+                                            + var.getElement().getBaseElement()
+                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
+                                            + "', but no value has been set before. (Compare model: "
+                                            + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
                 }
             }
         }

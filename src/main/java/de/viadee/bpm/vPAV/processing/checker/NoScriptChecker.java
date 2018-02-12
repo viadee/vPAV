@@ -43,6 +43,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -79,39 +80,25 @@ public class NoScriptChecker extends AbstractElementChecker {
             if (scriptTypes != null && !scriptTypes.isEmpty()) {
                 if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
                     for (String place : scriptTypes)
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                        + place + "' script",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                "Task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                        + place + "' script"));
                 } else {
                     ArrayList<String> allowedPlaces = settings
                             .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         for (String scriptType : scriptTypes)
                             if (!allowedPlaces.contains(scriptType))
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null, null,
-                                        "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                                + scriptType + "' script",
-                                        null));
-
+                                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                        "Task '" + CheckName.checkName(bpmnElement) + "' with '"
+                                                + scriptType + "' script"));
                 }
             }
 
             // ScriptTask
             if (bpmnElement instanceof ScriptTask && !settings.containsKey(BpmnConstants.SIMPLE_NAME_SCRIPT_TASK)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed", null));
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
             }
 
             // Check SequenceFlow on script in conditionExpression
@@ -123,24 +110,14 @@ public class NoScriptChecker extends AbstractElementChecker {
                             .getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         if (!allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp)
-                            issues.add(
-                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null,
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
-                                            "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                                    + "' with script in condition Expression",
-                                            null));
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    "SequenceFlow '" + CheckName.checkName(bpmnElement)
+                                            + "' with script in condition Expression"));
                 } else {
                     if (scriptCondExp) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                 "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                        + "' with script in condition Expression",
-                                null));
+                                        + "' with script in condition Expression"));
                     }
                 }
             }

@@ -89,7 +89,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         if (issues.size() == 0) {
             Assert.fail("there should be generated an issue");
         }
-        Assert.assertEquals("there is an empty script reference",
+        Assert.assertEquals("There is an empty script reference",
                 issues.iterator().next().getMessage());
     }
 
@@ -113,7 +113,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         if (issues.size() == 0) {
             Assert.fail("there should be generated an issue");
         }
-        Assert.assertEquals("there is no script format for given script",
+        Assert.assertEquals("There is no script format for given script",
                 issues.iterator().next().getMessage());
     }
 
@@ -137,7 +137,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         if (issues.size() == 0) {
             Assert.fail("there should be generated an issue");
         }
-        Assert.assertEquals("there is no script content for given script format",
+        Assert.assertEquals("There is no script content for given script format",
                 issues.iterator().next().getMessage());
     }
 
@@ -186,7 +186,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         if (issues.size() == 0) {
             Assert.fail("there should be generated an issue");
         }
-        Assert.assertEquals("there is no script content for given script format",
+        Assert.assertEquals("There is no script content for given script format",
                 issues.iterator().next().getMessage());
     }
 }

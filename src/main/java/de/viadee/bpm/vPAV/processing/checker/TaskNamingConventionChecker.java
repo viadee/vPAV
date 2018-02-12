@@ -41,6 +41,7 @@ import org.camunda.bpm.model.bpmn.instance.Task;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -75,19 +76,14 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
                 final Pattern pattern = Pattern.compile(patternString);
                 Matcher matcher = pattern.matcher(taskName);
                 if (!matcher.matches()) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), null, baseElement.getId(),
-                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "task name '" + taskName + "' is against the naming convention",
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                            "Task name '" + taskName + "' is against the naming convention",
                             elementConventions.iterator().next().getDescription()));
                 }
             } else {
-                issues.add(
-                        new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(),
-                                null, baseElement.getId(),
-                                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "task name must be specified", null));
+
+                issues.addAll(
+                        IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element, "Task name must be specified"));
             }
         }
         return issues;
