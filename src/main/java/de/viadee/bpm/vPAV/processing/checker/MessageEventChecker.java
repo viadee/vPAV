@@ -38,8 +38,9 @@ import org.camunda.bpm.model.bpmn.instance.Event;
 import org.camunda.bpm.model.bpmn.instance.Message;
 import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -47,7 +48,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class MessageEventChecker extends AbstractElementChecker {
 
-    public MessageEventChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public MessageEventChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -65,76 +66,116 @@ public class MessageEventChecker extends AbstractElementChecker {
         if (baseElement.getElementType().getTypeName()
                 .equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)
                 || baseElement.getElementType().getTypeName()
-                        .equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)
-                || baseElement.getElementType().getTypeName()
                         .equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_CATCH_EVENT)
                 || baseElement.getElementType().getTypeName()
                         .equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT)
                 || baseElement.getElementType().getTypeName()
                         .equals(BpmnModelConstants.BPMN_ELEMENT_BOUNDARY_EVENT)) {
 
-            final Event event = (Event) baseElement;
-            final Collection<MessageEventDefinition> messageEventDefinitions = event
-                    .getChildElementsByType(MessageEventDefinition.class);
-            if (messageEventDefinitions != null) {
-                for (MessageEventDefinition eventDef : messageEventDefinitions) {
-                    if (eventDef != null) {
-                        final Message message = eventDef.getMessage();
-                        if (message == null) {
-                            issues.add(
-                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                                            baseElement.getAttributeValue("name"), null, null, null,
-                                            "No message has been specified for '" + CheckName.checkName(baseElement)
-                                                    + "'.",
-                                            null));
-                        } else {
-                            if (message.getName() == null || message.getName().isEmpty()) {
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                                        baseElement.getAttributeValue("name"), null, null, null,
-                                        "No message name has been specified for '" + CheckName.checkName(baseElement)
-                                                + "'.",
-                                        null));
-                            } else {
-                                if (message.getName().contains("{") || message.getName().contains("}")) {
-                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                            CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                                            baseElement.getAttributeValue("name"), null, null, null,
-                                            "Usage of expressions in MessageStartEvent"
-                                                    + CheckName.checkName(baseElement) + "are not allowed",
-                                            null));
-                                }
-                            }
+            checkStartEventInSubProcess(element, issues, baseElement);
+        } else if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_RECEIVE_TASK)) {
+
+            if (baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF) == null
+                    || baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF).isEmpty()) {
+
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                        "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
+
+            } else {
+                if (bpmnScanner.getMessageName(
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF)) == null
+                        || bpmnScanner
+                                .getMessageName(
+                                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF))
+                                .isEmpty()) {
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            "No message name has been specified for '" + CheckName.checkName(baseElement) + "'."));
+                }
+            }
+        } else if (baseElement.getElementType().getTypeName()
+                .equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)) {
+
+            // Depending on whether the startEvent is part of a subprocess, expressions may be allowed to exist
+            if (bpmnScanner.checkStartEvent(baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID))) {
+                checkStartEventInSubProcess(element, issues, baseElement);
+            } else {
+                checkStartEventInProcess(element, issues, baseElement);
+            }
+        }
+        return issues;
+    }
+
+    /**
+     * Checks for existence of messages in startEvents. Expressions will create an issue due to write/read anomaly
+     *
+     * @param element
+     *            BpmnElement
+     * @param issues
+     *            Collection of CheckerIssues
+     * @param baseElement
+     *            BaseElement
+     */
+    private void checkStartEventInProcess(BpmnElement element, final Collection<CheckerIssue> issues,
+            final BaseElement baseElement) {
+        final Event event = (Event) baseElement;
+        final Collection<MessageEventDefinition> messageEventDefinitions = event
+                .getChildElementsByType(MessageEventDefinition.class);
+        if (messageEventDefinitions != null) {
+            for (MessageEventDefinition eventDef : messageEventDefinitions) {
+                if (eventDef != null) {
+                    final Message message = eventDef.getMessage();
+                    if (message == null) {
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
+                    } else {
+                        if (message.getName() == null || message.getName().isEmpty()) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    "No message name has been specified for '" + CheckName.checkName(baseElement)
+                                            + "'."));
+                        } else if (message.getName().contains("{") || message.getName().contains("}")) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    "Usage of expressions in MessageStartEvents '"
+                                            + CheckName.checkName(baseElement) + "' is not allowed"));
                         }
                     }
                 }
             }
-        } else if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_RECEIVE_TASK)) {
+        }
+    }
 
-            if (baseElement.getAttributeValue("messageRef") == null
-                    || baseElement.getAttributeValue("messageRef").isEmpty()) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
-                        "No message has been specified for '" + CheckName.checkName(baseElement)
-                                + "'.",
-                        null));
-            } else {
-                if (bpmnScanner.getMessageName(baseElement.getAttributeValue("messageRef")) == null
-                        || bpmnScanner.getMessageName(baseElement.getAttributeValue("messageRef")).isEmpty()) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                            element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                            baseElement.getAttributeValue("name"), null, null, null,
-                            "No message name has been specified for '" + CheckName.checkName(baseElement)
-                                    + "'.",
-                            null));
+    /**
+     * Checks for existence of messages and expression in startEvents
+     *
+     * @param element
+     *            BpmnElement
+     * @param issues
+     *            Collection of CheckerIssues
+     * @param baseElement
+     *            BaseElement
+     */
+    private void checkStartEventInSubProcess(BpmnElement element, final Collection<CheckerIssue> issues,
+            final BaseElement baseElement) {
+        final Event event = (Event) baseElement;
+        final Collection<MessageEventDefinition> messageEventDefinitions = event
+                .getChildElementsByType(MessageEventDefinition.class);
+        if (messageEventDefinitions != null) {
+            for (MessageEventDefinition eventDef : messageEventDefinitions) {
+                if (eventDef != null) {
+                    final Message message = eventDef.getMessage();
+                    if (message == null) {
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
+
+                    } else {
+                        if (message.getName() == null || message.getName().isEmpty()) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    "No message name has been specified for '" + CheckName.checkName(baseElement)
+                                            + "'."));
+                        }
+                    }
                 }
             }
         }
-        return issues;
     }
 
 }

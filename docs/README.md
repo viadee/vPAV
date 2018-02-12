@@ -30,7 +30,8 @@ Consistency checks are performed by individual modules called checkers, which se
 |[TimerExpressionChecker](TimerExpressionChecker.md)                                   | Are time events following the ISO 8601 scheme?                                        | Done         |
 |[NoExpressionChecker](NoExpressionChecker.md)                                   | Are expressions used against common best-practices?                                        | Done         |
 |[MessageEventChecker](MessageEventChecker.md)                                   | Are MessageEvents referencing messages and do they provide message names?                                  | Done         |
-|[ExtensionChecker](ExtensionChecker.md)                                   | Do tasks using key-value pairs in the extension panel fit into a desired pattern?                                  | Done         |
+|[ExtensionChecker](ExtensionChecker.md)                                  | Do tasks using key-value pairs in the extension panel fit into a desired pattern?                                  | Done         |
+|[OverlapChecker](OverlapChecker.md)                                   | Are there redundant sequence flows (some may be invisible due to overlap)?              | Done         
 |[BoundaryErrorChecker](BoundaryErrorChecker.md)                                   | Do tasks with attached BoundaryErrorEvents use the correct ErrorCode and do the corresponding classes exist?                                  | Experimental         |
 
 

@@ -38,6 +38,7 @@ import org.apache.maven.project.MavenProject;
 import org.springframework.context.ApplicationContext;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class RuntimeConfig {
 
@@ -55,7 +56,8 @@ public class RuntimeConfig {
             "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
             "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
-            "MessageEventChecker", "FieldInjectionChecker", "BoundaryErrorChecker", "ExtensionChecker" };
+            "MessageEventChecker", "FieldInjectionChecker", "BoundaryErrorChecker", "ExtensionChecker",
+            "OverlapChecker" };
 
     private ArrayList<String> allActiveRules = new ArrayList<>();
 
@@ -127,7 +129,7 @@ public class RuntimeConfig {
     public void addActiveRules(Map<String, Rule> rules) {
         for (Map.Entry<String, Rule> entry : rules.entrySet()) {
             Rule rule = entry.getValue();
-            if (rule.isActive() && !rule.getName().equals("HasParentRuleSet"))
+            if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET))
                 allActiveRules.add(rule.getName());
         }
     }

@@ -51,7 +51,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
@@ -116,7 +116,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariable> variables = new ProcessVariableReader(null, new BPMNScanner(PATH))
+            Map<String, ProcessVariable> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
                     .getVariablesFromElement(element);
             element.setProcessVariables(variables);
 
@@ -147,7 +147,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariable> variables = new ProcessVariableReader(null, new BPMNScanner(PATH))
+            Map<String, ProcessVariable> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
                     .getVariablesFromElement(element);
             element.setProcessVariables(variables);
 

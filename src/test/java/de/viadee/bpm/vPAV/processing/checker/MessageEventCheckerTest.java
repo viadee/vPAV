@@ -48,7 +48,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -85,7 +85,7 @@ public class MessageEventCheckerTest {
     @Test
     public void testStartEvent() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "MessageEventChecker_testStartEvent.bpmn";
-        checker = new MessageEventChecker(rule, new BPMNScanner(PATH));
+        checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -117,7 +117,7 @@ public class MessageEventCheckerTest {
     @Test
     public void testStartEventWithExpression() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "MessageEventChecker_testStartEventWithExpression.bpmn";
-        checker = new MessageEventChecker(rule, new BPMNScanner(PATH));
+        checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -149,7 +149,7 @@ public class MessageEventCheckerTest {
     @Test
     public void testEndEvent() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "MessageEventChecker_testEndEvent.bpmn";
-        checker = new MessageEventChecker(rule, new BPMNScanner(PATH));
+        checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -181,7 +181,7 @@ public class MessageEventCheckerTest {
     @Test
     public void testMixedEvents() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "MessageEventChecker_testMixedEvents.bpmn";
-        checker = new MessageEventChecker(rule, new BPMNScanner(PATH));
+        checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

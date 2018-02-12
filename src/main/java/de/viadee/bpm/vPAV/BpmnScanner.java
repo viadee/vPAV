@@ -45,7 +45,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class BPMNScanner {
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
+
+public class BpmnScanner {
 
     private DocumentBuilderFactory factory;
 
@@ -72,7 +74,7 @@ public class BPMNScanner {
      * @throws SAXException
      *             Encapsulate a general SAX error or warning.
      */
-    public BPMNScanner(String path) throws ParserConfigurationException, SAXException, IOException {
+    public BpmnScanner(String path) throws ParserConfigurationException, SAXException, IOException {
         factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         builder = factory.newDocumentBuilder();
@@ -91,11 +93,11 @@ public class BPMNScanner {
         // parse the given bpmn model
         doc = builder.parse(path);
 
-        if (doc.getElementsByTagName(BPMNConstants.DEFINITIONS).getLength() > 0)
+        if (doc.getElementsByTagName(BpmnConstants.DEFINITIONS).getLength() > 0)
             modelVersion = ModelVersionEnum.V1;
-        else if (doc.getElementsByTagName(BPMNConstants.BPMN_DEFINITIONS).getLength() > 0)
+        else if (doc.getElementsByTagName(BpmnConstants.BPMN_DEFINITIONS).getLength() > 0)
             modelVersion = ModelVersionEnum.V2;
-        else if (doc.getElementsByTagName(BPMNConstants.BPMN2_DEFINITIONS).getLength() > 0)
+        else if (doc.getElementsByTagName(BpmnConstants.BPMN2_DEFINITIONS).getLength() > 0)
             modelVersion = ModelVersionEnum.V3;
         else
             throw new ParserConfigurationException("Can't get the version of the BPMN Model");
@@ -119,25 +121,25 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BUSINESSRULETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.SERVICETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.SENDTASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.ENDEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.INTERMEDIATETHROWEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BUSINESSRULETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.SERVICETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.SENDTASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.ENDEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.INTERMEDIATETHROWEVENT));
                 break;
             case V2:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_BUSINESSRULETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_SERVICETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_SENDTASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_ENDEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_INTERMEDIATETHROWEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BUSINESSRULETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_SERVICETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_SENDTASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_ENDEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_INTERMEDIATETHROWEVENT));
                 break;
             case V3:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_BUSINESSRULETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_SERVICETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_SENDTASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_ENDEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_INTERMEDIATETHROWEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BUSINESSRULETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_SERVICETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_SENDTASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_ENDEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_INTERMEDIATETHROWEVENT));
                 break;
             default:
                 listNodeList = null;
@@ -152,7 +154,7 @@ public class BPMNScanner {
                 NamedNodeMap taskElementAttr = taskElement.getAttributes();
 
                 // check if the ids are corresponding
-                if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
                     // check if more than 1 inner attribute exists
                     if (taskElementAttr.getLength() > 1) {
                         // check all attributes, whether they fit an
@@ -161,22 +163,22 @@ public class BPMNScanner {
                             Node attr = taskElementAttr.item(x);
                             // node_name equals an implementation
                             nodeName = attr.getNodeName();
-                            if (nodeName.equals(BPMNConstants.CAMUNDA_CLASS)
-                                    || nodeName.equals(BPMNConstants.CAMUNDA_EXPRESSION)
-                                    || nodeName.equals(BPMNConstants.CAMUNDA_DEXPRESSION)
-                                    || nodeName.equals(BPMNConstants.CAMUNDA_DMN)
-                                    || nodeName.equals(BPMNConstants.CAMUNDA_EXT)) {
+                            if (nodeName.equals(BpmnConstants.CAMUNDA_CLASS)
+                                    || nodeName.equals(BpmnConstants.CAMUNDA_EXPRESSION)
+                                    || nodeName.equals(BpmnConstants.CAMUNDA_DEXPRESSION)
+                                    || nodeName.equals(BpmnConstants.CAMUNDA_DMN)
+                                    || nodeName.equals(BpmnConstants.CAMUNDA_EXT)) {
                                 returnImplementation = nodeName;
                             }
                         }
                         // if inner attributes dont consist of implementations
                     }
-                    if (taskElementAttr.getNamedItem(BPMNConstants.CAMUNDA_CLASS) == null
-                            && taskElementAttr.getNamedItem(BPMNConstants.CAMUNDA_EXPRESSION) == null
-                            && taskElementAttr.getNamedItem(BPMNConstants.CAMUNDA_DEXPRESSION) == null
-                            && taskElementAttr.getNamedItem(BPMNConstants.CAMUNDA_DMN) == null
-                            && taskElementAttr.getNamedItem(BPMNConstants.CAMUNDA_EXT) == null) {
-                        returnImplementation = BPMNConstants.IMPLEMENTATION;
+                    if (taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_CLASS) == null
+                            && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_EXPRESSION) == null
+                            && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_DEXPRESSION) == null
+                            && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_DMN) == null
+                            && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_EXT) == null) {
+                        returnImplementation = BpmnConstants.IMPLEMENTATION;
                     }
                 }
             }
@@ -200,19 +202,19 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BUSINESSRULETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.SERVICETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.SENDTASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BUSINESSRULETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.SERVICETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.SENDTASK));
                 break;
             case V2:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_BUSINESSRULETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_SERVICETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_SENDTASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BUSINESSRULETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_SERVICETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_SENDTASK));
                 break;
             case V3:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_BUSINESSRULETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_SERVICETASK));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_SENDTASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BUSINESSRULETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_SERVICETASK));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_SENDTASK));
                 break;
             default:
                 listNodeList = null;
@@ -226,12 +228,12 @@ public class BPMNScanner {
                 Element taskElement = (Element) list.item(i);
 
                 // check if the ids are corresponding
-                if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
                     // check for implementation reference
-                    if (implementation.equals(BPMNConstants.CAMUNDA_CLASS)) {
-                        implementationReference = taskElement.getAttribute(BPMNConstants.CAMUNDA_CLASS);
-                    } else if (implementation.equals(BPMNConstants.CAMUNDA_DEXPRESSION)) {
-                        implementationReference = taskElement.getAttribute(BPMNConstants.CAMUNDA_DEXPRESSION);
+                    if (implementation.equals(BpmnConstants.CAMUNDA_CLASS)) {
+                        implementationReference = taskElement.getAttribute(BpmnConstants.CAMUNDA_CLASS);
+                    } else if (implementation.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
+                        implementationReference = taskElement.getAttribute(BpmnConstants.CAMUNDA_DEXPRESSION);
                     }
                 }
             }
@@ -256,16 +258,16 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.ENDEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.INTERMEDIATETHROWEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.ENDEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.INTERMEDIATETHROWEVENT));
                 break;
             case V2:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_ENDEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_INTERMEDIATETHROWEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_ENDEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_INTERMEDIATETHROWEVENT));
                 break;
             case V3:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_ENDEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_INTERMEDIATETHROWEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_ENDEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_INTERMEDIATETHROWEVENT));
                 break;
             default:
                 listNodeList = null;
@@ -278,34 +280,34 @@ public class BPMNScanner {
                 final Element taskElement = (Element) list.item(i);
 
                 // check if the ids are corresponding
-                if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
 
                     final NodeList childNodes = taskElement.getChildNodes();
 
                     // check all attributes, whether they equal a messageEventDefinition
                     for (int x = 0; x < childNodes.getLength(); x++) {
                         if (childNodes.item(x).getLocalName() != null
-                                && childNodes.item(x).getLocalName().equals(BPMNConstants.MESSAGEEVENTDEFINITION)) {
+                                && childNodes.item(x).getLocalName().equals(BpmnConstants.MESSAGEEVENTDEFINITION)) {
                             final Element event = (Element) childNodes.item(x);
 
                             // if the node messageEventDefinition contains the camunda expression -> return
-                            if (event.getAttributeNode(BPMNConstants.CAMUNDA_EXPRESSION) != null) {
-                                returnImplementation = event.getAttributeNode(BPMNConstants.CAMUNDA_EXPRESSION)
+                            if (event.getAttributeNode(BpmnConstants.CAMUNDA_EXPRESSION) != null) {
+                                returnImplementation = event.getAttributeNode(BpmnConstants.CAMUNDA_EXPRESSION)
                                         .toString();
-                            } else if (event.getAttributeNode(BPMNConstants.CAMUNDA_DEXPRESSION) != null) {
-                                returnImplementation = event.getAttributeNode(BPMNConstants.CAMUNDA_DEXPRESSION)
+                            } else if (event.getAttributeNode(BpmnConstants.CAMUNDA_DEXPRESSION) != null) {
+                                returnImplementation = event.getAttributeNode(BpmnConstants.CAMUNDA_DEXPRESSION)
                                         .toString();
-                            } else if (event.getAttributeNode(BPMNConstants.CAMUNDA_CLASS) != null) {
-                                returnImplementation = event.getAttributeNode(BPMNConstants.CAMUNDA_CLASS).toString();
-                            } else if (event.getAttributeNode(BPMNConstants.CAMUNDA_EXT) != null) {
-                                returnImplementation = event.getAttributeNode(BPMNConstants.CAMUNDA_EXT).toString();
+                            } else if (event.getAttributeNode(BpmnConstants.CAMUNDA_CLASS) != null) {
+                                returnImplementation = event.getAttributeNode(BpmnConstants.CAMUNDA_CLASS).toString();
+                            } else if (event.getAttributeNode(BpmnConstants.CAMUNDA_EXT) != null) {
+                                returnImplementation = event.getAttributeNode(BpmnConstants.CAMUNDA_EXT).toString();
                             }
 
-                            if (event.getAttributeNode(BPMNConstants.CAMUNDA_DEXPRESSION) == null
-                                    && event.getAttributeNode(BPMNConstants.CAMUNDA_EXPRESSION) == null
-                                    && event.getAttributeNode(BPMNConstants.CAMUNDA_CLASS) == null
-                                    && event.getAttributeNode(BPMNConstants.CAMUNDA_EXT) == null) {
-                                returnImplementation = BPMNConstants.IMPLEMENTATION;
+                            if (event.getAttributeNode(BpmnConstants.CAMUNDA_DEXPRESSION) == null
+                                    && event.getAttributeNode(BpmnConstants.CAMUNDA_EXPRESSION) == null
+                                    && event.getAttributeNode(BpmnConstants.CAMUNDA_CLASS) == null
+                                    && event.getAttributeNode(BpmnConstants.CAMUNDA_EXT) == null) {
+                                returnImplementation = BpmnConstants.IMPLEMENTATION;
                             }
                         }
                     }
@@ -337,13 +339,13 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                nodeListExtensionElements = doc.getElementsByTagName(BPMNConstants.EXTELEMENTS);
+                nodeListExtensionElements = doc.getElementsByTagName(BpmnConstants.EXTELEMENTS);
                 break;
             case V2:
-                nodeListExtensionElements = doc.getElementsByTagName(BPMNConstants.BPMN_EXTELEMENTS);
+                nodeListExtensionElements = doc.getElementsByTagName(BpmnConstants.BPMN_EXTELEMENTS);
                 break;
             case V3:
-                nodeListExtensionElements = doc.getElementsByTagName(BPMNConstants.BPMN2_EXTELEMENTS);
+                nodeListExtensionElements = doc.getElementsByTagName(BpmnConstants.BPMN2_EXTELEMENTS);
                 break;
             default:
                 nodeListExtensionElements = null;
@@ -351,7 +353,7 @@ public class BPMNScanner {
 
         // search for parent with id
         for (int i = 0; i < nodeListExtensionElements.getLength(); i++) {
-            if (((Element) nodeListExtensionElements.item(i).getParentNode()).getAttribute(BPMNConstants.ATTR_ID)
+            if (((Element) nodeListExtensionElements.item(i).getParentNode()).getAttribute(BpmnConstants.ATTR_ID)
                     .equals(id)) {
                 NodeList childNodes = nodeListExtensionElements.item(i).getChildNodes();
                 for (int x = 0; x < childNodes.getLength(); x++) {
@@ -399,7 +401,7 @@ public class BPMNScanner {
         NodeList nodeList;
 
         // search for script tag
-        nodeList = doc.getElementsByTagName(BPMNConstants.SCRIPT_TAG);
+        nodeList = doc.getElementsByTagName(BpmnConstants.SCRIPT_TAG);
 
         // search for parent with id
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -410,6 +412,66 @@ public class BPMNScanner {
         }
 
         return returnScriptType;
+    }
+
+    /**
+     * Retrieve startevents to check whether any parent node is a subprocess
+     *
+     * @param id
+     *            id of element to check
+     * @return true if id was found
+     */
+    public boolean checkStartEvent(String id) {
+
+        // List for startevents elements
+        NodeList nodeList;
+        boolean isSubprocess = false;
+
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BpmnConstants.STARTEVENT);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_STARTEVENT);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_STARTEVENT);
+                break;
+            default:
+                nodeList = null;
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element startEvent = (Element) nodeList.item(i);
+            if (id.equals(startEvent.getAttribute(BpmnConstants.ATTR_ID))) {
+                return isSubprocess(startEvent);
+            }
+        }
+
+        return isSubprocess;
+    }
+
+    /**
+     * Check whether any parent node is a subprocess
+     *
+     * @param e
+     *            Element
+     * @return True if any parent node is a subprocess and false if any parent node is a process
+     */
+    private boolean isSubprocess(Element e) {
+
+        if (e.getParentNode() != null) {
+            if (e.getParentNode().getLocalName() != null
+                    && e.getParentNode().getLocalName().equals(BpmnConstants.SUBPROCESS)) {
+                return true;
+            } else if (e.getParentNode().getLocalName() != null
+                    && e.getParentNode().getLocalName().equals(BpmnConstants.PROCESS)) {
+                return false;
+            }
+            isSubprocess((Element) e.getParentNode());
+        }
+
+        return false;
     }
 
     /**
@@ -424,12 +486,12 @@ public class BPMNScanner {
     private boolean idMatch(Node n, String id) {
         Element e = (Element) n;
 
-        if (e.getAttribute(BPMNConstants.ATTR_ID).equals(id))
+        if (e.getAttribute(BpmnConstants.ATTR_ID).equals(id))
             return true;
 
-        while (e.getParentNode() != null && !e.getParentNode().getLocalName().equals(BPMNConstants.PROCESS)) {
+        while (e.getParentNode() != null && !e.getParentNode().getLocalName().equals(BpmnConstants.PROCESS)) {
             Element check = (Element) e.getParentNode();
-            if (check.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
+            if (check.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
                 return true;
             } else {
                 e = (Element) e.getParentNode();
@@ -452,19 +514,19 @@ public class BPMNScanner {
         switch (modelVersion) {
             case V1:
                 // create nodelist that contains all Tasks with the namespace
-                nodeList = doc.getElementsByTagName(BPMNConstants.SEQUENCE);
+                nodeList = doc.getElementsByTagName(BpmnConstants.SEQUENCE);
                 break;
             case V2:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_SEQUENCE);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_SEQUENCE);
                 break;
             case V3:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_SEQUENCE);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_SEQUENCE);
                 break;
         }
 
         for (int i = 0; i < nodeList.getLength(); i++) {
             Element sequenceElement = (Element) nodeList.item(i);
-            if (sequenceElement.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
+            if (sequenceElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
                 return hasCondExp(sequenceElement);
             }
         }
@@ -485,9 +547,9 @@ public class BPMNScanner {
             childNodes = sq.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); i++) {
                 Node childNode = childNodes.item(i);
-                if (childNode.getLocalName() != null && childNode.getLocalName().equals(BPMNConstants.CONDEXP)) {
+                if (childNode.getLocalName() != null && childNode.getLocalName().equals(BpmnConstants.CONDEXP)) {
                     Element childElement = (Element) childNode;
-                    if (childElement.getAttribute(BPMNConstants.LANG).trim().length() > 0)
+                    if (childElement.getAttribute(BpmnConstants.LANG).trim().length() > 0)
                         return true;
                 }
             }
@@ -510,13 +572,13 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                nodeList = doc.getElementsByTagName(BPMNConstants.GATEWAY);
+                nodeList = doc.getElementsByTagName(BpmnConstants.GATEWAY);
                 break;
             case V2:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_GATEWAY);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_GATEWAY);
                 break;
             case V3:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_GATEWAY);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_GATEWAY);
                 break;
             default:
                 return "";
@@ -527,8 +589,8 @@ public class BPMNScanner {
             Element taskElement = (Element) nodeList.item(i);
 
             // check if the ids are corresponding
-            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
-                gateway = taskElement.getAttribute(BPMNConstants.ATTR_ID);
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                gateway = taskElement.getAttribute(BpmnConstants.ATTR_ID);
             }
         }
         return gateway;
@@ -549,16 +611,16 @@ public class BPMNScanner {
         switch (modelVersion) {
             case V1:
                 // create nodelist that contains all Tasks with the namespace
-                nodeList = doc.getElementsByTagName(BPMNConstants.GATEWAY);
-                out = BPMNConstants.OUT;
+                nodeList = doc.getElementsByTagName(BpmnConstants.GATEWAY);
+                out = BpmnConstants.OUT;
                 break;
             case V2:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_GATEWAY);
-                out = BPMNConstants.BPMN_OUT;
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_GATEWAY);
+                out = BpmnConstants.BPMN_OUT;
                 break;
             case V3:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_GATEWAY);
-                out = BPMNConstants.BPMN2_OUT;
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_GATEWAY);
+                out = BpmnConstants.BPMN2_OUT;
                 break;
             default:
                 return -1;
@@ -569,7 +631,7 @@ public class BPMNScanner {
             Element taskElement = (Element) nodeList.item(i);
 
             // check if the ids are corresponding
-            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
                 NodeList childNodeGateway = taskElement.getChildNodes();
                 for (int x = 0; x < childNodeGateway.getLength(); x++) {
                     if (childNodeGateway.item(x).getNodeName().equals(out)) {
@@ -579,6 +641,43 @@ public class BPMNScanner {
             }
         }
         return outgoing;
+    }
+
+    /**
+     * get sequenceFlow attributes such as sourceRef and targetRef
+     *
+     * @param id
+     *            id of bpmn element
+     * @return ArrayList of outgoing Nodes
+     */
+    public ArrayList<String> getSequenceFlowDef(String id) {
+
+        final ArrayList<String> references = new ArrayList<>();
+
+        NodeList nodeList = null;
+
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BpmnConstants.SEQUENCE);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_SEQUENCE);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_SEQUENCE);
+                break;
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element taskElement = (Element) nodeList.item(i);
+
+            // check if the ids are corresponding and retrieve the attributes for target and source reference
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                references.add(taskElement.getAttribute(BpmnConstants.SOURCEREF));
+                references.add(taskElement.getAttribute(BpmnConstants.TARGETREF));
+            }
+        }
+        return references;
     }
 
     /**
@@ -597,16 +696,16 @@ public class BPMNScanner {
         switch (modelVersion) {
             case V1:
                 // create nodelist that contains all Tasks with the namespace
-                nodeList = doc.getElementsByTagName(BPMNConstants.GATEWAY);
-                out = BPMNConstants.OUT;
+                nodeList = doc.getElementsByTagName(BpmnConstants.GATEWAY);
+                out = BpmnConstants.OUT;
                 break;
             case V2:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_GATEWAY);
-                out = BPMNConstants.BPMN_OUT;
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_GATEWAY);
+                out = BpmnConstants.BPMN_OUT;
                 break;
             case V3:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_GATEWAY);
-                out = BPMNConstants.BPMN2_OUT;
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_GATEWAY);
+                out = BpmnConstants.BPMN2_OUT;
                 break;
         }
 
@@ -614,7 +713,7 @@ public class BPMNScanner {
             Element taskElement = (Element) nodeList.item(i);
 
             // check if the ids are corresponding and retrieve the outgoing edges of the xor gateway
-            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
                 NodeList children = taskElement.getChildNodes();
                 for (int j = 0; j < children.getLength(); j++) {
                     if (children.item(j).getNodeName().equals(out)) {
@@ -641,19 +740,19 @@ public class BPMNScanner {
         switch (modelVersion) {
             case V1:
                 // create nodelist that contains all Tasks with the namespace
-                nodeList = doc.getElementsByTagName(BPMNConstants.SEQUENCE);
+                nodeList = doc.getElementsByTagName(BpmnConstants.SEQUENCE);
                 break;
             case V2:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_SEQUENCE);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_SEQUENCE);
                 break;
             case V3:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_SEQUENCE);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_SEQUENCE);
                 break;
         }
 
         for (int i = 0; i < nodeList.getLength(); i++) {
             Element taskElement = (Element) nodeList.item(i);
-            if (taskElement.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
+            if (taskElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
                 edge = taskElement;
             }
         }
@@ -674,19 +773,19 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.STARTEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.INTERMEDIATECATCHEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.STARTEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.INTERMEDIATECATCHEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BOUNDARYEVENT));
                 break;
             case V2:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_STARTEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_INTERMEDIATECATCHEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_STARTEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_INTERMEDIATECATCHEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BOUNDARYEVENT));
                 break;
             case V3:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_STARTEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_INTERMEDIATECATCHEVENT));
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_STARTEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_INTERMEDIATECATCHEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BOUNDARYEVENT));
                 break;
             default:
                 listNodeList = null;
@@ -701,14 +800,14 @@ public class BPMNScanner {
                 final Element taskElement = (Element) list.item(i);
 
                 // check whether a node matches with the provided id
-                if (taskElement.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
+                if (taskElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
 
                     final NodeList childNodes = taskElement.getChildNodes();
                     for (int x = 0; x < childNodes.getLength(); x++) {
 
                         // check if an event consists of a timereventdefinition tag
                         if (childNodes.item(x).getLocalName() != null
-                                && childNodes.item(x).getLocalName().equals(BPMNConstants.TIMEREVENTDEFINTION)) {
+                                && childNodes.item(x).getLocalName().equals(BpmnConstants.TIMEREVENTDEFINTION)) {
 
                             timerList.put(taskElement, null);
 
@@ -731,47 +830,6 @@ public class BPMNScanner {
     }
 
     /**
-     * Retrieve the message name of a given receiveTask
-     *
-     * @param messageRef
-     *            id of message
-     * @return messageName
-     */
-    public String getMessageName(String messageRef) {
-        // List for all messages
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-        String messageName = "";
-
-        switch (modelVersion) {
-            case V1:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.MESSAGE));
-                break;
-            case V2:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_MESSAGE));
-                break;
-            case V3:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_MESSAGE));
-                break;
-            default:
-                listNodeList = null;
-        }
-
-        for (NodeList list : listNodeList) {
-            for (int i = 0; i < list.getLength(); i++) {
-
-                final Element taskElement = (Element) list.item(i);
-
-                // check whether a node matches with the provided id
-                if (taskElement.getAttribute(BPMNConstants.ATTR_ID).equals(messageRef)) {
-                    messageName = taskElement.getAttribute(BPMNConstants.ATTR_NAME);
-                }
-            }
-        }
-        return messageName;
-
-    }
-
-    /**
      * get List of output variables
      *
      * @param id
@@ -787,14 +845,14 @@ public class BPMNScanner {
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             if (idMatch(node, id)) {
-                listVariables.add(((Element) node).getAttribute(BPMNConstants.ATTR_NAME));
+                listVariables.add(((Element) node).getAttribute(BpmnConstants.ATTR_NAME));
             }
         }
         return listVariables;
     }
 
     public ArrayList<String> getOutputVariables(String id) {
-        return getInOutVariables(id, BPMNConstants.CAMUNDA_OUTPAR);
+        return getInOutVariables(id, BpmnConstants.CAMUNDA_OUTPAR);
     }
 
     /**
@@ -805,8 +863,8 @@ public class BPMNScanner {
      * @return ArrayList of String
      */
     public ArrayList<String> getInOutputVariablesValue(String id) {
-        ArrayList<String> variableValues = getInOutputVariablesValue(id, BPMNConstants.CAMUNDA_INPAR);
-        variableValues.addAll(getInOutputVariablesValue(id, BPMNConstants.CAMUNDA_OUTPAR));
+        ArrayList<String> variableValues = getInOutputVariablesValue(id, BpmnConstants.CAMUNDA_INPAR);
+        variableValues.addAll(getInOutputVariablesValue(id, BpmnConstants.CAMUNDA_OUTPAR));
         return variableValues;
     }
 
@@ -832,17 +890,17 @@ public class BPMNScanner {
                 if (node.hasChildNodes() && node.getChildNodes().getLength() > 1) {
                     NodeList nodeChilds = node.getChildNodes();
                     for (int y = 0; y < nodeChilds.getLength(); y++) {
-                        if (nodeChilds.item(y).getNodeName().equals(BPMNConstants.CAMUNDA_LIST)) {
+                        if (nodeChilds.item(y).getNodeName().equals(BpmnConstants.CAMUNDA_LIST)) {
                             NodeList listChilds = nodeChilds.item(y).getChildNodes();
                             for (int z = 0; z < listChilds.getLength(); z++) {
-                                if (listChilds.item(z).getNodeName().equals(BPMNConstants.CAMUNDA_VALUE)) {
+                                if (listChilds.item(z).getNodeName().equals(BpmnConstants.CAMUNDA_VALUE)) {
                                     listVariablesValue.add(listChilds.item(z).getTextContent());
                                 }
                             }
-                        } else if (nodeChilds.item(y).getNodeName().equals(BPMNConstants.CAMUNDA_MAP)) {
+                        } else if (nodeChilds.item(y).getNodeName().equals(BpmnConstants.CAMUNDA_MAP)) {
                             NodeList mapChilds = nodeChilds.item(y).getChildNodes();
                             for (int x = 0; x < mapChilds.getLength(); x++) {
-                                if (mapChilds.item(x).getNodeName().equals(BPMNConstants.CAMUNDA_ENTRY)) {
+                                if (mapChilds.item(x).getNodeName().equals(BpmnConstants.CAMUNDA_ENTRY)) {
                                     listVariablesValue.add(mapChilds.item(x).getTextContent());
                                 }
                             }
@@ -864,7 +922,7 @@ public class BPMNScanner {
      * @return inputVariables
      */
     public ArrayList<String> getInputVariables(String id) {
-        return getInOutVariables(id, BPMNConstants.CAMUNDA_INPAR);
+        return getInOutVariables(id, BpmnConstants.CAMUNDA_INPAR);
     }
 
     /**
@@ -876,12 +934,12 @@ public class BPMNScanner {
      */
     public ArrayList<String> getFieldInjectionExpression(String id) {
         ArrayList<String> varNames = new ArrayList<String>();
-        NodeList nodeList = doc.getElementsByTagName(BPMNConstants.CAMUNDA_FIELD);
+        NodeList nodeList = doc.getElementsByTagName(BpmnConstants.CAMUNDA_FIELD);
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             if (idMatch(node, id)) {
                 for (int y = 0; y < node.getChildNodes().getLength(); y++) {
-                    if (node.getChildNodes().item(y).getNodeName().equals(BPMNConstants.CAMUNDA_EXPRESSION)) {
+                    if (node.getChildNodes().item(y).getNodeName().equals(BpmnConstants.CAMUNDA_EXPRESSION)) {
                         varNames.add(node.getChildNodes().item(y).getTextContent());
                     }
                 }
@@ -899,12 +957,12 @@ public class BPMNScanner {
      */
     public ArrayList<String> getFieldInjectionVarName(String id) {
         ArrayList<String> varNames = new ArrayList<String>();
-        NodeList nodeList = doc.getElementsByTagName(BPMNConstants.CAMUNDA_FIELD);
+        NodeList nodeList = doc.getElementsByTagName(BpmnConstants.CAMUNDA_FIELD);
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             if (idMatch(node, id))
                 for (int y = 0; y < node.getAttributes().getLength(); y++) {
-                    if (node.getAttributes().item(y).getNodeName().equals(BPMNConstants.ATTR_NAME))
+                    if (node.getAttributes().item(y).getNodeName().equals(BpmnConstants.ATTR_NAME))
                         varNames.add(node.getAttributes().item(y).getNodeValue());
                 }
         }
@@ -925,13 +983,13 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BOUNDARYEVENT));
                 break;
             case V2:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BOUNDARYEVENT));
                 break;
             case V3:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BOUNDARYEVENT));
                 break;
             default:
                 listNodeList = null;
@@ -946,17 +1004,17 @@ public class BPMNScanner {
                 final Element taskElement = (Element) list.item(i);
 
                 // check whether a node matches with the provided id
-                if (taskElement.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
+                if (taskElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
 
                     final NodeList childNodes = taskElement.getChildNodes();
                     for (int x = 0; x < childNodes.getLength(); x++) {
 
                         // check if an event consists of a errorEventDefinition tag
                         if (childNodes.item(x).getLocalName() != null
-                                && childNodes.item(x).getLocalName().equals(BPMNConstants.ERROREVENTDEFINITION)) {
+                                && childNodes.item(x).getLocalName().equals(BpmnConstants.ERROREVENTDEFINITION)) {
                             final Element taskElement2 = (Element) childNodes.item(x);
-                            boundaryEventList.put(taskElement2.getAttribute(BPMNConstants.ATTR_ERRORREF),
-                                    taskElement2.getAttribute(BPMNConstants.CAMUNDA_ERRORCODEMESSVAR));
+                            boundaryEventList.put(taskElement2.getAttribute(BpmnConstants.ATTR_ERRORREF),
+                                    taskElement2.getAttribute(BpmnConstants.CAMUNDA_ERRORCODEMESSVAR));
 
                         }
                     }
@@ -979,13 +1037,13 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                nodeList = doc.getElementsByTagName(BPMNConstants.ERROR);
+                nodeList = doc.getElementsByTagName(BpmnConstants.ERROR);
                 break;
             case V2:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_ERROR);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_ERROR);
                 break;
             case V3:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_ERROR);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_ERROR);
                 break;
             default:
                 break;
@@ -998,9 +1056,9 @@ public class BPMNScanner {
             Element taskElement = (Element) nodeList.item(i);
 
             // check if the ids are corresponding
-            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
-                errorDef.put(taskElement.getAttribute(BPMNConstants.ATTR_NAME),
-                        taskElement.getAttribute(BPMNConstants.ATTR_ERRORCODE));
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                errorDef.put(taskElement.getAttribute(BpmnConstants.ATTR_NAME),
+                        taskElement.getAttribute(BpmnConstants.ATTR_ERRORCODE));
             }
         }
         return errorDef;
@@ -1019,13 +1077,13 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BOUNDARYEVENT));
                 break;
             case V2:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN_BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BOUNDARYEVENT));
                 break;
             case V3:
-                listNodeList.add(doc.getElementsByTagName(BPMNConstants.BPMN2_BOUNDARYEVENT));
+                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BOUNDARYEVENT));
                 break;
             default:
                 listNodeList = null;
@@ -1040,16 +1098,16 @@ public class BPMNScanner {
                 final Element taskElement = (Element) list.item(i);
 
                 // check whether a node matches with the provided id
-                if (taskElement.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
+                if (taskElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
 
                     final NodeList childNodes = taskElement.getChildNodes();
                     for (int x = 0; x < childNodes.getLength(); x++) {
 
                         // check if an event consists of a errorEventDefinition tag
                         if (childNodes.item(x).getLocalName() != null
-                                && childNodes.item(x).getLocalName().equals(BPMNConstants.ERROREVENTDEFINITION)) {
+                                && childNodes.item(x).getLocalName().equals(BpmnConstants.ERROREVENTDEFINITION)) {
                             final Element taskElement2 = (Element) childNodes.item(x);
-                            getErrorCodeVar = taskElement2.getAttribute(BPMNConstants.CAMUNDA_ERRORCODEVAR);
+                            getErrorCodeVar = taskElement2.getAttribute(BpmnConstants.CAMUNDA_ERRORCODEVAR);
                         }
                     }
                 }
@@ -1071,13 +1129,13 @@ public class BPMNScanner {
 
         switch (modelVersion) {
             case V1:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BOUNDARYEVENT);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BOUNDARYEVENT);
                 break;
             case V2:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN_BOUNDARYEVENT);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_BOUNDARYEVENT);
                 break;
             case V3:
-                nodeList = doc.getElementsByTagName(BPMNConstants.BPMN2_BOUNDARYEVENT);
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_BOUNDARYEVENT);
                 break;
             default:
                 break;
@@ -1088,8 +1146,8 @@ public class BPMNScanner {
             Element taskElement = (Element) nodeList.item(i);
 
             // check if the ids are corresponding
-            if (id.equals(taskElement.getAttribute(BPMNConstants.ATTR_ID))) {
-                attachedToTask = taskElement.getAttribute(BPMNConstants.ATTACHED_TO_REF);
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                attachedToTask = taskElement.getAttribute(BpmnConstants.ATTACHED_TO_REF);
             }
         }
 
@@ -1106,19 +1164,189 @@ public class BPMNScanner {
 
         final Map<String, String> keyPairs = new HashMap<String, String>();
 
-        final NodeList nodeList = doc.getElementsByTagName(BPMNConstants.CAMUNDA_PROPERTY);
+        final NodeList nodeList = doc.getElementsByTagName(BpmnConstants.CAMUNDA_PROPERTY);
 
         for (int i = 0; i < nodeList.getLength(); i++) {
 
             // Due to the static nesting of nodes, we can check the third parent node whether the id are corresponding
             Element parent_element = (Element) nodeList.item(i).getParentNode().getParentNode().getParentNode();
-            if (parent_element.getAttribute(BPMNConstants.ATTR_ID).equals(id)) {
+            if (parent_element.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
                 Element extension_node = (Element) nodeList.item(i);
-                keyPairs.put(extension_node.getAttribute(BPMNConstants.ATTR_NAME),
-                        extension_node.getAttribute(BPMNConstants.ATTR_VALUE));
+                keyPairs.put(extension_node.getAttribute(BpmnConstants.ATTR_NAME),
+                        extension_node.getAttribute(BpmnConstants.ATTR_VALUE));
             }
         }
 
         return keyPairs;
+    }
+
+    public ArrayList<String> getSignalRefs(String id) {
+        return getModelRefs(id, BpmnConstants.SIGNALEVENTDEFINITION, BpmnConstants.ATTR_SIGNALREF);
+    }
+
+    public ArrayList<String> getMessageRefs(String id) {
+        ArrayList<String> messageRefs = getModelRefs(id, BpmnConstants.MESSAGEEVENTDEFINITION,
+                BpmnConstants.ATTR_MESSAGEREF);
+        messageRefs.addAll(getMessageRefFromReceiveTask(id));
+        return messageRefs;
+    }
+
+    private ArrayList<String> getMessageRefFromReceiveTask(String id) {
+        ArrayList<String> messageRefs = new ArrayList<String>();
+        NodeList nodeList = null;
+
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BpmnConstants.RECEIVETASK);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_RECEIVETASK);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_RECEIVETASK);
+                break;
+            default:
+                break;
+        }
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element taskElement = (Element) nodeList.item(i);
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID)))
+                messageRefs.add(taskElement.getAttribute(BpmnConstants.ATTR_MESSAGEREF));
+        }
+        return messageRefs;
+    }
+
+    private ArrayList<String> getModelRefs(String id, String eventDefinition, String attrRef) {
+        ArrayList<String> refs = new ArrayList<String>();
+
+        switch (modelVersion) {
+            case V1:
+                refs.addAll(getRefs(id, BpmnConstants.BOUNDARYEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.INTERMEDIATECATCHEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.INTERMEDIATETHROWEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.STARTEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.ENDEVENT, eventDefinition, attrRef));
+                break;
+            case V2:
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_BOUNDARYEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_INTERMEDIATECATCHEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_INTERMEDIATETHROWEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_STARTEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_ENDEVENT, eventDefinition, attrRef));
+                break;
+            case V3:
+                refs.addAll(getRefs(id, BpmnConstants.BPMN2_BOUNDARYEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_INTERMEDIATECATCHEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_INTERMEDIATETHROWEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_STARTEVENT, eventDefinition, attrRef));
+                refs.addAll(getRefs(id, BpmnConstants.BPMN_ENDEVENT, eventDefinition, attrRef));
+                break;
+            default:
+                break;
+        }
+
+        return refs;
+    }
+
+    private ArrayList<String> getRefs(String id, String tag, String eventDefinition, String attrRef) {
+        ArrayList<String> signalRefs = new ArrayList<String>();
+        NodeList nodeList = null;
+
+        nodeList = doc.getElementsByTagName(tag);
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element taskElement = (Element) nodeList.item(i);
+
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                if (nodeList.item(i).hasChildNodes()) {
+                    NodeList boundaryChilds = nodeList.item(i).getChildNodes();
+                    for (int x = 0; x < boundaryChilds.getLength(); x++) {
+                        if (boundaryChilds.item(x).getLocalName() != null
+                                && boundaryChilds.item(x).getLocalName().equals(eventDefinition)) {
+                            Element boundaryChild = (Element) boundaryChilds.item(x);
+                            signalRefs.add(boundaryChild.getAttribute(attrRef));
+                        }
+                    }
+                }
+            }
+        }
+        return signalRefs;
+    }
+
+    /**
+     * Retrieve the message name
+     *
+     * @param messageRef
+     *            id of message
+     * @return messageName
+     */
+    public String getMessageName(String messageRef) {
+        NodeList nodeList = null;
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BpmnConstants.MESSAGE);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_MESSAGE);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_MESSAGE);
+                break;
+            default:
+                break;
+        }
+        return getName(nodeList, messageRef);
+    }
+
+    /**
+     * Retrieve the signal name
+     *
+     * @param signalRef
+     *            id of signal
+     * @return signalName
+     */
+    public String getSignalName(String signalRef) {
+        NodeList nodeList = null;
+        switch (modelVersion) {
+            case V1:
+                nodeList = doc.getElementsByTagName(BpmnConstants.SIGNAL);
+                break;
+            case V2:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_SIGNAL);
+                break;
+            case V3:
+                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_SIGNAL);
+                break;
+            default:
+                break;
+        }
+        return getName(nodeList, signalRef);
+    }
+
+    /**
+     * return attribute name of element
+     *
+     * @param nodeList
+     *            list of nodes to check
+     * @param id
+     *            element id
+     * @return name
+     */
+    private String getName(NodeList nodeList, String id) {
+        String name = "";
+
+        // iterate over list and check each item
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element taskElement = (Element) nodeList.item(i);
+
+            // check if the ids are corresponding
+            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                name = taskElement.getAttribute(BpmnConstants.ATTR_NAME);
+            }
+        }
+        return name;
     }
 }

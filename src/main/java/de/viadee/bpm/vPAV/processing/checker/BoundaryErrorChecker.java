@@ -47,11 +47,11 @@ import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
-import de.viadee.bpm.vPAV.BPMNConstants;
-import de.viadee.bpm.vPAV.BPMNScanner;
-import de.viadee.bpm.vPAV.ConstantsConfig;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -61,7 +61,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
     private static Logger logger = Logger.getLogger(BoundaryErrorChecker.class.getName());
 
-    public BoundaryErrorChecker(final Rule rule, BPMNScanner bpmnScanner) {
+    public BoundaryErrorChecker(final Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -94,15 +94,17 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     final String errorCode = bpmnScanner.getErrorCodeVar(bpmnElement.getId());
                     if (errorCode == null || errorCode.isEmpty()) {
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                element.getProcessdefinition(), null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
                                         + "' with no errorCodeVariable specified",
                                 null));
                     } else {
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                element.getProcessdefinition(), null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
                                         + "' with no error referenced",
                                 null));
@@ -117,8 +119,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (errorDef.entrySet().iterator().next().getValue() == null
                             || errorDef.entrySet().iterator().next().getValue().isEmpty()) {
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                element.getProcessdefinition(), null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
                                         + "' does not provide an ErrorCode",
                                 null));
@@ -126,19 +129,20 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     } else {
                         if (implementation != null) {
                             // Check the BeanMapping to resolve delegate expression
-                            if (implementation.equals(BPMNConstants.CAMUNDA_DEXPRESSION)) {
+                            if (implementation.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
                                 checkBeanMapping(element, issues, bpmnElement,
                                         errorDef.entrySet().iterator().next().getValue(), implementationRef);
 
                                 // Check the directly referenced class
-                            } else if (implementation.equals(BPMNConstants.CAMUNDA_CLASS)) {
+                            } else if (implementation.equals(BpmnConstants.CAMUNDA_CLASS)) {
                                 if (!readResourceFile(implementationRef,
                                         errorDef.entrySet().iterator().next().getValue())) {
                                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
                                             CriticalityEnum.ERROR,
                                             element.getProcessdefinition(), null,
-                                            bpmnElement.getAttributeValue("id"),
-                                            bpmnElement.getAttributeValue("name"), null, null, null,
+                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
+                                            null, null,
                                             "ErrorCode of '" + CheckName.checkName(bpmnElement)
                                                     + "' does not match with throwing declaration of class '"
                                                     + implementationRef + "'",
@@ -152,8 +156,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (errorDef.entrySet().iterator().next().getKey() == null
                             || errorDef.entrySet().iterator().next().getKey().isEmpty()) {
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                element.getProcessdefinition(), null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
                                         + "' does not provide an ErrorName",
                                 null));
@@ -163,8 +168,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (errorEventDef.entrySet().iterator().next().getValue() == null
                             || errorEventDef.entrySet().iterator().next().getValue().isEmpty()) {
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                element.getProcessdefinition(), null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
                                         + "' with no ErrorMessageVariable",
                                 null));
@@ -203,8 +209,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
                                         CriticalityEnum.ERROR,
                                         element.getProcessdefinition(), null,
-                                        bpmnElement.getAttributeValue("id"),
-                                        bpmnElement.getAttributeValue("name"), null, null,
+                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
+                                        null,
                                         null,
                                         "ErrorCode of '" + CheckName.checkName(bpmnElement)
                                                 + "' does not match with throwing declaration of bean '"
@@ -215,8 +222,8 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                             issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
                                     CriticalityEnum.ERROR,
                                     element.getProcessdefinition(), null,
-                                    bpmnElement.getAttributeValue("id"),
-                                    bpmnElement.getAttributeValue("name"), null, null,
+                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
                                     null,
                                     "Corresponding class of associated task could not be loaded or found.", null));
                         }
@@ -224,8 +231,8 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                         // incorrect beanmapping
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                                 element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "Due to incorrect beanmapping for delegate expression: '"
                                         + implementationRef
                                         + "' the BoundaryErrorEvent can not be linked to class.",
@@ -237,8 +244,8 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
             if (!checkClassFile(implementationRef)) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
                         element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue("id"),
-                        bpmnElement.getAttributeValue("name"), null, null, null,
+                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Class for '" + implementationRef
                                 + "' could not be found and therefore not linked to BoundaryErrorEvent '"
                                 + CheckName.checkName(bpmnElement) + "'.",
@@ -266,14 +273,14 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
                 if (RuntimeConfig.getInstance().isTest()) {
                     if (fileName.endsWith(".java"))
-                        scanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
+                        scanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
                     else
-                        scanner.setBasedir(ConstantsConfig.TEST_BASEPATH);
+                        scanner.setBasedir(ConfigConstants.TEST_BASEPATH);
                 } else {
                     if (fileName.endsWith(".java"))
-                        scanner.setBasedir(ConstantsConfig.JAVAPATH);
+                        scanner.setBasedir(ConfigConstants.JAVAPATH);
                     else
-                        scanner.setBasedir(ConstantsConfig.BASEPATH);
+                        scanner.setBasedir(ConfigConstants.BASEPATH);
                 }
 
                 Resource s = scanner.getResource(fileName);
@@ -282,9 +289,6 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
                     final String methodBody = IOUtils.toString(resource);
                     return validateContent(methodBody, errorCode);
-                    // CompilationUnit compilationUnit = JavaParser.parse(methodBody);
-                    // compilationUnit.getComments();
-
                 } else {
                     logger.warning("Class " + fileName + " could not be read or does not exist");
                 }

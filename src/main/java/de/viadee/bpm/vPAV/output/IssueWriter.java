@@ -27,58 +27,51 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.checker;
+package de.viadee.bpm.vPAV.output;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
-public class ElementIdConventionChecker extends AbstractElementChecker {
+public class IssueWriter {
 
-    public ElementIdConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
-    }
+    public static Collection<CheckerIssue> createIssue(
+            final Rule rule, final CriticalityEnum classification,
+            final BpmnElement element, final String message) {
 
-    /**
-     * Check if an element follows a configurable pattern
-     *
-     * @return issues
-     */
-    @Override
-    public Collection<CheckerIssue> check(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
         final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<ElementConvention> elementConventions = rule.getElementConventions();
+        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+                element.getProcessdefinition(),
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message));
 
-        final String elementId = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID);
-
-        if (elementConventions != null && !elementConventions.isEmpty() && elementId != null) {
-            for (final ElementConvention convention : elementConventions) {
-                final Pattern pattern = Pattern.compile(convention.getPattern().trim());
-                Matcher matcher = pattern.matcher(elementId);
-                String bpmnInstance = convention.getName();
-                if (!matcher.matches()
-                        && baseElement.getElementType().getInstanceType().getSimpleName().toLowerCase()
-                                .equals(bpmnInstance.toLowerCase())) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), null, baseElement.getId(),
-                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "ID '" + elementId + "' is against the naming convention", convention.getDescription()));
-                }
-            }
-        }
         return issues;
     }
+
+    public static Collection<CheckerIssue> createIssue(
+            final Rule rule, final CriticalityEnum classification,
+            final BpmnElement element, final String message, final String description) {
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        final BaseElement baseElement = element.getBaseElement();
+
+        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+                element.getProcessdefinition(),
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, description));
+
+        return issues;
+    }
+
 }

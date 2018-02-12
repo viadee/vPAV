@@ -49,7 +49,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
@@ -90,7 +90,7 @@ public class CallActivityTest {
                 BASE_PATH + "CallActivityTest_calledcalledProcess.bpmn");
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BPMNScanner(PATH));
+                new BpmnScanner(PATH));
 
         // create data flow graphs
         final Collection<String> calledElementHierarchy = new ArrayList<String>();

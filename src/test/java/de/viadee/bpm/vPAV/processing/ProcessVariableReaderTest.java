@@ -49,7 +49,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
@@ -88,7 +88,7 @@ public class ProcessVariableReaderTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BPMNScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);
@@ -106,7 +106,7 @@ public class ProcessVariableReaderTest {
         final Collection<CallActivity> allServiceTasks = modelInstance
                 .getModelElementsByType(CallActivity.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BPMNScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);

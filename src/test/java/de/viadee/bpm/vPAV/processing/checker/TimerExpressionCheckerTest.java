@@ -48,7 +48,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -92,7 +92,7 @@ public class TimerExpressionCheckerTest {
     public void testTimerExpression_Correct()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Correct.bpmn";
-        checker = new TimerExpressionChecker(rule, new BPMNScanner(PATH));
+        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -124,7 +124,7 @@ public class TimerExpressionCheckerTest {
     public void testTimerExpression_Wrong()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong.bpmn";
-        checker = new TimerExpressionChecker(rule, new BPMNScanner(PATH));
+        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -156,7 +156,7 @@ public class TimerExpressionCheckerTest {
     public void testTimerExpressions()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "TimerExpressionCheckerTest.bpmn";
-        checker = new TimerExpressionChecker(rule, new BPMNScanner(PATH));
+        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 

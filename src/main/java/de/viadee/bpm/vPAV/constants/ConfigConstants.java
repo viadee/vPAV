@@ -27,13 +27,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.constants;
 
 /**
  * Class to hold global constants
  */
 
-public final class ConstantsConfig {
+public final class ConfigConstants {
 
     public static final String RULESET = "ruleSet.xml";
 
@@ -97,7 +97,7 @@ public final class ConstantsConfig {
 
     public static final String GROOVY = "groovy";
 
-    private ConstantsConfig() {
+    private ConfigConstants() {
     }
 
 }

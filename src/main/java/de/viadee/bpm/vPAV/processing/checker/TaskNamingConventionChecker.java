@@ -34,10 +34,11 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.Task;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
@@ -47,7 +48,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class TaskNamingConventionChecker extends AbstractElementChecker {
 
-    public TaskNamingConventionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public TaskNamingConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -69,14 +70,14 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
                         "task naming convention checker must have one element convention!");
             }
             final String patternString = elementConventions.iterator().next().getPattern();
-            final String taskName = baseElement.getAttributeValue("name");
+            final String taskName = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
             if (taskName != null && taskName.trim().length() > 0) {
                 final Pattern pattern = Pattern.compile(patternString);
                 Matcher matcher = pattern.matcher(taskName);
                 if (!matcher.matches()) {
                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                             element.getProcessdefinition(), null, baseElement.getId(),
-                            baseElement.getAttributeValue("name"), null, null, null,
+                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                             "task name '" + taskName + "' is against the naming convention",
                             elementConventions.iterator().next().getDescription()));
                 }
@@ -84,7 +85,8 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
                 issues.add(
                         new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
                                 element.getProcessdefinition(),
-                                null, baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
+                                null, baseElement.getId(),
+                                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "task name must be specified", null));
             }
         }

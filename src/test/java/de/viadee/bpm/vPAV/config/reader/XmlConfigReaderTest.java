@@ -37,17 +37,20 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.viadee.bpm.vPAV.ConstantsConfig;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class XmlConfigReaderTest {
 
     private static ClassLoader cl;
+
+    private static Logger logger = Logger.getLogger(XmlConfigReaderTest.class.getName());
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -70,7 +73,7 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When
-        Map<String, Rule> result = reader.read(ConstantsConfig.RULESET);
+        Map<String, Rule> result = reader.read(ConfigConstants.RULESET);
 
         // Then
         assertFalse("No rules could be read", result.isEmpty());
@@ -85,14 +88,16 @@ public class XmlConfigReaderTest {
     public void testLoadingNonExistingXMLConfigFile() throws ConfigReaderException {
         // Given
         XmlConfigReader reader = new XmlConfigReader();
+        Map<String, Rule> result = null;
 
         // When
         try {
-            Map<String, Rule> result = reader.read("non-existing.xml");
+            result = reader.read("non-existing.xml");
             assertTrue("Exception expected, but no one was thrown.", result != null);
         } catch (ConfigReaderException e) {
             // load DefaultRuleSet
-            Map<String, Rule> result = reader.read("ruleSetDefault.xml");
+            result = reader.read("ruleSetDefault.xml");
+
             // Default rules correct
             assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
             assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());

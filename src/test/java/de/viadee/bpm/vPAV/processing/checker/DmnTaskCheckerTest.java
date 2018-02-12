@@ -48,7 +48,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.CheckName;
@@ -93,7 +93,7 @@ public class DmnTaskCheckerTest {
     public void testCorrectDMN()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_CorrectDMN.bpmn";
-        checker = new DmnTaskChecker(rule, new BPMNScanner(PATH));
+        checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -124,7 +124,7 @@ public class DmnTaskCheckerTest {
     public void testDMNTaskWithoutReference()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_WrongDmnTask.bpmn";
-        checker = new DmnTaskChecker(rule, new BPMNScanner(PATH));
+        checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -159,7 +159,7 @@ public class DmnTaskCheckerTest {
     public void testDMNTaskWithWrongDMN()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_wrongDMNReference.bpmn";
-        checker = new DmnTaskChecker(rule, new BPMNScanner(PATH));
+        checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -194,7 +194,7 @@ public class DmnTaskCheckerTest {
     public void testReadReferencedDMNFile()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_ReadReferencedDMN.bpmn";
-        checker = new DmnTaskChecker(rule, new BPMNScanner(PATH));
+        checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

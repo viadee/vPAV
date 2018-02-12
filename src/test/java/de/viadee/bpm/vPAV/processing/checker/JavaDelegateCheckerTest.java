@@ -49,7 +49,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -98,7 +98,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReference()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReference.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -127,7 +127,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReferenceSignal()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReferenceSignal.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -156,7 +156,7 @@ public class JavaDelegateCheckerTest {
     public void testCorrectJavaDelegateReferenceAbstract()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReferenceAbstract.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -185,7 +185,7 @@ public class JavaDelegateCheckerTest {
     public void testNoTechnicalAttributes()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoTechnicalAttributes.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -217,7 +217,7 @@ public class JavaDelegateCheckerTest {
     public void testNoJavaDelegateEntered()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoJavaDelegateEntered.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -249,7 +249,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegatePath()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegatePath.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -264,7 +264,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class 'TestDelegate2' not found",
+            Assert.assertEquals("class 'TestDelegate2' in camunda:class not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -281,7 +281,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateInterface()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateInterface.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -297,7 +297,7 @@ public class JavaDelegateCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "class 'DelegateWithWrongInterface' does not implement/extends the correct interface/class",
+                    "class 'DelegateWithWrongInterface' in camunda:class does not implement/extends the correct interface/class",
                     issues.iterator().next().getMessage());
         }
     }
@@ -314,7 +314,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateEntered()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateEntered.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -346,7 +346,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongJavaDelegateExpression()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateExpression.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -361,7 +361,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class 'TestDelegate2' not found",
+            Assert.assertEquals("class 'TestDelegate2' in camunda:delegateExpression not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -378,7 +378,7 @@ public class JavaDelegateCheckerTest {
     public void testWrongClassReference()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongClassReference.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -393,7 +393,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("class '${testDelegate}' not found",
+            Assert.assertEquals("class '${testDelegate}' in camunda:class not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -410,7 +410,7 @@ public class JavaDelegateCheckerTest {
     public void testInterfaceActivityBehavior()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_InterfaceActivityBehavior.bpmn";
-        checker = new JavaDelegateChecker(rule, new BPMNScanner(PATH));
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -426,7 +426,7 @@ public class JavaDelegateCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "class 'DelegateWithInterfaceActivityBehavior' implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
+                    "class 'DelegateWithInterfaceActivityBehavior' in camunda:class implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
                     issues.iterator().next().getMessage());
         }
     }

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -43,7 +44,7 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.JsOutputWriter;
 import de.viadee.bpm.vPAV.output.OutputWriterException;
@@ -62,6 +63,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  *
  */
 public class BpmnModelDispatcher {
+
+    private static Logger logger = Logger.getLogger(BpmnModelDispatcher.class.getName());
 
     private BpmnModelDispatcher() {
     }
@@ -96,9 +99,9 @@ public class BpmnModelDispatcher {
             throws ConfigItemNotFoundException {
 
         // create BPMNScanner
-        BPMNScanner bpmnScanner;
+        BpmnScanner bpmnScanner;
         try {
-            bpmnScanner = new BPMNScanner(processdefinition.getPath());
+            bpmnScanner = new BpmnScanner(processdefinition.getPath());
         } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new RuntimeException("Model couldn't be parsed");
         }
@@ -158,7 +161,7 @@ public class BpmnModelDispatcher {
         try {
             jWriter.writeVars(baseElements, graphBuilder, processdefinition);
         } catch (OutputWriterException e) {
-            e.printStackTrace();
+            logger.warning("Processvariables couldn't be written");
         }
 
         return issues;

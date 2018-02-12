@@ -96,7 +96,7 @@ public class OuterProcessVariablesTest {
 
         //// When...
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null,
-                processIdToVariables, new BPMNScanner(PATH));
+                processIdToVariables, new BpmnScanner(PATH));
         // create data flow graphs
         graphBuilder.createProcessGraph(modelInstance, processdefinition.getPath(), new ArrayList<String>());
 
@@ -134,7 +134,7 @@ public class OuterProcessVariablesTest {
 
         /// When
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null,
-                messageIdToVariables, null, new BPMNScanner(PATH));
+                messageIdToVariables, null, new BpmnScanner(PATH));
         // create data flow graphs
         graphBuilder.createProcessGraph(modelInstance, processdefinition.getPath(), new ArrayList<String>());
 

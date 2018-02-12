@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
 import org.camunda.bpm.model.bpmn.instance.EndEvent;
@@ -46,10 +47,10 @@ import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.camunda.bpm.model.bpmn.instance.UserTask;
 
-import de.viadee.bpm.vPAV.BPMNConstants;
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -57,7 +58,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoExpressionChecker extends AbstractElementChecker {
 
-    public NoExpressionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public NoExpressionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -80,25 +81,27 @@ public class NoExpressionChecker extends AbstractElementChecker {
             // read attributes from task
             final String implementationAttr = bpmnScanner.getImplementation(baseElement.getId());
 
-            if (implementationAttr != null && implementationAttr.equals(BPMNConstants.CAMUNDA_EXPRESSION)
+            if (implementationAttr != null && implementationAttr.equals(BpmnConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expressions in '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));
             }
 
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), "expression",
-                    "camunda:executionListener");
+            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
 
             if (!listener.isEmpty() && listener.size() > 0
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));
@@ -110,25 +113,27 @@ public class NoExpressionChecker extends AbstractElementChecker {
             // read attributes from event
             final String implementationAttrEvent = bpmnScanner.getEventImplementation(baseElement.getId());
 
-            if (implementationAttrEvent != null && implementationAttrEvent.contains(BPMNConstants.CAMUNDA_EXPRESSION)
+            if (implementationAttrEvent != null && implementationAttrEvent.contains(BpmnConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expression in event '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));
             }
 
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), "expression",
-                    "camunda:executionListener");
+            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
 
             if (!listener.isEmpty() && listener.size() > 0
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));
@@ -137,13 +142,14 @@ public class NoExpressionChecker extends AbstractElementChecker {
         } else if (baseElement instanceof SequenceFlow) {
 
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), "expression",
-                    "camunda:executionListener");
+            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));
@@ -151,39 +157,42 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         } else if (baseElement instanceof ExclusiveGateway) {
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), "expression",
-                    "camunda:executionListener");
+            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));
             }
         } else if (baseElement instanceof UserTask) {
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), "expression",
-                    "camunda:executionListener");
+            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));
             }
 
             // get the task listener
-            final ArrayList<String> taskListener = bpmnScanner.getListener(baseElement.getId(), "expression",
-                    "camunda:taskListener");
+            final ArrayList<String> taskListener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
             if (!taskListener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));
@@ -191,13 +200,14 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         } else if (baseElement instanceof ManualTask) {
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), "expression",
-                    "camunda:executionListener");
+            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), null, baseElement.getAttributeValue("id"),
-                        baseElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
                                 + "' is against best practices.",
                         null));

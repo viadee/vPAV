@@ -50,7 +50,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -98,7 +98,7 @@ public class XorConventionCheckerTest {
     public void testOutgoingXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorConventionChecker_outgoingXor.bpmn";
-        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
+        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -129,7 +129,7 @@ public class XorConventionCheckerTest {
     public void testCorrectXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorConventionChecker_correct.bpmn";
-        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
+        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -160,7 +160,7 @@ public class XorConventionCheckerTest {
     public void testFalseXor()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorConventionChecker_false.bpmn";
-        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
+        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -191,7 +191,7 @@ public class XorConventionCheckerTest {
     public void testOutgoingEdgesCorrect()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorConventionChecker_outgoingEdgesCorrect.bpmn";
-        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
+        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -222,7 +222,7 @@ public class XorConventionCheckerTest {
     public void testOutgoingEdgesFalse()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorConventionChecker_outgoingEdgesFalse.bpmn";
-        checker = new XorConventionChecker(rule, new BPMNScanner(PATH));
+        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -299,7 +299,7 @@ public class XorConventionCheckerTest {
     public void testDefaultPath()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorConventionChecker_NoDefault.bpmn";
-        checker = new XorConventionChecker(ruleDefault, new BPMNScanner(PATH));
+        checker = new XorConventionChecker(ruleDefault, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -329,7 +329,7 @@ public class XorConventionCheckerTest {
     public void testCorrectDefaultPath()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "XorConventionChecker_CorrectDefault.bpmn";
-        checker = new XorConventionChecker(ruleDefault, new BPMNScanner(PATH));
+        checker = new XorConventionChecker(ruleDefault, new BpmnScanner(PATH));
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

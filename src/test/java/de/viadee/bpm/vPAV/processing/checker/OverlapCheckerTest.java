@@ -36,8 +36,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -50,28 +48,22 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
-/**
- * unit tests for class NoExpressionChecke
- *
- */
-public class NoExpressionCheckerTest {
+public class OverlapCheckerTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
-    private static NoExpressionChecker checker;
+    private static OverlapChecker checker;
 
     private static ClassLoader cl;
 
-    private static Map<String, Setting> setting = new HashMap<String, Setting>();
-
-    private final Rule rule = new Rule("NoExpressionChecker", true, null, setting, null, null);
+    private final Rule rule = new Rule("OverlapChecker", true, null, null, null, null);
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -84,7 +76,7 @@ public class NoExpressionCheckerTest {
     }
 
     /**
-     * Case: Tasks without Expressions
+     * Case: Correct model
      *
      * @throws IOException
      * @throws SAXException
@@ -92,10 +84,10 @@ public class NoExpressionCheckerTest {
      * @throws XPathExpressionException
      */
     @Test
-    public void testTaskWithoutExpression()
+    public void testModelWithNoOverlap()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "NoExpressionChecker_WithoutExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "OverlapChecker_Correct.bpmn";
+        checker = new OverlapChecker(rule, new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -105,10 +97,12 @@ public class NoExpressionCheckerTest {
         final Collection<BaseElement> baseElements = modelInstance
                 .getModelElementsByType(BaseElement.class);
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
+        for (BaseElement event : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, event);
             issues.addAll(checker.check(element));
         }
+
+        AbstractRunner.resetSequenceFlowList();
 
         if (issues.size() > 0) {
             Assert.fail("correct model generates an issue");
@@ -116,7 +110,7 @@ public class NoExpressionCheckerTest {
     }
 
     /**
-     * Case: Tasks with Expressions
+     * Case: Incorrect model with overlapping sequence flows
      *
      * @throws IOException
      * @throws SAXException
@@ -124,10 +118,10 @@ public class NoExpressionCheckerTest {
      * @throws XPathExpressionException
      */
     @Test
-    public void testTaskWithExpression()
+    public void testModelWithOverlap()
             throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "NoExpressionChecker_WithExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "OverlapChecker_Wrong.bpmn";
+        checker = new OverlapChecker(rule, new BpmnScanner(PATH));
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -137,77 +131,15 @@ public class NoExpressionCheckerTest {
         final Collection<BaseElement> baseElements = modelInstance
                 .getModelElementsByType(BaseElement.class);
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
+        for (BaseElement event : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, event);
             issues.addAll(checker.check(element));
         }
 
-        if (issues.size() != 2) {
-            Assert.fail("correct model generates an issue");
-        }
-    }
-
-    /**
-     * Case: Events with Expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testEventsWithExpression()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "NoExpressionChecker_EventsWithExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
-
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
-
-        if (issues.size() != 3) {
-            Assert.fail("model should generate 3 issues");
-        }
-    }
-
-    /**
-     * Case: Sequenceflow with Expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testSequenceFlowWithExpression()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "NoExpressionChecker_SequenceFlowWithExpression.bpmn";
-        checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
-
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
+        AbstractRunner.resetSequenceFlowList();
 
         if (issues.size() != 1) {
-            Assert.fail("model should generate 3 issues");
+            Assert.fail("Incorrect model should generate an issue");
         }
     }
 }

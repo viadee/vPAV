@@ -33,14 +33,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ScriptTask;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -48,15 +50,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoScriptChecker extends AbstractElementChecker {
 
-    private final String process = "Process";
-
-    private final String subProcess = "SubProcess";
-
-    private final String scriptTask = "ScriptTask";
-
-    private final String sequenceFlow = "SequenceFlow";
-
-    public NoScriptChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public NoScriptChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -73,18 +67,22 @@ public class NoScriptChecker extends AbstractElementChecker {
         final BaseElement bpmnElement = element.getBaseElement();
 
         if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)
-                && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(process)
-                && !bpmnElement.getElementType().getInstanceType().getSimpleName().equals(subProcess)) {
+                && !bpmnElement.getElementType().getInstanceType().getSimpleName()
+                        .equals(BpmnConstants.SIMPLE_NAME_PROCESS)
+                && !bpmnElement.getElementType().getInstanceType().getSimpleName()
+                        .equals(BpmnConstants.SIMPLE_NAME_SUB_PROCESS)) {
             Map<String, Setting> settings = rule.getSettings();
 
             // Check all Elements with camunda:script tag
-            ArrayList<String> scriptTypes = bpmnScanner.getScriptTypes(bpmnElement.getAttributeValue("id"));
+            ArrayList<String> scriptTypes = bpmnScanner
+                    .getScriptTypes(bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID));
             if (scriptTypes != null && !scriptTypes.isEmpty()) {
                 if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
                     for (String place : scriptTypes)
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                element.getProcessdefinition(), null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "task '" + CheckName.checkName(bpmnElement) + "' with '"
                                         + place + "' script",
                                 null));
@@ -96,8 +94,10 @@ public class NoScriptChecker extends AbstractElementChecker {
                             if (!allowedPlaces.contains(scriptType))
                                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
                                         CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                        bpmnElement.getAttributeValue("name"), null, null, null,
+                                        element.getProcessdefinition(), null,
+                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
+                                        null, null,
                                         "task '" + CheckName.checkName(bpmnElement) + "' with '"
                                                 + scriptType + "' script",
                                         null));
@@ -106,32 +106,38 @@ public class NoScriptChecker extends AbstractElementChecker {
             }
 
             // ScriptTask
-            if (bpmnElement instanceof ScriptTask && !settings.containsKey(scriptTask)) {
+            if (bpmnElement instanceof ScriptTask && !settings.containsKey(BpmnConstants.SIMPLE_NAME_SCRIPT_TASK)) {
                 issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                        bpmnElement.getAttributeValue("name"), null, null, null,
+                        element.getProcessdefinition(), null,
+                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                         "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed", null));
             }
 
             // Check SequenceFlow on script in conditionExpression
             if (bpmnElement instanceof SequenceFlow) {
-                boolean scriptCondExp = bpmnScanner.hasScriptInCondExp(bpmnElement.getAttributeValue("id"));
-                if (settings.containsKey(sequenceFlow)) {
-                    ArrayList<String> allowedPlaces = settings.get(sequenceFlow).getScriptPlaces();
+                boolean scriptCondExp = bpmnScanner
+                        .hasScriptInCondExp(bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID));
+                if (settings.containsKey(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)) {
+                    ArrayList<String> allowedPlaces = settings.get(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)
+                            .getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
-                        if (!allowedPlaces.contains("conditionExpression") && scriptCondExp)
+                        if (!allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp)
                             issues.add(
                                     new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                            bpmnElement.getAttributeValue("name"), null, null, null,
+                                            element.getProcessdefinition(), null,
+                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
+                                            null, null,
                                             "SequenceFlow '" + CheckName.checkName(bpmnElement)
                                                     + "' with script in condition Expression",
                                             null));
                 } else {
                     if (scriptCondExp) {
                         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null, bpmnElement.getAttributeValue("id"),
-                                bpmnElement.getAttributeValue("name"), null, null, null,
+                                element.getProcessdefinition(), null,
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
                                 "SequenceFlow '" + CheckName.checkName(bpmnElement)
                                         + "' with script in condition Expression",
                                 null));

@@ -31,54 +31,66 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 
+import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
-public class ElementIdConventionChecker extends AbstractElementChecker {
+public class OverlapChecker extends AbstractElementChecker {
 
-    public ElementIdConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+    public OverlapChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
     /**
-     * Check if an element follows a configurable pattern
+     * Check for redundant edges between common elements (double or more flows instead of one)
      *
      * @return issues
      */
+
     @Override
-    public Collection<CheckerIssue> check(final BpmnElement element) {
+    public Collection<CheckerIssue> check(BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement baseElement = element.getBaseElement();
+        final BaseElement bpmnElement = element.getBaseElement();
 
-        final Collection<ElementConvention> elementConventions = rule.getElementConventions();
+        if (bpmnElement instanceof SequenceFlow) {
 
-        final String elementId = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID);
+            final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
 
-        if (elementConventions != null && !elementConventions.isEmpty() && elementId != null) {
-            for (final ElementConvention convention : elementConventions) {
-                final Pattern pattern = Pattern.compile(convention.getPattern().trim());
-                Matcher matcher = pattern.matcher(elementId);
-                String bpmnInstance = convention.getName();
-                if (!matcher.matches()
-                        && baseElement.getElementType().getInstanceType().getSimpleName().toLowerCase()
-                                .equals(bpmnInstance.toLowerCase())) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), null, baseElement.getId(),
-                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "ID '" + elementId + "' is against the naming convention", convention.getDescription()));
+            if (AbstractRunner.getSequenceFlowList().isEmpty()) {
+                AbstractRunner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            }
+
+            for (Map.Entry<String, ArrayList<String>> entry : AbstractRunner.getSequenceFlowList().entrySet()) {
+                // Check whether targetRef & sourceRef of current item exist in global list
+                if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
+                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
+                            element.getProcessdefinition(), null,
+                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
+                            "Multiple SequenceFlows detected. Delete " + CheckName.checkName(bpmnElement)
+                                    + " with identical source and target",
+                            null));
+                    return issues;
                 }
             }
+
+            if (!AbstractRunner.getSequenceFlowList().containsKey(bpmnElement.getId())) {
+                AbstractRunner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            }
+
         }
+
         return issues;
     }
+
 }

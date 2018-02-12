@@ -34,9 +34,10 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -51,7 +52,7 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
  */
 public class ProcessVariablesNameConventionChecker extends AbstractElementChecker {
 
-    public ProcessVariablesNameConventionChecker(final Rule rule, final BPMNScanner bpmnScanner) {
+    public ProcessVariablesNameConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
@@ -103,7 +104,8 @@ public class ProcessVariablesNameConventionChecker extends AbstractElementChecke
                                     issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
                                             CriticalityEnum.WARNING,
                                             element.getProcessdefinition(), variable.getResourceFilePath(),
-                                            baseElement.getId(), baseElement.getAttributeValue("name"),
+                                            baseElement.getId(),
+                                            baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
                                             variable.getName(), null, null,
                                             "process variable (" + variable.getName()
                                                     + ") is against the naming convention " + convention.getName()

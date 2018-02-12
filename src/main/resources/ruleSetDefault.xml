@@ -6,6 +6,10 @@
 		<state>true</state>
 	</rule>
 	<rule>
+		<name>OverlapChecker</name>
+		<state>true</state>
+	</rule>
+	<rule>
 		<name>ExtensionChecker</name>
 		<state>true</state>
 		<settings>
@@ -128,7 +132,8 @@
 		<elementConventions>
 			<elementConvention>
 				<name>ServiceTask</name>
-				<description>ServiceTask has to starts with "serviceTask" followed by at least two
+				<description>ServiceTask has to starts with "serviceTask" followed
+					by at least two
 					words starting with a capital letter</description>
 				<pattern>serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*
 				</pattern>

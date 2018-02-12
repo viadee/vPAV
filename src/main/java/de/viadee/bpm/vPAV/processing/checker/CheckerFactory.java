@@ -39,10 +39,10 @@ import java.util.logging.Logger;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
-import de.viadee.bpm.vPAV.BPMNConstants;
-import de.viadee.bpm.vPAV.BPMNScanner;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
@@ -72,7 +72,7 @@ public final class CheckerFactory {
      */
     public static Collection<ElementChecker> createCheckerInstancesBpmnElement(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
-            final BpmnElement element, BPMNScanner bpmnScanner)
+            final BpmnElement element, BpmnScanner bpmnScanner)
             throws ConfigItemNotFoundException {
 
         final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
@@ -88,13 +88,13 @@ public final class CheckerFactory {
                 try {
                     if (!rule.getKey().equals("VersioningChecker")) {
                         Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class,
-                                BPMNScanner.class);
+                                BpmnScanner.class);
                         AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(),
                                 bpmnScanner);
                         checkers.add(aChecker);
                     } else {
                         Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class,
-                                BPMNScanner.class, Collection.class);
+                                BpmnScanner.class, Collection.class);
                         AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(),
                                 bpmnScanner,
                                 resourcesNewestVersions);
@@ -123,10 +123,10 @@ public final class CheckerFactory {
         String fullyQualifiedName = "";
         if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getKey())
                 && rule.getValue().isActive()) {
-            fullyQualifiedName = BPMNConstants.INTERN_LOCATION + rule.getValue().getName().trim();
+            fullyQualifiedName = BpmnConstants.INTERN_LOCATION + rule.getValue().getName().trim();
         } else if (rule.getValue().isActive() && rule.getValue().getSettings() != null
-                && rule.getValue().getSettings().containsKey(BPMNConstants.EXTERN_LOCATION)) {
-            fullyQualifiedName = rule.getValue().getSettings().get(BPMNConstants.EXTERN_LOCATION).getValue()
+                && rule.getValue().getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
+            fullyQualifiedName = rule.getValue().getSettings().get(BpmnConstants.EXTERN_LOCATION).getValue()
                     + "." + rule.getValue().getName().trim();
         }
         if (fullyQualifiedName.isEmpty() && rule.getValue().isActive()) {

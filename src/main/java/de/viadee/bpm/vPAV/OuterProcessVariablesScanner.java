@@ -48,6 +48,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
 
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import groovyjarjarasm.asm.ClassReader;
 import groovyjarjarasm.asm.ClassVisitor;
 import groovyjarjarasm.asm.FieldVisitor;
@@ -146,9 +147,9 @@ public class OuterProcessVariablesScanner {
                 final DirectoryScanner scanner = new DirectoryScanner();
 
                 if (RuntimeConfig.getInstance().isTest()) {
-                    scanner.setBasedir(ConstantsConfig.TEST_JAVAPATH);
+                    scanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
                 } else {
-                    scanner.setBasedir(ConstantsConfig.JAVAPATH);
+                    scanner.setBasedir(ConfigConstants.JAVAPATH);
                 }
 
                 Resource s = scanner.getResource(filePath);

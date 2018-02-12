@@ -4,37 +4,14 @@ function markNodes(canvas, bpmnFile) {
     for (id in elementsToMark) {
         try {
             if ((elementsToMark[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) && (elementsToMark[id].elementId != "")) {
-                if (elementsToMark[id].ruleName == "VersioningChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'VersioningChecker');
-                } else if (elementsToMark[id].ruleName == "ProcessVariablesNameConventionChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'ProcessVariablesNameConventionChecker');
-                } else if (elementsToMark[id].ruleName == "JavaDelegateChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'JavaDelegateChecker');
-                } else if (elementsToMark[id].ruleName == "EmbeddedGroovyScriptChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'EmbeddedGroovyScriptChecker');
-                } else if (elementsToMark[id].ruleName == "DmnTaskChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'DmnTaskChecker');
-                } else if (elementsToMark[id].ruleName == "ProcessVariablesModelChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'ProcessVariablesModelChecker');
-                } else if (elementsToMark[id].ruleName == "TaskNamingConventionChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'TaskNamingConventionChecker');
-                } else if (elementsToMark[id].ruleName == "NoScriptChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'NoScriptChecker');
-                } else if (elementsToMark[id].ruleName == "XorConventionChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'XorConventionChecker');
-                } else if (elementsToMark[id].ruleName == "ElementIdConventionChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'ElementIdConventionChecker');
-                } else if (elementsToMark[id].ruleName == "TimerExpressionChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'TimerExpressionChecker');
-                } else if (elementsToMark[id].ruleName == "NoExpressionChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'NoExpressionChecker');
-                } else if (elementsToMark[id].ruleName == "MessageEventChecker") {
-                    canvas.addMarker(elementsToMark[id].elementId, 'MessageEventChecker');
-                } else {
-                    canvas.addMarker(elementsToMark[id].elementId, 'new');
-                }
+                if (elementsToMark[id].classification == "ERROR") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'error');
+                } else if (elementsToMark[id].classification == "WARNING") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'warning');
+                } else if (elementsToMark[id].classification == "INFO") {
+                    canvas.addMarker(elementsToMark[id].elementId, 'info');
+                } 
             }
-
         } catch (err) {
             console.log("element not found");
         }
@@ -273,8 +250,7 @@ function createTable(bpmnFile, tableContent) {
             //ruleName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
-            myCell.setAttribute("class", "new") // mark cell
-            myCell.setAttribute("id", issue.ruleName) // mark cell
+            myCell.setAttribute("id", issue.classification) // mark cell
             //create link 
             var a = document.createElement("a");
             a.appendChild(myText);
