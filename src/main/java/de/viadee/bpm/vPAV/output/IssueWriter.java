@@ -52,10 +52,14 @@ public class IssueWriter {
     /**
      *
      * @param rule
+     *            Rule
      * @param classification
+     *            CriticalityEnum
      * @param element
+     *            BpmnElement
      * @param message
-     * @return
+     *            Errormessage
+     * @return Issues
      */
     public static Collection<CheckerIssue> createIssue(
             final Rule rule, final CriticalityEnum classification,
@@ -74,13 +78,18 @@ public class IssueWriter {
     }
 
     /**
-     *
      * @param rule
+     *            Rule
+     *
      * @param classification
+     *            CriticalityEnum
      * @param element
+     *            BpmnElement
      * @param message
+     *            Errormessage
      * @param description
-     * @return
+     *            Description
+     * @return Issues
      */
     public static Collection<CheckerIssue> createIssue(
             final Rule rule, final CriticalityEnum classification,
@@ -101,11 +110,18 @@ public class IssueWriter {
     /**
      *
      * @param rule
+     *            Rule
      * @param classification
-     * @param element
+     *            CriticalityEnum
+     * @param var
+     *            Variable
+     * @param paths
+     *            List of paths
+     * @param anomaly
+     *            Anomaly
      * @param message
-     * @param description
-     * @return
+     *            Errormessage
+     * @return Issues
      */
     public static Collection<CheckerIssue> createIssue(final Rule rule, final CriticalityEnum classification,
             final ProcessVariable var, final List<Path> paths, final AnomalyContainer anomaly, final String message) {
@@ -125,17 +141,21 @@ public class IssueWriter {
     /**
      *
      * @param rule
+     *            Rule
      * @param classification
+     *            Criticality Enum
      * @param resourceFile
+     *            ResourceFile
      * @param element
+     *            BpmnElement
      * @param message
-     * @param description
-     * @return
+     *            Errormessage
+     * @return Issues
      */
     public static Collection<CheckerIssue> createIssue(
             final Rule rule, final CriticalityEnum classification, final String resourceFile,
             final BpmnElement element, final String message) {
-        // TODO:NOT DONE
+
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         final BaseElement baseElement = element.getBaseElement();
@@ -151,11 +171,43 @@ public class IssueWriter {
     /**
      *
      * @param rule
+     *            Rule
      * @param classification
+     *            CriticalityEnum
      * @param element
-     * @param bpmnFile
+     *            BpmnElement
+     * @param entry
+     *            Single entry in Map
      * @param message
-     * @return
+     *            Errormessage
+     * @return Issues
+     */
+    public static CheckerIssue createIssue(final Rule rule, final CriticalityEnum classification,
+            final BpmnElement element,
+            final Entry<Element, Element> entry, final String message) {
+
+        final BaseElement baseElement = element.getBaseElement();
+
+        return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+                element.getProcessdefinition(),
+                entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message);
+
+    }
+
+    /**
+     *
+     * @param rule
+     *            Rule
+     * @param classification
+     *            CriticalityEnum
+     * @param element
+     *            BpmnElement
+     * @param bpmnFile
+     *            BpmnFile
+     * @param message
+     *            ErrorMessage
+     * @return Issue
      */
     public static CheckerIssue createSingleIssue(final Rule rule, final CriticalityEnum classification,
             final BpmnElement element, final String bpmnFile, final String message) {
@@ -170,11 +222,20 @@ public class IssueWriter {
     /**
      *
      * @param rule
+     *            Rule
      * @param classification
+     *            CriticalityEnum
      * @param element
-     * @param bpmnFile
+     *            BpmnElement
+     * @param variableResourcePath
+     *            variableResourcePath
+     * @param varName
+     *            variableName
      * @param message
-     * @return
+     *            Errormessage
+     * @param convention
+     *            Convention specified in rule
+     * @return Issue
      */
     public static CheckerIssue createSingleIssue(final Rule rule, final CriticalityEnum classification,
             final BpmnElement element, final String variableResourcePath, final String varName, final String message,
@@ -193,33 +254,16 @@ public class IssueWriter {
     /**
      *
      * @param rule
+     *            Rule
      * @param classification
-     * @param element
-     * @param entry
-     * @param message
-     * @return
-     */
-    public static CheckerIssue createIssue(final Rule rule, final CriticalityEnum classification,
-            final BpmnElement element,
-            final Entry<Element, Element> entry, final String message) {
-
-        final BaseElement baseElement = element.getBaseElement();
-
-        return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
-                element.getProcessdefinition(),
-                entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message);
-
-    }
-
-    /**
-     *
-     * @param rule
-     * @param classification
+     *            CriticalityEnum
      * @param classPath
+     *            classPath
      * @param element
+     *            BpmnElement
      * @param message
-     * @return
+     *            Errormessage
+     * @return Issue
      */
     public static CheckerIssue createIssueWithClassPath(Rule rule, CriticalityEnum classification, String classPath,
             BpmnElement element, String message) {
