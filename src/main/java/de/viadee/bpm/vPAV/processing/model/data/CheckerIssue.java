@@ -115,18 +115,30 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     }
 
     /**
+     * CheckerIssue
      *
      * @param ruleName
+     *            Name of the Rule
      * @param ruleDescription
+     *            Issue ruleDescription
      * @param classification
+     *            Classification (Info, Warning or Error) of the rule
      * @param bpmnFile
+     *            Path to the BPMNFile
      * @param resourceFile
+     *            Path to resource file (e.g. dmn oder java)
      * @param elementId
+     *            Id of the Element with issue
      * @param elementName
+     *            Name of the Element with issue
      * @param variable
+     *            Variable
      * @param anomaly
+     *            Type of anomaly (DD, DU, UR)
      * @param invalidPaths
+     *            Invalid path
      * @param message
+     *            Issue message
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String resourceFile, final String elementId,
@@ -147,15 +159,26 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     }
 
     /**
+     * CheckerIssue
      *
      * @param ruleName
+     *            Name of the Rule
      * @param ruleDescription
+     *            Issue ruleDescription
      * @param classification
+     *            Classification (Info, Warning or Error) of the rule
      * @param bpmnFile
+     *            Path to the BPMNFile
+     * @param resourceFile
+     *            Path to resource file (e.g. dmn oder java)
      * @param elementId
+     *            Id of the Element with issue
      * @param elementName
+     *            Name of the Element woth issue
      * @param message
+     *            Issue message
      * @param elementDescription
+     *            Issue elementDescription
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String resourceFile, final String elementId,
@@ -172,6 +195,26 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.elementDescription = elementDescription;
     }
 
+    /**
+     * CheckerIssue
+     *
+     * @param ruleName
+     *            Name of the Rule
+     * @param ruleDescription
+     *            Issue ruleDescription
+     * @param classification
+     *            Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile
+     *            Path to the BPMNFile
+     * @param elementId
+     *            Id of the Element with issue
+     * @param elementName
+     *            Name of the Element woth issue
+     * @param message
+     *            Issue message
+     * @param elementDescription
+     *            Issue elementDescription
+     */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String elementId,
             final String elementName, final String message, final String elementDescription) {
@@ -187,14 +230,22 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     }
 
     /**
+     * CheckerIssue
      *
      * @param ruleName
+     *            Name of the Rule
      * @param ruleDescription
+     *            Issue ruleDescription
      * @param classification
+     *            Classification (Info, Warning or Error) of the rule
      * @param bpmnFile
+     *            Path to the BPMNFile
      * @param elementId
+     *            Id of the Element with issue
      * @param elementName
+     *            Name of the Element woth issue
      * @param message
+     *            Issue message
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String elementId,
@@ -211,13 +262,20 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     }
 
     /**
+     * CheckerIssue
      *
      * @param ruleName
+     *            Name of the Rule
      * @param classification
+     *            Classification (Info, Warning or Error) of the rule
      * @param bpmnFile
+     *            BpmnFile
      * @param elementId
+     *            Id of the Element with issue
      * @param elementName
+     *            Name of the Element woth issue
      * @param message
+     *            Issue message
      */
     public CheckerIssue(final String ruleName, final CriticalityEnum classification,
             final String bpmnFile, final String elementId,
@@ -232,21 +290,32 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     }
 
     /**
+     * CheckerIssue
      *
      * @param ruleName
+     *            Name of the Rule
      * @param ruleDescription
+     *            Issue ruleDescription
      * @param classification
+     *            Classification (Info, Warning or Error) of the rule
      * @param bpmnFile
+     *            Path to the BPMNFile
      * @param resourceFile
+     *            Path to resource file (e.g. dmn oder java)
      * @param elementId
+     *            Id of the Element with issue
      * @param elementName
-     * @param varName
+     *            Name of the Element woth issue
+     * @param variable
+     *            Name of variable
      * @param message
+     *            Issue message
      * @param description
+     *            Issue description
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String resourceFile, final String elementId, final String elementName,
-            final String varName, final String message, final String description) {
+            final String variable, final String message, final String description) {
         super();
         this.ruleName = ruleName;
         this.ruleDescription = ruleDescription;
@@ -255,7 +324,7 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.resourceFile = resourceFile;
         this.elementId = elementId;
         this.elementName = elementName;
-        this.variable = varName;
+        this.variable = variable;
         this.message = message;
         this.elementDescription = description;
     }
@@ -344,7 +413,8 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     /**
      *
      * @param input
-     * @return
+     *            String
+     * @return hashed Input
      */
     public static String getMD5(String input) {
         try {
