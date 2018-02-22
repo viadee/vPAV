@@ -74,7 +74,7 @@ public class MessageEventChecker extends AbstractElementChecker {
                 || baseElement.getElementType().getTypeName()
                         .equals(BpmnModelConstants.BPMN_ELEMENT_BOUNDARY_EVENT)) {
 
-            checkStartEventInSubProcess(element, issues, baseElement);
+            checkEventsInSubProcess(element, issues, baseElement);
         } else if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_RECEIVE_TASK)) {
 
             if (baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF) == null
@@ -99,9 +99,9 @@ public class MessageEventChecker extends AbstractElementChecker {
 
             // Depending on whether the startEvent is part of a subprocess, expressions may be allowed to exist
             if (bpmnScanner.checkStartEvent(baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID))) {
-                checkStartEventInSubProcess(element, issues, baseElement);
+                checkEventsInSubProcess(element, issues, baseElement);
             } else {
-                checkStartEventInProcess(element, issues, baseElement);
+                checkEventsInProcess(element, issues, baseElement);
             }
         }
         return issues;
@@ -117,7 +117,7 @@ public class MessageEventChecker extends AbstractElementChecker {
      * @param baseElement
      *            BaseElement
      */
-    private void checkStartEventInProcess(BpmnElement element, final Collection<CheckerIssue> issues,
+    private void checkEventsInProcess(BpmnElement element, final Collection<CheckerIssue> issues,
             final BaseElement baseElement) {
         final Event event = (Event) baseElement;
         final Collection<MessageEventDefinition> messageEventDefinitions = event
@@ -155,7 +155,7 @@ public class MessageEventChecker extends AbstractElementChecker {
      * @param baseElement
      *            BaseElement
      */
-    private void checkStartEventInSubProcess(BpmnElement element, final Collection<CheckerIssue> issues,
+    private void checkEventsInSubProcess(BpmnElement element, final Collection<CheckerIssue> issues,
             final BaseElement baseElement) {
         final Event event = (Event) baseElement;
         final Collection<MessageEventDefinition> messageEventDefinitions = event
