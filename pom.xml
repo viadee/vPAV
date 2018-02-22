@@ -18,8 +18,8 @@
 
 	<licenses>
 		<license>
-			<name>FreeBSD License</name>
-			<url>https://opensource.org/licenses/bsd-license.php</url>
+			<name>BSD-3 Clause</name>
+			<url>https://opensource.org/licenses/BSD-3-Clause</url>
 		</license>
 	</licenses>
 
@@ -271,10 +271,10 @@
 				<artifactId>license-maven-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
-					<header>src/main/resources/BSD4-license.txt</header>
+					<header>src/main/resources/BSD3-license.txt</header>
 					<properties>
 						<owner>viadee Unternehmensberatung GmbH</owner>
-						<inceptionYear>2017</inceptionYear>
+						<inceptionYear>2018</inceptionYear>
 						<email>Frank.Koehne@viadee.de</email>
 					</properties>
 					<excludes>
