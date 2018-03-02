@@ -996,6 +996,16 @@ public final class ProcessVariableReader {
             final KnownElementFieldType fieldType, final String scopeId) {
         final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
 
+        // HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
+        // ${dateTime().plusWeeks(1).toDate()}
+        // TODO: Change expression evaluation to camunda engine
+        final Pattern pattern = Pattern.compile("\\$\\{(\\w)*\\(.*\\)\\}");
+        Matcher matcher = pattern.matcher(expression);
+
+        if (matcher.matches()) {
+            return variables;
+        }
+
         try {
             // remove object name from method calls, otherwise the method arguments could not be found
             final String filteredExpression = expression.replaceAll("[\\w]+\\.", "");

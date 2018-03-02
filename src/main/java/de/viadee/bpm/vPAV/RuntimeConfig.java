@@ -158,8 +158,9 @@ public class RuntimeConfig {
      * Retrieve locale from ruleSet. If locale can not be retrieved, use system locale
      * 
      * @param rules
-     *            Rules from ruleset
+     *            RuleSet Rules from ruleset
      * @throws MalformedURLException
+     *             Exception if ResourceBundle could not be loaded
      */
     public void retrieveLocale(Map<String, Rule> rules) throws MalformedURLException {
         try {
@@ -185,8 +186,9 @@ public class RuntimeConfig {
      * Set base directory and set ResourceBundle
      * 
      * @param locale
-     *            Localization
+     *            Locale extracted from ruleSet or either default system locale Localization
      * @throws MalformedURLException
+     *             Exception if ResourceBundle could not be loaded
      */
     public void getResource(final String locale) throws MalformedURLException {
         setResourceBundle(fromClassLoader("messages_" + locale));
