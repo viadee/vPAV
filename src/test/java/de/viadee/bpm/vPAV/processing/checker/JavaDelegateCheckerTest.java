@@ -86,6 +86,7 @@ public class JavaDelegateCheckerTest {
         final URL[] classUrls = { classUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().getResource("en_US");
     }
 
     /**
@@ -266,7 +267,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("Class 'TestDelegate2' in camunda:class not found",
+            Assert.assertEquals("Class 'TestDelegate2' in 'camunda:class' not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -299,7 +300,7 @@ public class JavaDelegateCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "Class 'DelegateWithWrongInterface' in camunda:class does not implement/extends the correct interface/class",
+                    "Class 'DelegateWithWrongInterface' in 'camunda:class' does not implement/extend the correct interface/class",
                     issues.iterator().next().getMessage());
         }
     }
@@ -331,7 +332,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("Couldn't find correct beanmapping for delegate expression: ${IncorrectBean}",
+            Assert.assertEquals("Couldn't find correct beanmapping for delegate expression '${IncorrectBean}'",
                     issues.iterator().next().getMessage());
         }
     }
@@ -363,7 +364,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("Class 'TestDelegate2' in camunda:delegateExpression not found",
+            Assert.assertEquals("Class 'TestDelegate2' in 'camunda:delegateExpression' not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -395,7 +396,7 @@ public class JavaDelegateCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("Class '${testDelegate}' in camunda:class not found",
+            Assert.assertEquals("Class '${testDelegate}' in 'camunda:class' not found",
                     issues.iterator().next().getMessage());
         }
     }
@@ -428,7 +429,7 @@ public class JavaDelegateCheckerTest {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals(
-                    "Class 'DelegateWithInterfaceActivityBehavior' in camunda:class implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
+                    "Class 'DelegateWithInterfaceActivityBehavior' in 'camunda:class' implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
                     issues.iterator().next().getMessage());
         }
     }

@@ -40,6 +40,7 @@ import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
@@ -76,8 +77,9 @@ public class OverlapChecker extends AbstractElementChecker {
                 // Check whether targetRef & sourceRef of current item exist in global list
                 if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                            "Multiple SequenceFlows detected. Delete " + CheckName.checkName(bpmnElement)
-                                    + " with identical source and target"));
+                            String.format(
+                                    Messages.getString("OverlapChecker.0"), //$NON-NLS-1$
+                                    CheckName.checkName(bpmnElement))));
                     return issues;
                 }
             }

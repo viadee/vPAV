@@ -40,6 +40,7 @@ import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -80,7 +81,7 @@ public class DmnTaskChecker extends AbstractElementChecker {
                     if (dmnAttr == null || dmnAttr.trim().length() == 0) {
                         // Error, because no delegateExpression has been configured
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "Task " + CheckName.checkName(bpmnElement) + " with no dmn reference"));
+                                String.format(Messages.getString("DmnTaskChecker.0"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
                     } else {
                         issues.addAll(checkDMNFile(element, dmnAttr));
                     }
@@ -103,7 +104,7 @@ public class DmnTaskChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
-        final String dmnPath = dmnName.replaceAll("\\.", "/") + ".dmn";
+        final String dmnPath = dmnName.replaceAll("\\.", "/") + ".dmn"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         // If a dmn path has been found, check the correctness
         URL urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnPath);
@@ -111,7 +112,7 @@ public class DmnTaskChecker extends AbstractElementChecker {
         if (urlDMN == null) {
             // Throws an error, if the class was not found
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                    "Dmn file for task " + CheckName.checkName(bpmnElement) + " not found"));
+                    String.format(Messages.getString("DmnTaskChecker.4"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
         }
         return issues;
     }

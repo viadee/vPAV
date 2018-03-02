@@ -39,6 +39,7 @@ import java.util.Map;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
@@ -77,31 +78,31 @@ public class ProcessVariablesModelChecker implements ModelChecker {
                     issues.addAll(
                             IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
                                     anomaly,
-                                    "Process variable (" + var.getName() + ") will be overwritten in activity '"
-                                            + var.getElement().getBaseElement()
-                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                            + "' without use. (Compare model: "
-                                            + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
-
+                                    String.format(
+                                            Messages.getString("ProcessVariablesModelChecker.0"), //$NON-NLS-1$
+                                            var.getName(),
+                                            var.getElement().getBaseElement()
+                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                                            var.getChapter(), var.getFieldType().getDescription())));
                 } else if (anomaly.getAnomaly() == Anomaly.DU) {
                     issues.addAll(
                             IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
                                     anomaly,
-                                    "Process variable (" + var.getName() + ") will be deleted in activity '"
-                                            + var.getElement().getBaseElement()
-                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                            + "' without use. (Compare model: "
-                                            + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
-
+                                    String.format(
+                                            Messages.getString("ProcessVariablesModelChecker.1"), //$NON-NLS-1$
+                                            var.getName(),
+                                            var.getElement().getBaseElement()
+                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                                            var.getChapter(), var.getFieldType().getDescription())));
                 } else if (anomaly.getAnomaly() == Anomaly.UR) {
                     issues.addAll(
                             IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
-                                    anomaly,
-                                    "There is a read access to variable (" + var.getName() + ") in activity '"
-                                            + var.getElement().getBaseElement()
-                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)
-                                            + "', but no value has been set before. (Compare model: "
-                                            + var.getChapter() + ", " + var.getFieldType().getDescription() + ")"));
+                                    anomaly, String.format(
+                                            Messages.getString("ProcessVariablesModelChecker.2"), //$NON-NLS-1$
+                                            var.getName(),
+                                            var.getElement().getBaseElement()
+                                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+                                            var.getChapter(), var.getFieldType().getDescription())));
                 }
             }
         }

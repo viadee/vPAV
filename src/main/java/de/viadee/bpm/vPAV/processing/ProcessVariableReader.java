@@ -1023,7 +1023,7 @@ public final class ProcessVariableReader {
             variables.putAll(searchRemovedProcessVariablesInCode(element, chapter, fieldType, null,
                     scopeId, expression));
         } catch (final ELException e) {
-            throw new ProcessingException("el expression " + expression + " in "
+            throw new ProcessingException("EL expression " + expression + " in "
                     + element.getProcessdefinition() + ", element ID: " + element.getBaseElement().getId()
                     + ", Type: " + fieldType.getDescription() + " couldn't be parsed", e);
         }
@@ -1047,7 +1047,7 @@ public final class ProcessVariableReader {
                 }
             }
         } catch (final ELException e) {
-            throw new ProcessingException("el expression " + expression + " in "
+            throw new ProcessingException("EL expression " + expression + " in "
                     + element.getProcessdefinition() + ", element ID: " + element.getBaseElement().getId()
                     + ", Type: " + KnownElementFieldType.Expression + " couldn't be parsed", e);
         }

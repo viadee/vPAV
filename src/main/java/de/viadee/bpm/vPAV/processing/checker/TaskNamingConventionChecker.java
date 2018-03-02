@@ -41,6 +41,7 @@ import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.Task;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -70,7 +71,7 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
             if (elementConventions == null || elementConventions.size() < 1
                     || elementConventions.size() > 1) {
                 throw new ProcessingException(
-                        "task naming convention checker must have one element convention!");
+                        "task naming convention checker must have one element convention!"); //$NON-NLS-1$
             }
             final String patternString = elementConventions.iterator().next().getPattern();
             final String taskName = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
@@ -79,13 +80,13 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
                 Matcher matcher = pattern.matcher(taskName);
                 if (!matcher.matches()) {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                            "Task name '" + taskName + "' is against the naming convention",
+                            String.format(Messages.getString("TaskNamingConventionChecker.1"), taskName), //$NON-NLS-1$
                             elementConventions.iterator().next().getDescription()));
                 }
             } else {
 
                 issues.addAll(
-                        IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element, "Task name must be specified"));
+                        IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element, Messages.getString("TaskNamingConventionChecker.2"))); //$NON-NLS-1$
             }
         }
         return issues;

@@ -37,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -102,10 +103,10 @@ public class ProcessVariablesNameConventionChecker extends AbstractElementChecke
                                 if (!patternMatcher.matches()) {
                                     issues.add(IssueWriter.createSingleIssue(rule, CriticalityEnum.WARNING, element,
                                             variable.getResourceFilePath(), variable.getName(),
-                                            "Process variable (" + variable.getName()
-                                                    + ") is against the naming convention " + convention.getName()
-                                                    + " (compare model: " + variable.getChapter() + ", "
-                                                    + variable.getFieldType().getDescription() + ")",
+                                            String.format(
+                                                    Messages.getString("ProcessVariablesNameConventionChecker.0"), //$NON-NLS-1$
+                                                    variable.getName(), convention.getName(), variable.getChapter(),
+                                                    variable.getFieldType().getDescription()),
                                             convention));
 
                                 }

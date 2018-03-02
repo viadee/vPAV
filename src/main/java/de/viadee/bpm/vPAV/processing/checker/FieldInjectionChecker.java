@@ -52,6 +52,7 @@ import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -262,7 +263,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             final String varName) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final String classPath = className.replaceAll("\\.", "/") + ".java";
+        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             Class<?> clazz = RuntimeConfig.getInstance().getClassLoader().loadClass(className);
@@ -272,33 +273,34 @@ public class FieldInjectionChecker extends AbstractElementChecker {
                 if (!field.getType().isAssignableFrom(FixedValue.class)
                         && !field.getType().isAssignableFrom(Expression.class)) {
                     issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
-                            "The type of the variable '" + varName + "' is incorrect"));
+                            String.format(Messages.getString("FieldInjectionChecker.3"), varName))); //$NON-NLS-1$
                 }
 
                 if (!Modifier.isPublic(field.getModifiers())) {
                     issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
-                            "The variable '" + varName + "' should be public"));
+                            String.format(Messages.getString("FieldInjectionChecker.4"), varName))); //$NON-NLS-1$
 
                 }
                 Method[] methods = clazz.getMethods();
                 boolean hasMethod = false;
                 for (Method method : methods) {
-                    if (method.getName().toLowerCase().contains("set" + varName.toLowerCase()))
+                    if (method.getName().toLowerCase().contains("set" + varName.toLowerCase())) //$NON-NLS-1$
                         hasMethod = true;
                 }
 
                 if (!hasMethod) {
                     issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
-                            "No setter found for variable '" + varName + "'"));
+                            String.format(Messages.getString("FieldInjectionChecker.6"), varName))); //$NON-NLS-1$
                 }
 
             } catch (NoSuchFieldException | SecurityException e) {
                 issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
-                        "Class '" + clazz.getSimpleName() + "' does not declare the variable '" + varName + "'"));
+                        String.format(Messages.getString("FieldInjectionChecker.7"), clazz.getSimpleName(), //$NON-NLS-1$
+                                varName)));
             }
 
         } catch (final ClassNotFoundException e) {
-            LOGGER.warning("Class " + className + " does not exist." + e);
+            LOGGER.warning("Class " + className + " does not exist." + e); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         return issues;

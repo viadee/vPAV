@@ -37,6 +37,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -152,6 +153,13 @@ public abstract class AbstractRunner {
         }
 
         rules.remove(ConfigConstants.HASPARENTRULESET);
+
+        try {
+            RuntimeConfig.getInstance().retrieveLocale(rules);
+        } catch (MalformedURLException e) {
+            logger.warning("Could not read language files. No localization available");
+        }
+
         return rules;
     }
 

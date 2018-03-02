@@ -86,8 +86,8 @@ public class NoExpressionChecker extends AbstractElementChecker {
             if (implementationAttr != null && implementationAttr.equals(BpmnConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                        "Usage of expressions in '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                        String.format("Usage of expressions in '%s' is against best practices.",
+                                CheckName.checkName(baseElement))));
             }
 
             // get the execution listener
@@ -108,8 +108,8 @@ public class NoExpressionChecker extends AbstractElementChecker {
             if (implementationAttrEvent != null && implementationAttrEvent.contains(BpmnConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                        "Usage of expression in event '" + CheckName.checkName(baseElement)
-                                + "' is against best practices."));
+                        String.format("Usage of expression in event '%s' is against best practices.",
+                                CheckName.checkName(baseElement))));
             }
 
             // get the execution listener
@@ -181,8 +181,8 @@ public class NoExpressionChecker extends AbstractElementChecker {
      */
     private void addIssue(BpmnElement element, final Collection<CheckerIssue> issues, final BaseElement baseElement) {
         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                "Usage of expression in listeners for '" + CheckName.checkName(baseElement)
-                        + "' is against best practices."));
+                String.format("Usage of expression in listeners for '%s' is against best practices.",
+                        CheckName.checkName(baseElement))));
     }
 
 }

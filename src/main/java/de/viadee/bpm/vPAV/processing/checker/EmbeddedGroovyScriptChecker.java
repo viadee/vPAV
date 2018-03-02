@@ -45,6 +45,7 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.codehaus.groovy.control.CompilationFailedException;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -122,7 +123,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
             } else {
                 if (scriptTask.getCamundaResource() == null) {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                            "There is an empty script reference"));
+                            Messages.getString("EmbeddedGroovyScriptChecker.0"))); //$NON-NLS-1$
                 }
             }
         }
@@ -220,7 +221,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
                         ex.getMessage());
             } else {
                 return IssueWriter.createSingleIssue(rule, CriticalityEnum.ERROR, element, bpmnFile,
-                        "GroovyScript could not be evaluated. '" + ex.getMessage() + "'");
+                        String.format(Messages.getString("EmbeddedGroovyScriptChecker.1"), ex.getMessage())); //$NON-NLS-1$
             }
         }
         return null;
@@ -241,7 +242,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
         if (scriptFormat != null && (script == null || script.isEmpty())) {
             return IssueWriter.createSingleIssue(rule, CriticalityEnum.ERROR, element, bpmnFile,
-                    "There is no script content for given script format");
+                    Messages.getString("EmbeddedGroovyScriptChecker.2")); //$NON-NLS-1$
         }
         return null;
     }
@@ -261,7 +262,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
         if (scriptFormat == null && script != null) {
             return IssueWriter.createSingleIssue(rule, CriticalityEnum.ERROR, element, bpmnFile,
-                    "There is no script format for given script");
+                    Messages.getString("EmbeddedGroovyScriptChecker.3")); //$NON-NLS-1$
         }
         return null;
     }

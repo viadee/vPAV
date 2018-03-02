@@ -57,6 +57,7 @@ import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -282,7 +283,7 @@ public class VersioningChecker extends AbstractElementChecker {
      */
     private String getClassReference(final String javaResource) {
         if (javaResource != null && !FileScanner.getIsDirectory()) {
-            return javaResource.substring(javaResource.lastIndexOf('.') + 1, javaResource.length()) + ".class";
+            return javaResource.substring(javaResource.lastIndexOf('.') + 1, javaResource.length()) + ".class"; //$NON-NLS-1$
         } else if (javaResource != null && FileScanner.getIsDirectory()) {
             return javaResource;
         }
@@ -298,7 +299,7 @@ public class VersioningChecker extends AbstractElementChecker {
     private String getGroovyReference(String resourcePath) {
         if (resourcePath != null) {
             resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf('.'));
-            return resourcePath.substring(resourcePath.lastIndexOf('.') + 1, resourcePath.length()) + ".groovy";
+            return resourcePath.substring(resourcePath.lastIndexOf('.') + 1, resourcePath.length()) + ".groovy"; //$NON-NLS-1$
         }
         return null;
     }
@@ -313,7 +314,7 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
 
         try {
-            final String filteredExpression = expression.replaceAll("[\\w]+\\.", "");
+            final String filteredExpression = expression.replaceAll("[\\w]+\\.", ""); //$NON-NLS-1$ //$NON-NLS-2$
             final TreeBuilder treeBuilder = new Builder();
             final Tree tree = treeBuilder.build(filteredExpression);
 
@@ -332,8 +333,8 @@ public class VersioningChecker extends AbstractElementChecker {
             }
         } catch (final ELException e) {
             throw new ProcessingException(
-                    "el expression " + expression + " in " + element.getProcessdefinition() + ", element ID: "
-                            + element.getBaseElement().getId() + " couldn't be parsed",
+                    "el expression " + expression + " in " + element.getProcessdefinition() + ", element ID: " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                            + element.getBaseElement().getId() + " couldn't be parsed", //$NON-NLS-1$
                     e);
         }
         return null;
@@ -351,7 +352,7 @@ public class VersioningChecker extends AbstractElementChecker {
         if (resourcePath != null) {
             if (!resourcesNewestVersions.contains(resourcePath)) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, resourcePath, element,
-                        "Script reference is deprecated or file with version doesn't exist"));
+                        Messages.getString("VersioningChecker.8"))); //$NON-NLS-1$
             }
         }
     }
@@ -368,9 +369,9 @@ public class VersioningChecker extends AbstractElementChecker {
         final String beanReference = findBeanReferenceInExpression(expression, element, issues);
         if (beanReference != null && !resourcesNewestVersions.contains(beanReference)) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
-                    "Bean reference '" + beanReference
-                            + "' is deprecated or file with version does not exist for bean '"
-                            + expression + "'"));
+                    String.format(
+                            Messages.getString("VersioningChecker.9"), //$NON-NLS-1$
+                            beanReference, expression)));
         }
     }
 
@@ -386,17 +387,13 @@ public class VersioningChecker extends AbstractElementChecker {
         String beanReference = findBeanReferenceInExpression(expression, element, issues);
 
         if (beanReference != null) {
-            beanReference = beanReference.replace(".", "\\");
-            beanReference = beanReference.substring(0, beanReference.lastIndexOf("\\"));
+            beanReference = beanReference.replace(".", "\\"); //$NON-NLS-1$ //$NON-NLS-2$
+            beanReference = beanReference.substring(0, beanReference.lastIndexOf("\\")); //$NON-NLS-1$
 
             if (!resourcesNewestVersions.contains(beanReference)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                        null,
-                        "bean reference is deprecated for '"
-                                + beanReference + "'.",
-                        null));
+
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
+                        String.format(Messages.getString("VersioningChecker.13"), beanReference))); //$NON-NLS-1$
             }
         }
     }
@@ -413,24 +410,15 @@ public class VersioningChecker extends AbstractElementChecker {
         if (javaReference != null) {
             if (!resourcesNewestVersions.contains(javaReference)) {
                 if (element.getBaseElement().getId() == null) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), javaReference,
-                            element.getBaseElement().getParentElement()
-                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            element.getBaseElement().getParentElement()
-                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            null, null, null,
-                            "class reference is deprecated or file with version does not exist for class '"
-                                    + javaReference + "'",
-                            null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,
+                            String.format(
+                                    Messages.getString("VersioningChecker.14"), //$NON-NLS-1$
+                                    javaReference)));
                 } else {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
-                            element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                            null, null,
-                            "class reference is deprecated or file with version does not exist for class '"
-                                    + javaReference + "'",
-                            null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,
+                            String.format(
+                                    Messages.getString("VersioningChecker.15"), //$NON-NLS-1$
+                                    javaReference)));
                 }
             }
         }
@@ -446,17 +434,12 @@ public class VersioningChecker extends AbstractElementChecker {
     private void prepareDirBasedClassWarning(String javaReference, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
         if (javaReference != null) {
-            javaReference = javaReference.replace(".", "\\");
-            javaReference = javaReference.substring(0, javaReference.lastIndexOf("\\"));
+            javaReference = javaReference.replace(".", "\\"); //$NON-NLS-1$ //$NON-NLS-2$
+            javaReference = javaReference.substring(0, javaReference.lastIndexOf("\\")); //$NON-NLS-1$
 
             if (!resourcesNewestVersions.contains(javaReference)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                        null,
-                        "class reference is deprecated for '"
-                                + javaReference + "'.",
-                        null));
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,
+                        String.format(Messages.getString("VersioningChecker.19"), javaReference))); //$NON-NLS-1$
             }
         }
     }

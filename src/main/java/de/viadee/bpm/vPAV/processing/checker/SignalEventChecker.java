@@ -42,6 +42,7 @@ import org.camunda.bpm.model.bpmn.instance.SignalEventDefinition;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
@@ -79,12 +80,13 @@ public class SignalEventChecker extends AbstractElementChecker {
                         final Signal signal = eventDef.getSignal();
                         if (signal == null) {
                             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                    "No signal has been specified for '" + CheckName.checkName(baseElement) + "'."));
+                                    String.format(Messages.getString("SignalEventChecker.0"), //$NON-NLS-1$
+                                            CheckName.checkName(baseElement))));
                         } else {
                             if (signal.getName() == null || signal.getName().isEmpty()) {
                                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                        "No signal name has been specified for '" + CheckName.checkName(baseElement)
-                                                + "'."));
+                                        String.format(Messages.getString("SignalEventChecker.1"), //$NON-NLS-1$
+                                                CheckName.checkName(baseElement))));
                             } else if (baseElement.getElementType().getTypeName()
                                     .equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)) {
                                 issues.addAll(checkDoubleUsage(element, baseElement, signal));
@@ -114,8 +116,9 @@ public class SignalEventChecker extends AbstractElementChecker {
 
         if (!AbstractRunner.addSignal(baseElement, signal.getName())) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                    "Signal Names have to be used uniquely in StartEvents. Compare: " + CheckName.checkName(baseElement)
-                            + " and " + CheckName.checkName(AbstractRunner.getSignal(signal.getName()))));
+                    String.format(Messages.getString("SignalEventChecker.2"), //$NON-NLS-1$
+                            CheckName.checkName(baseElement),
+                            CheckName.checkName(AbstractRunner.getSignal(signal.getName())))));
         }
         return issues;
     }

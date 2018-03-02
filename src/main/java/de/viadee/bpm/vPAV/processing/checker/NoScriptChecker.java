@@ -42,6 +42,7 @@ import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -83,8 +84,7 @@ public class NoScriptChecker extends AbstractElementChecker {
                 if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
                     for (String place : scriptTypes)
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "Task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                        + place + "' script"));
+                                String.format(Messages.getString("NoScriptChecker.0"), CheckName.checkName(bpmnElement), place))); //$NON-NLS-1$
                 } else {
                     ArrayList<String> allowedPlaces = settings
                             .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
@@ -92,15 +92,15 @@ public class NoScriptChecker extends AbstractElementChecker {
                         for (String scriptType : scriptTypes)
                             if (!allowedPlaces.contains(scriptType))
                                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                        "Task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                                + scriptType + "' script"));
+                                        String.format(Messages.getString("NoScriptChecker.1"), CheckName.checkName(bpmnElement), //$NON-NLS-1$
+                                                scriptType)));
                 }
             }
 
             // ScriptTask
             if (bpmnElement instanceof ScriptTask && !settings.containsKey(BpmnConstants.SIMPLE_NAME_SCRIPT_TASK)) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed"));
+                        String.format(Messages.getString("NoScriptChecker.2"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
             }
 
             // Check SequenceFlow on script in conditionExpression
@@ -113,13 +113,14 @@ public class NoScriptChecker extends AbstractElementChecker {
                     if (!allowedPlaces.isEmpty())
                         if (!allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp)
                             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                    "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                            + "' with script in condition Expression"));
+                                    String.format(Messages.getString("NoScriptChecker.3"), //$NON-NLS-1$
+                                            CheckName.checkName(bpmnElement))));
+
                 } else {
                     if (scriptCondExp) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                        + "' with script in condition Expression"));
+                                String.format(Messages.getString("NoScriptChecker.4"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     }
                 }
             }

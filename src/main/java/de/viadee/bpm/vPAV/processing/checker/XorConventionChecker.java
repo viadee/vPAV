@@ -44,6 +44,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -80,10 +81,10 @@ public class XorConventionChecker extends AbstractElementChecker {
 
                 // check default path
                 if (settings != null && settings.containsKey(BpmnConstants.REQUIRED_DEFAULT)
-                        && settings.get(BpmnConstants.REQUIRED_DEFAULT).getValue().equals("true")
+                        && settings.get(BpmnConstants.REQUIRED_DEFAULT).getValue().equals("true") //$NON-NLS-1$
                         && bpmnElement.getAttributeValue(BpmnConstants.DEFAULT) == null) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element, "Xor gateway '"
-                            + CheckName.checkName(bpmnElement) + "' has no default path"));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                            String.format(Messages.getString("XorConventionChecker.1"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
                 }
 
                 final ArrayList<ElementConvention> elementConventions = (ArrayList<ElementConvention>) rule
@@ -91,7 +92,7 @@ public class XorConventionChecker extends AbstractElementChecker {
 
                 if (elementConventions == null) {
                     throw new ProcessingException(
-                            "xor naming convention checker must have one element convention!");
+                            "xor naming convention checker must have one element convention!"); //$NON-NLS-1$
                 }
 
                 // TODO: dont use indices
@@ -99,19 +100,20 @@ public class XorConventionChecker extends AbstractElementChecker {
                 final String taskName = bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
                 if (taskName != null && taskName.trim().length() > 0) {
                     final Pattern pattern = Pattern.compile(patternString);
-                    final String taskNameClean = taskName.replaceAll("\n", "").replaceAll("\r", "");
+                    final String taskNameClean = taskName.replaceAll("\n", "").replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                     Matcher matcher = pattern.matcher(taskNameClean);
 
                     if (!matcher.matches()) {
                         issues.addAll(
-                                IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element, "Xor gateway name '"
-                                        + CheckName.checkName(bpmnElement) + "' is against the naming convention",
+                                IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                        String.format(Messages.getString("XorConventionChecker.7"), //$NON-NLS-1$
+                                                CheckName.checkName(bpmnElement)),
                                         elementConventions.get(0).getDescription()));
                     }
                 } else {
                     issues.addAll(
                             IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                    "Xor gateway name must be specified"));
+                                    Messages.getString("XorConventionChecker.8"))); //$NON-NLS-1$
                 }
 
                 // TODO: dont use indices
@@ -123,19 +125,19 @@ public class XorConventionChecker extends AbstractElementChecker {
                     final String edgeName = Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
                     if (edgeName != null && edgeName.trim().length() > 0) {
                         final Pattern pattern = Pattern.compile(patternStringEdge);
-                        final String edgeNameClean = edgeName.replaceAll("\n", "").replaceAll("\r", "");
+                        final String edgeNameClean = edgeName.replaceAll("\n", "").replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                         Matcher matcher = pattern.matcher(edgeNameClean);
                         if (!matcher.matches()) {
                             issues.addAll(
                                     IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                            "Outgoing edges of xor gateway '"
-                                                    + CheckName.checkName(bpmnElement)
-                                                    + "' are against the naming convention",
+                                            String.format(
+                                                    Messages.getString("XorConventionChecker.13"), //$NON-NLS-1$
+                                                    CheckName.checkName(bpmnElement)),
                                             elementConventions.get(1).getDescription()));
                         }
                     } else {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                "Outgoing edges of xor gateway need to be named"));
+                                Messages.getString("XorConventionChecker.14"))); //$NON-NLS-1$
                     }
                 }
             }

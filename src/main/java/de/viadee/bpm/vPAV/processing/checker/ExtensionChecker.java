@@ -43,6 +43,7 @@ import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -151,9 +152,9 @@ public class ExtensionChecker extends AbstractElementChecker {
                     } else {
 
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "Key of '" + CheckName.checkName(bpmnElement)
-                                        + "' could not be resolved. The ruleset specifies the use of key '"
-                                        + setting.getName() + "'."));
+                                String.format(
+                                        Messages.getString("ExtensionChecker.0"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement), setting.getName())));
                     }
                 }
             }
@@ -162,7 +163,6 @@ public class ExtensionChecker extends AbstractElementChecker {
             if (setting.getType() == null && setting.getId() != null) {
                 if (setting.getId().equals(bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID))) {
                     checkValue(keyPairs, bpmnElement, element, issues, setting, false);
-                    // AbstractRunner.setIdFound(true);
                 }
             }
 
@@ -173,9 +173,9 @@ public class ExtensionChecker extends AbstractElementChecker {
                     checkValue(keyPairs, bpmnElement, element, issues, setting, false);
                 } else {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                            "Key of '" + CheckName.checkName(bpmnElement)
-                                    + "' could not be resolved. The ruleset specifies the use of key '"
-                                    + setting.getName() + "'."));
+                            String.format(
+                                    Messages.getString("ExtensionChecker.1"), //$NON-NLS-1$
+                                    CheckName.checkName(bpmnElement), setting.getName())));
                 }
             }
         }
@@ -267,15 +267,15 @@ public class ExtensionChecker extends AbstractElementChecker {
             // timeout)
             if (!matcher.matches()) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                        "Key-Value pair of '" + CheckName.checkName(bpmnElement)
-                                + "' does not fit the configured setting of the rule set. Check the extension with key '"
-                                + setting.getName() + "'."));
+                        String.format(
+                                Messages.getString("ExtensionChecker.2"), //$NON-NLS-1$
+                                CheckName.checkName(bpmnElement), setting.getName())));
             }
         } else {
             if (!check) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                        "Value of '" + CheckName.checkName(bpmnElement)
-                                + "' is empty. Check whether ruleset and model are congruent."));
+                        String.format(Messages.getString("ExtensionChecker.3"), //$NON-NLS-1$
+                                CheckName.checkName(bpmnElement))));
             }
         }
     }

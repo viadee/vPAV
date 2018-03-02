@@ -41,6 +41,7 @@ import org.camunda.bpm.model.bpmn.instance.Message;
 import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
@@ -81,7 +82,7 @@ public class MessageEventChecker extends AbstractElementChecker {
                     || baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF).isEmpty()) {
 
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                        "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
+                        String.format(Messages.getString("MessageEventChecker.0"), CheckName.checkName(baseElement)))); //$NON-NLS-1$
 
             } else {
                 if (bpmnScanner.getMessageName(
@@ -91,7 +92,8 @@ public class MessageEventChecker extends AbstractElementChecker {
                                         baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_MESSAGE_REF))
                                 .isEmpty()) {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                            "No message name has been specified for '" + CheckName.checkName(baseElement) + "'."));
+                            String.format(Messages.getString("MessageEventChecker.1"), //$NON-NLS-1$
+                                    CheckName.checkName(baseElement))));
                 }
             }
         } else if (baseElement.getElementType().getTypeName()
@@ -128,16 +130,17 @@ public class MessageEventChecker extends AbstractElementChecker {
                     final Message message = eventDef.getMessage();
                     if (message == null) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
+                                String.format(Messages.getString("MessageEventChecker.2"), //$NON-NLS-1$
+                                        CheckName.checkName(baseElement))));
                     } else {
                         if (message.getName() == null || message.getName().isEmpty()) {
                             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                    "No message name has been specified for '" + CheckName.checkName(baseElement)
-                                            + "'."));
-                        } else if (message.getName().contains("{") || message.getName().contains("}")) {
+                                    String.format(Messages.getString("MessageEventChecker.3"), //$NON-NLS-1$
+                                            CheckName.checkName(baseElement))));
+                        } else if (message.getName().contains("{") || message.getName().contains("}")) { //$NON-NLS-1$ //$NON-NLS-2$
                             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                    "Usage of expressions in MessageStartEvents '"
-                                            + CheckName.checkName(baseElement) + "' is not allowed"));
+                                    String.format(Messages.getString("MessageEventChecker.6"), //$NON-NLS-1$
+                                            CheckName.checkName(baseElement))));
                         }
                     }
                 }
@@ -166,13 +169,13 @@ public class MessageEventChecker extends AbstractElementChecker {
                     final Message message = eventDef.getMessage();
                     if (message == null) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "No message has been specified for '" + CheckName.checkName(baseElement) + "'."));
-
+                                String.format(Messages.getString("MessageEventChecker.7"), //$NON-NLS-1$
+                                        CheckName.checkName(baseElement))));
                     } else {
                         if (message.getName() == null || message.getName().isEmpty()) {
                             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                    "No message name has been specified for '" + CheckName.checkName(baseElement)
-                                            + "'."));
+                                    String.format(Messages.getString("MessageEventChecker.8"), //$NON-NLS-1$
+                                            CheckName.checkName(baseElement))));
                         }
                     }
                 }

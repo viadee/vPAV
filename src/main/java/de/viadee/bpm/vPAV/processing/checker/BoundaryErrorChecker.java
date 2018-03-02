@@ -50,6 +50,7 @@ import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -97,12 +98,12 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     final String errorCode = bpmnScanner.getErrorCodeVar(bpmnElement.getId());
                     if (errorCode == null || errorCode.isEmpty()) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no errorCodeVariable specified"));
+                                String.format(Messages.getString("BoundaryErrorChecker.0"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     } else {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no error referenced"));
+                                String.format(Messages.getString("BoundaryErrorChecker.1"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     }
                 } else {
 
@@ -114,8 +115,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (errorDef.entrySet().iterator().next().getValue() == null
                             || errorDef.entrySet().iterator().next().getValue().isEmpty()) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' does not provide an ErrorCode"));
+                                String.format(Messages.getString("BoundaryErrorChecker.2"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
+
                     } else {
                         if (implementation != null) {
                             // Check the BeanMapping to resolve delegate expression
@@ -128,9 +130,10 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                                 if (!readResourceFile(implementationRef,
                                         errorDef.entrySet().iterator().next().getValue())) {
                                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                            "ErrorCode of '" + CheckName.checkName(bpmnElement)
-                                                    + "' does not match with throwing declaration of class '"
-                                                    + implementationRef + "'"));
+                                            String.format(
+                                                    Messages.getString("BoundaryErrorChecker.3"), //$NON-NLS-1$
+                                                    CheckName.checkName(bpmnElement), implementationRef)));
+
                                 }
                             }
                         }
@@ -140,16 +143,16 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (errorDef.entrySet().iterator().next().getKey() == null
                             || errorDef.entrySet().iterator().next().getKey().isEmpty()) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' does not provide an ErrorName"));
+                                String.format(Messages.getString("BoundaryErrorChecker.4"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     }
 
                     // No ErrorMessageVariable has been specified
                     if (errorEventDef.entrySet().iterator().next().getValue() == null
                             || errorEventDef.entrySet().iterator().next().getValue().isEmpty()) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no ErrorMessageVariable"));
+                                String.format(Messages.getString("BoundaryErrorChecker.5"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     }
                 }
             }
@@ -183,29 +186,29 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                         if (checkClassFile(classFile)) {
                             if (!readResourceFile(classFile, errorDefEntry)) {
                                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                        "ErrorCode of '" + CheckName.checkName(bpmnElement)
-                                                + "' does not match with throwing declaration of bean '"
-                                                + node.getName() + "'"));
+                                        String.format(
+                                                Messages.getString("BoundaryErrorChecker.6"), //$NON-NLS-1$
+                                                CheckName.checkName(bpmnElement), node.getName())));
                             }
                         } else {
                             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                    "Corresponding class of associated task could not be loaded or found."));
+                                    Messages.getString("BoundaryErrorChecker.7"))); //$NON-NLS-1$
                         }
                     } else {
                         // incorrect beanmapping
-                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                "Due to incorrect beanmapping for delegate expression: '"
-                                        + implementationRef
-                                        + "' the BoundaryErrorEvent can not be linked to class."));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, String.format(
+                                Messages.getString("BoundaryErrorChecker.8"), //$NON-NLS-1$
+                                implementationRef)));
                     }
                 }
             }
         } else {
             if (!checkClassFile(implementationRef)) {
                 issues.addAll(
-                        IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, "Class for '" + implementationRef
-                                + "' could not be found and therefore not linked to BoundaryErrorEvent '"
-                                + CheckName.checkName(bpmnElement) + "'."));
+                        IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                String.format(
+                                        Messages.getString("BoundaryErrorChecker.9"), //$NON-NLS-1$
+                                        implementationRef, CheckName.checkName(bpmnElement))));
             }
         }
     }
@@ -219,7 +222,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      */
     private boolean readResourceFile(final String className, final String errorCode) {
 
-        final String fileName = className.replaceAll("\\.", "/") + ".java";
+        final String fileName = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         boolean matchingErrorCode = false;
 
@@ -228,12 +231,12 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                 final DirectoryScanner scanner = new DirectoryScanner();
 
                 if (RuntimeConfig.getInstance().isTest()) {
-                    if (fileName.endsWith(".java"))
+                    if (fileName.endsWith(".java")) //$NON-NLS-1$
                         scanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
                     else
                         scanner.setBasedir(ConfigConstants.TEST_BASEPATH);
                 } else {
-                    if (fileName.endsWith(".java"))
+                    if (fileName.endsWith(".java")) //$NON-NLS-1$
                         scanner.setBasedir(ConfigConstants.JAVAPATH);
                     else
                         scanner.setBasedir(ConfigConstants.BASEPATH);
@@ -246,10 +249,10 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     final String methodBody = IOUtils.toString(resource);
                     return validateContent(methodBody, errorCode);
                 } else {
-                    logger.warning("Class " + fileName + " could not be read or does not exist");
+                    logger.warning("Class " + fileName + " could not be read or does not exist"); //$NON-NLS-1$ //$NON-NLS-2$
                 }
             } catch (final IOException ex) {
-                logger.warning("Resource '" + fileName + "' could not be read: " + ex.getMessage());
+                logger.warning("Resource '" + fileName + "' could not be read: " + ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
 
@@ -266,11 +269,11 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     private boolean validateContent(final String methodBody, final String errorCode) {
 
         if (methodBody != null && !methodBody.isEmpty()) {
-            if (methodBody.contains("throw new BpmnError")) {
-                String temp = methodBody.substring(methodBody.indexOf("throw new BpmnError"));
-                temp = temp.substring(0, temp.indexOf(";") + 1);
+            if (methodBody.contains("throw new BpmnError")) { //$NON-NLS-1$
+                String temp = methodBody.substring(methodBody.indexOf("throw new BpmnError")); //$NON-NLS-1$
+                temp = temp.substring(0, temp.indexOf(";") + 1); //$NON-NLS-1$
 
-                final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\""));
+                final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
                 if (delErrorCode.equals(errorCode)) {
                     return true;
                 }
@@ -288,7 +291,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     private boolean checkClassFile(final String className) {
 
         @SuppressWarnings("unused")
-        final String classPath = className.replaceAll("\\.", "/") + ".java";
+        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             RuntimeConfig.getInstance().getClassLoader().loadClass(className);
