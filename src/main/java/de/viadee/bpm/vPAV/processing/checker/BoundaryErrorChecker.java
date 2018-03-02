@@ -1,31 +1,33 @@
 /**
- * Copyright © 2017, viadee Unternehmensberatung GmbH
+ * BSD 3-Clause License
+ *
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -48,10 +50,12 @@ import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -93,21 +97,13 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                         || errorEventDef.entrySet().iterator().next().getKey().isEmpty()) {
                     final String errorCode = bpmnScanner.getErrorCodeVar(bpmnElement.getId());
                     if (errorCode == null || errorCode.isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no errorCodeVariable specified",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                String.format(Messages.getString("BoundaryErrorChecker.0"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     } else {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no error referenced",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                String.format(Messages.getString("BoundaryErrorChecker.1"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     }
                 } else {
 
@@ -118,13 +114,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     // No errorCode has been specified
                     if (errorDef.entrySet().iterator().next().getValue() == null
                             || errorDef.entrySet().iterator().next().getValue().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' does not provide an ErrorCode",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                String.format(Messages.getString("BoundaryErrorChecker.2"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
 
                     } else {
                         if (implementation != null) {
@@ -137,16 +129,11 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                             } else if (implementation.equals(BpmnConstants.CAMUNDA_CLASS)) {
                                 if (!readResourceFile(implementationRef,
                                         errorDef.entrySet().iterator().next().getValue())) {
-                                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                            CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null,
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
-                                            "ErrorCode of '" + CheckName.checkName(bpmnElement)
-                                                    + "' does not match with throwing declaration of class '"
-                                                    + implementationRef + "'",
-                                            null));
+                                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                            String.format(
+                                                    Messages.getString("BoundaryErrorChecker.3"), //$NON-NLS-1$
+                                                    CheckName.checkName(bpmnElement), implementationRef)));
+
                                 }
                             }
                         }
@@ -155,25 +142,17 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     // No errorName has been specified
                     if (errorDef.entrySet().iterator().next().getKey() == null
                             || errorDef.entrySet().iterator().next().getKey().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' does not provide an ErrorName",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                String.format(Messages.getString("BoundaryErrorChecker.4"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     }
 
                     // No ErrorMessageVariable has been specified
                     if (errorEventDef.entrySet().iterator().next().getValue() == null
                             || errorEventDef.entrySet().iterator().next().getValue().isEmpty()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "BoundaryErrorEvent '" + CheckName.checkName(bpmnElement)
-                                        + "' with no ErrorMessageVariable",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                String.format(Messages.getString("BoundaryErrorChecker.5"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     }
                 }
             }
@@ -206,50 +185,30 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (classFile != null && classFile.trim().length() > 0) {
                         if (checkClassFile(classFile)) {
                             if (!readResourceFile(classFile, errorDefEntry)) {
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null,
-                                        null,
-                                        "ErrorCode of '" + CheckName.checkName(bpmnElement)
-                                                + "' does not match with throwing declaration of bean '"
-                                                + node.getName() + "'",
-                                        null));
+                                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                        String.format(
+                                                Messages.getString("BoundaryErrorChecker.6"), //$NON-NLS-1$
+                                                CheckName.checkName(bpmnElement), node.getName())));
                             }
                         } else {
-                            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                    CriticalityEnum.ERROR,
-                                    element.getProcessdefinition(), null,
-                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                                    null,
-                                    "Corresponding class of associated task could not be loaded or found.", null));
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    Messages.getString("BoundaryErrorChecker.7"))); //$NON-NLS-1$
                         }
                     } else {
                         // incorrect beanmapping
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "Due to incorrect beanmapping for delegate expression: '"
-                                        + implementationRef
-                                        + "' the BoundaryErrorEvent can not be linked to class.",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, String.format(
+                                Messages.getString("BoundaryErrorChecker.8"), //$NON-NLS-1$
+                                implementationRef)));
                     }
                 }
             }
         } else {
             if (!checkClassFile(implementationRef)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "Class for '" + implementationRef
-                                + "' could not be found and therefore not linked to BoundaryErrorEvent '"
-                                + CheckName.checkName(bpmnElement) + "'.",
-                        null));
+                issues.addAll(
+                        IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                String.format(
+                                        Messages.getString("BoundaryErrorChecker.9"), //$NON-NLS-1$
+                                        implementationRef, CheckName.checkName(bpmnElement))));
             }
         }
     }
@@ -263,7 +222,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      */
     private boolean readResourceFile(final String className, final String errorCode) {
 
-        final String fileName = className.replaceAll("\\.", "/") + ".java";
+        final String fileName = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         boolean matchingErrorCode = false;
 
@@ -272,12 +231,12 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                 final DirectoryScanner scanner = new DirectoryScanner();
 
                 if (RuntimeConfig.getInstance().isTest()) {
-                    if (fileName.endsWith(".java"))
+                    if (fileName.endsWith(".java")) //$NON-NLS-1$
                         scanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
                     else
                         scanner.setBasedir(ConfigConstants.TEST_BASEPATH);
                 } else {
-                    if (fileName.endsWith(".java"))
+                    if (fileName.endsWith(".java")) //$NON-NLS-1$
                         scanner.setBasedir(ConfigConstants.JAVAPATH);
                     else
                         scanner.setBasedir(ConfigConstants.BASEPATH);
@@ -290,10 +249,10 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     final String methodBody = IOUtils.toString(resource);
                     return validateContent(methodBody, errorCode);
                 } else {
-                    logger.warning("Class " + fileName + " could not be read or does not exist");
+                    logger.warning("Class " + fileName + " could not be read or does not exist"); //$NON-NLS-1$ //$NON-NLS-2$
                 }
             } catch (final IOException ex) {
-                logger.warning("Resource '" + fileName + "' could not be read: " + ex.getMessage());
+                logger.warning("Resource '" + fileName + "' could not be read: " + ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
 
@@ -310,11 +269,11 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     private boolean validateContent(final String methodBody, final String errorCode) {
 
         if (methodBody != null && !methodBody.isEmpty()) {
-            if (methodBody.contains("throw new BpmnError")) {
-                String temp = methodBody.substring(methodBody.indexOf("throw new BpmnError"));
-                temp = temp.substring(0, temp.indexOf(";") + 1);
+            if (methodBody.contains("throw new BpmnError")) { //$NON-NLS-1$
+                String temp = methodBody.substring(methodBody.indexOf("throw new BpmnError")); //$NON-NLS-1$
+                temp = temp.substring(0, temp.indexOf(";") + 1); //$NON-NLS-1$
 
-                final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\""));
+                final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
                 if (delErrorCode.equals(errorCode)) {
                     return true;
                 }
@@ -332,7 +291,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     private boolean checkClassFile(final String className) {
 
         @SuppressWarnings("unused")
-        final String classPath = className.replaceAll("\\.", "/") + ".java";
+        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             RuntimeConfig.getInstance().getClassLoader().loadClass(className);

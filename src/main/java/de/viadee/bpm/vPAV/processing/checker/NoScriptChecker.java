@@ -1,31 +1,33 @@
 /**
- * Copyright © 2017, viadee Unternehmensberatung GmbH
+ * BSD 3-Clause License
+ *
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -40,9 +42,11 @@ import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 import org.camunda.bpm.model.bpmn.instance.SubProcess;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -79,39 +83,24 @@ public class NoScriptChecker extends AbstractElementChecker {
             if (scriptTypes != null && !scriptTypes.isEmpty()) {
                 if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
                     for (String place : scriptTypes)
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                        + place + "' script",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                String.format(Messages.getString("NoScriptChecker.0"), CheckName.checkName(bpmnElement), place))); //$NON-NLS-1$
                 } else {
                     ArrayList<String> allowedPlaces = settings
                             .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         for (String scriptType : scriptTypes)
                             if (!allowedPlaces.contains(scriptType))
-                                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                                        CriticalityEnum.ERROR,
-                                        element.getProcessdefinition(), null,
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                        null, null,
-                                        "task '" + CheckName.checkName(bpmnElement) + "' with '"
-                                                + scriptType + "' script",
-                                        null));
-
+                                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                        String.format(Messages.getString("NoScriptChecker.1"), CheckName.checkName(bpmnElement), //$NON-NLS-1$
+                                                scriptType)));
                 }
             }
 
             // ScriptTask
             if (bpmnElement instanceof ScriptTask && !settings.containsKey(BpmnConstants.SIMPLE_NAME_SCRIPT_TASK)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                        element.getProcessdefinition(), null,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "ScriptTask '" + CheckName.checkName(bpmnElement) + "' not allowed", null));
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                        String.format(Messages.getString("NoScriptChecker.2"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
             }
 
             // Check SequenceFlow on script in conditionExpression
@@ -123,24 +112,15 @@ public class NoScriptChecker extends AbstractElementChecker {
                             .getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         if (!allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp)
-                            issues.add(
-                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                            element.getProcessdefinition(), null,
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
-                                            "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                                    + "' with script in condition Expression",
-                                            null));
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    String.format(Messages.getString("NoScriptChecker.3"), //$NON-NLS-1$
+                                            CheckName.checkName(bpmnElement))));
+
                 } else {
                     if (scriptCondExp) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.ERROR,
-                                element.getProcessdefinition(), null,
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "SequenceFlow '" + CheckName.checkName(bpmnElement)
-                                        + "' with script in condition Expression",
-                                null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                String.format(Messages.getString("NoScriptChecker.4"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     }
                 }
             }

@@ -1,31 +1,33 @@
 /**
- * Copyright © 2017, viadee Unternehmensberatung GmbH
+ * BSD 3-Clause License
+ *
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -55,10 +57,12 @@ import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -279,7 +283,7 @@ public class VersioningChecker extends AbstractElementChecker {
      */
     private String getClassReference(final String javaResource) {
         if (javaResource != null && !FileScanner.getIsDirectory()) {
-            return javaResource.substring(javaResource.lastIndexOf('.') + 1, javaResource.length()) + ".class";
+            return javaResource.substring(javaResource.lastIndexOf('.') + 1, javaResource.length()) + ".class"; //$NON-NLS-1$
         } else if (javaResource != null && FileScanner.getIsDirectory()) {
             return javaResource;
         }
@@ -295,7 +299,7 @@ public class VersioningChecker extends AbstractElementChecker {
     private String getGroovyReference(String resourcePath) {
         if (resourcePath != null) {
             resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf('.'));
-            return resourcePath.substring(resourcePath.lastIndexOf('.') + 1, resourcePath.length()) + ".groovy";
+            return resourcePath.substring(resourcePath.lastIndexOf('.') + 1, resourcePath.length()) + ".groovy"; //$NON-NLS-1$
         }
         return null;
     }
@@ -310,7 +314,7 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
 
         try {
-            final String filteredExpression = expression.replaceAll("[\\w]+\\.", "");
+            final String filteredExpression = expression.replaceAll("[\\w]+\\.", ""); //$NON-NLS-1$ //$NON-NLS-2$
             final TreeBuilder treeBuilder = new Builder();
             final Tree tree = treeBuilder.build(filteredExpression);
 
@@ -329,8 +333,8 @@ public class VersioningChecker extends AbstractElementChecker {
             }
         } catch (final ELException e) {
             throw new ProcessingException(
-                    "el expression " + expression + " in " + element.getProcessdefinition() + ", element ID: "
-                            + element.getBaseElement().getId() + " couldn't be parsed",
+                    "el expression " + expression + " in " + element.getProcessdefinition() + ", element ID: " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                            + element.getBaseElement().getId() + " couldn't be parsed", //$NON-NLS-1$
                     e);
         }
         return null;
@@ -347,11 +351,8 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
         if (resourcePath != null) {
             if (!resourcesNewestVersions.contains(resourcePath)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), resourcePath, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                        null,
-                        "script reference is deprecated or file with version doesn't exist", null));
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, resourcePath, element,
+                        Messages.getString("VersioningChecker.8"))); //$NON-NLS-1$
             }
         }
     }
@@ -367,14 +368,10 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
         final String beanReference = findBeanReferenceInExpression(expression, element, issues);
         if (beanReference != null && !resourcesNewestVersions.contains(beanReference)) {
-            issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                    element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
-                    element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                    null,
-                    "bean reference '" + beanReference
-                            + "' is deprecated or file with version does not exist for bean '"
-                            + expression + "'",
-                    null));
+            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
+                    String.format(
+                            Messages.getString("VersioningChecker.9"), //$NON-NLS-1$
+                            beanReference, expression)));
         }
     }
 
@@ -390,17 +387,13 @@ public class VersioningChecker extends AbstractElementChecker {
         String beanReference = findBeanReferenceInExpression(expression, element, issues);
 
         if (beanReference != null) {
-            beanReference = beanReference.replace(".", "\\");
-            beanReference = beanReference.substring(0, beanReference.lastIndexOf("\\"));
+            beanReference = beanReference.replace(".", "\\"); //$NON-NLS-1$ //$NON-NLS-2$
+            beanReference = beanReference.substring(0, beanReference.lastIndexOf("\\")); //$NON-NLS-1$
 
             if (!resourcesNewestVersions.contains(beanReference)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), beanReference, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                        null,
-                        "bean reference is deprecated for '"
-                                + beanReference + "'.",
-                        null));
+
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
+                        String.format(Messages.getString("VersioningChecker.13"), beanReference))); //$NON-NLS-1$
             }
         }
     }
@@ -417,24 +410,15 @@ public class VersioningChecker extends AbstractElementChecker {
         if (javaReference != null) {
             if (!resourcesNewestVersions.contains(javaReference)) {
                 if (element.getBaseElement().getId() == null) {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), javaReference,
-                            element.getBaseElement().getParentElement()
-                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                            element.getBaseElement().getParentElement()
-                                    .getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            null, null, null,
-                            "class reference is deprecated or file with version does not exist for class '"
-                                    + javaReference + "'",
-                            null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,
+                            String.format(
+                                    Messages.getString("VersioningChecker.14"), //$NON-NLS-1$
+                                    javaReference)));
                 } else {
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
-                            element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                            null, null,
-                            "class reference is deprecated or file with version does not exist for class '"
-                                    + javaReference + "'",
-                            null));
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,
+                            String.format(
+                                    Messages.getString("VersioningChecker.15"), //$NON-NLS-1$
+                                    javaReference)));
                 }
             }
         }
@@ -450,17 +434,12 @@ public class VersioningChecker extends AbstractElementChecker {
     private void prepareDirBasedClassWarning(String javaReference, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
         if (javaReference != null) {
-            javaReference = javaReference.replace(".", "\\");
-            javaReference = javaReference.substring(0, javaReference.lastIndexOf("\\"));
+            javaReference = javaReference.replace(".", "\\"); //$NON-NLS-1$ //$NON-NLS-2$
+            javaReference = javaReference.substring(0, javaReference.lastIndexOf("\\")); //$NON-NLS-1$
 
             if (!resourcesNewestVersions.contains(javaReference)) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), javaReference, element.getBaseElement().getId(),
-                        element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                        null,
-                        "class reference is deprecated for '"
-                                + javaReference + "'.",
-                        null));
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,
+                        String.format(Messages.getString("VersioningChecker.19"), javaReference))); //$NON-NLS-1$
             }
         }
     }

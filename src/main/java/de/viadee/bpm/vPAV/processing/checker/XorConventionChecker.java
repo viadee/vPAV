@@ -1,31 +1,33 @@
 /**
- * Copyright © 2017, viadee Unternehmensberatung GmbH
+ * BSD 3-Clause License
+ *
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -42,10 +44,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -77,21 +81,18 @@ public class XorConventionChecker extends AbstractElementChecker {
 
                 // check default path
                 if (settings != null && settings.containsKey(BpmnConstants.REQUIRED_DEFAULT)
-                        && settings.get(BpmnConstants.REQUIRED_DEFAULT).getValue().equals("true")
-                        && bpmnElement.getAttributeValue(BpmnConstants.DEFAULT) == null)
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), null, bpmnElement.getId(),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "xor gateway '"
-                                    + CheckName.checkName(bpmnElement) + "' has no default path",
-                            null));
+                        && settings.get(BpmnConstants.REQUIRED_DEFAULT).getValue().equals("true") //$NON-NLS-1$
+                        && bpmnElement.getAttributeValue(BpmnConstants.DEFAULT) == null) {
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                            String.format(Messages.getString("XorConventionChecker.1"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
+                }
 
                 final ArrayList<ElementConvention> elementConventions = (ArrayList<ElementConvention>) rule
                         .getElementConventions();
 
                 if (elementConventions == null) {
                     throw new ProcessingException(
-                            "xor naming convention checker must have one element convention!");
+                            "xor naming convention checker must have one element convention!"); //$NON-NLS-1$
                 }
 
                 // TODO: dont use indices
@@ -99,24 +100,20 @@ public class XorConventionChecker extends AbstractElementChecker {
                 final String taskName = bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
                 if (taskName != null && taskName.trim().length() > 0) {
                     final Pattern pattern = Pattern.compile(patternString);
-                    final String taskNameClean = taskName.replaceAll("\n", "").replaceAll("\r", "");
+                    final String taskNameClean = taskName.replaceAll("\n", "").replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                     Matcher matcher = pattern.matcher(taskNameClean);
 
                     if (!matcher.matches()) {
-                        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                element.getProcessdefinition(), null, bpmnElement.getId(),
-                                bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                                "xor gateway name '"
-                                        + CheckName.checkName(bpmnElement) + "' is against the naming convention",
-                                elementConventions.get(0).getDescription()));
+                        issues.addAll(
+                                IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                        String.format(Messages.getString("XorConventionChecker.7"), //$NON-NLS-1$
+                                                CheckName.checkName(bpmnElement)),
+                                        elementConventions.get(0).getDescription()));
                     }
                 } else {
-                    issues.add(
-                            new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                    element.getProcessdefinition(),
-                                    null, bpmnElement.getId(),
-                                    bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                                    null, "xor gateway name must be specified", null));
+                    issues.addAll(
+                            IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                    Messages.getString("XorConventionChecker.8"))); //$NON-NLS-1$
                 }
 
                 // TODO: dont use indices
@@ -128,28 +125,19 @@ public class XorConventionChecker extends AbstractElementChecker {
                     final String edgeName = Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
                     if (edgeName != null && edgeName.trim().length() > 0) {
                         final Pattern pattern = Pattern.compile(patternStringEdge);
-                        final String edgeNameClean = edgeName.replaceAll("\n", "").replaceAll("\r", "");
+                        final String edgeNameClean = edgeName.replaceAll("\n", "").replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                         Matcher matcher = pattern.matcher(edgeNameClean);
                         if (!matcher.matches()) {
-                            issues.add(
-                                    new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                            element.getProcessdefinition(), null,
-                                            Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                            Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null,
-                                            null, null,
-                                            "outgoing edges of xor gateway '"
-                                                    + CheckName.checkName(bpmnElement)
-                                                    + "' are against the naming convention",
+                            issues.addAll(
+                                    IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                            String.format(
+                                                    Messages.getString("XorConventionChecker.13"), //$NON-NLS-1$
+                                                    CheckName.checkName(bpmnElement)),
                                             elementConventions.get(1).getDescription()));
                         }
                     } else {
-                        issues.add(
-                                new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                                        element.getProcessdefinition(), null,
-                                        Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                                        Task_Element.getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null,
-                                        null,
-                                        "outgoing edges of xor gateway need to be named", null));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                Messages.getString("XorConventionChecker.14"))); //$NON-NLS-1$
                     }
                 }
             }

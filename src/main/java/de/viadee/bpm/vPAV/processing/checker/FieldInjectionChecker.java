@@ -1,31 +1,33 @@
 /**
- * Copyright © 2017, viadee Unternehmensberatung GmbH
+ * BSD 3-Clause License
+ *
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the viadee Unternehmensberatung GmbH.
- * 4. Neither the name of the viadee Unternehmensberatung GmbH nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY <viadee Unternehmensberatung GmbH> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
@@ -50,9 +52,11 @@ import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -259,8 +263,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             final String varName) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement bpmnElement = element.getBaseElement();
-        final String classPath = className.replaceAll("\\.", "/") + ".java";
+        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             Class<?> clazz = RuntimeConfig.getInstance().getClassLoader().loadClass(className);
@@ -268,45 +271,36 @@ public class FieldInjectionChecker extends AbstractElementChecker {
                 Field field = clazz.getDeclaredField(varName);
 
                 if (!field.getType().isAssignableFrom(FixedValue.class)
-                        && !field.getType().isAssignableFrom(Expression.class))
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), classPath,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "the type of the variable '" + varName + "' is incorrect", null));
+                        && !field.getType().isAssignableFrom(Expression.class)) {
+                    issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
+                            String.format(Messages.getString("FieldInjectionChecker.3"), varName))); //$NON-NLS-1$
+                }
 
-                if (!Modifier.isPublic(field.getModifiers()))
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), classPath,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "the variable '" + varName + "' should be public", null));
+                if (!Modifier.isPublic(field.getModifiers())) {
+                    issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
+                            String.format(Messages.getString("FieldInjectionChecker.4"), varName))); //$NON-NLS-1$
 
+                }
                 Method[] methods = clazz.getMethods();
                 boolean hasMethod = false;
                 for (Method method : methods) {
-                    if (method.getName().toLowerCase().contains("set" + varName.toLowerCase()))
+                    if (method.getName().toLowerCase().contains("set" + varName.toLowerCase())) //$NON-NLS-1$
                         hasMethod = true;
                 }
 
-                if (!hasMethod)
-                    issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                            element.getProcessdefinition(), classPath,
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                            bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                            "no setter found for variable '" + varName + "'", null));
+                if (!hasMethod) {
+                    issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
+                            String.format(Messages.getString("FieldInjectionChecker.6"), varName))); //$NON-NLS-1$
+                }
 
             } catch (NoSuchFieldException | SecurityException e) {
-                issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), CriticalityEnum.WARNING,
-                        element.getProcessdefinition(), classPath,
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                        bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), null, null, null,
-                        "class '" + clazz.getSimpleName() + "' does not declared the variable '" + varName + "'",
-                        null));
+                issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
+                        String.format(Messages.getString("FieldInjectionChecker.7"), clazz.getSimpleName(), //$NON-NLS-1$
+                                varName)));
             }
 
         } catch (final ClassNotFoundException e) {
-            LOGGER.warning("Class " + className + " does not exist." + e);
+            LOGGER.warning("Class " + className + " does not exist." + e); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         return issues;
