@@ -38,17 +38,26 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
  */
 public class VariableInfo {
 
-  public ProcessVariable var;
+    public ProcessVariable var;
 
-  boolean visited;
+    private boolean visited;
 
-  public VariableInfo(final ProcessVariable var) {
-    this.var = var;
-    this.clear();
-  }
+    public VariableInfo(final ProcessVariable var) {
+        this.var = var;
+        this.clear();
+    }
 
-  /** Resets the visited field. */
-  public void clear() {
-    this.visited = false;
-  }
+    /** Resets the visited field. */
+    public void clear() {
+        setVisited(false);
+    }
+
+    public void setVisited(final boolean visited) {
+        this.visited = visited;
+    }
+
+    public boolean getVisited() {
+        return visited;
+    }
+
 }

@@ -44,36 +44,67 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 public class VertexInfo {
 
     /** The vertex itself. */
-    public BpmnElement v;
+    private BpmnElement vertex;
 
     /** A mark for whether this vertex has been visited. Useful for path searching. */
-    public boolean visited;
+    private boolean visited;
 
     private Map<String, Void> visitedVariables;
 
     /**
      * Constructs information for the given vertex.
      *
-     * @param v
+     * @param vertex
      *            BpmnElement
+     * 
      */
 
-    public VertexInfo(final BpmnElement v) {
-        this.v = v;
+    public VertexInfo(final BpmnElement vertex) {
+        this.vertex = vertex;
         this.visitedVariables = new HashMap<String, Void>();
         this.clear();
     }
 
+    /**
+     * Puts variable into Map
+     * 
+     * @param varName
+     *            Name of variable
+     */
     public void visitVariable(final String varName) {
         visitedVariables.put(varName, null);
     }
 
+    /**
+     * Checks whether a variable has been visited
+     * 
+     * @param varName
+     *            Name of variable
+     * @return true/false
+     */
     public boolean variableVisited(final String varName) {
         return visitedVariables.containsKey(varName);
     }
 
     /** Resets the visited field. */
     public void clear() {
-        this.visited = false;
+        setVisited(false);
     }
+
+    public void setVisited(final boolean visited) {
+        this.visited = visited;
+    }
+
+    public boolean getVisited() {
+        return visited;
+    }
+
+    public void setVertex(final BpmnElement vertex) {
+        this.vertex = vertex;
+    }
+
+    public BpmnElement getVertex() {
+        return vertex;
+    }
+
 }
