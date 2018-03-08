@@ -39,14 +39,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
 /**
  * Factory decides which Checkers will be used in defined situations
@@ -63,8 +60,6 @@ public final class CheckerFactory {
      *            rules for checker
      * @param resourcesNewestVersions
      *            resourcesNewestVersions in context
-     * @param element
-     *            given BpmnElement
      * @param bpmnScanner
      *            bpmnScanner for model
      * @return checkers returns checkers
@@ -72,16 +67,12 @@ public final class CheckerFactory {
      * @throws ConfigItemNotFoundException
      *             exception when ConfigItem (e.g. rule) not found
      */
-    public static Collection<ElementChecker> createCheckerInstancesBpmnElement(
+    public static Collection<ElementChecker> createCheckerInstances(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
-            final BpmnElement element, BpmnScanner bpmnScanner)
+            final BpmnScanner bpmnScanner)
             throws ConfigItemNotFoundException {
 
         final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
-        final BaseElement baseElement = element.getBaseElement();
-        if (baseElement == null) {
-            throw new RuntimeException("Bpmn Element couldn't be found");
-        }
 
         for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
             String fullyQualifiedName = getFullyQualifiedName(rule);
