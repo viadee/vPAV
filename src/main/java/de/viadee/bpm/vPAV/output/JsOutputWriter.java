@@ -1,32 +1,26 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright © 2018, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
+ * * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
  *
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
+ * * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
  *
- * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
+ * * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.output;
@@ -79,7 +73,20 @@ public class JsOutputWriter implements IssueOutputWriter {
         final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
                 BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
         final String bpmn = transformToXMLDatastructure();
+        final String wrongCheckers = transformToJsonDatastructure(AbstractRunner.getIncorrectCheckers());
 
+        writeJS(json, json_noIssues, bpmn, wrongCheckers);
+    }
+
+    /**
+     * 
+     * @param json
+     * @param json_noIssues
+     * @param bpmn
+     * @throws OutputWriterException
+     */
+    private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers)
+            throws OutputWriterException {
         if (json != null && !json.isEmpty()) {
             try {
                 final FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT);
@@ -95,6 +102,14 @@ public class JsOutputWriter implements IssueOutputWriter {
                         new FileOutputStream(ConfigConstants.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8);
                 osWriterSuccess.write(json_noIssues);
                 osWriterSuccess.close();
+
+                if (wrongCheckers != null && !wrongCheckers.isEmpty()) {
+                    final OutputStreamWriter unlocatedCheckers = new OutputStreamWriter(
+                            new FileOutputStream(ConfigConstants.VALIDATION_UNLOCATED_CHECKERS),
+                            StandardCharsets.UTF_8);
+                    unlocatedCheckers.write(wrongCheckers);
+                    unlocatedCheckers.close();
+                }
 
             } catch (final IOException ex) {
                 throw new OutputWriterException("js output couldn't be written");
@@ -354,4 +369,25 @@ public class JsOutputWriter implements IssueOutputWriter {
         }
         return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
     }
+
+    /**
+     * Transforms the collection of wrong checkers into JSON format
+     *
+     * @param issues
+     * @return
+     */
+    private static String transformToJsonDatastructure(final Map<String, String> wrongCheckers) {
+        final String varName = "unlocatedCheckers";
+        final JsonArray jsonIssues = new JsonArray();
+        if (wrongCheckers != null && wrongCheckers.size() > 0) {
+            for (Map.Entry<String, String> entry : wrongCheckers.entrySet()) {
+                final JsonObject obj = new JsonObject();
+                obj.addProperty(ConfigConstants.RULENAME, entry.getKey());
+                obj.addProperty(ConfigConstants.MESSAGE, entry.getValue());
+                jsonIssues.add(obj);
+            }
+        }
+        return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+    }
+
 }

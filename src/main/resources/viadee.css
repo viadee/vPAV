@@ -55,6 +55,11 @@
 			border-radius: 0;
 		}
 
+		.viadee-big-alert{
+			font-size: 1.2em;
+			border-radius: 0;
+		}
+
 		#canvas {
 			height: 35rem;
 		}

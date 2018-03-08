@@ -574,6 +574,25 @@ function selectModel(name, issue_id, path_nr, func, path) {
         }
     }
 }
+
+
+function showUnlocatedCheckers() {    
+    unlocatedCheckers.forEach(element => {
+        
+        var warningMsg = 
+        `<div class='row' id='unlocatedCheckers'>
+            <div class="col">
+                <div class="alert alert-danger mt-2 mb-0 ml-0 pb-1 pt-1 viadee-big-alert"
+                role="alert">${element.message}</div>
+            </div>
+        </div>`;
+
+        document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg; 
+    });
+}
+
+
 viewer = initDiagram(diagramXMLSource[0], 0, null, false);
 activateLinkSuccess(diagramXMLSource[0].name);
 document.getElementById('vPAV').innerHTML = vPavVersion;
+showUnlocatedCheckers();
