@@ -77,6 +77,8 @@ public abstract class AbstractRunner {
     private static Collection<CheckerIssue> issues;
 
     private static Collection<CheckerIssue> filteredIssues;
+    
+    private static Map<String, String> incorrectCheckers = new HashMap<>();
 
     private static Map<String, String> fileMapping = createFileFolderMapping();
 
