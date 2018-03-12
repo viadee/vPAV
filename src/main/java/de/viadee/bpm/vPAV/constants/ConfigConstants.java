@@ -62,6 +62,8 @@ public final class ConfigConstants {
     public static final String VALIDATION_JS_MODEL_OUTPUT = "target/vPAV/js/bpmn_model.js";
 
     public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
+    
+    public static final String VALIDATION_UNLOCATED_CHECKERS = "target/vPAV/js/unlocated_checkers.js";
 
     public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
 
@@ -98,6 +100,10 @@ public final class ConfigConstants {
     public static final String VERSIONINGSCHEMECLASS = "versioningSchemeClass";
 
     public static final String GROOVY = "groovy";
+    
+    public static final String RULENAME = "rulename";
+
+    public static final String MESSAGE = "message";
 
     private ConfigConstants() {
     }
