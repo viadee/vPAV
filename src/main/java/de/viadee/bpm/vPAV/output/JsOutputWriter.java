@@ -79,7 +79,20 @@ public class JsOutputWriter implements IssueOutputWriter {
         final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
                 BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
         final String bpmn = transformToXMLDatastructure();
+        final String wrongCheckers = transformToJsonDatastructure(AbstractRunner.getIncorrectCheckers());
 
+        writeJS(json, json_noIssues, bpmn, wrongCheckers);
+    }
+
+    /**
+     * 
+     * @param json
+     * @param json_noIssues
+     * @param bpmn
+     * @throws OutputWriterException
+     */
+    private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers)
+            throws OutputWriterException {
         if (json != null && !json.isEmpty()) {
             try {
                 final FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT);
@@ -95,6 +108,14 @@ public class JsOutputWriter implements IssueOutputWriter {
                         new FileOutputStream(ConfigConstants.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8);
                 osWriterSuccess.write(json_noIssues);
                 osWriterSuccess.close();
+
+                if (wrongCheckers != null && !wrongCheckers.isEmpty()) {
+                    final OutputStreamWriter unlocatedCheckers = new OutputStreamWriter(
+                            new FileOutputStream(ConfigConstants.VALIDATION_UNLOCATED_CHECKERS),
+                            StandardCharsets.UTF_8);
+                    unlocatedCheckers.write(wrongCheckers);
+                    unlocatedCheckers.close();
+                }
 
             } catch (final IOException ex) {
                 throw new OutputWriterException("js output couldn't be written");
@@ -149,8 +170,9 @@ public class JsOutputWriter implements IssueOutputWriter {
                 jsFile += new String(encoded, "UTF-8");
 
                 // remove last ','
-                jsFile = (jsFile.length() > 1 ? jsFile.substring(0, jsFile.lastIndexOf(','))
-                        : jsFile);
+                if (jsFile.contains(","))
+                    jsFile = (jsFile.length() > 1 ? jsFile.substring(0, jsFile.lastIndexOf(','))
+                            : jsFile);
 
                 // add end '];'
                 jsFile += "];";
@@ -353,4 +375,25 @@ public class JsOutputWriter implements IssueOutputWriter {
         }
         return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
     }
+
+    /**
+     * Transforms the collection of wrong checkers into JSON format
+     *
+     * @param issues
+     * @return
+     */
+    private static String transformToJsonDatastructure(final Map<String, String> wrongCheckers) {
+        final String varName = "unlocatedCheckers";
+        final JsonArray jsonIssues = new JsonArray();
+        if (wrongCheckers != null && wrongCheckers.size() > 0) {
+            for (Map.Entry<String, String> entry : wrongCheckers.entrySet()) {
+                final JsonObject obj = new JsonObject();
+                obj.addProperty(ConfigConstants.RULENAME, entry.getKey());
+                obj.addProperty(ConfigConstants.MESSAGE, entry.getValue());
+                jsonIssues.add(obj);
+            }
+        }
+        return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+    }
+
 }
