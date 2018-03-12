@@ -662,5 +662,15 @@ public abstract class AbstractRunner {
     public static void removeElement(final String name) {
         AbstractRunner.signalNames.remove(name);
     }
+    
+    public static Map<String, String> getIncorrectCheckers() {
+        return incorrectCheckers;
+    }
+
+    public static void setIncorrectCheckers(final Map.Entry<String, Rule> rule, final String message) {
+        if (!getIncorrectCheckers().containsKey(rule.getValue().getName())) {
+            AbstractRunner.incorrectCheckers.put(rule.getValue().getName(), message);
+        }
+    }
 
 }
