@@ -471,16 +471,36 @@ public abstract class AbstractRunner {
      */
     private static Collection<CheckerIssue> getFilteredIssues(Collection<CheckerIssue> issues)
             throws IOException {
-        final Collection<CheckerIssue> filteredIssues = new ArrayList<CheckerIssue>();
-        filteredIssues.addAll(issues);
 
-        final Collection<String> ignoredIssues = collectIgnoredIssues(ConfigConstants.IGNORE_FILE);
+        // all issues
+        final HashMap<String, CheckerIssue> issuesMap = new HashMap<>();
+
+        // transform Collection into a HashMap
         for (final CheckerIssue issue : issues) {
-            if (ignoredIssues.contains(issue.getId())) {
-                filteredIssues.remove(issue);
+            if (!issuesMap.containsKey(issue.getId())) {
+                issuesMap.put(issue.getId(), issue);
             }
         }
-        return filteredIssues;
+        // all issues to be ignored
+        final Collection<String> ignoredIssues = collectIgnoredIssues(ConfigConstants.IGNORE_FILE);
+
+        final HashMap<String, CheckerIssue> filteredIssues = new HashMap<>();
+        filteredIssues.putAll(issuesMap);
+
+        // remove issues that are listed in ignore file
+        for (Map.Entry<String, CheckerIssue> entry : issuesMap.entrySet()) {
+            if (ignoredIssues.contains(entry.getKey())) {
+                filteredIssues.remove(entry.getKey());
+            }
+        }
+
+        // transform back into collection
+        final Collection<CheckerIssue> finalFilteredIssues = new ArrayList<CheckerIssue>();
+        for (Map.Entry<String, CheckerIssue> entry : filteredIssues.entrySet()) {
+            finalFilteredIssues.add(entry.getValue());
+        }
+
+        return finalFilteredIssues;
     }
 
     /**

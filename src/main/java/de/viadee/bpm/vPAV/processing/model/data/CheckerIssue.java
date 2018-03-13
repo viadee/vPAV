@@ -36,8 +36,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
@@ -451,6 +449,6 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(this).toHashCode();
+        return elementId.hashCode();
     }
 }
