@@ -238,7 +238,7 @@ function deleteTable() {
 //create issue table
 function createTable(bpmnFile, tableContent) {
     var myTable = document.getElementById("table_issues");
-
+       
     //fill table with all issuesof current model
     for (id in tableContent) {
         if (tableContent[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
@@ -574,6 +574,7 @@ function selectModel(name, issue_id, path_nr, func, path) {
         }
     }
 }
+
 
 
 function showUnlocatedCheckers() {    
