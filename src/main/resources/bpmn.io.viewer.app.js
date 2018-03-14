@@ -238,7 +238,7 @@ function deleteTable() {
 //create issue table
 function createTable(bpmnFile, tableContent) {
     var myTable = document.getElementById("table_issues");
-       
+
     //fill table with all issuesof current model
     for (id in tableContent) {
         if (tableContent[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
@@ -251,13 +251,21 @@ function createTable(bpmnFile, tableContent) {
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
             myCell.setAttribute("id", issue.classification) // mark cell
-            //create link 
+            
+            //create link for default checkers
             var a = document.createElement("a");
             a.appendChild(myText);
-            //link to docu
-            a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
-            a.setAttribute("title", "checker documentation");
-            myCell.appendChild(a);
+           
+            defaultCheckers.forEach(element => {                
+                if(issue.ruleName == element.rulename){
+                    a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
+                    a.setAttribute("title", "Checker documentation");                    
+                }                 
+            });
+            
+            myCell.appendChild(a);   
+           
+            //link to docu            
             myRow.appendChild(myCell);
 
             //elementId
