@@ -698,5 +698,4 @@ public abstract class AbstractRunner {
 			AbstractRunner.incorrectCheckers.put(rule.getValue().getName(), message);
 		}
 	}
-
 }
