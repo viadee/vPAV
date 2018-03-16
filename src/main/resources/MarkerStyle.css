@@ -1,10 +1,10 @@
 :root {
 	--var-path: #f5c6cb;
 	--var-oneElement: rgba(255, 0, 0, 0.5);
-	--var-error: rgba(255, 0, 0, 0.5);
-	--var-warning: rgba(255,245,134, 1.0);
+	--var-error: rgba(223, 173, 72, 1);
+	--var-warning: rgba(172,181,123, 1.0);
 	--var-info: rgba(112,186,204, 1.0);
-	--var-success: rgb(72, 199, 47, 0.5);
+	--var-success: rgb(126, 188, 169, 0.7);
 }
 
 .success .djs-visual> :nth-child(1) {

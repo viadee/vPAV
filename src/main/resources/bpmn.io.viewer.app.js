@@ -176,9 +176,9 @@ function addCountOverlay(overlays, bpmnFile) {
 
                             dCardTitle.innerHTML = issue.ruleName;
                             dCardTitle.appendChild(oImg);
-                            dCardText.innerHTML =  "<h6><b>Issue message</b></h6> " + issue.message;
-                            dCardRuleDescription.innerHTML = "<h6><b>Rule description</b></h6> " + issue.ruleDescription;
-                            dCardElementDescription.innerHTML = "<h6><b>Element description</b></h6> " + issue.elementDescription;
+                            dCardText.innerHTML =  "<h6><b>Issue:</b></h6> " + issue.message;
+                            dCardRuleDescription.innerHTML = "<h6><b>Rule:</b></h6> " + issue.ruleDescription;
+                            dCardElementDescription.innerHTML = "<h6><b>Reason:</b></h6> " + issue.elementDescription;
 
                             dCard.appendChild(dCardTitle);
                             dCardBody.appendChild(dCardText);
@@ -360,20 +360,20 @@ function createTable(bpmnFile, tableContent) {
 function createFooter() {
     const body = document.querySelector("body");
     var footer = document.createElement("footer");
-    footer.setAttribute("class", "footer pt-1 pb-1 pl-2 m-0");
-    footer.style.backgroundColor = "#CED6E3";
+    footer.setAttribute("class", "footer viadee-footer");
+    
 
     var fP = document.createElement("span");
-    fP.setAttribute("class", "text-muted");
+    fP.setAttribute("class", "text-muted-viadee");
     fP.innerHTML = viadee + " - " + vPavName + " " + vPavVersion;
 
     var aL = document.createElement("a");
-    aL.setAttribute("class", "text-muted float-right pr-2");
+    aL.setAttribute("class", "text-muted-viadee float-right pr-2");
     aL.setAttribute("href", "https://viadee.github.io/vPAV/#licenses");
     aL.innerHTML = "Licenses";
 
     var aI = document.createElement("a");
-    aI.setAttribute("class", "text-muted float-right pr-2");
+    aI.setAttribute("class", "text-muted-viadee float-right pr-2");
     aI.setAttribute("href", "https://www.viadee.de/impressum-datenschutz.html");
     aI.innerHTML = "Impressum";
 
@@ -467,7 +467,7 @@ function initDiagram(diagramXML, issue_id, path_nr, func, success) {
 //set Filename as Header
 function setUeberschrift(name) {
     subName = name.substr(0, name.length - 5);
-    document.querySelector("#modell").innerHTML = "Consistency check: " + subName;
+    document.querySelector("#modell").innerHTML = subName;
     var mDownload = document.getElementById("model_download");
     mDownload.setAttribute("href", "../../src/main/resources/" + name);
     setFocus(name);
@@ -516,7 +516,7 @@ function toggleDialog(sh) {
         if (countIssues(model.name, elementsToMark) == 0)
             a.innerHTML = subName + " <span class='badge badge-pill badge-success pt-1 pb-1'>" + countIssues(model.name, elementsToMark) + "</span>";
         else
-            a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 viadee-darkblue-text viadee-lightblue-bg'>" + countIssues(model.name, elementsToMark) + "</span>";
+            a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 viadee-darkblue-text viadee-pill-bg'>" + countIssues(model.name, elementsToMark) + "</span>";
         a.setAttribute("onclick", "selectModel('" + model.name.replace(/\\/g, "\\\\") + "', null, null, 0, 0)");
         a.setAttribute("href", "#");
         if (first == true) {
