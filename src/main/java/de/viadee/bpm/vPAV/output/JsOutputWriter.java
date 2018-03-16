@@ -79,9 +79,28 @@ public class JsOutputWriter implements IssueOutputWriter {
         final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
                 BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
         final String bpmn = transformToXMLDatastructure();
-        final String wrongCheckers = transformToJsonDatastructure(AbstractRunner.getIncorrectCheckers());
+        final String wrongCheckers = transformToJsDatastructure(AbstractRunner.getIncorrectCheckers());
+        final String defaultCheckers = transformDefaultRulesToJsDatastructure(
+                extractExternalCheckers(
+                        RuntimeConfig.getInstance().getActiveRules()));
 
-        writeJS(json, json_noIssues, bpmn, wrongCheckers);
+        writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers);
+    }
+
+    /**
+     * Extract external rules from active ruleset
+     * 
+     * @param activeRules
+     * @return
+     */
+    private ArrayList<String> extractExternalCheckers(final ArrayList<String> activeRules) {
+        final ArrayList<String> defaultRules = new ArrayList<String>();
+        for (String entry : RuntimeConfig.getInstance().getViadeeRules()) {
+            if (activeRules.contains(entry)) {
+                defaultRules.add(entry);
+            }
+        }
+        return defaultRules;
     }
 
     /**
@@ -91,8 +110,8 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param bpmn
      * @throws OutputWriterException
      */
-    private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers)
-            throws OutputWriterException {
+    private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
+            final String defaultCheckers) throws OutputWriterException {
         if (json != null && !json.isEmpty()) {
             try {
                 final FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT);
@@ -109,12 +128,19 @@ public class JsOutputWriter implements IssueOutputWriter {
                 osWriterSuccess.write(json_noIssues);
                 osWriterSuccess.close();
 
-                if (wrongCheckers != null && !wrongCheckers.isEmpty()) {
-                    final OutputStreamWriter unlocatedCheckers = new OutputStreamWriter(
-                            new FileOutputStream(ConfigConstants.VALIDATION_UNLOCATED_CHECKERS),
-                            StandardCharsets.UTF_8);
-                    unlocatedCheckers.write(wrongCheckers);
-                    unlocatedCheckers.close();
+                if ((wrongCheckers != null && !wrongCheckers.isEmpty())
+                        && (defaultCheckers != null && !defaultCheckers.isEmpty())) {
+                    final OutputStreamWriter wrongAndDefaultCheckers = new OutputStreamWriter(
+                            new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8);
+                    wrongAndDefaultCheckers.write(wrongCheckers);
+                    wrongAndDefaultCheckers.write(defaultCheckers);
+                    wrongAndDefaultCheckers.close();
+                } else if ((wrongCheckers == null || wrongCheckers.isEmpty())
+                        && (defaultCheckers != null && !defaultCheckers.isEmpty())) {
+                    final OutputStreamWriter defaultCheckerJS = new OutputStreamWriter(
+                            new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8);
+                    defaultCheckerJS.write(defaultCheckers);
+                    defaultCheckerJS.close();
                 }
 
             } catch (final IOException ex) {
@@ -171,8 +197,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
                 // remove last ','
                 if (jsFile.contains(","))
-                    jsFile = (jsFile.length() > 1 ? jsFile.substring(0, jsFile.lastIndexOf(','))
-                            : jsFile);
+                    jsFile = (jsFile.length() > 1 ? jsFile.substring(0, jsFile.lastIndexOf(',')) : jsFile);
 
                 // add end '];'
                 jsFile += "];";
@@ -206,8 +231,7 @@ public class JsOutputWriter implements IssueOutputWriter {
             // element Name
             if (element.getBaseElement().getAttributeValue("name") != null)
                 elementString += "\"elementName\" : \""
-                        + element.getBaseElement().getAttributeValue("name").trim().replace('\n', ' ')
-                        + "\",\n";
+                        + element.getBaseElement().getAttributeValue("name").trim().replace('\n', ' ') + "\",\n";
 
             for (Map.Entry<String, ProcessVariable> entry : element.getProcessVariables().entrySet()) {
                 entry.getValue().getOperation();
@@ -262,8 +286,8 @@ public class JsOutputWriter implements IssueOutputWriter {
                 }
                 if (ruleIssues.isEmpty())
                     newIssues.add(new CheckerIssue(ruleName, null, CriticalityEnum.SUCCESS,
-                            (ConfigConstants.JS_BASEPATH + bpmnFilename), null,
-                            "", "", null, null, null, "No issues found", null));
+                            (ConfigConstants.JS_BASEPATH + bpmnFilename), null, "", "", null, null, null,
+                            "No issues found", null));
             }
         }
 
@@ -382,7 +406,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformToJsonDatastructure(final Map<String, String> wrongCheckers) {
+    private static String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
         final String varName = "unlocatedCheckers";
         final JsonArray jsonIssues = new JsonArray();
         if (wrongCheckers != null && wrongCheckers.size() > 0) {
@@ -394,6 +418,24 @@ public class JsOutputWriter implements IssueOutputWriter {
             }
         }
         return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+    }
+
+    /**
+     * 
+     * @param wrongCheckers
+     * @return
+     */
+    private static String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
+        final String varName = "defaultCheckers";
+        final JsonArray jsonIssues = new JsonArray();
+        if (defaultCheckers != null && defaultCheckers.size() > 0) {
+            for (String entry : defaultCheckers) {
+                final JsonObject obj = new JsonObject();
+                obj.addProperty(ConfigConstants.RULENAME, entry);
+                jsonIssues.add(obj);
+            }
+        }
+        return ("\n var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
     }
 
 }

@@ -21,12 +21,12 @@
 
 <body class="container-fluid">
 	<header class="navbar sticky-top navbar-expand viadee-lightblue-bg">
-		<h3 id=modell></h3>
+		<h3 class="h3-header" id=modell></h3>
+		<a id="model_download" class="nav-item nav-link mr-4" href=""><img src="img/dl_button.png"
+			alt="Download BPMN" height="50" title="Download BPMN" />
+		</a>
 		<ul class="navbar-nav flex-row ml-md-auto">
-			<li class="nav-item"><a id="model_download"
-				class="nav-item nav-link mr-4 mt-3" href="" download>Download
-					BPMN</a></li>
-			<li class="nav-item"><a class="nav-item nav-link mr-4 mt-3"
+			<li class="nav-item"><a href="https://mvnrepository.com/artifact/de.viadee/viadeeProcessApplicationValidator" class="nav-item nav-link mr-4 mt-3 version"
 				id="vPAV"></a></li>
 			<li class="nav-item"><a class="nav-link mt-2 mr-4" id="logo"
 				href="https://viadee.github.io/vPAV/"> <img src="img/vPAV.png"
@@ -37,7 +37,7 @@
 					alt="GitHub" title="GitHub vPAV" />
 			</a></li>
 			<li class="nav-item"><a class="nav-link"
-				href="https://www.viadee.de/"> <img src="img/viadee_Logo.png"
+				href="https://www.viadee.de/"> <img src="img/viadee_Logo_lila.svg"
 					alt="viadee Homepage" height="50" title="viadee Homepage" />
 			</a></li>
 		</ul>
@@ -67,6 +67,10 @@
 		</div>
 	</div>
 
+	<!-- Unlocated checkers-->
+	<div id="unlocatedCheckersContainer">
+	</div>
+
 	<!-- reset Button -->
 	<div class="row">
 		<div class="col">
@@ -79,20 +83,19 @@
 	<div class="row">
 		<div class="col">
 			<button type="button" class="btn btn-viadee mt-2" id="success">Show
-				checker without issues</button>
+				checkers without issues</button>
 			<!-- <a class="pt-1 mt-0 mb-0 pl-0" id="success">Checker found no issues</a> -->
-			<h2 class="border border-light pt-2 mt-4 mb-0 pl-1" id="tableHeader">Error
-				list</h2>
+			<h2 class="border border-light pt-2 mt-4 mb-0 pl-1" id="tableHeader">Found Errors:</h2>
 			<table id="table_issues"
-				class="table table-bordered .table-responsive">
+				class="table table-row table-bordered .table-responsive">
 				<thead>
 					<tr id="tr_ueberschriften" class="table-primary">
-						<th id="th_ruleName">Rulename</th>
+						<th id="th_ruleName">Rule-Name</th>
 						<th id="th_elementId">Element-Id</th>
-						<th id="th_elementName">Elementname</th>
+						<th id="th_elementName">Element-Name</th>
 						<th id="th_classification">Class</th>
 						<th id="th_message">Message</th>
-						<th id="th_paths">Invalid Sequenzflow</th>
+						<th id="th_paths">Invalid Sequenceflow</th>
 					</tr>
 				</thead>
 			</table>
@@ -120,7 +123,8 @@
 	<!-- scripts -->
 	<!-- bpmn-js viewer -->
 	<script src="js/bpmn-navigated-viewer.js"></script>
-	<!-- bpmn-files, issues and pomInfo -->
+	<!-- bpmn-files, issues, unlocated checkers and pomInfo -->
+	<script src="js/checkers.js"></script>
 	<script src="js/bpmn_model.js"></script>
 	<script src="js/bpmn_validation.js"></script>
 	<script src="js/bpmn_validation_success.js"></script>

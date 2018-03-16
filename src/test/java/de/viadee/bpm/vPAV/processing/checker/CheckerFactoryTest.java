@@ -44,9 +44,6 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -57,7 +54,6 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
 /**
  * unit tests for class CheckerFactoryTest
@@ -102,11 +98,8 @@ public class CheckerFactoryTest {
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
         Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
         rules.put("JavaDelegateChecker", rule);
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstancesBpmnElement(rules, null, element,
+        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstances(rules, null,
                 new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should not be empty", !cElChecker.isEmpty());
@@ -125,11 +118,8 @@ public class CheckerFactoryTest {
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
         Rule rule = new Rule("WrongChecker", true, null, null, null, null);
         rules.put("WrongChecker", rule);
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstancesBpmnElement(rules, null, element,
+        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstances(rules, null,
                 new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
@@ -149,11 +139,8 @@ public class CheckerFactoryTest {
         settings.put("external_Location", setting);
         Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
         rules.put("WrongChecker", rule);
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstancesBpmnElement(rules, null, element,
+        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstances(rules, null,
                 new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());

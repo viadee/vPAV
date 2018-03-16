@@ -147,7 +147,7 @@ public class Graph implements IGraph {
         final List<Edge> edgeSucessorList = adjacencyListSucessor.get(from);
         Edge foundEdge = null;
         for (final Edge e : edgeSucessorList) {
-            if (e.from.toString().equals(from.toString()) && e.to.toString().equals(to.toString())) {
+            if (e.getFrom().toString().equals(from.toString()) && e.getTo().toString().equals(to.toString())) {
                 // delete
                 foundEdge = e;
             }
@@ -157,7 +157,7 @@ public class Graph implements IGraph {
         final List<Edge> edgePredecessorList = adjacencyListPredecessor.get(to);
         foundEdge = null;
         for (final Edge e : edgePredecessorList) {
-            if (e.to.toString().equals(from.toString()) && e.from.toString().equals(to.toString())) {
+            if (e.getTo().toString().equals(from.toString()) && e.getFrom().toString().equals(to.toString())) {
                 // delete
                 foundEdge = e;
             }
@@ -178,7 +178,7 @@ public class Graph implements IGraph {
         }
 
         for (Edge e : edgeList) {
-            if (e.to.equals(to)) {
+            if (e.getTo().equals(to)) {
                 return e;
             }
         }
@@ -227,21 +227,21 @@ public class Graph implements IGraph {
                         // 2) READ
                         // 3) DEFINED
                         if (outSuccessors.isEmpty()) {
-                            outSuccessors.putAll(t.to.getOut());
+                            outSuccessors.putAll(t.getTo().getOut());
                         } else {
-                            outSuccessors.putAll(unionWithStatePrecedence(outSuccessors, t.to.getOut()));
+                            outSuccessors.putAll(unionWithStatePrecedence(outSuccessors, t.getTo().getOut()));
                         }
                     } else {
                         // If the node is an other gateway, take the intersection of all predecessor variables.
                         // Follow the precedence rule (look above)
                         if (outSuccessors.isEmpty()) {
-                            outSuccessors.putAll(t.to.getOut());
+                            outSuccessors.putAll(t.getTo().getOut());
                         } else {
-                            outSuccessors.putAll(intersection(outSuccessors, t.to.getOut()));
+                            outSuccessors.putAll(intersection(outSuccessors, t.getTo().getOut()));
                         }
                     }
                 } else {
-                    outSuccessors.putAll(t.to.getOut());
+                    outSuccessors.putAll(t.getTo().getOut());
                 }
             }
         }
@@ -263,9 +263,9 @@ public class Graph implements IGraph {
         final List<Edge> edges = this.adjacencyListSucessor.get(startNode);
 
         for (final Edge t : edges) {
-            int occurrences = Collections.frequency(currentPath, t.to);
+            int occurrences = Collections.frequency(currentPath, t.getTo());
             if (occurrences < 2) { // case iterations n=1 and n=2 for loops
-                setAnomalyInformationRecursive(t.to, currentPath);
+                setAnomalyInformationRecursive(t.getTo(), currentPath);
             }
         }
 
@@ -335,8 +335,8 @@ public class Graph implements IGraph {
         }
 
         for (final Edge t : edges) {
-            if (!currentPath.contains(t.to) || t.to == anomaly.getVariable().getElement()) {
-                invalidPaths.addAll(getAllInvalidPathsRecursive(t.to, anomaly, currentPath));
+            if (!currentPath.contains(t.getTo()) || t.getTo() == anomaly.getVariable().getElement()) {
+                invalidPaths.addAll(getAllInvalidPathsRecursive(t.getTo(), anomaly, currentPath));
             }
         }
 

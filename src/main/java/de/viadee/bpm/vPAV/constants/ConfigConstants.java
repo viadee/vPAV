@@ -37,75 +37,75 @@ package de.viadee.bpm.vPAV.constants;
 
 public final class ConfigConstants {
 
-    public static final String RULESET = "ruleSet.xml";
+	public static final String RULESET = "ruleSet.xml";
 
-    public static final String RULESETDEFAULT = "ruleSetDefault.xml";
+	public static final String RULESETDEFAULT = "ruleSetDefault.xml";
 
-    public static final String RULESETPARENT = "parentRuleSet.xml";
+	public static final String RULESETPARENT = "parentRuleSet.xml";
 
-    public static final String HASPARENTRULESET = "HasParentRuleSet";
+	public static final String HASPARENTRULESET = "HasParentRuleSet";
 
-    public static final String IGNORE_FILE = "src/test/resources/.ignoreIssues";
+	public static final String IGNORE_FILE = "src/test/resources/.ignoreIssues";
 
-    public static final String BPMN_FILE_PATTERN = "**/*.bpmn";
+	public static final String BPMN_FILE_PATTERN = "**/*.bpmn";
 
-    public static final String DMN_FILE_PATTERN = "**/*.dmn";
+	public static final String DMN_FILE_PATTERN = "**/*.dmn";
 
-    public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
+	public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
 
-    public static final String JAVA_FILE_PATTERN = "**/*.java";
+	public static final String JAVA_FILE_PATTERN = "**/*.java";
 
-    public static final String EFFECTIVE_RULESET = "target/vPAV/effectiveRuleSet.xml";
+	public static final String EFFECTIVE_RULESET = "target/vPAV/effectiveRuleSet.xml";
 
-    public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
+	public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
 
-    public static final String VALIDATION_JS_MODEL_OUTPUT = "target/vPAV/js/bpmn_model.js";
+	public static final String VALIDATION_JS_MODEL_OUTPUT = "target/vPAV/js/bpmn_model.js";
 
-    public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
-    
-    public static final String VALIDATION_UNLOCATED_CHECKERS = "target/vPAV/js/unlocated_checkers.js";
+	public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
 
-    public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
+	public static final String VALIDATION_CHECKERS = "target/vPAV/js/checkers.js";
 
-    public static final String VALIDATION_JS_TMP = "target/vPAV/js/tmp.js";
+	public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
 
-    public static final String VALIDATION_JS_PROCESSVARIABLES = "target/vPAV/js/processVariables.js";
+	public static final String VALIDATION_JS_TMP = "target/vPAV/js/tmp.js";
 
-    public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";
+	public static final String VALIDATION_JS_PROCESSVARIABLES = "target/vPAV/js/processVariables.js";
 
-    public static final String VALIDATION_FOLDER = "target/vPAV/";
+	public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";
 
-    public static final String JS_FOLDER = "target/vPAV/js/";
+	public static final String VALIDATION_FOLDER = "target/vPAV/";
 
-    public static final String CSS_FOLDER = "target/vPAV/css/";
+	public static final String JS_FOLDER = "target/vPAV/js/";
 
-    public static final String IMG_FOLDER = "target/vPAV/img/";
+	public static final String CSS_FOLDER = "target/vPAV/css/";
 
-    public static final String BASEPATH = "src/main/resources/";
+	public static final String IMG_FOLDER = "target/vPAV/img/";
 
-    public static final String JAVAPATH = "src/main/java/";
+	public static final String BASEPATH = "src/main/resources/";
 
-    public static final String TEST_JAVAPATH = "src/test/java/";
+	public static final String JAVAPATH = "src/main/java/";
 
-    public static final String TEST_BASEPATH = "src/test/resources/";
+	public static final String TEST_JAVAPATH = "src/test/java/";
 
-    public static final String JS_BASEPATH = "src\\main\\resources\\";
+	public static final String TEST_BASEPATH = "src/test/resources/";
 
-    public static final String TARGET_CLASS_FOLDER = "target/classes";
+	public static final String JS_BASEPATH = "src\\main\\resources\\";
 
-    public static final String LOCATION = "location";
+	public static final String TARGET_CLASS_FOLDER = "target/classes";
 
-    public static final String VERSIONINGSCHEMEPACKAGE = "versioningSchemePackage";
+	public static final String LOCATION = "location";
 
-    public static final String VERSIONINGSCHEMECLASS = "versioningSchemeClass";
+	public static final String VERSIONINGSCHEMEPACKAGE = "versioningSchemePackage";
 
-    public static final String GROOVY = "groovy";
-    
-    public static final String RULENAME = "rulename";
+	public static final String VERSIONINGSCHEMECLASS = "versioningSchemeClass";
 
-    public static final String MESSAGE = "message";
+	public static final String GROOVY = "groovy";
 
-    private ConfigConstants() {
-    }
+	public static final String RULENAME = "rulename";
+
+	public static final String MESSAGE = "message";
+
+	private ConfigConstants() {
+	}
 
 }

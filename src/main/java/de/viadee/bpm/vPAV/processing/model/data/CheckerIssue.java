@@ -446,4 +446,9 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         else
             return false;
     }
+
+    @Override
+    public int hashCode() {
+        return elementId.hashCode();
+    }
 }

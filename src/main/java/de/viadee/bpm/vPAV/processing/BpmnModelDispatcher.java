@@ -150,8 +150,7 @@ public class BpmnModelDispatcher {
                 element = new BpmnElement(processdefinition.getPath(), baseElement);
             }
             final Collection<ElementChecker> checkerCollection = CheckerFactory
-                    .createCheckerInstancesBpmnElement(conf, resourcesNewestVersions, element,
-                            bpmnScanner);
+                    .createCheckerInstances(conf, resourcesNewestVersions, bpmnScanner);
             for (final ElementChecker checker : checkerCollection) {
                 issues.addAll(checker.check(element));
             }

@@ -506,8 +506,8 @@ public class ElementGraphBuilder {
         final Collection<List<Edge>> edges = subgraph.getEdges();
         for (final List<Edge> list : edges) {
             for (final Edge edge : list) {
-                final BpmnElement from = edge.from;
-                final BpmnElement to = edge.to;
+                final BpmnElement from = edge.getFrom();
+                final BpmnElement to = edge.getTo();
                 // add edge the the main data flow
                 graph.addEdge(from, to, 100);
             }

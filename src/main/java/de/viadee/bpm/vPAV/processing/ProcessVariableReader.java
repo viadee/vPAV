@@ -50,6 +50,10 @@ import javax.el.ELException;
 import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
+import org.camunda.bpm.engine.impl.juel.Builder;
+import org.camunda.bpm.engine.impl.juel.IdentifierNode;
+import org.camunda.bpm.engine.impl.juel.Tree;
+import org.camunda.bpm.engine.impl.juel.TreeBuilder;
 import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -82,10 +86,6 @@ import org.camunda.bpm.model.dmn.instance.Output;
 import org.camunda.bpm.model.dmn.instance.Text;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
-import de.odysseus.el.tree.IdentifierNode;
-import de.odysseus.el.tree.Tree;
-import de.odysseus.el.tree.TreeBuilder;
-import de.odysseus.el.tree.impl.Builder;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -998,8 +998,8 @@ public final class ProcessVariableReader {
 
         // HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
         // ${dateTime().plusWeeks(1).toDate()}
-        // TODO: Change expression evaluation to camunda engine
         final Pattern pattern = Pattern.compile("\\$\\{(\\w)*\\(.*\\)\\}");
+
         Matcher matcher = pattern.matcher(expression);
 
         if (matcher.matches()) {

@@ -40,9 +40,9 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
 public class Edge {
 
-    public BpmnElement from, to;
+    private BpmnElement from, to;
 
-    public int weight;
+    private int weight;
 
     public Edge(BpmnElement from, BpmnElement to, int weight) {
         if (from == null || to == null) {
@@ -51,6 +51,30 @@ public class Edge {
         this.from = from;
         this.to = to;
         this.weight = weight;
+    }
+
+    public void setFrom(final BpmnElement from) {
+        this.from = from;
+    }
+
+    public BpmnElement getFrom() {
+        return from;
+    }
+
+    public void setTo(final BpmnElement to) {
+        this.to = to;
+    }
+
+    public BpmnElement getTo() {
+        return to;
+    }
+
+    public void setWeight(final int weight) {
+        this.weight = weight;
+    }
+
+    public int getWeight() {
+        return weight;
     }
 
     @Override
