@@ -128,16 +128,24 @@ function addCountOverlay(overlays, bpmnFile) {
     //Add Overlays
     for (id in issues) {
         try {
+            
             var overlayHtml = document.createElement("span");
-            if(issues[id].i.classification == "ERROR"){
-                overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
-            }
-            if(issues[id].i.classification == "WARNING"){
-                overlayHtml.setAttribute("class", "badge badge-pill badge-warning");
-            }
-            if(issues[id].i.classification == "INFO"){
-                overlayHtml.setAttribute("class", "badge badge-pill badge-info");
-            }    
+
+            
+            issueSeverity.forEach(element => {        
+                if(element.id == issues[id].i.elementId){
+                    if(element.Criticality == "ERROR"){
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
+                    }
+                    if(element.Criticality  == "WARNING"){
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-warning");
+                    }
+                    if(element.Criticality  == "INFO"){
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-info");
+                    }   
+                }            
+            });
+
             overlayHtml.setAttribute("type", "button");
             overlayHtml.setAttribute("data-toggle", "bmodal");
             overlayHtml.setAttribute("data-target", "#issueModal");
@@ -619,3 +627,5 @@ viewer = initDiagram(diagramXMLSource[0], 0, null, false);
 activateLinkSuccess(diagramXMLSource[0].name);
 document.getElementById('vPAV').innerHTML = vPavVersion;
 showUnlocatedCheckers();
+
+
