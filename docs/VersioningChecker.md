@@ -39,6 +39,11 @@ Alternatively, if you use a package-based versioning scheme, the rule should be 
 The setting "versioningSchemePackage" includes an exemplary regular expression that matches package-based versioning, e.g.
 de.viadee.package.v10_19.example. This versioning scheme would be identified and in comparison, de.viadee.package.v12_20.example would be tagged as the newer version. This scheme is configurable as you desire. Beware, that as of now, the number of digits have to match and you need to fill up numbers with preceeding zeros.
 
+If the versioning scheme is based on packages, it is **mandatory** to adhere to our assumptions, i.e. two packages with different versions still contain the same classes (see figure below), else the VersioningChecker will malfunction.
+
+![Package based versioning](img/versioningSchemePackage.png "versioning with packages")
+
+
 Note, that **only one versioning scheme** can be used.
 
 Via `<state>true</state>` the check can be enabled.
