@@ -1,9 +1,67 @@
 # Release notes
 
+## 2.5.2-SNAPSHOT
+
+### Features
+**vPAV-168** Added information for severity, added unique issue ID to modal
+
+### Fixes
+
+### Misc
+
+## 2.5.1-SNAPSHOT
+
+### Features
+
+### Fixes
+**vPAV-160** Fixed a bug where wrongly name checkers have not been identified
+**vPAV-191** Fixed a bug where issues have not been whitelisted properly
+**vPAV-192** Removed automatic linkage for external checker 
+
+### Misc
+**vPAV-183** SonarQube cleanup
+**vPAV-174** Changed logos and other visuals
+
+## 2.5.0-SNAPSHOT
+
+### Features
+**vPAV-167** Added localization for DE and EN
+**vPAV-185** Added SignalEventChecker
+
+### Fixes
+
+### Misc
+**vPAV-187** Changed from BSD4 to BSD3 license
+**vPAV-172** Refactored CheckerIssue creation
+
+## 2.4.4-SNAPSHOT
+
+### Features
+**vPAV-176** Added check for redundant sequence flows
+
+### Fixes
+**vPAV-170** Added documentation for release management
+**vPAV-171** Removed <ModelConvention>
+
+### Misc
+**vPAV-173** Altered visual output
+
+## 2.4.3-SNAPSHOT
+
+### Features
+**vPAV-69** Added ExtensionChecker
+**vPAV-165** Expanded ruleSet to include description tags
+
+### Fixes
+
+### Misc 
+**vPAV-162** Improved documentation for whitelisting issues
+**vPAV-164** Extended documentation for CheckerIssue
+**vPAV-169** Added JUnit test for external checker + documentation
+
 ## 2.4.2-SNAPSHOT
 
 ### Features
-**vPAV-69** Added ExtensionChecker  
 **vPAV-156** Added check for expressions in MessageStartEvents
 
 ### Fixes
