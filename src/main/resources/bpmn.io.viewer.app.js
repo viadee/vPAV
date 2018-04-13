@@ -397,7 +397,7 @@ function createFooter() {
     var aI = document.createElement("a");
     aI.setAttribute("class", "text-muted-viadee float-right pr-2");
     aI.setAttribute("href", "https://www.viadee.de/impressum-datenschutz.html");
-    aI.innerHTML = "Impressum";
+    aI.innerHTML = "Imprint";
 
     fP.appendChild(aL);
     fP.appendChild(aI);
@@ -575,6 +575,16 @@ function setFocus(name) {
  * show checkers without issues 
  */
 function selectModel(name, issue_id, path_nr, func, path) {
+
+    var description = document.getElementById("tableHeader");
+    if(func == 3){        
+        description.setAttribute("data-content", 'Correct Checkers:');
+    } 
+    if(func == 0){       
+        description.setAttribute("data-content", 'Errors found:');
+    } 
+    
+
     document.getElementById("rowPath").setAttribute("class", "collapse");
 
     //delete footer
