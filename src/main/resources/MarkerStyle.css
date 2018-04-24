@@ -1,6 +1,6 @@
 :root {
 	--var-path: #f5c6cb;
-	--var-oneElement: rgba(255, 0, 0, 0.5);
+	--var-oneElement: rgba(223, 173, 72, 1);
 	--var-error: rgba(223, 173, 72, 1);
 	--var-warning: rgba(172,181,123, 1.0);
 	--var-info: rgba(112,186,204, 1.0);

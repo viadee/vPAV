@@ -128,8 +128,24 @@ function addCountOverlay(overlays, bpmnFile) {
     //Add Overlays
     for (id in issues) {
         try {
+            
             var overlayHtml = document.createElement("span");
-            overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
+
+            
+            issueSeverity.forEach(element => {        
+                if(element.id == issues[id].i.elementId){
+                    if(element.Criticality == "ERROR"){
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
+                    }
+                    if(element.Criticality  == "WARNING"){
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-warning");
+                    }
+                    if(element.Criticality  == "INFO"){
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-info");
+                    }   
+                }            
+            });
+
             overlayHtml.setAttribute("type", "button");
             overlayHtml.setAttribute("data-toggle", "bmodal");
             overlayHtml.setAttribute("data-target", "#issueModal");
@@ -167,6 +183,9 @@ function addCountOverlay(overlays, bpmnFile) {
                             var dCardRuleDescription = document.createElement("p");
                             dCardRuleDescription.setAttribute("class", "card-ruleDescription");
 
+                            var dCardIssueId = document.createElement("p");
+                            dCardIssueId.setAttribute("class", "card-issueId");
+
 
                             var oImg = document.createElement("img");
                             oImg.setAttribute('src', 'img/' + issue.classification + '.png');
@@ -179,6 +198,8 @@ function addCountOverlay(overlays, bpmnFile) {
                             dCardText.innerHTML =  "<h6><b>Issue:</b></h6> " + issue.message;
                             dCardRuleDescription.innerHTML = "<h6><b>Rule:</b></h6> " + issue.ruleDescription;
                             dCardElementDescription.innerHTML = "<h6><b>Reason:</b></h6> " + issue.elementDescription;
+                            dCardIssueId.innerHTML = "<h6><b>Issue Id:</b></h6>"  + issue.id;
+                            
 
                             dCard.appendChild(dCardTitle);
                             dCardBody.appendChild(dCardText);
@@ -186,6 +207,7 @@ function addCountOverlay(overlays, bpmnFile) {
                                 dCardBody.appendChild(dCardRuleDescription);
                             if(issue.elementDescription)
                                 dCardBody.appendChild(dCardElementDescription);
+                            dCardBody.appendChild(dCardIssueId);    
                             dCard.appendChild(dCardBody);
 
                             dialogContent.appendChild(dCard);
@@ -375,7 +397,7 @@ function createFooter() {
     var aI = document.createElement("a");
     aI.setAttribute("class", "text-muted-viadee float-right pr-2");
     aI.setAttribute("href", "https://www.viadee.de/impressum-datenschutz.html");
-    aI.innerHTML = "Impressum";
+    aI.innerHTML = "Imprint";
 
     fP.appendChild(aL);
     fP.appendChild(aI);
@@ -553,6 +575,16 @@ function setFocus(name) {
  * show checkers without issues 
  */
 function selectModel(name, issue_id, path_nr, func, path) {
+
+    var description = document.getElementById("tableHeader");
+    if(func == 3){        
+        description.setAttribute("data-content", 'Correct Checkers:');
+    } 
+    if(func == 0){       
+        description.setAttribute("data-content", 'Errors found:');
+    } 
+    
+
     document.getElementById("rowPath").setAttribute("class", "collapse");
 
     //delete footer
@@ -605,3 +637,5 @@ viewer = initDiagram(diagramXMLSource[0], 0, null, false);
 activateLinkSuccess(diagramXMLSource[0].name);
 document.getElementById('vPAV').innerHTML = vPavVersion;
 showUnlocatedCheckers();
+
+

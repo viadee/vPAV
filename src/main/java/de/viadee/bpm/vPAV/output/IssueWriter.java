@@ -63,8 +63,7 @@ public class IssueWriter {
      *            Errormessage
      * @return Issues
      */
-    public static Collection<CheckerIssue> createIssue(
-            final Rule rule, final CriticalityEnum classification,
+    public static Collection<CheckerIssue> createIssue(final Rule rule, final CriticalityEnum classification,
             final BpmnElement element, final String message) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -72,8 +71,7 @@ public class IssueWriter {
         final BaseElement baseElement = element.getBaseElement();
 
         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
-                element.getProcessdefinition(),
-                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                element.getProcessdefinition(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                 baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message));
 
         return issues;
@@ -93,8 +91,7 @@ public class IssueWriter {
      *            Description
      * @return Issues
      */
-    public static Collection<CheckerIssue> createIssue(
-            final Rule rule, final CriticalityEnum classification,
+    public static Collection<CheckerIssue> createIssue(final Rule rule, final CriticalityEnum classification,
             final BpmnElement element, final String message, final String description) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
@@ -102,8 +99,7 @@ public class IssueWriter {
         final BaseElement baseElement = element.getBaseElement();
 
         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
-                element.getProcessdefinition(),
-                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                element.getProcessdefinition(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                 baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, description));
 
         return issues;
@@ -130,12 +126,11 @@ public class IssueWriter {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(),
-                classification, var.getElement().getProcessdefinition(), var.getResourceFilePath(),
+        issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+                var.getElement().getProcessdefinition(), var.getResourceFilePath(),
                 var.getElement().getBaseElement().getId(),
                 var.getElement().getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
-                var.getName(),
-                anomaly.getAnomaly(), paths, message));
+                var.getName(), anomaly.getAnomaly(), paths, message));
 
         return issues;
     }
@@ -154,9 +149,8 @@ public class IssueWriter {
      *            Errormessage
      * @return Issues
      */
-    public static Collection<CheckerIssue> createIssue(
-            final Rule rule, final CriticalityEnum classification, final String resourceFile,
-            final BpmnElement element, final String message) {
+    public static Collection<CheckerIssue> createIssue(final Rule rule, final CriticalityEnum classification,
+            final String resourceFile, final BpmnElement element, final String message) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -185,14 +179,12 @@ public class IssueWriter {
      * @return Issues
      */
     public static CheckerIssue createIssue(final Rule rule, final CriticalityEnum classification,
-            final BpmnElement element,
-            final Entry<Element, Element> entry, final String message) {
+            final BpmnElement element, final Entry<Element, Element> entry, final String message) {
 
         final BaseElement baseElement = element.getBaseElement();
 
         return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
-                element.getProcessdefinition(),
-                entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                element.getProcessdefinition(), entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                 baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message);
 
     }
@@ -277,6 +269,54 @@ public class IssueWriter {
                 baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                 baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null);
 
+    }
+
+    /**
+     * 
+     * @param rule
+     *            Rule
+     * @param classification
+     *            CriticalityEnum
+     * @param element
+     *            BpmnElement
+     * @param javaReference
+     *            javaReference
+     * @param message
+     *            Errormessage
+     * @return Issue
+     */
+    public static CheckerIssue createIssueWithJavaRef(Rule rule, CriticalityEnum classification, BpmnElement element,
+            String javaReference, String message) {
+        final BaseElement baseElement = element.getBaseElement();
+
+        return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+                element.getProcessdefinition(), javaReference,
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null);
+    }
+
+    /**
+     * 
+     * @param rule
+     *            Rule
+     * @param classification
+     *            CriticalityEnum
+     * @param element
+     *            BpmnElement
+     * @param beanReference
+     *            beanReference
+     * @param message
+     *            Errormessage
+     * @return Issue
+     */
+    public static CheckerIssue createIssueWithBeanRef(Rule rule, CriticalityEnum classification, BpmnElement element,
+            String beanReference, String message) {
+        final BaseElement baseElement = element.getBaseElement();
+
+        return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+                element.getProcessdefinition(), beanReference,
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null);
     }
 
 }

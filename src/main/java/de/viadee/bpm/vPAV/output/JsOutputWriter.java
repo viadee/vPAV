@@ -41,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -83,8 +84,30 @@ public class JsOutputWriter implements IssueOutputWriter {
         final String defaultCheckers = transformDefaultRulesToJsDatastructure(
                 extractExternalCheckers(
                         RuntimeConfig.getInstance().getActiveRules()));
+        final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
 
-        writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers);
+        writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity);
+    }
+
+    /**
+     * Creates list which contains elements with multiple issues and the marks it with highest severity
+     * 
+     * @param issues
+     */
+    private Map<String, CriticalityEnum> createIssueSeverity(final Collection<CheckerIssue> issues) {
+        Map<String, CriticalityEnum> issueSeverity = new HashMap<String, CriticalityEnum>();
+        for (CheckerIssue issue : issues) {
+            if (!issueSeverity.containsKey(issue.getElementId())) {
+                issueSeverity.put(issue.getElementId(), issue.getClassification());
+            } else if (issueSeverity.containsKey(issue.getElementId())
+                    && issueSeverity.get(issue.getElementId()).equals(CriticalityEnum.WARNING)) {
+                if (issue.getClassification().equals(CriticalityEnum.ERROR)) {
+                    issueSeverity.put(issue.getElementId(), issue.getClassification());
+                }
+            }
+        }
+
+        return issueSeverity;
     }
 
     /**
@@ -111,7 +134,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @throws OutputWriterException
      */
     private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
-            final String defaultCheckers) throws OutputWriterException {
+            final String defaultCheckers, final String issueSeverity) throws OutputWriterException {
         if (json != null && !json.isEmpty()) {
             try {
                 final FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT);
@@ -141,6 +164,13 @@ public class JsOutputWriter implements IssueOutputWriter {
                             new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8);
                     defaultCheckerJS.write(defaultCheckers);
                     defaultCheckerJS.close();
+                }
+
+                if (issueSeverity != null && !issueSeverity.isEmpty()) {
+                    final OutputStreamWriter issueSeverityWriter = new OutputStreamWriter(
+                            new FileOutputStream(ConfigConstants.VALIDATION_ISSUE_SEVERITY), StandardCharsets.UTF_8);
+                    issueSeverityWriter.write(issueSeverity);
+                    issueSeverityWriter.close();
                 }
 
             } catch (final IOException ex) {
@@ -414,6 +444,26 @@ public class JsOutputWriter implements IssueOutputWriter {
                 final JsonObject obj = new JsonObject();
                 obj.addProperty(ConfigConstants.RULENAME, entry.getKey());
                 obj.addProperty(ConfigConstants.MESSAGE, entry.getValue());
+                jsonIssues.add(obj);
+            }
+        }
+        return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+    }
+
+    /**
+     * Transforms the collection of issue severities into JSON format
+     *
+     * @param issues
+     * @return
+     */
+    private static String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
+        final String varName = "issueSeverity";
+        final JsonArray jsonIssues = new JsonArray();
+        if (issues != null && issues.size() > 0) {
+            for (Map.Entry<String, CriticalityEnum> entry : issues.entrySet()) {
+                final JsonObject obj = new JsonObject();
+                obj.addProperty(BpmnConstants.ATTR_ID, entry.getKey());
+                obj.addProperty(ConfigConstants.CRITICALITY, entry.getValue().name().toString());
                 jsonIssues.add(obj);
             }
         }

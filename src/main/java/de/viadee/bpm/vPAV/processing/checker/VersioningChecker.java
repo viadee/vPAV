@@ -206,8 +206,8 @@ public class VersioningChecker extends AbstractElementChecker {
                 prepareBeanWarning(t_expression, element, issues);
             }
 
-            final String t_delegateExpression = baseElement
-                    .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_DEL);
+            final String t_delegateExpression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                    BpmnConstants.ATTR_DEL);
             if (t_delegateExpression != null && !FileScanner.getIsDirectory()) {
                 prepareBeanWarning(t_delegateExpression, element, issues);
             } else if (t_delegateExpression != null && FileScanner.getIsDirectory()) {
@@ -369,8 +369,7 @@ public class VersioningChecker extends AbstractElementChecker {
         final String beanReference = findBeanReferenceInExpression(expression, element, issues);
         if (beanReference != null && !resourcesNewestVersions.contains(beanReference)) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
-                    String.format(
-                            Messages.getString("VersioningChecker.9"), //$NON-NLS-1$
+                    String.format(Messages.getString("VersioningChecker.9"), //$NON-NLS-1$
                             beanReference, expression)));
         }
     }
@@ -389,10 +388,10 @@ public class VersioningChecker extends AbstractElementChecker {
         if (beanReference != null) {
             beanReference = beanReference.replace(".", "\\"); //$NON-NLS-1$ //$NON-NLS-2$
             beanReference = beanReference.substring(0, beanReference.lastIndexOf("\\")); //$NON-NLS-1$
+            beanReference = beanReference.replace("\\", "/");
 
             if (!resourcesNewestVersions.contains(beanReference)) {
-
-                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
+                issues.add(IssueWriter.createIssueWithBeanRef(rule, CriticalityEnum.WARNING, element, beanReference,
                         String.format(Messages.getString("VersioningChecker.13"), beanReference))); //$NON-NLS-1$
             }
         }
@@ -410,15 +409,12 @@ public class VersioningChecker extends AbstractElementChecker {
         if (javaReference != null) {
             if (!resourcesNewestVersions.contains(javaReference)) {
                 if (element.getBaseElement().getId() == null) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,
-                            String.format(
-                                    Messages.getString("VersioningChecker.14"), //$NON-NLS-1$
-                                    javaReference)));
+                    issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
+                            String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
+
                 } else {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,
-                            String.format(
-                                    Messages.getString("VersioningChecker.15"), //$NON-NLS-1$
-                                    javaReference)));
+                    issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
+                            String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
                 }
             }
         }

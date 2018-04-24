@@ -384,7 +384,7 @@ public abstract class AbstractRunner {
 		allFiles.add("MarkerStyle.css");
 
 		allFiles.add("vPAV.png");
-		allFiles.add("viadee_Logo_lila.svg");
+		allFiles.add("viadee_weiss.png");
 		allFiles.add("GitHub.png");
 		allFiles.add("error.png");
 		allFiles.add("warning.png");
@@ -416,7 +416,7 @@ public abstract class AbstractRunner {
 		fMap.put("MarkerStyle.css", ConfigConstants.CSS_FOLDER);
 
 		fMap.put("vPAV.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("viadee_Logo_lila.svg", ConfigConstants.IMG_FOLDER);
+		fMap.put("viadee_weiss.png", ConfigConstants.IMG_FOLDER);
 		fMap.put("GitHub.png", ConfigConstants.IMG_FOLDER);
 		fMap.put("error.png", ConfigConstants.IMG_FOLDER);
 		fMap.put("warning.png", ConfigConstants.IMG_FOLDER);
