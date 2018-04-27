@@ -45,7 +45,7 @@ public final class ConfigConstants {
 
     public static final String HASPARENTRULESET = "HasParentRuleSet";
 
-    public static final String IGNORE_FILE = "src/test/resources/.ignoreIssues";
+    public static final String IGNORE_FILE = "src/test/resources/ignoreIssues.txt";
 
     public static final String BPMN_FILE_PATTERN = "**/*.bpmn";
 
@@ -74,6 +74,8 @@ public final class ConfigConstants {
     public static final String VALIDATION_JS_PROCESSVARIABLES = "target/vPAV/js/processVariables.js";
 
     public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";
+
+    public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = "target/vPAV/js/ignoredIssues.js";
 
     public static final String VALIDATION_FOLDER = "target/vPAV/";
 

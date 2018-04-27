@@ -62,10 +62,29 @@ tbody tr td:nth-child(4) {
   max-width: 8em;
 }
 
+.btn-viadee-close {
+	cursor: pointer;
+}
+
 .btn-viadee {
 	color: #fff;
 	background-color: rgb(105, 24, 133);
 	border-color: rgb(90, 20, 114);
+	cursor: pointer;
+   	opacity: 0.8;
+}
+
+.btn-viadee:hover {
+    opacity: 1;   
+}
+
+.download {
+	position: absolute;
+	left: 1em;
+}
+
+.badge-pill-cursor {
+	cursor: pointer;
 }
 
 .viadee-head {

@@ -10,7 +10,7 @@ function markNodes(canvas, bpmnFile) {
                     canvas.addMarker(elementsToMark[id].elementId, 'warning');
                 } else if (elementsToMark[id].classification == "INFO") {
                     canvas.addMarker(elementsToMark[id].elementId, 'info');
-                } 
+                }
             }
         } catch (err) {
             console.log("element not found");
@@ -128,22 +128,22 @@ function addCountOverlay(overlays, bpmnFile) {
     //Add Overlays
     for (id in issues) {
         try {
-            
+
             var overlayHtml = document.createElement("span");
 
-            
-            issueSeverity.forEach(element => {        
-                if(element.id == issues[id].i.elementId){
-                    if(element.Criticality == "ERROR"){
-                        overlayHtml.setAttribute("class", "badge badge-pill badge-danger");
+
+            issueSeverity.forEach(element => {
+                if (element.id == issues[id].i.elementId) {
+                    if (element.Criticality == "ERROR") {
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-danger badge-pill-cursor");
                     }
-                    if(element.Criticality  == "WARNING"){
-                        overlayHtml.setAttribute("class", "badge badge-pill badge-warning");
+                    if (element.Criticality == "WARNING") {
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-warning badge-pill-cursor");
                     }
-                    if(element.Criticality  == "INFO"){
-                        overlayHtml.setAttribute("class", "badge badge-pill badge-info");
-                    }   
-                }            
+                    if (element.Criticality == "INFO") {
+                        overlayHtml.setAttribute("class", "badge badge-pill badge-info badge-pill-cursor");
+                    }
+                }
             });
 
             overlayHtml.setAttribute("type", "button");
@@ -186,7 +186,6 @@ function addCountOverlay(overlays, bpmnFile) {
                             var dCardIssueId = document.createElement("p");
                             dCardIssueId.setAttribute("class", "card-issueId");
 
-
                             var oImg = document.createElement("img");
                             oImg.setAttribute('src', 'img/' + issue.classification + '.png');
                             oImg.setAttribute('alt', 'issue.classification');
@@ -195,19 +194,19 @@ function addCountOverlay(overlays, bpmnFile) {
 
                             dCardTitle.innerHTML = issue.ruleName;
                             dCardTitle.appendChild(oImg);
-                            dCardText.innerHTML =  "<h6><b>Issue:</b></h6> " + issue.message;
+                            dCardText.innerHTML = "<h6><b>Issue:</b></h6> " + issue.message;
                             dCardRuleDescription.innerHTML = "<h6><b>Rule:</b></h6> " + issue.ruleDescription;
                             dCardElementDescription.innerHTML = "<h6><b>Reason:</b></h6> " + issue.elementDescription;
-                            dCardIssueId.innerHTML = "<h6><b>Issue Id:</b></h6>"  + issue.id;
-                            
+                            dCardIssueId.innerHTML = "<h6><b>Issue Id:</b></h6>" + issue.id;
+
 
                             dCard.appendChild(dCardTitle);
                             dCardBody.appendChild(dCardText);
-                            if(issue.ruleDescription)
+                            if (issue.ruleDescription)
                                 dCardBody.appendChild(dCardRuleDescription);
-                            if(issue.elementDescription)
+                            if (issue.elementDescription)
                                 dCardBody.appendChild(dCardElementDescription);
-                            dCardBody.appendChild(dCardIssueId);    
+                            dCardBody.appendChild(dCardIssueId);
                             dCard.appendChild(dCardBody);
 
                             dialogContent.appendChild(dCard);
@@ -241,6 +240,26 @@ function addCountOverlay(overlays, bpmnFile) {
         });
     }
 }
+
+// Add single issue to the ignoreIssues list
+function addIssue(){ 
+    var issueId = document.getElementsByClassName('card-issueId')[0].lastChild.data;  
+    var issue = document.getElementsByClassName('card-text')[0].lastChild.data;  
+    ignoredIssues[issueId] = '#' + issue.substring(0,29) + "..";
+}
+
+// download the ignoreIsses file 
+function downloadFile(){
+    var value;
+    var blob = "";
+    var output;
+    Object.keys(ignoredIssues).forEach(function(key) {
+        value = ignoredIssues[key];
+        blob = blob + value + "\n"+ key + "\n";
+    });    
+    download(new Blob([blob]),"ignoreIsses.txt", "text/plain");
+}
+
 //delete table under diagram
 function deleteTable() {
     //delete tBodys
@@ -273,20 +292,20 @@ function createTable(bpmnFile, tableContent) {
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
             myCell.setAttribute("id", issue.classification) // mark cell
-            
+
             //create link for default checkers
             var a = document.createElement("a");
             a.appendChild(myText);
-           
-            defaultCheckers.forEach(element => {                
-                if(issue.ruleName == element.rulename){
+
+            defaultCheckers.forEach(element => {
+                if (issue.ruleName == element.rulename) {
                     a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
-                    a.setAttribute("title", "Checker documentation");                    
-                }                 
+                    a.setAttribute("title", "Checker documentation");
+                }
             });
-            
-            myCell.appendChild(a);   
-           
+
+            myCell.appendChild(a);
+
             //link to docu            
             myRow.appendChild(myCell);
 
@@ -383,7 +402,7 @@ function createFooter() {
     const body = document.querySelector("body");
     var footer = document.createElement("footer");
     footer.setAttribute("class", "footer viadee-footer");
-    
+
 
     var fP = document.createElement("span");
     fP.setAttribute("class", "text-muted-viadee");
@@ -577,13 +596,13 @@ function setFocus(name) {
 function selectModel(name, issue_id, path_nr, func, path) {
 
     var description = document.getElementById("tableHeader");
-    if(func == 3){        
+    if (func == 3) {
         description.setAttribute("data-content", 'Correct Checkers:');
-    } 
-    if(func == 0){       
+    }
+    if (func == 0) {
         description.setAttribute("data-content", 'Errors found:');
-    } 
-    
+    }
+
 
     document.getElementById("rowPath").setAttribute("class", "collapse");
 
@@ -617,18 +636,18 @@ function selectModel(name, issue_id, path_nr, func, path) {
 
 
 
-function showUnlocatedCheckers() {    
+function showUnlocatedCheckers() {
     unlocatedCheckers.forEach(element => {
-        
-        var warningMsg = 
-        `<div class='row' id='unlocatedCheckers'>
+
+        var warningMsg =
+            `<div class='row' id='unlocatedCheckers'>
             <div class="col">
                 <div class="alert alert-danger mt-2 mb-0 ml-0 pb-1 pt-1 viadee-big-alert"
                 role="alert">${element.message}</div>
             </div>
         </div>`;
 
-        document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg; 
+        document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
     });
 }
 
