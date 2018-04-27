@@ -257,7 +257,7 @@ function downloadFile(){
         value = ignoredIssues[key];
         blob = blob + value + "\n"+ key + "\n";
     });    
-    download(new Blob([blob]),"ignoreIsses.txt", "text/plain");
+    download(new Blob([blob]),"ignoreIssues.txt", "text/plain");
 }
 
 //delete table under diagram
