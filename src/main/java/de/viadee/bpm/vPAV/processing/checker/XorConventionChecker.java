@@ -58,8 +58,17 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class XorConventionChecker extends AbstractElementChecker {
 
+    private static XorConventionChecker instance;
+
     public XorConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static XorConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (XorConventionChecker.instance == null) {
+            XorConventionChecker.instance = new XorConventionChecker(rule, bpmnScanner);
+        }
+        return XorConventionChecker.instance;
     }
 
     /**
@@ -84,7 +93,8 @@ public class XorConventionChecker extends AbstractElementChecker {
                         && settings.get(BpmnConstants.REQUIRED_DEFAULT).getValue().equals("true") //$NON-NLS-1$
                         && bpmnElement.getAttributeValue(BpmnConstants.DEFAULT) == null) {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                            String.format(Messages.getString("XorConventionChecker.1"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
+                            String.format(Messages.getString("XorConventionChecker.1"), //$NON-NLS-1$
+                                    CheckName.checkName(bpmnElement))));
                 }
 
                 final ArrayList<ElementConvention> elementConventions = (ArrayList<ElementConvention>) rule

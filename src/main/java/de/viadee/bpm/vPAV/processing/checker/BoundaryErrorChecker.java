@@ -63,10 +63,19 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class BoundaryErrorChecker extends AbstractElementChecker {
 
+    private static BoundaryErrorChecker instance;
+
     private static Logger logger = Logger.getLogger(BoundaryErrorChecker.class.getName());
 
     public BoundaryErrorChecker(final Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static BoundaryErrorChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (BoundaryErrorChecker.instance == null) {
+            BoundaryErrorChecker.instance = new BoundaryErrorChecker(rule, bpmnScanner);
+        }
+        return BoundaryErrorChecker.instance;
     }
 
     @Override

@@ -48,13 +48,20 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
-/**
- *
- */
 public class ProcessVariablesNameConventionChecker extends AbstractElementChecker {
+
+    private static ProcessVariablesNameConventionChecker instance;
 
     public ProcessVariablesNameConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static ProcessVariablesNameConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (ProcessVariablesNameConventionChecker.instance == null) {
+            ProcessVariablesNameConventionChecker.instance = new ProcessVariablesNameConventionChecker(rule,
+                    bpmnScanner);
+        }
+        return ProcessVariablesNameConventionChecker.instance;
     }
 
     /**

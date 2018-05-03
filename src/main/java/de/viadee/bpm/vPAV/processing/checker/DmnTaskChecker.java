@@ -56,8 +56,17 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
+    private static DmnTaskChecker instance;
+
     public DmnTaskChecker(final Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static DmnTaskChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (DmnTaskChecker.instance == null) {
+            DmnTaskChecker.instance = new DmnTaskChecker(rule, bpmnScanner);
+        }
+        return DmnTaskChecker.instance;
     }
 
     /**
@@ -81,7 +90,8 @@ public class DmnTaskChecker extends AbstractElementChecker {
                     if (dmnAttr == null || dmnAttr.trim().length() == 0) {
                         // Error, because no delegateExpression has been configured
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                String.format(Messages.getString("DmnTaskChecker.0"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
+                                String.format(Messages.getString("DmnTaskChecker.0"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
                     } else {
                         issues.addAll(checkDMNFile(element, dmnAttr));
                     }

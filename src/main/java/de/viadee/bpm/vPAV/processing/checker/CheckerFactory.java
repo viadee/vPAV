@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -82,23 +83,37 @@ public final class CheckerFactory {
             if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")) { //$NON-NLS-1$
                 try {
                     if (!rule.getKey().equals("VersioningChecker")) { //$NON-NLS-1$
-                        Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class,
-                                BpmnScanner.class);
-                        AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(),
-                                bpmnScanner);
-                        checkers.add(aChecker);
+
+                        if (rule.getValue().isActive() && rule.getValue().getSettings() != null
+                                && rule.getValue().getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
+                            Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class,
+                                    BpmnScanner.class);
+                            AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(),
+                                    bpmnScanner);
+                            checkers.add(aChecker);
+                        } else {
+
+                            Class clazz = Class.forName(fullyQualifiedName);
+                            Method m = clazz.getDeclaredMethod("getInstance", Rule.class, BpmnScanner.class);
+                            Object o = m.invoke(null, new Object[] { rule.getValue(), bpmnScanner });
+
+                            checkers.add((AbstractElementChecker) o);
+                        }
+
                     } else {
-                        Constructor<?> c = Class.forName(fullyQualifiedName).getConstructor(Rule.class,
-                                BpmnScanner.class, Collection.class);
-                        AbstractElementChecker aChecker = (AbstractElementChecker) c.newInstance(rule.getValue(),
-                                bpmnScanner,
-                                resourcesNewestVersions);
-                        checkers.add(aChecker);
+
+                        Class clazz = Class.forName(fullyQualifiedName);
+                        Method m = clazz.getDeclaredMethod("getInstance", Rule.class, BpmnScanner.class,
+                                Collection.class);
+                        Object o = m.invoke(null,
+                                new Object[] { rule.getValue(), bpmnScanner, resourcesNewestVersions });
+
+                        checkers.add((AbstractElementChecker) o);
                     }
 
                 } catch (NoSuchMethodException | SecurityException | ClassNotFoundException
-                        | InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException e) {
+                        | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException | InstantiationException e) {
                     LOGGER.warning("Class " + fullyQualifiedName + " not found or couldn't be instantiated"); //$NON-NLS-1$ //$NON-NLS-2$
                     rule.getValue().deactivate();
                 }

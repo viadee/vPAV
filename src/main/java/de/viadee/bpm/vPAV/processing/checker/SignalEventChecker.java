@@ -52,8 +52,17 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class SignalEventChecker extends AbstractElementChecker {
 
+    private static SignalEventChecker instance;
+
     public SignalEventChecker(Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static SignalEventChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (SignalEventChecker.instance == null) {
+            SignalEventChecker.instance = new SignalEventChecker(rule, bpmnScanner);
+        }
+        return SignalEventChecker.instance;
     }
 
     @Override

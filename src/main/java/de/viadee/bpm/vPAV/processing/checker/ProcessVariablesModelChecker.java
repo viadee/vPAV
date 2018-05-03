@@ -55,10 +55,20 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 
     private final Map<AnomalyContainer, List<Path>> invalidPathsMap;
 
+    private static ProcessVariablesModelChecker instance;
+
     public ProcessVariablesModelChecker(final Rule rule,
             final Map<AnomalyContainer, List<Path>> invalidPathsMap) {
         this.rule = rule;
         this.invalidPathsMap = invalidPathsMap;
+    }
+
+    public static ProcessVariablesModelChecker getInstance(final Rule rule,
+            final Map<AnomalyContainer, List<Path>> invalidPathsMap) {
+        if (ProcessVariablesModelChecker.instance == null) {
+            ProcessVariablesModelChecker.instance = new ProcessVariablesModelChecker(rule, invalidPathsMap);
+        }
+        return ProcessVariablesModelChecker.instance;
     }
 
     /**

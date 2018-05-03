@@ -68,8 +68,17 @@ public class FieldInjectionChecker extends AbstractElementChecker {
 
     private static final Logger LOGGER = Logger.getLogger(FieldInjectionChecker.class.getName());
 
+    private static FieldInjectionChecker instance;
+
     public FieldInjectionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static FieldInjectionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (FieldInjectionChecker.instance == null) {
+            FieldInjectionChecker.instance = new FieldInjectionChecker(rule, bpmnScanner);
+        }
+        return FieldInjectionChecker.instance;
     }
 
     /**
