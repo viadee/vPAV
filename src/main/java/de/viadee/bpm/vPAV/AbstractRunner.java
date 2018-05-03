@@ -524,12 +524,9 @@ public abstract class AbstractRunner {
 
         final Map<String, String> ignoredIssuesMap = getIgnoredIssuesMap();
         final Collection<String> ignoredIssues = new ArrayList<String>();
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(filePath);
-        } catch (final FileNotFoundException ex) {
-            logger.info("ignoreIssues.txt file doesn't exist");
-        }
+
+        FileReader fileReader = createFileReader(filePath);
+
         if (fileReader != null) {
             final BufferedReader bufferedReader = new BufferedReader(fileReader);
             String zeile = bufferedReader.readLine();
@@ -540,8 +537,37 @@ public abstract class AbstractRunner {
                 zeile = bufferedReader.readLine();
             }
             bufferedReader.close();
+            fileReader.close();
         }
         return ignoredIssues;
+    }
+
+    /**
+     * 
+     * @param filePath
+     *            Path to ignoreIssues file
+     * @return FileReader ignoreIssue file
+     */
+    private static FileReader createFileReader(final String filePath) {
+
+        FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(ConfigConstants.IGNORE_FILE_OLD);
+
+            if (fileReader != null) {
+                logger.warning(
+                        "Usage of .ignoreIssues is deprecated. Please use ignoreIssues.txt to whitelist issues.");
+            }
+        } catch (final FileNotFoundException ex) {
+        }
+
+        try {
+            fileReader = new FileReader(filePath);
+        } catch (final FileNotFoundException ex) {
+            logger.info(ex.getMessage());
+        }
+
+        return fileReader;
     }
 
     /**
