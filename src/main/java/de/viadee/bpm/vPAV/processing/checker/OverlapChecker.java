@@ -50,8 +50,17 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class OverlapChecker extends AbstractElementChecker {
 
+    private static OverlapChecker instance;
+
     public OverlapChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static OverlapChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (OverlapChecker.instance == null) {
+            OverlapChecker.instance = new OverlapChecker(rule, bpmnScanner);
+        }
+        return OverlapChecker.instance;
     }
 
     /**

@@ -66,8 +66,17 @@ import net.time4j.range.MomentInterval;
 
 public class TimerExpressionChecker extends AbstractElementChecker {
 
+    private static TimerExpressionChecker instance;
+
     public TimerExpressionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static TimerExpressionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (TimerExpressionChecker.instance == null) {
+            TimerExpressionChecker.instance = new TimerExpressionChecker(rule, bpmnScanner);
+        }
+        return TimerExpressionChecker.instance;
     }
 
     /**

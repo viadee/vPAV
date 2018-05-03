@@ -142,6 +142,10 @@ public class BpmnModelDispatcher {
             issues.addAll(processVarChecker.check(modelInstance));
         }
 
+        // create checkerInstances as singletons
+        Collection<ElementChecker> checkerInstances = createCheckerSingletons(resourcesNewestVersions, conf,
+                bpmnScanner, issues);
+
         // execute element checkers
         for (final BaseElement baseElement : baseElements) {
             BpmnElement element = graphBuilder.getElement(baseElement.getId());
@@ -149,9 +153,7 @@ public class BpmnModelDispatcher {
                 // if element is not in the data flow graph, create it.
                 element = new BpmnElement(processdefinition.getPath(), baseElement);
             }
-            final Collection<ElementChecker> checkerCollection = CheckerFactory
-                    .createCheckerInstances(conf, resourcesNewestVersions, bpmnScanner);
-            for (final ElementChecker checker : checkerCollection) {
+            for (final ElementChecker checker : checkerInstances) {
                 issues.addAll(checker.check(element));
             }
 
@@ -166,6 +168,26 @@ public class BpmnModelDispatcher {
         }
 
         return issues;
+    }
+
+    /**
+     * 
+     * @param resourcesNewestVersions
+     * @param conf
+     * @param bpmnScanner
+     * @param issues
+     * @param element
+     * @return
+     * @throws ConfigItemNotFoundException
+     */
+    private static Collection<ElementChecker> createCheckerSingletons(final Collection<String> resourcesNewestVersions,
+            final Map<String, Rule> conf, BpmnScanner bpmnScanner, final Collection<CheckerIssue> issues)
+            throws ConfigItemNotFoundException {
+
+        final Collection<ElementChecker> checkerCollection = CheckerFactory
+                .createCheckerInstances(conf, resourcesNewestVersions, bpmnScanner);
+
+        return checkerCollection;
     }
 
     private static String getClassName(Class<?> clazz) {

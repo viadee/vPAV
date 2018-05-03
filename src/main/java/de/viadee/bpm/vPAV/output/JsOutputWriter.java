@@ -85,8 +85,9 @@ public class JsOutputWriter implements IssueOutputWriter {
                 extractExternalCheckers(
                         RuntimeConfig.getInstance().getActiveRules()));
         final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
+        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(AbstractRunner.getIgnoredIssuesMap());
 
-        writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity);
+        writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues);
     }
 
     /**
@@ -134,7 +135,8 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @throws OutputWriterException
      */
     private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
-            final String defaultCheckers, final String issueSeverity) throws OutputWriterException {
+            final String defaultCheckers, final String issueSeverity, final String ignoredIssues)
+            throws OutputWriterException {
         if (json != null && !json.isEmpty()) {
             try {
                 final FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT);
@@ -171,6 +173,13 @@ public class JsOutputWriter implements IssueOutputWriter {
                             new FileOutputStream(ConfigConstants.VALIDATION_ISSUE_SEVERITY), StandardCharsets.UTF_8);
                     issueSeverityWriter.write(issueSeverity);
                     issueSeverityWriter.close();
+                }
+                if (ignoredIssues != null && !ignoredIssues.isEmpty()) {
+                    final OutputStreamWriter ignoredIssuesWriter = new OutputStreamWriter(
+                            new FileOutputStream(ConfigConstants.VALIDATION_IGNORED_ISSUES_OUTPUT),
+                            StandardCharsets.UTF_8);
+                    ignoredIssuesWriter.write(ignoredIssues);
+                    ignoredIssuesWriter.close();
                 }
 
             } catch (final IOException ex) {
@@ -468,6 +477,28 @@ public class JsOutputWriter implements IssueOutputWriter {
             }
         }
         return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+    }
+
+    /**
+     * Transforms the map of ignored issues into JSON format
+     * 
+     * @param ignoredIssues
+     * @return
+     */
+    private String transformIgnoredIssuesToJsDatastructure(Map<String, String> ignoredIssues) {
+        final String ignoredIssuesList = "ignoredIssues";
+        final JsonArray ignoredIssesJson = new JsonArray();
+
+        if (ignoredIssues != null && ignoredIssues.size() > 0) {
+            for (Map.Entry<String, String> entry : ignoredIssues.entrySet()) {
+                final JsonObject obj = new JsonObject();
+                obj.addProperty("ID", entry.getKey());
+                obj.addProperty("Comment", entry.getValue());
+                ignoredIssesJson.add(obj);
+            }
+        }
+        return ("var " + ignoredIssuesList + " = "
+                + new GsonBuilder().setPrettyPrinting().create().toJson(ignoredIssues) + ";");
     }
 
     /**

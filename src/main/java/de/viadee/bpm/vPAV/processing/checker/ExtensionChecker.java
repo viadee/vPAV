@@ -54,8 +54,17 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class ExtensionChecker extends AbstractElementChecker {
 
+    private static ExtensionChecker instance;
+
     public ExtensionChecker(Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static ExtensionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (ExtensionChecker.instance == null) {
+            ExtensionChecker.instance = new ExtensionChecker(rule, bpmnScanner);
+        }
+        return ExtensionChecker.instance;
     }
 
     @Override

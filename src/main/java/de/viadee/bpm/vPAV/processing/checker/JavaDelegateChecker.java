@@ -64,8 +64,17 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class JavaDelegateChecker extends AbstractElementChecker {
 
+    private static JavaDelegateChecker instance;
+
     public JavaDelegateChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static JavaDelegateChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (JavaDelegateChecker.instance == null) {
+            JavaDelegateChecker.instance = new JavaDelegateChecker(rule, bpmnScanner);
+        }
+        return JavaDelegateChecker.instance;
     }
 
     /**
@@ -200,7 +209,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                         && exprAttr == null && typeAttr == null) {
                     // No technical attributes have been added
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                            String.format(Messages.getString("JavaDelegateChecker.9"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
+                            String.format(Messages.getString("JavaDelegateChecker.9"), //$NON-NLS-1$
+                                    CheckName.checkName(bpmnElement))));
                 }
         }
 

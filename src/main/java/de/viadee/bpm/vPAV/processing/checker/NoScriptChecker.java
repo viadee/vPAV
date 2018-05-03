@@ -54,8 +54,17 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoScriptChecker extends AbstractElementChecker {
 
+    private static NoScriptChecker instance;
+
     public NoScriptChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
+    }
+
+    public static NoScriptChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
+        if (NoScriptChecker.instance == null) {
+            NoScriptChecker.instance = new NoScriptChecker(rule, bpmnScanner);
+        }
+        return NoScriptChecker.instance;
     }
 
     /**
@@ -84,7 +93,8 @@ public class NoScriptChecker extends AbstractElementChecker {
                 if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
                     for (String place : scriptTypes)
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                String.format(Messages.getString("NoScriptChecker.0"), CheckName.checkName(bpmnElement), place))); //$NON-NLS-1$
+                                String.format(Messages.getString("NoScriptChecker.0"), CheckName.checkName(bpmnElement), //$NON-NLS-1$
+                                        place)));
                 } else {
                     ArrayList<String> allowedPlaces = settings
                             .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
@@ -92,7 +102,8 @@ public class NoScriptChecker extends AbstractElementChecker {
                         for (String scriptType : scriptTypes)
                             if (!allowedPlaces.contains(scriptType))
                                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                        String.format(Messages.getString("NoScriptChecker.1"), CheckName.checkName(bpmnElement), //$NON-NLS-1$
+                                        String.format(Messages.getString("NoScriptChecker.1"), //$NON-NLS-1$
+                                                CheckName.checkName(bpmnElement),
                                                 scriptType)));
                 }
             }
