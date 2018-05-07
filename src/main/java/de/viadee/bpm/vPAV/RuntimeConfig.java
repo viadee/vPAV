@@ -40,8 +40,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.project.MavenProject;
 import org.springframework.context.ApplicationContext;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -104,23 +102,7 @@ public class RuntimeConfig {
 
     public ClassLoader getClassLoader() {
         return classLoader;
-    }
-
-    /**
-     * Retrieves the classloader for a given MavenProject
-     *
-     * @param project
-     *            MavenProject
-     * @return Classloader
-     * @throws MalformedURLException
-     *             indicate that a malformed URL has occurred
-     * @throws DependencyResolutionRequiredException
-     *             DependencyResolutionRequiredException
-     */
-    public ClassLoader getClassLoader(MavenProject project)
-            throws MalformedURLException, DependencyResolutionRequiredException {
-        return FileScanner.getClassLoader(project);
-    }
+    }  
 
     public boolean isTest() {
         return test;
