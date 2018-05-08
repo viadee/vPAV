@@ -4,7 +4,7 @@
 	<groupId>de.viadee</groupId>
 	<artifactId>viadeeProcessApplicationValidator</artifactId>
 
-	<version>2.5.4</version>
+	<version>2.5.4-SNAPSHOT</version>
 
 	<packaging>maven-plugin</packaging>
 
