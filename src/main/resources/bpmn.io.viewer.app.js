@@ -187,8 +187,8 @@ function addCountOverlay(overlays, bpmnFile) {
                             dCardIssueId.setAttribute("class", "card-issueId issue-id");
 
                             var dCardIssueButton = document.createElement("button");
-                            dCardIssueButton.setAttribute("class", "btn btn-viadee issue-button");
-                            dCardIssueButton.setAttribute("onclick","addIssue()");
+                            dCardIssueButton.setAttribute("class", "btn btn-viadee issue-button");                           
+                            dCardIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardIssueButton]));
                             dCardIssueButton.innerHTML = "Add Issue";
                             
                             var oImg = document.createElement("img");
@@ -248,17 +248,15 @@ function addCountOverlay(overlays, bpmnFile) {
 }
 
 // Add single issue to the ignoreIssues list
-function addIssue(){ 
-    var issueId = document.getElementsByClassName('card-issueId')[0].lastChild.data;  
-    var issue = document.getElementsByClassName('card-text')[0].lastChild.data;  
-    ignoredIssues[issueId] = '#' + issue.substring(0,29) + "..";
+function addIssue(issue){         
+    ignoredIssues[issue[0]] = '#' + issue[1].substring(0,29) + "..";
+    issue[2].disabled = true;
 }
 
-// download the ignoreIsses file 
+// download the ignoreIssues file 
 function downloadFile(){
     var value;
     var blob = "";
-    var output;
     Object.keys(ignoredIssues).forEach(function(key) {
         value = ignoredIssues[key];
         blob = blob + value + "\n"+ key + "\n";
