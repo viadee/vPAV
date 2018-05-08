@@ -47,6 +47,8 @@ public final class ConfigConstants {
 
     public static final String IGNORE_FILE = "src/test/resources/ignoreIssues.txt";
 
+    public static final String IGNORE_FILE_OLD = "src/test/resources/.ignoreIssues";
+
     public static final String BPMN_FILE_PATTERN = "**/*.bpmn";
 
     public static final String DMN_FILE_PATTERN = "**/*.dmn";

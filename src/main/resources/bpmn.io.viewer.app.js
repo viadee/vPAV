@@ -184,14 +184,19 @@ function addCountOverlay(overlays, bpmnFile) {
                             dCardRuleDescription.setAttribute("class", "card-ruleDescription");
 
                             var dCardIssueId = document.createElement("p");
-                            dCardIssueId.setAttribute("class", "card-issueId");
+                            dCardIssueId.setAttribute("class", "card-issueId issue-id");
 
+                            var dCardIssueButton = document.createElement("button");
+                            dCardIssueButton.setAttribute("class", "btn btn-viadee issue-button");
+                            dCardIssueButton.setAttribute("onclick","addIssue()");
+                            dCardIssueButton.innerHTML = "Add Issue";
+                            
                             var oImg = document.createElement("img");
                             oImg.setAttribute('src', 'img/' + issue.classification + '.png');
                             oImg.setAttribute('alt', 'issue.classification');
                             oImg.setAttribute('class', 'float-left mr-2');
                             oImg.setAttribute("title", issue.classification);
-
+                            
                             dCardTitle.innerHTML = issue.ruleName;
                             dCardTitle.appendChild(oImg);
                             dCardText.innerHTML = "<h6><b>Issue:</b></h6> " + issue.message;
@@ -201,13 +206,14 @@ function addCountOverlay(overlays, bpmnFile) {
 
 
                             dCard.appendChild(dCardTitle);
-                            dCardBody.appendChild(dCardText);
+                            dCardBody.appendChild(dCardText);                            
                             if (issue.ruleDescription)
                                 dCardBody.appendChild(dCardRuleDescription);
                             if (issue.elementDescription)
                                 dCardBody.appendChild(dCardElementDescription);
                             dCardBody.appendChild(dCardIssueId);
                             dCard.appendChild(dCardBody);
+                            dCardBody.appendChild(dCardIssueButton);
 
                             dialogContent.appendChild(dCard);
                         }
