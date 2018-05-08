@@ -52,8 +52,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.DirectoryScanner;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelException;
@@ -251,28 +249,6 @@ public class FileScanner {
      */
     public Collection<String> getResourcesNewestVersions() {
         return resourcesNewestVersions;
-    }
-
-    /**
-     * Get class loader for the maven project, which uses this plugin
-     *
-     * @param project
-     * @return
-     * @throws MalformedURLException
-     * @throws DependencyResolutionRequiredException
-     */
-    static ClassLoader getClassLoader(final MavenProject project)
-            throws MalformedURLException, DependencyResolutionRequiredException {
-        @SuppressWarnings("unchecked")
-        final List<String> classPathElements = project.getRuntimeClasspathElements();
-        final List<URL> classpathElementUrls = new ArrayList<URL>(classPathElements.size());
-        for (final String classPathElement : classPathElements) {
-            classpathElementUrls.add(new File(classPathElement).toURI().toURL());
-        }
-        classpathElementUrls.add(new File(ConfigConstants.TEST_BASEPATH).toURI().toURL());
-        classpathElementUrls.add(new File(ConfigConstants.JAVAPATH).toURI().toURL());
-        return new URLClassLoader(classpathElementUrls.toArray(new URL[classpathElementUrls.size()]),
-                Thread.currentThread().getContextClassLoader());
     }
 
     /**
