@@ -152,7 +152,7 @@ public class ElementGraphBuilder {
                 // initialize element
                 final BpmnElement node = new BpmnElement(processdefinition, element);
                 // examine process variables and save it with access operation
-                final Map<String, ProcessVariable> variables = new ProcessVariableReader(decisionRefToPathMap,
+                final Map<String, ProcessVariable> variables = new ProcessVariableReaderRegex(decisionRefToPathMap,
                         bpmnScanner).getVariablesFromElement(node);
                 // examine process variables for element and set it
                 node.setProcessVariables(variables);
@@ -375,7 +375,7 @@ public class ElementGraphBuilder {
             // add elements of the sub process as nodes
             final BpmnElement node = new BpmnElement(processdefinitionPath, subElement);
             // determine process variables with operations
-            final Map<String, ProcessVariable> variables = new ProcessVariableReader(decisionRefToPathMap, bpmnScanner)
+            final Map<String, ProcessVariable> variables = new ProcessVariableReaderRegex(decisionRefToPathMap, bpmnScanner)
                     .getVariablesFromElement(node);
             // set process variables for the node
             node.setProcessVariables(variables);

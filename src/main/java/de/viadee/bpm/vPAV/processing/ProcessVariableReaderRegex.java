@@ -100,15 +100,15 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
  * search process variables for an bpmn element
  *
  */
-public final class ProcessVariableReader {
+public final class ProcessVariableReaderRegex implements ProcessVariableReaderI {
 
     private final Map<String, String> decisionRefToPathMap;
 
     private final BpmnScanner bpmnScanner;
 
-    public static final Logger LOGGER = Logger.getLogger(ProcessVariableReader.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(ProcessVariableReaderRegex.class.getName());
 
-    public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, BpmnScanner scanner) {
+    public ProcessVariableReaderRegex(final Map<String, String> decisionRefToPathMap, BpmnScanner scanner) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.bpmnScanner = scanner;
     }

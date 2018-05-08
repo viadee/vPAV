@@ -57,7 +57,7 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
-public class ProcessVariableReaderTest {
+public class ProcessVariableReaderRegexTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
@@ -90,7 +90,7 @@ public class ProcessVariableReaderTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+        final ProcessVariableReaderRegex variableReader = new ProcessVariableReaderRegex(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);
@@ -108,7 +108,7 @@ public class ProcessVariableReaderTest {
         final Collection<CallActivity> allServiceTasks = modelInstance
                 .getModelElementsByType(CallActivity.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+        final ProcessVariableReaderRegex variableReader = new ProcessVariableReaderRegex(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);
