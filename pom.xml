@@ -169,6 +169,12 @@
 			<artifactId>time4j-range</artifactId>
 			<version>4.33</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/soot/soot -->
+		<dependency>
+		    <groupId>ca.mcgill.sable</groupId>
+		    <artifactId>soot</artifactId>
+		    <version>3.0.0-SNAPSHOT</version>
+		</dependency>
 
 	</dependencies>
 
