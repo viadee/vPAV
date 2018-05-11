@@ -1,32 +1,26 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
- * All rights reserved.
+ * Copyright © 2018, viadee Unternehmensberatung GmbH All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
+ * * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
  *
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
+ * * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
  *
- * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
+ * * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV;
@@ -92,6 +86,8 @@ public abstract class AbstractRunner {
 
     private static boolean isMisconfigured = false;
 
+    private static boolean checkProcessVariables = false;
+
     /**
      * Main method which represents lifecycle of the validation process Calls main functions
      */
@@ -104,7 +100,7 @@ public abstract class AbstractRunner {
         scanClassPath(rules);
 
         // 3
-        getProcessVariables();
+        getProcessVariables(rules);
 
         // 4
         createIssues(rules);
@@ -118,7 +114,7 @@ public abstract class AbstractRunner {
         // 7
         copyFiles();
 
-        logger.info("BPMN validation successful completed");
+        logger.info("BPMN validation successfully completed");
     }
 
     /**
@@ -198,9 +194,15 @@ public abstract class AbstractRunner {
     /**
      * Initializes the variableScanner to scan and read outer process variables with the current javaResources
      */
-    private static void getProcessVariables() {
-        variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
-        readOuterProcessVariables(variableScanner);
+    private static void getProcessVariables(Map<String, Rule> rules) {
+        if (rules.get("ProcessVariablesModelChecker").isActive()
+                || rules.get("ProcessVariablesNameConventionChecker").isActive()) {
+            variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
+            readOuterProcessVariables(variableScanner);
+            setCheckProcessVariables(true);
+        } else {
+            setCheckProcessVariables(false);
+        }
     }
 
     /**
@@ -616,16 +618,23 @@ public abstract class AbstractRunner {
      */
     private static Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processdef,
             final FileScanner fileScanner, final OuterProcessVariablesScanner variableScanner) throws RuntimeException {
-        Collection<CheckerIssue> modelIssues;
+        Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
         try {
-            modelIssues = BpmnModelDispatcher.dispatch(new File(ConfigConstants.BASEPATH + processdef),
-                    fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
-                    variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
-                    fileScanner.getResourcesNewestVersions(), rules);
-
+            if (variableScanner != null) {
+                modelIssues = BpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
+                        fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
+                        variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
+                        fileScanner.getResourcesNewestVersions(), rules);
+            } else {
+                modelIssues = BpmnModelDispatcher.dispatchWithoutVariables(
+                        new File(ConfigConstants.BASEPATH + processdef),
+                        fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
+                        fileScanner.getResourcesNewestVersions(), rules);
+            }
         } catch (final ConfigItemNotFoundException e) {
             throw new RuntimeException("Config item couldn't be read");
         }
+
         return modelIssues;
     }
 
@@ -736,5 +745,13 @@ public abstract class AbstractRunner {
 
     public static void setIgnoredIssuesMap(Map<String, String> ignoredIssuesMap) {
         AbstractRunner.ignoredIssuesMap = ignoredIssuesMap;
+    }
+
+    public static boolean isCheckProcessVariables() {
+        return checkProcessVariables;
+    }
+
+    public static void setCheckProcessVariables(boolean checkProcessVariables) {
+        AbstractRunner.checkProcessVariables = checkProcessVariables;
     }
 }
