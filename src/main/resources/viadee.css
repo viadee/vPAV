@@ -81,7 +81,7 @@ tbody tr td:nth-child(4) {
 }
 
 .btn-viadee-close {
-	cursor: pointer;
+	cursor: pointer;	
 }
 
 .btn-viadee {
@@ -116,6 +116,7 @@ tbody tr td:nth-child(4) {
 
 .badge-pill-cursor {
 	cursor: pointer;
+	-webkit-appearance: none !important;
 }
 
 .viadee-head {
