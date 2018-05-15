@@ -53,6 +53,7 @@ import java.util.logging.Logger;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -91,6 +92,8 @@ public abstract class AbstractRunner {
     private static Map<String, BaseElement> signalNames = new HashMap<>();
 
     private static boolean isMisconfigured = false;
+
+    private static boolean isStatic = false;
 
     /**
      * Main method which represents lifecycle of the validation process Calls main functions
@@ -162,6 +165,9 @@ public abstract class AbstractRunner {
         } catch (MalformedURLException e) {
             logger.warning("Could not read language files. No localization available");
         }
+
+        //set boolean value for ProcessVariableReader: with Static Code Analysis or without(Regex)?
+        setIsStatic(rules);
 
         return rules;
     }
@@ -674,6 +680,14 @@ public abstract class AbstractRunner {
         }
         return ignoredIssuesMap;
     }
+    
+    private static boolean setIsStatic(Map<String, Rule> rules) {
+        Rule rule = rules.get("ProcessVariableModelChecker");
+        Setting setting = rule.getSettings().get("UseStaticAnalysisBoolean");
+        if (setting.getValue().equals("true"))
+          isStatic = true;
+        return isStatic;
+    }
 
     public static Set<String> getModelPath() {
         return fileScanner.getProcessdefinitions();
@@ -737,4 +751,9 @@ public abstract class AbstractRunner {
     public static void setIgnoredIssuesMap(Map<String, String> ignoredIssuesMap) {
         AbstractRunner.ignoredIssuesMap = ignoredIssuesMap;
     }
+
+    public static boolean getIsStatic() {
+        return isStatic;
+    }
+
 }

@@ -46,6 +46,7 @@ import org.junit.Test;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class XmlConfigReaderTest {
@@ -140,4 +141,28 @@ public class XmlConfigReaderTest {
         reader.read("ruleSetIncorrect.xml");
 
     }
+
+    @Test()
+    public void testBooleanForTypeOfProcessVariableModelReader() throws ConfigReaderException {
+
+        // Given
+        XmlConfigReader reader = new XmlConfigReader();
+
+        // When
+        Map<String, Rule> result = reader.read(ConfigConstants.RULESETDEFAULT);
+
+        // Then
+        boolean isStatic = false;
+        Rule pvm = result.get("ProcessVariablesModelChecker");
+
+        Setting setting = pvm.getSettings().get("UseStaticAnalysisBoolean");
+        String value = setting.getValue();
+        if (setting.getValue().equals("true"))
+            isStatic = true;
+
+        assertTrue(isStatic);
+
+    }
+
+
 }
