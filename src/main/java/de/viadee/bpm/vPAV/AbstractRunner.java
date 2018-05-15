@@ -68,7 +68,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
 public abstract class AbstractRunner {
 
-    private static Logger logger = Logger.getLogger(AbstractRunner.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AbstractRunner.class.getName());
 
     private static FileScanner fileScanner;
 
@@ -81,6 +81,8 @@ public abstract class AbstractRunner {
     private static Map<String, String> ignoredIssuesMap = new HashMap<String, String>();
 
     private static Map<String, String> incorrectCheckers = new HashMap<>();
+
+    private static Map<String, String> externalCheckers = new HashMap<>();
 
     private static Map<String, String> fileMapping = createFileFolderMapping();
 
@@ -120,7 +122,7 @@ public abstract class AbstractRunner {
         // 7
         copyFiles();
 
-        logger.info("BPMN validation successfully completed");
+        LOGGER.info("BPMN validation successfully completed");
     }
 
     /**
@@ -162,7 +164,7 @@ public abstract class AbstractRunner {
         try {
             RuntimeConfig.getInstance().retrieveLocale(rules);
         } catch (MalformedURLException e) {
-            logger.warning("Could not read language files. No localization available");
+            LOGGER.warning("Could not read language files. No localization available");
         }
 
         return rules;
@@ -563,7 +565,7 @@ public abstract class AbstractRunner {
             fileReader = new FileReader(ConfigConstants.IGNORE_FILE_OLD);
 
             if (fileReader != null) {
-                logger.warning(
+                LOGGER.warning(
                         "Usage of .ignoreIssues is deprecated. Please use ignoreIssues.txt to whitelist issues.");
             }
         } catch (final FileNotFoundException ex) {
@@ -572,7 +574,7 @@ public abstract class AbstractRunner {
         try {
             fileReader = new FileReader(filePath);
         } catch (final FileNotFoundException ex) {
-            logger.info(ex.getMessage());
+            LOGGER.info(ex.getMessage());
         }
 
         return fileReader;
@@ -666,7 +668,7 @@ public abstract class AbstractRunner {
      */
     private static void checkMisconfiguration() {
         if (getIsMisconfigured())
-            logger.warning(
+            LOGGER.warning(
                     "Misconfiguration of rule for ExtensionChecker. Please provide either tasktype or a specific ID of an element.");
     }
 
@@ -759,5 +761,17 @@ public abstract class AbstractRunner {
 
     public static void setCheckProcessVariables(boolean checkProcessVariables) {
         AbstractRunner.checkProcessVariables = checkProcessVariables;
+    }
+
+    public static Map<String, String> getExternalCheckers() {
+        return externalCheckers;
+    }
+
+    public static void addExternalCheckers(String externalChecker, Object object) {
+        if (!getExternalCheckers().containsKey(externalChecker)) {
+            AbstractRunner.externalCheckers.put(externalChecker,
+                    object.toString().substring(0, object.toString().indexOf(":")));
+        }
+
     }
 }

@@ -111,11 +111,15 @@ public final class CheckerFactory {
                         checkers.add((AbstractElementChecker) o);
                     }
 
-                } catch (NoSuchMethodException | SecurityException | ClassNotFoundException
+                } catch (NoSuchMethodException | SecurityException
                         | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | InstantiationException e) {
+                        | InstantiationException e) {
                     LOGGER.warning("Class " + fullyQualifiedName + " not found or couldn't be instantiated"); //$NON-NLS-1$ //$NON-NLS-2$
                     rule.getValue().deactivate();
+                } catch (InvocationTargetException e1) {
+                    AbstractRunner.addExternalCheckers(fullyQualifiedName, e1);
+                } catch (ClassNotFoundException e2) {
+                    AbstractRunner.addExternalCheckers(fullyQualifiedName, e2);
                 }
             }
         }
