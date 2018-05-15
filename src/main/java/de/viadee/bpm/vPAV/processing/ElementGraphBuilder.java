@@ -106,6 +106,13 @@ public class ElementGraphBuilder {
         this.bpmnScanner = bpmnScanner;
     }
 
+    public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
+            final Map<String, String> processIdToPathMap, BpmnScanner bpmnScanner) {
+        this.decisionRefToPathMap = decisionRefToPathMap;
+        this.processIdToPathMap = processIdToPathMap;
+        this.bpmnScanner = bpmnScanner;
+    }
+
     /**
      * Create data flow graphs for a model
      *

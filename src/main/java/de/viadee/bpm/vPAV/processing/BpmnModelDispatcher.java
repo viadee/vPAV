@@ -93,20 +93,14 @@ public class BpmnModelDispatcher {
      * @throws ConfigItemNotFoundException
      *             ruleSet couldn't be read
      */
-    public static Collection<CheckerIssue> dispatch(final File processdefinition,
+    public static Collection<CheckerIssue> dispatchWithVariables(final File processdefinition,
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,
             final Map<String, Collection<String>> processIdToVariables,
             final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf)
             throws ConfigItemNotFoundException {
 
-        // create BPMNScanner
-        BpmnScanner bpmnScanner;
-        try {
-            bpmnScanner = new BpmnScanner(processdefinition.getPath());
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new RuntimeException("Model couldn't be parsed");
-        }
+        BpmnScanner bpmnScanner = createScanner(processdefinition);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
@@ -146,6 +140,78 @@ public class BpmnModelDispatcher {
         Collection<ElementChecker> checkerInstances = createCheckerSingletons(resourcesNewestVersions, conf,
                 bpmnScanner, issues);
 
+        executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
+
+        writeVarsInJS(processdefinition, baseElements, graphBuilder);
+
+        return issues;
+    }
+
+    /**
+     * The BpmnModelDispatcher reads a model and creates a collection of all elements. Iterates through collection and
+     * checks each element for validity Additionally a graph is created to check for invalid paths.
+     *
+     * @param processdefinition
+     *            Holds the path to the BPMN model
+     * @param decisionRefToPathMap
+     *            decisionRefToPathMap
+     * @param processIdToPathMap
+     *            Map of prozessId to bpmn file
+     * @param resourcesNewestVersions
+     *            collection with newest versions of class files
+     * @param conf
+     *            ruleSet
+     * @return issues
+     * @throws ConfigItemNotFoundException
+     *             ruleSet couldn't be read
+     */
+    public static Collection<CheckerIssue> dispatchWithoutVariables(final File processdefinition,
+            final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
+            final Collection<String> resourcesNewestVersions,
+            final Map<String, Rule> conf)
+            throws ConfigItemNotFoundException {
+
+        BpmnScanner bpmnScanner = createScanner(processdefinition);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+
+        // hold bpmn elements
+        final Collection<BaseElement> baseElements = modelInstance
+                .getModelElementsByType(BaseElement.class);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap,
+                processIdToPathMap, bpmnScanner);
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        // create checkerInstances as singletons
+        Collection<ElementChecker> checkerInstances = createCheckerSingletons(resourcesNewestVersions, conf,
+                bpmnScanner, issues);
+
+        executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
+
+        writeVarsInJS(processdefinition, baseElements, graphBuilder);
+
+        return issues;
+    }
+
+    /**
+     * 
+     * @param processdefinition
+     *            Holds the path to the BPMN model
+     * @param baseElements
+     *            List of baseElements
+     * @param graphBuilder
+     *            ElementGraphBuilder used for data flow of a BPMN Model
+     * @param issues
+     *            List of issues
+     * @param checkerInstances
+     *            ElementCheckers from ruleSet
+     */
+    private static void executeCheckers(final File processdefinition, final Collection<BaseElement> baseElements,
+            final ElementGraphBuilder graphBuilder, final Collection<CheckerIssue> issues,
+            Collection<ElementChecker> checkerInstances) {
         // execute element checkers
         for (final BaseElement baseElement : baseElements) {
             BpmnElement element = graphBuilder.getElement(baseElement.getId());
@@ -158,7 +224,36 @@ public class BpmnModelDispatcher {
             }
 
         }
+    }
 
+    /**
+     * 
+     * @param processdefinition
+     *            Holds the path to the BPMN model
+     * @return BpmnScanner
+     */
+    public static BpmnScanner createScanner(final File processdefinition) {
+        // create BPMNScanner
+        BpmnScanner bpmnScanner;
+        try {
+            bpmnScanner = new BpmnScanner(processdefinition.getPath());
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            throw new RuntimeException("Model couldn't be parsed");
+        }
+        return bpmnScanner;
+    }
+
+    /**
+     * 
+     * @param processdefinition
+     *            Holds the path to the BPMN model
+     * @param baseElements
+     *            List of baseElements
+     * @param graphBuilder
+     *            ElementGraphBuilder used for data flow of a BPMN Model
+     */
+    private static void writeVarsInJS(final File processdefinition, final Collection<BaseElement> baseElements,
+            final ElementGraphBuilder graphBuilder) {
         // write js with processvariables
         JsOutputWriter jWriter = new JsOutputWriter();
         try {
@@ -166,18 +261,19 @@ public class BpmnModelDispatcher {
         } catch (OutputWriterException e) {
             logger.warning("Processvariables couldn't be written");
         }
-
-        return issues;
     }
 
     /**
      * 
      * @param resourcesNewestVersions
+     *            Resources with their newest version as found on classpath during runtime
      * @param conf
+     *            ruleSet
      * @param bpmnScanner
+     *            BPMNScanner
      * @param issues
-     * @param element
-     * @return
+     *            List of issues
+     * @return CheckerCollection
      * @throws ConfigItemNotFoundException
      */
     private static Collection<ElementChecker> createCheckerSingletons(final Collection<String> resourcesNewestVersions,

@@ -62,8 +62,26 @@ tbody tr td:nth-child(4) {
   max-width: 8em;
 }
 
+.issue-card-body {
+	-ms-flex: 1 1 auto;
+	flex: 1 1 auto;
+	padding: 0rem;	
+}
+
+.issue-button {
+	float: left;
+	width: 25%;
+	margin-top: .1rem;
+	height: 45px; 
+}
+
+.issue-id {
+	float: left;
+	width: 75%;
+}
+
 .btn-viadee-close {
-	cursor: pointer;
+	cursor: pointer;	
 }
 
 .btn-viadee {
@@ -78,6 +96,19 @@ tbody tr td:nth-child(4) {
     opacity: 1;   
 }
 
+.btn-viadee:active {
+	background-color: rgb(90, 20, 114);
+	box-shadow: 0 5px #666;
+	transform: translateY(5px); 
+}
+
+.btn-viadee:disabled {
+	cursor: no-drop;
+  	border: 1px solid #999999;
+  	background-color: #cccccc;
+  	color: #666666;
+}
+
 .download {
 	position: absolute;
 	left: 1em;
@@ -85,6 +116,7 @@ tbody tr td:nth-child(4) {
 
 .badge-pill-cursor {
 	cursor: pointer;
+	-webkit-appearance: none !important;
 }
 
 .viadee-head {

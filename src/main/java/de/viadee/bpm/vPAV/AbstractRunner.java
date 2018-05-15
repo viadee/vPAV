@@ -92,6 +92,8 @@ public abstract class AbstractRunner {
 
     private static boolean isMisconfigured = false;
 
+    private static boolean checkProcessVariables = false;
+
     /**
      * Main method which represents lifecycle of the validation process Calls main functions
      */
@@ -104,7 +106,7 @@ public abstract class AbstractRunner {
         scanClassPath(rules);
 
         // 3
-        getProcessVariables();
+        getProcessVariables(rules);
 
         // 4
         createIssues(rules);
@@ -118,7 +120,7 @@ public abstract class AbstractRunner {
         // 7
         copyFiles();
 
-        logger.info("BPMN validation successful completed");
+        logger.info("BPMN validation successfully completed");
     }
 
     /**
@@ -198,9 +200,15 @@ public abstract class AbstractRunner {
     /**
      * Initializes the variableScanner to scan and read outer process variables with the current javaResources
      */
-    private static void getProcessVariables() {
-        variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
-        readOuterProcessVariables(variableScanner);
+    private static void getProcessVariables(Map<String, Rule> rules) {
+        if (rules.get("ProcessVariablesModelChecker").isActive()
+                || rules.get("ProcessVariablesNameConventionChecker").isActive()) {
+            variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
+            readOuterProcessVariables(variableScanner);
+            setCheckProcessVariables(true);
+        } else {
+            setCheckProcessVariables(false);
+        }
     }
 
     /**
@@ -524,12 +532,9 @@ public abstract class AbstractRunner {
 
         final Map<String, String> ignoredIssuesMap = getIgnoredIssuesMap();
         final Collection<String> ignoredIssues = new ArrayList<String>();
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(filePath);
-        } catch (final FileNotFoundException ex) {
-            logger.info("ignoreIssues.txt file doesn't exist");
-        }
+
+        FileReader fileReader = createFileReader(filePath);
+
         if (fileReader != null) {
             final BufferedReader bufferedReader = new BufferedReader(fileReader);
             String zeile = bufferedReader.readLine();
@@ -540,8 +545,37 @@ public abstract class AbstractRunner {
                 zeile = bufferedReader.readLine();
             }
             bufferedReader.close();
+            fileReader.close();
         }
         return ignoredIssues;
+    }
+
+    /**
+     * 
+     * @param filePath
+     *            Path to ignoreIssues file
+     * @return FileReader ignoreIssue file
+     */
+    private static FileReader createFileReader(final String filePath) {
+
+        FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(ConfigConstants.IGNORE_FILE_OLD);
+
+            if (fileReader != null) {
+                logger.warning(
+                        "Usage of .ignoreIssues is deprecated. Please use ignoreIssues.txt to whitelist issues.");
+            }
+        } catch (final FileNotFoundException ex) {
+        }
+
+        try {
+            fileReader = new FileReader(filePath);
+        } catch (final FileNotFoundException ex) {
+            logger.info(ex.getMessage());
+        }
+
+        return fileReader;
     }
 
     /**
@@ -590,16 +624,23 @@ public abstract class AbstractRunner {
      */
     private static Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processdef,
             final FileScanner fileScanner, final OuterProcessVariablesScanner variableScanner) throws RuntimeException {
-        Collection<CheckerIssue> modelIssues;
+        Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
         try {
-            modelIssues = BpmnModelDispatcher.dispatch(new File(ConfigConstants.BASEPATH + processdef),
-                    fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
-                    variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
-                    fileScanner.getResourcesNewestVersions(), rules);
-
+            if (variableScanner != null) {
+                modelIssues = BpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
+                        fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
+                        variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
+                        fileScanner.getResourcesNewestVersions(), rules);
+            } else {
+                modelIssues = BpmnModelDispatcher.dispatchWithoutVariables(
+                        new File(ConfigConstants.BASEPATH + processdef),
+                        fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
+                        fileScanner.getResourcesNewestVersions(), rules);
+            }
         } catch (final ConfigItemNotFoundException e) {
             throw new RuntimeException("Config item couldn't be read");
         }
+
         return modelIssues;
     }
 
@@ -710,5 +751,13 @@ public abstract class AbstractRunner {
 
     public static void setIgnoredIssuesMap(Map<String, String> ignoredIssuesMap) {
         AbstractRunner.ignoredIssuesMap = ignoredIssuesMap;
+    }
+
+    public static boolean isCheckProcessVariables() {
+        return checkProcessVariables;
+    }
+
+    public static void setCheckProcessVariables(boolean checkProcessVariables) {
+        AbstractRunner.checkProcessVariables = checkProcessVariables;
     }
 }

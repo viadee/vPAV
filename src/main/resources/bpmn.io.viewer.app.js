@@ -184,14 +184,19 @@ function addCountOverlay(overlays, bpmnFile) {
                             dCardRuleDescription.setAttribute("class", "card-ruleDescription");
 
                             var dCardIssueId = document.createElement("p");
-                            dCardIssueId.setAttribute("class", "card-issueId");
+                            dCardIssueId.setAttribute("class", "card-issueId issue-id");
 
+                            var dCardIssueButton = document.createElement("button");
+                            dCardIssueButton.setAttribute("class", "btn btn-viadee issue-button");                           
+                            dCardIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardIssueButton]));
+                            dCardIssueButton.innerHTML = "Add Issue";
+                            
                             var oImg = document.createElement("img");
                             oImg.setAttribute('src', 'img/' + issue.classification + '.png');
                             oImg.setAttribute('alt', 'issue.classification');
                             oImg.setAttribute('class', 'float-left mr-2');
                             oImg.setAttribute("title", issue.classification);
-
+                            
                             dCardTitle.innerHTML = issue.ruleName;
                             dCardTitle.appendChild(oImg);
                             dCardText.innerHTML = "<h6><b>Issue:</b></h6> " + issue.message;
@@ -201,13 +206,14 @@ function addCountOverlay(overlays, bpmnFile) {
 
 
                             dCard.appendChild(dCardTitle);
-                            dCardBody.appendChild(dCardText);
+                            dCardBody.appendChild(dCardText);                            
                             if (issue.ruleDescription)
                                 dCardBody.appendChild(dCardRuleDescription);
                             if (issue.elementDescription)
                                 dCardBody.appendChild(dCardElementDescription);
                             dCardBody.appendChild(dCardIssueId);
                             dCard.appendChild(dCardBody);
+                            dCardBody.appendChild(dCardIssueButton);
 
                             dialogContent.appendChild(dCard);
                         }
@@ -242,17 +248,15 @@ function addCountOverlay(overlays, bpmnFile) {
 }
 
 // Add single issue to the ignoreIssues list
-function addIssue(){ 
-    var issueId = document.getElementsByClassName('card-issueId')[0].lastChild.data;  
-    var issue = document.getElementsByClassName('card-text')[0].lastChild.data;  
-    ignoredIssues[issueId] = '#' + issue.substring(0,29) + "..";
+function addIssue(issue){         
+    ignoredIssues[issue[0]] = '#' + issue[1].substring(0,29) + "..";
+    issue[2].disabled = true;
 }
 
-// download the ignoreIsses file 
+// download the ignoreIssues file 
 function downloadFile(){
     var value;
     var blob = "";
-    var output;
     Object.keys(ignoredIssues).forEach(function(key) {
         value = ignoredIssues[key];
         blob = blob + value + "\n"+ key + "\n";
