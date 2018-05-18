@@ -47,6 +47,7 @@ import org.junit.Test;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class XmlConfigReaderTest {
@@ -106,7 +107,7 @@ public class XmlConfigReaderTest {
             assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());
             assertFalse("False Default ruleSet ", result.get("VersioningChecker").isActive());
             assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
+//            assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
             assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").isActive());
             assertFalse("False Default ruleSet ", result.get("TaskNamingConventionChecker").isActive());
         }
@@ -153,16 +154,18 @@ public class XmlConfigReaderTest {
 
         // Then
         boolean isStatic = false;
-        Rule pvm = result.get("ProcessVariablesModelChecker");
-
-        Setting setting = pvm.getSettings().get("UseStaticAnalysisBoolean");
-        String value = setting.getValue();
-        if (setting.getValue().equals("true"))
-            isStatic = true;
-
+        Rule rule = result.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
+        if (rule != null) {
+            Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
+            if (setting != null) {
+                String value = setting.getValue();
+                if (setting.getValue().equals("true")) {
+                    isStatic = true;
+                }
+            }
+        }
         assertTrue(isStatic);
 
     }
-
 
 }

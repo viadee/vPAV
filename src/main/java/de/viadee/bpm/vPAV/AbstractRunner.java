@@ -56,6 +56,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueOutputWriter;
 import de.viadee.bpm.vPAV.output.JsOutputWriter;
@@ -166,7 +167,7 @@ public abstract class AbstractRunner {
             logger.warning("Could not read language files. No localization available");
         }
 
-        //set boolean value for ProcessVariableReader: with Static Code Analysis or without(Regex)?
+        // set boolean value for ProcessVariableReader: with Static Code Analysis or without(Regex)?
         setIsStatic(rules);
 
         return rules;
@@ -680,12 +681,21 @@ public abstract class AbstractRunner {
         }
         return ignoredIssuesMap;
     }
-    
+
+    /**
+     * Based on the RuleSet config file, set the usage of Static Analysis to true. Based on the boolean value the
+     * Process Variables are collected with Regex or Static Analysis
+     *
+     * @param rules
+     * @return
+     */
     private static boolean setIsStatic(Map<String, Rule> rules) {
-        Rule rule = rules.get("ProcessVariableModelChecker");
-        Setting setting = rule.getSettings().get("UseStaticAnalysisBoolean");
-        if (setting.getValue().equals("true"))
-          isStatic = true;
+        Rule rule = rules.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
+        if (rule != null) {
+            Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
+            if (setting != null && setting.getValue().equals("true"))
+                isStatic = true;
+        }
         return isStatic;
     }
 

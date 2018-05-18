@@ -548,9 +548,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                         new ProcessVariable(t_resultVariable, element, ElementChapter.Details,
                                 KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId));
             }
-            processVariables.putAll(getVariablesFromJavaDelegate(
-                    baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS), element,
-                    ElementChapter.Details, KnownElementFieldType.Class, scopeId));
+            processVariables.putAll(getVariablesFromJavaDelegateStatic());
 
             if (baseElement instanceof BusinessRuleTask) {
                 final String t_decisionRef = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,

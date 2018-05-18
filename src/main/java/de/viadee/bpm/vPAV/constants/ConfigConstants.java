@@ -113,6 +113,8 @@ public final class ConfigConstants {
 
     public static final String CRITICALITY = "Criticality";
 
+    public static final String USE_STATIC_ANALYSIS_BOOLEAN = "UseStaticAnalysisBoolean";
+
     private ConfigConstants() {
     }
 
