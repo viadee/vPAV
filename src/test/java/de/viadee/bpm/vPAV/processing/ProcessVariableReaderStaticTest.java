@@ -40,13 +40,14 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -57,34 +58,26 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
-public class ProcessVariableReaderStrategyPatternTest {
+public class ProcessVariableReaderStaticTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
     private static ClassLoader cl;
 
+    private static Logger logger = Logger.getLogger(ProcessVariableReaderStaticTest.class.getName());
+
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        RuntimeConfig.getInstance().setTest(true);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-        final URL[] classUrls = { classUrl, resourcesUrl };
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
     }
 
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
-    }
-
-    @Test()
-    public void testStrategyPatternProcessVariableReaderStatic()
-            throws ParserConfigurationException, SAXException, IOException {
-
-        boolean isStatic = true;
+    @Test
+    public void testSootReachingMethod() throws ParserConfigurationException, SAXException, IOException {
 
         ProcessApplicationValidator pav = new ProcessApplicationValidator();
         pav.findModelErrors();
@@ -97,45 +90,12 @@ public class ProcessVariableReaderStrategyPatternTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        ProcessVariableReaderContext pvc = new ProcessVariableReaderContext();
-        if (isStatic) {
-            pvc.setReadingStrategy(new ProcessVariableReaderStatic(null, new BpmnScanner(PATH)));
-        } else {
-            pvc.setReadingStrategy(new ProcessVariableReaderRegex(null, new BpmnScanner(PATH)));
-        }
+        final ProcessVariableReaderStatic variableReader = new ProcessVariableReaderStatic(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariable> variables = pvc.readingVariables(element);
+        final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);
 
-        assertEquals(2, variables.size());
-    }
-
-    @Test()
-    public void testStrategyPatternProcessVariableReaderRegex()
-            throws ParserConfigurationException, SAXException, IOException {
-
-        boolean isStatic = false;
-
-        final String PATH = BASE_PATH + "ProcessVariableStaticReaderTest_RecogniseVariablesInClassStatic.bpmn";
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<ServiceTask> allServiceTasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
-
-        ProcessVariableReaderContext pvc = new ProcessVariableReaderContext();
-        if (isStatic) {
-            pvc.setReadingStrategy(new ProcessVariableReaderStatic(null, new BpmnScanner(PATH)));
-        } else {
-            pvc.setReadingStrategy(new ProcessVariableReaderRegex(null, new BpmnScanner(PATH)));
-        }
-
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariable> variables = pvc.readingVariables(element);
-
-        assertEquals(3, variables.size());
-
+        Assert.assertEquals(2, variables.size());
     }
 
 }

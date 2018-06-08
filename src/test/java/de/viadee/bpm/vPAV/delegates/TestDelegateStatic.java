@@ -29,47 +29,23 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.delegates;
 
-import static org.junit.Assert.*;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.logging.Logger;
+public class TestDelegateStatic implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
 
-import de.viadee.bpm.vPAV.config.reader.XmlConfigReaderTest;
+        final String variableName = "ProcessVariable1";
+        execution.setVariable(variableName, true);
 
-public class AbstractRunnerTest {
+        // TODO Auto-generated method stub
+        // execution.setVariable("dshfhdsfhfds", true);
+        execution.getVariable("ProcessVariable2");
 
-    private static ClassLoader cl;
-
-    private static Logger logger = Logger.getLogger(XmlConfigReaderTest.class.getName());
-
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+        String variableName2 = "ProcessVariable3";
+        execution.setVariable(variableName2, true);
     }
-
-    @Test
-    public void testStaticConfiguration() {
-
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrors();
-
-        boolean isStatic = AbstractRunner.getIsStatic();
-
-        assertEquals(true, isStatic);
-
-    }
-
 }

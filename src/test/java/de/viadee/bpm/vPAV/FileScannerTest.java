@@ -42,13 +42,11 @@ import java.util.logging.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.viadee.bpm.vPAV.config.reader.XmlConfigReaderTest;
-
-public class AbstractRunnerTest {
+public class FileScannerTest {
 
     private static ClassLoader cl;
 
-    private static Logger logger = Logger.getLogger(XmlConfigReaderTest.class.getName());
+    private static Logger logger = Logger.getLogger(FileScannerTest.class.getName());
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -61,15 +59,14 @@ public class AbstractRunnerTest {
     }
 
     @Test
-    public void testStaticConfiguration() {
+    public void testSootPathLoading() {
 
         ProcessApplicationValidator pav = new ProcessApplicationValidator();
         pav.findModelErrors();
 
-        boolean isStatic = AbstractRunner.getIsStatic();
+        String sootPath = FileScanner.getSootPath();
 
-        assertEquals(true, isStatic);
-
+        System.out.println(sootPath);
     }
 
 }

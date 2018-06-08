@@ -76,7 +76,7 @@ public class FileScanner {
 
     private final Set<String> processdefinitions;
 
-    private Set<String> javaResourcesFileInputStream = new HashSet<String>();
+    private static Set<String> javaResourcesFileInputStream = new HashSet<String>();
 
     private Set<String> includedFiles = new HashSet<String>();
 
@@ -87,6 +87,8 @@ public class FileScanner {
     private Map<String, String> processIdToPathMap;
 
     private static String scheme = null;
+
+    private static String sootPath = "";
 
     private static boolean isDirectory = false;
 
@@ -132,6 +134,20 @@ public class FileScanner {
         }
 
         urls = ucl.getURLs();
+
+        // retrieve all jars during runtime and pass them to get class files
+        for (URL url : urls) {
+
+            // Create a long String with every file and jar path for Soot.
+            String sootPathCurrent = url.toString();
+            if (sootPathCurrent != null) {
+                sootPathCurrent = sootPathCurrent.replace("file:/", "");
+                sootPathCurrent = sootPathCurrent.replace("/./", "/");
+                sootPathCurrent = sootPathCurrent.replace("/", "\\\\");
+                sootPath = sootPath + sootPathCurrent + ";";
+            }
+        }
+        sootPath = sootPath.replace("\\\\;", ";");
 
         // retrieve all jars during runtime and pass them to get class files
 
@@ -426,7 +442,7 @@ public class FileScanner {
         return scheme;
     }
 
-    public Set<String> getJavaResourcesFileInputStream() {
+    public static Set<String> getJavaResourcesFileInputStream() {
         return javaResourcesFileInputStream;
     }
 
@@ -436,5 +452,12 @@ public class FileScanner {
 
     public static void setIsDirectory(boolean isDirectory) {
         FileScanner.isDirectory = isDirectory;
+    }
+
+    /**
+     * Get all jar paths for Soot configuration
+     */
+    public static String getSootPath() {
+        return sootPath;
     }
 }

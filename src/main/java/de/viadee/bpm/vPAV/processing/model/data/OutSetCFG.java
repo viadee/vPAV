@@ -29,47 +29,57 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.processing.model.data;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.logging.Logger;
+import soot.toolkits.graph.Block;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+/**
+ * 
+ * helper class storing information for Data-flow analysis algorithm
+ * 
+ * 
+ *
+ */
+public class OutSetCFG {
 
-import de.viadee.bpm.vPAV.config.reader.XmlConfigReaderTest;
+    private List<VariableBlock> variableBlocks;
 
-public class AbstractRunnerTest {
+    public OutSetCFG(List<VariableBlock> vbs) {
 
-    private static ClassLoader cl;
-
-    private static Logger logger = Logger.getLogger(XmlConfigReaderTest.class.getName());
-
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+        this.variableBlocks = vbs;
     }
 
-    @Test
-    public void testStaticConfiguration() {
+    public VariableBlock getVariableBlock(Block b) {
 
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrors();
+        for (VariableBlock vb : variableBlocks) {
 
-        boolean isStatic = AbstractRunner.getIsStatic();
+            if (vb.getBlock().equals(b)) {
+                return vb;
+            }
+        }
+        return null;
+    }
 
-        assertEquals(true, isStatic);
+    public void addVariableBlock(VariableBlock vb) {
 
+        this.variableBlocks.add(vb);
+    }
+
+    public Map<String, ProcessVariable> getAllProcessVariables() {
+
+        Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+
+        for (VariableBlock vb : variableBlocks) {
+
+            variables.putAll(vb.getProcessVariablesMapped());
+
+        }
+        return variables;
     }
 
 }

@@ -39,8 +39,10 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,14 +89,32 @@ import org.camunda.bpm.model.dmn.instance.Text;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.OutSetCFG;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.VariableBlock;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+
+import soot.Body;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.Unit;
+import soot.jimple.AssignStmt;
+import soot.jimple.InvokeStmt;
+import soot.jimple.StringConstant;
+import soot.jimple.internal.JInterfaceInvokeExpr;
+import soot.options.Options;
+import soot.toolkits.graph.Block;
+import soot.toolkits.graph.BlockGraph;
+import soot.toolkits.graph.ClassicCompleteBlockGraph;
 
 /**
  * search process variables for an bpmn element
@@ -548,7 +568,9 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                         new ProcessVariable(t_resultVariable, element, ElementChapter.Details,
                                 KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId));
             }
-            processVariables.putAll(getVariablesFromJavaDelegateStatic());
+            processVariables.putAll(getVariablesFromJavaDelegateStatic(
+                    baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS), element,
+                    ElementChapter.Details, KnownElementFieldType.Class, scopeId));
 
             if (baseElement instanceof BusinessRuleTask) {
                 final String t_decisionRef = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
@@ -711,12 +733,203 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                 fieldType, scopeId);
         return variables;
     }
-    
-    //TODO: description of method
-    private Map<String, ProcessVariable> getVariablesFromJavaDelegateStatic(){
-        //TODO: implementation
+
+    /**
+     * Checks a java delegate for process variable references with Static code analysis (read/write/delete).
+     *
+     * Constraints: names, which only could be determined at runtime, can't be analyzed. e.g.
+     * execution.setVariable(execution.getActivityId() + "-" + execution.getEventName(), true)
+     *
+     * @param classFile
+     * @param element
+     * @param chapter
+     * @param fieldType
+     * @param scopeId
+     * @return
+     */
+    private Map<String, ProcessVariable> getVariablesFromJavaDelegateStatic(final String classFile,
+            final BpmnElement element, final ElementChapter chapter,
+            final KnownElementFieldType fieldType, final String scopeId) {
+
         final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+
+        String filePath = "";
+        if (classFile != null && classFile.trim().length() > 0) {
+            filePath = classFile.replaceAll("\\.", "/") + ".java";
+
+            String javaHome = System.getenv("JAVA_HOME");
+            String specialSootJarPaths = javaHome + "\\jre\\lib\\jce.jar;" + javaHome + "\\jre\\lib\\rt.jar;";
+
+            // TODO: exchange rt.jar and jce.jar
+            String sootPath = FileScanner.getSootPath() + specialSootJarPaths;
+
+            System.setProperty("soot.class.path", sootPath);
+
+            Set<String> classPaths = FileScanner.getJavaResourcesFileInputStream();
+
+            Options.v().set_whole_program(true);
+            Options.v().set_allow_phantom_refs(true);
+
+            SootClass clazz = Scene.v().forceResolve(classFile, SootClass.SIGNATURES);
+
+            if (clazz != null) {
+                clazz.setApplicationClass();
+                Scene.v().loadNecessaryClasses();
+
+                // Retrieve the method and its body
+                SootMethod method = clazz.getMethodByName("execute");
+                if (method != null) {
+                    Body body = method.retrieveActiveBody();
+
+                    BlockGraph graph = new ClassicCompleteBlockGraph(body);
+
+                    List<Block> graphHeads = graph.getHeads();
+                    List<Block> graphTails = graph.getTails();
+
+                    OutSetCFG oldOutSet = new OutSetCFG(new ArrayList<VariableBlock>());
+                    OutSetCFG newOutSet = new OutSetCFG(new ArrayList<VariableBlock>());
+
+                    for (Block head : graphHeads) {
+
+                        newOutSet = graphIterator(graph, head, graphTails,
+                                oldOutSet, element, chapter, fieldType, filePath, scopeId);
+                    }
+
+                    variables.putAll(newOutSet.getAllProcessVariables());
+
+                } else {
+                    LOGGER.warning("In class " + classFile + " execute method was not found by Soot");
+                }
+            } else {
+                LOGGER.warning("Class " + classFile + " was not found by Soot");
+            }
+        }
         return variables;
+    }
+
+    /**
+     * Iterate through the control-flow graph with an iterative data-flow analysis logic
+     *
+     *
+     * @param graph
+     * @param head
+     * @param blockTails
+     * @param inSet
+     * @param element
+     * @param chapter
+     * @param fieldType
+     * @param filePath
+     * @param scopeId
+     * @return
+     */
+    private OutSetCFG graphIterator(BlockGraph graph, Block head, List<Block> blockTails,
+            OutSetCFG inSet, final BpmnElement element, final ElementChapter chapter,
+            final KnownElementFieldType fieldType, final String filePath, final String scopeId) {
+
+        Iterator<Block> graphIterator = graph.iterator();
+        while (graphIterator.hasNext()) {
+            Block b = graphIterator.next();
+
+            // Collect the functions Unit by Unit via the blockIterator
+            VariableBlock vb = blockIteraror(b, inSet, element, chapter, fieldType, filePath, scopeId);
+            inSet.addVariableBlock(vb);
+        }
+
+        return inSet;
+    }
+
+    /**
+     * Iterator through the source code line by line, collecting the ProcessVariables Camunda methods are interface
+     * invocations appearing either in Assign statement or Invoke statement Constraint: Only String constants can be
+     * precisely recognized.
+     *
+     * @param block
+     * @param InSet
+     * @param element
+     * @param chapter
+     * @param fieldType
+     * @param filePath
+     * @param scopeId
+     * @return
+     */
+    private VariableBlock blockIteraror(Block block, OutSetCFG InSet, final BpmnElement element,
+            final ElementChapter chapter,
+            final KnownElementFieldType fieldType, final String filePath, final String scopeId) {
+
+        VariableBlock variableBlock = new VariableBlock(block, new ArrayList<ProcessVariable>());
+
+        List<String> functions = new ArrayList<String>();
+
+        Iterator unitIt = block.iterator();
+        while (unitIt.hasNext()) {
+            Unit unit = (Unit) unitIt.next();
+            if (unit instanceof AssignStmt || unit instanceof InvokeStmt) {
+
+                if (unit instanceof InvokeStmt) {
+
+                    if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+
+                        JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox()
+                                .getValue();
+                        if (expr != null) {
+                            String functionName = expr.getMethodRef().name();
+                            int numberOfArg = expr.getArgCount();
+
+                            if (CamundaProcessVariableFunctions.findByNameAndNumberOfBoxes(functionName,
+                                    numberOfArg) != null) {
+
+                                int location = CamundaProcessVariableFunctions
+                                        .findByNameAndNumberOfBoxes(functionName, numberOfArg)
+                                        .getLocation() - 1;
+                                VariableOperation type = CamundaProcessVariableFunctions
+                                        .findByNameAndNumberOfBoxes(functionName, numberOfArg)
+                                        .getOperationType();
+
+                                if (expr.getArgBox(location).getValue() instanceof StringConstant) {
+                                    variableBlock.addProcessVariable(new ProcessVariable(
+                                            expr.getArgBox(location).getValue().toString(), element, chapter, fieldType,
+                                            filePath, type, scopeId));
+                                }
+                            }
+                        }
+                    }
+                }
+                if (unit instanceof AssignStmt) {
+
+                    if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
+
+                        JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox()
+                                .getValue();
+
+                        if (expr != null) {
+                            String functionName = expr.getMethodRef().name();
+                            int numberOfArg = expr.getArgCount();
+
+                            if (CamundaProcessVariableFunctions.findByNameAndNumberOfBoxes(functionName,
+                                    numberOfArg) != null) {
+
+                                int location = CamundaProcessVariableFunctions
+                                        .findByNameAndNumberOfBoxes(functionName, numberOfArg)
+                                        .getLocation() - 1;
+                                VariableOperation type = CamundaProcessVariableFunctions
+                                        .findByNameAndNumberOfBoxes(functionName, numberOfArg)
+                                        .getOperationType();
+
+                                if (expr.getArgBox(location).getValue() instanceof StringConstant) {
+                                    variableBlock.addProcessVariable(new ProcessVariable(
+                                            expr.getArgBox(location).getValue().toString(), element, chapter, fieldType,
+                                            filePath, type, scopeId));
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+
+        return variableBlock;
     }
 
     /**

@@ -29,47 +29,58 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.processing.model.data;
 
-import static org.junit.Assert.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.logging.Logger;
+import soot.toolkits.graph.Block;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+/**
+ * 
+ * helper class storing information for data-flow analysis assigns ProcessVariables to basic blocks of the control-flow
+ * graph
+ * 
+ *
+ */
+public class VariableBlock {
 
-import de.viadee.bpm.vPAV.config.reader.XmlConfigReaderTest;
+    private Block block;
 
-public class AbstractRunnerTest {
+    private List<ProcessVariable> processVariables;
 
-    private static ClassLoader cl;
-
-    private static Logger logger = Logger.getLogger(XmlConfigReaderTest.class.getName());
-
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+    public VariableBlock(Block block, List<ProcessVariable> pvs) {
+        this.block = block;
+        this.processVariables = pvs;
     }
 
-    @Test
-    public void testStaticConfiguration() {
+    public void setBlock(Block block) {
 
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrors();
+        this.block = block;
+    }
 
-        boolean isStatic = AbstractRunner.getIsStatic();
+    public Block getBlock() {
+        return block;
+    }
 
-        assertEquals(true, isStatic);
+    public List<ProcessVariable> getAllProcessVariables() {
+        return processVariables;
+    }
 
+    public void addProcessVariable(ProcessVariable processVariable) {
+        this.processVariables.add(processVariable);
+    }
+
+    public Map<String, ProcessVariable> getProcessVariablesMapped() {
+
+        Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        for (ProcessVariable pv : processVariables) {
+
+            variables.put(pv.getName(), pv);
+        }
+
+        return variables;
     }
 
 }
