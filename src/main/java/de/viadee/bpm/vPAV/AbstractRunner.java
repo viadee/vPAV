@@ -66,7 +66,7 @@ import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
-public abstract class AbstractRunner {
+public class AbstractRunner {
 
     private static Logger logger = Logger.getLogger(AbstractRunner.class.getName());
 
