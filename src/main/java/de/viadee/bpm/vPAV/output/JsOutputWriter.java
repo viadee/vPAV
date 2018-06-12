@@ -46,13 +46,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import de.viadee.bpm.vPAV.Runner;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -80,12 +80,12 @@ public class JsOutputWriter implements IssueOutputWriter {
         final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
                 BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
         final String bpmn = transformToXMLDatastructure();
-        final String wrongCheckers = transformToJsDatastructure(AbstractRunner.getIncorrectCheckers());
+        final String wrongCheckers = transformToJsDatastructure(Runner.getIncorrectCheckers());
         final String defaultCheckers = transformDefaultRulesToJsDatastructure(
                 extractExternalCheckers(
                         RuntimeConfig.getInstance().getActiveRules()));
         final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
-        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(AbstractRunner.getIgnoredIssuesMap());
+        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(Runner.getIgnoredIssuesMap());
 
         writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues);
     }
@@ -306,7 +306,7 @@ public class JsOutputWriter implements IssueOutputWriter {
     private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
         Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
 
-        for (final String bpmnFilename : AbstractRunner.getModelPath()) {
+        for (final String bpmnFilename : Runner.getModelPath()) {
             Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
             modelIssues.addAll(issues);
 
@@ -343,7 +343,7 @@ public class JsOutputWriter implements IssueOutputWriter {
         String output = "var diagramXMLSource = [\n";
 
         try {
-            for (final String bpmnFilename : AbstractRunner.getModelPath()) {
+            for (final String bpmnFilename : Runner.getModelPath()) {
                 String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
                 output += "{\"name\":\"" + prettyBpmnFileName + "\",\n \"xml\": \"";
                 output += convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename);

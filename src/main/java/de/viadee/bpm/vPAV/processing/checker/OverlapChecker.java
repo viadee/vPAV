@@ -35,10 +35,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import de.viadee.bpm.vPAV.Runner;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -78,11 +78,11 @@ public class OverlapChecker extends AbstractElementChecker {
 
             final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
 
-            if (AbstractRunner.getSequenceFlowList().isEmpty()) {
-                AbstractRunner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            if (Runner.getSequenceFlowList().isEmpty()) {
+                Runner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
             }
 
-            for (Map.Entry<String, ArrayList<String>> entry : AbstractRunner.getSequenceFlowList().entrySet()) {
+            for (Map.Entry<String, ArrayList<String>> entry : Runner.getSequenceFlowList().entrySet()) {
                 // Check whether targetRef & sourceRef of current item exist in global list
                 if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
@@ -93,8 +93,8 @@ public class OverlapChecker extends AbstractElementChecker {
                 }
             }
 
-            if (!AbstractRunner.getSequenceFlowList().containsKey(bpmnElement.getId())) {
-                AbstractRunner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            if (!Runner.getSequenceFlowList().containsKey(bpmnElement.getId())) {
+                Runner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
             }
 
         }

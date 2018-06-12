@@ -40,7 +40,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
+import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -143,7 +143,7 @@ public final class CheckerFactory {
             LOGGER.warning("Checker '" + rule.getValue().getName() //$NON-NLS-1$
                     + "' not found. Please add setting for external_location in ruleSet.xml."); //$NON-NLS-1$
             rule.getValue().deactivate();
-            AbstractRunner.setIncorrectCheckers(rule,
+            Runner.setIncorrectCheckers(rule,
                     String.format(Messages.getString("CheckerFactory.8"), //$NON-NLS-1$
                             rule.getValue().getName()));
         }
