@@ -79,6 +79,10 @@ public final class CheckerFactory {
 
         for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
             String fullyQualifiedName = getFullyQualifiedName(rule);
+            
+            if(rule.getKey().equals("CreateOutputHTML")) {
+            	continue;
+            }
 
             if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")) { //$NON-NLS-1$
                 try {
@@ -133,7 +137,7 @@ public final class CheckerFactory {
         String fullyQualifiedName = ""; //$NON-NLS-1$
         if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getKey())
                 && rule.getValue().isActive()) {
-            fullyQualifiedName = BpmnConstants.INTERN_LOCATION + rule.getValue().getName().trim();
+            fullyQualifiedName = BpmnConstants.INTERN_LOCATION + rule.getValue().getName().trim();            
         } else if (rule.getValue().isActive() && rule.getValue().getSettings() != null
                 && rule.getValue().getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
             fullyQualifiedName = rule.getValue().getSettings().get(BpmnConstants.EXTERN_LOCATION).getValue()

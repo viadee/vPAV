@@ -2,6 +2,10 @@
 <!DOCTYPE xml>
 <ruleSet>
 	<rule>
+		<name>CreateOutputHTML</name>
+		<state>true</state>
+	</rule>
+	<rule>
 		<name>MessageEventChecker</name>
 		<state>true</state>
 	</rule>

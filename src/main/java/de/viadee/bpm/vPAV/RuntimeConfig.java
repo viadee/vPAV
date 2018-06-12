@@ -67,7 +67,7 @@ public class RuntimeConfig {
             "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
             "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
             "MessageEventChecker", "FieldInjectionChecker", "BoundaryErrorChecker", "ExtensionChecker",
-            "OverlapChecker", "SignalEventChecker" };
+            "OverlapChecker", "SignalEventChecker", "CreateOutputHTML" };
 
     private ArrayList<String> allActiveRules = new ArrayList<>();
 
