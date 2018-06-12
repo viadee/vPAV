@@ -757,15 +757,18 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
         if (classFile != null && classFile.trim().length() > 0) {
             filePath = classFile.replaceAll("\\.", "/") + ".java";
 
-            String javaHome = System.getenv("JAVA_HOME");
-            String specialSootJarPaths = javaHome + "\\jre\\lib\\jce.jar;" + javaHome + "\\jre\\lib\\rt.jar;";
-
+            //TODO: Coding style: variable not modified later should be final
+            final String javaHome = System.getenv("JAVA_HOME");
+            final String specialSootJarPaths = javaHome + "\\jre\\lib\\rt.jar;"
+                    + javaHome + "\\jre\\lib\\jce.jar;"
+                    + "D:\\Projects\\vPAV\\vPAV\\target\\test-classes";
+            
             // TODO: exchange rt.jar and jce.jar
-            String sootPath = FileScanner.getSootPath() + specialSootJarPaths;
+            final String sootPath = FileScanner.getSootPath() + specialSootJarPaths;
 
             System.setProperty("soot.class.path", sootPath);
 
-            Set<String> classPaths = FileScanner.getJavaResourcesFileInputStream();
+            final Set<String> classPaths = FileScanner.getJavaResourcesFileInputStream();
 
             Options.v().set_whole_program(true);
             Options.v().set_allow_phantom_refs(true);
@@ -779,12 +782,12 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                 // Retrieve the method and its body
                 SootMethod method = clazz.getMethodByName("execute");
                 if (method != null) {
-                    Body body = method.retrieveActiveBody();
+                    final Body body = method.retrieveActiveBody();
 
                     BlockGraph graph = new ClassicCompleteBlockGraph(body);
 
-                    List<Block> graphHeads = graph.getHeads();
-                    List<Block> graphTails = graph.getTails();
+                    final List<Block> graphHeads = graph.getHeads();
+                    final List<Block> graphTails = graph.getTails();
 
                     OutSetCFG oldOutSet = new OutSetCFG(new ArrayList<VariableBlock>());
                     OutSetCFG newOutSet = new OutSetCFG(new ArrayList<VariableBlock>());
@@ -826,12 +829,12 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
             OutSetCFG inSet, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId) {
 
-        Iterator<Block> graphIterator = graph.iterator();
+        final Iterator<Block> graphIterator = graph.iterator();
         while (graphIterator.hasNext()) {
             Block b = graphIterator.next();
 
             // Collect the functions Unit by Unit via the blockIterator
-            VariableBlock vb = blockIteraror(b, inSet, element, chapter, fieldType, filePath, scopeId);
+            final VariableBlock vb = blockIteraror(b, inSet, element, chapter, fieldType, filePath, scopeId);
             inSet.addVariableBlock(vb);
         }
 
@@ -852,17 +855,15 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param scopeId
      * @return
      */
-    private VariableBlock blockIteraror(Block block, OutSetCFG InSet, final BpmnElement element,
+    private VariableBlock blockIteraror(final Block block, OutSetCFG InSet, final BpmnElement element,
             final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId) {
 
         VariableBlock variableBlock = new VariableBlock(block, new ArrayList<ProcessVariable>());
 
-        List<String> functions = new ArrayList<String>();
-
-        Iterator unitIt = block.iterator();
+        final Iterator<Unit> unitIt = block.iterator();
         while (unitIt.hasNext()) {
-            Unit unit = (Unit) unitIt.next();
+            Unit unit = unitIt.next();
             if (unit instanceof AssignStmt || unit instanceof InvokeStmt) {
 
                 if (unit instanceof InvokeStmt) {
