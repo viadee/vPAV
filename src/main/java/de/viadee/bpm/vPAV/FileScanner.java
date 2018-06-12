@@ -135,18 +135,20 @@ public class FileScanner {
 
         urls = ucl.getURLs();
 
-        // retrieve all jars during runtime and pass them to get class files
+        // retrieve all jars and create one String for Soot path
         for (URL url : urls) {
 
-            // Create a long String with every file and jar path for Soot.
             String sootPathCurrent = url.toString();
-            if (sootPathCurrent != null) {
-                sootPathCurrent = sootPathCurrent.replace("file:/", "");
-                sootPathCurrent = sootPathCurrent.replace("/./", "/");
-                sootPathCurrent = sootPathCurrent.replace("/", "\\\\");
-                sootPath = sootPath + sootPathCurrent + ";";
-            }
+            AddStringToSootPath(sootPathCurrent);
+
         }
+
+        URL urlTargetClass = this.getClass().getResource("/");
+        if (urlTargetClass != null) {
+            String path = urlTargetClass.toString();
+            AddStringToSootPath(path);
+        }
+
         sootPath = sootPath.replace("\\\\;", ";");
 
         // retrieve all jars during runtime and pass them to get class files
@@ -193,6 +195,26 @@ public class FileScanner {
                 resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
             }
         }
+    }
+
+    /**
+     * Take one jar`s path, modify it from ClassLoader format to Soot`s format and add it to the previous paths.
+     *
+     * @param sootPathCurrent
+     *            - one jar's local path
+     */
+    private void AddStringToSootPath(String sootPathCurrent) {
+
+        // Create a long String with every file and jar path for Soot.
+
+        if (sootPathCurrent != null) {
+            sootPathCurrent = sootPathCurrent.replace("file:/", "");
+            sootPathCurrent = sootPathCurrent.replace("/./", "/");
+            sootPathCurrent = sootPathCurrent.replace("/", "\\\\");
+
+        }
+        sootPath = sootPath + sootPathCurrent + ";";
+
     }
 
     /**
@@ -455,7 +477,8 @@ public class FileScanner {
     }
 
     /**
-     * Get all jar paths for Soot configuration
+     *
+     * @return - Concatenated String of jars' local paths
      */
     public static String getSootPath() {
         return sootPath;

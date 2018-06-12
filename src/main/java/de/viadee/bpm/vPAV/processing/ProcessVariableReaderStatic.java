@@ -757,13 +757,10 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
         if (classFile != null && classFile.trim().length() > 0) {
             filePath = classFile.replaceAll("\\.", "/") + ".java";
 
-            //TODO: Coding style: variable not modified later should be final
             final String javaHome = System.getenv("JAVA_HOME");
             final String specialSootJarPaths = javaHome + "\\jre\\lib\\rt.jar;"
-                    + javaHome + "\\jre\\lib\\jce.jar;"
-                    + "D:\\Projects\\vPAV\\vPAV\\target\\test-classes";
-            
-            // TODO: exchange rt.jar and jce.jar
+                    + javaHome + "\\jre\\lib\\jce.jar;";
+
             final String sootPath = FileScanner.getSootPath() + specialSootJarPaths;
 
             System.setProperty("soot.class.path", sootPath);
@@ -780,7 +777,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                 Scene.v().loadNecessaryClasses();
 
                 // Retrieve the method and its body
-                SootMethod method = clazz.getMethodByName("execute");
+                SootMethod method = clazz.getMethodByNameUnsafe("execute");
                 if (method != null) {
                     final Body body = method.retrieveActiveBody();
 
