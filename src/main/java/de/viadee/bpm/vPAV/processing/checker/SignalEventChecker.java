@@ -40,7 +40,7 @@ import org.camunda.bpm.model.bpmn.instance.Event;
 import org.camunda.bpm.model.bpmn.instance.Signal;
 import org.camunda.bpm.model.bpmn.instance.SignalEventDefinition;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
+import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -123,11 +123,11 @@ public class SignalEventChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        if (!AbstractRunner.addSignal(baseElement, signal.getName())) {
+        if (!Runner.addSignal(baseElement, signal.getName())) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                     String.format(Messages.getString("SignalEventChecker.2"), //$NON-NLS-1$
                             CheckName.checkName(baseElement),
-                            CheckName.checkName(AbstractRunner.getSignal(signal.getName())))));
+                            CheckName.checkName(Runner.getSignal(signal.getName())))));
         }
         return issues;
     }
