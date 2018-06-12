@@ -40,7 +40,7 @@ import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
-public class ProcessApplicationValidator extends AbstractRunner {
+public class ProcessApplicationValidator {
 
     /**
      * find issues with given ApplicationContext (Spring)
@@ -54,9 +54,9 @@ public class ProcessApplicationValidator extends AbstractRunner {
         RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        viadeeProcessApplicationValidator();
+        Runner.viadeeProcessApplicationValidator();
 
-        return AbstractRunner.getfilteredIssues();
+        return Runner.getfilteredIssues();
     }
 
     /**
@@ -71,9 +71,9 @@ public class ProcessApplicationValidator extends AbstractRunner {
         RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        viadeeProcessApplicationValidator();
+        Runner.viadeeProcessApplicationValidator();
 
-        return filterErrors(AbstractRunner.getfilteredIssues(), CriticalityEnum.ERROR);
+        return filterErrors(Runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
 
     /**
@@ -84,9 +84,9 @@ public class ProcessApplicationValidator extends AbstractRunner {
     public static Collection<CheckerIssue> findModelInconsistencies() {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        viadeeProcessApplicationValidator();
+        Runner.viadeeProcessApplicationValidator();
 
-        return AbstractRunner.getfilteredIssues();
+        return Runner.getfilteredIssues();
     }
 
     /**
@@ -97,9 +97,9 @@ public class ProcessApplicationValidator extends AbstractRunner {
     public static Collection<CheckerIssue> findModelErrors() {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        viadeeProcessApplicationValidator();
+        Runner.viadeeProcessApplicationValidator();
 
-        return filterErrors(AbstractRunner.getfilteredIssues(), CriticalityEnum.ERROR);
+        return filterErrors(Runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
 
     /**

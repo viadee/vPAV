@@ -38,10 +38,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.viadee.bpm.vPAV.Runner;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -301,7 +301,7 @@ public class ExtensionChecker extends AbstractElementChecker {
 
         if (setting.getType() != null && setting.getId() != null) {
             misconfigured = true;
-            AbstractRunner.setIsMisconfigured(misconfigured);
+            Runner.setIsMisconfigured(misconfigured);
             return misconfigured;
         }
         return misconfigured;

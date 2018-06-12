@@ -46,13 +46,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import de.viadee.bpm.vPAV.Runner;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -80,17 +80,14 @@ public class JsOutputWriter implements IssueOutputWriter {
         final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
                 BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
         final String bpmn = transformToXMLDatastructure();
-        final String wrongCheckers = transformToJsDatastructure(AbstractRunner.getIncorrectCheckers());
-        final String externalCheckers = transformExternalCheckersToJsDatastructure(
-                AbstractRunner.getExternalCheckers());
+        final String wrongCheckers = transformToJsDatastructure(Runner.getIncorrectCheckers());
         final String defaultCheckers = transformDefaultRulesToJsDatastructure(
                 extractExternalCheckers(
                         RuntimeConfig.getInstance().getActiveRules()));
         final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
-        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(AbstractRunner.getIgnoredIssuesMap());
+        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(Runner.getIgnoredIssuesMap());
 
-        writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, externalCheckers, issueSeverity,
-                ignoredIssues);
+        writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues);
     }
 
     /**
@@ -138,8 +135,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @throws OutputWriterException
      */
     private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
-            final String defaultCheckers, final String externalCheckers, final String issueSeverity,
-            final String ignoredIssues)
+            final String defaultCheckers, final String issueSeverity, final String ignoredIssues)
             throws OutputWriterException {
         if (json != null && !json.isEmpty()) {
             try {
@@ -158,14 +154,18 @@ public class JsOutputWriter implements IssueOutputWriter {
                 osWriterSuccess.close();
 
                 if ((wrongCheckers != null && !wrongCheckers.isEmpty())
-                        && (defaultCheckers != null && !defaultCheckers.isEmpty())
-                        && (externalCheckers != null && !externalCheckers.isEmpty())) {
-                    final OutputStreamWriter wrongDefaultExternalCheckers = new OutputStreamWriter(
+                        && (defaultCheckers != null && !defaultCheckers.isEmpty())) {
+                    final OutputStreamWriter wrongAndDefaultCheckers = new OutputStreamWriter(
                             new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8);
-                    wrongDefaultExternalCheckers.write(wrongCheckers);
-                    wrongDefaultExternalCheckers.write(defaultCheckers);
-                    wrongDefaultExternalCheckers.write(externalCheckers);
-                    wrongDefaultExternalCheckers.close();
+                    wrongAndDefaultCheckers.write(wrongCheckers);
+                    wrongAndDefaultCheckers.write(defaultCheckers);
+                    wrongAndDefaultCheckers.close();
+                } else if ((wrongCheckers == null || wrongCheckers.isEmpty())
+                        && (defaultCheckers != null && !defaultCheckers.isEmpty())) {
+                    final OutputStreamWriter defaultCheckerJS = new OutputStreamWriter(
+                            new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8);
+                    defaultCheckerJS.write(defaultCheckers);
+                    defaultCheckerJS.close();
                 }
 
                 if (issueSeverity != null && !issueSeverity.isEmpty()) {
@@ -306,7 +306,7 @@ public class JsOutputWriter implements IssueOutputWriter {
     private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
         Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
 
-        for (final String bpmnFilename : AbstractRunner.getModelPath()) {
+        for (final String bpmnFilename : Runner.getModelPath()) {
             Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
             modelIssues.addAll(issues);
 
@@ -343,7 +343,7 @@ public class JsOutputWriter implements IssueOutputWriter {
         String output = "var diagramXMLSource = [\n";
 
         try {
-            for (final String bpmnFilename : AbstractRunner.getModelPath()) {
+            for (final String bpmnFilename : Runner.getModelPath()) {
                 String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
                 output += "{\"name\":\"" + prettyBpmnFileName + "\",\n \"xml\": \"";
                 output += convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename);
@@ -503,7 +503,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
     /**
      * 
-     * @param defaultCheckers
+     * @param wrongCheckers
      * @return
      */
     private static String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
@@ -513,25 +513,6 @@ public class JsOutputWriter implements IssueOutputWriter {
             for (String entry : defaultCheckers) {
                 final JsonObject obj = new JsonObject();
                 obj.addProperty(ConfigConstants.RULENAME, entry);
-                jsonIssues.add(obj);
-            }
-        }
-        return ("\n var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
-    }
-
-    /**
-     * 
-     * @param externalCheckers
-     * @return
-     */
-    private static String transformExternalCheckersToJsDatastructure(final Map<String, String> externalCheckers) {
-        final String varName = "externalCheckers";
-        final JsonArray jsonIssues = new JsonArray();
-        if (externalCheckers != null && externalCheckers.size() > 0) {
-            for (Map.Entry<String, String> entry : externalCheckers.entrySet()) {
-                final JsonObject obj = new JsonObject();
-                obj.addProperty(ConfigConstants.RULENAME, entry.getKey());
-                obj.addProperty("message", entry.getValue());
                 jsonIssues.add(obj);
             }
         }
