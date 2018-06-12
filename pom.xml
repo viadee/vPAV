@@ -61,6 +61,12 @@
 			<organization>viadee Unternehmensberatung GmbH</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
+		<developer>
+			<name>Lars Beyer</name>
+			<email>Lars.Beyer@viadee.de</email>
+			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organizationUrl>http://www.viadee.de</organizationUrl>
+		</developer>
 	</developers>
 
 	<scm>
