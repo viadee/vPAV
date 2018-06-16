@@ -138,7 +138,11 @@ public class Runner {
 	 *
 	 * @return Map(String, Rule) ruleSet
 	 */
-	private static Map<String, Rule> readConfig() {		
+	private static Map<String, Rule> readConfig() {	
+		
+		deleteFiles();
+		createvPAVFolder();
+		
 		Map<String, Rule> rules = new XmlConfigReader().getDeactivatedRuleSet();
 		final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
 		try {
@@ -251,9 +255,7 @@ public class Runner {
 	 *             Abort if writer can not be instantiated
 	 */
 	private static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
-		deleteFiles();
-		createvPAVFolder();
-		
+
 		try {
 			Files.createDirectory(Paths.get(ConfigConstants.JS_FOLDER));
 			Files.createDirectory(Paths.get(ConfigConstants.CSS_FOLDER));
