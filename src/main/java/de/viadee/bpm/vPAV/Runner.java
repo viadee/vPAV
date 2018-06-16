@@ -140,10 +140,8 @@ public class Runner {
 	 */
 	private static Map<String, Rule> readConfig() {	
 		
-		deleteFiles();
-		createvPAVFolder();
+		prepareOutputFolder();
 		
-		Map<String, Rule> rules = new XmlConfigReader().getDeactivatedRuleSet();
 		final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
 		try {
 			if (new File(ConfigConstants.TEST_BASEPATH + ConfigConstants.RULESET).exists()) {
@@ -175,6 +173,23 @@ public class Runner {
 		}
 
 		return rules;
+	}
+
+	/**
+	 * Delete old output and create new output folder
+	 */
+	private static void prepareOutputFolder() {
+		
+		deleteFiles();
+		createvPAVFolder();
+		try {
+			Files.createDirectory(Paths.get(ConfigConstants.JS_FOLDER));
+			Files.createDirectory(Paths.get(ConfigConstants.CSS_FOLDER));
+			Files.createDirectory(Paths.get(ConfigConstants.IMG_FOLDER));
+		} catch (IOException e) {
+			logger.warning("Could not create either output folder for JS, CSS or IMG");
+		}
+		
 	}
 
 	/**
@@ -255,14 +270,6 @@ public class Runner {
 	 *             Abort if writer can not be instantiated
 	 */
 	private static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
-
-		try {
-			Files.createDirectory(Paths.get(ConfigConstants.JS_FOLDER));
-			Files.createDirectory(Paths.get(ConfigConstants.CSS_FOLDER));
-			Files.createDirectory(Paths.get(ConfigConstants.IMG_FOLDER));
-		} catch (IOException e) {
-			logger.warning("Could not create either output folder for JS, CSS or IMG");
-		}
 		
 		if (filteredIssues.size() > 0) {
 			final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
