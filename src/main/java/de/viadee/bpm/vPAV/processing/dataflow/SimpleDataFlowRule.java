@@ -34,21 +34,23 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class SimpleDataFlowRule implements DataFlowRule {
-    private final Collection<ProcessVariable> variables;
     private final Constraint<ProcessVariable> constraint;
     private final Condition condition;
 
-    SimpleDataFlowRule(Collection<ProcessVariable> variables, Constraint<ProcessVariable> constraint, Condition condition) {
+    SimpleDataFlowRule(Constraint<ProcessVariable> constraint, Condition condition) {
 
-        this.variables = variables;
         this.constraint = constraint;
         this.condition = condition;
     }
 
-    public boolean check() {
-        List<ProcessVariable> filteredVariables = variables.stream().filter(constraint::apply).collect(Collectors.toList());
+    public boolean check(Collection<ProcessVariable> variables) {
+        Stream<ProcessVariable> variableStream = variables.stream();
+        if (constraint != null)
+            variableStream = variableStream.filter(constraint::apply);
+        List<ProcessVariable> filteredVariables = variableStream.collect(Collectors.toList());
         return filteredVariables.size() <= filteredVariables.stream().filter(condition::apply).count();
     }
 }

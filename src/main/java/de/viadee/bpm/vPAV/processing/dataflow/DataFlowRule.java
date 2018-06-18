@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import java.util.Collection;
+
 public interface DataFlowRule {
-    boolean check();
+    boolean check(Collection<ProcessVariable> variables);
 }

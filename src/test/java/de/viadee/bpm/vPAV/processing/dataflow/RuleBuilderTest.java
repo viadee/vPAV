@@ -31,6 +31,14 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.ExclusiveGateway;
+import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.camunda.bpm.model.bpmn.instance.UserTask;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -38,9 +46,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static de.viadee.bpm.vPAV.processing.dataflow.RuleBuilder.defineRule;
+import static de.viadee.bpm.vPAV.processing.dataflow.RuleBuilder.processVariables;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class RuleBuilderTest {
 
@@ -54,60 +63,186 @@ public class RuleBuilderTest {
 
     @Test()
     public void testRuleWithoutVariablesSucceeds() {
-        DataFlowRule rule = defineRule()
-                .withVariables(new ArrayList<>())
+        DataFlowRule rule = processVariables()
                 .that(constraintFrom(v -> false))
                 .should(conditionFrom(v -> false));
 
-        assertThat(rule.check(), is(true));
+        assertThat(rule.check(new ArrayList<>()), is(true));
     }
 
     @Test()
     public void testRulesWithBrokenConditionFails() {
         List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
-        DataFlowRule rule = defineRule()
-                .withVariables(processVariables)
+        DataFlowRule rule = processVariables()
                 .that(constraintFrom(v -> true))
                 .should(conditionFrom(v -> false));
 
-        assertThat(rule.check(), is(false));
+        assertThat(rule.check(processVariables), is(false));
     }
 
     @Test()
     public void testRulesWithNonFulfillableConstraintSucceeds() {
         List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
-        DataFlowRule rule = defineRule()
-                .withVariables(processVariables)
+        DataFlowRule rule = processVariables()
                 .that(constraintFrom(v -> false))
                 .should(conditionFrom(v -> false));
 
-        assertThat(rule.check(), is(true));
+        assertThat(rule.check(processVariables), is(true));
     }
 
     @Test()
     public void testRulesWithFullfilledConstrainedAndConditionSucceeds() {
         List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
-        DataFlowRule rule = defineRule()
-                .withVariables(processVariables)
+        DataFlowRule rule = processVariables()
                 .that(constraintFrom(v -> true))
                 .should(conditionFrom(v -> true));
 
-        assertThat(rule.check(), is(true));
+        assertThat(rule.check(processVariables), is(true));
+    }
+
+    @Test
+    public void testConstraintAreDefinedByServiceTasksFiltersCorrectProcessVariables() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("variable1");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+        processVariable = new ProcessVariable("variable2");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        processVariable.addWrite(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(ExclusiveGateway.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+
+        Counter cnt = new Counter();
+        processVariables()
+                .that().areDefinedByServiceTasks()
+                .should(conditionFrom(countingPredicate(cnt)))
+                .check(variables);
+
+        assertThat(cnt.value(), is(1));
+    }
+
+    @Test
+    public void testConstraintHavePrefixFiltersCorrectProcessVariables() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("variable1");
+        variables.add(processVariable);
+        processVariable = new ProcessVariable("ext_variable2");
+        variables.add(processVariable);
+
+        Counter cnt = new Counter();
+        processVariables()
+                .that().havePrefix("ext_")
+                .should(conditionFrom(countingPredicate(cnt)))
+                .check(variables);
+
+        assertThat(cnt.value(), is(1));
     }
 
     @Test()
-    public void testCanBuildRuleWithPredefinedConstraints() {
+    public void testAndConstraintConjunctionIsAppliedCorrectly() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("ext_variable1");
+        variables.add(processVariable);
+        processVariable = new ProcessVariable("variable1");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+        processVariable = new ProcessVariable("ext_variable3");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
 
-        List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
-
-        DataFlowRule rule = defineRule()
-                .withVariables(processVariables)
+        Counter cnt = new Counter();
+        processVariables()
                 .that().areDefinedByServiceTasks()
-                .should(conditionFrom(v -> true));
+                .andThat().havePrefix("ext_")
+                .should(conditionFrom(countingPredicate(cnt)))
+                .check(variables);
 
-        assertThat(rule.check(), is(true));
+        assertThat(cnt.value(), is(1));
+    }
+
+    @Test()
+    public void testOrConstraintConjunctionIsAppliedCorrectly() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("ext_variable1");
+        variables.add(processVariable);
+        processVariable = new ProcessVariable("variable1");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+        processVariable = new ProcessVariable("ext_variable3");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+        processVariable = new ProcessVariable("variable3");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+
+        Counter cnt = new Counter();
+        processVariables()
+                .that().areDefinedByServiceTasks()
+                .orThat().havePrefix("ext_")
+                .should(conditionFrom(countingPredicate(cnt)))
+                .check(variables);
+
+        assertThat(cnt.value(), is(3));
+    }
+
+    private static Predicate<ProcessVariable> countingPredicate(Counter cnt) {
+        return processVariable -> {
+            cnt.increment();
+            return true;
+        };
+    }
+
+    private class ProcessVariableBuilder {
+        private String name = "variable";
+        private BpmnElement element = new BpmnElement("process1", mock(BaseElement.class));
+        private VariableOperation operation = VariableOperation.WRITE;
+
+        public ProcessVariableBuilder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public ProcessVariableBuilder withElement(Class<? extends BaseElement> clazz) {
+            element = new BpmnElement("process1", mock(clazz));
+            return this;
+        }
+
+        public ProcessVariableBuilder withOperation(VariableOperation operation) {
+            this.operation = operation;
+            return this;
+        }
+
+        public de.viadee.bpm.vPAV.processing.model.data.ProcessVariable build() {
+            return new de.viadee.bpm.vPAV.processing.model.data.ProcessVariable(name, element, ElementChapter.Details,
+                    KnownElementFieldType.Class, "", operation, "");
+        }
+    }
+
+    private class Counter {
+        private int c = 0;
+
+        public void increment() {
+            c++;
+        }
+
+        public void decrement() {
+            c--;
+        }
+
+        public int value() {
+            return c;
+        }
     }
 }

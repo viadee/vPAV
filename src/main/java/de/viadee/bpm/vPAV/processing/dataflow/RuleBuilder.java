@@ -31,15 +31,16 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import org.springframework.util.Assert;
+
 import java.util.Collection;
 
 public class RuleBuilder implements DataFlowRule {
 
     private Condition condition;
     private Constraint<ProcessVariable> constraint;
-    private Collection<ProcessVariable> variables;
 
-    public static RuleBuilder defineRule() {
+    public static RuleBuilder processVariables() {
         return new RuleBuilder();
     }
 
@@ -48,22 +49,33 @@ public class RuleBuilder implements DataFlowRule {
         return this;
     }
 
-    public RuleBuilder withVariables(Collection<ProcessVariable> variables) {
-        this.variables = variables;
-        return this;
+    public ConstrainedProcessVariableSet that(Constraint<ProcessVariable> constraint) {
+        this.constraint = constraint;
+        return new ConstrainedProcessVariableSetImpl(this);
     }
 
-    public RuleBuilder that(Constraint<ProcessVariable> constraint) {
-        this.constraint = constraint;
-        return this;
+    public ConstrainedProcessVariableSet orThat(Constraint<ProcessVariable> constraint) {
+        Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
+        this.constraint = this.constraint.or(constraint);
+        return new ConstrainedProcessVariableSetImpl(this);
+    }
+
+    public ConstrainedProcessVariableSet andThat(Constraint<ProcessVariable> constraint) {
+        Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
+        this.constraint = this.constraint.and(constraint);
+        return new ConstrainedProcessVariableSetImpl(this);
+    }
+
+    public ProcessVariableConstraintBuilder that() {
+        return new ProcessVariableConstraintBuilderImpl(this::that);
     }
 
     public DataFlowRule build() {
-        return new SimpleDataFlowRule(variables, constraint, condition);
+        return new SimpleDataFlowRule(constraint, condition);
     }
 
     @Override
-    public boolean check() {
-        return new SimpleDataFlowRule(variables, constraint, condition).check();
+    public boolean check(Collection<ProcessVariable> variables) {
+        return new SimpleDataFlowRule(constraint, condition).check(variables);
     }
 }
