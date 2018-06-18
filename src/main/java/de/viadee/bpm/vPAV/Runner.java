@@ -346,7 +346,8 @@ public class Runner {
 		for (String file : allOutputFilesArray)
 			outputFiles.add(Paths.get(fileMapping.get(file), file));
 
-		if (rules.get("CreateOutputHTML").isActive()) {			
+		if (rules.containsKey(ConfigConstants.CREATE_OUTPUT_RULE) &&
+				rules.get(ConfigConstants.CREATE_OUTPUT_RULE).isActive()) {
 			for (String file : allOutputFilesArray)
 				copyFileToVPAVFolder(file);
 		}
