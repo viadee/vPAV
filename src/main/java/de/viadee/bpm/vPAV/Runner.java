@@ -284,13 +284,11 @@ public class Runner {
 				throw new RuntimeException("Output couldn't be written");
 			}
 		} else {
-			// 6a if no issues, then delete files if exists
-			deleteFiles();
 			final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
 			try {
 				jsOutputWriter.write(filteredIssues);
 			} catch (OutputWriterException e) {
-				throw new RuntimeException("JavaScript File couldn't be written");
+				throw new RuntimeException("JavaScript File couldn't be written", e);
 			}
 		}
 	}

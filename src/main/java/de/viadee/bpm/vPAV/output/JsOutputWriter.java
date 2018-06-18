@@ -183,7 +183,7 @@ public class JsOutputWriter implements IssueOutputWriter {
                 }
 
             } catch (final IOException ex) {
-                throw new OutputWriterException("js output couldn't be written");
+                throw new OutputWriterException("js output couldn't be written", ex);
             }
         }
     }
