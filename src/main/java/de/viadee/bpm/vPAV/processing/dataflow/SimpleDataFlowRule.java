@@ -31,8 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;

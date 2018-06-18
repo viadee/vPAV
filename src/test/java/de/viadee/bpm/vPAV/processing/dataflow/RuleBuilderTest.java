@@ -31,10 +31,10 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -64,9 +64,7 @@ public class RuleBuilderTest {
 
     @Test()
     public void testRulesWithBrokenConditionFails() {
-        List<ProcessVariable> processVariables = new ArrayList<>();
-        processVariables.add(new ProcessVariable("variable1", null, ElementChapter.General,
-                KnownElementFieldType.ElementVariable, "", VariableOperation.READ, ""));
+        List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
         DataFlowRule rule = defineRule()
                 .withVariables(processVariables)
@@ -78,9 +76,7 @@ public class RuleBuilderTest {
 
     @Test()
     public void testRulesWithNonFulfillableConstraintSucceeds() {
-        List<ProcessVariable> processVariables = new ArrayList<>();
-        processVariables.add(new ProcessVariable("variable1", null, ElementChapter.General,
-                KnownElementFieldType.ElementVariable, "", VariableOperation.READ, ""));
+        List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
         DataFlowRule rule = defineRule()
                 .withVariables(processVariables)
@@ -92,13 +88,24 @@ public class RuleBuilderTest {
 
     @Test()
     public void testRulesWithFullfilledConstrainedAndConditionSucceeds() {
-        List<ProcessVariable> processVariables = new ArrayList<>();
-        processVariables.add(new ProcessVariable("variable1", null, ElementChapter.General,
-                KnownElementFieldType.ElementVariable, "", VariableOperation.READ, ""));
+        List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
         DataFlowRule rule = defineRule()
                 .withVariables(processVariables)
                 .that(constraintFrom(v -> true))
+                .should(conditionFrom(v -> true));
+
+        assertThat(rule.check(), is(true));
+    }
+
+    @Test()
+    public void testCanBuildRuleWithPredefinedConstraints() {
+
+        List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
+
+        DataFlowRule rule = defineRule()
+                .withVariables(processVariables)
+                .that().areDefinedByServiceTasks()
                 .should(conditionFrom(v -> true));
 
         assertThat(rule.check(), is(true));
