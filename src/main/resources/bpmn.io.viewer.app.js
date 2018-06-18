@@ -26,8 +26,8 @@ function activateButtonAllIssues(model) {
     btReset.setAttribute("href", "#");
 }
 
-//add attribute to link
-function activateLinkSuccess(model) {
+//add button "show checkers without issues"
+function addAllSuccessButton(model) {
     var aSuccess = document.getElementById("success");
     if (countIssues(model, noIssuesElements) > 0)
         aSuccess.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
