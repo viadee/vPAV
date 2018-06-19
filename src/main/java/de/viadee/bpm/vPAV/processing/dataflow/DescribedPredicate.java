@@ -31,31 +31,31 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import java.util.function.Predicate;
+import java.util.function.Function;
 
-public class Constraint<T> {
+public class DescribedPredicate<T> {
 
-    private final Predicate<T> predicate;
+    private final Function<T, EvaluationResult> predicate;
     private final String description;
 
-    public Constraint(Predicate<T> predicate, String description) {
+    public DescribedPredicate(Function<T, EvaluationResult> predicate, String description) {
         this.predicate = predicate;
         this.description = description;
     }
 
     public boolean apply(T value) {
-        return predicate.test(value);
+        return !predicate.apply(value).isRuleViolated();
     }
 
     public String getDescription() {
         return description;
     }
 
-    public Constraint<T> or(Constraint<T> other) {
-        return new Constraint<>(predicate.or(other.predicate), description + " or " + other.description);
+    public DescribedPredicate<T> or(DescribedPredicate<T> other) {
+        return new DescribedPredicate<T>(predicate.or(other.predicate), description + " or " + other.description);
     }
 
-    public Constraint<T> and(Constraint other) {
-        return new Constraint<T>(predicate.and(other.predicate), description + " and " + other.description);
+    public DescribedPredicate<T> and(DescribedPredicate other) {
+        return new DescribedPredicate<T>(predicate.and(other.predicate), description + " and " + other.description);
     }
 }

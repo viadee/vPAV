@@ -4,15 +4,12 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
-
 public class SimpleDataFlowRuleTest {
 
     @Test
     public void testCheckWorksWithoutConstraint() {
-        SimpleDataFlowRule rule = new SimpleDataFlowRule(null, new Condition(v -> true, ""));
+        SimpleDataFlowRule rule = new SimpleDataFlowRule(null, new DescribedPredicate<>(v -> true, ""));
 
-        assertThat(rule.check(Collections.emptyList()), is(true));
+        rule.check(Collections.emptyList());
     }
 }

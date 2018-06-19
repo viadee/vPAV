@@ -37,20 +37,38 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class SimpleDataFlowRule implements DataFlowRule {
-    private final Constraint<ProcessVariable> constraint;
-    private final Condition condition;
+    private final DescribedPredicate<ProcessVariable> constraint;
+    private final DescribedPredicate<ProcessVariable> condition;
 
-    SimpleDataFlowRule(Constraint<ProcessVariable> constraint, Condition condition) {
-
+    SimpleDataFlowRule(DescribedPredicate<ProcessVariable> constraint, DescribedPredicate<ProcessVariable> condition) {
         this.constraint = constraint;
         this.condition = condition;
     }
 
-    public boolean check(Collection<ProcessVariable> variables) {
+    public void check(Collection<ProcessVariable> variables) {
+        String ruleDescription =
+                constraint != null ?
+                        constraint.getDescription() + " " :
+                        ""
+                                + condition.getDescription();
+
         Stream<ProcessVariable> variableStream = variables.stream();
         if (constraint != null)
             variableStream = variableStream.filter(constraint::apply);
-        List<ProcessVariable> filteredVariables = variableStream.collect(Collectors.toList());
-        return filteredVariables.size() <= filteredVariables.stream().filter(condition::apply).count();
+        List<EvaluationResult> results = variableStream
+                .map(p -> new EvaluationResult(ruleDescription, condition.apply(p), p))
+                .collect(Collectors.toList());
+        assertNoViolations(results);
+    }
+
+    private void assertNoViolations(List<EvaluationResult> result) {
+        List<EvaluationResult> violations = result.stream()
+                .filter(EvaluationResult::isRuleViolated)
+                .collect(Collectors.toList());
+        if (violations.size() > 0) {
+            throw new AssertionError(violations.stream()
+                    .map(EvaluationResult::getDescription)
+                    .collect(Collectors.joining("\n")));
+        }
     }
 }

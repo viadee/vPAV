@@ -1,10 +1,10 @@
 package de.viadee.bpm.vPAV.processing.dataflow;
 
 public interface ConstrainedProcessVariableSet {
-    ProcessVariableConstraintBuilder orThat();
-    ProcessVariableConstraintBuilder andThat();
-    ConstrainedProcessVariableSet orThat(Constraint<ProcessVariable> constraint);
-    ConstrainedProcessVariableSet andThat(Constraint<ProcessVariable> constraint);
-    RuleBuilder should();
-    RuleBuilder should(Condition condition);
+    ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> orThatAre();
+    ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> andThatAre();
+    ConstrainedProcessVariableSet orThatAre(DescribedPredicate<ProcessVariable> constraint);
+    ConstrainedProcessVariableSet andThatAre(DescribedPredicate<ProcessVariable> constraint);
+    ProcessVariablePredicateBuilder<ConditionedSet> shouldBe();
+    ConditionedSet shouldBe(DescribedPredicate<ProcessVariable> condition);
 }

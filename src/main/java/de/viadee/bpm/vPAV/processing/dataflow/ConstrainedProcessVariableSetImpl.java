@@ -1,6 +1,6 @@
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-public class ConstrainedProcessVariableSetImpl implements ConstrainedProcessVariableSet {
+class ConstrainedProcessVariableSetImpl implements ConstrainedProcessVariableSet {
 
     private final RuleBuilder builder;
 
@@ -9,34 +9,34 @@ public class ConstrainedProcessVariableSetImpl implements ConstrainedProcessVari
     }
 
     @Override
-    public ProcessVariableConstraintBuilder orThat() {
-        return new ProcessVariableConstraintBuilderImpl(builder::orThat);
+    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> orThatAre() {
+        return new ProcessVariablePredicateBuilderImpl<>(builder::orThatAre);
     }
 
     @Override
-    public ProcessVariableConstraintBuilder andThat() {
-        return new ProcessVariableConstraintBuilderImpl(builder::andThat);
+    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> andThatAre() {
+        return new ProcessVariablePredicateBuilderImpl<>(builder::andThatAre);
     }
 
     @Override
-    public ConstrainedProcessVariableSet orThat(Constraint<ProcessVariable> constraint) {
-        builder.orThat(constraint);
+    public ConstrainedProcessVariableSet orThatAre(DescribedPredicate<ProcessVariable> constraint) {
+        builder.orThatAre(constraint);
         return this;
     }
 
     @Override
-    public ConstrainedProcessVariableSet andThat(Constraint<ProcessVariable> constraint) {
-        builder.orThat(constraint);
+    public ConstrainedProcessVariableSet andThatAre(DescribedPredicate<ProcessVariable> constraint) {
+        builder.orThatAre(constraint);
         return this;
     }
 
     @Override
-    public RuleBuilder should() {
-        return null;
+    public ProcessVariablePredicateBuilder<ConditionedSet> shouldBe() {
+        return builder.shouldBe();
     }
 
     @Override
-    public RuleBuilder should(Condition condition) {
-        return builder.should(condition);
+    public ConditionedSet shouldBe(DescribedPredicate<ProcessVariable> condition) {
+        return builder.shouldBe(condition);
     }
 }

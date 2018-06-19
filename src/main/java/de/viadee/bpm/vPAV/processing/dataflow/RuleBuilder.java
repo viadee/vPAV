@@ -37,37 +37,53 @@ import java.util.Collection;
 
 public class RuleBuilder implements DataFlowRule {
 
-    private Condition condition;
-    private Constraint<ProcessVariable> constraint;
+    private DescribedPredicate<ProcessVariable> condition;
+    private DescribedPredicate<ProcessVariable> constraint;
 
     public static RuleBuilder processVariables() {
         return new RuleBuilder();
     }
 
-    public RuleBuilder should(Condition condition) {
+    public ConditionedSet shouldBe(DescribedPredicate<ProcessVariable> condition) {
         this.condition = condition;
-        return this;
+        return new ConditionedSetImpl(this);
     }
 
-    public ConstrainedProcessVariableSet that(Constraint<ProcessVariable> constraint) {
+    public ProcessVariablePredicateBuilder<ConditionedSet> shouldBe() {
+        return new ProcessVariablePredicateBuilderImpl<>(this::shouldBe);
+    }
+
+    ConditionedSet orShouldBe(DescribedPredicate<ProcessVariable> condition) {
+        Assert.notNull(this.condition, "Condition conjunction is not allowed without defining initial condition");
+        this.condition = this.condition.or(condition);
+        return new ConditionedSetImpl(this);
+    }
+
+    ConditionedSet andShouldBe(DescribedPredicate<ProcessVariable> condition) {
+        Assert.notNull(this.condition, "Condition conjunction is not allowed without defining initial condition");
+        this.condition = this.condition.and(condition);
+        return new ConditionedSetImpl(this);
+    }
+
+    public ConstrainedProcessVariableSet thatAre(DescribedPredicate<ProcessVariable> constraint) {
         this.constraint = constraint;
         return new ConstrainedProcessVariableSetImpl(this);
     }
 
-    public ConstrainedProcessVariableSet orThat(Constraint<ProcessVariable> constraint) {
+    ConstrainedProcessVariableSet orThatAre(DescribedPredicate<ProcessVariable> constraint) {
         Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
         this.constraint = this.constraint.or(constraint);
         return new ConstrainedProcessVariableSetImpl(this);
     }
 
-    public ConstrainedProcessVariableSet andThat(Constraint<ProcessVariable> constraint) {
+    ConstrainedProcessVariableSet andThatAre(DescribedPredicate<ProcessVariable> constraint) {
         Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
         this.constraint = this.constraint.and(constraint);
         return new ConstrainedProcessVariableSetImpl(this);
     }
 
-    public ProcessVariableConstraintBuilder that() {
-        return new ProcessVariableConstraintBuilderImpl(this::that);
+    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> that() {
+        return new ProcessVariablePredicateBuilderImpl<>(this::thatAre);
     }
 
     public DataFlowRule build() {
@@ -75,7 +91,7 @@ public class RuleBuilder implements DataFlowRule {
     }
 
     @Override
-    public boolean check(Collection<ProcessVariable> variables) {
-        return new SimpleDataFlowRule(constraint, condition).check(variables);
+    public void check(Collection<ProcessVariable> variables) {
+        new SimpleDataFlowRule(constraint, condition).check(variables);
     }
 }

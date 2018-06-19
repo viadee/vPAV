@@ -36,11 +36,11 @@ import org.junit.Test;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.*;
 
-public class ConstraintTest {
+public class DescribedPredicateTest {
 
     @Test
     public void testApplyAppliesPredicate() {
-        Constraint<String> constraint = new Constraint<>(String::isEmpty, "");
+        DescribedPredicate<String> constraint = new DescribedPredicate<>(String::isEmpty, "");
 
         assertThat(constraint.apply(""), is(true));
         assertThat(constraint.apply("notEmpty"), is(false));
@@ -48,10 +48,10 @@ public class ConstraintTest {
 
     @Test
     public void testOrCombinesConstraintsCorrectly() {
-        Constraint<String> constraint = new Constraint<>(String::isEmpty, "constraint1");
-        Constraint<String> constraint2 = new Constraint<>(s -> s.startsWith("ext_"), "constraint2");
+        DescribedPredicate<String> constraint = new DescribedPredicate<>(String::isEmpty, "constraint1");
+        DescribedPredicate<String> constraint2 = new DescribedPredicate<>(s -> s.startsWith("ext_"), "constraint2");
 
-        Constraint<String> testConstraint = constraint.or(constraint2);
+        DescribedPredicate<String> testConstraint = constraint.or(constraint2);
 
         assertThat(testConstraint.getDescription(), is("constraint1 or constraint2"));
         assertThat(testConstraint.apply(""), is(true));
@@ -61,10 +61,10 @@ public class ConstraintTest {
 
     @Test
     public void testAndCombinesConstraintsCorrectly() {
-        Constraint<String> constraint = new Constraint<>(s -> s.length() == 5, "constraint1");
-        Constraint<String> constraint2 = new Constraint<>(s -> s.startsWith("ext_"), "constraint2");
+        DescribedPredicate<String> constraint = new DescribedPredicate<>(s -> s.length() == 5, "constraint1");
+        DescribedPredicate<String> constraint2 = new DescribedPredicate<>(s -> s.startsWith("ext_"), "constraint2");
 
-        Constraint<String> testConstraint = constraint.and(constraint2);
+        DescribedPredicate<String> testConstraint = constraint.and(constraint2);
 
         assertThat(testConstraint.getDescription(), is("constraint1 and constraint2"));
         assertThat(testConstraint.apply("five5"), is(false));
