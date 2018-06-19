@@ -1,3 +1,3 @@
 language: java
 install: 
-script: mvn install -DskipTests=false
+script: mvn install -DskipTests=false -Dmaven.javadoc.skip=true
