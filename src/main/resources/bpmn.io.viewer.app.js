@@ -278,23 +278,34 @@ function downloadFile(){
 
 //delete table under diagram
 function deleteTable() {
-    //delete tBodys
-    var tb = document.querySelectorAll('tbody');
-    for (var i = 0; i < tb.length; i++) {
-        if (tb[i].children.length === 0) {
-            tb[i].parentNode.removeChild(tb[i]);
-        }
-    }
-
-    var myTable = document.getElementById("table_issues");
-    //delete rows
-    while (myTable.rows.length > 1) {
-        myTable.deleteRow(myTable.rows.length - 1);
+    let myTable = document.getElementById("table_issues");
+    while (myTable.firstChild) {
+        myTable.removeChild(myTable.firstChild);
     }
 }
+
+function createTableHeader(id, content) {
+    let myTh = document.createElement("th");
+    myTh.setAttribute("id", id);
+    myTh.innerHTML = content;
+    return myTh;
+}
+
 //create issue table
 function createIssueTable(bpmnFile, tableContent) {
     var myTable = document.getElementById("table_issues");
+    let myTHead = document.createElement("thead");
+    let myRow = document.createElement("tr");
+    myRow.setAttribute("id", "tr_ueberschriften");
+    myRow.setAttribute("class", "table-primary");
+    myRow.appendChild(createTableHeader("th_ruleName", "Rule-Name"));
+    myRow.appendChild(createTableHeader("th_elementId", "Element-Id"));
+    myRow.appendChild(createTableHeader("th_elementName", "Element-Name"));
+    myRow.appendChild(createTableHeader("th_classification", "Class"));
+    myRow.appendChild(createTableHeader("th_message", "Message"));
+    myRow.appendChild(createTableHeader("th_paths", "Invalid Sequenceflow"));
+    myTHead.appendChild(myRow);
+    myTable.appendChild(myTHead);
 
     //fill table with all issuesof current model
     for (id in tableContent) {
@@ -406,18 +417,27 @@ function createIssueTable(bpmnFile, tableContent) {
             myParent.setAttribute("class", "container-fluid");
             myTBody.appendChild(myRow);
             myTable.appendChild(myTBody);
-            myParent.appendChild(myTable);
         }
     }
 }
 
 //create issue table
 function createVariableTable(bpmnFile, tableContent) {
-    var myTable = document.getElementById("table_issues");
+    let myTable = document.getElementById("table_issues");
+    let myTHead = document.createElement("thead");
+    let myRow = document.createElement("tr");
+    myRow.setAttribute("id", "tr_ueberschriften");
+    myRow.setAttribute("class", "table-primary");
+    myRow.appendChild(createTableHeader("th_ruleName", "Rule-Name"));
+    myRow.appendChild(createTableHeader("th_reads", "Reads"));
+    myRow.appendChild(createTableHeader("th_writes", "Writes"));
+    myRow.appendChild(createTableHeader("th_deletes", "Deletes"));
+    myTHead.appendChild(myRow);
+    myTable.appendChild(myTHead);
 
     //fill table with all issuesof current model
     for (id in tableContent) {
-        if (tableContent[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
+        if (tableContent[id].bpmnFile === ("src\\main\\resources\\" + bpmnFile)) {
             processVariable = tableContent[id];
             myParent = document.getElementsByTagName("body").item(0);
             myTBody = document.createElement("tbody");
@@ -425,10 +445,24 @@ function createVariableTable(bpmnFile, tableContent) {
 
 
             myCell = document.createElement("td");
-            myText = document.createTextNode(issue.elementName);
+            myText = document.createTextNode(processVariable.name);
             myCell.appendChild(myText);
             myRow.appendChild(myCell);
 
+            myCell = document.createElement("td");
+            myText = document.createTextNode(processVariable.read.map(p => p.elementName).join(", "));
+            myCell.appendChild(myText);
+            myRow.appendChild(myCell);
+
+            myCell = document.createElement("td");
+            myText = document.createTextNode(processVariable.write.map(p => p.elementName).join(", "));
+            myCell.appendChild(myText);
+            myRow.appendChild(myCell);
+
+            myCell = document.createElement("td");
+            myText = document.createTextNode(processVariable.delete.map(p => p.elementName).join(", "));
+            myCell.appendChild(myText);
+            myRow.appendChild(myCell);
             //---------
             myParent.setAttribute("class", "container-fluid");
             myTBody.appendChild(myRow);
