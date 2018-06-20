@@ -51,6 +51,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -93,6 +95,8 @@ public class Runner {
 
 	private static Map<String, BaseElement> signalNames = new HashMap<>();
 
+	private static Collection<BpmnElement> elements = new ArrayList<>();
+
 	private static boolean isMisconfigured = false;
 
 	private static boolean checkProcessVariables = false;
@@ -119,7 +123,7 @@ public class Runner {
 		removeIgnoredIssues();
 
 		// 6
-		writeOutput(filteredIssues);
+		writeOutput(filteredIssues, elements);
 
 		// 7
 		copyFiles();
@@ -266,19 +270,22 @@ public class Runner {
 	 *
 	 * @param filteredIssues
 	 *            List of filteredIssues
+	 * @param elements
+	 *            List of BPMN element across all models
 	 * @throws RuntimeException
 	 *             Abort if writer can not be instantiated
 	 */
-	private static void writeOutput(final Collection<CheckerIssue> filteredIssues) throws RuntimeException {
+	private static void writeOutput(final Collection<CheckerIssue> filteredIssues, final Collection<BpmnElement> elements) throws RuntimeException {
 		
 		if (filteredIssues.size() > 0) {
 			final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
 			final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();
-			final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
+			final JsOutputWriter jsOutputWriter = new JsOutputWriter();
 			try {
 				xmlOutputWriter.write(filteredIssues);
 				jsonOutputWriter.write(filteredIssues);
 				jsOutputWriter.write(filteredIssues);
+				jsOutputWriter.writeVars(elements);
 
 			} catch (final OutputWriterException e) {
 				throw new RuntimeException("Output couldn't be written");
@@ -585,7 +592,6 @@ public class Runner {
 			Runner.resetSequenceFlowList();
 		}
 		checkMisconfiguration();
-		JsOutputWriter.finish();
 		return issues;
 	}
 
@@ -607,23 +613,24 @@ public class Runner {
 	 */
 	private static Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processdef,
 			final FileScanner fileScanner, final OuterProcessVariablesScanner variableScanner) throws RuntimeException {
-		Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
+		ModelDispatchResult dispatchResult;
 		try {
 			if (variableScanner != null) {
-				modelIssues = BpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
+				dispatchResult = BpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
 						fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
 						variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
 						fileScanner.getResourcesNewestVersions(), rules);
 			} else {
-				modelIssues = BpmnModelDispatcher.dispatchWithoutVariables(
+				dispatchResult = BpmnModelDispatcher.dispatchWithoutVariables(
 						new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
 						fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
 			}
 		} catch (final ConfigItemNotFoundException e) {
 			throw new RuntimeException("Config item couldn't be read");
 		}
+		elements.addAll(dispatchResult.getBpmnElements());
 
-		return modelIssues;
+		return dispatchResult.getIssues();
 	}
 
 	/**

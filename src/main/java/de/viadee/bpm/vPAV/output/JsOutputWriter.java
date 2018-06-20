@@ -45,8 +45,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import de.viadee.bpm.vPAV.Runner;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import com.google.gson.GsonBuilder;
@@ -57,11 +59,6 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
@@ -191,72 +188,64 @@ public class JsOutputWriter implements IssueOutputWriter {
     /**
      * write javascript file with elements which have variables
      *
-     * @param baseElements
-     *            Collection of baseelements
-     * @param graphBuilder
-     *            graphBuilder
-     * @param processdefinition
-     *            bpmn file
+     * @param elements
+     *            Collection of BPMN elements across all models
      * @throws OutputWriterException
      *             javascript couldnt be written
      */
-    public void writeVars(Collection<BaseElement> baseElements, ElementGraphBuilder graphBuilder,
-            File processdefinition) throws OutputWriterException {
-        String modelVariables = "";
-
-        // add infos for specific processdefinition
+    public void writeVars(Collection<BpmnElement> elements) throws OutputWriterException {
         try {
-            FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_TMP, true);
-            for (final BaseElement baseElement : baseElements) {
-                BpmnElement element = graphBuilder.getElement(baseElement.getId());
-                if (element == null) {
-                    // if element is not in the data flow graph, create it.
-                    element = new BpmnElement(processdefinition.getPath(), baseElement);
+            FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, true);
+
+            // write elements containing operations
+            StringBuilder jsFile = new StringBuilder();
+            jsFile.append("var proz_vars = [\n")
+                    .append(elements.stream()
+                            .filter(e -> !e.getProcessVariables().isEmpty())
+                            .map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
+                            .collect(Collectors.joining(",\n\n")))
+                    .append("];\n\n");
+
+            // write variables containing elements
+            // first, we need to inverse mapping to process variable -> operations (including element)
+            // TODO: this belongs somewhere else
+            final Map<String, ActualProcessVariable> processVariables = new HashMap<>();
+            for (final BpmnElement element : elements) {
+                for (final ProcessVariable variableOperation : element.getProcessVariables().values()) {
+                    final String variableName = variableOperation.getName();
+                    if (!processVariables.containsKey(variableName)) {
+                        processVariables.put(variableName, new ActualProcessVariable(variableName));
+                    }
+                    final ActualProcessVariable processVariable = processVariables.get(variableName);
+                    switch (variableOperation.getOperation()) {
+                        case READ:
+                            processVariable.addRead(variableOperation);
+                            break;
+                        case WRITE:
+                            processVariable.addWrite(variableOperation);
+                            break;
+                        case DELETE:
+                            processVariable.addDelete(variableOperation);
+                            break;
+                    }
                 }
-                modelVariables += (transformToString(element));
             }
-            writer.write(modelVariables);
+
+            JsonArray jsonIssues = processVariables.values().stream()
+                    .map(JsOutputWriter::transformProcessVariablesToJson)
+                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+            jsFile.append("var processVariables = ")
+                    .append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues))
+                    .append(";");
+
+            writer.write(jsFile.toString());
             writer.close();
         } catch (IOException e) {
             logger.warning("Processvariables couldn't be written");
         }
     }
 
-    /**
-     * Finish the javascript file for processvariables
-     *
-     */
-    public static void finish() {
-        String jsFile = "var proz_vars = [\n";
-        if (new File(ConfigConstants.VALIDATION_JS_TMP).exists()) {
-            try {
-                // add file content
-                byte[] encoded = Files.readAllBytes(Paths.get(ConfigConstants.VALIDATION_JS_TMP));
-                jsFile += new String(encoded, "UTF-8");
-
-                // remove last ','
-                if (jsFile.contains(","))
-                    jsFile = (jsFile.length() > 1 ? jsFile.substring(0, jsFile.lastIndexOf(',')) : jsFile);
-
-                // add end '];'
-                jsFile += "];";
-
-                // delete files
-                new File(ConfigConstants.VALIDATION_JS_TMP).delete();
-                if (new File(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES).exists())
-                    new File(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES).delete();
-
-                FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, false);
-                // write file to target
-                writer.write(jsFile);
-                writer.close();
-            } catch (IOException e) {
-                logger.warning("Processvariables couldn't be written");
-            }
-        }
-    }
-
-    private String transformToString(BpmnElement element) {
+    private static String transformElementToJsonIncludingProcessVariables(BpmnElement element) {
         String elementString = "";
         String read = "";
         String write = "";
@@ -291,9 +280,43 @@ public class JsOutputWriter implements IssueOutputWriter {
             elementString += "\"delete\" : ["
                     + (delete.length() > 1 ? delete.substring(0, delete.length() - 1) : delete) + "]\n";
             // end
-            elementString += "},\n\n";
+            elementString += "}";
         }
         return elementString;
+    }
+
+    /**
+     * Transforms a process variable to a json object
+     *
+     * @param processVariable
+     * @return
+     */
+    private static JsonObject transformProcessVariablesToJson(final ActualProcessVariable processVariable) {
+        final JsonObject obj = new JsonObject();
+        obj.addProperty("name", processVariable.getName());
+        if (processVariable.getOperations().size() > 0) {
+            String bpmnFile = processVariable.getOperations().get(0).getElement().getProcessdefinition();
+            obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace(File.separator, "\\", bpmnFile));
+        }
+        obj.add("read", processVariable.getReads().stream().map(o -> {
+            final JsonObject jsonOperation = new JsonObject();
+            jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
+            jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
+            return jsonOperation;
+        }).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        obj.add("write", processVariable.getWrites().stream().map(o -> {
+            final JsonObject jsonOperation = new JsonObject();
+            jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
+            jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
+            return jsonOperation;
+        }).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        obj.add("delete", processVariable.getDeletes().stream().map(o -> {
+            final JsonObject jsonOperation = new JsonObject();
+            jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
+            jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
+            return jsonOperation;
+        }).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        return obj;
     }
 
     /**

@@ -44,8 +44,7 @@ function addProcessVariablesButton(model) {
         btnProcessVariables.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     else
         btnProcessVariables.setAttribute("class", "btn btn-viadee mt-2 collapse");
-    // TODO: adjust selectModel
-    btnProcessVariables.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 3, 0)");
+    btnProcessVariables.setAttribute("onclick", "showProcessVariables('" + model.replace(/\\/g, "\\\\") + "')");
     btnProcessVariables.setAttribute("href", "#");
 }
 
@@ -294,7 +293,7 @@ function deleteTable() {
     }
 }
 //create issue table
-function createTable(bpmnFile, tableContent) {
+function createIssueTable(bpmnFile, tableContent) {
     var myTable = document.getElementById("table_issues");
 
     //fill table with all issuesof current model
@@ -412,14 +411,45 @@ function createTable(bpmnFile, tableContent) {
     }
 }
 
+//create issue table
+function createVariableTable(bpmnFile, tableContent) {
+    var myTable = document.getElementById("table_issues");
+
+    //fill table with all issuesof current model
+    for (id in tableContent) {
+        if (tableContent[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
+            processVariable = tableContent[id];
+            myParent = document.getElementsByTagName("body").item(0);
+            myTBody = document.createElement("tbody");
+            myRow = document.createElement("tr");
+
+
+            myCell = document.createElement("td");
+            myText = document.createTextNode(issue.elementName);
+            myCell.appendChild(myText);
+            myRow.appendChild(myCell);
+
+            //---------
+            myParent.setAttribute("class", "container-fluid");
+            myTBody.appendChild(myRow);
+            myTable.appendChild(myTBody);
+            myParent.appendChild(myTable);
+        }
+    }
+}
+
 /**
  * create Footer
  */
 function createFooter() {
     const body = document.querySelector("body");
-    var footer = document.createElement("footer");
-    footer.setAttribute("class", "footer viadee-footer");
+    let footer = document.querySelector("footer");
+    //delete footer first
+    if (!(footer === null))
+        footer.parentNode.removeChild(footer);
 
+    footer = document.createElement("footer");
+    footer.setAttribute("class", "footer viadee-footer");
 
     var fP = document.createElement("span");
     fP.setAttribute("class", "text-muted-viadee");
@@ -454,13 +484,16 @@ const tableViewModes = Object.freeze({
 });
 
 function createTableFromViewMode(tableViewMode, diagramName) {
-    if (countIssues(diagramName, elementsToMark) > 0) {
+    deleteTable();
+    if (tableViewMode === tableViewModes.VARIABLES) {
+        createVariableTable(diagramName, processVariables);
+    } else if (countIssues(diagramName, elementsToMark) > 0) {
         if (tableViewMode === tableViewModes.ISSUES)
-            createTable(diagramName, elementsToMark);
+            createIssueTable(diagramName, elementsToMark);
         else
-            createTable(diagramName, noIssuesElements);
+            createIssueTable(diagramName, noIssuesElements);
     } else {
-        createTable(diagramName, noIssuesElements);
+        createIssueTable(diagramName, noIssuesElements);
     }
     tableVisible(true);
 }
@@ -472,6 +505,8 @@ function createTableFromViewMode(tableViewMode, diagramName) {
  * and opens it using the bpmn-js viewer.
  */
 function initDiagram(diagramXML, issue_id, path_nr, modelViewMode, tableViewMode) {
+    // remove current diagram
+    document.querySelector("#canvas").innerHTML = "";
     // create viewer
     var bpmnViewer = new window.BpmnJS({
         container: '#canvas'
@@ -514,20 +549,14 @@ function initDiagram(diagramXML, issue_id, path_nr, modelViewMode, tableViewMode
     bpmnViewer.xml = diagramXML.xml;
 
     bpmnViewer.reload = function (model, tableViewMode) {
-        document.querySelector("#canvas").innerHTML = "";
-        deleteTable();
         initDiagram(model, null, null, modelViewModes.COUNT_OVERLAY, tableViewMode);
     };
 
     bpmnViewer.reloadMarkPath = function (model, issue_id, path_nr) {
-        document.querySelector("#canvas").innerHTML = "";
-        deleteTable();
         initDiagram(model, issue_id, path_nr, modelViewModes.MARK_PATH, tableViewMode.ISSUES);
     };
 
     bpmnViewer.reloadMarkElement = function (model, issue_id) {
-        document.querySelector("#canvas").innerHTML = "";
-        deleteTable();
         initDiagram(model, issue_id, null, modelViewModes.MARK_ELEMENT, tableViewMode.ISSUES);
     };
 
@@ -579,7 +608,7 @@ function toggleDialog(sh) {
 (function () {
     var first = true;
     for (var id = 0; id <= diagramXMLSource.length - 1; id++) {
-        model = diagramXMLSource[id];
+        let model = diagramXMLSource[id];
         var ul = document.getElementById("linkList");
         var li = document.createElement("li");
         var a = document.createElement("a");
@@ -638,16 +667,13 @@ function selectModel(name, issue_id, path_nr, func, path) {
 
     document.getElementById("rowPath").setAttribute("class", "collapse");
 
-    //delete footer
-    const footer = document.querySelector("footer");
-    if (!(footer === null))
-        footer.parentNode.removeChild(footer);
     for (var id = 0; id <= diagramXMLSource.length - 1; id++) {
         var a = document.getElementById(diagramXMLSource[id].name);
         a.setAttribute("class", "nav-link");
         if (diagramXMLSource[id].name === name) {
             a.setAttribute("class", "nav-link active");
-            activateLinkSuccess(diagramXMLSource[id].name);
+            addAllSuccessButton(diagramXMLSource[id].name);
+            addProcessVariablesButton(diagramXMLSource[id].name);
             if (func == 0) {
                 viewer.reload(diagramXMLSource[id], tableViewModes.ISSUES);
                 document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
@@ -662,6 +688,17 @@ function selectModel(name, issue_id, path_nr, func, path) {
                 document.getElementById("success").setAttribute("class", "btn btn-viadee mt-2 collapse");
                 activateButtonAllIssues(diagramXMLSource[id].name);
             }
+        }
+    }
+}
+
+function showProcessVariables(name) {
+    for (var id = 0; id <= diagramXMLSource.length - 1; id++) {
+        if (diagramXMLSource[id].name === name) {
+            viewer.reload(diagramXMLSource[id], tableViewModes.VARIABLES);
+            document.getElementById("processVariables").setAttribute("class", "btn btn-viadee mt-2 collapse");
+            addAllSuccessButton(diagramXMLSource[id].name);
+            addAllIssuesButton(diagramXMLSource[id].name);
         }
     }
 }
