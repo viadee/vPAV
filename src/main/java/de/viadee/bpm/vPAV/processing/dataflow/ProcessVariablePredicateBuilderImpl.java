@@ -3,7 +3,6 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicateBuilder<T> {
@@ -31,13 +30,13 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
 
     @Override
     public T definedByServiceTasks() {
-        final Function<ProcessVariable, EvaluationResult> evaluator = p -> {
+        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             return p.getDefinitions().stream().anyMatch(o -> o.getElement().getBaseElement() instanceof ServiceTask) ?
-                    EvaluationResult.forSuccess() :
+                    EvaluationResult.forSuccess(p) :
                     EvaluationResult.forViolation("needed to be defined by ServiceTask but was defined by" +
                             p.getDefinitions().stream()
                                     .map(o -> o.getElement().getBaseElement().getClass().toString())
-                                    .collect(Collectors.joining(", ")));
+                                    .collect(Collectors.joining(", ")), p);
         };
         final String description = "defined by service tasks";
         return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -45,10 +44,10 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
 
     @Override
     public T prefixed(String prefix) {
-        final Function<ProcessVariable, EvaluationResult> evaluator = p -> {
+        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             return p.getName().startsWith(prefix) ?
-                    EvaluationResult.forSuccess() :
-                    EvaluationResult.forViolation("needed to be prefixed by " + prefix);
+                    EvaluationResult.forSuccess(p) :
+                    EvaluationResult.forViolation("needed to be prefixed by " + prefix, p);
         };
         final String description = String.format("prefixed with '%s'", prefix);
         return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));

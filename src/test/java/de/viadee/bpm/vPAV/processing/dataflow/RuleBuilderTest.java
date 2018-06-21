@@ -64,7 +64,7 @@ public class RuleBuilderTest {
         rule.check(new ArrayList<>());
     }
 
-    @Test()
+    @Test(expected = AssertionError.class)
     public void testRulesWithBrokenConditionFails() {
         List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
@@ -200,11 +200,11 @@ public class RuleBuilderTest {
     }
 
     private static <T> DescribedPredicateEvaluator<T> constraintFrom(Predicate<T> predicate) {
-        return new DescribedPredicateEvaluator<>(v -> predicate.test(v) ? EvaluationResult.forSuccess() : EvaluationResult.forViolation(null), "");
+        return new DescribedPredicateEvaluator<>(v -> predicate.test(v) ? EvaluationResult.forSuccess(v) : EvaluationResult.forViolation("", v), "");
     }
 
     private static List<ProcessVariable> filterProcessVariables(List<ProcessVariable> variables, ConstrainedProcessVariableSet constrainedSet) {
-        DescribedPredicateEvaluator<ProcessVariable> condition = spy(new DescribedPredicateEvaluator<>(v -> EvaluationResult.forSuccess(), ""));
+        DescribedPredicateEvaluator<ProcessVariable> condition = spy(new DescribedPredicateEvaluator<>(EvaluationResult::forSuccess, ""));
         constrainedSet.shouldBe(condition).check(variables);
 
         ArgumentCaptor<ProcessVariable> classesCaptor = ArgumentCaptor.forClass(ProcessVariable.class);

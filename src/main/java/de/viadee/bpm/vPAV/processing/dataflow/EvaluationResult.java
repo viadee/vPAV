@@ -2,25 +2,32 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import java.util.Optional;
 
-class EvaluationResult {
+class EvaluationResult<T> {
     private String message;
     private boolean result;
 
-    public static EvaluationResult forViolation(String violationMessage) {
-        return new EvaluationResult(true, violationMessage);
+    private T evaluatedVariable;
+
+    public static <T> EvaluationResult<T> forViolation(String violationMessage, T evaluatedVariable) {
+        return new EvaluationResult<>(false, violationMessage, evaluatedVariable);
     }
 
-    public static EvaluationResult forSuccess() {
-        return new EvaluationResult(true, null);
+    public static <T> EvaluationResult<T> forSuccess(T evaluatedVariable) {
+        return new EvaluationResult<>(true, null, evaluatedVariable);
     }
 
-    private EvaluationResult(boolean result, String message) {
+    private EvaluationResult(boolean result, String message, T evaluatedVariable) {
         this.message = message;
         this.result = result;
+        this.evaluatedVariable = evaluatedVariable;
     }
 
     public boolean isFulfilled() {
-        return !result;
+        return result;
+    }
+
+    public T getEvaluatedVariable() {
+        return evaluatedVariable;
     }
 
     public Optional<String> getViolationMessage() {

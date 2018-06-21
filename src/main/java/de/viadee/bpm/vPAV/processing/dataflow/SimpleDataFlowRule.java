@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class SimpleDataFlowRule implements DataFlowRule {
+    private static final String RULE_DESCRIPTION_TEMPLATE = "Rule 'process variables%s should be %s' was violated %s times:\n";
     private final DescribedPredicateEvaluator<ProcessVariable> constraint;
     private final DescribedPredicateEvaluator<ProcessVariable> condition;
 
@@ -46,28 +47,33 @@ class SimpleDataFlowRule implements DataFlowRule {
     }
 
     public void check(Collection<ProcessVariable> variables) {
-        String ruleDescription =
-                constraint != null ?
-                        constraint.getDescription() + " " :
-                        "" + condition.getDescription();
-
         Stream<ProcessVariable> variableStream = variables.stream();
         if (constraint != null)
-            variableStream = variableStream.filter(p -> !constraint.evaluate(p).isFulfilled());
-        List<EvaluationResult> results = variableStream
+            variableStream = variableStream.filter(p -> constraint.evaluate(p).isFulfilled());
+        List<EvaluationResult<ProcessVariable>> results = variableStream
                 .map(condition::evaluate)
                 .collect(Collectors.toList());
         assertNoViolations(results);
     }
 
-    private void assertNoViolations(List<EvaluationResult> result) {
-        List<EvaluationResult> violations = result.stream()
-                .filter(EvaluationResult::isFulfilled)
+    private void assertNoViolations(List<EvaluationResult<ProcessVariable>> result) {
+        List<EvaluationResult<ProcessVariable>> violations = result.stream()
+                .filter(r -> !r.isFulfilled())
                 .collect(Collectors.toList());
         if (violations.size() > 0) {
-            throw new AssertionError(violations.stream()
-                    .map(r -> r.getViolationMessage().get())
-                    .collect(Collectors.joining("\n")));
+            String ruleDescription = createRuleDescription(violations.size());
+
+            String violationsString = violations.stream()
+                    .map(r -> r.getEvaluatedVariable().getName() + " " + r.getViolationMessage().get())
+                    .collect(Collectors.joining("\n"));
+            throw new AssertionError( ruleDescription + violationsString);
         }
+    }
+
+    private String createRuleDescription(int violationCount) {
+        String constraintDescription = constraint != null ?
+                " that are " + constraint.getDescription() :
+                "";
+        return String.format(RULE_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription(), violationCount);
     }
 }

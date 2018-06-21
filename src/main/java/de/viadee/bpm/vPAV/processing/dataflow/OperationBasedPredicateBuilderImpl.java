@@ -22,12 +22,12 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
     @Override
     public T exactly(int n) {
         final String times = n == 1 ? "time" : "times";
-        final Function<ProcessVariable, EvaluationResult> evaluator = p -> {
+        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             int operationsCount = operationProvider.apply(p).size();
             return operationsCount == n ?
-                    EvaluationResult.forSuccess() :
+                    EvaluationResult.forSuccess(p) :
                     EvaluationResult.forViolation(String.format("needed to be %s exactly %s %s but was %s",
-                            operationDescription, n, times, operationsCount));
+                            operationDescription, n, times, operationsCount), p);
         };
         final String description = String.format("%s exactly %s %s", operationDescription, n, times);
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -36,12 +36,12 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
     @Override
     public T atLeast(int n) {
         final String times = n == 1 ? "time" : "times";
-        final Function<ProcessVariable, EvaluationResult> evaluator = p -> {
+        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             int operationsCount = operationProvider.apply(p).size();
             return operationsCount >= n ?
-                    EvaluationResult.forSuccess() :
+                    EvaluationResult.forSuccess(p) :
                     EvaluationResult.forViolation(String.format("needed to be %s at least %s %s but was %s",
-                            operationDescription, n, times, operationsCount));
+                            operationDescription, n, times, operationsCount), p);
         };
         final String description = String.format("%s at least %s %s", operationDescription, n, times);
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -50,12 +50,12 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
     @Override
     public T atMost(int n) {
         final String times = n == 1 ? "time" : "times";
-        final Function<ProcessVariable, EvaluationResult> evaluator = p -> {
+        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             int operationsCount = operationProvider.apply(p).size();
             return operationsCount <= n ?
-                    EvaluationResult.forSuccess() :
+                    EvaluationResult.forSuccess(p) :
                     EvaluationResult.forViolation(String.format("needed to be %s at most %s %s but was %s",
-                            operationDescription, n, times, operationsCount));
+                            operationDescription, n, times, operationsCount), p);
         };
         final String description = String.format("%s at most %s %s", operationDescription, n, times);
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
