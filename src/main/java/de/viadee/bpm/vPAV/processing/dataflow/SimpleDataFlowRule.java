@@ -37,10 +37,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class SimpleDataFlowRule implements DataFlowRule {
-    private final DescribedPredicate<ProcessVariable> constraint;
-    private final DescribedPredicate<ProcessVariable> condition;
+    private final DescribedPredicateEvaluator<ProcessVariable> constraint;
+    private final DescribedPredicateEvaluator<ProcessVariable> condition;
 
-    SimpleDataFlowRule(DescribedPredicate<ProcessVariable> constraint, DescribedPredicate<ProcessVariable> condition) {
+    SimpleDataFlowRule(DescribedPredicateEvaluator<ProcessVariable> constraint, DescribedPredicateEvaluator<ProcessVariable> condition) {
         this.constraint = constraint;
         this.condition = condition;
     }
@@ -49,25 +49,24 @@ class SimpleDataFlowRule implements DataFlowRule {
         String ruleDescription =
                 constraint != null ?
                         constraint.getDescription() + " " :
-                        ""
-                                + condition.getDescription();
+                        "" + condition.getDescription();
 
         Stream<ProcessVariable> variableStream = variables.stream();
         if (constraint != null)
-            variableStream = variableStream.filter(constraint::apply);
+            variableStream = variableStream.filter(p -> !constraint.evaluate(p).isFulfilled());
         List<EvaluationResult> results = variableStream
-                .map(p -> new EvaluationResult(ruleDescription, condition.apply(p), p))
+                .map(condition::evaluate)
                 .collect(Collectors.toList());
         assertNoViolations(results);
     }
 
     private void assertNoViolations(List<EvaluationResult> result) {
         List<EvaluationResult> violations = result.stream()
-                .filter(EvaluationResult::isRuleViolated)
+                .filter(EvaluationResult::isFulfilled)
                 .collect(Collectors.toList());
         if (violations.size() > 0) {
             throw new AssertionError(violations.stream()
-                    .map(EvaluationResult::getDescription)
+                    .map(r -> r.getViolationMessage().get())
                     .collect(Collectors.joining("\n")));
         }
     }

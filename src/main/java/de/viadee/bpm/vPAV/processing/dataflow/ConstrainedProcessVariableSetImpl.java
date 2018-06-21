@@ -19,13 +19,13 @@ class ConstrainedProcessVariableSetImpl implements ConstrainedProcessVariableSet
     }
 
     @Override
-    public ConstrainedProcessVariableSet orThatAre(DescribedPredicate<ProcessVariable> constraint) {
+    public ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         builder.orThatAre(constraint);
         return this;
     }
 
     @Override
-    public ConstrainedProcessVariableSet andThatAre(DescribedPredicate<ProcessVariable> constraint) {
+    public ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         builder.orThatAre(constraint);
         return this;
     }
@@ -36,7 +36,7 @@ class ConstrainedProcessVariableSetImpl implements ConstrainedProcessVariableSet
     }
 
     @Override
-    public ConditionedSet shouldBe(DescribedPredicate<ProcessVariable> condition) {
+    public ConditionedSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         return builder.shouldBe(condition);
     }
 }

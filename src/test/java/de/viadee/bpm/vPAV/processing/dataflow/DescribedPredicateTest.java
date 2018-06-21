@@ -40,35 +40,35 @@ public class DescribedPredicateTest {
 
     @Test
     public void testApplyAppliesPredicate() {
-        DescribedPredicate<String> constraint = new DescribedPredicate<>(String::isEmpty, "");
+        DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(String::isEmpty, "");
 
-        assertThat(constraint.apply(""), is(true));
-        assertThat(constraint.apply("notEmpty"), is(false));
+        assertThat(constraint.evaluate(""), is(true));
+        assertThat(constraint.evaluate("notEmpty"), is(false));
     }
 
     @Test
     public void testOrCombinesConstraintsCorrectly() {
-        DescribedPredicate<String> constraint = new DescribedPredicate<>(String::isEmpty, "constraint1");
-        DescribedPredicate<String> constraint2 = new DescribedPredicate<>(s -> s.startsWith("ext_"), "constraint2");
+        DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(String::isEmpty, "constraint1");
+        DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.startsWith("ext_"), "constraint2");
 
-        DescribedPredicate<String> testConstraint = constraint.or(constraint2);
+        DescribedPredicateEvaluator<String> testConstraint = constraint.or(constraint2);
 
         assertThat(testConstraint.getDescription(), is("constraint1 or constraint2"));
-        assertThat(testConstraint.apply(""), is(true));
-        assertThat(testConstraint.apply("ext_"), is(true));
-        assertThat(testConstraint.apply("notEmpty"), is(false));
+        assertThat(testConstraint.evaluate(""), is(true));
+        assertThat(testConstraint.evaluate("ext_"), is(true));
+        assertThat(testConstraint.evaluate("notEmpty"), is(false));
     }
 
     @Test
     public void testAndCombinesConstraintsCorrectly() {
-        DescribedPredicate<String> constraint = new DescribedPredicate<>(s -> s.length() == 5, "constraint1");
-        DescribedPredicate<String> constraint2 = new DescribedPredicate<>(s -> s.startsWith("ext_"), "constraint2");
+        DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.length() == 5, "constraint1");
+        DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.startsWith("ext_"), "constraint2");
 
-        DescribedPredicate<String> testConstraint = constraint.and(constraint2);
+        DescribedPredicateEvaluator<String> testConstraint = constraint.and(constraint2);
 
         assertThat(testConstraint.getDescription(), is("constraint1 and constraint2"));
-        assertThat(testConstraint.apply("five5"), is(false));
-        assertThat(testConstraint.apply("ext_"), is(false));
-        assertThat(testConstraint.apply("ext_5"), is(true));
+        assertThat(testConstraint.evaluate("five5"), is(false));
+        assertThat(testConstraint.evaluate("ext_"), is(false));
+        assertThat(testConstraint.evaluate("ext_5"), is(true));
     }
 }

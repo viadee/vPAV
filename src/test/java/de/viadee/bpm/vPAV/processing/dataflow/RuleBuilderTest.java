@@ -199,16 +199,16 @@ public class RuleBuilderTest {
         rule.check(variables);
     }
 
-    private static <T> DescribedPredicate<T> constraintFrom(Predicate<T> predicate) {
-        return new DescribedPredicate<>(predicate, "");
+    private static <T> DescribedPredicateEvaluator<T> constraintFrom(Predicate<T> predicate) {
+        return new DescribedPredicateEvaluator<>(v -> predicate.test(v) ? EvaluationResult.forSuccess() : EvaluationResult.forViolation(null), "");
     }
 
     private static List<ProcessVariable> filterProcessVariables(List<ProcessVariable> variables, ConstrainedProcessVariableSet constrainedSet) {
-        DescribedPredicate<ProcessVariable> condition = spy(new DescribedPredicate<>(v -> true, ""));
+        DescribedPredicateEvaluator<ProcessVariable> condition = spy(new DescribedPredicateEvaluator<>(v -> EvaluationResult.forSuccess(), ""));
         constrainedSet.shouldBe(condition).check(variables);
 
         ArgumentCaptor<ProcessVariable> classesCaptor = ArgumentCaptor.forClass(ProcessVariable.class);
-        verify(condition, atLeast(0)).apply(classesCaptor.capture());
+        verify(condition, atLeast(0)).evaluate(classesCaptor.capture());
 
         return classesCaptor.getAllValues();
     }
@@ -218,10 +218,6 @@ public class RuleBuilderTest {
         private BpmnElement element = new BpmnElement("process1", mock(BaseElement.class));
         private VariableOperation operation = VariableOperation.WRITE;
 
-        public ProcessVariableBuilder withName(String name) {
-            this.name = name;
-            return this;
-        }
 
         public ProcessVariableBuilder withElement(Class<? extends BaseElement> clazz) {
             element = new BpmnElement("process1", mock(clazz));

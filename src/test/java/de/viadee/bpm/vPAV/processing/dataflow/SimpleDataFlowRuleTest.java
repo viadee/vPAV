@@ -8,7 +8,7 @@ public class SimpleDataFlowRuleTest {
 
     @Test
     public void testCheckWorksWithoutConstraint() {
-        SimpleDataFlowRule rule = new SimpleDataFlowRule(null, new DescribedPredicate<>(v -> true, ""));
+        SimpleDataFlowRule rule = new SimpleDataFlowRule(null, new DescribedPredicateEvaluator<>(v -> true, ""));
 
         rule.check(Collections.emptyList());
     }

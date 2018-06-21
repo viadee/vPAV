@@ -21,12 +21,12 @@ class ConditionedSetImpl implements ConditionedSet {
     }
 
     @Override
-    public ConditionedSet andShouldBe(DescribedPredicate<ProcessVariable> condition) {
+    public ConditionedSet andShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         return ruleBuilder.andShouldBe(condition);
     }
 
     @Override
-    public ConditionedSet orShouldBe(DescribedPredicate<ProcessVariable> condition) {
+    public ConditionedSet orShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         return ruleBuilder.orShouldBe(condition);
     }
 

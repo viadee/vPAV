@@ -4,12 +4,13 @@ import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicateBuilder<T> {
 
-    private final Function<DescribedPredicate<ProcessVariable>, T> constraintSetter;
+    private final Function<DescribedPredicateEvaluator<ProcessVariable>, T> constraintSetter;
 
-    ProcessVariablePredicateBuilderImpl(Function<DescribedPredicate<ProcessVariable>, T> constraintSetter) {
+    ProcessVariablePredicateBuilderImpl(Function<DescribedPredicateEvaluator<ProcessVariable>, T> constraintSetter) {
         this.constraintSetter = constraintSetter;
     }
 
@@ -30,15 +31,26 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
 
     @Override
     public T definedByServiceTasks() {
-        final Predicate<ProcessVariable> predicate = p -> p.getDefinitions().stream().anyMatch(o -> o.getElement().getBaseElement() instanceof ServiceTask);
+        final Function<ProcessVariable, EvaluationResult> evaluator = p -> {
+            return p.getDefinitions().stream().anyMatch(o -> o.getElement().getBaseElement() instanceof ServiceTask) ?
+                    EvaluationResult.forSuccess() :
+                    EvaluationResult.forViolation("needed to be defined by ServiceTask but was defined by" +
+                            p.getDefinitions().stream()
+                                    .map(o -> o.getElement().getBaseElement().getClass().toString())
+                                    .collect(Collectors.joining(", ")));
+        };
         final String description = "defined by service tasks";
-        return constraintSetter.apply(new DescribedPredicate<>(predicate, description));
+        return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
     @Override
     public T prefixed(String prefix) {
-        final Predicate<ProcessVariable> predicate = p -> p.getName().startsWith(prefix);
+        final Function<ProcessVariable, EvaluationResult> evaluator = p -> {
+            return p.getName().startsWith(prefix) ?
+                    EvaluationResult.forSuccess() :
+                    EvaluationResult.forViolation("needed to be prefixed by " + prefix);
+        };
         final String description = String.format("prefixed with '%s'", prefix);
-        return constraintSetter.apply(new DescribedPredicate<>(predicate, description));
+        return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 }

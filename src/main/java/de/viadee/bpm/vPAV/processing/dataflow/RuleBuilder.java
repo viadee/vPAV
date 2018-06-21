@@ -37,14 +37,14 @@ import java.util.Collection;
 
 public class RuleBuilder implements DataFlowRule {
 
-    private DescribedPredicate<ProcessVariable> condition;
-    private DescribedPredicate<ProcessVariable> constraint;
+    private DescribedPredicateEvaluator<ProcessVariable> condition;
+    private DescribedPredicateEvaluator<ProcessVariable> constraint;
 
     public static RuleBuilder processVariables() {
         return new RuleBuilder();
     }
 
-    public ConditionedSet shouldBe(DescribedPredicate<ProcessVariable> condition) {
+    public ConditionedSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         this.condition = condition;
         return new ConditionedSetImpl(this);
     }
@@ -53,30 +53,30 @@ public class RuleBuilder implements DataFlowRule {
         return new ProcessVariablePredicateBuilderImpl<>(this::shouldBe);
     }
 
-    ConditionedSet orShouldBe(DescribedPredicate<ProcessVariable> condition) {
+    ConditionedSet orShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         Assert.notNull(this.condition, "Condition conjunction is not allowed without defining initial condition");
         this.condition = this.condition.or(condition);
         return new ConditionedSetImpl(this);
     }
 
-    ConditionedSet andShouldBe(DescribedPredicate<ProcessVariable> condition) {
+    ConditionedSet andShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         Assert.notNull(this.condition, "Condition conjunction is not allowed without defining initial condition");
         this.condition = this.condition.and(condition);
         return new ConditionedSetImpl(this);
     }
 
-    public ConstrainedProcessVariableSet thatAre(DescribedPredicate<ProcessVariable> constraint) {
+    public ConstrainedProcessVariableSet thatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         this.constraint = constraint;
         return new ConstrainedProcessVariableSetImpl(this);
     }
 
-    ConstrainedProcessVariableSet orThatAre(DescribedPredicate<ProcessVariable> constraint) {
+    ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
         this.constraint = this.constraint.or(constraint);
         return new ConstrainedProcessVariableSetImpl(this);
     }
 
-    ConstrainedProcessVariableSet andThatAre(DescribedPredicate<ProcessVariable> constraint) {
+    ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
         this.constraint = this.constraint.and(constraint);
         return new ConstrainedProcessVariableSetImpl(this);

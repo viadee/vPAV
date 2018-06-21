@@ -1,21 +1,29 @@
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-class EvaluationResult {
-    private String ruleDescription;
-    private boolean result;
-    private ProcessVariable correspondingVariable;
+import java.util.Optional;
 
-    public EvaluationResult(String ruleDescription, boolean result, ProcessVariable correspondingVariable) {
-        this.ruleDescription = ruleDescription;
-        this.result = result;
-        this.correspondingVariable = correspondingVariable;
+class EvaluationResult {
+    private String message;
+    private boolean result;
+
+    public static EvaluationResult forViolation(String violationMessage) {
+        return new EvaluationResult(true, violationMessage);
     }
 
-    public boolean isRuleViolated() {
+    public static EvaluationResult forSuccess() {
+        return new EvaluationResult(true, null);
+    }
+
+    private EvaluationResult(boolean result, String message) {
+        this.message = message;
+        this.result = result;
+    }
+
+    public boolean isFulfilled() {
         return !result;
     }
 
-    public String getDescription() {
-        return correspondingVariable.getName() + ruleDescription;
+    public Optional<String> getViolationMessage() {
+        return Optional.ofNullable(message);
     }
 }
