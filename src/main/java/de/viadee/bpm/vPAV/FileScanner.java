@@ -412,7 +412,9 @@ public class FileScanner {
                 isDirectory = true;
             }
             if (setting == null) {
-                throw new ConfigItemNotFoundException("Settings for VersioningChecker not found");
+                throw new ConfigItemNotFoundException("VersioningChecker: Versioning Scheme could not be read. "
+                        + "Possible options: " + ConfigConstants.VERSIONINGSCHEMECLASS + " or "
+                        + ConfigConstants.VERSIONINGSCHEMEPACKAGE);
             } else {
                 scheme = setting.getValue().trim();
             }
