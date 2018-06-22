@@ -46,6 +46,7 @@ import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 
 /**
@@ -80,7 +81,7 @@ public final class CheckerFactory {
         for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
             String fullyQualifiedName = getFullyQualifiedName(rule);
             
-            if(rule.getKey().equals("CreateOutputHTML")) {
+            if(rule.getKey().equals(ConfigConstants.CREATE_OUTPUT_RULE)) {
             	continue;
             }
 

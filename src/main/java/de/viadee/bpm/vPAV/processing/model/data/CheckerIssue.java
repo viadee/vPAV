@@ -441,14 +441,14 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.getClass() == this.getClass())
-            return true;
+        if (obj.hashCode() == this.hashCode())        	
+        	return true;
         else
             return false;
     }
 
     @Override
     public int hashCode() {
-        return elementId.hashCode();
+        return (elementId + elementName).hashCode();
     }
 }

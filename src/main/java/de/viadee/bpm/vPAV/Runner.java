@@ -142,6 +142,8 @@ public class Runner {
 		
 		prepareOutputFolder();
 		
+		rules = new XmlConfigReader().getDeactivatedRuleSet();
+		
 		final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
 		try {
 			if (new File(ConfigConstants.TEST_BASEPATH + ConfigConstants.RULESET).exists()) {
@@ -157,6 +159,7 @@ public class Runner {
 			} else {
 				rules = new XmlConfigReader().read(ConfigConstants.RULESETDEFAULT);
 			}
+			
 			ruleSetOutputWriter.write(rules);
 			RuntimeConfig.getInstance().addActiveRules(rules);
 
@@ -344,8 +347,7 @@ public class Runner {
 		for (String file : allOutputFilesArray)
 			outputFiles.add(Paths.get(fileMapping.get(file), file));
 
-		if (rules.containsKey(ConfigConstants.CREATE_OUTPUT_RULE) &&
-				rules.get(ConfigConstants.CREATE_OUTPUT_RULE).isActive()) {
+		if (rules.get(ConfigConstants.CREATE_OUTPUT_RULE).isActive()) {
 			for (String file : allOutputFilesArray)
 				copyFileToVPAVFolder(file);
 		}
