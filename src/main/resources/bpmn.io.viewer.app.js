@@ -60,8 +60,53 @@ function getElementsOnPath(id, pos) {
 }
 
 //create issue count on each node
-function addCountOverlay(overlays, bpmnFile) {
+function addCountOverlay(overlays, elements, title) {
+    //Add Overlays
+    for (let element of elements) {
+        try {
+            let overlayHtml = document.createElement("span");
+            overlayHtml.setAttribute("class", "badge badge-pill badge-pill-cursor " + element.colorClass);
+            overlayHtml.setAttribute("type", "button");
+            overlayHtml.setAttribute("data-toggle", "bmodal");
+            overlayHtml.setAttribute("data-target", "#issueModal");
+            overlayHtml.setAttribute("title", title);
+            overlayHtml.innerHTML = element.anz;
+            overlayHtml.onclick = (function () {
+                return function () {
+                    element.clickOverlay();
+                };
 
+            })();
+
+            overlays.add(element.i.elementId, {
+                position: {
+                    bottom: 10,
+                    right: 20
+                },
+                html: overlayHtml
+            });
+        } catch (err) {
+            console.log("element not found");
+        }
+    }
+}
+
+function getProcessVariableOverlay(bpmnFile) {
+    let filteredVariables = proz_vars
+        .filter(p => p.bpmnFile === ("src\\main\\resources\\" + bpmnFile))
+        .filter(p => p.elementIid !== "");
+
+    return filteredVariables.map(p => {
+        let overlayData = {};
+        overlayData.i = p;
+        overlayData.anz = p.read.length + p.write.length + p.delete.length;
+        overlayData.clickOverlay = () => undefined;
+        overlayData.colorClass = "badge-info";
+        return overlayData;
+    });
+}
+
+function getIssueOverlays(bpmnFile) {
     //getElemtIds
     var eId = [];
     for (id in elementsToMark) {
@@ -94,7 +139,7 @@ function addCountOverlay(overlays, bpmnFile) {
     //add count
     var i, j;
     var anz = 0;
-    var objFehler = { eid: "dummy", anz: 0 };
+    var objFehler = {eid: "dummy", anz: 0};
     var anzArray = [];
 
     for (i = 0; i < eIdUnique.length; i++) {
@@ -103,12 +148,12 @@ function addCountOverlay(overlays, bpmnFile) {
             if (eId[j] == anzId)
                 anz++;
         }
-        objFehler = { eid: eIdUnique[i], anz: anz };
+        objFehler = {eid: eIdUnique[i], anz: anz};
         anzArray[i] = objFehler;
         anz = 0;
     }
 
-    //Add count on each issue 
+    //Add count on each issue
     var issue = { i: "dummy", anz: 0 };
     var issues = [];
     for (id in elementsToMark) {
@@ -116,132 +161,101 @@ function addCountOverlay(overlays, bpmnFile) {
             var obj = elementsToMark[id];
             for (var i = 0; i < anzArray.length; i++) {
                 if (anzArray[i].eid == obj.elementId) {
-                    issue = { i: elementsToMark[id], anz: anzArray[i].anz };
+                    issue = {i: elementsToMark[id], anz: anzArray[i].anz};
                     issues[id] = issue;
                 }
             }
         }
     }
-
-    //Add Overlays
-    for (id in issues) {
-        try {
-
-            var overlayHtml = document.createElement("span");
-
-
-            issueSeverity.forEach(element => {
-                if (element.id == issues[id].i.elementId) {
-                    if (element.Criticality == "ERROR") {
-                        overlayHtml.setAttribute("class", "badge badge-pill badge-danger badge-pill-cursor");
-                    }
-                    if (element.Criticality == "WARNING") {
-                        overlayHtml.setAttribute("class", "badge badge-pill badge-warning badge-pill-cursor");
-                    }
-                    if (element.Criticality == "INFO") {
-                        overlayHtml.setAttribute("class", "badge badge-pill badge-info badge-pill-cursor");
-                    }
+    //Add dialog contents
+    issues.forEach(issue => issue.clickOverlay = createIssueDialog(issues));
+    issues.forEach(issue => {
+        issueSeverity.forEach(element => {
+            if (element.id === issue.i.elementId) {
+                if (element.Criticality === "ERROR") {
+                    issue.colorClass = "badge-danger";
                 }
-            });
-
-            overlayHtml.setAttribute("type", "button");
-            overlayHtml.setAttribute("data-toggle", "bmodal");
-            overlayHtml.setAttribute("data-target", "#issueModal");
-            overlayHtml.setAttribute("title", "issues");
-            overlayHtml.innerHTML = issues[id].anz;
-
-            // add DialogMessage
-            function clickOverlay(id) {
-                //clear dialog
-                const dialogContent = document.querySelector(".modal-body");
-                while (dialogContent.hasChildNodes()) {
-                    dialogContent.removeChild(dialogContent.lastChild);
+                if (element.Criticality === "WARNING") {
+                    issue.colorClass = "badge-warning";
                 }
-                if (issues[id].i.elementId != "") {
-                    var eId = issues[id].i.elementId;
-                    for (y in issues) {
-                        if (issues[y].i.elementId == eId) {
-                            var issue = issues[y].i;
-
-                            var dCard = document.createElement("div");
-                            dCard.setAttribute("class", "card bg-light mb-3");
-
-                            var dCardBody = document.createElement("div");
-                            dCardBody.setAttribute("class", "card-body");
-
-                            var dCardTitle = document.createElement("h5");
-                            dCardTitle.setAttribute("class", "card-header");
-
-                            var dCardText = document.createElement("p");
-                            dCardText.setAttribute("class", "card-text");
-
-                            var dCardElementDescription = document.createElement("p");
-                            dCardElementDescription.setAttribute("class", "card-elementDescription");
-
-                            var dCardRuleDescription = document.createElement("p");
-                            dCardRuleDescription.setAttribute("class", "card-ruleDescription");
-
-                            var dCardIssueId = document.createElement("p");
-                            dCardIssueId.setAttribute("class", "card-issueId issue-id");
-
-                            var dCardIssueButton = document.createElement("button");
-                            dCardIssueButton.setAttribute("class", "btn btn-viadee issue-button");                           
-                            dCardIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardIssueButton]));
-                            dCardIssueButton.innerHTML = "Add Issue";
-                            
-                            var oImg = document.createElement("img");
-                            oImg.setAttribute('src', 'img/' + issue.classification + '.png');
-                            oImg.setAttribute('alt', 'issue.classification');
-                            oImg.setAttribute('class', 'float-left mr-2');
-                            oImg.setAttribute("title", issue.classification);
-                            
-                            dCardTitle.innerHTML = issue.ruleName;
-                            dCardTitle.appendChild(oImg);
-                            dCardText.innerHTML = "<h6><b>Issue:</b></h6> " + issue.message;
-                            dCardRuleDescription.innerHTML = "<h6><b>Rule:</b></h6> " + issue.ruleDescription;
-                            dCardElementDescription.innerHTML = "<h6><b>Reason:</b></h6> " + issue.elementDescription;
-                            dCardIssueId.innerHTML = "<h6><b>Issue Id:</b></h6>" + issue.id;
-
-
-                            dCard.appendChild(dCardTitle);
-                            dCardBody.appendChild(dCardText);                            
-                            if (issue.ruleDescription)
-                                dCardBody.appendChild(dCardRuleDescription);
-                            if (issue.elementDescription)
-                                dCardBody.appendChild(dCardElementDescription);
-                            dCardBody.appendChild(dCardIssueId);
-                            dCard.appendChild(dCardBody);
-                            dCardBody.appendChild(dCardIssueButton);
-
-                            dialogContent.appendChild(dCard);
-                        }
-                    }
+                if (element.Criticality === "INFO") {
+                    issue.colorClass = "badge-info";
                 }
-                toggleDialog('show');
             }
-
-            overlayHtml.onclick = (function () {
-                var currentId = id;
-                return function () {
-                    clickOverlay(currentId);
-                };
-
-            })();
-            attachOverlay();
-        } catch (err) {
-            console.log("element not found");
-        }
-    }
-
-    function attachOverlay(r) {
-        // attach the overlayHtml to a node
-        overlays.add(issues[id].i.elementId, {
-            position: {
-                bottom: 10,
-                right: 20
-            },
-            html: overlayHtml
         });
+    });
+    return issues;
+}
+
+function createIssueDialog(elements) {
+    // add DialogMessage
+    return function clickOverlay() {
+        //clear dialog
+        const dialogContent = document.querySelector(".modal-body");
+        while (dialogContent.hasChildNodes()) {
+            dialogContent.removeChild(dialogContent.lastChild);
+        }
+        if (this.i.elementId !== "") {
+            let eId = this.i.elementId;
+            for (let y in elements) {
+                if (elements[y].i.elementId === eId) {
+                    var issue = elements[y].i;
+
+                    var dCard = document.createElement("div");
+                    dCard.setAttribute("class", "card bg-light mb-3");
+
+                    var dCardBody = document.createElement("div");
+                    dCardBody.setAttribute("class", "card-body");
+
+                    var dCardTitle = document.createElement("h5");
+                    dCardTitle.setAttribute("class", "card-header");
+
+                    var dCardText = document.createElement("p");
+                    dCardText.setAttribute("class", "card-text");
+
+                    var dCardElementDescription = document.createElement("p");
+                    dCardElementDescription.setAttribute("class", "card-elementDescription");
+
+                    var dCardRuleDescription = document.createElement("p");
+                    dCardRuleDescription.setAttribute("class", "card-ruleDescription");
+
+                    var dCardIssueId = document.createElement("p");
+                    dCardIssueId.setAttribute("class", "card-issueId issue-id");
+
+                    var dCardIssueButton = document.createElement("button");
+                    dCardIssueButton.setAttribute("class", "btn btn-viadee issue-button");
+                    dCardIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardIssueButton]));
+                    dCardIssueButton.innerHTML = "Add Issue";
+
+                    var oImg = document.createElement("img");
+                    oImg.setAttribute('src', 'img/' + issue.classification + '.png');
+                    oImg.setAttribute('alt', 'issue.classification');
+                    oImg.setAttribute('class', 'float-left mr-2');
+                    oImg.setAttribute("title", issue.classification);
+
+                    dCardTitle.innerHTML = issue.ruleName;
+                    dCardTitle.appendChild(oImg);
+                    dCardText.innerHTML = "<h6><b>Issue:</b></h6> " + issue.message;
+                    dCardRuleDescription.innerHTML = "<h6><b>Rule:</b></h6> " + issue.ruleDescription;
+                    dCardElementDescription.innerHTML = "<h6><b>Reason:</b></h6> " + issue.elementDescription;
+                    dCardIssueId.innerHTML = "<h6><b>Issue Id:</b></h6>" + issue.id;
+
+
+                    dCard.appendChild(dCardTitle);
+                    dCardBody.appendChild(dCardText);
+                    if (issue.ruleDescription)
+                        dCardBody.appendChild(dCardRuleDescription);
+                    if (issue.elementDescription)
+                        dCardBody.appendChild(dCardElementDescription);
+                    dCardBody.appendChild(dCardIssueId);
+                    dCard.appendChild(dCardBody);
+                    dCardBody.appendChild(dCardIssueButton);
+
+                    dialogContent.appendChild(dCard);
+                }
+            }
+        }
+        toggleDialog('show');
     }
 }
 
@@ -501,10 +515,10 @@ function createFooter() {
     body.appendChild(footer);
 }
 
-const modelViewModes = Object.freeze({
-    COUNT_OVERLAY:   Symbol("count overlay"),
-    MARK_PATH:  Symbol("mark path"),
-    MARK_ELEMENT: Symbol("mark element")
+const overlayModes = Object.freeze({
+    ISSUE_OVERLAY:   Symbol("issue overlay"),
+    NONE:  Symbol("no overlay"),
+    VARIABLE_OVERLAY: Symbol("process variable overlay")
 });
 
 const tableViewModes = Object.freeze({
@@ -535,7 +549,7 @@ function createTableFromViewMode(tableViewMode, diagramName) {
  * This is an example script that loads an embedded diagram file <diagramXML>
  * and opens it using the bpmn-js viewer.
  */
-function initDiagram(diagramXML, elements, modelViewMode) {
+function initDiagram(diagramXML, elements, overlayMode) {
     // remove current diagram
     document.querySelector("#canvas").innerHTML = "";
     // create viewer
@@ -561,10 +575,10 @@ function initDiagram(diagramXML, elements, modelViewMode) {
             setUeberschrift(diagramXML.name);
             if (countIssues(diagramXML.name, elementsToMark) > 0) {
                 //MarkElements
-                if (modelViewMode == null || modelViewMode === modelViewModes.COUNT_OVERLAY) {
-                    addCountOverlay(overlays, diagramXML.name);
-                } else {
-                    addAllIssuesButton(diagramXML.name);
+                if (overlayMode == null || overlayMode === overlayModes.ISSUE_OVERLAY) {
+                    addCountOverlay(overlays, getIssueOverlays(diagramXML.name), "issues");
+                } else if (overlayMode === overlayModes.VARIABLE_OVERLAY) {
+                    addCountOverlay(overlays, getProcessVariableOverlay(diagramXML.name), "variable operations");
                 }
                 markNodes(elements, canvas, diagramXML.name);
             } else {
@@ -575,16 +589,16 @@ function initDiagram(diagramXML, elements, modelViewMode) {
 
     bpmnViewer.xml = diagramXML.xml;
 
-    bpmnViewer.reload = function (model, elements) {
-        initDiagram(model, elements, modelViewModes.COUNT_OVERLAY);
+    bpmnViewer.reload = function (model, elements, overlayMode) {
+        initDiagram(model, elements, overlayMode);
     };
 
     bpmnViewer.reloadMarkPath = function (model, issue_id, path_nr) {
-        initDiagram(model, getElementsOnPath(issue_id, path_nr), modelViewModes.MARK_PATH);
+        initDiagram(model, getElementsOnPath(issue_id, path_nr), overlayModes.NONE);
     };
 
     bpmnViewer.reloadMarkElement = function (model, issue_id) {
-        initDiagram(model, [{elementId: issue_id, classification: 'one-element'}], modelViewModes.MARK_ELEMENT);
+        initDiagram(model, [{elementId: issue_id, classification: 'one-element'}], overlayModes.NONE);
     };
 
     // import xml
@@ -710,21 +724,22 @@ function selectModel(modelName, elementId, path_nr, func, path) {
     let tableViewMode;
     addAllSuccessButton(diagramXML.name);
     addProcessVariablesButton(diagramXML.name);
+    addAllIssuesButton(diagramXML.name);
     if (func == 0) {
-        viewer.reload(diagramXML, filterElementsByModel(elementsToMark, diagramXML.name));
+        viewer.reload(diagramXML, filterElementsByModel(elementsToMark, diagramXML.name), overlayModes.ISSUE_OVERLAY);
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
         tableViewMode = tableViewModes.ISSUES;
     } else if (func == 1) {
         viewer.reloadMarkPath(diagramXML, elementId, path_nr);
         document.getElementById('invalidPath').innerHTML = path;
         document.getElementById("rowPath").setAttribute("class", "collapse.show");
+        document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
         tableViewMode = tableViewModes.ISSUES;
     } else if (func == 2) {
         throw "deprecated view function; use showMarkedElement() instead";
     } else if (func == 3) {
-        viewer.reload(diagramXML, filterElementsByModel(elementsToMark, diagramXML.name));
+        viewer.reload(diagramXML, filterElementsByModel(elementsToMark, diagramXML.name), overlayModes.ISSUE_OVERLAY);
         document.getElementById("success").setAttribute("class", "btn btn-viadee mt-2 collapse");
-        addAllIssuesButton(diagramXML.name);
         tableViewMode = tableViewModes.NO_ISSUES;
     }
     createTableFromViewMode(tableViewMode, diagramXML.name);
@@ -738,7 +753,7 @@ function showProcessVariables(modelName) {
     if (diagramXML === undefined)
         return;
 
-    viewer.reload(diagramXML, []);
+    viewer.reload(diagramXML, [], overlayModes.VARIABLE_OVERLAY);
     document.getElementById("processVariables").setAttribute("class", "btn btn-viadee mt-2 collapse");
     addAllSuccessButton(diagramXML.name);
     addAllIssuesButton(diagramXML.name);
@@ -769,7 +784,7 @@ function showVariableOperations(modelName, variableName) {
         return o;
     });
 
-    viewer.reload(diagramXML, elements);
+    viewer.reload(diagramXML, elements, overlayModes.VARIABLE_OVERLAY);
 }
 
 function getModel(modelName) {
@@ -800,7 +815,7 @@ function showUnlocatedCheckers() {
 
 // Init
 let bpmnFile = diagramXMLSource[0].name;
-viewer = initDiagram(diagramXMLSource[0], filterElementsByModel(elementsToMark, bpmnFile), modelViewModes.COUNT_OVERLAY);
+viewer = initDiagram(diagramXMLSource[0], filterElementsByModel(elementsToMark, bpmnFile), overlayModes.ISSUE_OVERLAY);
 createTableFromViewMode(tableViewModes.ISSUES, bpmnFile);
 addAllSuccessButton(bpmnFile);
 addProcessVariablesButton(bpmnFile);
