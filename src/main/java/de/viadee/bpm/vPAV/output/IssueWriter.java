@@ -155,11 +155,11 @@ public class IssueWriter {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         final BaseElement baseElement = element.getBaseElement();
-
+        
         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
                 element.getProcessdefinition(), resourceFile,
                 baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message));
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
 
         return issues;
     }
