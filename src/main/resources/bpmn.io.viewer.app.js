@@ -14,37 +14,6 @@ function filterElementsByModel(elements, bpmnFile) {
     return elements.filter(element =>(element.bpmnFile === ("src\\main\\resources\\" + bpmnFile)) && (element.elementId !== ""));
 }
 
-//add button "show all issues"
-function addAllIssuesButton(model) {
-    var btnReset = document.getElementById("reset");
-    btnReset.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
-    btnReset.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 0, 0)");
-    btnReset.setAttribute("href", "#");
-}
-
-//add button "show checkers without issues"
-function addAllSuccessButton(model) {
-    var btnSuccess = document.getElementById("success");
-    if (countIssues(model, noIssuesElements) > 0)
-        btnSuccess.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
-    else
-        btnSuccess.setAttribute("class", "btn btn-viadee mt-2 collapse");
-    btnSuccess.setAttribute("onclick", "selectModel('" + model.replace(/\\/g, "\\\\") + "', null, null, 3, 0)");
-    btnSuccess.setAttribute("href", "#");
-}
-
-//add button "show all process variables
-function addProcessVariablesButton(model) {
-    var btnProcessVariables = document.getElementById("processVariables");
-    if (proz_vars !== undefined && proz_vars.length > 0)
-        btnProcessVariables.setAttribute("class", "btn btn-viadee mt-2 collapse.show");
-    else
-        btnProcessVariables.setAttribute("class", "btn btn-viadee mt-2 collapse");
-    btnProcessVariables.setAttribute("onclick", "showProcessVariables('" + model.replace(/\\/g, "\\\\") + "')");
-    btnProcessVariables.setAttribute("href", "#");
-}
-
-
 //mark invalid path
 function getElementsOnPath(id, pos) {
     let pathElements = [];
@@ -60,7 +29,7 @@ function getElementsOnPath(id, pos) {
 }
 
 //create issue count on each node
-function addCountOverlay(overlays, elements, title) {
+function addCountOverlay(overlays, elements) {
     //Add Overlays
     for (let element of elements) {
         try {
@@ -69,7 +38,7 @@ function addCountOverlay(overlays, elements, title) {
             overlayHtml.setAttribute("type", "button");
             overlayHtml.setAttribute("data-toggle", "bmodal");
             overlayHtml.setAttribute("data-target", "#issueModal");
-            overlayHtml.setAttribute("title", title);
+            overlayHtml.setAttribute("title", element.title);
             overlayHtml.innerHTML = element.anz;
             overlayHtml.onclick = () => element.clickOverlay();
 
@@ -97,6 +66,7 @@ function getProcessVariableOverlay(bpmnFile) {
         overlayData.anz = p.read.length + p.write.length + p.delete.length;
         overlayData.clickOverlay = createVariableDialog(p);
         overlayData.colorClass = "badge-info";
+        overlayData.title = "variable operations";
         return overlayData;
     });
 }
@@ -164,6 +134,7 @@ function getIssueOverlays(bpmnFile) {
     }
     //Add dialog contents
     issues.forEach(issue => issue.clickOverlay = createIssueDialog(issues));
+    issues.forEach(issue => issue.title = "issues");
     issues.forEach(issue => {
         issueSeverity.forEach(element => {
             if (element.id === issue.i.elementId) {
@@ -424,7 +395,7 @@ function createIssueTable(bpmnFile, tableContent) {
 
                     var b = document.createElement("a");
                     b.appendChild(myText);
-                    b.setAttribute("onclick", "selectModel('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.id + "','" + x + "', 1, '" + path_text + "')");
+                    b.setAttribute("onclick", "showPath('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.id + "','" + x + "', '" + path_text + "')");
                     b.setAttribute("href", "#");
 
                     myCell.appendChild(b);
@@ -556,12 +527,6 @@ function createFooter() {
     body.appendChild(footer);
 }
 
-const overlayModes = Object.freeze({
-    ISSUE_OVERLAY:   Symbol("issue overlay"),
-    NONE:  Symbol("no overlay"),
-    VARIABLE_OVERLAY: Symbol("process variable overlay")
-});
-
 const tableViewModes = Object.freeze({
     ISSUES:   Symbol("issues"),
     NO_ISSUES:  Symbol("no issues"),
@@ -580,7 +545,6 @@ function createTableFromViewMode(tableViewMode, diagramName) {
     } else {
         createIssueTable(diagramName, noIssuesElements);
     }
-    tableVisible(true);
     createFooter();
 }
 
@@ -590,63 +554,31 @@ function createTableFromViewMode(tableViewMode, diagramName) {
  * This is an example script that loads an embedded diagram file <diagramXML>
  * and opens it using the bpmn-js viewer.
  */
-function initDiagram(diagramXML, elements, overlayMode) {
+function initDiagram(diagramXML, elements, overlayData) {
     // remove current diagram
     document.querySelector("#canvas").innerHTML = "";
+
     // create viewer
-    var bpmnViewer = new window.BpmnJS({
+    let bpmnViewer = new window.BpmnJS({
         container: '#canvas'
     });
 
-    // import function
-    function importXML(xml) {
+    // import diagram
+    bpmnViewer.importXML(diagramXML.xml, function (err) {
+        if (err) {
+            return console.error('could not import BPMN 2.0 diagram', err);
+        }
 
-        // import diagram
-        bpmnViewer.importXML(xml, function (err) {
+        var canvas = bpmnViewer.get('canvas'),
+            overlays = bpmnViewer.get('overlays');
 
-            if (err) {
-                return console.error('could not import BPMN 2.0 diagram', err);
-            }
-
-            var canvas = bpmnViewer.get('canvas'),
-                overlays = bpmnViewer.get('overlays');
-
-            // zoom to fit full viewport
-            canvas.zoom('fit-viewport');
-            setUeberschrift(diagramXML.name);
-            if (countIssues(diagramXML.name, elementsToMark) > 0) {
-                //MarkElements
-                if (overlayMode == null || overlayMode === overlayModes.ISSUE_OVERLAY) {
-                    addCountOverlay(overlays, getIssueOverlays(diagramXML.name), "issues");
-                } else if (overlayMode === overlayModes.VARIABLE_OVERLAY) {
-                    addCountOverlay(overlays, getProcessVariableOverlay(diagramXML.name), "variable operations");
-                }
-                markNodes(elements, canvas);
-            } else {
-                document.getElementById("success").setAttribute("class", "btn btn-viadee mt-2 collapse");
-            }
-        });
-    };
-
-    bpmnViewer.xml = diagramXML.xml;
-
-    bpmnViewer.reload = function (model, elements, overlayMode) {
-        initDiagram(model, elements, overlayMode);
-    };
-
-    bpmnViewer.reloadMarkPath = function (model, issue_id, path_nr) {
-        initDiagram(model, getElementsOnPath(issue_id, path_nr), overlayModes.NONE);
-    };
-
-    bpmnViewer.reloadMarkElement = function (model, issue_id) {
-        initDiagram(model, [{elementId: issue_id, classification: 'one-element'}], overlayModes.NONE);
-    };
-
-    // import xml
-    importXML(diagramXML.xml);
-
-    return bpmnViewer;
-};
+        // zoom to fit full viewport
+        canvas.zoom('fit-viewport');
+        setUeberschrift(diagramXML.name);
+        addCountOverlay(overlays, overlayData);
+        markNodes(elements, canvas);
+    });
+}
 
 //set Filename as Header
 function setUeberschrift(name) {
@@ -655,17 +587,6 @@ function setUeberschrift(name) {
     var mDownload = document.getElementById("model_download");
     mDownload.setAttribute("href", "../../src/main/resources/" + name);
     setFocus(name);
-}
-
-//hideTable
-function tableVisible(show) {
-    if (show) {
-        document.getElementById("tableHeader").style.display = "block";
-        document.getElementById("table_issues").style.display = "table";
-    } else {
-        document.getElementById("tableHeader").style.display = "none";
-        document.getElementById("table_issues").style.display = "none";
-    }
 }
 
 //get issue count from specific bpmnFile
@@ -694,13 +615,13 @@ function showDialog() {
         var subName = model.name.substr(0, model.name.length - 5);
         li.appendChild(a);
         li.setAttribute("class", "nav-item");
-        if (countIssues(model.name, elementsToMark) == 0)
+        if (countIssues(model.name, elementsToMark) === 0)
             a.innerHTML = subName + " <span class='badge badge-pill badge-success pt-1 pb-1'>" + countIssues(model.name, elementsToMark) + "</span>";
         else
             a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 viadee-darkblue-text viadee-pill-bg'>" + countIssues(model.name, elementsToMark) + "</span>";
-        a.setAttribute("onclick", "selectModel('" + model.name.replace(/\\/g, "\\\\") + "', null, null, 0, 0)");
+        a.setAttribute("onclick", "showIssues('" + model.name.replace(/\\/g, "\\\\") + "', tableViewModes.ISSUES)");
         a.setAttribute("href", "#");
-        if (first == true) {
+        if (first === true) {
             a.setAttribute("class", "nav-link active");
             first = false;
         } else {
@@ -712,89 +633,73 @@ function showDialog() {
     }
 })();
 
+// List all view modes
+function createViewModesNavBar(model) {
+    if (countIssues(model, elementsToMark) > 0)
+        createNavItem("All issues", "showAllIssues", "showIssues('" + model.replace(/\\/g, "\\\\") + "', tableViewModes.ISSUES)");
+    if (countIssues(model, noIssuesElements) > 0)
+        createNavItem("Checkers without issues", "showSuccess", "showIssues('" + model.replace(/\\/g, "\\\\") + "', tableViewModes.NO_ISSUES)");
+    if (proz_vars !== undefined && proz_vars.length > 0)
+        createNavItem("Process variables", "showVariables", "showProcessVariables('" + model.replace(/\\/g, "\\\\") + "')");
+}
+
+function createNavItem(title, id, onClick) {
+    let ul = document.getElementById("viewModeNavBar");
+    let li = document.createElement("li");
+    let a = document.createElement("a");
+    a.innerHTML = title;
+    a.setAttribute("onclick", onClick);
+    a.setAttribute("href", "#");
+    a.setAttribute("class", "nav-link");
+    a.setAttribute("id", id);
+    li.appendChild(a);
+    li.setAttribute("class", "nav-item");
+
+    ul.appendChild(li);
+}
+
 function setFocus(name) {
     document.getElementById(name).focus();
 }
 
 /**
- * reload model diagram
-<<<<<<< b409ad5fbbd1bad22190f163b2d9f26aac4c476c
- * @param {*} name 
- * model name
- * @param {*} issue_id 
-=======
- * @param {*} modelName
- * model name
- * @param {*} elementId
->>>>>>> Mark elements of process variable operations
- * id of element to mark
- * @param {*} path_nr
- * number of path 
- * @param {*} func
- * 0 = normal 
- * 1 = mark path
-<<<<<<< b409ad5fbbd1bad22190f163b2d9f26aac4c476c
- * 2 = mark one element
- * @param {*} path 
-=======
- * @param {*} path
->>>>>>> Mark elements of process variable operations
- * path to mark
- * @param {*} success
- * show checkers without issues 
+ * reload model diagram with issue overlay
+ * @param modelName
+ * specify which model to show
+ * @param tableViewMode
+ * specify which issue to show in table
  */
-function selectModel(modelName, elementId, path_nr, func, path) {
-
-    var description = document.getElementById("tableHeader");
-    if (func == 3) {
-        description.setAttribute("data-content", 'Correct Checkers:');
-    } else {
-        description.setAttribute("data-content", 'Errors found:');
-    }
-
-
+function showIssues(modelName, tableViewMode) {
     document.getElementById("rowPath").setAttribute("class", "collapse");
 
     let diagramXML = getModel(modelName);
     if (diagramXML === undefined)
         return;
 
-    let tableViewMode;
-    addAllSuccessButton(diagramXML.name);
-    addProcessVariablesButton(diagramXML.name);
-    addAllIssuesButton(diagramXML.name);
-    if (func == 0) {
-        viewer.reload(diagramXML, filterElementsByModel(elementsToMark, diagramXML.name), overlayModes.ISSUE_OVERLAY);
-        document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
-        tableViewMode = tableViewModes.ISSUES;
-    } else if (func == 1) {
-        viewer.reloadMarkPath(diagramXML, elementId, path_nr);
-        document.getElementById('invalidPath').innerHTML = path;
-        document.getElementById("rowPath").setAttribute("class", "collapse.show");
-        document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
-        tableViewMode = tableViewModes.ISSUES;
-    } else if (func == 2) {
-        throw "deprecated view function; use showMarkedElement() instead";
-    } else if (func == 3) {
-        viewer.reload(diagramXML, filterElementsByModel(elementsToMark, diagramXML.name), overlayModes.ISSUE_OVERLAY);
-        document.getElementById("success").setAttribute("class", "btn btn-viadee mt-2 collapse");
-        tableViewMode = tableViewModes.NO_ISSUES;
-    }
+    initDiagram(diagramXML, filterElementsByModel(elementsToMark, diagramXML.name), getIssueOverlays(diagramXML.name));
     createTableFromViewMode(tableViewMode, diagramXML.name);
 }
 
+function showPath(modelName, elementId, path_nr, path) {
+    let diagramXML = getModel(modelName);
+    if (diagramXML === undefined)
+        return;
+
+    document.getElementById('invalidPath').innerHTML = path;
+    document.getElementById("rowPath").setAttribute("class", "collapse.show");
+    document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
+
+    initDiagram(diagramXML, getElementsOnPath(elementId, path_nr), []);
+}
+
 function showProcessVariables(modelName) {
-    document.getElementById("tableHeader").setAttribute("data-content", 'Process variables:');
     document.getElementById("rowPath").setAttribute("class", "collapse");
 
     let diagramXML = getModel(modelName);
     if (diagramXML === undefined)
         return;
 
-    viewer.reload(diagramXML, [], overlayModes.VARIABLE_OVERLAY);
-    document.getElementById("processVariables").setAttribute("class", "btn btn-viadee mt-2 collapse");
-    addAllSuccessButton(diagramXML.name);
-    addAllIssuesButton(diagramXML.name);
+    initDiagram(diagramXML, [], getProcessVariableOverlay(diagramXML.name));
     createTableFromViewMode(tableViewModes.VARIABLES, diagramXML.name);
 }
 
@@ -805,7 +710,7 @@ function showMarkedElement(modelName, elementId) {
     if (diagramXML === undefined)
         return;
 
-    viewer.reloadMarkElement(diagramXML, elementId);
+    initDiagram(diagramXML, [{elementId: elementId, classification: 'one-element'}], []);
 }
 
 function showVariableOperations(modelName, variableName) {
@@ -822,7 +727,7 @@ function showVariableOperations(modelName, variableName) {
         return o;
     });
 
-    viewer.reload(diagramXML, elements, overlayModes.VARIABLE_OVERLAY);
+    initDiagram(diagramXML, elements, getProcessVariableOverlay(diagramXML.name));
 }
 
 function getModel(modelName) {
@@ -853,10 +758,8 @@ function showUnlocatedCheckers() {
 
 // Init
 let bpmnFile = diagramXMLSource[0].name;
-viewer = initDiagram(diagramXMLSource[0], filterElementsByModel(elementsToMark, bpmnFile), overlayModes.ISSUE_OVERLAY);
-createTableFromViewMode(tableViewModes.ISSUES, bpmnFile);
-addAllSuccessButton(bpmnFile);
-addProcessVariablesButton(bpmnFile);
+createViewModesNavBar(bpmnFile);
+showIssues(bpmnFile, tableViewModes.ISSUES);
 document.getElementById('vPAV').innerHTML = vPavVersion;
 showUnlocatedCheckers();
 
