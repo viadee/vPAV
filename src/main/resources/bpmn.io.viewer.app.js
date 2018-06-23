@@ -71,12 +71,7 @@ function addCountOverlay(overlays, elements, title) {
             overlayHtml.setAttribute("data-target", "#issueModal");
             overlayHtml.setAttribute("title", title);
             overlayHtml.innerHTML = element.anz;
-            overlayHtml.onclick = (function () {
-                return function () {
-                    element.clickOverlay();
-                };
-
-            })();
+            overlayHtml.onclick = () => element.clickOverlay();
 
             overlays.add(element.i.elementId, {
                 position: {
@@ -100,7 +95,7 @@ function getProcessVariableOverlay(bpmnFile) {
         let overlayData = {};
         overlayData.i = p;
         overlayData.anz = p.read.length + p.write.length + p.delete.length;
-        overlayData.clickOverlay = () => undefined;
+        overlayData.clickOverlay = createVariableDialog(p);
         overlayData.colorClass = "badge-info";
         return overlayData;
     });
@@ -195,6 +190,7 @@ function createIssueDialog(elements) {
         while (dialogContent.hasChildNodes()) {
             dialogContent.removeChild(dialogContent.lastChild);
         }
+        document.querySelector(".modal-title").innerHTML = "Issues";
         if (this.i.elementId !== "") {
             let eId = this.i.elementId;
             for (let y in elements) {
@@ -228,7 +224,7 @@ function createIssueDialog(elements) {
                     dCardIssueButton.innerHTML = "Add Issue";
 
                     var oImg = document.createElement("img");
-                    oImg.setAttribute('src', 'img/' + issue.classification + '.png');
+                    oImg.setAttribute('src', 'img/' + issue.classification.toLowerCase() + '.png');
                     oImg.setAttribute('alt', 'issue.classification');
                     oImg.setAttribute('class', 'float-left mr-2');
                     oImg.setAttribute("title", issue.classification);
@@ -255,8 +251,49 @@ function createIssueDialog(elements) {
                 }
             }
         }
-        toggleDialog('show');
+        showDialog('show');
     }
+}
+
+function createVariableDialog(processVariable) {
+    // add DialogMessage
+    return function clickOverlay() {
+        //clear dialog
+        const dialogContent = document.querySelector(".modal-body");
+        while (dialogContent.hasChildNodes()) {
+            dialogContent.removeChild(dialogContent.lastChild);
+        }
+        document.querySelector(".modal-title").innerHTML = "Process Variables";
+
+        dialogContent.appendChild(createCardForVariableOperations(processVariable.read, "Reads", processVariable.bpmnFile));
+        dialogContent.appendChild(createCardForVariableOperations(processVariable.write, "Writes", processVariable.bpmnFile));
+        dialogContent.appendChild(createCardForVariableOperations(processVariable.delete, "Deletes", processVariable.bpmnFile));
+
+        showDialog('show');
+    }
+}
+
+function createCardForVariableOperations(operations, title, bpmnFile) {
+    var dCard = document.createElement("div");
+    dCard.setAttribute("class", "card bg-light mb-3");
+
+    var dCardBody = document.createElement("div");
+    dCardBody.setAttribute("class", "card-body");
+
+    var dCardTitle = document.createElement("h5");
+    dCardTitle.setAttribute("class", "card-header");
+
+    var dCardText = document.createElement("p");
+    dCardText.setAttribute("class", "card-text");
+
+    dCardTitle.innerHTML = title;
+    dCardText.innerHTML = operations.map(p => createShowOperationsLink(bpmnFile, p).outerHTML).join(", ");
+
+    dCard.appendChild(dCardTitle);
+    dCardBody.appendChild(dCardText);
+    dCard.appendChild(dCardBody);
+
+    return dCard;
 }
 
 // Add single issue to the ignoreIssues list
@@ -414,6 +451,7 @@ function createIssueTable(bpmnFile, tableContent) {
 
 //create process variable table
 function createVariableTable(bpmnFile, tableContent) {
+    let myParent = document.getElementsByTagName("body").item(0);
     let myTable = document.getElementById("table_issues");
     let myTHead = document.createElement("thead");
     let myRow = document.createElement("tr");
@@ -426,47 +464,38 @@ function createVariableTable(bpmnFile, tableContent) {
     myTHead.appendChild(myRow);
     myTable.appendChild(myTHead);
 
-    //fill table with all issuesof current model
-    for (id in tableContent) {
-        if (tableContent[id].bpmnFile === ("src\\main\\resources\\" + bpmnFile)) {
-            processVariable = tableContent[id];
-            myParent = document.getElementsByTagName("body").item(0);
-            myTBody = document.createElement("tbody");
-            myRow = document.createElement("tr");
+    //fill table with all variables of current model
+    for (let processVariable of tableContent) {
+        if (processVariable.bpmnFile !== ("src\\main\\resources\\" + bpmnFile))
+            continue;
 
+        let myTBody = document.createElement("tbody");
+        let myRow = document.createElement("tr");
 
-            myCell = document.createElement("td");
-            myText = document.createTextNode(processVariable.name);
-            //create link
-            let c = document.createElement("a");
-            c.appendChild(myText);
-            c.setAttribute("onclick", "showVariableOperations('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + processVariable.name + "')");
-            c.setAttribute("href", "#");
-            c.setAttribute("title", "mark operations");
-            myCell.appendChild(c);
-            myRow.appendChild(myCell);
+        let myCell = document.createElement("td");
+        myCell.appendChild(createShowOperationsLink(bpmnFile, processVariable.name));
+        myRow.appendChild(myCell);
 
-            myCell = document.createElement("td");
-            let elementLinks = processVariable.read.map(p => createMarkElementLink(bpmnFile, p));
-            myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
-            myRow.appendChild(myCell);
+        myCell = document.createElement("td");
+        let elementLinks = processVariable.read.map(p => createMarkElementLink(bpmnFile, p));
+        myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
+        myRow.appendChild(myCell);
 
-            myCell = document.createElement("td");
-            elementLinks = processVariable.write.map(p => createMarkElementLink(bpmnFile, p));
-            myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
-            myRow.appendChild(myCell);
+        myCell = document.createElement("td");
+        elementLinks = processVariable.write.map(p => createMarkElementLink(bpmnFile, p));
+        myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
+        myRow.appendChild(myCell);
 
-            myCell = document.createElement("td");
-            elementLinks = processVariable.delete.map(p => createMarkElementLink(bpmnFile, p));
-            myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
-            myRow.appendChild(myCell);
-            //---------
-            myParent.setAttribute("class", "container-fluid");
-            myTBody.appendChild(myRow);
-            myTable.appendChild(myTBody);
-            myParent.appendChild(myTable);
-        }
+        myCell = document.createElement("td");
+        elementLinks = processVariable.delete.map(p => createMarkElementLink(bpmnFile, p));
+        myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
+        myRow.appendChild(myCell);
+        //---------
+        myParent.setAttribute("class", "container-fluid");
+        myTBody.appendChild(myRow);
+        myTable.appendChild(myTBody);
     }
+    myParent.appendChild(myTable);
 }
 
 function createMarkElementLink(bpmnFile, element) {
@@ -479,6 +508,18 @@ function createMarkElementLink(bpmnFile, element) {
         c.setAttribute("href", "#");
         c.setAttribute("title", "mark element");
     }
+    return c;
+}
+
+function createShowOperationsLink(bpmnFile, processVariableName) {
+    //create link
+    let c = document.createElement("a");
+    let myText = document.createTextNode(processVariableName);
+    c.appendChild(myText);
+    c.setAttribute("onclick", "showVariableOperations('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + processVariableName + "')");
+    c.setAttribute("href", "#");
+    c.setAttribute("title", "mark operations");
+    c.setAttribute("data-dismiss", "modal");
     return c;
 }
 
@@ -580,7 +621,7 @@ function initDiagram(diagramXML, elements, overlayMode) {
                 } else if (overlayMode === overlayModes.VARIABLE_OVERLAY) {
                     addCountOverlay(overlays, getProcessVariableOverlay(diagramXML.name), "variable operations");
                 }
-                markNodes(elements, canvas, diagramXML.name);
+                markNodes(elements, canvas);
             } else {
                 document.getElementById("success").setAttribute("class", "btn btn-viadee mt-2 collapse");
             }
@@ -638,11 +679,8 @@ function countIssues(bpmnFile, tableContent) {
     return count;
 }
 
-//dialog
-var dialogOpen = false, lastFocus, dialog, okbutton, pagebackground;
-function toggleDialog(sh) {
-    dialog = $('#issueModal');
-    dialog.modal();
+function showDialog() {
+    $('#issueModal').modal();
 }
 
 // List all ProcessInstances
