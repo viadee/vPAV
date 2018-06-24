@@ -35,7 +35,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.checker.*;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import de.viadee.bpm.vPAV.processing.dataflow.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;

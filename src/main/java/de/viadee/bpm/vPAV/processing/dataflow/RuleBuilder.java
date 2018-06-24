@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.springframework.util.Assert;
 
 import java.util.Collection;

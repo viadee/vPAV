@@ -35,14 +35,13 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.dataflow.EvaluationResult;
-import de.viadee.bpm.vPAV.processing.dataflow.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class DataFlowChecker implements ModelChecker {
 

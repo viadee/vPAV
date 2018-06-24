@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 
 import java.util.function.Function;
@@ -57,20 +58,6 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
     @Override
     public OperationBasedPredicateBuilder<T> written() {
         return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getWrites, "written");
-    }
-
-    @Override
-    public T definedByServiceTasks() {
-        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
-            return p.getDefinitions().stream().anyMatch(o -> o.getElement().getBaseElement() instanceof ServiceTask) ?
-                    EvaluationResult.forSuccess(p) :
-                    EvaluationResult.forViolation("needed to be defined by ServiceTask but was defined by" +
-                            p.getDefinitions().stream()
-                                    .map(o -> o.getElement().getBaseElement().getClass().toString())
-                                    .collect(Collectors.joining(", ")), p);
-        };
-        final String description = "defined by service tasks";
-        return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
     @Override

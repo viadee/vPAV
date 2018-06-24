@@ -52,7 +52,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import de.viadee.bpm.vPAV.processing.dataflow.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -70,8 +70,6 @@ import de.viadee.bpm.vPAV.output.XmlOutputWriter;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-
-import javax.xml.crypto.Data;
 
 public class Runner {
 

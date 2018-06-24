@@ -31,14 +31,12 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
-import static de.viadee.bpm.vPAV.processing.dataflow.RuleBuilder.processVariables;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;

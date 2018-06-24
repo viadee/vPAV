@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+
 import java.util.Collection;
 
 class ConditionedSetImpl implements ConditionedSet {

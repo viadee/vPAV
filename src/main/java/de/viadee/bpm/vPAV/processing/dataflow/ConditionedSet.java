@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+
 public interface ConditionedSet extends DataFlowRule {
     ProcessVariablePredicateBuilder<ConditionedSet> andShouldBe();
     ProcessVariablePredicateBuilder<ConditionedSet> orShouldBe();

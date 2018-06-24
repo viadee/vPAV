@@ -31,10 +31,16 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static groovy.xml.Entity.times;
 
 class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBuilder<T> {
 
@@ -91,5 +97,16 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
         };
         final String description = String.format("%s at most %s %s", operationDescription, n, times);
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+    }
+
+    @Override
+    public ElementBasedPredicateBuilder<T> byModelElements() {
+        final Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> {
+            return operationProvider.apply(p).stream()
+                    .map(ProcessVariableOperation::getElement)
+                    .collect(Collectors.toList());
+        };
+        return new ElementBasedPredicateBuilderImpl<T>(conditionSetter, elementProvider,
+                operationDescription + " by model elements");
     }
 }

@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.viadee.bpm.vPAV.Runner;
-import de.viadee.bpm.vPAV.processing.dataflow.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 
 import com.google.gson.GsonBuilder;

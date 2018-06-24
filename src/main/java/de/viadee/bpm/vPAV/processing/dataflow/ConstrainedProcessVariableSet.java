@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+
 public interface ConstrainedProcessVariableSet {
     ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> orThatAre();
     ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> andThatAre();

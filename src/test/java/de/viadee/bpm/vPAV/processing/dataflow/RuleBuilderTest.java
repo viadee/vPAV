@@ -111,7 +111,7 @@ public class RuleBuilderTest {
         variables.add(processVariable);
 
         List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .thatAre().definedByServiceTasks());
+                .thatAre().defined().byModelElements().ofType(ServiceTask.class));
 
         assertThat(filteredVariables.size(), is(1));
     }
@@ -145,7 +145,7 @@ public class RuleBuilderTest {
         variables.add(processVariable);
 
         List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .thatAre().definedByServiceTasks()
+                .thatAre().defined().byModelElements().ofType(ServiceTask.class)
                 .andThatAre().prefixed("ext_"));
 
         assertThat(filteredVariables.size(), is(1));
@@ -170,7 +170,7 @@ public class RuleBuilderTest {
         variables.add(processVariable);
 
         List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .thatAre().definedByServiceTasks()
+                .thatAre().defined().byModelElements().ofType(ServiceTask.class)
                 .orThatAre().prefixed("ext_"));
 
         assertThat(filteredVariables.size(), is(3));
@@ -178,7 +178,6 @@ public class RuleBuilderTest {
 
     @Test
     public void testWrittenConditionIsAppliedCorrectly() {
-
         List<ProcessVariable> variables = new ArrayList<>();
         ProcessVariable processVariable = new ProcessVariable("ext_variable1");
         variables.add(processVariable);
@@ -194,6 +193,41 @@ public class RuleBuilderTest {
                 .shouldBe().written().exactly(1);
 
         rule.check(variables);
+    }
+
+    @Test
+    public void testModelBasedConstraintIsAppliedCorrectly() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("variable2");
+        processVariable.addWrite(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        processVariable = new ProcessVariable("variable3");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+        processVariable = new ProcessVariable("variable1");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+
+        List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
+                .thatAre().defined().byModelElements().ofType(ServiceTask.class));
+
+        assertThat(filteredVariables.size(), is(1));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testModelBasedConditionIsAppliedCorrectly() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("variable2");
+        processVariable.addWrite(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        processVariable = new ProcessVariable("variable3");
+        processVariable.addDefinition(new ProcessVariableBuilder()
+                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+
+        processVariables().shouldBe().defined().byModelElements().ofType(ServiceTask.class).check(variables);
     }
 
     private static <T> DescribedPredicateEvaluator<T> constraintFrom(Predicate<T> predicate) {
