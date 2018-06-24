@@ -82,7 +82,7 @@ public class RuleBuilder implements DataFlowRule {
         return new ConstrainedProcessVariableSetImpl(this);
     }
 
-    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> that() {
+    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> thatAre() {
         return new ProcessVariablePredicateBuilderImpl<>(this::thatAre);
     }
 
@@ -93,5 +93,15 @@ public class RuleBuilder implements DataFlowRule {
     @Override
     public void check(Collection<ProcessVariable> variables) {
         new SimpleDataFlowRule(constraint, condition).check(variables);
+    }
+
+    @Override
+    public Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables) {
+        return new SimpleDataFlowRule(constraint, condition).evaluate(variables);
+    }
+
+    @Override
+    public String getRuleDescription() {
+        return new SimpleDataFlowRule(constraint, condition).getRuleDescription();
     }
 }

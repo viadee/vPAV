@@ -65,4 +65,14 @@ class ConditionedSetImpl implements ConditionedSet {
     public void check(Collection<ProcessVariable> variables) {
         ruleBuilder.check(variables);
     }
+
+    @Override
+    public Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables) {
+        return ruleBuilder.evaluate(variables);
+    }
+
+    @Override
+    public String getRuleDescription() {
+        return ruleBuilder.getRuleDescription();
+    }
 }

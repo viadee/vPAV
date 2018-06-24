@@ -41,6 +41,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
@@ -54,10 +55,9 @@ import org.xml.sax.SAXException;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
-public class ProcessVariableReaderTest {
+public class ProcessVariableOperationReaderTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
@@ -93,7 +93,7 @@ public class ProcessVariableReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);
+        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
 
         Assert.assertEquals(2, variables.size());
     }
@@ -111,23 +111,23 @@ public class ProcessVariableReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);
+        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
 
-        final ProcessVariable nameOfVariableInMainProcess = variables
+        final ProcessVariableOperation nameOfVariableInMainProcess = variables
                 .get("nameOfVariableInMainProcess");
         Assert.assertNotNull(nameOfVariableInMainProcess);
         Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess.getOperation());
 
-        final ProcessVariable nameOfVariableInMainProcess2 = variables
+        final ProcessVariableOperation nameOfVariableInMainProcess2 = variables
                 .get("nameOfVariableInMainProcess2");
         Assert.assertNotNull(nameOfVariableInMainProcess2);
         Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess2.getOperation());
 
-        final ProcessVariable someVariableInMainProcess = variables.get("someVariableInMainProcess");
+        final ProcessVariableOperation someVariableInMainProcess = variables.get("someVariableInMainProcess");
         Assert.assertNotNull(someVariableInMainProcess);
         Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess.getOperation());
 
-        final ProcessVariable someVariableInMainProcess2 = variables.get("someVariableInMainProcess2");
+        final ProcessVariableOperation someVariableInMainProcess2 = variables.get("someVariableInMainProcess2");
         Assert.assertNotNull(someVariableInMainProcess2);
         Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.getOperation());
     }

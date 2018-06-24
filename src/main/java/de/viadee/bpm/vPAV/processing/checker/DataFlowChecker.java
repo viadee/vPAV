@@ -29,32 +29,47 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.output.IssueWriter;
+import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
+import de.viadee.bpm.vPAV.processing.dataflow.EvaluationResult;
 import de.viadee.bpm.vPAV.processing.dataflow.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-public class ModelDispatchResult {
-    private Collection<CheckerIssue> issues;
-    private Collection<BpmnElement> bpmnElements;
+public class DataFlowChecker implements ModelChecker {
+
+    private Rule rule;
+    private Collection<DataFlowRule> dataFlowRules;
     private Collection<ProcessVariable> processVariables;
 
-    public ModelDispatchResult(Collection<CheckerIssue> issues, Collection<BpmnElement> bpmnElements, Collection<ProcessVariable> processVariables) {
-        this.issues = issues;
-        this.bpmnElements = bpmnElements;
+    public DataFlowChecker(Rule rule, Collection<DataFlowRule> dataFlowRules, Collection<ProcessVariable> processVariables) {
+        this.rule = rule;
+        this.dataFlowRules = dataFlowRules;
         this.processVariables = processVariables;
     }
 
-    public Collection<CheckerIssue> getIssues() {
+    @Override
+    public Collection<CheckerIssue> check(BpmnModelInstance processdefinition) {
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        for (DataFlowRule dataFlowRule : dataFlowRules) {
+            dataFlowRule.evaluate(processVariables).stream()
+                    .filter(EvaluationResult::isFulfilled)
+                    // TODO: think about correct BPMN element
+                    // TODO: Message template in resource bundle
+                    .map(r -> IssueWriter.createIssue(rule, CriticalityEnum.ERROR,
+                            r.getEvaluatedVariable().getOperations().get(0).getElement(),
+                            String.format("Rule '%s' violated: %s %s", dataFlowRule.getRuleDescription(),
+                                    r.getEvaluatedVariable().getName(), r.getViolationMessage().get())))
+                    .forEach(issues::addAll);
+        }
         return issues;
-    }
-
-    public Collection<BpmnElement> getBpmnElements() {
-        return bpmnElements;
-    }
-
-    public Collection<ProcessVariable> getProcessVariables() {
-        return processVariables;
     }
 }

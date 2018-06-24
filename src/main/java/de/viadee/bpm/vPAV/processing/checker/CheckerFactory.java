@@ -85,7 +85,8 @@ public final class CheckerFactory {
             	continue;
             }
 
-            if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")) { //$NON-NLS-1$
+            if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker") &&
+                    !rule.getKey().equals("DataFlowChecker")) { //$NON-NLS-1$
                 try {
                     if (!rule.getKey().equals("VersioningChecker")) { //$NON-NLS-1$
 

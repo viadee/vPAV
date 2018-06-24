@@ -37,7 +37,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class SimpleDataFlowRule implements DataFlowRule {
-    private static final String RULE_DESCRIPTION_TEMPLATE = "Rule 'process variables%s should be %s' was violated %s times:\n";
+    private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE = "Rule 'process variables%s should be %s' was violated %s times:\n";
+    private static final String RULE_DESCRIPTION_TEMPLATE = "Process variables%s should be %s";
     private final DescribedPredicateEvaluator<ProcessVariable> constraint;
     private final DescribedPredicateEvaluator<ProcessVariable> condition;
 
@@ -46,17 +47,21 @@ class SimpleDataFlowRule implements DataFlowRule {
         this.condition = condition;
     }
 
-    public void check(Collection<ProcessVariable> variables) {
+    public Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables) {
         Stream<ProcessVariable> variableStream = variables.stream();
         if (constraint != null)
             variableStream = variableStream.filter(p -> constraint.evaluate(p).isFulfilled());
         List<EvaluationResult<ProcessVariable>> results = variableStream
                 .map(condition::evaluate)
                 .collect(Collectors.toList());
-        assertNoViolations(results);
+        return results;
     }
 
-    private void assertNoViolations(List<EvaluationResult<ProcessVariable>> result) {
+    public void check(Collection<ProcessVariable> variables) {
+        assertNoViolations(evaluate(variables));
+    }
+
+    private void assertNoViolations(Collection<EvaluationResult<ProcessVariable>> result) {
         List<EvaluationResult<ProcessVariable>> violations = result.stream()
                 .filter(r -> !r.isFulfilled())
                 .collect(Collectors.toList());
@@ -70,10 +75,14 @@ class SimpleDataFlowRule implements DataFlowRule {
         }
     }
 
+    public String getRuleDescription() {
+        return String.format(RULE_DESCRIPTION_TEMPLATE, constraint, condition);
+    }
+
     private String createRuleDescription(int violationCount) {
         String constraintDescription = constraint != null ?
                 " that are " + constraint.getDescription() :
                 "";
-        return String.format(RULE_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription(), violationCount);
+        return String.format(RULE_VIOLATION_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription(), violationCount);
     }
 }

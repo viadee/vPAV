@@ -85,6 +85,10 @@
 		<state>false</state>
 	</rule>
 	<rule>
+		<name>DataFlowChecker</name>
+		<state>true</state>
+	</rule>
+	<rule>
 		<name>ProcessVariablesModelChecker</name>
 		<state>false</state>
 	</rule>

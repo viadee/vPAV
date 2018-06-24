@@ -33,17 +33,17 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import java.util.Optional;
 
-class EvaluationResult<T> {
+public class EvaluationResult<T> {
     private String message;
     private boolean result;
 
     private T evaluatedVariable;
 
-    public static <T> EvaluationResult<T> forViolation(String violationMessage, T evaluatedVariable) {
+    static <T> EvaluationResult<T> forViolation(String violationMessage, T evaluatedVariable) {
         return new EvaluationResult<>(false, violationMessage, evaluatedVariable);
     }
 
-    public static <T> EvaluationResult<T> forSuccess(T evaluatedVariable) {
+    static <T> EvaluationResult<T> forSuccess(T evaluatedVariable) {
         return new EvaluationResult<>(true, null, evaluatedVariable);
     }
 

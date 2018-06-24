@@ -35,7 +35,7 @@ package de.viadee.bpm.vPAV.processing.model.data;
  * Represents a process variable with some meaningful information.
  *
  */
-public class ProcessVariable {
+public class ProcessVariableOperation {
 
   private String name;
 
@@ -52,9 +52,9 @@ public class ProcessVariable {
 
   private KnownElementFieldType fieldType;
 
-  public ProcessVariable(final String name, final BpmnElement element, final ElementChapter chapter,
-      final KnownElementFieldType fieldType, final String resourceFilePath,
-      final VariableOperation operation, final String scopeId) {
+  public ProcessVariableOperation(final String name, final BpmnElement element, final ElementChapter chapter,
+                                  final KnownElementFieldType fieldType, final String resourceFilePath,
+                                  final VariableOperation operation, final String scopeId) {
     super();
     this.name = name;
     this.element = element;
@@ -106,8 +106,8 @@ public class ProcessVariable {
 
   @Override
   public boolean equals(final Object o) {
-    if (o instanceof ProcessVariable) {
-      final ProcessVariable p = (ProcessVariable) o;
+    if (o instanceof ProcessVariableOperation) {
+      final ProcessVariableOperation p = (ProcessVariableOperation) o;
       if (name.equals(p.getName())) {
         return true;
       }

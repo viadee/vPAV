@@ -31,32 +31,23 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
+import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.processing.checker.*;
+import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
+import de.viadee.bpm.vPAV.processing.dataflow.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.processing.checker.CheckerFactory;
-import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
-import de.viadee.bpm.vPAV.processing.checker.ModelChecker;
-import de.viadee.bpm.vPAV.processing.checker.ProcessVariablesModelChecker;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
-import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Calls model and element checkers for a concrete bpmn processdefinition
@@ -93,6 +84,7 @@ public class BpmnModelDispatcher {
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,
             final Map<String, Collection<String>> processIdToVariables,
+            final Collection<DataFlowRule> dataFlowRules,
             final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf)
             throws ConfigItemNotFoundException {
 
@@ -117,6 +109,10 @@ public class BpmnModelDispatcher {
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
                 .createInvalidPaths(graphCollection);
 
+        final Collection<BpmnElement> bpmnElements =
+                getBpmnElements(processdefinition, baseElements, graphBuilder);
+        final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         // call model checkers
@@ -131,6 +127,17 @@ public class BpmnModelDispatcher {
                     processVariablesModelRule, invalidPathMap);
             issues.addAll(processVarChecker.check(modelInstance));
         }
+        final Rule dataFlowRule = conf
+                .get(getClassName(DataFlowRule.class));
+        if (dataFlowRule == null)
+            throw new ConfigItemNotFoundException(
+                    getClassName(DataFlowRule.class) + " not found");
+        if (dataFlowRule.isActive() && !dataFlowRules.isEmpty()) {
+            final DataFlowChecker dataFlowChecker = new DataFlowChecker(
+                    dataFlowRule, dataFlowRules, processVariables
+            );
+            issues.addAll(dataFlowChecker.check(modelInstance));
+        }
 
         // create checkerInstances as singletons
         Collection<ElementChecker> checkerInstances = createCheckerSingletons(resourcesNewestVersions, conf,
@@ -138,7 +145,7 @@ public class BpmnModelDispatcher {
 
         executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
 
-        return new ModelDispatchResult(issues, getBpmnElements(processdefinition, baseElements, graphBuilder));
+        return new ModelDispatchResult(issues, bpmnElements, processVariables);
     }
 
 
@@ -187,7 +194,7 @@ public class BpmnModelDispatcher {
 
         executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
 
-        return new ModelDispatchResult(issues, getBpmnElements(processdefinition, baseElements, graphBuilder));
+        return new ModelDispatchResult(issues, getBpmnElements(processdefinition, baseElements, graphBuilder), Collections.emptyList());
     }
 
     /**
@@ -210,6 +217,37 @@ public class BpmnModelDispatcher {
             elements.add(element);
         }
         return elements;
+    }
+
+    /**
+     * @param elements
+     *            Collection of BPMN elements
+     */
+    private static Collection<ProcessVariable> getProcessVariables(Collection<BpmnElement> elements) {
+        // write variables containing elements
+        // first, we need to inverse mapping to process variable -> operations (including element)
+        final Map<String, ProcessVariable> processVariables = new HashMap<>();
+        for (final BpmnElement element : elements) {
+            for (final ProcessVariableOperation variableOperation : element.getProcessVariables().values()) {
+                final String variableName = variableOperation.getName();
+                if (!processVariables.containsKey(variableName)) {
+                    processVariables.put(variableName, new ProcessVariable(variableName));
+                }
+                final ProcessVariable processVariable = processVariables.get(variableName);
+                switch (variableOperation.getOperation()) {
+                    case READ:
+                        processVariable.addRead(variableOperation);
+                        break;
+                    case WRITE:
+                        processVariable.addWrite(variableOperation);
+                        break;
+                    case DELETE:
+                        processVariable.addDelete(variableOperation);
+                        break;
+                }
+            }
+        }
+        return processVariables.values();
     }
 
     /**

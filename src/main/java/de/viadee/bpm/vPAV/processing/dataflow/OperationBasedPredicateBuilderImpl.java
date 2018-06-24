@@ -31,19 +31,20 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBuilder<T> {
 
     private final Function<DescribedPredicateEvaluator<ProcessVariable>, T> conditionSetter;
-    private final Function<ProcessVariable, List<de.viadee.bpm.vPAV.processing.model.data.ProcessVariable>> operationProvider;
+    private final Function<ProcessVariable, List<ProcessVariableOperation>> operationProvider;
     private final String operationDescription;
 
     OperationBasedPredicateBuilderImpl(
             Function<DescribedPredicateEvaluator<ProcessVariable>, T> conditionSetter,
-            Function<ProcessVariable, List<de.viadee.bpm.vPAV.processing.model.data.ProcessVariable>> operationProvider,
+            Function<ProcessVariable, List<ProcessVariableOperation>> operationProvider,
             String operationDescription) {
         this.conditionSetter = conditionSetter;
         this.operationProvider = operationProvider;

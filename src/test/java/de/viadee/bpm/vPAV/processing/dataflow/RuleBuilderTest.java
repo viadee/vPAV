@@ -31,10 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ExclusiveGateway;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
@@ -114,7 +111,7 @@ public class RuleBuilderTest {
         variables.add(processVariable);
 
         List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .that().definedByServiceTasks());
+                .thatAre().definedByServiceTasks());
 
         assertThat(filteredVariables.size(), is(1));
     }
@@ -128,7 +125,7 @@ public class RuleBuilderTest {
         variables.add(processVariable);
 
         List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .that().prefixed("ext_"));
+                .thatAre().prefixed("ext_"));
 
         assertThat(filteredVariables.size(), is(1));
     }
@@ -148,7 +145,7 @@ public class RuleBuilderTest {
         variables.add(processVariable);
 
         List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .that().definedByServiceTasks()
+                .thatAre().definedByServiceTasks()
                 .andThatAre().prefixed("ext_"));
 
         assertThat(filteredVariables.size(), is(1));
@@ -173,7 +170,7 @@ public class RuleBuilderTest {
         variables.add(processVariable);
 
         List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .that().definedByServiceTasks()
+                .thatAre().definedByServiceTasks()
                 .orThatAre().prefixed("ext_"));
 
         assertThat(filteredVariables.size(), is(3));
@@ -229,8 +226,8 @@ public class RuleBuilderTest {
             return this;
         }
 
-        public de.viadee.bpm.vPAV.processing.model.data.ProcessVariable build() {
-            return new de.viadee.bpm.vPAV.processing.model.data.ProcessVariable(name, element, ElementChapter.Details,
+        public ProcessVariableOperation build() {
+            return new ProcessVariableOperation(name, element, ElementChapter.Details,
                     KnownElementFieldType.Class, "", operation, "");
         }
     }

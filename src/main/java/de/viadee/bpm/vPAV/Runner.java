@@ -51,6 +51,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
+import de.viadee.bpm.vPAV.processing.dataflow.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -68,6 +70,8 @@ import de.viadee.bpm.vPAV.output.XmlOutputWriter;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+
+import javax.xml.crypto.Data;
 
 public class Runner {
 
@@ -97,6 +101,10 @@ public class Runner {
 
 	private static Collection<BpmnElement> elements = new ArrayList<>();
 
+	private static Collection<ProcessVariable> processVariables = new ArrayList<>();
+
+	private static Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
+
 	private static boolean isMisconfigured = false;
 
 	private static boolean checkProcessVariables = false;
@@ -117,13 +125,13 @@ public class Runner {
 		getProcessVariables(rules);
 
 		// 4
-		createIssues(rules);
+		createIssues(rules, dataFlowRules);
 
 		// 5
 		removeIgnoredIssues();
 
 		// 6
-		writeOutput(filteredIssues, elements);
+		writeOutput(filteredIssues, elements, processVariables);
 
 		// 7
 		copyFiles();
@@ -234,8 +242,9 @@ public class Runner {
 	 * the current javaResources
 	 */
 	private static void getProcessVariables(Map<String, Rule> rules) {
-		if (rules.get("ProcessVariablesModelChecker").isActive()
-				|| rules.get("ProcessVariablesNameConventionChecker").isActive()) {
+		if (rules.get("ProcessVariablesModelChecker").isActive() ||
+				rules.get("ProcessVariablesNameConventionChecker").isActive() ||
+				rules.get("DataFlowChecker").isActive()) {
 			variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
 			readOuterProcessVariables(variableScanner);
 			setCheckProcessVariables(true);
@@ -254,8 +263,9 @@ public class Runner {
 	 * @throws RuntimeException
 	 *             Config item couldn't be read
 	 */
-	private static void createIssues(Map<String, Rule> rules) throws RuntimeException {
-		issues = checkModels(rules, fileScanner, variableScanner);
+	private static void createIssues(Map<String, Rule> rules,
+									 Collection<DataFlowRule> dataFlowRules) throws RuntimeException {
+		issues = checkModels(rules, fileScanner, variableScanner, dataFlowRules);
 	}
 
 	/**
@@ -275,10 +285,14 @@ public class Runner {
 	 *            List of filteredIssues
 	 * @param elements
 	 *            List of BPMN element across all models
+	 * @param processVariables
+	 *            List of process variables across all models
 	 * @throws RuntimeException
 	 *             Abort if writer can not be instantiated
 	 */
-	private static void writeOutput(final Collection<CheckerIssue> filteredIssues, final Collection<BpmnElement> elements) throws RuntimeException {
+	private static void writeOutput(final Collection<CheckerIssue> filteredIssues,
+									final Collection<BpmnElement> elements,
+									final Collection<ProcessVariable> processVariables) throws RuntimeException {
 		
 		if (filteredIssues.size() > 0) {
 			final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
@@ -288,7 +302,7 @@ public class Runner {
 				xmlOutputWriter.write(filteredIssues);
 				jsonOutputWriter.write(filteredIssues);
 				jsOutputWriter.write(filteredIssues);
-				jsOutputWriter.writeVars(elements);
+				jsOutputWriter.writeVars(elements, processVariables);
 
 			} catch (final OutputWriterException e) {
 				throw new RuntimeException("Output couldn't be written");
@@ -586,11 +600,11 @@ public class Runner {
 	 *             ConfigItem not found
 	 */
 	private static Collection<CheckerIssue> checkModels(final Map<String, Rule> rules, final FileScanner fileScanner,
-			final OuterProcessVariablesScanner variableScanner) throws RuntimeException {
+			final OuterProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules) throws RuntimeException {
 		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		for (final String pathToModel : fileScanner.getProcessdefinitions()) {
-			issues.addAll(checkModel(rules, pathToModel, fileScanner, variableScanner));
+			issues.addAll(checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules));
 			Runner.resetSequenceFlowList();
 		}
 		checkMisconfiguration();
@@ -614,14 +628,15 @@ public class Runner {
 	 * @throws ConfigItemNotFoundException
 	 */
 	private static Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processdef,
-			final FileScanner fileScanner, final OuterProcessVariablesScanner variableScanner) throws RuntimeException {
+			final FileScanner fileScanner, final OuterProcessVariablesScanner variableScanner,
+			Collection<DataFlowRule> dataFlowRules) throws RuntimeException {
 		ModelDispatchResult dispatchResult;
 		try {
 			if (variableScanner != null) {
 				dispatchResult = BpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
 						fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
 						variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
-						fileScanner.getResourcesNewestVersions(), rules);
+						dataFlowRules, fileScanner.getResourcesNewestVersions(), rules);
 			} else {
 				dispatchResult = BpmnModelDispatcher.dispatchWithoutVariables(
 						new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
@@ -631,6 +646,8 @@ public class Runner {
 			throw new RuntimeException("Config item couldn't be read");
 		}
 		elements.addAll(dispatchResult.getBpmnElements());
+		processVariables.addAll(dispatchResult.getProcessVariables());
+
 
 		return dispatchResult.getIssues();
 	}
@@ -751,5 +768,9 @@ public class Runner {
 
 	public static void setCheckProcessVariables(boolean checkProcessVariables) {
 		Runner.checkProcessVariables = checkProcessVariables;
+	}
+
+	public static void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {
+		Runner.dataFlowRules = dataFlowRules;
 	}
 }
