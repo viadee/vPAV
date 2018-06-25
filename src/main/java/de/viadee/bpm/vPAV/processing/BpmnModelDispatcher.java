@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -93,7 +94,7 @@ public class BpmnModelDispatcher {
      * @throws ConfigItemNotFoundException
      *             ruleSet couldn't be read
      */
-    public static Collection<CheckerIssue> dispatchWithVariables(final File processdefinition,
+    public static ModelDispatchResult dispatchWithVariables(final File processdefinition,
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,
             final Map<String, Collection<String>> processIdToVariables,
@@ -142,10 +143,9 @@ public class BpmnModelDispatcher {
 
         executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
 
-        writeVarsInJS(processdefinition, baseElements, graphBuilder);
-
-        return issues;
+        return new ModelDispatchResult(issues, getBpmnElements(processdefinition, baseElements, graphBuilder));
     }
+
 
     /**
      * The BpmnModelDispatcher reads a model and creates a collection of all elements. Iterates through collection and
@@ -165,11 +165,12 @@ public class BpmnModelDispatcher {
      * @throws ConfigItemNotFoundException
      *             ruleSet couldn't be read
      */
-    public static Collection<CheckerIssue> dispatchWithoutVariables(final File processdefinition,
-            final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
-            final Collection<String> resourcesNewestVersions,
-            final Map<String, Rule> conf)
-            throws ConfigItemNotFoundException {
+    public static ModelDispatchResult dispatchWithoutVariables(final File processdefinition,
+           final Map<String, String> decisionRefToPathMap,
+           final Map<String, String> processIdToPathMap,
+           final Collection<String> resourcesNewestVersions,
+           final Map<String, Rule> conf)
+           throws ConfigItemNotFoundException {
 
         BpmnScanner bpmnScanner = createScanner(processdefinition);
 
@@ -191,9 +192,29 @@ public class BpmnModelDispatcher {
 
         executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
 
-        writeVarsInJS(processdefinition, baseElements, graphBuilder);
+        return new ModelDispatchResult(issues, getBpmnElements(processdefinition, baseElements, graphBuilder));
+    }
 
-        return issues;
+    /**
+     * @param baseElements
+     *            Collection of baseelements
+     * @param graphBuilder
+     *            graphBuilder
+     * @param processdefinition
+     *            bpmn file
+     */
+    private static Collection<BpmnElement> getBpmnElements(
+            File processdefinition, Collection<BaseElement> baseElements, ElementGraphBuilder graphBuilder) {
+        List<BpmnElement> elements = new ArrayList<>();
+        for (final BaseElement baseElement : baseElements) {
+            BpmnElement element = graphBuilder.getElement(baseElement.getId());
+            if (element == null) {
+                // if element is not in the data flow graph, create it.
+                element = new BpmnElement(processdefinition.getPath(), baseElement);
+            }
+            elements.add(element);
+        }
+        return elements;
     }
 
     /**
@@ -241,26 +262,6 @@ public class BpmnModelDispatcher {
             throw new RuntimeException("Model couldn't be parsed");
         }
         return bpmnScanner;
-    }
-
-    /**
-     * 
-     * @param processdefinition
-     *            Holds the path to the BPMN model
-     * @param baseElements
-     *            List of baseElements
-     * @param graphBuilder
-     *            ElementGraphBuilder used for data flow of a BPMN Model
-     */
-    private static void writeVarsInJS(final File processdefinition, final Collection<BaseElement> baseElements,
-            final ElementGraphBuilder graphBuilder) {
-        // write js with processvariables
-        JsOutputWriter jWriter = new JsOutputWriter();
-        try {
-            jWriter.writeVars(baseElements, graphBuilder, processdefinition);
-        } catch (OutputWriterException e) {
-            logger.warning("Processvariables couldn't be written");
-        }
     }
 
     /**
