@@ -65,7 +65,7 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
         final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             return p.getName().startsWith(prefix) ?
                     EvaluationResult.forSuccess(p) :
-                    EvaluationResult.forViolation("needed to be prefixed by " + prefix, p);
+                    EvaluationResult.forViolation(p);
         };
         final String description = String.format("prefixed with '%s'", prefix);
         return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));

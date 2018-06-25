@@ -59,8 +59,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
             return element.getBaseElement() instanceof ServiceTask ?
                     EvaluationResult.forSuccess(element) :
-                    EvaluationResult.forViolation(String.format("needed to be of type %s but was %s",
-                            clazz, element.getBaseElement().getClass()), element);
+                    EvaluationResult.forViolation(element.getBaseElement().getClass().toString(), element);
         };
         final String description = String.format("of type %s", clazz);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -71,8 +70,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
             return element.getBaseElement().getId().startsWith(prefix) ?
                     EvaluationResult.forSuccess(element) :
-                    EvaluationResult.forViolation(String.format("needed to be prefixed with %s but was %s",
-                            prefix, element.getBaseElement().getId()), element);
+                    EvaluationResult.forViolation(element.getBaseElement().getId(), element);
         };
         final String description = String.format("with prefix %s", prefix);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -94,12 +92,9 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
             List<BpmnElement> elements = elementProvider.apply(p);
             return elements.stream().anyMatch(e -> predicate.evaluate(e).isFulfilled()) ?
                     EvaluationResult.forSuccess(p) :
-                    EvaluationResult.forViolation(String.format("needed to be %s %s but was %s by %s",
-                            elementDescription, predicate.getDescription(), elementDescription,
-                            elements.stream()
+                    EvaluationResult.forViolation(elements.stream()
                                     .map(e -> e.getBaseElement().getClass().toString())
-                                    .collect(Collectors.joining(", "))
-                    ), p);
+                                    .collect(Collectors.joining(", ")), p);
         };
         final String description = String.format("%s %s", elementDescription, predicate.getDescription());
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));

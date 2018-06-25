@@ -108,4 +108,20 @@ public class DescribedPredicateEvaluatorTest {
         assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().isPresent(), is(true));
         assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().get(), is("violation1 and violation2"));
     }
+
+    @Test
+    public void testAndCombinesViolationMessagesInCaseOfAbsence() {
+        DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.length() == 5 ?
+                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("violation1", s), "constraint1");
+        DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.startsWith("ext_") ?
+                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation(s), "constraint2");
+
+        DescribedPredicateEvaluator<String> testConstraint = constraint.and(constraint2);
+
+        assertThat(testConstraint.evaluate("five5").getViolationMessage().isPresent(), is(false));
+        assertThat(testConstraint.evaluate("ext_").getViolationMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("ext_").getViolationMessage().get(), is("violation1"));
+        assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().get(), is("violation1"));
+    }
 }

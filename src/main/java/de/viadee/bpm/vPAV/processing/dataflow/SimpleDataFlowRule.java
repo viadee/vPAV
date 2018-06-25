@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 class SimpleDataFlowRule implements DataFlowRule {
     private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE = "Rule 'process variables%s should be %s' was violated %s times:\n";
     private static final String RULE_DESCRIPTION_TEMPLATE = "Process variables%s should be %s";
+    private static final String VIOLATION_TEMPLATE = "'%s' needed to be %s%s";
     private final DescribedPredicateEvaluator<ProcessVariable> constraint;
     private final DescribedPredicateEvaluator<ProcessVariable> condition;
 
@@ -71,7 +72,7 @@ class SimpleDataFlowRule implements DataFlowRule {
             String ruleDescription = createRuleDescription(violations.size());
 
             String violationsString = violations.stream()
-                    .map(r -> r.getEvaluatedVariable().getName() + " " + r.getViolationMessage().get())
+                    .map(this::createViolationMessage)
                     .collect(Collectors.joining("\n"));
             throw new AssertionError( ruleDescription + violationsString);
         }
@@ -89,5 +90,13 @@ class SimpleDataFlowRule implements DataFlowRule {
                 " that are " + constraint.getDescription() :
                 "";
         return String.format(RULE_VIOLATION_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription(), violationCount);
+    }
+
+    private String createViolationMessage(EvaluationResult<ProcessVariable> result) {
+        String violationMessage = result.getViolationMessage().isPresent() ?
+                " but was " + result.getViolationMessage().get() :
+                "";
+        return String.format(VIOLATION_TEMPLATE,
+                result.getEvaluatedVariable().getName(), condition.getDescription(), violationMessage);
     }
 }

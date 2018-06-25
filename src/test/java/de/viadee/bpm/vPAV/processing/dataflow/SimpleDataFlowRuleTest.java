@@ -87,14 +87,28 @@ public class SimpleDataFlowRuleTest {
     }
 
     @Test
-    public void testErrorMessageContainsCorrectViolationText() {
-        SimpleDataFlowRule rule = new SimpleDataFlowRule(null,
-                new DescribedPredicateEvaluator<>(v -> EvaluationResult.forViolation("is not right", v), ""));
+    public void testErrorMessageLeavesOutViolationIfNotProvided() {
+        SimpleDataFlowRule rule = new SimpleDataFlowRule(
+                new DescribedPredicateEvaluator<>(EvaluationResult::forSuccess, "easily fulfilling something"),
+                new DescribedPredicateEvaluator<>(EvaluationResult::forViolation, ""));
 
         try {
             rule.check(Collections.singletonList(new ProcessVariable("var1")));
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), containsString("var1 is not right"));
+            assertThat(e.getMessage(), not(containsString("but was")));
+        }
+    }
+
+    @Test
+    public void testErrorMessageContainsCorrectViolationText() {
+        SimpleDataFlowRule rule = new SimpleDataFlowRule(null,
+                new DescribedPredicateEvaluator<>(v -> EvaluationResult.forViolation("not right", v), ""));
+
+        try {
+            rule.check(Collections.singletonList(new ProcessVariable("var1")));
+        } catch (AssertionError e) {
+            assertThat(e.getMessage(), containsString("'var1' needed to be"));
+            assertThat(e.getMessage(), containsString("but was not right"));
         }
     }
 
@@ -103,7 +117,7 @@ public class SimpleDataFlowRuleTest {
         SimpleDataFlowRule rule = new SimpleDataFlowRule(null,
                 new DescribedPredicateEvaluator<>(v -> v.getName().equals("correct name") ?
                         EvaluationResult.forSuccess(v) :
-                        EvaluationResult.forViolation("is not right", v), ""));
+                        EvaluationResult.forViolation("not right", v), ""));
 
         try {
             rule.check(Arrays.asList(
@@ -111,8 +125,8 @@ public class SimpleDataFlowRuleTest {
                     new ProcessVariable("correct name"),
                     new ProcessVariable("var3")));
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), containsString("var1 is not right"));
-            assertThat(e.getMessage(), containsString("var3 is not right"));
+            assertThat(e.getMessage(), containsString("'var1' needed to be  but was not right"));
+            assertThat(e.getMessage(), containsString("'var3' needed to be  but was not right"));
             assertThat(e.getMessage(), containsString("was violated 2 times"));
             assertThat(e.getMessage(), not(containsString("correct name is not right")));
         }

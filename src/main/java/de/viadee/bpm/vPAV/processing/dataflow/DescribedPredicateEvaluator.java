@@ -80,10 +80,14 @@ public class DescribedPredicateEvaluator<T> {
 
     private EvaluationResult<T> createEvaluationResult(EvaluationResult<T> result1, EvaluationResult<T> result2, boolean isCombinedViolation) {
         if (isCombinedViolation) {
-            return EvaluationResult.forViolation(Stream.of(result1, result2)
+            String violationMessage = Stream.of(result1, result2)
                     .filter(r -> !r.isFulfilled())
+                    .filter(r -> r.getViolationMessage().isPresent())
                     .map(r -> r.getViolationMessage().get())
-                    .collect(Collectors.joining(" and ")), result1.getEvaluatedVariable());
+                    .collect(Collectors.joining(" and "));
+            return violationMessage.isEmpty() ?
+                    EvaluationResult.forViolation(result1.getEvaluatedVariable()) :
+                    EvaluationResult.forViolation(violationMessage, result1.getEvaluatedVariable());
         } else {
             return EvaluationResult.forSuccess(result1.getEvaluatedVariable());
         }

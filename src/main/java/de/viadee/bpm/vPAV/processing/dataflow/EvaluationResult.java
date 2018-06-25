@@ -43,6 +43,10 @@ public class EvaluationResult<T> {
         return new EvaluationResult<>(false, violationMessage, evaluatedVariable);
     }
 
+    static <T> EvaluationResult<T> forViolation(T evaluatedVariable) {
+        return new EvaluationResult<>(false, null, evaluatedVariable);
+    }
+
     static <T> EvaluationResult<T> forSuccess(T evaluatedVariable) {
         return new EvaluationResult<>(true, null, evaluatedVariable);
     }
