@@ -39,20 +39,29 @@ public class EvaluationResult<T> {
 
     private T evaluatedVariable;
 
-    static <T> EvaluationResult<T> forViolation(String violationMessage, T evaluatedVariable) {
-        return new EvaluationResult<>(false, violationMessage, evaluatedVariable);
+    static <T> EvaluationResult<T> forViolation(String message, T evaluatedVariable) {
+        return new EvaluationResult<>(false, evaluatedVariable, message);
     }
 
     static <T> EvaluationResult<T> forViolation(T evaluatedVariable) {
-        return new EvaluationResult<>(false, null, evaluatedVariable);
+        return new EvaluationResult<>(false, evaluatedVariable, null);
     }
 
     static <T> EvaluationResult<T> forSuccess(T evaluatedVariable) {
-        return new EvaluationResult<>(true, null, evaluatedVariable);
+        return new EvaluationResult<>(true, evaluatedVariable);
     }
 
-    private EvaluationResult(boolean result, String message, T evaluatedVariable) {
+    static <T> EvaluationResult<T> forSuccess(String message, T evaluatedVariable) {
+        return new EvaluationResult<>(true, evaluatedVariable, message);
+    }
+
+    public EvaluationResult(boolean result, T evaluatedVariable, String message) {
         this.message = message;
+        this.result = result;
+        this.evaluatedVariable = evaluatedVariable;
+    }
+
+    public EvaluationResult(boolean result, T evaluatedVariable) {
         this.result = result;
         this.evaluatedVariable = evaluatedVariable;
     }
@@ -65,7 +74,11 @@ public class EvaluationResult<T> {
         return evaluatedVariable;
     }
 
-    public Optional<String> getViolationMessage() {
+    public Optional<String> getMessage() {
         return Optional.ofNullable(message);
+    }
+
+    public EvaluationResult<T> inverse() {
+        return new EvaluationResult<>(!result, evaluatedVariable, message);
     }
 }

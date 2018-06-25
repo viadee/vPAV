@@ -78,12 +78,16 @@ public class DescribedPredicateEvaluator<T> {
         return new DescribedPredicateEvaluator<>(andPredicateEvaluator, description + " and " + other.description);
     }
 
+    public DescribedPredicateEvaluator<T> inverse() {
+        return new DescribedPredicateEvaluator<>(T -> predicateEvaluator.apply(T).inverse(), "not " + description);
+    }
+
     private EvaluationResult<T> createEvaluationResult(EvaluationResult<T> result1, EvaluationResult<T> result2, boolean isCombinedViolation) {
         if (isCombinedViolation) {
             String violationMessage = Stream.of(result1, result2)
                     .filter(r -> !r.isFulfilled())
-                    .filter(r -> r.getViolationMessage().isPresent())
-                    .map(r -> r.getViolationMessage().get())
+                    .filter(r -> r.getMessage().isPresent())
+                    .map(r -> r.getMessage().get())
                     .collect(Collectors.joining(" and "));
             return violationMessage.isEmpty() ?
                     EvaluationResult.forViolation(result1.getEvaluatedVariable()) :
@@ -92,4 +96,5 @@ public class DescribedPredicateEvaluator<T> {
             return EvaluationResult.forSuccess(result1.getEvaluatedVariable());
         }
     }
+
 }

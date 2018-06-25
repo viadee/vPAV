@@ -93,8 +93,8 @@ class SimpleDataFlowRule implements DataFlowRule {
     }
 
     private String createViolationMessage(EvaluationResult<ProcessVariable> result) {
-        String violationMessage = result.getViolationMessage().isPresent() ?
-                " but was " + result.getViolationMessage().get() :
+        String violationMessage = result.getMessage().isPresent() ?
+                " but was " + result.getMessage().get() :
                 "";
         return String.format(VIOLATION_TEMPLATE,
                 result.getEvaluatedVariable().getName(), condition.getDescription(), violationMessage);

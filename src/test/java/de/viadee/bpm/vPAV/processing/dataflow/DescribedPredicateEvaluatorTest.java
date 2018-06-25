@@ -42,11 +42,26 @@ public class DescribedPredicateEvaluatorTest {
     public void testEvaluateAppliesPredicateCorrectly() {
         DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.isEmpty() ?
                 EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("error", s), "");
+        DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.isEmpty() ?
+                EvaluationResult.forSuccess("success", s) : EvaluationResult.forViolation(s), "");
 
         assertThat(constraint.evaluate("").isFulfilled(), is(true));
         assertThat(constraint.evaluate("notEmpty").isFulfilled(), is(false));
-        assertThat(constraint.evaluate("notEmpty").getViolationMessage().isPresent(), is(true));
-        assertThat(constraint.evaluate("notEmpty").getViolationMessage().get(), is("error"));
+    }
+
+    @Test
+    public void testEvaluateSetsMessagesCorrectly() {
+        DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.isEmpty() ?
+                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("error", s), "");
+        DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.isEmpty() ?
+                EvaluationResult.forSuccess("success", s) : EvaluationResult.forViolation(s), "");
+
+        assertThat(constraint.evaluate("").getMessage().isPresent(), is(false));
+        assertThat(constraint.evaluate("notEmpty").getMessage().isPresent(), is(true));
+        assertThat(constraint.evaluate("notEmpty").getMessage().get(), is("error"));
+        assertThat(constraint2.evaluate("").getMessage().isPresent(), is(true));
+        assertThat(constraint2.evaluate("").getMessage().get(), is("success"));
+        assertThat(constraint2.evaluate("notEmpty").getMessage().isPresent(), is(false));
     }
 
     @Test
@@ -65,16 +80,20 @@ public class DescribedPredicateEvaluatorTest {
     }
 
     @Test
-    public void testOrCombinesViolationMessagesCorrectly() {
+    public void testOrCombinesMessagesCorrectly() {
         DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.isEmpty() ?
-                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("violation1", s), "constraint1");
+                EvaluationResult.forSuccess("success1", s) : EvaluationResult.forViolation("violation1", s), "constraint1");
         DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.startsWith("ext_") ?
-                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("violation2", s), "constraint2");
+                EvaluationResult.forSuccess("success2", s) : EvaluationResult.forViolation("violation2", s), "constraint2");
 
         DescribedPredicateEvaluator<String> testConstraint = constraint.or(constraint2);
 
-        assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().isPresent(), is(true));
-        assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().get(), is("violation1 and violation2"));
+        assertThat(testConstraint.evaluate("five5").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("five5").getMessage().get(), is("success1"));
+        assertThat(testConstraint.evaluate("ext_").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("ext_").getMessage().get(), is("success2"));
+        assertThat(testConstraint.evaluate("notEmpty").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("notEmpty").getMessage().get(), is("violation1 and violation2"));
     }
 
     @Test
@@ -93,35 +112,48 @@ public class DescribedPredicateEvaluatorTest {
     }
 
     @Test
-    public void testAndCombinesViolationMessagesCorrectly() {
+    public void testAndCombinesMessagesCorrectly() {
         DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.length() == 5 ?
-                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("violation1", s), "constraint1");
+                EvaluationResult.forSuccess("success1", s) : EvaluationResult.forViolation("violation1", s), "constraint1");
         DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.startsWith("ext_") ?
-                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("violation2", s), "constraint2");
+                EvaluationResult.forSuccess("success2", s) : EvaluationResult.forViolation("violation2", s), "constraint2");
 
         DescribedPredicateEvaluator<String> testConstraint = constraint.and(constraint2);
 
-        assertThat(testConstraint.evaluate("five5").getViolationMessage().isPresent(), is(true));
-        assertThat(testConstraint.evaluate("five5").getViolationMessage().get(), is("violation2"));
-        assertThat(testConstraint.evaluate("ext_").getViolationMessage().isPresent(), is(true));
-        assertThat(testConstraint.evaluate("ext_").getViolationMessage().get(), is("violation1"));
-        assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().isPresent(), is(true));
-        assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().get(), is("violation1 and violation2"));
+        assertThat(testConstraint.evaluate("five5").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("five5").getMessage().get(), is("violation2"));
+        assertThat(testConstraint.evaluate("ext_").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("ext_").getMessage().get(), is("violation1"));
+        assertThat(testConstraint.evaluate("notEmpty").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("notEmpty").getMessage().get(), is("violation1 and violation2"));
     }
 
     @Test
-    public void testAndCombinesViolationMessagesInCaseOfAbsence() {
+    public void testAndCombinesMessagesInCaseOfAbsence() {
         DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.length() == 5 ?
                 EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("violation1", s), "constraint1");
         DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.startsWith("ext_") ?
-                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation(s), "constraint2");
+                EvaluationResult.forSuccess("success2", s) : EvaluationResult.forViolation(s), "constraint2");
 
         DescribedPredicateEvaluator<String> testConstraint = constraint.and(constraint2);
 
-        assertThat(testConstraint.evaluate("five5").getViolationMessage().isPresent(), is(false));
-        assertThat(testConstraint.evaluate("ext_").getViolationMessage().isPresent(), is(true));
-        assertThat(testConstraint.evaluate("ext_").getViolationMessage().get(), is("violation1"));
-        assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().isPresent(), is(true));
-        assertThat(testConstraint.evaluate("notEmpty").getViolationMessage().get(), is("violation1"));
+        assertThat(testConstraint.evaluate("five5").getMessage().isPresent(), is(false));
+        assertThat(testConstraint.evaluate("ext_").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("ext_").getMessage().get(), is("violation1"));
+        assertThat(testConstraint.evaluate("notEmpty").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("notEmpty").getMessage().get(), is("violation1"));
+    }
+
+    @Test
+    public void testInverseInversesTheConstraintCorrectly() {
+        DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.startsWith("ext_") ?
+                EvaluationResult.forSuccess(s) : EvaluationResult.forViolation(s), "constraint");
+
+        DescribedPredicateEvaluator<String> testConstraint = constraint.inverse();
+
+        assertThat(testConstraint.getDescription(), is("not constraint"));
+        assertThat(testConstraint.evaluate("").isFulfilled(), is(true));
+        assertThat(testConstraint.evaluate("ext_").isFulfilled(), is(false));
+        assertThat(testConstraint.evaluate("notEmpty").isFulfilled(), is(true));
     }
 }

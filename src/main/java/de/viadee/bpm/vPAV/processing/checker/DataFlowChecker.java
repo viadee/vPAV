@@ -34,7 +34,6 @@ package de.viadee.bpm.vPAV.processing.checker;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import de.viadee.bpm.vPAV.processing.dataflow.EvaluationResult;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -66,7 +65,7 @@ public class DataFlowChecker implements ModelChecker {
                     .map(r -> IssueWriter.createIssue(rule, CriticalityEnum.ERROR,
                             r.getEvaluatedVariable().getOperations().get(0).getElement(),
                             String.format("Rule '%s' violated:\n%s %s", dataFlowRule.getRuleDescription(),
-                                    r.getEvaluatedVariable().getName(), r.getViolationMessage().get())))
+                                    r.getEvaluatedVariable().getName(), r.getMessage().get())))
                     .forEach(issues::addAll);
         }
         return issues;
