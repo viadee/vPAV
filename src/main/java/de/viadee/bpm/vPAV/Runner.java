@@ -623,26 +623,21 @@ public class Runner {
 	 * @param variableScanner
 	 *            variableScanner
 	 * @return modelIssues
-	 * @throws ConfigItemNotFoundException
 	 */
 	private static Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processdef,
 			final FileScanner fileScanner, final OuterProcessVariablesScanner variableScanner,
-			Collection<DataFlowRule> dataFlowRules) throws RuntimeException {
+			Collection<DataFlowRule> dataFlowRules) {
 		ModelDispatchResult dispatchResult;
-		try {
-			if (variableScanner != null) {
-				dispatchResult = BpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
-						fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
-						variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
-						dataFlowRules, fileScanner.getResourcesNewestVersions(), rules);
-			} else {
-				dispatchResult = BpmnModelDispatcher.dispatchWithoutVariables(
-						new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
-						fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
-			}
-		} catch (final ConfigItemNotFoundException e) {
-			throw new RuntimeException("Config item couldn't be read");
-		}
+        if (variableScanner != null) {
+            dispatchResult = BpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
+                    fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
+                    variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
+                    dataFlowRules, fileScanner.getResourcesNewestVersions(), rules);
+        } else {
+            dispatchResult = BpmnModelDispatcher.dispatchWithoutVariables(
+                    new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
+                    fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
+        }
 		elements.addAll(dispatchResult.getBpmnElements());
 		processVariables.addAll(dispatchResult.getProcessVariables());
 

@@ -60,12 +60,12 @@ public class DataFlowChecker implements ModelChecker {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (DataFlowRule dataFlowRule : dataFlowRules) {
             dataFlowRule.evaluate(processVariables).stream()
-                    .filter(EvaluationResult::isFulfilled)
+                    .filter(r-> !r.isFulfilled())
                     // TODO: think about correct BPMN element
                     // TODO: Message template in resource bundle
                     .map(r -> IssueWriter.createIssue(rule, CriticalityEnum.ERROR,
                             r.getEvaluatedVariable().getOperations().get(0).getElement(),
-                            String.format("Rule '%s' violated: %s %s", dataFlowRule.getRuleDescription(),
+                            String.format("Rule '%s' violated:\n%s %s", dataFlowRule.getRuleDescription(),
                                     r.getEvaluatedVariable().getName(), r.getViolationMessage().get())))
                     .forEach(issues::addAll);
         }

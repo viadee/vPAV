@@ -77,16 +77,13 @@ public class BpmnModelDispatcher {
      * @param conf
      *            ruleSet
      * @return issues
-     * @throws ConfigItemNotFoundException
-     *             ruleSet couldn't be read
      */
     public static ModelDispatchResult dispatchWithVariables(final File processdefinition,
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,
             final Map<String, Collection<String>> processIdToVariables,
             final Collection<DataFlowRule> dataFlowRules,
-            final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf)
-            throws ConfigItemNotFoundException {
+            final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
 
         BpmnScanner bpmnScanner = createScanner(processdefinition);
         
@@ -103,7 +100,7 @@ public class BpmnModelDispatcher {
 
         // create data flow graphs for bpmn model
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
-                processdefinition.getPath(), new ArrayList<String>());
+                processdefinition.getPath(), new ArrayList<>());
 
         // add data flow information to graph and calculate invalid paths
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
@@ -113,26 +110,20 @@ public class BpmnModelDispatcher {
                 getBpmnElements(processdefinition, baseElements, graphBuilder);
         final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
         // call model checkers
         // TODO: move it to a factory class later
         final Rule processVariablesModelRule = conf
                 .get(getClassName(ProcessVariablesModelChecker.class));
-        if (processVariablesModelRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(ProcessVariablesModelChecker.class) + " not found");
-        if (processVariablesModelRule.isActive()) {
+        if (processVariablesModelRule != null && processVariablesModelRule.isActive()) {
             final ModelChecker processVarChecker = new ProcessVariablesModelChecker(
                     processVariablesModelRule, invalidPathMap);
             issues.addAll(processVarChecker.check(modelInstance));
         }
         final Rule dataFlowRule = conf
-                .get(getClassName(DataFlowRule.class));
-        if (dataFlowRule == null)
-            throw new ConfigItemNotFoundException(
-                    getClassName(DataFlowRule.class) + " not found");
-        if (dataFlowRule.isActive() && !dataFlowRules.isEmpty()) {
+                .get(getClassName(DataFlowChecker.class));
+        if (dataFlowRule != null && dataFlowRule.isActive() && !dataFlowRules.isEmpty()) {
             final DataFlowChecker dataFlowChecker = new DataFlowChecker(
                     dataFlowRule, dataFlowRules, processVariables
             );
@@ -164,15 +155,12 @@ public class BpmnModelDispatcher {
      * @param conf
      *            ruleSet
      * @return issues
-     * @throws ConfigItemNotFoundException
-     *             ruleSet couldn't be read
      */
     public static ModelDispatchResult dispatchWithoutVariables(final File processdefinition,
            final Map<String, String> decisionRefToPathMap,
            final Map<String, String> processIdToPathMap,
            final Collection<String> resourcesNewestVersions,
-           final Map<String, Rule> conf)
-           throws ConfigItemNotFoundException {
+           final Map<String, Rule> conf) {
 
         BpmnScanner bpmnScanner = createScanner(processdefinition);
 
@@ -186,7 +174,7 @@ public class BpmnModelDispatcher {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap,
                 processIdToPathMap, bpmnScanner);
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
         // create checkerInstances as singletons
         Collection<ElementChecker> checkerInstances = createCheckerSingletons(resourcesNewestVersions, conf,
@@ -308,11 +296,9 @@ public class BpmnModelDispatcher {
      * @param issues
      *            List of issues
      * @return CheckerCollection
-     * @throws ConfigItemNotFoundException
      */
     private static Collection<ElementChecker> createCheckerSingletons(final Collection<String> resourcesNewestVersions,
-            final Map<String, Rule> conf, BpmnScanner bpmnScanner, final Collection<CheckerIssue> issues)
-            throws ConfigItemNotFoundException {
+            final Map<String, Rule> conf, BpmnScanner bpmnScanner, final Collection<CheckerIssue> issues) {
 
         final Collection<ElementChecker> checkerCollection = CheckerFactory
                 .createCheckerInstances(conf, resourcesNewestVersions, bpmnScanner);

@@ -87,10 +87,6 @@ public class RuleBuilder implements DataFlowRule {
         return new ProcessVariablePredicateBuilderImpl<>(this::thatAre);
     }
 
-    public DataFlowRule build() {
-        return new SimpleDataFlowRule(constraint, condition);
-    }
-
     @Override
     public void check(Collection<ProcessVariable> variables) {
         new SimpleDataFlowRule(constraint, condition).check(variables);

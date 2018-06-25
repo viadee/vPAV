@@ -78,7 +78,10 @@ class SimpleDataFlowRule implements DataFlowRule {
     }
 
     public String getRuleDescription() {
-        return String.format(RULE_DESCRIPTION_TEMPLATE, constraint, condition);
+        String constraintDescription = constraint != null ?
+                " that are " + constraint.getDescription() :
+                "";
+        return String.format(RULE_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription());
     }
 
     private String createRuleDescription(int violationCount) {
