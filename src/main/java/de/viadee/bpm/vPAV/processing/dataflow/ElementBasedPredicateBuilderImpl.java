@@ -38,6 +38,7 @@ import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicateBuilder<T> {
@@ -77,12 +78,22 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
 
     @Override
     public T withPostfix(String postfix) {
-        return null;
+        final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
+            String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
+            return new EvaluationResult<>(elementName.endsWith(postfix), element, elementName);
+        };
+        final String description = String.format("with postfix %s", postfix);
+        return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
     @Override
     public T withNameMatching(String regex) {
-        return null;
+        final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
+            String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
+            return new EvaluationResult<>(Pattern.matches(regex, elementName), element, elementName);
+        };
+        final String description = String.format("with name matching %s", regex);
+        return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
     @Override
