@@ -80,25 +80,17 @@
 			<button type="button" class="btn btn-viadee mt-2 collapse" id="reset">Show all issues</button>
 		</div>
 	</div>
+	<div class="row">
+		<div class="col">
+			<ul id="viewModeNavBar" class="nav nav-pills">
+			</ul>
+		</div>
+	</div>
 
 	<!-- Issue table -->
 	<div class="row">
 		<div class="col">
-			<button type="button" class="btn btn-viadee mt-2" id="success">Show checkers without issues</button>
-			<!-- <a class="pt-1 mt-0 mb-0 pl-0" id="success">Checker found no issues</a> -->
-			<h2 class="border border-light pt-2 mt-4 mb-0 pl-1" id="tableHeader" data-content="Errors found:"></h2>
-			<table id="table_issues" class="table table-row table-bordered .table-responsive">
-				<thead>
-					<tr id="tr_ueberschriften" class="table-primary">
-						<th id="th_ruleName">Rule-Name</th>
-						<th id="th_elementId">Element-Id</th>
-						<th id="th_elementName">Element-Name</th>
-						<th id="th_classification">Class</th>
-						<th id="th_message">Message</th>
-						<th id="th_paths">Invalid Sequenceflow</th>
-					</tr>
-				</thead>
-			</table>
+			<table id="table_issues" class="table table-row table-bordered .table-responsive"></table>
 		</div>
 	</div>
 
@@ -106,7 +98,7 @@
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header viadee-lightblue-bg viadee-head">
-					<h4 class="modal-title">Issues</h4>
+					<h4 class="modal-title"></h4>
 					<button type="button" class="close btn-viadee-close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
@@ -132,6 +124,7 @@
 	<script src="js/issue_severity.js"></script>
 	<script src="js/ignoredIssues.js"></script>
 	<script src='js/download.js'></script>
+	<script src='js/processVariables.js'></script>
 	<!-- bootstrap with dependencies-->
 	<script src="js/jquery-3.2.1.min.js"></script>
 	<script src="js/popper.min.js"></script>
