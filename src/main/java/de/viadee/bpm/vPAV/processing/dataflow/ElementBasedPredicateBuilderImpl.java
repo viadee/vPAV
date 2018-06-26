@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 
 import java.util.List;
@@ -57,9 +58,8 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
     @Override
     public T ofType(Class clazz) {
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
-            return element.getBaseElement() instanceof ServiceTask ?
-                    EvaluationResult.forSuccess(element) :
-                    EvaluationResult.forViolation(element.getBaseElement().getClass().toString(), element);
+            return new EvaluationResult<>(clazz.isInstance(element.getBaseElement()), element,
+                    element.getBaseElement().getClass().getName());
         };
         final String description = String.format("of type %s", clazz);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -68,9 +68,8 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
     @Override
     public T withPrefix(String prefix) {
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
-            return element.getBaseElement().getId().startsWith(prefix) ?
-                    EvaluationResult.forSuccess(element) :
-                    EvaluationResult.forViolation(element.getBaseElement().getId(), element);
+            String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
+            return new EvaluationResult<>(elementName.startsWith(prefix), element, elementName);
         };
         final String description = String.format("with prefix %s", prefix);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -89,11 +88,18 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
     @Override
     public T thatFulfill(DescribedPredicateEvaluator<BpmnElement> predicate) {
         final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
-            List<BpmnElement> elements = elementProvider.apply(p);
-            return elements.stream().anyMatch(e -> predicate.evaluate(e).isFulfilled()) ?
-                    EvaluationResult.forSuccess(p) :
-                    EvaluationResult.forViolation(elements.stream()
-                                    .map(e -> e.getBaseElement().getClass().toString())
+            List<EvaluationResult<BpmnElement>> results = elementProvider.apply(p).stream()
+                    .map(predicate::evaluate).collect(Collectors.toList());
+            return results.stream().filter(EvaluationResult::isFulfilled).collect(Collectors.toList()).size() > 0 ?
+                    EvaluationResult.forSuccess(results.stream()
+                                    .filter(EvaluationResult::isFulfilled)
+                                    .filter(r -> r.getMessage().isPresent())
+                                    .map(r -> r.getMessage().get())
+                                    .collect(Collectors.joining(", ")), p) :
+                    EvaluationResult.forViolation(results.stream()
+                                    .filter(r -> !r.isFulfilled())
+                                    .filter(r -> r.getMessage().isPresent())
+                                    .map(r -> r.getMessage().get())
                                     .collect(Collectors.joining(", ")), p);
         };
         final String description = String.format("%s %s", elementDescription, predicate.getDescription());

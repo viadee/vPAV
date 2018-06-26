@@ -89,11 +89,14 @@ public class DescribedPredicateEvaluator<T> {
                     .filter(r -> r.getMessage().isPresent())
                     .map(r -> r.getMessage().get())
                     .collect(Collectors.joining(" and "));
-            return violationMessage.isEmpty() ?
-                    EvaluationResult.forViolation(result1.getEvaluatedVariable()) :
-                    EvaluationResult.forViolation(violationMessage, result1.getEvaluatedVariable());
+            return EvaluationResult.forViolation(violationMessage, result1.getEvaluatedVariable());
         } else {
-            return EvaluationResult.forSuccess(result1.getEvaluatedVariable());
+            String successMessage = Stream.of(result1, result2)
+                    .filter(EvaluationResult::isFulfilled)
+                    .filter(r -> r.getMessage().isPresent())
+                    .map(r -> r.getMessage().get())
+                    .collect(Collectors.joining(" and "));
+            return EvaluationResult.forSuccess(successMessage, result1.getEvaluatedVariable());
         }
     }
 

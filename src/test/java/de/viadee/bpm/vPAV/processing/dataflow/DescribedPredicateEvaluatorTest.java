@@ -81,19 +81,21 @@ public class DescribedPredicateEvaluatorTest {
 
     @Test
     public void testOrCombinesMessagesCorrectly() {
-        DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.isEmpty() ?
+        DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.length() == 5 ?
                 EvaluationResult.forSuccess("success1", s) : EvaluationResult.forViolation("violation1", s), "constraint1");
         DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.startsWith("ext_") ?
                 EvaluationResult.forSuccess("success2", s) : EvaluationResult.forViolation("violation2", s), "constraint2");
 
         DescribedPredicateEvaluator<String> testConstraint = constraint.or(constraint2);
 
-        assertThat(testConstraint.evaluate("five5").getMessage().isPresent(), is(true));
-        assertThat(testConstraint.evaluate("five5").getMessage().get(), is("success1"));
+        assertThat(testConstraint.evaluate("wrongg").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("wrongg").getMessage().get(), is("violation1 and violation2"));
         assertThat(testConstraint.evaluate("ext_").getMessage().isPresent(), is(true));
         assertThat(testConstraint.evaluate("ext_").getMessage().get(), is("success2"));
-        assertThat(testConstraint.evaluate("notEmpty").getMessage().isPresent(), is(true));
-        assertThat(testConstraint.evaluate("notEmpty").getMessage().get(), is("violation1 and violation2"));
+        assertThat(testConstraint.evaluate("ext_5").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("ext_5").getMessage().get(), is("success1 and success2"));
+        assertThat(testConstraint.evaluate("five5").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("five5").getMessage().get(), is("success1"));
     }
 
     @Test
@@ -120,6 +122,8 @@ public class DescribedPredicateEvaluatorTest {
 
         DescribedPredicateEvaluator<String> testConstraint = constraint.and(constraint2);
 
+        assertThat(testConstraint.evaluate("ext_5").getMessage().isPresent(), is(true));
+        assertThat(testConstraint.evaluate("ext_5").getMessage().get(), is("success1 and success2"));
         assertThat(testConstraint.evaluate("five5").getMessage().isPresent(), is(true));
         assertThat(testConstraint.evaluate("five5").getMessage().get(), is("violation2"));
         assertThat(testConstraint.evaluate("ext_").getMessage().isPresent(), is(true));

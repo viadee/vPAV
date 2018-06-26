@@ -46,6 +46,11 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
     }
 
     @Override
+    public ProcessVariablePredicateBuilder<T> not() {
+        return new ProcessVariablePredicateBuilderImpl<>(predicate -> constraintSetter.apply(predicate.inverse()));
+    }
+
+    @Override
     public OperationBasedPredicateBuilder<T> defined() {
         return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getDefinitions, "defined");
     }

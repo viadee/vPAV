@@ -217,6 +217,23 @@ public class RuleBuilderTest {
     }
 
     @Test(expected = AssertionError.class)
+    public void testNotConditionAreAppliedCorrectly() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("ext_variable1");
+        variables.add(processVariable);
+
+        DataFlowRule rule = processVariables()
+                .shouldBe().not().written().exactly(1);
+
+        rule.check(variables);
+
+        rule = processVariables()
+                .shouldBe().not().not().written().exactly(1);
+
+        rule.check(variables);
+    }
+
+    @Test(expected = AssertionError.class)
     public void testModelBasedConditionIsAppliedCorrectly() {
         List<ProcessVariable> variables = new ArrayList<>();
         ProcessVariable processVariable = new ProcessVariable("variable2");
@@ -250,17 +267,17 @@ public class RuleBuilderTest {
         private VariableOperation operation = VariableOperation.WRITE;
 
 
-        public ProcessVariableBuilder withElement(Class<? extends BaseElement> clazz) {
+        ProcessVariableBuilder withElement(Class<? extends BaseElement> clazz) {
             element = new BpmnElement("process1", mock(clazz));
             return this;
         }
 
-        public ProcessVariableBuilder withOperation(VariableOperation operation) {
+        ProcessVariableBuilder withOperation(VariableOperation operation) {
             this.operation = operation;
             return this;
         }
 
-        public ProcessVariableOperation build() {
+        ProcessVariableOperation build() {
             return new ProcessVariableOperation(name, element, ElementChapter.Details,
                     KnownElementFieldType.Class, "", operation, "");
         }

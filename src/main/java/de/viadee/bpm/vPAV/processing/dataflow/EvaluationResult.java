@@ -40,7 +40,7 @@ public class EvaluationResult<T> {
     private T evaluatedVariable;
 
     static <T> EvaluationResult<T> forViolation(String message, T evaluatedVariable) {
-        return new EvaluationResult<>(false, evaluatedVariable, message);
+        return new EvaluationResult<>(false, evaluatedVariable, message.isEmpty() ? null : message);
     }
 
     static <T> EvaluationResult<T> forViolation(T evaluatedVariable) {
@@ -52,7 +52,7 @@ public class EvaluationResult<T> {
     }
 
     static <T> EvaluationResult<T> forSuccess(String message, T evaluatedVariable) {
-        return new EvaluationResult<>(true, evaluatedVariable, message);
+        return new EvaluationResult<>(true, evaluatedVariable, message.isEmpty() ? null : message);
     }
 
     public EvaluationResult(boolean result, T evaluatedVariable, String message) {
