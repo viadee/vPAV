@@ -75,6 +75,8 @@ public class TimerExpressionChecker extends AbstractElementChecker {
     public static TimerExpressionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (TimerExpressionChecker.instance == null) {
             TimerExpressionChecker.instance = new TimerExpressionChecker(rule, bpmnScanner);
+        } else {
+        	TimerExpressionChecker.instance.bpmnScanner = bpmnScanner;
         }
         return TimerExpressionChecker.instance;
     }

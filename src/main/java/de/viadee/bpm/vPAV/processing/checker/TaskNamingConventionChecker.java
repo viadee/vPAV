@@ -61,6 +61,8 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
     public static TaskNamingConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (TaskNamingConventionChecker.instance == null) {
             TaskNamingConventionChecker.instance = new TaskNamingConventionChecker(rule, bpmnScanner);
+        } else {
+        	TaskNamingConventionChecker.instance.bpmnScanner = bpmnScanner;
         }
         return TaskNamingConventionChecker.instance;
     }

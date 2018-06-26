@@ -88,6 +88,8 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<String> resourcesNewestVersions) {
         if (VersioningChecker.instance == null) {
             VersioningChecker.instance = new VersioningChecker(rule, bpmnScanner, resourcesNewestVersions);
+        } else {
+        	VersioningChecker.instance.bpmnScanner = bpmnScanner;
         }
         return VersioningChecker.instance;
     }

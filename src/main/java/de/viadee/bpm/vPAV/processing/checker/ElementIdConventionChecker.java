@@ -59,6 +59,8 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
     public static ElementIdConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (ElementIdConventionChecker.instance == null) {
             ElementIdConventionChecker.instance = new ElementIdConventionChecker(rule, bpmnScanner);
+        } else {
+        	ElementIdConventionChecker.instance.bpmnScanner = bpmnScanner;
         }
         return ElementIdConventionChecker.instance;
     }

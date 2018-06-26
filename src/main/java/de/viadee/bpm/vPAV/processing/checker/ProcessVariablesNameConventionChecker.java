@@ -60,6 +60,8 @@ public class ProcessVariablesNameConventionChecker extends AbstractElementChecke
         if (ProcessVariablesNameConventionChecker.instance == null) {
             ProcessVariablesNameConventionChecker.instance = new ProcessVariablesNameConventionChecker(rule,
                     bpmnScanner);
+        } else {
+        	ProcessVariablesNameConventionChecker.instance.bpmnScanner = bpmnScanner;
         }
         return ProcessVariablesNameConventionChecker.instance;
     }

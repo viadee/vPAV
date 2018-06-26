@@ -65,6 +65,8 @@ public class DmnTaskChecker extends AbstractElementChecker {
     public static DmnTaskChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (DmnTaskChecker.instance == null) {
             DmnTaskChecker.instance = new DmnTaskChecker(rule, bpmnScanner);
+        } else {
+        	DmnTaskChecker.instance.bpmnScanner = bpmnScanner;
         }
         return DmnTaskChecker.instance;
     }

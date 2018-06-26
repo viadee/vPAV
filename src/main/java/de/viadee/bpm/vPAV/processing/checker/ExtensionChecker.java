@@ -63,6 +63,8 @@ public class ExtensionChecker extends AbstractElementChecker {
     public static ExtensionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (ExtensionChecker.instance == null) {
             ExtensionChecker.instance = new ExtensionChecker(rule, bpmnScanner);
+        } else {
+        	ExtensionChecker.instance.bpmnScanner = bpmnScanner;
         }
         return ExtensionChecker.instance;
     }

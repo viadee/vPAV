@@ -72,6 +72,8 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
     public static EmbeddedGroovyScriptChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (EmbeddedGroovyScriptChecker.instance == null) {
             EmbeddedGroovyScriptChecker.instance = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
+        } else {
+        	EmbeddedGroovyScriptChecker.instance.bpmnScanner = bpmnScanner;
         }
         return EmbeddedGroovyScriptChecker.instance;
     }

@@ -61,6 +61,8 @@ public class SignalEventChecker extends AbstractElementChecker {
     public static SignalEventChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (SignalEventChecker.instance == null) {
             SignalEventChecker.instance = new SignalEventChecker(rule, bpmnScanner);
+        } else {
+        	SignalEventChecker.instance.bpmnScanner = bpmnScanner;
         }
         return SignalEventChecker.instance;
     }

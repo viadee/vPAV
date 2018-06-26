@@ -59,6 +59,8 @@ public class OverlapChecker extends AbstractElementChecker {
     public static OverlapChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (OverlapChecker.instance == null) {
             OverlapChecker.instance = new OverlapChecker(rule, bpmnScanner);
+        } else {
+        	OverlapChecker.instance.bpmnScanner = bpmnScanner;
         }
         return OverlapChecker.instance;
     }

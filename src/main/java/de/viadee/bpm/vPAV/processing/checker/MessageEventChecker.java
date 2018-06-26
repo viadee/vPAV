@@ -60,6 +60,8 @@ public class MessageEventChecker extends AbstractElementChecker {
     public static MessageEventChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (MessageEventChecker.instance == null) {
             MessageEventChecker.instance = new MessageEventChecker(rule, bpmnScanner);
+        } else {
+        	MessageEventChecker.instance.bpmnScanner = bpmnScanner;
         }
         return MessageEventChecker.instance;
     }

@@ -67,6 +67,8 @@ public class XorConventionChecker extends AbstractElementChecker {
     public static XorConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (XorConventionChecker.instance == null) {
             XorConventionChecker.instance = new XorConventionChecker(rule, bpmnScanner);
+        } else {
+        	XorConventionChecker.instance.bpmnScanner = bpmnScanner;
         }
         return XorConventionChecker.instance;
     }

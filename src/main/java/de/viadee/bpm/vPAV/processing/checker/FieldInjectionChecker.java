@@ -77,6 +77,8 @@ public class FieldInjectionChecker extends AbstractElementChecker {
     public static FieldInjectionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (FieldInjectionChecker.instance == null) {
             FieldInjectionChecker.instance = new FieldInjectionChecker(rule, bpmnScanner);
+        } else {
+        	FieldInjectionChecker.instance.bpmnScanner = bpmnScanner;
         }
         return FieldInjectionChecker.instance;
     }

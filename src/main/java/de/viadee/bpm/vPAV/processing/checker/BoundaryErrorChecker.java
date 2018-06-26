@@ -74,7 +74,9 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     public static BoundaryErrorChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (BoundaryErrorChecker.instance == null) {
             BoundaryErrorChecker.instance = new BoundaryErrorChecker(rule, bpmnScanner);
-        }
+        } else {
+        	BoundaryErrorChecker.instance.bpmnScanner = bpmnScanner;
+        }	
         return BoundaryErrorChecker.instance;
     }
 

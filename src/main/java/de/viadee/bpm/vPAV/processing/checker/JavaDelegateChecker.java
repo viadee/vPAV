@@ -73,7 +73,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
     public static JavaDelegateChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (JavaDelegateChecker.instance == null) {
             JavaDelegateChecker.instance = new JavaDelegateChecker(rule, bpmnScanner);
-        }
+        } else {
+        	JavaDelegateChecker.instance.bpmnScanner = bpmnScanner;
+        }	
         return JavaDelegateChecker.instance;
     }
 

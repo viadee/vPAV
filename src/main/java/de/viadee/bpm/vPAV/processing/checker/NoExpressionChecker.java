@@ -69,6 +69,8 @@ public class NoExpressionChecker extends AbstractElementChecker {
     public static NoExpressionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (NoExpressionChecker.instance == null) {
             NoExpressionChecker.instance = new NoExpressionChecker(rule, bpmnScanner);
+        } else {
+        	NoExpressionChecker.instance.bpmnScanner = bpmnScanner;
         }
         return NoExpressionChecker.instance;
     }

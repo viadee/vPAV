@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -49,8 +48,6 @@ import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.output.JsOutputWriter;
-import de.viadee.bpm.vPAV.output.OutputWriterException;
 import de.viadee.bpm.vPAV.processing.checker.CheckerFactory;
 import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
 import de.viadee.bpm.vPAV.processing.checker.ModelChecker;
@@ -66,8 +63,6 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  *
  */
 public class BpmnModelDispatcher {
-
-    private static Logger logger = Logger.getLogger(BpmnModelDispatcher.class.getName());
 
     private BpmnModelDispatcher() {
     }
@@ -102,7 +97,7 @@ public class BpmnModelDispatcher {
             throws ConfigItemNotFoundException {
 
         BpmnScanner bpmnScanner = createScanner(processdefinition);
-
+        
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
 

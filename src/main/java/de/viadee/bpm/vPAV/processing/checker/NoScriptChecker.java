@@ -63,6 +63,8 @@ public class NoScriptChecker extends AbstractElementChecker {
     public static NoScriptChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
         if (NoScriptChecker.instance == null) {
             NoScriptChecker.instance = new NoScriptChecker(rule, bpmnScanner);
+        } else {
+        	NoScriptChecker.instance.bpmnScanner = bpmnScanner;
         }
         return NoScriptChecker.instance;
     }
