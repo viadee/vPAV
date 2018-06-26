@@ -99,9 +99,11 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         // read attributes from task
         if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
-                || bpmnElement instanceof SendTask))
-            implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
-
+                || bpmnElement instanceof SendTask)) {
+        	implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());  
+        }
+            
+        
         if (bpmnElement instanceof UserTask) {
             taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_DEL,
                     BpmnConstants.CAMUNDA_TASKLISTENER);
