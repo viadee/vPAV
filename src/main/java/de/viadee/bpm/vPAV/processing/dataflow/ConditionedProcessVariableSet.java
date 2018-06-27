@@ -33,43 +33,9 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
-class ConstrainedProcessVariableSetImpl implements ConstrainedProcessVariableSet {
-
-    private final RuleBuilder builder;
-
-    ConstrainedProcessVariableSetImpl(RuleBuilder builder) {
-        this.builder = builder;
-    }
-
-    @Override
-    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> orThatAre() {
-        return new ProcessVariablePredicateBuilderImpl<>(builder::orThatAre);
-    }
-
-    @Override
-    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> andThatAre() {
-        return new ProcessVariablePredicateBuilderImpl<>(builder::andThatAre);
-    }
-
-    @Override
-    public ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
-        builder.orThatAre(constraint);
-        return this;
-    }
-
-    @Override
-    public ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
-        builder.orThatAre(constraint);
-        return this;
-    }
-
-    @Override
-    public ProcessVariablePredicateBuilder<ConditionedSet> shouldBe() {
-        return builder.shouldBe();
-    }
-
-    @Override
-    public ConditionedSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
-        return builder.shouldBe(condition);
-    }
+public interface ConditionedProcessVariableSet extends DataFlowRule {
+    ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> andShouldBe();
+    ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> orShouldBe();
+    ConditionedProcessVariableSet andShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
+    ConditionedProcessVariableSet orShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
 }

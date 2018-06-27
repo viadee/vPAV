@@ -34,7 +34,6 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 
 import java.util.List;
 import java.util.function.Function;

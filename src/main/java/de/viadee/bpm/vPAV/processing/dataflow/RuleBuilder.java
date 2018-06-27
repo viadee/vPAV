@@ -36,51 +36,71 @@ import org.springframework.util.Assert;
 
 import java.util.Collection;
 
-public class RuleBuilder implements DataFlowRule {
+public class RuleBuilder implements ProcessVariableSet, ConditionedProcessVariableSet, ConstrainedProcessVariableSet, DataFlowRule {
 
     private DescribedPredicateEvaluator<ProcessVariable> condition;
     private DescribedPredicateEvaluator<ProcessVariable> constraint;
 
-    public static RuleBuilder processVariables() {
+    public static ProcessVariableSet processVariables() {
         return new RuleBuilder();
     }
 
-    public ConditionedSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
+    public ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         this.condition = condition;
-        return new ConditionedSetImpl(this);
+        return this;
     }
 
-    public ProcessVariablePredicateBuilder<ConditionedSet> shouldBe() {
+    public ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe() {
         return new ProcessVariablePredicateBuilderImpl<>(this::shouldBe);
     }
 
-    ConditionedSet orShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
+    public ConditionedProcessVariableSet orShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         Assert.notNull(this.condition, "Condition conjunction is not allowed without defining initial condition");
         this.condition = this.condition.or(condition);
-        return new ConditionedSetImpl(this);
+        return this;
     }
 
-    ConditionedSet andShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
+    @Override
+    public ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> andShouldBe() {
+        return new ProcessVariablePredicateBuilderImpl<>(this::andShouldBe);
+    }
+
+    @Override
+    public ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> orShouldBe() {
+        return new ProcessVariablePredicateBuilderImpl<>(this::orShouldBe);
+    }
+
+    public ConditionedProcessVariableSet andShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         Assert.notNull(this.condition, "Condition conjunction is not allowed without defining initial condition");
         this.condition = this.condition.and(condition);
-        return new ConditionedSetImpl(this);
+        return this;
     }
 
     public ConstrainedProcessVariableSet thatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         this.constraint = constraint;
-        return new ConstrainedProcessVariableSetImpl(this);
+        return this;
     }
 
-    ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
+    @Override
+    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> orThatAre() {
+        return new ProcessVariablePredicateBuilderImpl<>(this::orThatAre);
+    }
+
+    @Override
+    public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> andThatAre() {
+        return new ProcessVariablePredicateBuilderImpl<>(this::andThatAre);
+    }
+
+    public ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
         this.constraint = this.constraint.or(constraint);
-        return new ConstrainedProcessVariableSetImpl(this);
+        return this;
     }
 
-    ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
+    public ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
         this.constraint = this.constraint.and(constraint);
-        return new ConstrainedProcessVariableSetImpl(this);
+        return this;
     }
 
     public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> thatAre() {

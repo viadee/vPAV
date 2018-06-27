@@ -38,6 +38,6 @@ public interface ConstrainedProcessVariableSet {
     ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> andThatAre();
     ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
     ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
-    ProcessVariablePredicateBuilder<ConditionedSet> shouldBe();
-    ConditionedSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
+    ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe();
+    ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
 }
