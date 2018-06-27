@@ -44,12 +44,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static de.viadee.bpm.vPAV.processing.dataflow.RuleBuilder.processVariables;
+import static de.viadee.bpm.vPAV.processing.dataflow.DataFlowRuleBuilder.processVariables;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-public class RuleBuilderTest {
+public class DataFlowRuleBuilderTest {
 
 
     @Test()

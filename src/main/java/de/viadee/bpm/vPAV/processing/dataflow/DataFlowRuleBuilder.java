@@ -36,24 +36,27 @@ import org.springframework.util.Assert;
 
 import java.util.Collection;
 
-public class RuleBuilder implements ProcessVariableSet, ConditionedProcessVariableSet, ConstrainedProcessVariableSet, DataFlowRule {
+public class DataFlowRuleBuilder implements ProcessVariableSet, ConditionedProcessVariableSet, ConstrainedProcessVariableSet, DataFlowRule {
 
     private DescribedPredicateEvaluator<ProcessVariable> condition;
     private DescribedPredicateEvaluator<ProcessVariable> constraint;
 
     public static ProcessVariableSet processVariables() {
-        return new RuleBuilder();
+        return new DataFlowRuleBuilder();
     }
 
+    @Override
     public ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         this.condition = condition;
         return this;
     }
 
+    @Override
     public ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe() {
         return new ProcessVariablePredicateBuilderImpl<>(this::shouldBe);
     }
 
+    @Override
     public ConditionedProcessVariableSet orShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         Assert.notNull(this.condition, "Condition conjunction is not allowed without defining initial condition");
         this.condition = this.condition.or(condition);
@@ -70,12 +73,14 @@ public class RuleBuilder implements ProcessVariableSet, ConditionedProcessVariab
         return new ProcessVariablePredicateBuilderImpl<>(this::orShouldBe);
     }
 
+    @Override
     public ConditionedProcessVariableSet andShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition) {
         Assert.notNull(this.condition, "Condition conjunction is not allowed without defining initial condition");
         this.condition = this.condition.and(condition);
         return this;
     }
 
+    @Override
     public ConstrainedProcessVariableSet thatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         this.constraint = constraint;
         return this;
@@ -91,18 +96,21 @@ public class RuleBuilder implements ProcessVariableSet, ConditionedProcessVariab
         return new ProcessVariablePredicateBuilderImpl<>(this::andThatAre);
     }
 
+    @Override
     public ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
         this.constraint = this.constraint.or(constraint);
         return this;
     }
 
+    @Override
     public ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint) {
         Assert.notNull(this.constraint, "Constraint conjunction is not allowed without defining initial constraint");
         this.constraint = this.constraint.and(constraint);
         return this;
     }
 
+    @Override
     public ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> thatAre() {
         return new ProcessVariablePredicateBuilderImpl<>(this::thatAre);
     }
@@ -122,6 +130,7 @@ public class RuleBuilder implements ProcessVariableSet, ConditionedProcessVariab
         return new SimpleDataFlowRule(constraint, condition).getRuleDescription();
     }
 
+    @Override
     public DataFlowRule because(String reason) {
         return new SimpleDataFlowRule(constraint, condition).because(reason);
     }

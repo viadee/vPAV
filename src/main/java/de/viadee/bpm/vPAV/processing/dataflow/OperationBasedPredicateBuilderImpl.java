@@ -103,7 +103,7 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
                     .map(ProcessVariableOperation::getElement)
                     .collect(Collectors.toList());
         };
-        return new ElementBasedPredicateBuilderImpl<T>(conditionSetter, elementProvider,
+        return new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider,
                 operationDescription + " by model elements");
     }
 }
