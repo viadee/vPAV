@@ -67,12 +67,25 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
 
     @Override
     public T prefixed(String prefix) {
-        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
-            return p.getName().startsWith(prefix) ?
-                    EvaluationResult.forSuccess(p) :
-                    EvaluationResult.forViolation(p);
-        };
+        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p ->
+                new EvaluationResult<>(p.getName().startsWith(prefix), p);
         final String description = String.format("prefixed with '%s'", prefix);
+        return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+    }
+
+    @Override
+    public T postfixed(String postfix) {
+        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p ->
+                new EvaluationResult<>(p.getName().endsWith(postfix), p);
+        final String description = String.format("postfixed with '%s'", postfix);
+        return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+    }
+
+    @Override
+    public T matching(String regex) {
+        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p ->
+                new EvaluationResult<>(p.getName().matches(regex), p);
+        final String description = String.format("matching with '%s'", regex);
         return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 }

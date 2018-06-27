@@ -37,4 +37,6 @@ public interface ProcessVariablePredicateBuilder<T> {
     OperationBasedPredicateBuilder<T> read();
     OperationBasedPredicateBuilder<T> written();
     T prefixed(String prefix);
+    T postfixed(String postfix);
+    T matching(String regex);
 }
