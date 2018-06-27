@@ -66,6 +66,11 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
     }
 
     @Override
+    public OperationBasedPredicateBuilder<T> accessed() {
+        return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getOperations, "accessed");
+    }
+
+    @Override
     public T prefixed(String prefix) {
         final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p ->
                 new EvaluationResult<>(p.getName().startsWith(prefix), p);
