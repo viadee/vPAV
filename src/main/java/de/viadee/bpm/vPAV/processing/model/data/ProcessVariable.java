@@ -43,7 +43,6 @@ public class ProcessVariable {
     private final List<ProcessVariableOperation> writes;
     private final List<ProcessVariableOperation> reads;
     private final List<ProcessVariableOperation> deletes;
-    private final List<ProcessVariableOperation> definitions;
 
     public ProcessVariable(String name) {
         this.name = name;
@@ -51,13 +50,6 @@ public class ProcessVariable {
         this.writes = new ArrayList<>();
         this.reads = new ArrayList<>();
         this.deletes = new ArrayList<>();
-        this.definitions = new ArrayList<>();
-    }
-
-    public void addDefinition(ProcessVariableOperation operation) {
-        operations.add(operation);
-        writes.add(operation);
-        definitions.add(operation);
     }
 
     public void addWrite(ProcessVariableOperation operation) {
@@ -89,10 +81,6 @@ public class ProcessVariable {
 
     public List<ProcessVariableOperation> getDeletes() {
         return deletes;
-    }
-
-    public List<ProcessVariableOperation> getDefinitions() {
-        return definitions;
     }
 
     public List<ProcessVariableOperation> getOperations() {

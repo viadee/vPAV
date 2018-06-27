@@ -51,8 +51,8 @@ class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicate
     }
 
     @Override
-    public OperationBasedPredicateBuilder<T> defined() {
-        return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getDefinitions, "defined");
+    public OperationBasedPredicateBuilder<T> deleted() {
+        return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getDeletes, "deleted");
     }
 
     @Override

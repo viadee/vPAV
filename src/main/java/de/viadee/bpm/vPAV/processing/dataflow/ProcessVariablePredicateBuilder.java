@@ -33,7 +33,7 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 public interface ProcessVariablePredicateBuilder<T> {
     ProcessVariablePredicateBuilder<T> not();
-    OperationBasedPredicateBuilder<T> defined();
+    OperationBasedPredicateBuilder<T> deleted();
     OperationBasedPredicateBuilder<T> read();
     OperationBasedPredicateBuilder<T> written();
     T prefixed(String prefix);
