@@ -69,7 +69,7 @@ public class SimpleDataFlowRuleTest {
         try {
             rule.check(Collections.singletonList(new ProcessVariable("var1")));
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), containsString("Rule 'process variables should be not wrong!' was violated 1 times"));
+            assertThat(e.getMessage(), containsString("Rule 'Process variables should be not wrong!' was violated 1 times"));
         }
     }
 
@@ -82,7 +82,7 @@ public class SimpleDataFlowRuleTest {
         try {
             rule.check(Collections.singletonList(new ProcessVariable("var1")));
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), containsString("process variables that are easily fulfilling something should be"));
+            assertThat(e.getMessage(), containsString("Process variables that are easily fulfilling something should be"));
         }
     }
 
@@ -129,6 +129,19 @@ public class SimpleDataFlowRuleTest {
             assertThat(e.getMessage(), containsString("'var3' needed to be  but was not right"));
             assertThat(e.getMessage(), containsString("was violated 2 times"));
             assertThat(e.getMessage(), not(containsString("correct name is not right")));
+        }
+    }
+
+    @Test
+    public void testBecauseAttachesReasonToDescription() {
+        SimpleDataFlowRule rule = new SimpleDataFlowRule(
+                new DescribedPredicateEvaluator<>(EvaluationResult::forSuccess, "easily fulfilling something"),
+                new DescribedPredicateEvaluator<>(EvaluationResult::forViolation, "also holding tough condition"));
+
+        try {
+            rule.because("of reasons").check(Collections.singletonList(new ProcessVariable("var1")));
+        } catch (AssertionError e) {
+            assertThat(e.getMessage(), containsString("easily fulfilling something should be also holding tough condition because of reasons"));
         }
     }
 }

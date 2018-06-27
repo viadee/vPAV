@@ -77,4 +77,9 @@ class ConditionedSetImpl implements ConditionedSet {
     public String getRuleDescription() {
         return ruleBuilder.getRuleDescription();
     }
+
+    @Override
+    public DataFlowRule because(String reason) {
+        return ruleBuilder.because(reason);
+    }
 }

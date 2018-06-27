@@ -101,4 +101,8 @@ public class RuleBuilder implements DataFlowRule {
     public String getRuleDescription() {
         return new SimpleDataFlowRule(constraint, condition).getRuleDescription();
     }
+
+    public DataFlowRule because(String reason) {
+        return new SimpleDataFlowRule(constraint, condition).because(reason);
+    }
 }

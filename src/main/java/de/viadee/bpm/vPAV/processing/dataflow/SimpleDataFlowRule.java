@@ -39,11 +39,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class SimpleDataFlowRule implements DataFlowRule {
-    private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE = "Rule 'process variables%s should be %s' was violated %s times:\n";
-    private static final String RULE_DESCRIPTION_TEMPLATE = "Process variables%s should be %s";
+    private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE = "Rule '%s' was violated %s times:\n";
+    private static final String RULE_DESCRIPTION_TEMPLATE = "Process variables%s should be %s%s";
     private static final String VIOLATION_TEMPLATE = "'%s' needed to be %s%s";
     private final DescribedPredicateEvaluator<ProcessVariable> constraint;
     private final DescribedPredicateEvaluator<ProcessVariable> condition;
+    private String reason;
 
     SimpleDataFlowRule(DescribedPredicateEvaluator<ProcessVariable> constraint, DescribedPredicateEvaluator<ProcessVariable> condition) {
         this.constraint = constraint;
@@ -69,7 +70,7 @@ class SimpleDataFlowRule implements DataFlowRule {
                 .filter(r -> !r.isFulfilled())
                 .collect(Collectors.toList());
         if (violations.size() > 0) {
-            String ruleDescription = createRuleDescription(violations.size());
+            String ruleDescription = createRuleDescriptionMessage(violations.size());
 
             String violationsString = violations.stream()
                     .map(this::createViolationMessage)
@@ -82,14 +83,18 @@ class SimpleDataFlowRule implements DataFlowRule {
         String constraintDescription = constraint != null ?
                 " that are " + constraint.getDescription() :
                 "";
-        return String.format(RULE_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription());
+        String reasonMessage = reason != null ? " because " + reason : "";
+        return String.format(RULE_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription(), reasonMessage);
     }
 
-    private String createRuleDescription(int violationCount) {
-        String constraintDescription = constraint != null ?
-                " that are " + constraint.getDescription() :
-                "";
-        return String.format(RULE_VIOLATION_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription(), violationCount);
+    @Override
+    public DataFlowRule because(String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    private String createRuleDescriptionMessage(int violationCount) {
+        return String.format(RULE_VIOLATION_DESCRIPTION_TEMPLATE, getRuleDescription(), violationCount);
     }
 
     private String createViolationMessage(EvaluationResult<ProcessVariable> result) {
