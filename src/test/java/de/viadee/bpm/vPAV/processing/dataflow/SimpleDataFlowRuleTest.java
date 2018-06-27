@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.junit.Test;
 
@@ -83,6 +84,19 @@ public class SimpleDataFlowRuleTest {
             rule.check(Collections.singletonList(new ProcessVariable("var1")));
         } catch (AssertionError e) {
             assertThat(e.getMessage(), containsString("Process variables that are easily fulfilling something should be"));
+        }
+    }
+
+    @Test
+    public void testErrorMessageContainsSeverityDescription() {
+        SimpleDataFlowRule rule = new SimpleDataFlowRule(
+                new DescribedPredicateEvaluator<>(EvaluationResult::forSuccess, "easily fulfilling something"),
+                new DescribedPredicateEvaluator<>(v -> EvaluationResult.forViolation("also holding this condition", v), ""));
+
+        try {
+            rule.withCriticality(CriticalityEnum.WARNING).check(Collections.singletonList(new ProcessVariable("var1")));
+        } catch (AssertionError e) {
+            assertThat(e.getMessage(), containsString("times [Criticality: WARNING]"));
         }
     }
 

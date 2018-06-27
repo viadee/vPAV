@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
 import java.util.Collection;
@@ -39,12 +40,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class SimpleDataFlowRule implements DataFlowRule {
-    private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE = "Rule '%s' was violated %s times:\n";
+    private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE = "Rule '%s' was violated %s times%s:\n";
     private static final String RULE_DESCRIPTION_TEMPLATE = "Process variables%s should be %s%s";
     private static final String VIOLATION_TEMPLATE = "'%s' needed to be %s%s";
     private final DescribedPredicateEvaluator<ProcessVariable> constraint;
     private final DescribedPredicateEvaluator<ProcessVariable> condition;
     private String reason;
+    private CriticalityEnum criticality = CriticalityEnum.ERROR;
 
     SimpleDataFlowRule(DescribedPredicateEvaluator<ProcessVariable> constraint, DescribedPredicateEvaluator<ProcessVariable> condition) {
         this.constraint = constraint;
@@ -88,13 +90,25 @@ class SimpleDataFlowRule implements DataFlowRule {
     }
 
     @Override
+    public CriticalityEnum getCriticality() {
+        return criticality;
+    }
+
+    @Override
     public DataFlowRule because(String reason) {
         this.reason = reason;
         return this;
     }
 
+    @Override
+    public DataFlowRule withCriticality(CriticalityEnum criticality) {
+        this.criticality = criticality;
+        return this;
+    }
+
     private String createRuleDescriptionMessage(int violationCount) {
-        return String.format(RULE_VIOLATION_DESCRIPTION_TEMPLATE, getRuleDescription(), violationCount);
+        String criticalityMessage = criticality != null ? " [Criticality: " + criticality + "]": "";
+        return String.format(RULE_VIOLATION_DESCRIPTION_TEMPLATE, getRuleDescription(), violationCount, criticalityMessage);
     }
 
     private String createViolationMessage(EvaluationResult<ProcessVariable> result) {

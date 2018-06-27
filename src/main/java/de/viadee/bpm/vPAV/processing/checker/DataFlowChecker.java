@@ -62,7 +62,7 @@ public class DataFlowChecker implements ModelChecker {
                     .filter(r-> !r.isFulfilled())
                     // TODO: think about correct BPMN element
                     // TODO: Message template in resource bundle
-                    .map(r -> IssueWriter.createIssue(rule, CriticalityEnum.ERROR,
+                    .map(r -> IssueWriter.createIssue(rule, dataFlowRule.getCriticality(),
                             r.getEvaluatedVariable().getOperations().get(0).getElement(),
                             String.format("Rule '%s' violated:\n%s %s", dataFlowRule.getRuleDescription(),
                                     r.getEvaluatedVariable().getName(), r.getMessage().get())))

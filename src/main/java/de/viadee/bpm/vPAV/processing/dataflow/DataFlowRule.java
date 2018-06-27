@@ -31,13 +31,17 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
 import java.util.Collection;
 
 public interface DataFlowRule {
+    DataFlowRule because(String reason);
+    DataFlowRule withCriticality(CriticalityEnum criticality);
+
     void check(Collection<ProcessVariable> variables);
     Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables);
     String getRuleDescription();
-    DataFlowRule because(String reason);
+    CriticalityEnum getCriticality();
 }

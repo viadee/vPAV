@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.springframework.util.Assert;
 
@@ -131,7 +132,17 @@ public class DataFlowRuleBuilder implements ProcessVariableSet, ConditionedProce
     }
 
     @Override
+    public CriticalityEnum getCriticality() {
+        return new SimpleDataFlowRule(constraint, condition).getCriticality();
+    }
+
+    @Override
     public DataFlowRule because(String reason) {
         return new SimpleDataFlowRule(constraint, condition).because(reason);
+    }
+
+    @Override
+    public DataFlowRule withCriticality(CriticalityEnum criticality) {
+        return new SimpleDataFlowRule(constraint, condition).withCriticality(criticality);
     }
 }
