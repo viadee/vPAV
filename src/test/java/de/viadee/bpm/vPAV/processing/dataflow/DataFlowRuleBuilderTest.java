@@ -233,18 +233,45 @@ public class DataFlowRuleBuilderTest {
         rule.check(variables);
     }
 
-    @Test(expected = AssertionError.class)
-    public void testModelBasedConditionIsAppliedCorrectly() {
+    @Test
+    public void testModelBasedConditionIsAppliedCorrectlyInCaseOfSuccess() {
         List<ProcessVariable> variables = new ArrayList<>();
         ProcessVariable processVariable = new ProcessVariable("variable2");
         processVariable.addWrite(new ProcessVariableBuilder()
                 .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        processVariable.addWrite(new ProcessVariableBuilder()
+                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+
+        processVariables().shouldBe().written().byModelElements().ofType(ServiceTask.class).check(variables);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testModelBasedConditionIsAppliedCorrectlyInCaseOfViolation() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("variable2");
+        processVariable.addWrite(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
         processVariable = new ProcessVariable("variable3");
         processVariable.addWrite(new ProcessVariableBuilder()
                 .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
         variables.add(processVariable);
 
         processVariables().shouldBe().written().byModelElements().ofType(ServiceTask.class).check(variables);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testOnlyModelBasedConditionIsAppliedCorrectly() {
+        List<ProcessVariable> variables = new ArrayList<>();
+        ProcessVariable processVariable = new ProcessVariable("variable2");
+        processVariable.addWrite(new ProcessVariableBuilder()
+                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
+        processVariable.addWrite(new ProcessVariableBuilder()
+                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
+        variables.add(processVariable);
+
+        processVariables().shouldBe().written().onlyByModelElements().ofType(ServiceTask.class).check(variables);
     }
 
     private static <T> DescribedPredicateEvaluator<T> constraintFrom(Predicate<T> predicate) {

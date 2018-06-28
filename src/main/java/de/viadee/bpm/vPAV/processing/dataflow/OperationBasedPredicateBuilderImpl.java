@@ -62,9 +62,7 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
         final String times = n == 1 ? "time" : "times";
         final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             Integer operationsCount = operationProvider.apply(p).size();
-            return operationsCount == n ?
-                    EvaluationResult.forSuccess(p) :
-                    EvaluationResult.forViolation(operationsCount.toString(), p);
+            return new EvaluationResult<>(operationsCount == n, p, operationsCount.toString());
         };
         final String description = String.format("%s exactly %s %s", operationDescription, n, times);
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -75,9 +73,7 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
         final String times = n == 1 ? "time" : "times";
         final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             Integer operationsCount = operationProvider.apply(p).size();
-            return operationsCount >= n ?
-                    EvaluationResult.forSuccess(p) :
-                    EvaluationResult.forViolation(operationsCount.toString(), p);
+            return new EvaluationResult<>(operationsCount >= n, p, operationsCount.toString());
         };
         final String description = String.format("%s at least %s %s", operationDescription, n, times);
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -88,9 +84,7 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
         final String times = n == 1 ? "time" : "times";
         final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             Integer operationsCount = operationProvider.apply(p).size();
-            return operationsCount <= n ?
-                    EvaluationResult.forSuccess(p) :
-                    EvaluationResult.forViolation(operationsCount.toString(), p);
+            return new EvaluationResult<>(operationsCount <= n, p, operationsCount.toString());
         };
         final String description = String.format("%s at most %s %s", operationDescription, n, times);
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
@@ -98,12 +92,21 @@ class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBu
 
     @Override
     public ElementBasedPredicateBuilder<T> byModelElements() {
-        final Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> {
-            return operationProvider.apply(p).stream()
-                    .map(ProcessVariableOperation::getElement)
-                    .collect(Collectors.toList());
-        };
-        return new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider,
+        final Function<ProcessVariable, List<BpmnElement>> elementProvider = createElementProvider();
+        return new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider, false,
                 operationDescription + " by model elements");
+    }
+
+    @Override
+    public ElementBasedPredicateBuilder<T> onlyByModelElements() {
+        final Function<ProcessVariable, List<BpmnElement>> elementProvider = createElementProvider();
+        return new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider, true,
+                operationDescription + " by model elements");
+    }
+
+    private Function<ProcessVariable, List<BpmnElement>> createElementProvider() {
+        return p -> operationProvider.apply(p).stream()
+                .map(ProcessVariableOperation::getElement)
+                .collect(Collectors.toList());
     }
 }

@@ -140,6 +140,53 @@ public class ElementBasedPredicateBuilderImplTest {
     }
 
     @Test
+    public void testThatFulfillDoesFilterCorrectlyForOnlyFlagInCaseOfSuccess() {
+        List<BpmnElement> bpmnElements = Arrays.asList(
+                new BpmnElementBuilder().withName("e1").ofType(ServiceTask.class).build(),
+                new BpmnElementBuilder().withName("e2").ofType(ServiceTask.class).build(),
+                new BpmnElementBuilder().withName("e3").ofType(ServiceTask.class).build()
+        );
+        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
+            EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
+            assertThat(result.isFulfilled(), is(true));
+            assertThat(result.getMessage().isPresent(), is(true));
+            assertThat(result.getMessage().get(), is("e1, e2, e3"));
+            return new Object();
+        };
+        Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
+        ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
+                conditionSetter, elementProvider, true, ""
+        );
+
+        predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(e ->
+                new EvaluationResult<>(ServiceTask.class.isInstance(e.getBaseElement()),
+                        e, e.getBaseElement().getAttributeValue("name")), ""));
+    }
+    @Test
+    public void testThatFulfillDoesFilterCorrectlyForOnlyFlagInCaseOfFailure() {
+        List<BpmnElement> bpmnElements = Arrays.asList(
+                new BpmnElementBuilder().withName("e1").ofType(ServiceTask.class).build(),
+                new BpmnElementBuilder().withName("e2").ofType(UserTask.class).build(),
+                new BpmnElementBuilder().withName("e3").ofType(ServiceTask.class).build()
+        );
+        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
+            EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
+            assertThat(result.isFulfilled(), is(false));
+            assertThat(result.getMessage().isPresent(), is(true));
+            assertThat(result.getMessage().get(), is("e2"));
+            return new Object();
+        };
+        Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
+        ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
+                conditionSetter, elementProvider, true, ""
+        );
+
+        predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(e ->
+                new EvaluationResult<>(ServiceTask.class.isInstance(e.getBaseElement()),
+                        e, e.getBaseElement().getAttributeValue("name")), ""));
+    }
+
+    @Test
     public void testThatFulfillSetsCorrectDescription() {
         List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("e1").build());
 
@@ -149,7 +196,7 @@ public class ElementBasedPredicateBuilderImplTest {
         };
         Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
         ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, "all elements"
+                conditionSetter, elementProvider, false, "all elements"
         );
 
         predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(EvaluationResult::forViolation, "fulfilling this"));
@@ -172,7 +219,7 @@ public class ElementBasedPredicateBuilderImplTest {
         };
         Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
         ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, "all elements"
+                conditionSetter, elementProvider, false, "all elements"
         );
 
         predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(e ->
@@ -196,7 +243,7 @@ public class ElementBasedPredicateBuilderImplTest {
         };
         Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
         ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, ""
+                conditionSetter, elementProvider, false, ""
         );
 
         predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(e ->
@@ -208,7 +255,7 @@ public class ElementBasedPredicateBuilderImplTest {
                 predicate.evaluate(new ProcessVariable(""));
         Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
         return new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider,  "element description");
+                conditionSetter, elementProvider, false,  "element description");
     }
 
     private class BpmnElementBuilder {

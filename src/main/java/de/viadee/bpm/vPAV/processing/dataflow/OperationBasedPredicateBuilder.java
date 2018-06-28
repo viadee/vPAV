@@ -36,4 +36,5 @@ public interface OperationBasedPredicateBuilder<T> {
     T atLeast(int n);
     T atMost(int n);
     ElementBasedPredicateBuilder<T> byModelElements();
+    ElementBasedPredicateBuilder<T> onlyByModelElements();
 }

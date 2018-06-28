@@ -45,13 +45,16 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
     private final Function<DescribedPredicateEvaluator<ProcessVariable>, T> conditionSetter;
     private final Function<ProcessVariable, List<BpmnElement>> elementProvider;
     private final String elementDescription;
+    private boolean onlyFlag = false;
 
     public ElementBasedPredicateBuilderImpl(
             Function<DescribedPredicateEvaluator<ProcessVariable>, T> conditionSetter,
             Function<ProcessVariable,List<BpmnElement>> elementProvider,
+            boolean onlyFlag,
             String elementDescription) {
         this.conditionSetter = conditionSetter;
         this.elementProvider = elementProvider;
+        this.onlyFlag = onlyFlag;
         this.elementDescription = elementDescription;
     }
 
@@ -100,7 +103,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
         final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
             List<EvaluationResult<BpmnElement>> results = elementProvider.apply(p).stream()
                     .map(predicate::evaluate).collect(Collectors.toList());
-            return results.stream().filter(EvaluationResult::isFulfilled).collect(Collectors.toList()).size() > 0 ?
+            return isSuccess(results) ?
                     EvaluationResult.forSuccess(results.stream()
                                     .filter(EvaluationResult::isFulfilled)
                                     .filter(r -> r.getMessage().isPresent())
@@ -114,5 +117,12 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
         };
         final String description = String.format("%s %s", elementDescription, predicate.getDescription());
         return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+    }
+
+    private boolean isSuccess(List<EvaluationResult<BpmnElement>> results) {
+        int numberOfSuccesses = results.stream().filter(EvaluationResult::isFulfilled).collect(Collectors.toList()).size();
+        return onlyFlag ?
+                numberOfSuccesses == results.size() :
+                numberOfSuccesses > 0;
     }
 }
