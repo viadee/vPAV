@@ -36,17 +36,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.w3c.dom.Element;
 
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 public class IssueWriter {
@@ -122,7 +119,7 @@ public class IssueWriter {
      * @return Issues
      */
     public static Collection<CheckerIssue> createIssue(final Rule rule, final CriticalityEnum classification,
-            final ProcessVariable var, final List<Path> paths, final AnomalyContainer anomaly, final String message) {
+                                                       final ProcessVariableOperation var, final List<Path> paths, final AnomalyContainer anomaly, final String message) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 

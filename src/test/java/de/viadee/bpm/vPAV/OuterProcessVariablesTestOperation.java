@@ -54,7 +54,7 @@ import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 /**
  * unit test checks, whether outer variables on data flow graph will be set
@@ -63,7 +63,7 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
  *
  * assumption: examining process variables in source code is done before
  */
-public class OuterProcessVariablesTest {
+public class OuterProcessVariablesTestOperation {
 
     private static final String BASE_PATH = "src/test/resources/";
 
@@ -105,7 +105,7 @@ public class OuterProcessVariablesTest {
         //// Then...
         // select start event from process and check variable
         final BpmnElement element = graphBuilder.getElement("StartEvent_0m79sut");
-        final Map<String, ProcessVariable> variables = element.getProcessVariables();
+        final Map<String, ProcessVariableOperation> variables = element.getProcessVariables();
         if (variables == null) {
             fail("there are no outer variables set on data flow graph");
         }
@@ -143,7 +143,7 @@ public class OuterProcessVariablesTest {
         /// Then
         // select start event from process and check variable
         final BpmnElement startEvent = graphBuilder.getElement("StartEvent_05bq8nu");
-        final Map<String, ProcessVariable> startVariables = startEvent.getProcessVariables();
+        final Map<String, ProcessVariableOperation> startVariables = startEvent.getProcessVariables();
         if (startVariables == null) {
             fail("there are no outer variables set on data flow graph (message start event)");
         }
@@ -154,7 +154,7 @@ public class OuterProcessVariablesTest {
 
         // select intermediate event from process and check variable
         final BpmnElement intermediateEvent = graphBuilder.getElement("IntermediateCatchEvent_103fbi3");
-        final Map<String, ProcessVariable> intermediateVariables = intermediateEvent
+        final Map<String, ProcessVariableOperation> intermediateVariables = intermediateEvent
                 .getProcessVariables();
         if (intermediateVariables == null) {
             fail("there are no outer variables set on data flow graph (message intermediate event)");

@@ -31,18 +31,18 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 /**
  * Info for the searched process variable
  */
 public class VariableInfo {
 
-    public ProcessVariable var;
+    public ProcessVariableOperation var;
 
     private boolean visited;
 
-    public VariableInfo(final ProcessVariable var) {
+    public VariableInfo(final ProcessVariableOperation var) {
         this.var = var;
         this.clear();
     }

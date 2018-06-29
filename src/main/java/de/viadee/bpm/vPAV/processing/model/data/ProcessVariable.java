@@ -31,87 +31,59 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-/**
- * Represents a process variable with some meaningful information.
- *
- */
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProcessVariable {
 
-  private String name;
+    private final String name;
+    private final List<ProcessVariableOperation> operations;
+    private final List<ProcessVariableOperation> writes;
+    private final List<ProcessVariableOperation> reads;
+    private final List<ProcessVariableOperation> deletes;
 
-  private VariableOperation operation;
-
-  private String scopeId;
-
-  /** Detailed Information about the location of the match **/
-  private BpmnElement element;
-
-  private String resourceFilePath;
-
-  private ElementChapter chapter;
-
-  private KnownElementFieldType fieldType;
-
-  public ProcessVariable(final String name, final BpmnElement element, final ElementChapter chapter,
-      final KnownElementFieldType fieldType, final String resourceFilePath,
-      final VariableOperation operation, final String scopeId) {
-    super();
-    this.name = name;
-    this.element = element;
-    this.resourceFilePath = resourceFilePath;
-    this.chapter = chapter;
-    this.fieldType = fieldType;
-    this.operation = operation;
-    this.scopeId = scopeId;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getResourceFilePath() {
-    return resourceFilePath;
-  }
-
-  public BpmnElement getElement() {
-    return element;
-  }
-
-  public ElementChapter getChapter() {
-    return chapter;
-  }
-
-  public KnownElementFieldType getFieldType() {
-    return fieldType;
-  }
-
-  public VariableOperation getOperation() {
-    return operation;
-  }
-
-  public String getScopeId() {
-    return scopeId;
-  }
-
-  public String toString() {
-    return name + " [" + element.getProcessdefinition() + ", " + element.getBaseElement().getId()
-        + ", Scope: " + scopeId + ", " + chapter.name() + ", " + fieldType.getDescription() + ", "
-        + resourceFilePath + "]";
-  }
-
-  @Override
-  public int hashCode() {
-    return name.hashCode();
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (o instanceof ProcessVariable) {
-      final ProcessVariable p = (ProcessVariable) o;
-      if (name.equals(p.getName())) {
-        return true;
-      }
+    public ProcessVariable(String name) {
+        this.name = name;
+        this.operations = new ArrayList<>();
+        this.writes = new ArrayList<>();
+        this.reads = new ArrayList<>();
+        this.deletes = new ArrayList<>();
     }
-    return false;
-  }
+
+    public void addWrite(ProcessVariableOperation operation) {
+        operations.add(operation);
+        writes.add(operation);
+    }
+
+    public void addRead(ProcessVariableOperation operation) {
+        operations.add(operation);
+        reads.add(operation);
+    }
+
+    public void addDelete(ProcessVariableOperation operation) {
+        operations.add(operation);
+        deletes.add(operation);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<ProcessVariableOperation> getWrites() {
+        return writes;
+    }
+
+    public List<ProcessVariableOperation> getReads() {
+        return reads;
+    }
+
+    public List<ProcessVariableOperation> getDeletes() {
+        return deletes;
+    }
+
+    public List<ProcessVariableOperation> getOperations() {
+        return operations;
+    }
 }

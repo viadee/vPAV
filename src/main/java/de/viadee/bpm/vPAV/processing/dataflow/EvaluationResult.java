@@ -29,63 +29,56 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.processing.dataflow;
 
-import java.util.Objects;
+import java.util.Optional;
 
-public class AnomalyContainer {
+public class EvaluationResult<T> {
+    private String message;
+    private boolean result;
 
-  private String name;
+    private T evaluatedVariable;
 
-  private Anomaly anomaly;
-
-  private String elementId;
-
-  private ProcessVariableOperation variable;
-
-  public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId,
-      final ProcessVariableOperation variable) {
-    this.name = name;
-    this.anomaly = anomaly;
-    this.elementId = elementId;
-    this.variable = variable;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public Anomaly getAnomaly() {
-    return anomaly;
-  }
-
-  public String getElementId() {
-    return elementId;
-  }
-
-  public ProcessVariableOperation getVariable() {
-    return variable;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof AnomalyContainer) {
-      final AnomalyContainer anomalyContainer = (AnomalyContainer) obj;
-      if (this.name.equals(anomalyContainer.getName())
-          && this.anomaly == anomalyContainer.getAnomaly()) {
-        return true;
-      }
+    static <T> EvaluationResult<T> forViolation(String message, T evaluatedVariable) {
+        return new EvaluationResult<>(false, evaluatedVariable, message.isEmpty() ? null : message);
     }
-    return false;
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode());
-  }
+    static <T> EvaluationResult<T> forViolation(T evaluatedVariable) {
+        return new EvaluationResult<>(false, evaluatedVariable, null);
+    }
 
-  @Override
-  public String toString() {
-    return name + "(" + elementId + ", " + anomaly + ")";
-  }
+    static <T> EvaluationResult<T> forSuccess(T evaluatedVariable) {
+        return new EvaluationResult<>(true, evaluatedVariable);
+    }
+
+    static <T> EvaluationResult<T> forSuccess(String message, T evaluatedVariable) {
+        return new EvaluationResult<>(true, evaluatedVariable, message.isEmpty() ? null : message);
+    }
+
+    public EvaluationResult(boolean result, T evaluatedVariable, String message) {
+        this.message = message;
+        this.result = result;
+        this.evaluatedVariable = evaluatedVariable;
+    }
+
+    public EvaluationResult(boolean result, T evaluatedVariable) {
+        this.result = result;
+        this.evaluatedVariable = evaluatedVariable;
+    }
+
+    public boolean isFulfilled() {
+        return result;
+    }
+
+    public T getEvaluatedVariable() {
+        return evaluatedVariable;
+    }
+
+    public Optional<String> getMessage() {
+        return Optional.ofNullable(message);
+    }
+
+    public EvaluationResult<T> inverse() {
+        return new EvaluationResult<>(!result, evaluatedVariable, message);
+    }
 }

@@ -29,63 +29,15 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.processing.dataflow;
 
-import java.util.Objects;
-
-public class AnomalyContainer {
-
-  private String name;
-
-  private Anomaly anomaly;
-
-  private String elementId;
-
-  private ProcessVariableOperation variable;
-
-  public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId,
-      final ProcessVariableOperation variable) {
-    this.name = name;
-    this.anomaly = anomaly;
-    this.elementId = elementId;
-    this.variable = variable;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public Anomaly getAnomaly() {
-    return anomaly;
-  }
-
-  public String getElementId() {
-    return elementId;
-  }
-
-  public ProcessVariableOperation getVariable() {
-    return variable;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof AnomalyContainer) {
-      final AnomalyContainer anomalyContainer = (AnomalyContainer) obj;
-      if (this.name.equals(anomalyContainer.getName())
-          && this.anomaly == anomalyContainer.getAnomaly()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode());
-  }
-
-  @Override
-  public String toString() {
-    return name + "(" + elementId + ", " + anomaly + ")";
-  }
+public interface ProcessVariablePredicateBuilder<T> {
+    ProcessVariablePredicateBuilder<T> not();
+    OperationBasedPredicateBuilder<T> deleted();
+    OperationBasedPredicateBuilder<T> read();
+    OperationBasedPredicateBuilder<T> written();
+    OperationBasedPredicateBuilder<T> accessed();
+    T prefixed(String prefix);
+    T postfixed(String postfix);
+    T matching(String regex);
 }

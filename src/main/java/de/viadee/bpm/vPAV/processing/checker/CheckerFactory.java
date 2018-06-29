@@ -67,14 +67,10 @@ public final class CheckerFactory {
      * @param bpmnScanner
      *            bpmnScanner for model
      * @return checkers returns checkers
-     *
-     * @throws ConfigItemNotFoundException
-     *             exception when ConfigItem (e.g. rule) not found
      */
     public static Collection<ElementChecker> createCheckerInstances(
             final Map<String, Rule> ruleConf, final Collection<String> resourcesNewestVersions,
-            final BpmnScanner bpmnScanner)
-            throws ConfigItemNotFoundException {
+            final BpmnScanner bpmnScanner) {
 
         final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
 
@@ -85,7 +81,8 @@ public final class CheckerFactory {
             	continue;
             }
 
-            if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")) { //$NON-NLS-1$
+            if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker") &&
+                    !rule.getKey().equals("DataFlowChecker")) { //$NON-NLS-1$
                 try {
                     if (!rule.getKey().equals("VersioningChecker")) { //$NON-NLS-1$
 

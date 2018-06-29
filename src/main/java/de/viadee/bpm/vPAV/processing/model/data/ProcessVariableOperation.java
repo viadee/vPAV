@@ -31,61 +31,87 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import java.util.Objects;
-
-public class AnomalyContainer {
+/**
+ * Represents a process variable with some meaningful information.
+ *
+ */
+public class ProcessVariableOperation {
 
   private String name;
 
-  private Anomaly anomaly;
+  private VariableOperation operation;
 
-  private String elementId;
+  private String scopeId;
 
-  private ProcessVariableOperation variable;
+  /** Detailed Information about the location of the match **/
+  private BpmnElement element;
 
-  public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId,
-      final ProcessVariableOperation variable) {
+  private String resourceFilePath;
+
+  private ElementChapter chapter;
+
+  private KnownElementFieldType fieldType;
+
+  public ProcessVariableOperation(final String name, final BpmnElement element, final ElementChapter chapter,
+                                  final KnownElementFieldType fieldType, final String resourceFilePath,
+                                  final VariableOperation operation, final String scopeId) {
+    super();
     this.name = name;
-    this.anomaly = anomaly;
-    this.elementId = elementId;
-    this.variable = variable;
+    this.element = element;
+    this.resourceFilePath = resourceFilePath;
+    this.chapter = chapter;
+    this.fieldType = fieldType;
+    this.operation = operation;
+    this.scopeId = scopeId;
   }
 
   public String getName() {
     return name;
   }
 
-  public Anomaly getAnomaly() {
-    return anomaly;
+  public String getResourceFilePath() {
+    return resourceFilePath;
   }
 
-  public String getElementId() {
-    return elementId;
+  public BpmnElement getElement() {
+    return element;
   }
 
-  public ProcessVariableOperation getVariable() {
-    return variable;
+  public ElementChapter getChapter() {
+    return chapter;
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof AnomalyContainer) {
-      final AnomalyContainer anomalyContainer = (AnomalyContainer) obj;
-      if (this.name.equals(anomalyContainer.getName())
-          && this.anomaly == anomalyContainer.getAnomaly()) {
-        return true;
-      }
-    }
-    return false;
+  public KnownElementFieldType getFieldType() {
+    return fieldType;
+  }
+
+  public VariableOperation getOperation() {
+    return operation;
+  }
+
+  public String getScopeId() {
+    return scopeId;
+  }
+
+  public String toString() {
+    return name + " [" + element.getProcessdefinition() + ", " + element.getBaseElement().getId()
+        + ", Scope: " + scopeId + ", " + chapter.name() + ", " + fieldType.getDescription() + ", "
+        + resourceFilePath + "]";
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode());
+    return name.hashCode();
   }
 
   @Override
-  public String toString() {
-    return name + "(" + elementId + ", " + anomaly + ")";
+  public boolean equals(final Object o) {
+    if (o instanceof ProcessVariableOperation) {
+      final ProcessVariableOperation p = (ProcessVariableOperation) o;
+      if (name.equals(p.getName())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

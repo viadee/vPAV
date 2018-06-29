@@ -48,8 +48,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.viadee.bpm.vPAV.Runner;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.*;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -58,7 +58,6 @@ import com.google.gson.JsonObject;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
@@ -193,7 +192,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @throws OutputWriterException
      *             javascript couldnt be written
      */
-    public void writeVars(Collection<BpmnElement> elements) throws OutputWriterException {
+    public void writeVars(Collection<BpmnElement> elements, Collection<ProcessVariable> processVariables) throws OutputWriterException {
         try {
             FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, true);
 
@@ -206,32 +205,9 @@ public class JsOutputWriter implements IssueOutputWriter {
                             .collect(Collectors.joining(",\n\n")))
                     .append("];\n\n");
 
-            // write variables containing elements
-            // first, we need to inverse mapping to process variable -> operations (including element)
-            // TODO: this belongs somewhere else
-            final Map<String, ActualProcessVariable> processVariables = new HashMap<>();
-            for (final BpmnElement element : elements) {
-                for (final ProcessVariable variableOperation : element.getProcessVariables().values()) {
-                    final String variableName = variableOperation.getName();
-                    if (!processVariables.containsKey(variableName)) {
-                        processVariables.put(variableName, new ActualProcessVariable(variableName));
-                    }
-                    final ActualProcessVariable processVariable = processVariables.get(variableName);
-                    switch (variableOperation.getOperation()) {
-                        case READ:
-                            processVariable.addRead(variableOperation);
-                            break;
-                        case WRITE:
-                            processVariable.addWrite(variableOperation);
-                            break;
-                        case DELETE:
-                            processVariable.addDelete(variableOperation);
-                            break;
-                    }
-                }
-            }
 
-            JsonArray jsonIssues = processVariables.values().stream()
+
+            JsonArray jsonIssues = processVariables.stream()
                     .map(JsOutputWriter::transformProcessVariablesToJson)
                     .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
             jsFile.append("var processVariables = ")
@@ -261,7 +237,7 @@ public class JsOutputWriter implements IssueOutputWriter {
                 elementString += "\"elementName\" : \""
                         + element.getBaseElement().getAttributeValue("name").trim().replace('\n', ' ') + "\",\n";
 
-            for (Map.Entry<String, ProcessVariable> entry : element.getProcessVariables().entrySet()) {
+            for (Map.Entry<String, ProcessVariableOperation> entry : element.getProcessVariables().entrySet()) {
                 entry.getValue().getOperation();
                 if (entry.getValue().getOperation().equals(VariableOperation.READ))
                     read += "\"" + entry.getValue().getName() + "\",";
@@ -291,7 +267,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param processVariable
      * @return
      */
-    private static JsonObject transformProcessVariablesToJson(final ActualProcessVariable processVariable) {
+    private static JsonObject transformProcessVariablesToJson(final ProcessVariable processVariable) {
         final JsonObject obj = new JsonObject();
         obj.addProperty("name", processVariable.getName());
         if (processVariable.getOperations().size() > 0) {
