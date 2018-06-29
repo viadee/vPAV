@@ -316,9 +316,8 @@ function createIssueTable(bpmnFile, tableContent) {
     myTable.appendChild(myTHead);
 
     //fill table with all issuesof current model
-    for (id in tableContent) {
-        if (tableContent[id].bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
-            issue = tableContent[id];
+    for (let issue of tableContent) {
+        if (issue.bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
             myParent = document.getElementsByTagName("body").item(0);
             myTBody = document.createElement("tbody");
             myRow = document.createElement("tr");
@@ -346,13 +345,17 @@ function createIssueTable(bpmnFile, tableContent) {
 
             //elementId
             myCell = document.createElement("td");
-            myCell.appendChild(createMarkElementLink(issue));
+            if (issue.elementId !== undefined) {
+                myCell.appendChild(createMarkElementLink(issue.elementId));
+            }
             myRow.appendChild(myCell);
 
             //elementName
             myCell = document.createElement("td");
-            myText = document.createTextNode(issue.elementName);
-            myCell.appendChild(myText);
+            if (issue.elementId !== undefined) {
+                myText = document.createTextNode(issue.elementName);
+                myCell.appendChild(myText);
+            }
             myRow.appendChild(myCell);
 
             //classification
@@ -367,7 +370,10 @@ function createIssueTable(bpmnFile, tableContent) {
 
             //message
             myCell = document.createElement("td");
-            myText = document.createTextNode(issue.message);
+            let messageText = issue.message;
+            processVariables.filter(p => issue.message.includes(p.name))
+                .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name)));
+            myText = document.createTextNode(messageText);
             myCell.appendChild(myText);
             myRow.appendChild(myCell);
 
@@ -448,17 +454,17 @@ function createVariableTable(bpmnFile, tableContent) {
         myRow.appendChild(myCell);
 
         myCell = document.createElement("td");
-        let elementLinks = processVariable.read.map(p => createMarkElementLink(p));
+        let elementLinks = processVariable.read.map(p => createMarkElementLink(p.elementId));
         myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
         myRow.appendChild(myCell);
 
         myCell = document.createElement("td");
-        elementLinks = processVariable.write.map(p => createMarkElementLink(p));
+        elementLinks = processVariable.write.map(p => createMarkElementLink(p.elementId));
         myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
         myRow.appendChild(myCell);
 
         myCell = document.createElement("td");
-        elementLinks = processVariable.delete.map(p => createMarkElementLink(p));
+        elementLinks = processVariable.delete.map(p => createMarkElementLink(p.elementId));
         myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
         myRow.appendChild(myCell);
         //---------
@@ -469,13 +475,13 @@ function createVariableTable(bpmnFile, tableContent) {
     myParent.appendChild(myTable);
 }
 
-function createMarkElementLink(element) {
-    let myText = document.createTextNode(element.elementId);
+function createMarkElementLink(elementId) {
+    let myText = document.createTextNode(elementId);
     //create link
     let c = document.createElement("a");
     c.appendChild(myText);
-    if (element.elementId !== "") {
-        c.setAttribute("onclick", "controller.markElement('" + element.elementId + "')");
+    if (elementId !== "") {
+        c.setAttribute("onclick", "controller.markElement('" + elementId + "')");
         c.setAttribute("href", "#");
         c.setAttribute("title", "mark element");
     }

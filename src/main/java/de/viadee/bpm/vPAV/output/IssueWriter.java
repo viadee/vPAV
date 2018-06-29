@@ -74,6 +74,32 @@ public class IssueWriter {
         return issues;
     }
 
+
+    /**
+     *
+     * @param rule
+     *            Rule
+     * @param classification
+     *            CriticalityEnum
+     * @param variable
+     *            ProcessVariable
+     * @param message
+     *            Errormessage
+     * @return Issues
+     */
+    public static Collection<CheckerIssue> createIssue(final Rule rule, String ruleDescription, final CriticalityEnum classification,
+            final ProcessVariable variable, final String message) {
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        final BpmnElement element = variable.getOperations().get(0).getElement();
+
+        issues.add(new CheckerIssue(rule.getName() + ": '" + ruleDescription + "'", ruleDescription, classification,
+                element.getProcessdefinition(), null,
+                null, message));
+
+        return issues;
+    }
     /**
      * @param rule
      *            Rule

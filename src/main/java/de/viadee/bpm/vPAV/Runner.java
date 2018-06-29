@@ -298,7 +298,7 @@ public class Runner {
 				jsOutputWriter.writeVars(elements, processVariables);
 
 			} catch (final OutputWriterException e) {
-				throw new RuntimeException("Output couldn't be written");
+				throw new RuntimeException("Output couldn't be written", e);
 			}
 		} else {
 			final IssueOutputWriter jsOutputWriter = new JsOutputWriter();

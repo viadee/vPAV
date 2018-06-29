@@ -75,7 +75,7 @@ class SimpleDataFlowRule implements DataFlowRule {
             String ruleDescription = createRuleDescriptionMessage(violations.size());
 
             String violationsString = violations.stream()
-                    .map(this::createViolationMessage)
+                    .map(this::getViolationMessageFor)
                     .collect(Collectors.joining("\n"));
             throw new AssertionError( ruleDescription + violationsString);
         }
@@ -111,7 +111,8 @@ class SimpleDataFlowRule implements DataFlowRule {
         return String.format(RULE_VIOLATION_DESCRIPTION_TEMPLATE, getRuleDescription(), violationCount, criticalityMessage);
     }
 
-    private String createViolationMessage(EvaluationResult<ProcessVariable> result) {
+    @Override
+    public String getViolationMessageFor(EvaluationResult<ProcessVariable> result) {
         String violationMessage = result.getMessage().isPresent() ?
                 " but was " + result.getMessage().get() :
                 "";
