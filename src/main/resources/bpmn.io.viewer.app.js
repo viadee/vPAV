@@ -64,7 +64,7 @@ function getProcessVariableOverlay(bpmnFile) {
         let overlayData = {};
         overlayData.i = p;
         overlayData.anz = p.read.length + p.write.length + p.delete.length;
-        overlayData.clickOverlay = createVariableDialog(p, bpmnFile);
+        overlayData.clickOverlay = createVariableDialog(p);
         overlayData.colorClass = "badge-info";
         overlayData.title = "variable operations";
         return overlayData;
@@ -226,7 +226,7 @@ function createIssueDialog(elements) {
     }
 }
 
-function createVariableDialog(processVariable, bpmnFile) {
+function createVariableDialog(processVariable) {
     // add DialogMessage
     return function clickOverlay() {
         //clear dialog
@@ -236,15 +236,15 @@ function createVariableDialog(processVariable, bpmnFile) {
         }
         document.querySelector(".modal-title").innerHTML = "Process Variables";
 
-        dialogContent.appendChild(createCardForVariableOperations(processVariable.read, "Reads", bpmnFile));
-        dialogContent.appendChild(createCardForVariableOperations(processVariable.write, "Writes", bpmnFile));
-        dialogContent.appendChild(createCardForVariableOperations(processVariable.delete, "Deletes", bpmnFile));
+        dialogContent.appendChild(createCardForVariableOperations(processVariable.read, "Reads"));
+        dialogContent.appendChild(createCardForVariableOperations(processVariable.write, "Writes"));
+        dialogContent.appendChild(createCardForVariableOperations(processVariable.delete, "Deletes"));
 
         showDialog('show');
     }
 }
 
-function createCardForVariableOperations(operations, title, bpmnFile) {
+function createCardForVariableOperations(operations, title) {
     var dCard = document.createElement("div");
     dCard.setAttribute("class", "card bg-light mb-3");
 
@@ -258,7 +258,7 @@ function createCardForVariableOperations(operations, title, bpmnFile) {
     dCardText.setAttribute("class", "card-text");
 
     dCardTitle.innerHTML = title;
-    dCardText.innerHTML = operations.map(p => createShowOperationsLink(bpmnFile, p).outerHTML).join(", ");
+    dCardText.innerHTML = operations.map(p => createShowOperationsLink(p).outerHTML).join(", ");
 
     dCard.appendChild(dCardTitle);
     dCardBody.appendChild(dCardText);
@@ -395,7 +395,7 @@ function createIssueTable(bpmnFile, tableContent) {
 
                     var b = document.createElement("a");
                     b.appendChild(myText);
-                    b.setAttribute("onclick", "showPath('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + issue.id + "','" + x + "', '" + path_text + "')");
+                    b.setAttribute("onclick", "showPath('" + issue.id + "','" + x + "', '" + path_text + "')");
                     b.setAttribute("href", "#");
 
                     myCell.appendChild(b);
@@ -444,7 +444,7 @@ function createVariableTable(bpmnFile, tableContent) {
         let myRow = document.createElement("tr");
 
         let myCell = document.createElement("td");
-        myCell.appendChild(createShowOperationsLink(bpmnFile, processVariable.name));
+        myCell.appendChild(createShowOperationsLink(processVariable.name));
         myRow.appendChild(myCell);
 
         myCell = document.createElement("td");
@@ -470,24 +470,24 @@ function createVariableTable(bpmnFile, tableContent) {
 }
 
 function createMarkElementLink(element) {
-    let myText = document.createTextNode(element.elementName);
+    let myText = document.createTextNode(element.elementId);
     //create link
     let c = document.createElement("a");
     c.appendChild(myText);
     if (element.elementId !== "") {
-        c.setAttribute("onclick", "controller.markedElement('" + element.elementId + "')");
+        c.setAttribute("onclick", "controller.markElement('" + element.elementId + "')");
         c.setAttribute("href", "#");
         c.setAttribute("title", "mark element");
     }
     return c;
 }
 
-function createShowOperationsLink(bpmnFile, processVariableName) {
+function createShowOperationsLink(processVariableName) {
     //create link
     let c = document.createElement("a");
     let myText = document.createTextNode(processVariableName);
     c.appendChild(myText);
-    c.setAttribute("onclick", "showVariableOperations('" + bpmnFile.replace(/\\/g, "\\\\") + "','" + processVariableName + "')");
+    c.setAttribute("onclick", "controller.showVariableOperations('" + processVariableName + "')");
     c.setAttribute("href", "#");
     c.setAttribute("title", "mark operations");
     c.setAttribute("data-dismiss", "modal");
@@ -674,8 +674,8 @@ function createViewController() {
     }
 
     function updateView(overlayViewMode, tableViewMode, model) {
-        controller.currentTableViewMode = tableViewModes.ISSUES;
-        controller.currentOverlayViewMode = overlayViewModes.ISSUES;
+        controller.currentTableViewMode = tableViewMode;
+        controller.currentOverlayViewMode = overlayViewMode;
         controller.currentModel = model;
 
         let elements, overlayData;
@@ -689,6 +689,10 @@ function createViewController() {
 
         updateDiagram(model, elements, overlayData);
         updateTable(tableViewMode, model.name);
+
+        let btReset = document.getElementById("reset");
+        btReset.setAttribute("class", "btn btn-viadee mt-2 collapse");
+        btReset.setAttribute("onclick", "controller.resetOverlay()");
     }
 
     function getModel(modelName) {
@@ -703,7 +707,7 @@ function createViewController() {
     }
 
     ctrl.init = function() {
-        updateView(tableViewModes.ISSUES, overlayViewModes.ISSUES, diagramXMLSource[0])
+        updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, diagramXMLSource[0])
     };
 
     ctrl.showIssues = function () {
@@ -721,6 +725,7 @@ function createViewController() {
     ctrl.showPath = function(elementId, path_nr, path) {
         updateDiagram(this.currentModel, getElementsOnPath(elementId, path_nr), []);
 
+        document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
         document.getElementById('invalidPath').innerHTML = path;
         document.getElementById("rowPath").setAttribute("class", "collapse.show");
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
@@ -728,6 +733,7 @@ function createViewController() {
 
     ctrl.markElement = function(elementId) {
         updateDiagram(this.currentModel, [{elementId: elementId, classification: 'one-element'}], []);
+        document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     };
 
     ctrl.showVariableOperations = function(variableName) {
@@ -739,6 +745,7 @@ function createViewController() {
         });
 
         updateDiagram(this.currentModel, elements, getProcessVariableOverlay(this.currentModel.name));
+        document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     };
 
     ctrl.resetOverlay = function() {
@@ -749,13 +756,13 @@ function createViewController() {
         let model = getModel(modelName);
         if (model === null) throw "model not found";
 
-        document.querySelector("#linkList li").setAttribute("class", "nav-link");
+        document.querySelectorAll("#linkList li a").forEach(a => a.setAttribute("class", "nav-link"));
         document.getElementById(model.name).setAttribute("class", "nav-link active");
 
         updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, model);
     };
 
-    return controller;
+    return ctrl;
 }
 
 function showUnlocatedCheckers() {
