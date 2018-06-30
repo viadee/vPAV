@@ -2,17 +2,39 @@
 	background-color: rgb(126, 188, 169);
 }
 
-.nav-pills .nav-link.active {
+.nav-pills .model-selector.active {
 	color: rgb(105, 24, 133);
 	background: linear-gradient(to right, #DFAD47, rgb(183, 179, 112));
 	border-radius: 0;
 	border: 2.0px solid #7EBCA9;
 }
 
-.nav-pills .nav-link {
+.nav-pills .model-selector {
 	color: rgb(105, 24, 133);
 	background: linear-gradient(to right, #DFAD47, rgb(183, 179, 112));
 	border-radius: 0;
+}
+
+.nav-pills .table-selector {
+	color: white;
+	border-radius: 0;
+	background-color: rgb(105, 24, 133);
+	padding: 12px 30px;
+	margin: 0 1px 0 0;
+	font-weight: bold;
+	opacity: 0.65;
+}
+
+.nav-pills .table-selector.active {
+	background-color: rgb(105, 24, 133);
+	opacity: 1;
+}
+
+#viewModeNavBar a:hover {
+	color: white !important;;
+	text-decoration: none !important;
+	text-decoration-color: white !important;;
+    opacity: 0.9;
 }
 
 .h3-header {
@@ -39,24 +61,23 @@ a:hover {
 	table-layout: fixed;
 }
 
-thead tr th:first-child,
-tbody tr td:first-child {
+.table-issues thead tr th:first-child,
+.table-issues tbody tr td:first-child {
+  width: 16em;
+  min-width: 17em;
+  max-width: 8em;
+}
+
+.table-issues thead tr th:nth-child(2),
+.table-issues tbody tr td:nth-child(2) {
   width: 16em;
   min-width: 17em;
   max-width: 8em;
   word-break: break-all;
 }
 
-thead tr th:nth-child(2),
-tbody tr td:nth-child(2) {
-  width: 16em;
-  min-width: 17em;
-  max-width: 8em;
-  word-break: break-all;
-}
-
-thead tr th:nth-child(4),
-tbody tr td:nth-child(4) {
+.table-issues thead tr th:nth-child(4),
+.table-issues tbody tr td:nth-child(4) {
   width: 8em;
   min-width: 8em;
   max-width: 8em;

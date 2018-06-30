@@ -46,8 +46,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.*;
@@ -212,21 +212,21 @@ public class JsOutputWriter implements IssueOutputWriter {
             FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, true);
 
             // write elements containing operations
+            JsonArray jsonElements = elements.stream()
+                    .map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
+                    .filter(o -> o.has("elementId"))
+                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
             StringBuilder jsFile = new StringBuilder();
-            jsFile.append("var proz_vars = [\n")
-                    .append(elements.stream()
-                            .filter(e -> !e.getProcessVariables().isEmpty())
-                            .map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
-                            .collect(Collectors.joining(",\n\n")))
-                    .append("];\n\n");
+            jsFile.append("var proz_vars = ")
+                    .append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonElements))
+                    .append(";\n\n");
 
 
-
-            JsonArray jsonIssues = processVariables.stream()
+            JsonArray jsonVariables = processVariables.stream()
                     .map(JsOutputWriter::transformProcessVariablesToJson)
                     .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
             jsFile.append("var processVariables = ")
-                    .append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues))
+                    .append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonVariables))
                     .append(";");
 
             writer.write(jsFile.toString());
@@ -236,44 +236,35 @@ public class JsOutputWriter implements IssueOutputWriter {
         }
     }
 
-    private static String transformElementToJsonIncludingProcessVariables(BpmnElement element) {
-        String elementString = "";
-        String read = "";
-        String write = "";
-        String delete = "";
+    private static JsonObject transformElementToJsonIncludingProcessVariables(BpmnElement element) {
+        final JsonObject obj = new JsonObject();
         if (!element.getProcessVariables().isEmpty()) {
             // elementID
-            elementString += "{\n\"elementId\" : \"" + element.getBaseElement().getId() + "\",\n";
+            obj.addProperty("elementId", element.getBaseElement().getId());
             // bpmnFile
-            elementString += "\"bpmnFile\" : \"" + replace(File.separator, "\\\\", element.getProcessdefinition())
-                    + "\",\n";
+            obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace(File.separator, "\\", element.getProcessdefinition()));
             // element Name
             if (element.getBaseElement().getAttributeValue("name") != null)
-                elementString += "\"elementName\" : \""
-                        + element.getBaseElement().getAttributeValue("name").trim().replace('\n', ' ') + "\",\n";
+                obj.addProperty("elementName", element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME));
 
-            for (Map.Entry<String, ProcessVariableOperation> entry : element.getProcessVariables().entrySet()) {
-                entry.getValue().getOperation();
-                if (entry.getValue().getOperation().equals(VariableOperation.READ))
-                    read += "\"" + entry.getValue().getName() + "\",";
-                if (entry.getValue().getOperation().equals(VariableOperation.WRITE))
-                    write += "\"" + entry.getValue().getName() + "\",";
-                if (entry.getValue().getOperation().equals(VariableOperation.DELETE))
-                    delete += "\"" + entry.getValue().getName() + "\",";
-            }
-            // red
-            elementString += "\"read\" : [" + (read.length() > 1 ? read.substring(0, read.length() - 1) : read)
-                    + "],\n";
-            // write
-            elementString += "\"write\" : [" + (write.length() > 1 ? write.substring(0, write.length() - 1) : write)
-                    + "],\n";
-            // delete
-            elementString += "\"delete\" : ["
-                    + (delete.length() > 1 ? delete.substring(0, delete.length() - 1) : delete) + "]\n";
-            // end
-            elementString += "}";
+            Function<ProcessVariableOperation, JsonObject> processVariableToJson = o -> {
+                final JsonObject jsonOperation = new JsonObject();
+                jsonOperation.addProperty("name", o.getName());
+                jsonOperation.addProperty("fieldType", o.getFieldType().getDescription());
+                jsonOperation.addProperty("elementChapter", o.getChapter().toString());
+                return jsonOperation;
+            };
+            obj.add("read", element.getProcessVariables().values().stream()
+                    .filter(o -> o.getOperation() == VariableOperation.READ)
+                    .map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+            obj.add("write", element.getProcessVariables().values().stream()
+                    .filter(o -> o.getOperation() == VariableOperation.WRITE)
+                    .map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+            obj.add("delete", element.getProcessVariables().values().stream()
+                    .filter(o -> o.getOperation() == VariableOperation.DELETE)
+                    .map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
         }
-        return elementString;
+        return obj;
     }
 
     /**
@@ -289,24 +280,17 @@ public class JsOutputWriter implements IssueOutputWriter {
             String bpmnFile = processVariable.getOperations().get(0).getElement().getProcessdefinition();
             obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace(File.separator, "\\", bpmnFile));
         }
-        obj.add("read", processVariable.getReads().stream().map(o -> {
+        Function<ProcessVariableOperation, JsonObject> processVariableToJson = o -> {
             final JsonObject jsonOperation = new JsonObject();
             jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
             jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
+            jsonOperation.addProperty("fieldType", o.getFieldType().getDescription());
+            jsonOperation.addProperty("elementChapter", o.getChapter().toString());
             return jsonOperation;
-        }).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
-        obj.add("write", processVariable.getWrites().stream().map(o -> {
-            final JsonObject jsonOperation = new JsonObject();
-            jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
-            jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
-            return jsonOperation;
-        }).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
-        obj.add("delete", processVariable.getDeletes().stream().map(o -> {
-            final JsonObject jsonOperation = new JsonObject();
-            jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
-            jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
-            return jsonOperation;
-        }).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        };
+        obj.add("read", processVariable.getReads().stream().map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        obj.add("write", processVariable.getWrites().stream().map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        obj.add("delete", processVariable.getDeletes().stream().map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
         return obj;
     }
 

@@ -105,7 +105,11 @@ public class Runner {
 	 * functions
 	 */
 	public void viadeeProcessApplicationValidator() {
-		
+
+		// 0
+		processVariables = new ArrayList<>();
+		elements = new ArrayList<>();
+
 		// 1
 		rules = readConfig();
 

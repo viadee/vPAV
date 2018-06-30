@@ -222,6 +222,22 @@ function createIssueDialog(elements) {
                 }
             }
         }
+        const dialogFooter = document.querySelector(".modal-footer");
+        while (dialogFooter.hasChildNodes()) {
+            dialogFooter.removeChild(dialogFooter.lastChild);
+        }
+        let downloadButton = document.createElement("button");
+        downloadButton.setAttribute("type", "button");
+        downloadButton.setAttribute("class", "btn btn-viadee download");
+        downloadButton.setAttribute("onclick", "downloadFile()");
+        downloadButton.innerHTML = "Download ignoreIssues";
+        dialogFooter.appendChild(downloadButton);
+        let closeButton = document.createElement("button");
+        closeButton.setAttribute("type", "button");
+        closeButton.setAttribute("class", "btn btn-viadee");
+        closeButton.setAttribute("data-dismiss", "modal");
+        closeButton.innerHTML = "Close";
+        dialogFooter.appendChild(closeButton);
         showDialog('show');
     }
 }
@@ -235,36 +251,48 @@ function createVariableDialog(processVariable) {
             dialogContent.removeChild(dialogContent.lastChild);
         }
         document.querySelector(".modal-title").innerHTML = "Process Variables";
+        var dCard = document.createElement("div");
+        dCard.setAttribute("class", "card bg-light mb-3");
 
-        dialogContent.appendChild(createCardForVariableOperations(processVariable.read, "Reads"));
-        dialogContent.appendChild(createCardForVariableOperations(processVariable.write, "Writes"));
-        dialogContent.appendChild(createCardForVariableOperations(processVariable.delete, "Deletes"));
+        var dCardBody = document.createElement("div");
+        dCardBody.setAttribute("class", "card-body");
+
+        var dCardTitle = document.createElement("h5");
+        dCardTitle.setAttribute("class", "card-header");
+        dCardTitle.innerHTML = `'${processVariable.elementName}' does the following accesses to process variables:`;
+        dCard.appendChild(dCardTitle);
+
+        dCardBody.appendChild(createCardForVariableOperations(processVariable.read, "Reads:"));
+        dCardBody.appendChild(createCardForVariableOperations(processVariable.write, "Writes:"));
+        dCardBody.appendChild(createCardForVariableOperations(processVariable.delete, "Deletes:"));
+
+
+        dCard.appendChild(dCardBody);
+        dialogContent.appendChild(dCard);
+
+        const dialogFooter = document.querySelector(".modal-footer");
+        while (dialogFooter.hasChildNodes()) {
+            dialogFooter.removeChild(dialogFooter.lastChild);
+        }
+        let closeButton = document.createElement("button");
+        closeButton.setAttribute("type", "button");
+        closeButton.setAttribute("class", "btn btn-viadee");
+        closeButton.setAttribute("data-dismiss", "modal");
+        closeButton.innerHTML = "Close";
+        dialogFooter.appendChild(closeButton);
 
         showDialog('show');
     }
 }
 
 function createCardForVariableOperations(operations, title) {
-    var dCard = document.createElement("div");
-    dCard.setAttribute("class", "card bg-light mb-3");
-
-    var dCardBody = document.createElement("div");
-    dCardBody.setAttribute("class", "card-body");
-
-    var dCardTitle = document.createElement("h5");
-    dCardTitle.setAttribute("class", "card-header");
-
     var dCardText = document.createElement("p");
     dCardText.setAttribute("class", "card-text");
 
-    dCardTitle.innerHTML = title;
-    dCardText.innerHTML = operations.map(p => createShowOperationsLink(p).outerHTML).join(", ");
+    let operationsText = operations.map(o => createShowOperationsLink(o.name).outerHTML + ` ('${o.elementChapter}', '${o.fieldType}')`).join("<br />");
+    dCardText.innerHTML = `<h6><b>${title}</b></h6> ` + operationsText;
 
-    dCard.appendChild(dCardTitle);
-    dCardBody.appendChild(dCardText);
-    dCard.appendChild(dCardBody);
-
-    return dCard;
+    return dCardText;
 }
 
 // Add single issue to the ignoreIssues list
@@ -286,7 +314,7 @@ function downloadFile(){
 
 //delete table under diagram
 function deleteTable() {
-    let myTable = document.getElementById("table_issues");
+    let myTable = document.getElementById("table");
     while (myTable.firstChild) {
         myTable.removeChild(myTable.firstChild);
     }
@@ -301,7 +329,8 @@ function createTableHeader(id, content) {
 
 //create issue table
 function createIssueTable(bpmnFile, tableContent) {
-    var myTable = document.getElementById("table_issues");
+    var myTable = document.getElementById("table");
+    myTable.setAttribute("class", "table table-issues table-row table-bordered .table-responsive")
     let myTHead = document.createElement("thead");
     let myRow = document.createElement("tr");
     myRow.setAttribute("id", "tr_ueberschriften");
@@ -370,11 +399,11 @@ function createIssueTable(bpmnFile, tableContent) {
 
             //message
             myCell = document.createElement("td");
+            //add links for process variables contained in message
             let messageText = issue.message;
-            processVariables.filter(p => issue.message.includes(p.name))
-                .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name)));
-            myText = document.createTextNode(messageText);
-            myCell.appendChild(myText);
+            processVariables.filter(p => issue.message.includes(`'${p.name}'`))
+                .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
+            myCell.innerHTML = messageText;
             myRow.appendChild(myCell);
 
             //path
@@ -429,7 +458,8 @@ function createIssueTable(bpmnFile, tableContent) {
 //create process variable table
 function createVariableTable(bpmnFile, tableContent) {
     let myParent = document.getElementsByTagName("body").item(0);
-    let myTable = document.getElementById("table_issues");
+    let myTable = document.getElementById("table");
+    myTable.setAttribute("class", "table table-variables table-row table-bordered .table-responsive")
     let myTHead = document.createElement("thead");
     let myRow = document.createElement("tr");
     myRow.setAttribute("id", "tr_ueberschriften");
@@ -577,10 +607,10 @@ function showDialog() {
         a.setAttribute("onclick", "controller.switchModel('" + model.name.replace(/\\/g, "\\\\") + "')");
         a.setAttribute("href", "#");
         if (first === true) {
-            a.setAttribute("class", "nav-link active");
+            a.setAttribute("class", "nav-link model-selector active");
             first = false;
         } else {
-            a.setAttribute("class", "nav-link");
+            a.setAttribute("class", "nav-link model-selector");
         }
 
         a.setAttribute("id", model.name);
@@ -605,7 +635,7 @@ function createNavItem(title, id, onClick) {
     a.innerHTML = title;
     a.setAttribute("onclick", onClick);
     a.setAttribute("href", "#");
-    a.setAttribute("class", "nav-link");
+    a.setAttribute("class", "nav-link table-selector");
     a.setAttribute("id", id);
     li.appendChild(a);
     li.setAttribute("class", "nav-item");
@@ -666,14 +696,21 @@ function createViewController() {
 
     function updateTable(tableViewMode, diagramName) {
         deleteTable();
+        document.getElementById("viewModeNavBar").querySelectorAll("a").forEach(a => a.setAttribute("class", "nav-link table-selector"));
+
         if (tableViewMode === tableViewModes.VARIABLES) {
+            document.getElementById("showVariables").setAttribute("class", "nav-link table-selector active");
             createVariableTable(diagramName, processVariables);
         } else if (countIssues(diagramName, elementsToMark) > 0) {
-            if (tableViewMode === tableViewModes.ISSUES)
+            if (tableViewMode === tableViewModes.ISSUES) {
+                document.getElementById("showAllIssues").setAttribute("class", "nav-link table-selector active");
                 createIssueTable(diagramName, elementsToMark);
-            else
+            } else {
+                document.getElementById("showSuccess").setAttribute("class", "nav-link table-selector active");
                 createIssueTable(diagramName, noIssuesElements);
+            }
         } else {
+            document.getElementById("showAllIssues").setAttribute("class", "nav-link table-selector active");
             createIssueTable(diagramName, noIssuesElements);
         }
         createFooter();
@@ -704,9 +741,9 @@ function createViewController() {
     function getModel(modelName) {
         for (let model of diagramXMLSource) {
             let a = document.getElementById(model.name);
-            a.setAttribute("class", "nav-link");
+            a.setAttribute("class", "nav-link model-selector");
             if (model.name === modelName) {
-                a.setAttribute("class", "nav-link active");
+                a.setAttribute("class", "nav-link active model-selector");
                 return model;
             }
         }
@@ -762,8 +799,8 @@ function createViewController() {
         let model = getModel(modelName);
         if (model === null) throw "model not found";
 
-        document.querySelectorAll("#linkList li a").forEach(a => a.setAttribute("class", "nav-link"));
-        document.getElementById(model.name).setAttribute("class", "nav-link active");
+        document.querySelectorAll("#linkList li a").forEach(a => a.setAttribute("class", "nav-link model-selector"));
+        document.getElementById(model.name).setAttribute("class", "nav-link model-selector active");
 
         updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, model);
     };
