@@ -34,12 +34,12 @@ function addCountOverlay(overlays, elements) {
     for (let element of elements) {
         try {
             let overlayHtml = document.createElement("span");
-            overlayHtml.setAttribute("class", "badge badge-pill badge-pill-cursor " + element.colorClass);
+            overlayHtml.setAttribute("class", "badge badge-pill badge-pill-cursor " + element.classes);
             overlayHtml.setAttribute("type", "button");
             overlayHtml.setAttribute("data-toggle", "bmodal");
             overlayHtml.setAttribute("data-target", "#issueModal");
             overlayHtml.setAttribute("title", element.title);
-            overlayHtml.innerHTML = element.anz;
+            overlayHtml.innerHTML = element.anz.join("<br />");
             overlayHtml.onclick = () => element.clickOverlay();
 
             overlays.add(element.i.elementId, {
@@ -63,9 +63,9 @@ function getProcessVariableOverlay(bpmnFile) {
     return filteredVariables.map(p => {
         let overlayData = {};
         overlayData.i = p;
-        overlayData.anz = p.read.length + p.write.length + p.delete.length;
+        overlayData.anz = [p.read.length, p.write.length, p.delete.length];
         overlayData.clickOverlay = createVariableDialog(p);
-        overlayData.colorClass = "badge-info";
+        overlayData.classes = "badge-info badge-variable-operations";
         overlayData.title = "variable operations";
         return overlayData;
     });
@@ -126,7 +126,7 @@ function getIssueOverlays(bpmnFile) {
             var obj = elementsToMark[id];
             for (var i = 0; i < anzArray.length; i++) {
                 if (anzArray[i].eid == obj.elementId) {
-                    issue = {i: elementsToMark[id], anz: anzArray[i].anz};
+                    issue = {i: elementsToMark[id], anz: [anzArray[i].anz]};
                     issues[id] = issue;
                 }
             }
@@ -139,13 +139,13 @@ function getIssueOverlays(bpmnFile) {
         issueSeverity.forEach(element => {
             if (element.id === issue.i.elementId) {
                 if (element.Criticality === "ERROR") {
-                    issue.colorClass = "badge-danger";
+                    issue.classes = "badge-danger";
                 }
                 if (element.Criticality === "WARNING") {
-                    issue.colorClass = "badge-warning";
+                    issue.classes = "badge-warning";
                 }
                 if (element.Criticality === "INFO") {
-                    issue.colorClass = "badge-info";
+                    issue.classes = "badge-info";
                 }
             }
         });
@@ -259,12 +259,16 @@ function createVariableDialog(processVariable) {
 
         var dCardTitle = document.createElement("h5");
         dCardTitle.setAttribute("class", "card-header");
-        dCardTitle.innerHTML = `'${processVariable.elementName}' does the following accesses to process variables:`;
+        let elementName = processVariable.elementName !== undefined ? processVariable.elementName : processVariable.elementId;
+        dCardTitle.innerHTML = `'${elementName}' does the following accesses to process variables:`;
         dCard.appendChild(dCardTitle);
 
-        dCardBody.appendChild(createCardForVariableOperations(processVariable.read, "Reads:"));
-        dCardBody.appendChild(createCardForVariableOperations(processVariable.write, "Writes:"));
-        dCardBody.appendChild(createCardForVariableOperations(processVariable.delete, "Deletes:"));
+        if (processVariable.read.length > 0)
+            dCardBody.appendChild(createCardForVariableOperations(processVariable.read, "Reads:"));
+        if (processVariable.write.length > 0)
+            dCardBody.appendChild(createCardForVariableOperations(processVariable.write, "Writes:"));
+        if (processVariable.delete.length > 0)
+            dCardBody.appendChild(createCardForVariableOperations(processVariable.delete, "Deletes:"));
 
 
         dCard.appendChild(dCardBody);

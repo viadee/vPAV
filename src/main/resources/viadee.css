@@ -140,6 +140,11 @@ a:hover {
 	-webkit-appearance: none !important;
 }
 
+.badge-variable-operations {
+	padding: 0.3em 0.4em;
+	line-height: 1.2;
+}
+
 .viadee-head {
 	border-bottom: 1px solid #003278;
 }
