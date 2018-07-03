@@ -129,8 +129,8 @@ public class BpmnModelDispatcher {
             issues.addAll(dataFlowChecker.check(modelInstance));
         }
 
-        // create checkerInstances as singletons
-        Collection<ElementChecker> checkerInstances = createCheckerSingletons(resourcesNewestVersions, conf,
+        // create checkerInstances
+        Collection<ElementChecker> checkerInstances = createCheckerInstances(resourcesNewestVersions, conf,
                 bpmnScanner, issues);
 
         executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
@@ -176,7 +176,7 @@ public class BpmnModelDispatcher {
         final Collection<CheckerIssue> issues = new ArrayList<>();
 
         // create checkerInstances as singletons
-        Collection<ElementChecker> checkerInstances = createCheckerSingletons(resourcesNewestVersions, conf,
+        Collection<ElementChecker> checkerInstances = createCheckerInstances(resourcesNewestVersions, conf,
                 bpmnScanner, issues);
 
         executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
@@ -263,7 +263,6 @@ public class BpmnModelDispatcher {
             for (final ElementChecker checker : checkerInstances) {
                 issues.addAll(checker.check(element));
             }
-
         }
     }
 
@@ -296,7 +295,7 @@ public class BpmnModelDispatcher {
      *            List of issues
      * @return CheckerCollection
      */
-    private Collection<ElementChecker> createCheckerSingletons(final Collection<String> resourcesNewestVersions,
+    private Collection<ElementChecker> createCheckerInstances(final Collection<String> resourcesNewestVersions,
             final Map<String, Rule> conf, BpmnScanner bpmnScanner, final Collection<CheckerIssue> issues) {
     	CheckerFactory checkerFactory = new CheckerFactory();
 
