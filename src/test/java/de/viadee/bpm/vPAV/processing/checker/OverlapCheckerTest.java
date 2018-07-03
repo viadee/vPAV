@@ -42,7 +42,6 @@ import java.util.Collection;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import de.viadee.bpm.vPAV.Runner;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -104,8 +103,7 @@ public class OverlapCheckerTest {
             final BpmnElement element = new BpmnElement(PATH, event);
             issues.addAll(checker.check(element));
         }
-
-        Runner.resetSequenceFlowList();
+       
 
         if (issues.size() > 0) {
             Assert.fail("correct model generates an issue");
@@ -138,8 +136,6 @@ public class OverlapCheckerTest {
             final BpmnElement element = new BpmnElement(PATH, event);
             issues.addAll(checker.check(element));
         }
-
-        Runner.resetSequenceFlowList();
 
         if (issues.size() != 1) {
             Assert.fail("Incorrect model should generate an issue");

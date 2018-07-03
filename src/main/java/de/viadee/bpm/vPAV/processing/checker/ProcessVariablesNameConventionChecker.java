@@ -47,21 +47,10 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ProcessVariablesNameConventionChecker extends AbstractElementChecker {
 
-    private static ProcessVariablesNameConventionChecker instance;
-
     public ProcessVariablesNameConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
-    public static ProcessVariablesNameConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (ProcessVariablesNameConventionChecker.instance == null) {
-            ProcessVariablesNameConventionChecker.instance = new ProcessVariablesNameConventionChecker(rule,
-                    bpmnScanner);
-        } else {
-        	ProcessVariablesNameConventionChecker.instance.bpmnScanner = bpmnScanner;
-        }
-        return ProcessVariablesNameConventionChecker.instance;
-    }
 
     /**
      * Checks process variables in an bpmn element, whether they comply naming conventions

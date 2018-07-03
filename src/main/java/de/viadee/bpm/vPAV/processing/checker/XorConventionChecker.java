@@ -58,19 +58,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class XorConventionChecker extends AbstractElementChecker {
 
-    private static XorConventionChecker instance;
-
     public XorConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static XorConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (XorConventionChecker.instance == null) {
-            XorConventionChecker.instance = new XorConventionChecker(rule, bpmnScanner);
-        } else {
-        	XorConventionChecker.instance.bpmnScanner = bpmnScanner;
-        }
-        return XorConventionChecker.instance;
     }
 
     /**

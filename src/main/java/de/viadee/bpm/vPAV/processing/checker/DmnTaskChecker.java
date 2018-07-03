@@ -56,19 +56,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
-    private static DmnTaskChecker instance;
-
     public DmnTaskChecker(final Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static DmnTaskChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (DmnTaskChecker.instance == null) {
-            DmnTaskChecker.instance = new DmnTaskChecker(rule, bpmnScanner);
-        } else {
-        	DmnTaskChecker.instance.bpmnScanner = bpmnScanner;
-        }
-        return DmnTaskChecker.instance;
     }
 
     /**

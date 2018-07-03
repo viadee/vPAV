@@ -33,6 +33,8 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -40,7 +42,6 @@ import org.camunda.bpm.model.bpmn.instance.Event;
 import org.camunda.bpm.model.bpmn.instance.Signal;
 import org.camunda.bpm.model.bpmn.instance.SignalEventDefinition;
 
-import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -51,20 +52,11 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class SignalEventChecker extends AbstractElementChecker {
-
-    private static SignalEventChecker instance;
+	
+	private Map<String, BaseElement> signalNames = new HashMap<>();	
 
     public SignalEventChecker(Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static SignalEventChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (SignalEventChecker.instance == null) {
-            SignalEventChecker.instance = new SignalEventChecker(rule, bpmnScanner);
-        } else {
-        	SignalEventChecker.instance.bpmnScanner = bpmnScanner;
-        }
-        return SignalEventChecker.instance;
     }
 
     @Override
@@ -125,13 +117,30 @@ public class SignalEventChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        if (!Runner.addSignal(baseElement, signal.getName())) {
+        if (!addSignal(baseElement, signal.getName())) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                     String.format(Messages.getString("SignalEventChecker.2"), //$NON-NLS-1$
                             CheckName.checkName(baseElement),
-                            CheckName.checkName(Runner.getSignal(signal.getName())))));
+                            CheckName.checkName(getSignal(signal.getName())))));
         }
         return issues;
     }
+    
+	public boolean addSignal(final BaseElement baseElement, final String name) {
+		if (!signalNames.containsKey(name)) {
+			signalNames.put(name, baseElement);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public BaseElement getSignal(final String name) {
+		return signalNames.get(name);
+	}
+
+	public void removeElement(final String name) {
+		signalNames.remove(name);
+	}
 
 }

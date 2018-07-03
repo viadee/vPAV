@@ -54,9 +54,10 @@ public class ProcessApplicationValidator {
         RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner.viadeeProcessApplicationValidator();
+        Runner runner = new Runner();
+        runner.viadeeProcessApplicationValidator();
 
-        return Runner.getfilteredIssues();
+        return runner.getfilteredIssues();
     }
 
     /**
@@ -71,9 +72,10 @@ public class ProcessApplicationValidator {
         RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner.viadeeProcessApplicationValidator();
+        Runner runner = new Runner();
+        runner.viadeeProcessApplicationValidator();
 
-        return filterErrors(Runner.getfilteredIssues(), CriticalityEnum.ERROR);
+        return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
 
     /**
@@ -84,9 +86,10 @@ public class ProcessApplicationValidator {
     public static Collection<CheckerIssue> findModelInconsistencies() {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner.viadeeProcessApplicationValidator();
+        Runner runner = new Runner();
+        runner.viadeeProcessApplicationValidator();
 
-        return Runner.getfilteredIssues();
+        return runner.getfilteredIssues();
     }
 
     /**
@@ -97,9 +100,10 @@ public class ProcessApplicationValidator {
     public static Collection<CheckerIssue> findModelErrors() {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner.viadeeProcessApplicationValidator();
+        Runner runner = new Runner();
+        runner.viadeeProcessApplicationValidator();
 
-        return filterErrors(Runner.getfilteredIssues(), CriticalityEnum.ERROR);
+        return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
 
     /**

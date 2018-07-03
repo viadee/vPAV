@@ -54,10 +54,9 @@ import java.util.*;
  *
  */
 public class BpmnModelDispatcher {
-
-    private BpmnModelDispatcher() {
-    }
-
+	
+	private Map<String, String> incorrectCheckers = new HashMap<>();
+	
     /**
      * The BpmnModelDispatcher reads a model and creates a collection of all elements. Iterates through collection and
      * checks each element for validity Additionally a graph is created to check for invalid paths.
@@ -78,7 +77,7 @@ public class BpmnModelDispatcher {
      *            ruleSet
      * @return issues
      */
-    public static ModelDispatchResult dispatchWithVariables(final File processdefinition,
+    public ModelDispatchResult dispatchWithVariables(final File processdefinition,
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,
             final Map<String, Collection<String>> processIdToVariables,
@@ -156,7 +155,7 @@ public class BpmnModelDispatcher {
      *            ruleSet
      * @return issues
      */
-    public static ModelDispatchResult dispatchWithoutVariables(final File processdefinition,
+    public ModelDispatchResult dispatchWithoutVariables(final File processdefinition,
            final Map<String, String> decisionRefToPathMap,
            final Map<String, String> processIdToPathMap,
            final Collection<String> resourcesNewestVersions,
@@ -193,7 +192,7 @@ public class BpmnModelDispatcher {
      * @param processdefinition
      *            bpmn file
      */
-    private static Collection<BpmnElement> getBpmnElements(
+    private Collection<BpmnElement> getBpmnElements(
             File processdefinition, Collection<BaseElement> baseElements, ElementGraphBuilder graphBuilder) {
         List<BpmnElement> elements = new ArrayList<>();
         for (final BaseElement baseElement : baseElements) {
@@ -211,7 +210,7 @@ public class BpmnModelDispatcher {
      * @param elements
      *            Collection of BPMN elements
      */
-    private static Collection<ProcessVariable> getProcessVariables(Collection<BpmnElement> elements) {
+    private Collection<ProcessVariable> getProcessVariables(Collection<BpmnElement> elements) {
         // write variables containing elements
         // first, we need to inverse mapping to process variable -> operations (including element)
         final Map<String, ProcessVariable> processVariables = new HashMap<>();
@@ -251,7 +250,7 @@ public class BpmnModelDispatcher {
      * @param checkerInstances
      *            ElementCheckers from ruleSet
      */
-    private static void executeCheckers(final File processdefinition, final Collection<BaseElement> baseElements,
+    private void executeCheckers(final File processdefinition, final Collection<BaseElement> baseElements,
             final ElementGraphBuilder graphBuilder, final Collection<CheckerIssue> issues,
             Collection<ElementChecker> checkerInstances) {
         // execute element checkers
@@ -274,7 +273,7 @@ public class BpmnModelDispatcher {
      *            Holds the path to the BPMN model
      * @return BpmnScanner
      */
-    public static BpmnScanner createScanner(final File processdefinition) {
+    public BpmnScanner createScanner(final File processdefinition) {
         // create BPMNScanner
         BpmnScanner bpmnScanner;
         try {
@@ -297,16 +296,29 @@ public class BpmnModelDispatcher {
      *            List of issues
      * @return CheckerCollection
      */
-    private static Collection<ElementChecker> createCheckerSingletons(final Collection<String> resourcesNewestVersions,
+    private Collection<ElementChecker> createCheckerSingletons(final Collection<String> resourcesNewestVersions,
             final Map<String, Rule> conf, BpmnScanner bpmnScanner, final Collection<CheckerIssue> issues) {
+    	CheckerFactory checkerFactory = new CheckerFactory();
 
-        final Collection<ElementChecker> checkerCollection = CheckerFactory
+        final Collection<ElementChecker> checkerCollection = checkerFactory
                 .createCheckerInstances(conf, resourcesNewestVersions, bpmnScanner);
+        
+        setIncorrectCheckers(checkerFactory.getIncorrectCheckers());
 
         return checkerCollection;
     }
 
-    private static String getClassName(Class<?> clazz) {
+    private String getClassName(Class<?> clazz) {
         return clazz.getSimpleName();
     }
+
+
+	public Map<String, String> getIncorrectCheckers() {
+		return incorrectCheckers;
+	}
+
+
+	public void setIncorrectCheckers(Map<String, String> incorrectCheckers) {
+		this.incorrectCheckers = incorrectCheckers;
+	}
 }

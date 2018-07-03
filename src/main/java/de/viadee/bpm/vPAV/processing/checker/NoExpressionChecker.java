@@ -60,19 +60,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoExpressionChecker extends AbstractElementChecker {
 
-    private static NoExpressionChecker instance;
-
     public NoExpressionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static NoExpressionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (NoExpressionChecker.instance == null) {
-            NoExpressionChecker.instance = new NoExpressionChecker(rule, bpmnScanner);
-        } else {
-        	NoExpressionChecker.instance.bpmnScanner = bpmnScanner;
-        }
-        return NoExpressionChecker.instance;
     }
 
     /**

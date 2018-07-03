@@ -51,19 +51,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class MessageEventChecker extends AbstractElementChecker {
 
-    private static MessageEventChecker instance;
-
     public MessageEventChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static MessageEventChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (MessageEventChecker.instance == null) {
-            MessageEventChecker.instance = new MessageEventChecker(rule, bpmnScanner);
-        } else {
-        	MessageEventChecker.instance.bpmnScanner = bpmnScanner;
-        }
-        return MessageEventChecker.instance;
     }
 
     /**

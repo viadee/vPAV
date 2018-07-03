@@ -35,12 +35,9 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static groovy.xml.Entity.times;
 
 class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBuilder<T> {
 

@@ -42,12 +42,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 
@@ -66,27 +67,41 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 public class JsOutputWriter implements IssueOutputWriter {
 
     private static Logger logger = Logger.getLogger(JsOutputWriter.class.getName());
+    
+    private Map<String, String> ignoredIssuesMap = new HashMap<>();
+    
+    private Map<String, String> wrongCheckersMap = new HashMap<>();
+    
+    private Set<String> modelPaths = new HashSet<>();
 
     /**
      * Writes the output as JavaScript to the vPAV output folder
      */
     @Override
-    public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
+    public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {    	
+    	
         final String json = transformToJsonDatastructure(issues, BpmnConstants.VPAV_ELEMENTS_TO_MARK);
         final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
                 BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
         final String bpmn = transformToXMLDatastructure();
-        final String wrongCheckers = transformToJsDatastructure(Runner.getIncorrectCheckers());
+        final String wrongCheckers = transformToJsDatastructure(getWrongCheckersMap());
         final String defaultCheckers = transformDefaultRulesToJsDatastructure(
                 extractExternalCheckers(
                         RuntimeConfig.getInstance().getActiveRules()));
         final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
-        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(Runner.getIgnoredIssuesMap());
+        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
 
         writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues);
     }
 
-    /**
+    public void prepareMaps(final Map<String, String> wrongCheckers, final Map<String, String> ignoredIssues, final Set<String> modelPath) {
+    	this.setWrongCheckersMap(wrongCheckers);
+    	this.setIgnoredIssuesMap(ignoredIssues);
+    	this.setModelPaths(modelPath);
+    }
+
+
+	/**
      * Creates list which contains elements with multiple issues and the marks it with highest severity
      * 
      * @param issues
@@ -305,7 +320,7 @@ public class JsOutputWriter implements IssueOutputWriter {
     private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
         Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
 
-        for (final String bpmnFilename : Runner.getModelPath()) {
+        for (final String bpmnFilename : getModelPaths()) {
             Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
             modelIssues.addAll(issues);
 
@@ -342,7 +357,7 @@ public class JsOutputWriter implements IssueOutputWriter {
         String output = "var diagramXMLSource = [\n";
 
         try {
-            for (final String bpmnFilename : Runner.getModelPath()) {
+            for (final String bpmnFilename : getModelPaths()) {
                 String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
                 output += "{\"name\":\"" + prettyBpmnFileName + "\",\n \"xml\": \"";
                 output += convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename);
@@ -395,7 +410,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
+    private String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
         final JsonArray jsonIssues = new JsonArray();
         if (issues != null && issues.size() > 0) {
             for (final CheckerIssue issue : issues) {
@@ -444,7 +459,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
+    private String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
         final String varName = "unlocatedCheckers";
         final JsonArray jsonIssues = new JsonArray();
         if (wrongCheckers != null && wrongCheckers.size() > 0) {
@@ -464,7 +479,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
+    private String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
         final String varName = "issueSeverity";
         final JsonArray jsonIssues = new JsonArray();
         if (issues != null && issues.size() > 0) {
@@ -505,7 +520,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param wrongCheckers
      * @return
      */
-    private static String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
+    private String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
         final String varName = "defaultCheckers";
         final JsonArray jsonIssues = new JsonArray();
         if (defaultCheckers != null && defaultCheckers.size() > 0) {
@@ -517,5 +532,29 @@ public class JsOutputWriter implements IssueOutputWriter {
         }
         return ("\n var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
     }
+
+	public Map<String, String> getIgnoredIssuesMap() {
+		return ignoredIssuesMap;
+	}
+
+	public void setIgnoredIssuesMap(Map<String, String> ignoredIssuesMap) {
+		this.ignoredIssuesMap = ignoredIssuesMap;
+	}
+
+	public Map<String, String> getWrongCheckersMap() {
+		return wrongCheckersMap;
+	}
+
+	public void setWrongCheckersMap(Map<String, String> wrongCheckersMap) {
+		this.wrongCheckersMap = wrongCheckersMap;
+	}
+
+	public Set<String> getModelPaths() {
+		return modelPaths;
+	}
+
+	public void setModelPaths(Set<String> modelPaths) {
+		this.modelPaths = modelPaths;
+	}
 
 }

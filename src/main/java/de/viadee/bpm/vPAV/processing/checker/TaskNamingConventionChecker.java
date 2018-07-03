@@ -52,19 +52,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class TaskNamingConventionChecker extends AbstractElementChecker {
 
-    private static TaskNamingConventionChecker instance;
-
     public TaskNamingConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static TaskNamingConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (TaskNamingConventionChecker.instance == null) {
-            TaskNamingConventionChecker.instance = new TaskNamingConventionChecker(rule, bpmnScanner);
-        } else {
-        	TaskNamingConventionChecker.instance.bpmnScanner = bpmnScanner;
-        }
-        return TaskNamingConventionChecker.instance;
     }
 
     /**

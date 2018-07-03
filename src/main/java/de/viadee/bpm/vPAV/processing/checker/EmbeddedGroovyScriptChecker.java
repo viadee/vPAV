@@ -63,19 +63,8 @@ import groovy.lang.MissingPropertyException;
  */
 public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
-    private static EmbeddedGroovyScriptChecker instance;
-
     public EmbeddedGroovyScriptChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static EmbeddedGroovyScriptChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (EmbeddedGroovyScriptChecker.instance == null) {
-            EmbeddedGroovyScriptChecker.instance = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
-        } else {
-        	EmbeddedGroovyScriptChecker.instance.bpmnScanner = bpmnScanner;
-        }
-        return EmbeddedGroovyScriptChecker.instance;
     }
 
     /**
