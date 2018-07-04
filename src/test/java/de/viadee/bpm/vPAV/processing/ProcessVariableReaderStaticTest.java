@@ -57,6 +57,7 @@ import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ProcessVariableReaderStaticTest {
 
@@ -93,7 +94,7 @@ public class ProcessVariableReaderStaticTest {
         final ProcessVariableReaderStatic variableReader = new ProcessVariableReaderStatic(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariable> variables = variableReader.getVariablesFromElement(element);
+        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
 
         Assert.assertEquals(2, variables.size());
     }

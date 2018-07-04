@@ -33,12 +33,12 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -50,18 +50,11 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class OverlapChecker extends AbstractElementChecker {
 
-    private static OverlapChecker instance;
-
     public OverlapChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
-
-    public static OverlapChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (OverlapChecker.instance == null) {
-            OverlapChecker.instance = new OverlapChecker(rule, bpmnScanner);
-        }
-        return OverlapChecker.instance;
-    }
+    
+    private Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
 
     /**
      * Check for redundant edges between common elements (double or more flows instead of one)
@@ -78,11 +71,11 @@ public class OverlapChecker extends AbstractElementChecker {
 
             final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
 
-            if (AbstractRunner.getSequenceFlowList().isEmpty()) {
-                AbstractRunner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            if (getSequenceFlowList().isEmpty()) {
+                addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
             }
 
-            for (Map.Entry<String, ArrayList<String>> entry : AbstractRunner.getSequenceFlowList().entrySet()) {
+            for (Map.Entry<String, ArrayList<String>> entry : getSequenceFlowList().entrySet()) {
                 // Check whether targetRef & sourceRef of current item exist in global list
                 if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
@@ -93,13 +86,25 @@ public class OverlapChecker extends AbstractElementChecker {
                 }
             }
 
-            if (!AbstractRunner.getSequenceFlowList().containsKey(bpmnElement.getId())) {
-                AbstractRunner.addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            if (!getSequenceFlowList().containsKey(bpmnElement.getId())) {
+                addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
             }
 
         }
 
         return issues;
     }
+
+	public Map<String, ArrayList<String>> getSequenceFlowList() {
+		return sequenceFlowList;
+	}
+
+	public void addToSequenceFlowList(String id, ArrayList<String> sequenceFlowList) {
+		this.sequenceFlowList.put(id, sequenceFlowList);
+	}
+
+	public void resetSequenceFlowList() {
+		this.sequenceFlowList.clear();
+	}
 
 }

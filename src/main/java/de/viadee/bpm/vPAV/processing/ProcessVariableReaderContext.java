@@ -35,6 +35,7 @@ import java.util.Map;
 
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ProcessVariableReaderContext {
 
@@ -44,7 +45,7 @@ private ProcessVariableReaderI readingStrategy;
         this.readingStrategy = readingStrategy;
     }
     
-    public Map<String, ProcessVariable> readingVariables(final BpmnElement element) {
+    public Map<String, ProcessVariableOperation> readingVariables(final BpmnElement element) {
         return readingStrategy.getVariablesFromElement(element);
     }
     

@@ -66,7 +66,7 @@ public class AbstractRunnerTest {
         ProcessApplicationValidator pav = new ProcessApplicationValidator();
         pav.findModelErrors();
 
-        boolean isStatic = AbstractRunner.getIsStatic();
+        boolean isStatic = Runner.getIsStatic();
 
         assertEquals(true, isStatic);
 

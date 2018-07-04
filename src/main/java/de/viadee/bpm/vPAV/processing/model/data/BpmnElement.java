@@ -65,12 +65,12 @@ public class BpmnElement {
     /* out interface for call activity */
     private Collection<String> outCa;
 
-    private Map<String, ProcessVariable> processVariables;
+    private Map<String, ProcessVariableOperation> processVariables;
 
     public BpmnElement(final String processdefinition, final BaseElement element) {
         this.processdefinition = processdefinition;
         this.baseElement = element;
-        this.processVariables = new HashMap<String, ProcessVariable>();
+        this.processVariables = new HashMap<String, ProcessVariableOperation>();
     }
 
     public String getProcessdefinition() {
@@ -81,15 +81,15 @@ public class BpmnElement {
         return baseElement;
     }
 
-    public Map<String, ProcessVariable> getProcessVariables() {
+    public Map<String, ProcessVariableOperation> getProcessVariables() {
         return processVariables;
     }
 
-    public void setProcessVariables(final Map<String, ProcessVariable> variables) {
+    public void setProcessVariables(final Map<String, ProcessVariableOperation> variables) {
         this.processVariables = variables;
     }
 
-    public void setProcessVariable(final String variableName, final ProcessVariable variableObject) {
+    public void setProcessVariable(final String variableName, final ProcessVariableOperation variableObject) {
         processVariables.put(variableName, variableObject);
     }
 
@@ -160,7 +160,7 @@ public class BpmnElement {
 
     private Map<String, InOutState> used() {
         if (this.used.isEmpty()) {
-            for (final ProcessVariable var : processVariables.values()) {
+            for (final ProcessVariableOperation var : processVariables.values()) {
                 if (var.getOperation() == VariableOperation.READ) {
                     used.put(var.getName(), InOutState.READ);
                 }
@@ -171,7 +171,7 @@ public class BpmnElement {
 
     public Map<String, InOutState> defined() {
         if (this.defined.isEmpty()) {
-            for (final ProcessVariable var : processVariables.values()) {
+            for (final ProcessVariableOperation var : processVariables.values()) {
                 if (var.getOperation() == VariableOperation.WRITE) {
                     defined.put(var.getName(), InOutState.DEFINED);
                 }
@@ -182,7 +182,7 @@ public class BpmnElement {
 
     private Map<String, InOutState> killed() {
         final Map<String, InOutState> killedVariables = new HashMap<String, InOutState>();
-        for (final ProcessVariable var : processVariables.values()) {
+        for (final ProcessVariableOperation var : processVariables.values()) {
             if (var.getOperation() == VariableOperation.DELETE) {
                 killedVariables.put(var.getName(), InOutState.DELETED);
             }

@@ -48,9 +48,9 @@ public class VariableBlock {
 
     private Block block;
 
-    private List<ProcessVariable> processVariables;
+    private List<ProcessVariableOperation> processVariables;
 
-    public VariableBlock(Block block, List<ProcessVariable> pvs) {
+    public VariableBlock(Block block, List<ProcessVariableOperation> pvs) {
         this.block = block;
         this.processVariables = pvs;
     }
@@ -64,18 +64,18 @@ public class VariableBlock {
         return block;
     }
 
-    public List<ProcessVariable> getAllProcessVariables() {
+    public List<ProcessVariableOperation> getAllProcessVariables() {
         return processVariables;
     }
 
-    public void addProcessVariable(ProcessVariable processVariable) {
+    public void addProcessVariable(ProcessVariableOperation processVariable) {
         this.processVariables.add(processVariable);
     }
 
-    public Map<String, ProcessVariable> getProcessVariablesMapped() {
+    public Map<String, ProcessVariableOperation> getProcessVariablesMapped() {
 
-        Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
-        for (ProcessVariable pv : processVariables) {
+        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+        for (ProcessVariableOperation pv : processVariables) {
 
             variables.put(pv.getName(), pv);
         }

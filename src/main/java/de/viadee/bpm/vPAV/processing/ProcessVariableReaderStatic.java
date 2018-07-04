@@ -99,6 +99,7 @@ import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.OutSetCFG;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableBlock;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
@@ -140,9 +141,9 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      *            BpmnElement
      * @return processVariables returns processVariables
      */
-    public Map<String, ProcessVariable> getVariablesFromElement(final BpmnElement element) {
+    public Map<String, ProcessVariableOperation> getVariablesFromElement(final BpmnElement element) {
 
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
 
         // 1) Search variables in task
         processVariables.putAll(getVariablesFromTask(element));
@@ -158,8 +159,8 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
         return processVariables;
     }
 
-    private Map<String, ProcessVariable> getVariablesFromNames(BpmnElement element) {
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+    private Map<String, ProcessVariableOperation> getVariablesFromNames(BpmnElement element) {
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
         final BaseElement baseElement = element.getBaseElement();
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
 
@@ -175,13 +176,13 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
         ArrayList<String> messageVariables = getMessageVariables(messagesRefs, element);
 
         for (String variable : messageVariables) {
-            processVariables.put(variable, new ProcessVariable(variable, element, ElementChapter.General,
+            processVariables.put(variable, new ProcessVariableOperation(variable, element, ElementChapter.General,
                     KnownElementFieldType.Message, element.getProcessdefinition(), VariableOperation.READ,
                     scopeElementId));
         }
 
         for (String variable : signalVariables) {
-            processVariables.put(variable, new ProcessVariable(variable, element, ElementChapter.General,
+            processVariables.put(variable, new ProcessVariableOperation(variable, element, ElementChapter.General,
                     KnownElementFieldType.Signal, element.getProcessdefinition(), VariableOperation.READ,
                     scopeElementId));
         }
@@ -226,8 +227,8 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @return Map of ProcessVariable
      *
      */
-    private Map<String, ProcessVariable> getVariablesFromParameters(BpmnElement element) {
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+    private Map<String, ProcessVariableOperation> getVariablesFromParameters(BpmnElement element) {
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
         final BaseElement baseElement = element.getBaseElement();
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
 
@@ -243,7 +244,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
         // save output variables
         for (String name : outVar) {
             processVariables.put(name,
-                    new ProcessVariable(name, element, ElementChapter.InputOutput,
+                    new ProcessVariableOperation(name, element, ElementChapter.InputOutput,
                             KnownElementFieldType.OutputParameter,
                             element.getProcessdefinition(), VariableOperation.WRITE, scopeElementId));
         }
@@ -256,14 +257,14 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
 
         // add all processVariables to List
         for (String var : varValueClean) {
-            processVariables.put(var, new ProcessVariable(var, element, ElementChapter.InputOutput,
+            processVariables.put(var, new ProcessVariableOperation(var, element, ElementChapter.InputOutput,
                     KnownElementFieldType.OutputParameter, element.getProcessdefinition(), VariableOperation.READ,
                     scopeElementId));
         }
 
         for (String name : outVar)
             processVariables.put(name,
-                    new ProcessVariable(name, element, ElementChapter.InputOutput,
+                    new ProcessVariableOperation(name, element, ElementChapter.InputOutput,
                             KnownElementFieldType.OutputParameter,
                             element.getProcessdefinition(), VariableOperation.WRITE, scopeElementId));
 
@@ -276,9 +277,9 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param element
      * @return variables
      */
-    private Map<String, ProcessVariable> searchExtensionsElements(final BpmnElement element) {
+    private Map<String, ProcessVariableOperation> searchExtensionsElements(final BpmnElement element) {
 
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
         final BaseElement baseElement = element.getBaseElement();
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
         String scopeElementId = null;
@@ -314,10 +315,10 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param elementId
      * @return variables
      */
-    private Map<String, ProcessVariable> getVariablesFromExecutionListener(final BpmnElement element,
+    private Map<String, ProcessVariableOperation> getVariablesFromExecutionListener(final BpmnElement element,
             final ExtensionElements extensionElements, final String scopeId) {
 
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
         List<CamundaExecutionListener> listenerList = extensionElements.getElementsQuery()
                 .filterByType(CamundaExecutionListener.class).list();
         for (final CamundaExecutionListener listener : listenerList) {
@@ -365,10 +366,10 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param elementId
      * @return variables
      */
-    private Map<String, ProcessVariable> getVariablesFromTaskListener(final BpmnElement element,
+    private Map<String, ProcessVariableOperation> getVariablesFromTaskListener(final BpmnElement element,
             final ExtensionElements extensionElements, final String scopeId) {
 
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
         List<CamundaTaskListener> listenerList = extensionElements.getElementsQuery()
                 .filterByType(CamundaTaskListener.class).list();
         for (final CamundaTaskListener listener : listenerList) {
@@ -414,10 +415,10 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param elementId
      * @return variables
      */
-    private Map<String, ProcessVariable> getVariablesFromFormData(final BpmnElement element,
+    private Map<String, ProcessVariableOperation> getVariablesFromFormData(final BpmnElement element,
             final ExtensionElements extensionElements, final String scopeElementId) {
 
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
 
         final Query<CamundaFormData> formDataQuery = extensionElements.getElementsQuery()
                 .filterByType(CamundaFormData.class);
@@ -427,7 +428,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                 final Collection<CamundaFormField> formFields = formData.getCamundaFormFields();
                 for (final CamundaFormField field : formFields) {
                     processVariables.put(field.getCamundaId(),
-                            new ProcessVariable(field.getCamundaId(), element, ElementChapter.FormData,
+                            new ProcessVariableOperation(field.getCamundaId(), element, ElementChapter.FormData,
                                     KnownElementFieldType.FormField, null, VariableOperation.WRITE, scopeElementId));
                 }
             }
@@ -444,10 +445,10 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param elementScopeId
      * @return variables
      */
-    private Map<String, ProcessVariable> searchVariablesInInputOutputExtensions(
+    private Map<String, ProcessVariableOperation> searchVariablesInInputOutputExtensions(
             final BpmnElement element, final ExtensionElements extensionElements, final String scopeId) {
 
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
 
         final BaseElement baseElement = element.getBaseElement();
 
@@ -458,7 +459,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                 final String source = inputAssociation.getCamundaSource();
                 if (source != null && !source.isEmpty()) {
                     processVariables.put(source,
-                            new ProcessVariable(source, element, ElementChapter.InputData,
+                            new ProcessVariableOperation(source, element, ElementChapter.InputData,
                                     KnownElementFieldType.CamundaIn, null, VariableOperation.READ, scopeId));
                 }
             }
@@ -468,7 +469,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                 final String target = outputAssociation.getCamundaTarget();
                 if (target != null && !target.isEmpty()) {
                     processVariables.put(target,
-                            new ProcessVariable(target, element, ElementChapter.OutputData,
+                            new ProcessVariableOperation(target, element, ElementChapter.OutputData,
                                     KnownElementFieldType.CamundaOut, null, VariableOperation.WRITE, scopeId));
                 }
             }
@@ -483,9 +484,9 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param element
      * @return variables
      */
-    private Map<String, ProcessVariable> searchVariablesFromSequenceFlow(final BpmnElement element) {
+    private Map<String, ProcessVariableOperation> searchVariablesFromSequenceFlow(final BpmnElement element) {
 
-        Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
         final BaseElement baseElement = element.getBaseElement();
         if (baseElement instanceof SequenceFlow) {
             final SequenceFlow flow = (SequenceFlow) baseElement;
@@ -526,9 +527,9 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param element
      * @return variables
      */
-    private Map<String, ProcessVariable> getVariablesFromTask(final BpmnElement element) {
+    private Map<String, ProcessVariableOperation> getVariablesFromTask(final BpmnElement element) {
 
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
 
         final BaseElement baseElement = element.getBaseElement();
         BpmnModelElementInstance scopeElement = baseElement.getScope();
@@ -565,7 +566,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                     BpmnConstants.RESULT_VARIABLE);
             if (t_resultVariable != null && t_resultVariable.trim().length() > 0) {
                 processVariables.put(t_resultVariable,
-                        new ProcessVariable(t_resultVariable, element, ElementChapter.Details,
+                        new ProcessVariableOperation(t_resultVariable, element, ElementChapter.Details,
                                 KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId));
             }
             processVariables.putAll(getVariablesFromJavaDelegateStatic(
@@ -629,7 +630,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
             String resultVariable = scriptTask.getCamundaResultVariable();
             if (resultVariable != null && resultVariable.trim().length() > 0) {
                 processVariables.put(resultVariable,
-                        new ProcessVariable(resultVariable, element, ElementChapter.Details,
+                        new ProcessVariableOperation(resultVariable, element, ElementChapter.Details,
                                 KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId));
             }
         } else if (baseElement instanceof CallActivity) {
@@ -659,9 +660,9 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param element
      * @return variables
      */
-    private Map<String, ProcessVariable> searchVariablesInMultiInstanceTask(final BpmnElement element) {
+    private Map<String, ProcessVariableOperation> searchVariablesInMultiInstanceTask(final BpmnElement element) {
 
-        final Map<String, ProcessVariable> processVariables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
 
         final BaseElement baseElement = element.getBaseElement();
         BpmnModelElementInstance scopeElement = baseElement.getScope();
@@ -676,14 +677,14 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                     .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.COLLECTION);
             if (collectionName != null && collectionName.trim().length() > 0) {
                 processVariables.put(collectionName,
-                        new ProcessVariable(collectionName, element, ElementChapter.MultiInstance,
+                        new ProcessVariableOperation(collectionName, element, ElementChapter.MultiInstance,
                                 KnownElementFieldType.CollectionElement, null, VariableOperation.READ, scopeId));
             }
             final String elementVariable = loopCharacteristics
                     .getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ELEMENT_VARIABLE);
             if (elementVariable != null && elementVariable.trim().length() > 0) {
                 processVariables.put(elementVariable,
-                        new ProcessVariable(elementVariable, element, ElementChapter.MultiInstance,
+                        new ProcessVariableOperation(elementVariable, element, ElementChapter.MultiInstance,
                                 KnownElementFieldType.ElementVariable, null, VariableOperation.READ, scopeId));
             }
             final ModelElementInstance loopCardinality = loopCharacteristics
@@ -721,7 +722,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @return variables
      * @throws MalformedURLException
      */
-    private Map<String, ProcessVariable> getVariablesFromJavaDelegate(final String classFile,
+    private Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
             final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId) {
         // convert package format in a concrete path to the java class (.java)
@@ -729,7 +730,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
         if (classFile != null && classFile.trim().length() > 0) {
             filePath = classFile.replaceAll("\\.", "/") + ".java";
         }
-        final Map<String, ProcessVariable> variables = readResourceFile(filePath, element, chapter,
+        final Map<String, ProcessVariableOperation> variables = readResourceFile(filePath, element, chapter,
                 fieldType, scopeId);
         return variables;
     }
@@ -747,11 +748,11 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param scopeId
      * @return
      */
-    private Map<String, ProcessVariable> getVariablesFromJavaDelegateStatic(final String classFile,
+    private Map<String, ProcessVariableOperation> getVariablesFromJavaDelegateStatic(final String classFile,
             final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId) {
 
-        final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
 
         String filePath = "";
         if (classFile != null && classFile.trim().length() > 0) {
@@ -856,7 +857,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
             final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId) {
 
-        VariableBlock variableBlock = new VariableBlock(block, new ArrayList<ProcessVariable>());
+        VariableBlock variableBlock = new VariableBlock(block, new ArrayList<ProcessVariableOperation>());
 
         final Iterator<Unit> unitIt = block.iterator();
         while (unitIt.hasNext()) {
@@ -884,7 +885,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                                         .getOperationType();
 
                                 if (expr.getArgBox(location).getValue() instanceof StringConstant) {
-                                    variableBlock.addProcessVariable(new ProcessVariable(
+                                    variableBlock.addProcessVariable(new ProcessVariableOperation(
                                             expr.getArgBox(location).getValue().toString(), element, chapter, fieldType,
                                             filePath, type, scopeId));
                                 }
@@ -914,7 +915,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                                         .getOperationType();
 
                                 if (expr.getArgBox(location).getValue() instanceof StringConstant) {
-                                    variableBlock.addProcessVariable(new ProcessVariable(
+                                    variableBlock.addProcessVariable(new ProcessVariableOperation(
                                             expr.getArgBox(location).getValue().toString(), element, chapter, fieldType,
                                             filePath, type, scopeId));
                                 }
@@ -936,11 +937,11 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param groovyFile
      * @return variables
      */
-    private Map<String, ProcessVariable> getVariablesFromGroovyScript(final String groovyFile,
+    private Map<String, ProcessVariableOperation> getVariablesFromGroovyScript(final String groovyFile,
             final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId) {
 
-        final Map<String, ProcessVariable> variables = readResourceFile(groovyFile, element, chapter,
+        final Map<String, ProcessVariableOperation> variables = readResourceFile(groovyFile, element, chapter,
                 fieldType, scopeId);
         return variables;
     }
@@ -952,10 +953,10 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param element
      * @return variables
      */
-    private Map<String, ProcessVariable> readResourceFile(final String fileName,
+    private Map<String, ProcessVariableOperation> readResourceFile(final String fileName,
             final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId) {
-        Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
         if (fileName != null && fileName.trim().length() > 0) {
             try {
                 final DirectoryScanner directoryScanner = new DirectoryScanner();
@@ -1000,11 +1001,11 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param filePath
      * @return
      */
-    private Map<String, ProcessVariable> readDmnFile(final String decisionId, final String fileName,
+    private Map<String, ProcessVariableOperation> readDmnFile(final String decisionId, final String fileName,
             final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId) {
 
-        final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
 
         if (fileName != null && fileName.trim().length() > 0) {
             final InputStream resource = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(fileName);
@@ -1016,14 +1017,14 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                         .getModelElementsByType(InputExpression.class);
                 for (final InputExpression inputExpression : inputExpressions) {
                     final Text variable = inputExpression.getText();
-                    variables.put(variable.getTextContent(), new ProcessVariable(variable.getTextContent(),
+                    variables.put(variable.getTextContent(), new ProcessVariableOperation(variable.getTextContent(),
                             element, chapter, fieldType, fileName, VariableOperation.READ, scopeId));
                 }
                 final Collection<Output> outputs = decision.getModelInstance()
                         .getModelElementsByType(Output.class);
                 for (final Output output : outputs) {
                     final String variable = output.getName();
-                    variables.put(variable, new ProcessVariable(variable, element, chapter, fieldType,
+                    variables.put(variable, new ProcessVariableOperation(variable, element, chapter, fieldType,
                             fileName, VariableOperation.WRITE, scopeId));
                 }
             }
@@ -1039,11 +1040,11 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param code
      * @return variables
      */
-    private Map<String, ProcessVariable> searchProcessVariablesInCode(final BpmnElement element,
+    private Map<String, ProcessVariableOperation> searchProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
             final String scopeId, final String code) {
 
-        final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
         variables.putAll(
                 searchReadProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
         variables.putAll(
@@ -1062,11 +1063,11 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param code
      * @return
      */
-    private Map<String, ProcessVariable> searchReadProcessVariablesInCode(final BpmnElement element,
+    private Map<String, ProcessVariableOperation> searchReadProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
             final String scopeId, final String code) {
 
-        final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
@@ -1083,7 +1084,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
 
         while (matcherRuntimeService.find()) {
             final String match = matcherRuntimeService.group(2);
-            variables.put(match, new ProcessVariable(match, element, chapter, fieldType, fileName,
+            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
                     VariableOperation.READ, scopeId));
         }
 
@@ -1094,7 +1095,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
 
         while (matcherDelegateExecution.find()) {
             final String match = matcherDelegateExecution.group(1);
-            variables.put(match, new ProcessVariable(match, element, chapter, fieldType, fileName,
+            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
                     VariableOperation.READ, scopeId));
         }
 
@@ -1109,12 +1110,12 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param code
      * @return
      */
-    private Map<String, ProcessVariable> searchWrittenProcessVariablesInCode(
+    private Map<String, ProcessVariableOperation> searchWrittenProcessVariablesInCode(
             final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String fileName, final String scopeId,
             final String code) {
 
-        final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
@@ -1131,7 +1132,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                 .matcher(cleanedCode);
         while (matcherPatternRuntimeService.find()) {
             final String match = matcherPatternRuntimeService.group(2);
-            variables.put(match, new ProcessVariable(match, element, chapter, fieldType, fileName,
+            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
                     VariableOperation.WRITE, scopeId));
         }
 
@@ -1141,7 +1142,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                 .matcher(cleanedCode);
         while (matcherPatternDelegateExecution.find()) {
             final String match = matcherPatternDelegateExecution.group(1);
-            variables.put(match, new ProcessVariable(match, element, chapter, fieldType, fileName,
+            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
                     VariableOperation.WRITE, scopeId));
         }
 
@@ -1159,12 +1160,12 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @param code
      * @return variables
      */
-    private Map<String, ProcessVariable> searchRemovedProcessVariablesInCode(
+    private Map<String, ProcessVariableOperation> searchRemovedProcessVariablesInCode(
             final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String fileName, final String scopeId,
             final String code) {
 
-        final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
@@ -1181,7 +1182,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
 
         while (matcherRuntimeService.find()) {
             final String match = matcherRuntimeService.group(2);
-            variables.put(match, new ProcessVariable(match, element, chapter, fieldType, fileName,
+            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
                     VariableOperation.DELETE, scopeId));
         }
 
@@ -1192,7 +1193,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
 
         while (matcherDelegateExecution.find()) {
             final String match = matcherDelegateExecution.group(1);
-            variables.put(match, new ProcessVariable(match, element, chapter, fieldType, fileName,
+            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
                     VariableOperation.DELETE, scopeId));
         }
 
@@ -1207,10 +1208,10 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
      * @return variables
      * @throws ProcessingException
      */
-    private Map<String, ProcessVariable> findVariablesInExpression(final String expression,
+    private Map<String, ProcessVariableOperation> findVariablesInExpression(final String expression,
             final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId) {
-        final Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
 
         // HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
         // ${dateTime().plusWeeks(1).toDate()}
@@ -1238,7 +1239,7 @@ public final class ProcessVariableReaderStatic implements ProcessVariableReaderI
                             getVariablesFromJavaDelegate(className, element, chapter, fieldType, scopeId));
                 } else {
                     // save variable
-                    variables.put(node.getName(), new ProcessVariable(node.getName(), element, chapter,
+                    variables.put(node.getName(), new ProcessVariableOperation(node.getName(), element, chapter,
                             fieldType, null, VariableOperation.READ, scopeId));
                 }
             }

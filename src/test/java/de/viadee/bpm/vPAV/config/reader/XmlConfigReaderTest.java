@@ -39,7 +39,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,8 +52,6 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 public class XmlConfigReaderTest {
 
     private static ClassLoader cl;
-
-    private static Logger logger = Logger.getLogger(XmlConfigReaderTest.class.getName());
 
     @BeforeClass
     public static void setup() throws MalformedURLException {

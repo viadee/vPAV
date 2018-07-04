@@ -70,9 +70,9 @@ public class OutSetCFG {
         this.variableBlocks.add(vb);
     }
 
-    public Map<String, ProcessVariable> getAllProcessVariables() {
+    public Map<String, ProcessVariableOperation> getAllProcessVariables() {
 
-        Map<String, ProcessVariable> variables = new HashMap<String, ProcessVariable>();
+        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
 
         for (VariableBlock vb : variableBlocks) {
 

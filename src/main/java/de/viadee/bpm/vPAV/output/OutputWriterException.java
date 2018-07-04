@@ -38,4 +38,8 @@ public class OutputWriterException extends Exception {
   public OutputWriterException(final String message) {
     super(message);
   }
+
+  public OutputWriterException(final String message, Exception ex) {
+    super(message, ex);
+  }
 }

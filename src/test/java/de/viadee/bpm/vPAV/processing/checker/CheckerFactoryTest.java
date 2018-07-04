@@ -98,8 +98,9 @@ public class CheckerFactoryTest {
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
         Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
         rules.put("JavaDelegateChecker", rule);
+        CheckerFactory checkerFactory = new CheckerFactory();
 
-        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstances(rules, null,
+        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
                 new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should not be empty", !cElChecker.isEmpty());
@@ -118,8 +119,9 @@ public class CheckerFactoryTest {
             throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
         Rule rule = new Rule("WrongChecker", true, null, null, null, null);
         rules.put("WrongChecker", rule);
-
-        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstances(rules, null,
+        CheckerFactory checkerFactory = new CheckerFactory();
+        
+        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
                 new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
@@ -139,8 +141,9 @@ public class CheckerFactoryTest {
         settings.put("external_Location", setting);
         Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
         rules.put("WrongChecker", rule);
-
-        Collection<ElementChecker> cElChecker = CheckerFactory.createCheckerInstances(rules, null,
+        CheckerFactory checkerFactory = new CheckerFactory();
+        
+        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
                 new BpmnScanner(PATH));
 
         assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());

@@ -60,15 +60,15 @@ import org.camunda.bpm.model.bpmn.instance.SubProcess;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -104,6 +104,13 @@ public class ElementGraphBuilder {
         this.processIdToPathMap = processIdToPathMap;
         this.messageIdToVariables = messageIdToVariables;
         this.processIdToVariables = processIdToVariables;
+        this.bpmnScanner = bpmnScanner;
+    }
+
+    public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
+            final Map<String, String> processIdToPathMap, BpmnScanner bpmnScanner) {
+        this.decisionRefToPathMap = decisionRefToPathMap;
+        this.processIdToPathMap = processIdToPathMap;
         this.bpmnScanner = bpmnScanner;
     }
 
@@ -155,13 +162,13 @@ public class ElementGraphBuilder {
                 //based on configuration either with regular expressions or with Static Code analysis:
                 // examine process variables and save it with access operation
                 ProcessVariableReaderContext pvrc = new ProcessVariableReaderContext();
-                if(AbstractRunner.getIsStatic()) {
+                if(Runner.getIsStatic()) {
                     pvrc.setReadingStrategy(new ProcessVariableReaderStatic(decisionRefToPathMap, bpmnScanner));
                 }
                 else {
                     pvrc.setReadingStrategy(new ProcessVariableReaderRegex(decisionRefToPathMap, bpmnScanner));
                 }
-                final Map<String, ProcessVariable> variables = pvrc.readingVariables(node);
+                final Map<String, ProcessVariableOperation> variables = pvrc.readingVariables(node);
                 // examine process variables for element and set it
                 node.setProcessVariables(variables);
 
@@ -215,7 +222,7 @@ public class ElementGraphBuilder {
             if (outerVariables != null) {
                 for (final String varName : outerVariables) {
                     node.setProcessVariable(varName,
-                            new ProcessVariable(varName, node, ElementChapter.OutstandingVariable,
+                            new ProcessVariableOperation(varName, node, ElementChapter.OutstandingVariable,
                                     KnownElementFieldType.Class, null, VariableOperation.WRITE, ""));
                 }
             }
@@ -247,7 +254,7 @@ public class ElementGraphBuilder {
                                 if (outerVariables != null) {
                                     for (final String varName : outerVariables) {
                                         node.setProcessVariable(varName,
-                                                new ProcessVariable(varName, node, ElementChapter.OutstandingVariable,
+                                                new ProcessVariableOperation(varName, node, ElementChapter.OutstandingVariable,
                                                         KnownElementFieldType.Class, null, VariableOperation.WRITE,
                                                         ""));
                                     }
@@ -385,14 +392,14 @@ public class ElementGraphBuilder {
             //based on configuration either with regular expressions or with Static Code analysis:
             // determine process variables with operations
             ProcessVariableReaderContext pvrc = new ProcessVariableReaderContext();
-            if(AbstractRunner.getIsStatic()) {
+            if(Runner.getIsStatic()) {
                 pvrc.setReadingStrategy(new ProcessVariableReaderStatic(decisionRefToPathMap, bpmnScanner));
             }
             else
             {
                 pvrc.setReadingStrategy(new ProcessVariableReaderRegex(decisionRefToPathMap, bpmnScanner));
             }
-            final Map<String, ProcessVariable> variables = pvrc.readingVariables(node);
+            final Map<String, ProcessVariableOperation> variables = pvrc.readingVariables(node);
             // set process variables for the node
             node.setProcessVariables(variables);
             // mention the element

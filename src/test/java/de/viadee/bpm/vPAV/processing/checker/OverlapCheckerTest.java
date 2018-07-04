@@ -50,7 +50,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.AbstractRunner;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -104,8 +103,7 @@ public class OverlapCheckerTest {
             final BpmnElement element = new BpmnElement(PATH, event);
             issues.addAll(checker.check(element));
         }
-
-        AbstractRunner.resetSequenceFlowList();
+       
 
         if (issues.size() > 0) {
             Assert.fail("correct model generates an issue");
@@ -138,8 +136,6 @@ public class OverlapCheckerTest {
             final BpmnElement element = new BpmnElement(PATH, event);
             issues.addAll(checker.check(element));
         }
-
-        AbstractRunner.resetSequenceFlowList();
 
         if (issues.size() != 1) {
             Assert.fail("Incorrect model should generate an issue");
