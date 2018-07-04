@@ -90,7 +90,7 @@ public class ProcessVariableOperationReaderTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReaderRegex variableReader = new ProcessVariableReaderRegex(null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
@@ -108,7 +108,7 @@ public class ProcessVariableOperationReaderTest {
         final Collection<CallActivity> allServiceTasks = modelInstance
                 .getModelElementsByType(CallActivity.class);
 
-        final ProcessVariableReaderRegex variableReader = new ProcessVariableReaderRegex(null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);

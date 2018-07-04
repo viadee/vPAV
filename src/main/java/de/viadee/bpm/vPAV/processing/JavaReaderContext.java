@@ -34,11 +34,20 @@ package de.viadee.bpm.vPAV.processing;
 import java.util.Map;
 
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
-public interface ProcessVariableReaderI {
+public class JavaReaderContext {
 
-    public Map<String, ProcessVariableOperation> getVariablesFromElement(final BpmnElement element);
-    
+    private JavaReader javaReaderStrategy;
+
+    public void setJavaReadingStrategy(JavaReader readingStrategy) {
+        this.javaReaderStrategy = readingStrategy;
+    }
+
+    public Map<String, ProcessVariableOperation> readJavaDelegate(final String classFile, final BpmnElement element,
+            final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
+        return javaReaderStrategy.getVariablesFromJavaDelegate(classFile, element, chapter, fieldType, scopeId);
+    }
 }

@@ -29,23 +29,18 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.delegates;
+package de.viadee.bpm.vPAV.processing;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
+import java.util.Map;
 
-public class TestDelegateStatic implements org.camunda.bpm.engine.delegate.JavaDelegate {
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
+public interface JavaReader {
 
-        final String variableName = "ProcessVariable1";
-        execution.setVariable(variableName, true);
-
-        // TODO Auto-generated method stub
-        /* execution.setVariable("dshfhdsfhfds", true); */
-        execution.getVariable("ProcessVariable2");
-
-        final String variableName2 = "ProcessVariable3";
-        execution.setVariable(variableName2, true);
-    }
+    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
+            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+            final String scopeId);
 }

@@ -83,20 +83,11 @@ public class ProcessVariableReaderStaticTest {
         ProcessApplicationValidator pav = new ProcessApplicationValidator();
         pav.findModelErrors();
 
-        final String PATH = BASE_PATH + "ProcessVariableStaticReaderTest_RecogniseVariablesInClassStatic.bpmn";
+        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(
+                "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        assertEquals(3, variables.size());
 
-        final Collection<ServiceTask> allServiceTasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
-
-        final ProcessVariableReaderStatic variableReader = new ProcessVariableReaderStatic(null, new BpmnScanner(PATH));
-
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
-
-        Assert.assertEquals(2, variables.size());
     }
 
 }
