@@ -88,7 +88,7 @@ public class JavaReaderStatic implements JavaReader {
      *            - KnownElementFieldType
      * @param scopeId
      *            - Scope of the element
-     * @return
+     * @return - Map of Process Variables
      */
     public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
@@ -296,12 +296,13 @@ public class JavaReaderStatic implements JavaReader {
         int numberOfArg = expr.getArgCount();
         String baseBox = expr.getBaseBox().getValue().getType().toString();
 
-        if (CamundaProcessVariableFunctions.findByNameAndNumberOfBoxes(functionName, numberOfArg) != null) {
+        CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
+                .findByNameAndNumberOfBoxes(functionName, baseBox, numberOfArg);
 
-            int location = CamundaProcessVariableFunctions.findByNameAndNumberOfBoxes(functionName, numberOfArg)
-                    .getLocation() - 1;
-            VariableOperation type = CamundaProcessVariableFunctions
-                    .findByNameAndNumberOfBoxes(functionName, numberOfArg).getOperationType();
+        if (foundMethod != null) {
+
+            int location = foundMethod.getLocation() - 1;
+            VariableOperation type = foundMethod.getOperationType();
 
             if (expr.getArgBox(location).getValue() instanceof StringConstant) {
 

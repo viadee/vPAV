@@ -60,8 +60,10 @@ public class ResourceFileReader {
      * Reads a resource file from class path
      *
      * @param fileName
+     *            - Name of Java Delegate class
      * @param element
-     * @return variables
+     *            - Bpmn element
+     * @return variables - found Process Variables
      */
     public static Map<String, ProcessVariableOperation> readResourceFile(final String fileName,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
@@ -108,9 +110,18 @@ public class ResourceFileReader {
      * Examine java code for process variables
      *
      * @param element
+     *            - Bpmn element
+     * @param chapter
+     *            - ElementChapter
+     * @param fieldType
+     *            - KnownElementFieldType
      * @param fileName
+     *            - class name
+     * @param scopeId
+     *            - Scope
      * @param code
-     * @return variables
+     *            - cleaned source code
+     * @return - found Process Variables
      */
     public static Map<String, ProcessVariableOperation> searchProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
@@ -128,9 +139,18 @@ public class ResourceFileReader {
      * Search read process variables
      *
      * @param element
+     *            - Bpmn element
+     * @param chapter
+     *            - ElementChapter
+     * @param fieldType
+     *            - KnownElementFieldType
      * @param fileName
+     *            - class name
+     * @param scopeId
+     *            - Scope
      * @param code
-     * @return variables
+     *            - cleaned source code
+     * @return - found Process Variables
      */
     public static Map<String, ProcessVariableOperation> searchReadProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
@@ -172,9 +192,18 @@ public class ResourceFileReader {
      * Search written process variables
      *
      * @param element
+     *            - Bpmn element
+     * @param chapter
+     *            - ElementChapter
+     * @param fieldType
+     *            - KnownElementFieldType
      * @param fileName
+     *            - Name of file
+     * @param scopeId
+     *            - Scope
      * @param code
-     * @return variables
+     *            - cleaned code
+     * @return
      */
     public static Map<String, ProcessVariableOperation> searchWrittenProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
@@ -214,12 +243,18 @@ public class ResourceFileReader {
      * Search removed process variables
      *
      * @param element
+     *            - BpmnElement
      * @param chapter
+     *            - ElementChapter
      * @param fieldType
+     *            - KnownElementFieldType
      * @param fileName
+     *            - Name of file
      * @param scopeId
+     *            - Scope
      * @param code
-     * @return variables
+     *            - cleaned source code
+     * @return - found Process Variables
      */
     public static Map<String, ProcessVariableOperation> searchRemovedProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,

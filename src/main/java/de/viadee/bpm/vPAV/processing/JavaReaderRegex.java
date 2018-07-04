@@ -51,9 +51,10 @@ public class JavaReaderRegex implements JavaReader {
      * execution.setVariable(execution.getActivityId() + "-" + execution.getEventName(), true)
      *
      * @param classFile
+     *            - name of JavaDelegate class
      * @param element
-     * @return variables
-     * @throws MalformedURLException
+     *            - Bpmn element
+     * @return variables - Process Variables
      */
     public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,

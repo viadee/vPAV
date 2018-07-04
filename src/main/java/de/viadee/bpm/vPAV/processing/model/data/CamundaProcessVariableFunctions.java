@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+
 /**
  * 
  * enum storing Camunda methods of ProcessVariable operations.
@@ -41,17 +43,31 @@ package de.viadee.bpm.vPAV.processing.model.data;
  */
 public enum CamundaProcessVariableFunctions {
 
-    SetVariable("setVariable", 2, 1, VariableOperation.WRITE), GetVariable(
-            "getVariable",
+    SetVariable("setVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.WRITE), SetVariable2(
+            "setVariable",
+            CamundaMethodServices.RUNTIME,
+            3,
             1,
-            1,
-            VariableOperation.READ), RemoveVariable(
-                    "removeVariable",
+            VariableOperation.WRITE), GetVariable(
+                    "getVariable",
+                    CamundaMethodServices.DELEGATE,
                     1,
                     1,
-                    VariableOperation.DELETE);
+                    VariableOperation.READ), GetVariable2(
+                            "getVariable",
+                            CamundaMethodServices.DELEGATE,
+                            2,
+                            1,
+                            VariableOperation.READ), RemoveVariable(
+                                    "removeVariable",
+                                    CamundaMethodServices.DELEGATE,
+                                    1,
+                                    1,
+                                    VariableOperation.DELETE);
 
     private String name;
+
+    private String service;
 
     private int numberOfArgBoxes;
 
@@ -70,8 +86,10 @@ public enum CamundaProcessVariableFunctions {
      * @param type
      *            - VariableOperation
      */
-    private CamundaProcessVariableFunctions(final String name, int number, int loc, VariableOperation type) {
+    private CamundaProcessVariableFunctions(final String name, final String service, int number, int loc,
+            VariableOperation type) {
         this.name = name;
+        this.service = service;
         this.numberOfArgBoxes = number;
         this.locationOfBox = loc;
         this.operationType = type;
@@ -79,6 +97,10 @@ public enum CamundaProcessVariableFunctions {
 
     public String getName() {
         return name;
+    }
+
+    public String getService() {
+        return service;
     }
 
     public int getNumberOfArgBoxes() {
@@ -93,10 +115,12 @@ public enum CamundaProcessVariableFunctions {
         return operationType;
     }
 
-    public static CamundaProcessVariableFunctions findByNameAndNumberOfBoxes(String name, int numberOfBoxes) {
+    public static CamundaProcessVariableFunctions findByNameAndNumberOfBoxes(final String name, final String service,
+            int numberOfBoxes) {
 
         for (CamundaProcessVariableFunctions f : values()) {
-            if (f.getName().equals(name) && f.getNumberOfArgBoxes() == numberOfBoxes) {
+            if (f.getName().equals(name) && f.getNumberOfArgBoxes() == numberOfBoxes
+                    && f.getService().equals(service)) {
                 return f;
             }
         }
