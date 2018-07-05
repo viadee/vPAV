@@ -67,7 +67,7 @@ import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -159,7 +159,7 @@ public class ElementGraphBuilder {
                 // initialize element
                 final BpmnElement node = new BpmnElement(processdefinition, element);
                 // examine process variables and save it with access operation
-                final Map<String, ProcessVariable> variables = new ProcessVariableReader(decisionRefToPathMap,
+                final Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(decisionRefToPathMap,
                         bpmnScanner).getVariablesFromElement(node);
                 // examine process variables for element and set it
                 node.setProcessVariables(variables);
@@ -214,7 +214,7 @@ public class ElementGraphBuilder {
             if (outerVariables != null) {
                 for (final String varName : outerVariables) {
                     node.setProcessVariable(varName,
-                            new ProcessVariable(varName, node, ElementChapter.OutstandingVariable,
+                            new ProcessVariableOperation(varName, node, ElementChapter.OutstandingVariable,
                                     KnownElementFieldType.Class, null, VariableOperation.WRITE, ""));
                 }
             }
@@ -246,7 +246,7 @@ public class ElementGraphBuilder {
                                 if (outerVariables != null) {
                                     for (final String varName : outerVariables) {
                                         node.setProcessVariable(varName,
-                                                new ProcessVariable(varName, node, ElementChapter.OutstandingVariable,
+                                                new ProcessVariableOperation(varName, node, ElementChapter.OutstandingVariable,
                                                         KnownElementFieldType.Class, null, VariableOperation.WRITE,
                                                         ""));
                                     }
@@ -382,7 +382,7 @@ public class ElementGraphBuilder {
             // add elements of the sub process as nodes
             final BpmnElement node = new BpmnElement(processdefinitionPath, subElement);
             // determine process variables with operations
-            final Map<String, ProcessVariable> variables = new ProcessVariableReader(decisionRefToPathMap, bpmnScanner)
+            final Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(decisionRefToPathMap, bpmnScanner)
                     .getVariablesFromElement(node);
             // set process variables for the node
             node.setProcessVariables(variables);

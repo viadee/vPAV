@@ -32,7 +32,6 @@
 package de.viadee.bpm.vPAV;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -41,7 +40,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -414,7 +412,9 @@ public class FileScanner {
                 isDirectory = true;
             }
             if (setting == null) {
-                throw new ConfigItemNotFoundException("Settings for VersioningChecker not found");
+                throw new ConfigItemNotFoundException("VersioningChecker: Versioning Scheme could not be read. "
+                        + "Possible options: " + ConfigConstants.VERSIONINGSCHEMECLASS + " or "
+                        + ConfigConstants.VERSIONINGSCHEMEPACKAGE);
             } else {
                 scheme = setting.getValue().trim();
             }

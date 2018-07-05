@@ -36,17 +36,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 public class ProcessVariablesModelChecker implements ModelChecker {
@@ -55,20 +52,10 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 
     private final Map<AnomalyContainer, List<Path>> invalidPathsMap;
 
-    private static ProcessVariablesModelChecker instance;
-
     public ProcessVariablesModelChecker(final Rule rule,
             final Map<AnomalyContainer, List<Path>> invalidPathsMap) {
         this.rule = rule;
         this.invalidPathsMap = invalidPathsMap;
-    }
-
-    public static ProcessVariablesModelChecker getInstance(final Rule rule,
-            final Map<AnomalyContainer, List<Path>> invalidPathsMap) {
-        if (ProcessVariablesModelChecker.instance == null) {
-            ProcessVariablesModelChecker.instance = new ProcessVariablesModelChecker(rule, invalidPathsMap);
-        }
-        return ProcessVariablesModelChecker.instance;
     }
 
     /**
@@ -82,7 +69,7 @@ public class ProcessVariablesModelChecker implements ModelChecker {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final AnomalyContainer anomaly : invalidPathsMap.keySet()) {
             final List<Path> paths = invalidPathsMap.get(anomaly);
-            final ProcessVariable var = anomaly.getVariable();
+            final ProcessVariableOperation var = anomaly.getVariable();
             if (paths != null) {
                 if (anomaly.getAnomaly() == Anomaly.DD) {
                     issues.addAll(

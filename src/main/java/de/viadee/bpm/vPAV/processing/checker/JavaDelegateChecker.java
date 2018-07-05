@@ -64,17 +64,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class JavaDelegateChecker extends AbstractElementChecker {
 
-    private static JavaDelegateChecker instance;
-
     public JavaDelegateChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static JavaDelegateChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (JavaDelegateChecker.instance == null) {
-            JavaDelegateChecker.instance = new JavaDelegateChecker(rule, bpmnScanner);
-        }
-        return JavaDelegateChecker.instance;
     }
 
     /**
@@ -99,9 +90,11 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         // read attributes from task
         if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
-                || bpmnElement instanceof SendTask))
-            implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
-
+                || bpmnElement instanceof SendTask)) {
+        	implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());  
+        }
+            
+        
         if (bpmnElement instanceof UserTask) {
             taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_DEL,
                     BpmnConstants.CAMUNDA_TASKLISTENER);

@@ -56,17 +56,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
-    private static DmnTaskChecker instance;
-
     public DmnTaskChecker(final Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static DmnTaskChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (DmnTaskChecker.instance == null) {
-            DmnTaskChecker.instance = new DmnTaskChecker(rule, bpmnScanner);
-        }
-        return DmnTaskChecker.instance;
     }
 
     /**
@@ -81,7 +72,7 @@ public class DmnTaskChecker extends AbstractElementChecker {
         if (bpmnElement instanceof BusinessRuleTask) {
             // read attributes from task
             final String implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
-
+        
             final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF);
             if (implementationAttr != null) {

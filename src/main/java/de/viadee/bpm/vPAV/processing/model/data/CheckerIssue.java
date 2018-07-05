@@ -333,7 +333,7 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     public String getId() {
         return getMD5(
-                ruleName + "_" + bpmnFile + "_" + resourceFile + "_" + elementId + "_" + variable);
+                ruleName + "_" + bpmnFile + "_" + resourceFile + "_" + elementId + "_" + variable + "_" + message);
     }
 
     public String getRuleName() {
@@ -441,14 +441,14 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.getClass() == this.getClass())
-            return true;
+        if (obj.hashCode() == this.hashCode())        	
+        	return true;
         else
             return false;
     }
 
     @Override
     public int hashCode() {
-        return elementId.hashCode();
+        return (elementId + elementName).hashCode();
     }
 }

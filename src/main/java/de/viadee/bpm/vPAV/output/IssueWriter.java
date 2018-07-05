@@ -36,17 +36,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.w3c.dom.Element;
 
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 public class IssueWriter {
@@ -77,6 +74,32 @@ public class IssueWriter {
         return issues;
     }
 
+
+    /**
+     *
+     * @param rule
+     *            Rule
+     * @param classification
+     *            CriticalityEnum
+     * @param variable
+     *            ProcessVariable
+     * @param message
+     *            Errormessage
+     * @return Issues
+     */
+    public static Collection<CheckerIssue> createIssue(final Rule rule, String ruleDescription, final CriticalityEnum classification,
+            final ProcessVariable variable, final String message) {
+
+        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+        final BpmnElement element = variable.getOperations().get(0).getElement();
+
+        issues.add(new CheckerIssue(rule.getName(), ruleDescription, classification,
+                element.getProcessdefinition(), null,
+                null, message));
+
+        return issues;
+    }
     /**
      * @param rule
      *            Rule
@@ -122,7 +145,7 @@ public class IssueWriter {
      * @return Issues
      */
     public static Collection<CheckerIssue> createIssue(final Rule rule, final CriticalityEnum classification,
-            final ProcessVariable var, final List<Path> paths, final AnomalyContainer anomaly, final String message) {
+                                                       final ProcessVariableOperation var, final List<Path> paths, final AnomalyContainer anomaly, final String message) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -155,11 +178,11 @@ public class IssueWriter {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
         final BaseElement baseElement = element.getBaseElement();
-
+        
         issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
                 element.getProcessdefinition(), resourceFile,
                 baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message));
+                baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
 
         return issues;
     }

@@ -42,27 +42,15 @@ import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ProcessVariablesNameConventionChecker extends AbstractElementChecker {
-
-    private static ProcessVariablesNameConventionChecker instance;
 
     public ProcessVariablesNameConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
     }
 
-    public static ProcessVariablesNameConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (ProcessVariablesNameConventionChecker.instance == null) {
-            ProcessVariablesNameConventionChecker.instance = new ProcessVariablesNameConventionChecker(rule,
-                    bpmnScanner);
-        }
-        return ProcessVariablesNameConventionChecker.instance;
-    }
 
     /**
      * Checks process variables in an bpmn element, whether they comply naming conventions
@@ -96,7 +84,7 @@ public class ProcessVariablesNameConventionChecker extends AbstractElementChecke
                 final Pattern pattern = Pattern.compile(convention.getPattern());
                 final ElementFieldTypes fieldTypes = convention.getElementFieldTypes();
                 final Collection<String> fieldTypeItems = fieldTypes.getElementFieldTypes();
-                for (final ProcessVariable variable : element.getProcessVariables().values()) {
+                for (final ProcessVariableOperation variable : element.getProcessVariables().values()) {
                     if (variable.getOperation() == VariableOperation.WRITE) {
                         if (fieldTypeItems != null) {
                             boolean isInRange = false;

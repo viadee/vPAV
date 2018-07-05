@@ -54,17 +54,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoScriptChecker extends AbstractElementChecker {
 
-    private static NoScriptChecker instance;
-
     public NoScriptChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static NoScriptChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (NoScriptChecker.instance == null) {
-            NoScriptChecker.instance = new NoScriptChecker(rule, bpmnScanner);
-        }
-        return NoScriptChecker.instance;
     }
 
     /**

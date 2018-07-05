@@ -76,20 +76,10 @@ public class VersioningChecker extends AbstractElementChecker {
 
     private Collection<String> resourcesNewestVersions;
 
-    private static VersioningChecker instance;
-
     public VersioningChecker(final Rule rule, final BpmnScanner bpmnScanner,
             final Collection<String> resourcesNewestVersions) {
         super(rule, bpmnScanner);
         this.resourcesNewestVersions = resourcesNewestVersions;
-    }
-
-    public static VersioningChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner,
-            final Collection<String> resourcesNewestVersions) {
-        if (VersioningChecker.instance == null) {
-            VersioningChecker.instance = new VersioningChecker(rule, bpmnScanner, resourcesNewestVersions);
-        }
-        return VersioningChecker.instance;
     }
 
     /**
