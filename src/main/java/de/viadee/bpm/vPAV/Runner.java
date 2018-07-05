@@ -105,7 +105,11 @@ public class Runner {
 	 * functions
 	 */
 	public void viadeeProcessApplicationValidator() {
-		
+
+		// 0
+		processVariables = new ArrayList<>();
+		elements = new ArrayList<>();
+
 		// 1
 		rules = readConfig();
 
@@ -298,7 +302,7 @@ public class Runner {
 				jsOutputWriter.writeVars(elements, processVariables);
 
 			} catch (final OutputWriterException e) {
-				throw new RuntimeException("Output couldn't be written");
+				throw new RuntimeException("Output couldn't be written", e);
 			}
 		} else {
 			final IssueOutputWriter jsOutputWriter = new JsOutputWriter();

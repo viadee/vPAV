@@ -43,5 +43,6 @@ public interface DataFlowRule {
     void check(Collection<ProcessVariable> variables);
     Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables);
     String getRuleDescription();
+    String getViolationMessageFor(EvaluationResult<ProcessVariable> result);
     CriticalityEnum getCriticality();
 }
