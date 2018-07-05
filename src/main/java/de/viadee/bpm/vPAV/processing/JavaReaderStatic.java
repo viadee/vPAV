@@ -101,9 +101,11 @@ public class JavaReaderStatic implements JavaReader {
             filePath = classFile.replaceAll("\\.", "/") + ".java";
 
             final String javaHome = System.getenv("JAVA_HOME");
-            final String specialSootJarPaths = javaHome + "\\jre\\lib\\rt.jar;" + javaHome + "\\jre\\lib\\jce.jar;";
+            final String specialSootJarPaths = javaHome + "/jre\\lib\\rt.jar;" + javaHome + "\\jre\\lib\\jce.jar;";
 
-            final String sootPath = FileScanner.getSootPath() + specialSootJarPaths;
+            String path = specialSootJarPaths.replace("/", "\\").replace("\\", "\\\\");
+
+            final String sootPath = FileScanner.getSootPath() + path;
 
             System.setProperty("soot.class.path", sootPath);
 
