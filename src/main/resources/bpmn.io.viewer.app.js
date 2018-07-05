@@ -260,7 +260,7 @@ function createVariableDialog(processVariable) {
         var dCardTitle = document.createElement("h5");
         dCardTitle.setAttribute("class", "card-header");
         let elementName = processVariable.elementName !== undefined ? processVariable.elementName : processVariable.elementId;
-        dCardTitle.innerHTML = `'${elementName}' does the following accesses to process variables:`;
+        dCardTitle.innerHTML = `'${elementName}' accesses the following to process variables:`;
         dCard.appendChild(dCardTitle);
 
         if (processVariable.read.length > 0)
@@ -357,7 +357,10 @@ function createIssueTable(bpmnFile, tableContent) {
 
             //ruleName
             myCell = document.createElement("td");
-            myText = document.createTextNode(issue.ruleName);
+            let ruleDescription = issue.ruleDescription !== undefined ?
+                `${issue.ruleName}: '${issue.ruleDescription}'` :
+                issue.ruleName;
+            myText = document.createTextNode(ruleDescription);
             myCell.setAttribute("id", issue.classification) // mark cell
 
             //create link for default checkers

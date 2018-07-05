@@ -94,7 +94,7 @@ public class IssueWriter {
 
         final BpmnElement element = variable.getOperations().get(0).getElement();
 
-        issues.add(new CheckerIssue(rule.getName() + ": '" + ruleDescription + "'", ruleDescription, classification,
+        issues.add(new CheckerIssue(rule.getName(), ruleDescription, classification,
                 element.getProcessdefinition(), null,
                 null, message));
 
