@@ -147,7 +147,7 @@ public class FileScanner {
             AddStringToSootPath(path);
         }
 
-        sootPath = sootPath.replace("\\\\;", ";");
+        sootPath = sootPath.replace("\\\\;", ";").replace("/", "\\\\");
 
         // retrieve all jars during runtime and pass them to get class files
 
