@@ -123,6 +123,7 @@ To find the visual output, check the created vPAV folder inside your project's t
 ![Issue Table](img/table.png "Table with listed information for all issues")
 
 ## Requirements
+- JDK 8
 - Camunda BPM Engine 7.4.0 and above
 
 ## Installation/Usage
