@@ -329,17 +329,21 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 	}
 
 	public String getId() {
-		String resourceFileClean = null;
+		
+		return getMD5(
+				ruleName + "_" + cleanPath(bpmnFile) + "_" + cleanPath(resourceFile) + "_" + elementId + "_" + variable + "_" + message);
+	}
 
-		if (resourceFile != null) {
-			resourceFileClean = resourceFile.replace('/', '\\');
-			// by replacing this way, ignored issues from a windows
-			// system remain ignored on a linux based CI system
-			// (only relevant for old issues)
+	// by replacing this way, ignored issues from a windows system remain ignored on
+	// a linux based CI system (only relevant for old issues)
+	private String cleanPath(final String path) {
+		String cleanedPath = null;
+		
+		if (path != null) {
+			cleanedPath = path.replace('/', '\\');
 		}
-
-		return getMD5(ruleName + "_" + bpmnFile.replace('/', '\\') + "_" + resourceFileClean + "_" + elementId + "_"
-				+ variable + "_" + message);
+				
+		return cleanedPath;
 	}
 
 	public String getRuleName() {
