@@ -35,37 +35,37 @@
 		<developer>
 			<name>Frank Koehne</name>
 			<email>Frank.Koehne@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Claus Usener</name>
 			<email>Claus-Alexander.Usener@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Marcel Flasskamp</name>
 			<email>Marcel.Flasskamp@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Sascha Di Bernardo</name>
 			<email>Sascha.DiBernardo@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Petra Horvath</name>
 			<email>Petra.Horvath@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Lars Beyer</name>
 			<email>Lars.Beyer@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 	</developers>
@@ -287,7 +287,7 @@
 				<configuration>
 					<header>src/main/resources/BSD3-license.txt</header>
 					<properties>
-						<owner>viadee Unternehmensberatung GmbH</owner>
+						<owner>viadee Unternehmensberatung AG</owner>
 						<inceptionYear>2018</inceptionYear>
 						<email>Frank.Koehne@viadee.de</email>
 					</properties>
