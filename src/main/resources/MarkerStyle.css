@@ -1,6 +1,6 @@
 :root {
 	--var-path: #f5c6cb;
-	--var-oneElement: rgba(223, 173, 72, 1);
+	--var-one-element: rgba(223, 173, 72, 1);
 	--var-error: rgba(223, 173, 72, 1);
 	--var-warning: rgba(172,181,123, 1.0);
 	--var-info: rgba(112,186,204, 1.0);
@@ -51,10 +51,10 @@
 	fill: var(--var-path) !important;
 }
 
-.oneElement .djs-visual> :nth-child(1) {
-	stroke: var(--var-oneElement) !important;
+.one-element .djs-visual> :nth-child(1) {
+	stroke: var(--var-one-element) !important;
 }
 
-.oneElement:not(.djs-connection) .djs-visual> :nth-child(1) {
-	fill: var(--var-oneElement) !important;
+.one-element:not(.djs-connection) .djs-visual> :nth-child(1) {
+	fill: var(--var-one-element) !important;
 }

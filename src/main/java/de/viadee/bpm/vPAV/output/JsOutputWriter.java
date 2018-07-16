@@ -42,12 +42,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
-import de.viadee.bpm.vPAV.Runner;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -56,12 +59,6 @@ import com.google.gson.JsonObject;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
@@ -70,27 +67,41 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 public class JsOutputWriter implements IssueOutputWriter {
 
     private static Logger logger = Logger.getLogger(JsOutputWriter.class.getName());
+    
+    private Map<String, String> ignoredIssuesMap = new HashMap<>();
+    
+    private Map<String, String> wrongCheckersMap = new HashMap<>();
+    
+    private Set<String> modelPaths = new HashSet<>();
 
     /**
      * Writes the output as JavaScript to the vPAV output folder
      */
     @Override
-    public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
+    public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {    	
+    	
         final String json = transformToJsonDatastructure(issues, BpmnConstants.VPAV_ELEMENTS_TO_MARK);
         final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
                 BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
         final String bpmn = transformToXMLDatastructure();
-        final String wrongCheckers = transformToJsDatastructure(Runner.getIncorrectCheckers());
+        final String wrongCheckers = transformToJsDatastructure(getWrongCheckersMap());
         final String defaultCheckers = transformDefaultRulesToJsDatastructure(
                 extractExternalCheckers(
                         RuntimeConfig.getInstance().getActiveRules()));
         final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
-        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(Runner.getIgnoredIssuesMap());
+        final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
 
         writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues);
     }
 
-    /**
+    public void prepareMaps(final Map<String, String> wrongCheckers, final Map<String, String> ignoredIssues, final Set<String> modelPath) {
+    	this.setWrongCheckersMap(wrongCheckers);
+    	this.setIgnoredIssuesMap(ignoredIssues);
+    	this.setModelPaths(modelPath);
+    }
+
+
+	/**
      * Creates list which contains elements with multiple issues and the marks it with highest severity
      * 
      * @param issues
@@ -183,7 +194,7 @@ public class JsOutputWriter implements IssueOutputWriter {
                 }
 
             } catch (final IOException ex) {
-                throw new OutputWriterException("js output couldn't be written");
+                throw new OutputWriterException("js output couldn't be written", ex);
             }
         }
     }
@@ -191,109 +202,96 @@ public class JsOutputWriter implements IssueOutputWriter {
     /**
      * write javascript file with elements which have variables
      *
-     * @param baseElements
-     *            Collection of baseelements
-     * @param graphBuilder
-     *            graphBuilder
-     * @param processdefinition
-     *            bpmn file
+     * @param elements
+     *            Collection of BPMN elements across all models
      * @throws OutputWriterException
      *             javascript couldnt be written
      */
-    public void writeVars(Collection<BaseElement> baseElements, ElementGraphBuilder graphBuilder,
-            File processdefinition) throws OutputWriterException {
-        String modelVariables = "";
-
-        // add infos for specific processdefinition
+    public void writeVars(Collection<BpmnElement> elements, Collection<ProcessVariable> processVariables) throws OutputWriterException {
         try {
-            FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_TMP, true);
-            for (final BaseElement baseElement : baseElements) {
-                BpmnElement element = graphBuilder.getElement(baseElement.getId());
-                if (element == null) {
-                    // if element is not in the data flow graph, create it.
-                    element = new BpmnElement(processdefinition.getPath(), baseElement);
-                }
-                modelVariables += (transformToString(element));
-            }
-            writer.write(modelVariables);
+            FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, true);
+
+            // write elements containing operations
+            JsonArray jsonElements = elements.stream()
+                    .map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
+                    .filter(o -> o.has("elementId"))
+                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+            StringBuilder jsFile = new StringBuilder();
+            jsFile.append("var proz_vars = ")
+                    .append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonElements))
+                    .append(";\n\n");
+
+
+            JsonArray jsonVariables = processVariables.stream()
+                    .map(JsOutputWriter::transformProcessVariablesToJson)
+                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+            jsFile.append("var processVariables = ")
+                    .append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonVariables))
+                    .append(";");
+
+            writer.write(jsFile.toString());
             writer.close();
         } catch (IOException e) {
             logger.warning("Processvariables couldn't be written");
         }
     }
 
-    /**
-     * Finish the javascript file for processvariables
-     *
-     */
-    public static void finish() {
-        String jsFile = "var proz_vars = [\n";
-        if (new File(ConfigConstants.VALIDATION_JS_TMP).exists()) {
-            try {
-                // add file content
-                byte[] encoded = Files.readAllBytes(Paths.get(ConfigConstants.VALIDATION_JS_TMP));
-                jsFile += new String(encoded, "UTF-8");
-
-                // remove last ','
-                if (jsFile.contains(","))
-                    jsFile = (jsFile.length() > 1 ? jsFile.substring(0, jsFile.lastIndexOf(',')) : jsFile);
-
-                // add end '];'
-                jsFile += "];";
-
-                // delete files
-                new File(ConfigConstants.VALIDATION_JS_TMP).delete();
-                if (new File(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES).exists())
-                    new File(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES).delete();
-
-                FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, false);
-                // write file to target
-                writer.write(jsFile);
-                writer.close();
-            } catch (IOException e) {
-                logger.warning("Processvariables couldn't be written");
-            }
-        }
-    }
-
-    private String transformToString(BpmnElement element) {
-        String elementString = "";
-        String read = "";
-        String write = "";
-        String delete = "";
+    private static JsonObject transformElementToJsonIncludingProcessVariables(BpmnElement element) {
+        final JsonObject obj = new JsonObject();
         if (!element.getProcessVariables().isEmpty()) {
             // elementID
-            elementString += "{\n\"elementId\" : \"" + element.getBaseElement().getId() + "\",\n";
+            obj.addProperty("elementId", element.getBaseElement().getId());
             // bpmnFile
-            elementString += "\"bpmnFile\" : \"" + replace(File.separator, "\\\\", element.getProcessdefinition())
-                    + "\",\n";
+            obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace(File.separator, "\\", element.getProcessdefinition()));
             // element Name
             if (element.getBaseElement().getAttributeValue("name") != null)
-                elementString += "\"elementName\" : \""
-                        + element.getBaseElement().getAttributeValue("name").trim().replace('\n', ' ') + "\",\n";
+                obj.addProperty("elementName", element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME));
 
-            for (Map.Entry<String, ProcessVariable> entry : element.getProcessVariables().entrySet()) {
-                entry.getValue().getOperation();
-                if (entry.getValue().getOperation().equals(VariableOperation.READ))
-                    read += "\"" + entry.getValue().getName() + "\",";
-                if (entry.getValue().getOperation().equals(VariableOperation.WRITE))
-                    write += "\"" + entry.getValue().getName() + "\",";
-                if (entry.getValue().getOperation().equals(VariableOperation.DELETE))
-                    delete += "\"" + entry.getValue().getName() + "\",";
-            }
-            // red
-            elementString += "\"read\" : [" + (read.length() > 1 ? read.substring(0, read.length() - 1) : read)
-                    + "],\n";
-            // write
-            elementString += "\"write\" : [" + (write.length() > 1 ? write.substring(0, write.length() - 1) : write)
-                    + "],\n";
-            // delete
-            elementString += "\"delete\" : ["
-                    + (delete.length() > 1 ? delete.substring(0, delete.length() - 1) : delete) + "]\n";
-            // end
-            elementString += "},\n\n";
+            Function<ProcessVariableOperation, JsonObject> processVariableToJson = o -> {
+                final JsonObject jsonOperation = new JsonObject();
+                jsonOperation.addProperty("name", o.getName());
+                jsonOperation.addProperty("fieldType", o.getFieldType().getDescription());
+                jsonOperation.addProperty("elementChapter", o.getChapter().toString());
+                return jsonOperation;
+            };
+            obj.add("read", element.getProcessVariables().values().stream()
+                    .filter(o -> o.getOperation() == VariableOperation.READ)
+                    .map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+            obj.add("write", element.getProcessVariables().values().stream()
+                    .filter(o -> o.getOperation() == VariableOperation.WRITE)
+                    .map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+            obj.add("delete", element.getProcessVariables().values().stream()
+                    .filter(o -> o.getOperation() == VariableOperation.DELETE)
+                    .map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
         }
-        return elementString;
+        return obj;
+    }
+
+    /**
+     * Transforms a process variable to a json object
+     *
+     * @param processVariable
+     * @return
+     */
+    private static JsonObject transformProcessVariablesToJson(final ProcessVariable processVariable) {
+        final JsonObject obj = new JsonObject();
+        obj.addProperty("name", processVariable.getName());
+        if (processVariable.getOperations().size() > 0) {
+            String bpmnFile = processVariable.getOperations().get(0).getElement().getProcessdefinition();
+            obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace(File.separator, "\\", bpmnFile));
+        }
+        Function<ProcessVariableOperation, JsonObject> processVariableToJson = o -> {
+            final JsonObject jsonOperation = new JsonObject();
+            jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
+            jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
+            jsonOperation.addProperty("fieldType", o.getFieldType().getDescription());
+            jsonOperation.addProperty("elementChapter", o.getChapter().toString());
+            return jsonOperation;
+        };
+        obj.add("read", processVariable.getReads().stream().map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        obj.add("write", processVariable.getWrites().stream().map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        obj.add("delete", processVariable.getDeletes().stream().map(processVariableToJson).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        return obj;
     }
 
     /**
@@ -306,7 +304,7 @@ public class JsOutputWriter implements IssueOutputWriter {
     private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
         Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
 
-        for (final String bpmnFilename : Runner.getModelPath()) {
+        for (final String bpmnFilename : getModelPaths()) {
             Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
             modelIssues.addAll(issues);
 
@@ -343,7 +341,7 @@ public class JsOutputWriter implements IssueOutputWriter {
         String output = "var diagramXMLSource = [\n";
 
         try {
-            for (final String bpmnFilename : Runner.getModelPath()) {
+            for (final String bpmnFilename : getModelPaths()) {
                 String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
                 output += "{\"name\":\"" + prettyBpmnFileName + "\",\n \"xml\": \"";
                 output += convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename);
@@ -396,7 +394,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
+    private String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
         final JsonArray jsonIssues = new JsonArray();
         if (issues != null && issues.size() > 0) {
             for (final CheckerIssue issue : issues) {
@@ -445,7 +443,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
+    private String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
         final String varName = "unlocatedCheckers";
         final JsonArray jsonIssues = new JsonArray();
         if (wrongCheckers != null && wrongCheckers.size() > 0) {
@@ -465,7 +463,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param issues
      * @return
      */
-    private static String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
+    private String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
         final String varName = "issueSeverity";
         final JsonArray jsonIssues = new JsonArray();
         if (issues != null && issues.size() > 0) {
@@ -506,7 +504,7 @@ public class JsOutputWriter implements IssueOutputWriter {
      * @param wrongCheckers
      * @return
      */
-    private static String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
+    private String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
         final String varName = "defaultCheckers";
         final JsonArray jsonIssues = new JsonArray();
         if (defaultCheckers != null && defaultCheckers.size() > 0) {
@@ -518,5 +516,29 @@ public class JsOutputWriter implements IssueOutputWriter {
         }
         return ("\n var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
     }
+
+	public Map<String, String> getIgnoredIssuesMap() {
+		return ignoredIssuesMap;
+	}
+
+	public void setIgnoredIssuesMap(Map<String, String> ignoredIssuesMap) {
+		this.ignoredIssuesMap = ignoredIssuesMap;
+	}
+
+	public Map<String, String> getWrongCheckersMap() {
+		return wrongCheckersMap;
+	}
+
+	public void setWrongCheckersMap(Map<String, String> wrongCheckersMap) {
+		this.wrongCheckersMap = wrongCheckersMap;
+	}
+
+	public Set<String> getModelPaths() {
+		return modelPaths;
+	}
+
+	public void setModelPaths(Set<String> modelPaths) {
+		this.modelPaths = modelPaths;
+	}
 
 }

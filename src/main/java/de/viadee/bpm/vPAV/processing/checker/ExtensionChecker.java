@@ -35,10 +35,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.viadee.bpm.vPAV.Runner;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
@@ -53,18 +53,13 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class ExtensionChecker extends AbstractElementChecker {
-
-    private static ExtensionChecker instance;
+	
+	private static Logger logger = Logger.getLogger(ExtensionChecker.class.getName());
+	
+	private boolean isMisconfigured = false;
 
     public ExtensionChecker(Rule rule, BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static ExtensionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (ExtensionChecker.instance == null) {
-            ExtensionChecker.instance = new ExtensionChecker(rule, bpmnScanner);
-        }
-        return ExtensionChecker.instance;
     }
 
     @Override
@@ -96,6 +91,8 @@ public class ExtensionChecker extends AbstractElementChecker {
             // Check for all optional extension pairs
             issues.addAll(checkOptExtension(whiteList, optionalSettings, keyPairs, bpmnElement, element));
         }
+        
+        checkMisconfiguration();
 
         return issues;
 
@@ -288,23 +285,43 @@ public class ExtensionChecker extends AbstractElementChecker {
             }
         }
     }
-
+    
     /**
      * Checks whether a misconfiguration of the ruleSet.xml occured
      *
      * @param setting
      *            Certain setting out of all settings
      */
-    private boolean checkMisconfiguration(Setting setting) {
+    public boolean checkMisconfiguration(Setting setting) {
 
         boolean misconfigured = false;
 
         if (setting.getType() != null && setting.getId() != null) {
             misconfigured = true;
-            Runner.setIsMisconfigured(misconfigured);
+            setIsMisconfigured(misconfigured);
             return misconfigured;
         }
         return misconfigured;
     }
+
+	/**
+	 * Checks whether a misconfiguration of the ruleSet.xml occured
+	 *
+	 */
+	private void checkMisconfiguration() {
+		if (getIsMisconfigured())
+			logger.warning(
+					"Misconfiguration of rule for ExtensionChecker. Please provide either tasktype or a specific ID of an element.");
+	}
+    
+    
+	public boolean getIsMisconfigured() {
+		return isMisconfigured;
+	}
+
+	public void setIsMisconfigured(boolean isMisconfigured) {
+		this.isMisconfigured = isMisconfigured;
+	}
+	
 
 }

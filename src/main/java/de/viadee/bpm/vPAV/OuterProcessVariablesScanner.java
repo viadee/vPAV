@@ -44,8 +44,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
@@ -97,10 +97,11 @@ public class OuterProcessVariablesScanner {
                                 // if messageId is already set, create intersection of variables and overwrite map
                                 // item
                                 final Collection<String> existingProcessVariables = messageIdToVariableMap
-                                        .get(messageId);
-                                final List<String> intersectionProcessVariables = ListUtils.intersection(
-                                        (List<String>) existingProcessVariables,
-                                        (List<String>) initialProcessVariablesInFilePath);
+                                        .get(messageId);                                
+                                final List<String> intersectionProcessVariables = existingProcessVariables.stream()
+                                        .filter(initialProcessVariablesInFilePath::contains)
+                                        .collect(Collectors.toList());
+                                
                                 messageIdToVariableMap.put(messageId, intersectionProcessVariables);
                             } else {
                                 messageIdToVariableMap.put(messageId, initialProcessVariablesInFilePath);

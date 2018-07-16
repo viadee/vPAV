@@ -61,7 +61,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 /**
  * unit tests for ProcessVariablesNameConventionChecker
@@ -119,7 +119,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariable> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
+            Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
                     .getVariablesFromElement(element);
             element.setProcessVariables(variables);
 
@@ -150,7 +150,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariable> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
+            Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
                     .getVariablesFromElement(element);
             element.setProcessVariables(variables);
 

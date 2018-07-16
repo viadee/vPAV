@@ -50,17 +50,8 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class ElementIdConventionChecker extends AbstractElementChecker {
 
-    private static ElementIdConventionChecker instance;
-
     public ElementIdConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         super(rule, bpmnScanner);
-    }
-
-    public static ElementIdConventionChecker getInstance(final Rule rule, final BpmnScanner bpmnScanner) {
-        if (ElementIdConventionChecker.instance == null) {
-            ElementIdConventionChecker.instance = new ElementIdConventionChecker(rule, bpmnScanner);
-        }
-        return ElementIdConventionChecker.instance;
     }
 
     /**

@@ -152,11 +152,10 @@ public class BpmnScanner {
         for (final NodeList list : listNodeList) {
             // iterate over list and check child of each node
             for (int i = 0; i < list.getLength(); i++) {
-                Element taskElement = (Element) list.item(i);
-                NamedNodeMap taskElementAttr = taskElement.getAttributes();
-
+                Element taskElement = (Element) list.item(i);   
                 // check if the ids are corresponding
                 if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                	NamedNodeMap taskElementAttr = taskElement.getAttributes();
                     // check if more than 1 inner attribute exists
                     if (taskElementAttr.getLength() > 1) {
                         // check all attributes, whether they fit an
@@ -171,6 +170,7 @@ public class BpmnScanner {
                                     || nodeName.equals(BpmnConstants.CAMUNDA_DMN)
                                     || nodeName.equals(BpmnConstants.CAMUNDA_EXT)) {
                                 returnImplementation = nodeName;
+                                break;
                             }
                         }
                         // if inner attributes dont consist of implementations
@@ -181,8 +181,9 @@ public class BpmnScanner {
                             && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_DMN) == null
                             && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_EXT) == null) {
                         returnImplementation = BpmnConstants.IMPLEMENTATION;
+                        break;
                     }
-                }
+                }                 
             }
         }
         return returnImplementation;
