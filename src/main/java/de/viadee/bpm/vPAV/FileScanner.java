@@ -92,7 +92,7 @@ public class FileScanner {
 
     private static final Logger LOGGER = Logger.getLogger(FileScanner.class.getName());
 
-    public FileScanner(final Map<String, Rule> rules) {
+    public FileScanner(final Map<String, Rule> rules, final String javaScanPath) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
         scanner.setBasedir(ConfigConstants.BASEPATH);
@@ -102,7 +102,7 @@ public class FileScanner {
         scanner.scan();
         processdefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
-        scanner.setBasedir(ConfigConstants.JAVAPATH);
+        scanner.setBasedir(javaScanPath);
         // get file paths of process definitions
         scanner.setIncludes(new String[] { ConfigConstants.JAVA_FILE_PATTERN });
         scanner.scan();

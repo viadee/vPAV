@@ -108,13 +108,13 @@ public class Runner {
 	 * Main method which represents lifecycle of the validation process Calls main
 	 * functions
 	 */
-	public void viadeeProcessApplicationValidator() {
+	public void viadeeProcessApplicationValidator(final String javaScanPath) {
 
 		// 1
 		rules = readConfig();
 
 		// 2
-		scanClassPath(rules);
+		setFileScanner(new FileScanner(rules, javaScanPath));
 
 		// 3
 		getProcessVariables(rules);
@@ -225,15 +225,6 @@ public class Runner {
 		return finalRules;
 	}
 
-	/**
-	 * Initializes the fileScanner with the current set of rules
-	 *
-	 * @param rules
-	 *            Map of rules
-	 */
-	private void scanClassPath(Map<String, Rule> rules) {
-		setFileScanner(new FileScanner(rules));
-	}
 
 	/**
 	 * Initializes the variableScanner to scan and read outer process variables with
