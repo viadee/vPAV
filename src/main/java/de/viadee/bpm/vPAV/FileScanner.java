@@ -211,7 +211,7 @@ public class FileScanner {
 
         }
 
-        sootPath = sootPath + sootPathCurrent + ";";
+        sootPath = sootPath + ";" + sootPathCurrent + ";";
 
     }
 
