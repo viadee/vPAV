@@ -59,13 +59,13 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
-public class ProcessVariableReaderStaticTest {
+public class ReachingDefinitionTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
     private static ClassLoader cl;
 
-    private static Logger logger = Logger.getLogger(ProcessVariableReaderStaticTest.class.getName());
+    private static Logger logger = Logger.getLogger(ReachingDefinitionTest.class.getName());
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -84,7 +84,7 @@ public class ProcessVariableReaderStaticTest {
         pav.findModelErrorsFromClassloader(cl);
 
         final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
+                "de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", null, null, null, null);
 
         assertEquals(3, variables.size());
 

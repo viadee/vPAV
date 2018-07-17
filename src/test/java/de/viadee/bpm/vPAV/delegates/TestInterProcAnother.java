@@ -29,63 +29,18 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.delegates;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-import soot.toolkits.graph.Block;
+public class TestInterProcAnother {
 
-/**
- * 
- * helper class storing information for data-flow analysis assigns ProcessVariables to basic blocks of the control-flow
- * graph
- * 
- *
- */
-public class VariableBlock {
+    public void doSomething(DelegateExecution execution) {
 
-    private Block block;
+        execution.setVariable("abotherClass", "var");
 
-    private List<ProcessVariableOperation> usedProcessVariables;
+        TestInterProcOther other = new TestInterProcOther();
 
-    public VariableBlock(Block block, List<ProcessVariableOperation> pvs) {
-        this.block = block;
-        this.usedProcessVariables = pvs;
+        other.doSomethingElse(execution);
     }
-
-    public void setBlock(Block block) {
-
-        this.block = block;
-    }
-
-    public Block getBlock() {
-        return block;
-    }
-
-    public List<ProcessVariableOperation> getAllProcessVariables() {
-        return usedProcessVariables;
-    }
-
-    public void addProcessVariable(ProcessVariableOperation processVariable) {
-        this.usedProcessVariables.add(processVariable);
-    }
-
-    public void addUsed(List<ProcessVariableOperation> usedVariables) {
-
-    }
-
-    public Map<String, ProcessVariableOperation> getProcessVariablesMapped() {
-
-        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
-        for (ProcessVariableOperation pv : usedProcessVariables) {
-
-            variables.put(pv.getName(), pv);
-        }
-
-        return variables;
-    }
-
 }

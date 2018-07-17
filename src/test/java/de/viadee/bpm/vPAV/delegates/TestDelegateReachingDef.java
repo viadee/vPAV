@@ -29,63 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.delegates;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-import soot.toolkits.graph.Block;
+public class TestDelegateReachingDef implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
-/**
- * 
- * helper class storing information for data-flow analysis assigns ProcessVariables to basic blocks of the control-flow
- * graph
- * 
- *
- */
-public class VariableBlock {
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
 
-    private Block block;
+        final String variableName = "ProcessVariable1";
+        execution.setVariable(variableName, true);
 
-    private List<ProcessVariableOperation> usedProcessVariables;
+        // TODO Auto-generated method stub
+        /* execution.setVariable("dshfhdsfhfds", true); */
+        String bla = (String) execution.getVariable("ProcessVariable2");
 
-    public VariableBlock(Block block, List<ProcessVariableOperation> pvs) {
-        this.block = block;
-        this.usedProcessVariables = pvs;
-    }
+        int a = 1;
+        final String variableName2 = "ProcessVariable3";
+        if (a == 1) {
+            execution.setVariable(variableName2, true);
+            execution.removeVariable(variableName);
 
-    public void setBlock(Block block) {
-
-        this.block = block;
-    }
-
-    public Block getBlock() {
-        return block;
-    }
-
-    public List<ProcessVariableOperation> getAllProcessVariables() {
-        return usedProcessVariables;
-    }
-
-    public void addProcessVariable(ProcessVariableOperation processVariable) {
-        this.usedProcessVariables.add(processVariable);
-    }
-
-    public void addUsed(List<ProcessVariableOperation> usedVariables) {
-
-    }
-
-    public Map<String, ProcessVariableOperation> getProcessVariablesMapped() {
-
-        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
-        for (ProcessVariableOperation pv : usedProcessVariables) {
-
-            variables.put(pv.getName(), pv);
         }
 
-        return variables;
+        execution.removeVariable(variableName2);
+
     }
 
 }

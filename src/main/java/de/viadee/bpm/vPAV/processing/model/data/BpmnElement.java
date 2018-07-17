@@ -255,6 +255,11 @@ public class BpmnElement {
         }
         anomalyMap.put(this, anomalies);
 
+        if (sourceCodeAnomalies != null) {
+            // add anomalies found on Java code level
+            anomalies.addAll(sourceCodeAnomalies);
+        }
+
         return anomalyMap;
     }
 

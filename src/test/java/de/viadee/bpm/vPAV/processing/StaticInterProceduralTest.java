@@ -33,60 +33,52 @@ package de.viadee.bpm.vPAV.processing;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.junit.Assert;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
+import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
-public class ProcessVariableReaderStaticTest {
+public class StaticInterProceduralTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+    private static Runner runner;
 
-    private static ClassLoader cl;
-
-    private static Logger logger = Logger.getLogger(ProcessVariableReaderStaticTest.class.getName());
+    private static ClassLoader oldClassLoader;
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+        // Prepare for post-test cleanup
+        oldClassLoader = RuntimeConfig.getInstance().getClassLoader();
+        RuntimeConfig.getInstance().setClassLoader(StaticInterProceduralTest.class.getClassLoader());
+        runner = new Runner();
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        RuntimeConfig.getInstance().setClassLoader(oldClassLoader);
     }
 
     @Test
-    public void testSootReachingMethod() throws ParserConfigurationException, SAXException, IOException {
+    public void testInterProceduralAnalysis() throws ParserConfigurationException, SAXException, IOException {
+        // Given
+        runner.viadeeProcessApplicationValidator(ConfigConstants.TEST_JAVAPATH);
 
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrorsFromClassloader(cl);
-
+        // When
         final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
-
-        assertEquals(3, variables.size());
+                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null);
+        // Then
+        assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
+                variables.size());
 
     }
 

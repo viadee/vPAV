@@ -102,7 +102,8 @@ public class ProcessVariableReaderStrategyPatternTest {
         final Map<String, ProcessVariableOperation> variables = pvc
                 .readJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
 
-        assertEquals(3, variables.size());
+        assertEquals("Static reader should not find 4 variables since one of them is in a comment", 3,
+                variables.size());
 
     }
 
@@ -124,7 +125,8 @@ public class ProcessVariableReaderStrategyPatternTest {
         final Map<String, ProcessVariableOperation> variables = pvc
                 .readJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
 
-        assertEquals(4, variables.size());
+        assertEquals("RegEx reader should find 4 variables including a false positive in a comment", 4,
+                variables.size());
 
     }
 
