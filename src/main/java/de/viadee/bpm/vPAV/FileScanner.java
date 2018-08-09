@@ -136,8 +136,13 @@ public class FileScanner {
         // retrieve all jars and create one String for Soot path
         for (URL url : urls) {
 
-            String sootPathCurrent = url.toString();
-            addStringToSootPath(sootPathCurrent);
+            if (Pattern.compile(".*target/classes.*").matcher(url.toString()).find()
+                    || Pattern.compile(".*target/test-classes.*").matcher(url.toString()).find()) {
+
+                String sootPathCurrent = url.toString();
+                addStringToSootPath(sootPathCurrent);
+
+            }
 
         }
 

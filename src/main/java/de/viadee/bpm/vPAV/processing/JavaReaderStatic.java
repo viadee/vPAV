@@ -100,7 +100,7 @@ public class JavaReaderStatic implements JavaReader {
 
         if (classFile != null && classFile.trim().length() > 0) {
 
-            final String sootPath = "D:\\Projects\\Git\\vPAV\\target\\test-classes;";
+            final String sootPath = FileScanner.getSootPath();
 
             System.setProperty("soot.class.path", sootPath);
 
