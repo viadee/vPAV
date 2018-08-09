@@ -82,4 +82,9 @@ public class OutSetCFG {
         return variables;
     }
 
+    public List<VariableBlock> getAllVariableBlocks() {
+
+        return variableBlocks;
+    }
+
 }

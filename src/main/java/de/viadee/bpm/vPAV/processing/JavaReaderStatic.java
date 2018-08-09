@@ -1,26 +1,32 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH All rights reserved.
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
- * disclaimer.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
  *
- * * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
- * disclaimer in the documentation and/or other materials provided with the distribution.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
  *
- * * Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
- * products derived from this software without specific prior written permission.
+ * * Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.processing;
@@ -94,12 +100,7 @@ public class JavaReaderStatic implements JavaReader {
 
         if (classFile != null && classFile.trim().length() > 0) {
 
-            final String javaHome = System.getenv("JAVA_HOME");
-            final String specialSootJarPaths = javaHome + "/jre/lib/rt.jar;" + javaHome + "/jre/lib/jce.jar;";
-
-            String path = specialSootJarPaths.replace("\\", "/");
-
-            final String sootPath = FileScanner.getSootPath() + path;
+            final String sootPath = "D:\\Projects\\Git\\vPAV\\target\\test-classes;";
 
             System.setProperty("soot.class.path", sootPath);
 
@@ -117,14 +118,14 @@ public class JavaReaderStatic implements JavaReader {
      *
      * Starting by the main JavaDelegate statically analyse the classes implemented for the bpmn element.
      *
-     * @param classPaths
-     * @param className
-     * @param methodName
-     * @param classFile
-     * @param element
-     * @param chapter
-     * @param fieldType
-     * @param scopeId
+     * @param classPaths - Set of classes that is included in inter-procedural analysis
+     * @param className - name of currently analysed class
+     * @param methodName - name of currently analysed method
+     * @param classFile - location path of class
+     * @param element - Bpmn element
+     * @param chapter - ElementChapter
+     * @param fieldType - KnownElementFieldType
+     * @param scopeId - Scope of the element
      * @return
      */
     public Map<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths, String className,
@@ -134,8 +135,20 @@ public class JavaReaderStatic implements JavaReader {
 
         Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
 
-        processVariables.putAll(classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter,
-                fieldType, scopeId, processVariables));
+        OutSetCFG outSet = new OutSetCFG(new ArrayList<VariableBlock>());
+
+        classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter,
+                fieldType, scopeId, outSet, null);
+
+        processVariables.putAll(outSet.getAllProcessVariables());
+
+        // Add Java code level anomalies to BpmnElement so later it is included into
+        try {
+
+            addAnomaliesFoundInSourceCode(element, outSet);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
 
         return processVariables;
 
@@ -145,34 +158,28 @@ public class JavaReaderStatic implements JavaReader {
      *
      * Recursive call to find Camunda methods in other classes, called from the JavaDelegate.
      *
-     * @param classPaths
-     * @param className
-     * @param methodName
-     * @param classFile
-     * @param element
-     * @param chapter
-     * @param fieldType
-     * @param scopeId
-     * @param variables
+     * @param classPaths - Set of classes that is included in inter-procedural analysis
+     * @param className -  name of currently analysed class
+     * @param methodName - name of currently analysed method
+     * @param classFile -  location path of class
+     * @param element - Bpmn element
+     * @param chapter - ElementChapter
+     * @param fieldType - KnownElementFieldType
+     * @param scopeId - Scope of the element
      * @return
      */
-    public Map<String, ProcessVariableOperation> classFetcherRecursive(final Set<String> classPaths, String className,
+    public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className,
             String methodName,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId,
-            Map<String, ProcessVariableOperation> variables) {
+            OutSetCFG outSet, VariableBlock originalBlock) {
 
         className = className.replace("\\", ".").replace(".java", "");
 
-        List<String> excludeList = new LinkedList<>();
-        excludeList.add("java.*");
-
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
-        Options.v().set_exclude(excludeList);
-        Options.v().set_no_bodies_for_excluded(true);
 
-        SootClass sootClass = Scene.v().forceResolve(className, SootClass.BODIES);
+        SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
         if (sootClass != null) {
             sootClass.setApplicationClass();
@@ -192,28 +199,16 @@ public class JavaReaderStatic implements JavaReader {
 
                 PackManager.v().getPack("cg").apply();
                 CallGraph cg = Scene.v().getCallGraph();
-
                 final List<Block> graphHeads = graph.getHeads();
                 final List<Block> graphTails = graph.getTails();
-
-                OutSetCFG outSet = new OutSetCFG(new ArrayList<VariableBlock>());
 
                 for (Block head : graphHeads) {
 
                     outSet = graphIterator(classPaths, cg, graph, head, graphTails, outSet, element, chapter, fieldType,
-                            classFile,
-                            scopeId, variables);
+                            classFile, scopeId, originalBlock, className);
                 }
 
-                variables.putAll(outSet.getAllProcessVariables());
-
-                // Add Java code level anomalies to BpmnElement so later it is included into
-                try {
-
-                    addAnomaliesFoundInSourceCode(element, graph, outSet, graphHeads, graphTails);
-                } catch (Exception e) {
-                    // TODO: handle exception
-                }
+                // variables.putAll(outSet.getAllProcessVariables());
 
             } else {
                 LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
@@ -222,7 +217,7 @@ public class JavaReaderStatic implements JavaReader {
             LOGGER.warning("Class " + classFile + " was not found by Soot");
         }
 
-        return variables;
+        return outSet;
 
     }
 
@@ -253,7 +248,7 @@ public class JavaReaderStatic implements JavaReader {
     private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, Block head,
             List<Block> blockTails, OutSetCFG outSet,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String filePath, final String scopeId, Map<String, ProcessVariableOperation> variables) {
+            final String filePath, final String scopeId, VariableBlock originalBlock, String oldClassName) {
 
         final Iterator<Block> graphIterator = graph.iterator();
 
@@ -263,8 +258,15 @@ public class JavaReaderStatic implements JavaReader {
 
             // Collect the functions Unit by Unit via the blockIterator
             final VariableBlock vb = blockIteraror(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-                    scopeId, variables);
-            outSet.addVariableBlock(vb);
+                    scopeId, originalBlock, oldClassName);
+
+            // depending if ouset already has that Block, only add varibles,
+            // if not, then add the whole vb
+
+            if (outSet.getVariableBlock(vb.getBlock()) == null) {
+                outSet.addVariableBlock(vb);
+
+            }
         }
 
         return outSet;
@@ -292,19 +294,21 @@ public class JavaReaderStatic implements JavaReader {
      * @return
      */
     private VariableBlock blockIteraror(final Set<String> classPaths, final CallGraph cg, final Block block,
-            OutSetCFG InSet, final BpmnElement element,
+            OutSetCFG outSet, final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String filePath,
-            final String scopeId, Map<String, ProcessVariableOperation> variables) {
+            final String scopeId, VariableBlock variableBlock, String oldClassName) {
 
-        VariableBlock variableBlock = new VariableBlock(block, new ArrayList<ProcessVariableOperation>());
+        if (variableBlock == null) {
+            variableBlock = new VariableBlock(block, new ArrayList<ProcessVariableOperation>());
 
+        }
         final Iterator<Unit> unitIt = block.iterator();
 
         Unit unit;
         while (unitIt.hasNext()) {
             unit = unitIt.next();
 
-            if (unit instanceof InvokeStmt) {
+            if (cg != null & (unit instanceof InvokeStmt || unit instanceof AssignStmt)) {
 
                 Iterator<soot.jimple.toolkits.callgraph.Edge> sources = cg.edgesOutOf(unit);
 
@@ -313,22 +317,32 @@ public class JavaReaderStatic implements JavaReader {
                     src = (Edge) sources.next();
                     String methodName = src.tgt().getName();
 
-                    String className = src.tgt().getDeclaringClass().getName().replace(".", "\\") + ".java";
-                    if (classPaths.contains(className)) {
-                        G.reset();
-                        classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
-                                scopeId, variables);
+                    String className = src.tgt().getDeclaringClass().getName();
+                    if (!className.equals(oldClassName)) {
+                        className = className.replace(".", "\\") + ".java";
+
+                        if (classPaths.contains(className)) {
+                            G.reset();
+
+                            classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
+                                    fieldType,
+                                    scopeId, outSet, variableBlock);
+
+                        }
                     }
                 }
 
-                if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+                if (unit instanceof InvokeStmt) {
 
-                    JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox()
-                            .getValue();
-                    if (expr != null) {
-                        parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId);
+                    if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+
+                        JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox()
+                                .getValue();
+                        if (expr != null) {
+                            parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId);
+                        }
+
                     }
-
                 }
             }
             if (unit instanceof AssignStmt) {
@@ -409,13 +423,15 @@ public class JavaReaderStatic implements JavaReader {
      * @param graphTails
      *            - End Blocks of CFG
      */
-    private void addAnomaliesFoundInSourceCode(final BpmnElement element, final BlockGraph graph,
-            final OutSetCFG outSet, final List<Block> graphHeads, final List<Block> graphTails) {
+    private void addAnomaliesFoundInSourceCode(final BpmnElement element,
+            final OutSetCFG outSet) {
 
-        for (Block block : graphHeads) {
-            addAnomaliesFoundInPathsRecursive(element, block, new LinkedList<String>(), outSet,
-                    new LinkedList<ProcessVariableOperation>(), "");
+        for (VariableBlock vb : outSet.getAllVariableBlocks()) {
 
+            if (vb.getBlock().getIndexInMethod() == 0) {
+                addAnomaliesFoundInPathsRecursive(element, vb.getBlock(), new LinkedList<String>(), outSet,
+                        new LinkedList<ProcessVariableOperation>(), "");
+            }
         }
     }
 

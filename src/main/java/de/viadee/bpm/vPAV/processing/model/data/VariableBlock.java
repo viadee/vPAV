@@ -88,4 +88,12 @@ public class VariableBlock {
         return variables;
     }
 
+    public void addAllProcessVariables(List<ProcessVariableOperation> pvs) {
+        for (ProcessVariableOperation pv : pvs) {
+
+            addProcessVariable(pv);
+        }
+
+    }
+
 }

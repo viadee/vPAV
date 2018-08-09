@@ -63,7 +63,18 @@ public enum CamundaProcessVariableFunctions {
                                     CamundaMethodServices.DELEGATE,
                                     1,
                                     1,
-                                    VariableOperation.DELETE);
+                                    VariableOperation.DELETE),
+    SetVariableS("setVariable", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
+    GetVariableS("getVariable",
+            CamundaMethodServices.SCOPE,
+            1,
+            1,
+            VariableOperation.READ),
+    SetVariabelL("setVariableLocal",
+            CamundaMethodServices.SCOPE,
+            2,
+            1,
+            VariableOperation.WRITE);
 
     private String name;
 
