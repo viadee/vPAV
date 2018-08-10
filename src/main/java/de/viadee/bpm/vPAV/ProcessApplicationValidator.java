@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import org.springframework.context.ApplicationContext;
 
 import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
@@ -62,7 +63,8 @@ public class ProcessApplicationValidator {
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         Runner runner = createRunner();
-
+        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
+      
         return runner.getfilteredIssues();
     }
 
@@ -79,6 +81,7 @@ public class ProcessApplicationValidator {
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         Runner runner = createRunner();
+        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
@@ -92,6 +95,7 @@ public class ProcessApplicationValidator {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         Runner runner = createRunner();
+        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return runner.getfilteredIssues();
     }
@@ -105,6 +109,22 @@ public class ProcessApplicationValidator {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         Runner runner = createRunner();
+        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
+
+        return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
+    }
+
+    /**
+     * Find model errors without spring context. Alternative method for testing purposes, to allow using a classloader
+     * that includes example delegates in /src/test/java etc.
+     *
+     * @return issues with status error
+     */
+    public static Collection<CheckerIssue> findModelErrorsFromClassloader(ClassLoader classloader) {
+
+        RuntimeConfig.getInstance().setClassLoader(classloader);
+        Runner runner = createRunner();
+        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }

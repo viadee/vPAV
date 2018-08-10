@@ -67,6 +67,9 @@ public class BpmnElement {
 
     private Map<String, ProcessVariableOperation> processVariables;
 
+    // collecting anomalies found on Java code level
+    private List<AnomalyContainer> sourceCodeAnomalies = new ArrayList<AnomalyContainer>();
+
     public BpmnElement(final String processdefinition, final BaseElement element) {
         this.processdefinition = processdefinition;
         this.baseElement = element;
@@ -91,6 +94,10 @@ public class BpmnElement {
 
     public void setProcessVariable(final String variableName, final ProcessVariableOperation variableObject) {
         processVariables.put(variableName, variableObject);
+    }
+
+    public void addSourceCodeAnomaly(AnomalyContainer anomaly) {
+        sourceCodeAnomalies.add(anomaly);
     }
 
     @Override
@@ -216,8 +223,7 @@ public class BpmnElement {
     }
 
     public boolean dd(final String varName) {
-        if (in.containsKey(varName) && in.get(varName) == InOutState.DEFINED
-                && defined().containsKey(varName)) {
+        if (in.containsKey(varName) && in.get(varName) == InOutState.DEFINED && defined().containsKey(varName)) {
             return true;
         }
         return false;
@@ -248,6 +254,11 @@ public class BpmnElement {
             }
         }
         anomalyMap.put(this, anomalies);
+
+        if (sourceCodeAnomalies != null) {
+            // add anomalies found on Java code level
+            anomalies.addAll(sourceCodeAnomalies);
+        }
 
         return anomalyMap;
     }

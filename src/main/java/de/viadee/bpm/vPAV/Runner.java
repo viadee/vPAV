@@ -57,8 +57,10 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueOutputWriter;
 import de.viadee.bpm.vPAV.output.JsOutputWriter;
@@ -82,12 +84,12 @@ public class Runner {
 
 	private Collection<CheckerIssue> filteredIssues;
 
-	private Map<String, Rule> rules = new HashMap<String, Rule>(); 	
+	private Map<String, Rule> rules = new HashMap<String, Rule>();
 
 	private Map<String, String> ignoredIssuesMap = new HashMap<String, String>();
 
 	private Map<String, String> fileMapping = createFileFolderMapping();
-	
+
 	private Map<String, String> wrongCheckersMap = new HashMap<>();
 
 	private ArrayList<String> allOutputFilesArray = createAllOutputFilesArray();
@@ -100,11 +102,14 @@ public class Runner {
 
 	private boolean checkProcessVariables = false;
 
+	private static boolean isStatic = false;
+
 	/**
 	 * Main method which represents lifecycle of the validation process Calls main
 	 * functions
 	 */
-	public void viadeeProcessApplicationValidator() {
+
+	public void viadeeProcessApplicationValidator(final String javaScanPath) {
 
 		// 0
 		processVariables = new ArrayList<>();
@@ -114,7 +119,7 @@ public class Runner {
 		rules = readConfig();
 
 		// 2
-		scanClassPath(rules);
+		setFileScanner(new FileScanner(rules, javaScanPath));
 
 		// 3
 		getProcessVariables(rules);
@@ -145,12 +150,12 @@ public class Runner {
 	 *
 	 * @return Map(String, Rule) ruleSet
 	 */
-	private Map<String, Rule> readConfig() {	
-		
+	private Map<String, Rule> readConfig() {
+
 		prepareOutputFolder();
-		
+
 		rules = new XmlConfigReader().getDeactivatedRuleSet();
-		
+
 		final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
 		try {
 			if (new File(ConfigConstants.TEST_BASEPATH + ConfigConstants.RULESET).exists()) {
@@ -166,7 +171,7 @@ public class Runner {
 			} else {
 				rules = new XmlConfigReader().read(ConfigConstants.RULESETDEFAULT);
 			}
-			
+
 			ruleSetOutputWriter.write(rules);
 			RuntimeConfig.getInstance().addActiveRules(rules);
 
@@ -182,6 +187,10 @@ public class Runner {
 			logger.warning("Could not read language files. No localization available");
 		}
 
+		// set boolean value for ProcessVariableReader: with Static Code Analysis or
+		// without(Regex)?
+		setIsStatic(rules);
+
 		return rules;
 	}
 
@@ -189,7 +198,7 @@ public class Runner {
 	 * Delete old output and create new output folder
 	 */
 	private void prepareOutputFolder() {
-		
+
 		deleteFiles();
 		createvPAVFolder();
 		try {
@@ -199,7 +208,7 @@ public class Runner {
 		} catch (IOException e) {
 			logger.warning("Could not create either output folder for JS, CSS or IMG");
 		}
-		
+
 	}
 
 	/**
@@ -212,8 +221,7 @@ public class Runner {
 	 *            New RuleSet
 	 * @return Map(String, Rule) finalRules merged ruleSet
 	 */
-	private Map<String, Rule> mergeRuleSet(final Map<String, Rule> parentRules,
-			final Map<String, Rule> childRules) {
+	private Map<String, Rule> mergeRuleSet(final Map<String, Rule> parentRules, final Map<String, Rule> childRules) {
 		final Map<String, Rule> finalRules = new HashMap<>();
 
 		finalRules.putAll(parentRules);
@@ -222,24 +230,15 @@ public class Runner {
 		return finalRules;
 	}
 
-	/**
-	 * Initializes the fileScanner with the current set of rules
-	 *
-	 * @param rules
-	 *            Map of rules
-	 */
-	private void scanClassPath(Map<String, Rule> rules) {
-		setFileScanner(new FileScanner(rules));
-	}
 
 	/**
 	 * Initializes the variableScanner to scan and read outer process variables with
 	 * the current javaResources
 	 */
 	private void getProcessVariables(Map<String, Rule> rules) {
-		if (rules.get("ProcessVariablesModelChecker").isActive() ||
-				rules.get("ProcessVariablesNameConventionChecker").isActive() ||
-				rules.get("DataFlowChecker").isActive()) {
+		if (rules.get("ProcessVariablesModelChecker").isActive()
+				|| rules.get("ProcessVariablesNameConventionChecker").isActive()
+				|| rules.get("DataFlowChecker").isActive()) {
 			variableScanner = new OuterProcessVariablesScanner(getFileScanner().getJavaResourcesFileInputStream());
 			readOuterProcessVariables(variableScanner);
 			setCheckProcessVariables(true);
@@ -258,8 +257,7 @@ public class Runner {
 	 * @throws RuntimeException
 	 *             Config item couldn't be read
 	 */
-	private void createIssues(Map<String, Rule> rules,
-									 Collection<DataFlowRule> dataFlowRules) throws RuntimeException {
+	private void createIssues(Map<String, Rule> rules, Collection<DataFlowRule> dataFlowRules) throws RuntimeException {
 		issues = checkModels(rules, getFileScanner(), variableScanner, dataFlowRules);
 	}
 
@@ -285,19 +283,18 @@ public class Runner {
 	 * @throws RuntimeException
 	 *             Abort if writer can not be instantiated
 	 */
-	private void writeOutput(final Collection<CheckerIssue> filteredIssues,
-									final Collection<BpmnElement> elements,
-									final Collection<ProcessVariable> processVariables) throws RuntimeException {
-		
+	private void writeOutput(final Collection<CheckerIssue> filteredIssues, final Collection<BpmnElement> elements,
+			final Collection<ProcessVariable> processVariables) throws RuntimeException {
+
 		if (filteredIssues.size() > 0) {
 			final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
 			final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();
 			final JsOutputWriter jsOutputWriter = new JsOutputWriter();
 			try {
 				jsOutputWriter.prepareMaps(this.getWrongCheckersMap(), this.getIgnoredIssuesMap(), this.getModelPath());
-				
+
 				xmlOutputWriter.write(filteredIssues);
-				jsonOutputWriter.write(filteredIssues);				
+				jsonOutputWriter.write(filteredIssues);
 				jsOutputWriter.write(filteredIssues);
 				jsOutputWriter.writeVars(elements, processVariables);
 
@@ -466,8 +463,7 @@ public class Runner {
 	 * @throws IOException
 	 *             Ignored issues couldn't be read successfully
 	 */
-	private Collection<CheckerIssue> filterIssues(final Collection<CheckerIssue> issues)
-			throws RuntimeException {
+	private Collection<CheckerIssue> filterIssues(final Collection<CheckerIssue> issues) throws RuntimeException {
 		Collection<CheckerIssue> filteredIssues;
 		try {
 			filteredIssues = getFilteredIssues(issues);
@@ -597,12 +593,13 @@ public class Runner {
 	 *             ConfigItem not found
 	 */
 	private Collection<CheckerIssue> checkModels(final Map<String, Rule> rules, final FileScanner fileScanner,
-			final OuterProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules) throws RuntimeException {
+			final OuterProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules)
+			throws RuntimeException {
 		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		for (final String pathToModel : fileScanner.getProcessdefinitions()) {
-			issues.addAll(checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules));			
-		}		
+			issues.addAll(checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules));
+		}
 		return issues;
 	}
 
@@ -626,16 +623,16 @@ public class Runner {
 			Collection<DataFlowRule> dataFlowRules) {
 		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
 		ModelDispatchResult dispatchResult;
-        if (variableScanner != null) {
-            dispatchResult = bpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
-                    fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
-                    variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
-                    dataFlowRules, fileScanner.getResourcesNewestVersions(), rules);
-        } else {
-            dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(
-                    new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
-                    fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
-        }
+		if (variableScanner != null) {
+			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
+					fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
+					variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
+					dataFlowRules, fileScanner.getResourcesNewestVersions(), rules);
+		} else {
+			dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(
+					new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
+					fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
+		}
 		elements.addAll(dispatchResult.getBpmnElements());
 		processVariables.addAll(dispatchResult.getProcessVariables());
 		setWrongCheckersMap(bpmnModelDispatcher.getIncorrectCheckers());
@@ -680,6 +677,21 @@ public class Runner {
 		return ignoredIssuesMap;
 	}
 
+	/**
+	 * Based on the RuleSet config file, set the usage of Static Analysis to true.
+	 * Based on the boolean value the // * Process Variables are collected with
+	 * Regex or Static Analysis // * // * @param rules // * @return //
+	 */
+	private static boolean setIsStatic(Map<String, Rule> rules) {
+		Rule rule = rules.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
+		if (rule != null) {
+			Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
+			if (setting != null && setting.getValue().equals("true"))
+				isStatic = true;
+		}
+		return isStatic;
+	}
+
 	public Set<String> getModelPath() {
 		return getFileScanner().getProcessdefinitions();
 	}
@@ -722,5 +734,9 @@ public class Runner {
 
 	public void setWrongCheckersMap(Map<String, String> wrongCheckersMap) {
 		this.wrongCheckersMap = wrongCheckersMap;
+	}
+
+	public static boolean getIsStatic() {
+		return isStatic;
 	}
 }

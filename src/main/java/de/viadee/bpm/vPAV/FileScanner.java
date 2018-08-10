@@ -74,7 +74,7 @@ public class FileScanner {
 
     private final Set<String> processdefinitions;
 
-    private Set<String> javaResourcesFileInputStream = new HashSet<String>();
+    private static Set<String> javaResourcesFileInputStream = new HashSet<String>();
 
     private Set<String> includedFiles = new HashSet<String>();
 
@@ -86,11 +86,13 @@ public class FileScanner {
 
     private static String scheme = null;
 
+    private static StringBuilder sootPath = new StringBuilder();
+
     private static boolean isDirectory = false;
 
     private static final Logger LOGGER = Logger.getLogger(FileScanner.class.getName());
 
-    public FileScanner(final Map<String, Rule> rules) {
+    public FileScanner(final Map<String, Rule> rules, final String javaScanPath) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
         scanner.setBasedir(ConfigConstants.BASEPATH);
@@ -100,7 +102,7 @@ public class FileScanner {
         scanner.scan();
         processdefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
-        scanner.setBasedir(ConfigConstants.JAVAPATH);
+        scanner.setBasedir(javaScanPath);
         // get file paths of process definitions
         scanner.setIncludes(new String[] { ConfigConstants.JAVA_FILE_PATTERN });
         scanner.scan();
@@ -131,9 +133,28 @@ public class FileScanner {
 
         urls = ucl.getURLs();
 
-        // retrieve all jars during runtime and pass them to get class files
+        URL urlTargetClass = this.getClass().getResource("/");
+        if (urlTargetClass != null) {
+            String path = urlTargetClass.toString();
+            addStringToSootPath(path);
+        }
 
+        if (System.getProperty("os.name").startsWith("Windows")) {
+        	sootPath = new StringBuilder(sootPath.toString().replace("/;", ";").replace(";;", ";"));
+        } else {
+        	sootPath = new StringBuilder(sootPath.toString().replace("/;", "").replace(";", ":"));
+        }
+        
+        
         for (URL url : urls) {
+        	// retrieve all jars during runtime and pass them to get class files
+        	if (Pattern.compile(".*target/classes.*").matcher(url.toString()).find()
+                    || Pattern.compile(".*target/test-classes.*").matcher(url.toString()).find()) {        		
+        		String sootPathCurrent = url.toString();
+                addStringToSootPath(sootPathCurrent);             
+            }
+        	
+        	
             if (url.getFile().contains(ConfigConstants.TARGET_CLASS_FOLDER)) {
                 File f = new File(url.getFile());
                 if (!isDirectory && f.exists()) {
@@ -175,6 +196,32 @@ public class FileScanner {
                 resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
             }
         }
+    }
+
+    /**
+     * Take one jar`s path, modify it from ClassLoader format to Soot`s format and add it to the previous paths.
+     *
+     * @param sootPathCurrent
+     *            - one jar's local path
+     */
+    private void addStringToSootPath(String sootPathCurrent) {
+
+        // Create a long String with every file and jar path for Soot.    	
+        if (sootPathCurrent != null) {
+        	if (System.getProperty("os.name").startsWith("Windows")) {
+        		sootPathCurrent = sootPathCurrent.replace("file:/", "");
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\");
+                sootPath.append(';');
+                sootPath.append(sootPathCurrent);
+                sootPath.append(';');
+        	} else {
+        		sootPathCurrent = sootPathCurrent.replace("file:", "");
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\");
+                sootPath.append(":");
+                sootPath.append(sootPathCurrent);
+                sootPath.append(":");
+        	}        	            
+        }     
     }
 
     /**
@@ -426,7 +473,7 @@ public class FileScanner {
         return scheme;
     }
 
-    public Set<String> getJavaResourcesFileInputStream() {
+    public static Set<String> getJavaResourcesFileInputStream() {
         return javaResourcesFileInputStream;
     }
 
@@ -436,5 +483,13 @@ public class FileScanner {
 
     public static void setIsDirectory(boolean isDirectory) {
         FileScanner.isDirectory = isDirectory;
+    }
+
+    /**
+     *
+     * @return - Concatenated String of jars' local paths
+     */
+    public static String getSootPath() {
+        return sootPath.toString();
     }
 }

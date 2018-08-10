@@ -31,11 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-
 import java.util.function.Function;
-import java.util.stream.Collectors;
+
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
 class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicateBuilder<T> {
 

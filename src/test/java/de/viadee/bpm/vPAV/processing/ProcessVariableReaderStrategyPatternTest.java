@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -41,23 +43,22 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
-public class ProcessVariableOperationReaderTest {
+public class ProcessVariableReaderStrategyPatternTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
@@ -80,55 +81,53 @@ public class ProcessVariableOperationReaderTest {
         RuntimeConfig.getInstance().setTest(false);
     }
 
-    @Test
-    public void testRecogniseVariablesInClass() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
+    @Test()
+    public void testStrategyPatternProcessVariableReaderStatic()
+            throws ParserConfigurationException, SAXException, IOException {
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        boolean isStatic = true;
 
-        final Collection<ServiceTask> allServiceTasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+        ProcessApplicationValidator pav = new ProcessApplicationValidator();
+        pav.findModelErrors();
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "ProcessVariableStaticReaderTest_RecogniseVariablesInClassStatic.bpmn";
 
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
+        JavaReaderContext pvc = new JavaReaderContext();
+        if (isStatic) {
+            pvc.setJavaReadingStrategy(new JavaReaderStatic());
+        } else {
+            pvc.setJavaReadingStrategy(new JavaReaderRegex());
+        }
 
-        Assert.assertEquals(2, variables.size());
+        final Map<String, ProcessVariableOperation> variables = pvc
+                .readJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
+
+        assertEquals("Static reader should not find 4 variables since one of them is in a comment", 3,
+                variables.size());
+
     }
 
-    @Test
-    public void testRecogniseInputOutputAssociations() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
+    @Test()
+    public void testStrategyPatternProcessVariableReaderRegex()
+            throws ParserConfigurationException, SAXException, IOException {
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        boolean isStatic = false;
 
-        final Collection<CallActivity> allServiceTasks = modelInstance
-                .getModelElementsByType(CallActivity.class);
+        final String PATH = BASE_PATH + "ProcessVariableStaticReaderTest_RecogniseVariablesInClassStatic.bpmn";
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+        JavaReaderContext pvc = new JavaReaderContext();
+        if (isStatic) {
+            pvc.setJavaReadingStrategy(new JavaReaderStatic());
+        } else {
+            pvc.setJavaReadingStrategy(new JavaReaderRegex());
+        }
 
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
+        final Map<String, ProcessVariableOperation> variables = pvc
+                .readJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
 
-        final ProcessVariableOperation nameOfVariableInMainProcess = variables
-                .get("nameOfVariableInMainProcess");
-        Assert.assertNotNull(nameOfVariableInMainProcess);
-        Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess.getOperation());
+        assertEquals("RegEx reader should find 4 variables including a false positive in a comment", 4,
+                variables.size());
 
-        final ProcessVariableOperation nameOfVariableInMainProcess2 = variables
-                .get("nameOfVariableInMainProcess2");
-        Assert.assertNotNull(nameOfVariableInMainProcess2);
-        Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess2.getOperation());
-
-        final ProcessVariableOperation someVariableInMainProcess = variables.get("someVariableInMainProcess");
-        Assert.assertNotNull(someVariableInMainProcess);
-        Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess.getOperation());
-
-        final ProcessVariableOperation someVariableInMainProcess2 = variables.get("someVariableInMainProcess2");
-        Assert.assertNotNull(someVariableInMainProcess2);
-        Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.getOperation());
     }
+
 }
