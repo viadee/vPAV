@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import org.springframework.context.ApplicationContext;
 
 import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
@@ -42,6 +43,12 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class ProcessApplicationValidator {
+
+    private static Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
+
+    public static void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {
+        ProcessApplicationValidator.dataFlowRules = dataFlowRules;
+    }
 
     /**
      * find issues with given ApplicationContext (Spring)
@@ -55,9 +62,9 @@ public class ProcessApplicationValidator {
         RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner runner = new Runner();
+        Runner runner = createRunner();
         runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
-
+      
         return runner.getfilteredIssues();
     }
 
@@ -73,7 +80,7 @@ public class ProcessApplicationValidator {
         RuntimeConfig.getInstance().setApplicationContext(ctx);
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner runner = new Runner();
+        Runner runner = createRunner();
         runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
@@ -87,7 +94,7 @@ public class ProcessApplicationValidator {
     public static Collection<CheckerIssue> findModelInconsistencies() {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner runner = new Runner();
+        Runner runner = createRunner();
         runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return runner.getfilteredIssues();
@@ -101,7 +108,7 @@ public class ProcessApplicationValidator {
     public static Collection<CheckerIssue> findModelErrors() {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner runner = new Runner();
+        Runner runner = createRunner();
         runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
@@ -116,7 +123,7 @@ public class ProcessApplicationValidator {
     public static Collection<CheckerIssue> findModelErrorsFromClassloader(ClassLoader classloader) {
 
         RuntimeConfig.getInstance().setClassLoader(classloader);
-        Runner runner = new Runner();
+        Runner runner = createRunner();
         runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
@@ -139,5 +146,13 @@ public class ProcessApplicationValidator {
             }
         }
         return filteredErrors;
+    }
+
+    private static Runner createRunner() {
+        Runner runner = new Runner();
+        runner.setDataFlowRules(dataFlowRules);
+        dataFlowRules = new ArrayList<>();
+        runner.viadeeProcessApplicationValidator();
+        return runner;
     }
 }

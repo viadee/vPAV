@@ -59,12 +59,8 @@ public class DataFlowChecker implements ModelChecker {
         for (DataFlowRule dataFlowRule : dataFlowRules) {
             dataFlowRule.evaluate(processVariables).stream()
                     .filter(r-> !r.isFulfilled())
-                    // TODO: think about correct BPMN element
-                    // TODO: Message template in resource bundle
-                    .map(r -> IssueWriter.createIssue(rule, dataFlowRule.getCriticality(),
-                            r.getEvaluatedVariable().getOperations().get(0).getElement(),
-                            String.format("Rule '%s' violated:\n%s %s", dataFlowRule.getRuleDescription(),
-                                    r.getEvaluatedVariable().getName(), r.getMessage().get())))
+                    .map(r -> IssueWriter.createIssue(rule, dataFlowRule.getRuleDescription(), dataFlowRule.getCriticality(),
+                            r.getEvaluatedVariable(), dataFlowRule.getViolationMessageFor(r)))
                     .forEach(issues::addAll);
         }
         return issues;

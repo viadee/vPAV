@@ -132,6 +132,11 @@ public class DataFlowRuleBuilder implements ProcessVariableSet, ConditionedProce
     }
 
     @Override
+    public String getViolationMessageFor(EvaluationResult<ProcessVariable> result) {
+        return new SimpleDataFlowRule(constraint, condition).getViolationMessageFor(result);
+    }
+
+    @Override
     public CriticalityEnum getCriticality() {
         return new SimpleDataFlowRule(constraint, condition).getCriticality();
     }

@@ -31,6 +31,7 @@ Consistency checks are performed by individual modules called checkers, which se
 |[NoExpressionChecker](NoExpressionChecker.md)                                   | Are expressions used against common best-practices?                                        | Done         |
 |[MessageEventChecker](MessageEventChecker.md)                                   | Are MessageEvents referencing messages and do they provide message names?                                  | Done         |
 |[SignalEventChecker](SignalEventChecker.md)                                   | Are SignalEvents referencing signals and do they provide signal names? Are signal names used more than once in StartEvents?                                  | Done         |
+|[DataFlowChecker](DataFlowChecker.md)                                  | Does your model adhere to your configurable rules (read, writes, deletions) ?                                  | Done         |
 |[ExtensionChecker](ExtensionChecker.md)                                  | Do tasks using key-value pairs in the extension panel fit into a desired pattern?                                  | Done         |
 |[OverlapChecker](OverlapChecker.md)                                   | Are there redundant sequence flows (some may be invisible due to overlap)?              | Done         
 |[BoundaryErrorChecker](BoundaryErrorChecker.md)                                   | Do tasks with attached BoundaryErrorEvents use the correct ErrorCode and do the corresponding classes exist?                                  | Experimental         |
@@ -122,6 +123,7 @@ To find the visual output, check the created vPAV folder inside your project's t
 ![Issue Table](img/table.png "Table with listed information for all issues")
 
 ## Requirements
+- JDK 8
 - Camunda BPM Engine 7.4.0 and above
 
 ## Installation/Usage
