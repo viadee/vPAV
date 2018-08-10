@@ -101,7 +101,7 @@ public class JavaReaderStatic implements JavaReader {
         if (classFile != null && classFile.trim().length() > 0) {
 
             final String sootPath = FileScanner.getSootPath();
-
+      
             System.setProperty("soot.class.path", sootPath);
 
             final Set<String> classPaths = FileScanner.getJavaResourcesFileInputStream();
@@ -174,7 +174,12 @@ public class JavaReaderStatic implements JavaReader {
             final KnownElementFieldType fieldType, final String scopeId,
             OutSetCFG outSet, VariableBlock originalBlock) {
 
-        className = className.replace("\\", ".").replace(".java", "");
+    	if (System.getProperty("os.name").startsWith("Windows")) {
+    		className = className.replace("\\", ".").replace(".java", "");
+    	} else {
+    		className = className.replace("/", ".").replace(".java", "");
+    	}
+        
 
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
@@ -319,7 +324,12 @@ public class JavaReaderStatic implements JavaReader {
 
                     String className = src.tgt().getDeclaringClass().getName();
                     if (!className.equals(oldClassName)) {
-                        className = className.replace(".", "\\") + ".java";
+                    	if (System.getProperty("os.name").startsWith("Windows")) {
+                    		className = className.replace(".", "\\") + ".java";
+                    	} else {
+                    		className = className.replace(".", "/") + ".java";
+                    	}
+                        
 
                         if (classPaths.contains(className)) {
                             G.reset();

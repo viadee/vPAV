@@ -133,30 +133,28 @@ public class FileScanner {
 
         urls = ucl.getURLs();
 
-        // retrieve all jars and create one String for Soot path
-        for (URL url : urls) {
-
-            if (Pattern.compile(".*target/classes.*").matcher(url.toString()).find()
-                    || Pattern.compile(".*target/test-classes.*").matcher(url.toString()).find()) {
-
-                String sootPathCurrent = url.toString();
-                addStringToSootPath(sootPathCurrent);
-
-            }
-
-        }
-
         URL urlTargetClass = this.getClass().getResource("/");
         if (urlTargetClass != null) {
             String path = urlTargetClass.toString();
             addStringToSootPath(path);
         }
 
-        sootPath = new StringBuilder(sootPath.toString().replace("/;", ";").replace(";;", ";"));
-
-        // retrieve all jars during runtime and pass them to get class files
-
+        if (System.getProperty("os.name").startsWith("Windows")) {
+        	sootPath = new StringBuilder(sootPath.toString().replace("/;", ";").replace(";;", ";"));
+        } else {
+        	sootPath = new StringBuilder(sootPath.toString().replace("/;", "").replace(";", ":"));
+        }
+        
+        
         for (URL url : urls) {
+        	// retrieve all jars during runtime and pass them to get class files
+        	if (Pattern.compile(".*target/classes.*").matcher(url.toString()).find()
+                    || Pattern.compile(".*target/test-classes.*").matcher(url.toString()).find()) {        		
+        		String sootPathCurrent = url.toString();
+                addStringToSootPath(sootPathCurrent);             
+            }
+        	
+        	
             if (url.getFile().contains(ConfigConstants.TARGET_CLASS_FOLDER)) {
                 File f = new File(url.getFile());
                 if (!isDirectory && f.exists()) {
@@ -208,17 +206,22 @@ public class FileScanner {
      */
     private void addStringToSootPath(String sootPathCurrent) {
 
-        // Create a long String with every file and jar path for Soot.
-
+        // Create a long String with every file and jar path for Soot.    	
         if (sootPathCurrent != null) {
-            sootPathCurrent = sootPathCurrent.replace("file:/", "");
-            sootPathCurrent = sootPathCurrent.replace("/./", "/");
-
-        }
-
-        sootPath.append(';');
-        sootPath.append(sootPathCurrent);
-        sootPath.append(';');
+        	if (System.getProperty("os.name").startsWith("Windows")) {
+        		sootPathCurrent = sootPathCurrent.replace("file:/", "");
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\");
+                sootPath.append(';');
+                sootPath.append(sootPathCurrent);
+                sootPath.append(';');
+        	} else {
+        		sootPathCurrent = sootPathCurrent.replace("file:", "");
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\");
+                sootPath.append(":");
+                sootPath.append(sootPathCurrent);
+                sootPath.append(":");
+        	}        	            
+        }     
     }
 
     /**

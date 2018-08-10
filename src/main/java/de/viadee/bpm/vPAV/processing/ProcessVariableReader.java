@@ -31,11 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,10 +43,6 @@ import java.util.regex.Pattern;
 
 import javax.el.ELException;
 
-import de.viadee.bpm.vPAV.processing.model.data.*;
-import org.apache.commons.io.IOUtils;
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.Resource;
 import org.camunda.bpm.engine.impl.juel.Builder;
 import org.camunda.bpm.engine.impl.juel.IdentifierNode;
 import org.camunda.bpm.engine.impl.juel.Tree;
@@ -92,7 +84,11 @@ import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
 /**
  * search process variables for an bpmn element
