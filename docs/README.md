@@ -322,7 +322,7 @@ In the sense of semantic versioning, the resulting XML and JSON outputs are the 
 We will keep these as stable as possible, in order to enable users to analyse and integrate results into the toolsets of their choice.
 
 ## Cooperation
-Feel free to report issues, questions, ideas or patches. We are looking forward to it.
+Feel free to report issues, questions, ideas or patches. We are looking forward to it. For more information please refer to Contributing.md. 
 
 ## Resources
 Status of the development branch: [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=development)](https://travis-ci.org/viadee/vPAV)
