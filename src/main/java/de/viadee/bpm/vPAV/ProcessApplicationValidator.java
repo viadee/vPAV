@@ -152,7 +152,7 @@ public class ProcessApplicationValidator {
         Runner runner = new Runner();
         runner.setDataFlowRules(dataFlowRules);
         dataFlowRules = new ArrayList<>();
-        runner.viadeeProcessApplicationValidator();
+        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
         return runner;
     }
 }
