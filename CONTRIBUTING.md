@@ -1,11 +1,11 @@
-#CONTRIBUTING GUIDELINES
+# CONTRIBUTING GUIDELINES
 We value your contributions in whatever form. 
 Please stick to the following basic principles: 
-##Contributing issues
+## Contributing issues
 When opening a new issue please 
 * search for duplicates
 * describe clearly which behavior you get and what you were expecting
-##Contributing code
+## Contributing code
 Please submit a Pull Request if you want to contribute changes to the source code. 
 
 Your Pull Request should:
