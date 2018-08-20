@@ -306,8 +306,8 @@ public class Runner {
 			try {
 				final JsOutputWriter jsOutputWriter = new JsOutputWriter();
 				jsOutputWriter.prepareMaps(this.getWrongCheckersMap(), this.getIgnoredIssuesMap(), this.getModelPath());
-				jsOutputWriter.writeVars(elements, processVariables);
 				jsOutputWriter.write(filteredIssues);
+				jsOutputWriter.writeVars(elements, processVariables);
 			} catch (OutputWriterException e) {
 				throw new RuntimeException("JavaScript File couldn't be written", e);
 			}
