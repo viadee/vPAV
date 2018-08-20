@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperties;
@@ -77,11 +78,18 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
     public T withProperty(String propertyName) {
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
             ExtensionElements elements = element.getBaseElement().getExtensionElements();
-            Collection<CamundaProperty> properties = elements.getElementsQuery()
-              .filterByType(CamundaProperties.class)
-              .singleResult()
-              .getCamundaProperties();
-            boolean hasProperty = properties.stream().anyMatch(p -> p.getCamundaName().equals(propertyName));
+            boolean hasProperty = false;
+            if (elements != null) {
+                Query<CamundaProperties> query = elements.getElementsQuery()
+                        .filterByType(CamundaProperties.class);
+                if (query.count() > 0) {
+                    Collection<CamundaProperty> properties = query
+                            .singleResult()
+                            .getCamundaProperties();
+                    hasProperty = properties.stream().anyMatch(p -> p.getCamundaName() != null && p.getCamundaName().equals(propertyName));
+                }
+            }
+
             String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
             return new EvaluationResult<>(hasProperty, element,
                     hasProperty ? "present at " + elementName : "not present at " + elementName);
