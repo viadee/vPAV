@@ -103,7 +103,7 @@ public class ElementBasedPredicateBuilderImplTest {
 
         assertThat(result.isFulfilled(), is(true));
         assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString(UserTask.class.getName()));
+        assertThat(result.getMessage().get(), containsString(UserTask.class.getSimpleName()));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class ElementBasedPredicateBuilderImplTest {
 
         assertThat(result.isFulfilled(), is(false));
         assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString(ServiceTask.class.getName()));
+        assertThat(result.getMessage().get(), containsString(ServiceTask.class.getSimpleName()));
     }
 
     @Test

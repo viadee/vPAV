@@ -34,7 +34,10 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -62,9 +65,23 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
     public T ofType(Class clazz) {
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
             return new EvaluationResult<>(clazz.isInstance(element.getBaseElement()), element,
-                    element.getBaseElement().getClass().getName());
+                    element.getBaseElement().getClass().getSimpleName());
         };
         final String description = String.format("of type %s", clazz);
+        return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
+    }
+
+    @Override
+    public T withProperty(String propertyName) {
+        final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
+            ExtensionElements elements = element.getBaseElement().getExtensionElements();
+            boolean hasProperty = elements != null && elements.getElements().stream()
+                    .anyMatch(e -> e.getAttributeValue("name") != null && e.getAttributeValue("name").equals(propertyName));
+            String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
+            return new EvaluationResult<>(hasProperty, element,
+                    hasProperty ? "present at " + elementName : "not present at " + elementName);
+        };
+        final String description = String.format("with property %s", propertyName);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 

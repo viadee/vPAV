@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
 public interface ElementBasedPredicateBuilder<T> {
     T ofType(Class clazz);
+    T withProperty(String propertyName);
     T withPrefix(String prefix);
     T withPostfix(String postfix);
     T withNameMatching(String regex);
