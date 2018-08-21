@@ -507,6 +507,7 @@ public final class ProcessVariableReader {
 
         final BaseElement baseElement = element.getBaseElement();
         BpmnModelElementInstance scopeElement = baseElement.getScope();
+
         String scopeId = null;
         if (scopeElement != null) {
             scopeId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
@@ -551,10 +552,16 @@ public final class ProcessVariableReader {
             } else {
                 jvc.setJavaReadingStrategy(new JavaReaderRegex());
             }
-            processVariables.putAll(jvc.readJavaDelegate(
-                    baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS), element,
-                    ElementChapter.Details, KnownElementFieldType.Class, scopeId));
-
+            
+            if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS) != null) {
+            	processVariables.putAll(jvc.readJavaDelegate(
+                        baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS), element,
+                        ElementChapter.Details, KnownElementFieldType.Class, scopeId));
+            } else {
+            	processVariables.putAll(jvc.readJavaDelegate(resolveBeanMapping(t_delegateExpression), element,
+                        ElementChapter.Details, KnownElementFieldType.Class, scopeId));
+            }
+            
             if (baseElement instanceof BusinessRuleTask) {
                 final String t_decisionRef = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                         BpmnConstants.DECISIONREF);
@@ -635,7 +642,27 @@ public final class ProcessVariableReader {
         return processVariables;
     }
 
-    /**
+    private String resolveBeanMapping(final String bean) { 
+        if (bean != null && bean.length() > 0 && RuntimeConfig.getInstance().getBeanMapping() != null) {
+            final TreeBuilder treeBuilder = new Builder();
+            final Tree tree = treeBuilder.build(bean);
+            final Iterable<IdentifierNode> identifierNodes = tree.getIdentifierNodes();
+            // if beanMapping ${...} reference
+            if (identifierNodes.iterator().hasNext()) {
+                for (final IdentifierNode node : identifierNodes) {
+                    final String classFile = RuntimeConfig.getInstance().getBeanMapping()
+                            .get(node.getName());
+                    // correct beanmapping was found -> check if class exists
+                    if (classFile != null && classFile.trim().length() > 0) {
+                        return classFile;
+                    } 
+                }
+            } 
+        }
+		return "";		
+	}
+
+	/**
      * Examine multi instance tasks for process variables
      *
      * @param element

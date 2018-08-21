@@ -60,6 +60,7 @@ public class StaticInterProceduralTest {
         // Prepare for post-test cleanup
         oldClassLoader = RuntimeConfig.getInstance().getClassLoader();
         RuntimeConfig.getInstance().setClassLoader(StaticInterProceduralTest.class.getClassLoader());
+        RuntimeConfig.getInstance().setTest(true);
         runner = new Runner();
     }
 

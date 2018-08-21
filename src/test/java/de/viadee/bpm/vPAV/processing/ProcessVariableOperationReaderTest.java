@@ -72,7 +72,7 @@ public class ProcessVariableOperationReaderTest {
         final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
         final URL[] classUrls = { classUrl, resourcesUrl };
         cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().setClassLoader(cl);        
     }
 
     @AfterClass

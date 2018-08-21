@@ -63,7 +63,6 @@ public class ProcessApplicationValidator {
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         Runner runner = createRunner();
-        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
       
         return runner.getfilteredIssues();
     }
@@ -81,7 +80,6 @@ public class ProcessApplicationValidator {
         RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         Runner runner = createRunner();
-        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
@@ -95,7 +93,6 @@ public class ProcessApplicationValidator {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         Runner runner = createRunner();
-        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return runner.getfilteredIssues();
     }
@@ -109,7 +106,6 @@ public class ProcessApplicationValidator {
 
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         Runner runner = createRunner();
-        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
@@ -124,7 +120,6 @@ public class ProcessApplicationValidator {
 
         RuntimeConfig.getInstance().setClassLoader(classloader);
         Runner runner = createRunner();
-        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
 
         return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
     }
