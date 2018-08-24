@@ -302,8 +302,10 @@ public class Runner {
 				throw new RuntimeException("Output couldn't be written", e);
 			}
 		} else {
-			final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
 			try {
+				final JsOutputWriter jsOutputWriter = new JsOutputWriter();
+				jsOutputWriter.prepareMaps(this.getWrongCheckersMap(), this.getIgnoredIssuesMap(), this.getModelPath());
+				jsOutputWriter.writeVars(elements, processVariables);
 				jsOutputWriter.write(filteredIssues);
 			} catch (OutputWriterException e) {
 				throw new RuntimeException("JavaScript File couldn't be written", e);

@@ -58,17 +58,17 @@ function addCountOverlay(overlays, elements) {
 function getProcessVariableOverlay(bpmnFile) {
     let filteredVariables = proz_vars
         .filter(p => p.bpmnFile === ("src\\main\\resources\\" + bpmnFile))
-        .filter(p => p.elementIid !== "");
+.filter(p => p.elementIid !== "");
 
     return filteredVariables.map(p => {
         let overlayData = {};
-        overlayData.i = p;
-        overlayData.anz = [p.read.length, p.write.length, p.delete.length];
-        overlayData.clickOverlay = createVariableDialog(p);
-        overlayData.classes = "badge-info badge-variable-operations";
-        overlayData.title = "variable operations";
-        return overlayData;
-    });
+    overlayData.i = p;
+    overlayData.anz = [p.read.length, p.write.length, p.delete.length];
+    overlayData.clickOverlay = createVariableDialog(p);
+    overlayData.classes = "badge-info badge-variable-operations";
+    overlayData.title = "variable operations";
+    return overlayData;
+});
 }
 
 function getIssueOverlays(bpmnFile) {
@@ -137,19 +137,19 @@ function getIssueOverlays(bpmnFile) {
     issues.forEach(issue => issue.title = "issues");
     issues.forEach(issue => {
         issueSeverity.forEach(element => {
-            if (element.id === issue.i.elementId) {
-                if (element.Criticality === "ERROR") {
-                    issue.classes = "badge-danger";
-                }
-                if (element.Criticality === "WARNING") {
-                    issue.classes = "badge-warning";
-                }
-                if (element.Criticality === "INFO") {
-                    issue.classes = "badge-info";
-                }
-            }
-        });
-    });
+        if (element.id === issue.i.elementId) {
+        if (element.Criticality === "ERROR") {
+            issue.classes = "badge-danger";
+        }
+        if (element.Criticality === "WARNING") {
+            issue.classes = "badge-warning";
+        }
+        if (element.Criticality === "INFO") {
+            issue.classes = "badge-info";
+        }
+    }
+});
+});
     return issues;
 }
 
@@ -300,7 +300,7 @@ function createCardForVariableOperations(operations, title) {
 }
 
 // Add single issue to the ignoreIssues list
-function addIssue(issue){         
+function addIssue(issue){
     ignoredIssues[issue[0]] = '#' + issue[1].substring(0,29) + "..";
     issue[2].disabled = true;
 }
@@ -312,7 +312,7 @@ function downloadFile(){
     Object.keys(ignoredIssues).forEach(function(key) {
         value = ignoredIssues[key];
         blob = blob + value + "\n"+ key + "\n";
-    });    
+    });
     download(new Blob([blob]),"ignoreIssues.txt", "text/plain");
 }
 
@@ -369,10 +369,10 @@ function createIssueTable(bpmnFile, tableContent) {
 
             defaultCheckers.forEach(element => {
                 if (issue.ruleName == element.rulename) {
-                    a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
-                    a.setAttribute("title", "Checker documentation");
-                }
-            });
+                a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
+                a.setAttribute("title", "Checker documentation");
+            }
+        });
 
             myCell.appendChild(a);
 
@@ -409,7 +409,7 @@ function createIssueTable(bpmnFile, tableContent) {
             //add links for process variables contained in message
             let messageText = issue.message;
             processVariables.filter(p => issue.message.includes(`'${p.name}'`))
-                .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
+        .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
             myCell.innerHTML = messageText;
             myRow.appendChild(myCell);
 
@@ -425,10 +425,10 @@ function createIssueTable(bpmnFile, tableContent) {
                             else
                                 path_text += issue.paths[x][y].elementId;
                         else
-                            if (y < issue.paths[x].length - 1)
-                                path_text += issue.paths[x][y].elementName + " -> ";
-                            else
-                                path_text += issue.paths[x][y].elementName
+                        if (y < issue.paths[x].length - 1)
+                            path_text += issue.paths[x][y].elementName + " -> ";
+                        else
+                            path_text += issue.paths[x][y].elementName
                     }
                     myText = document.createTextNode("Mark invalid flow");
 
@@ -717,7 +717,7 @@ function createViewController() {
                 createIssueTable(diagramName, noIssuesElements);
             }
         } else {
-            document.getElementById("showAllIssues").setAttribute("class", "nav-link table-selector active");
+            document.getElementById("showSuccess").setAttribute("class", "nav-link table-selector active");
             createIssueTable(diagramName, noIssuesElements);
         }
         createFooter();
@@ -791,8 +791,8 @@ function createViewController() {
         let operations = processVariable.read.concat(processVariable.write, processVariable.delete);
         let elements = operations.map(o => {
             o.classification = "one-element";
-            return o;
-        });
+        return o;
+    });
 
         updateDiagram(this.currentModel, elements, getProcessVariableOverlay(this.currentModel.name));
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
@@ -826,8 +826,8 @@ function showUnlocatedCheckers() {
             </div>
         </div>`;
 
-        document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
-    });
+    document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
+});
 }
 
 // Init
