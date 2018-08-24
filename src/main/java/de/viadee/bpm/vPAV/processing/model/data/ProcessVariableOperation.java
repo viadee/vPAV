@@ -32,7 +32,7 @@
 package de.viadee.bpm.vPAV.processing.model.data;
 
 /**
- * Represents a process variable with some meaningful information.
+ * Represents a process variable operation with some meaningful information.
  *
  */
 public class ProcessVariableOperation {

@@ -33,6 +33,12 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import java.util.Optional;
 
+/**
+ * Representing the result of a rule evaluation containing a message.
+ * Note that this message is only used in case of negative result, but needed in both cases,
+ * as the negation of predicates may lead an inversion.
+ * @param <T>
+ */
 public class EvaluationResult<T> {
     private String message;
     private boolean result;
