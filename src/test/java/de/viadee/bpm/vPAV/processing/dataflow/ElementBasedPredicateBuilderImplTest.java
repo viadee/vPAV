@@ -132,7 +132,7 @@ public class ElementBasedPredicateBuilderImplTest {
 
         assertThat(result.isFulfilled(), is(true));
         assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("present at element"));
+        assertThat(result.getMessage().get(), containsString("present at 'element'"));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class ElementBasedPredicateBuilderImplTest {
 
         assertThat(result.isFulfilled(), is(false));
         assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("not present at element"));
+        assertThat(result.getMessage().get(), containsString("not present at 'element'"));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ElementBasedPredicateBuilderImplTest {
 
         assertThat(result.isFulfilled(), is(false));
         assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("not present at element"));
+        assertThat(result.getMessage().get(), containsString("not present at 'element'"));
     }
 
     @Test
