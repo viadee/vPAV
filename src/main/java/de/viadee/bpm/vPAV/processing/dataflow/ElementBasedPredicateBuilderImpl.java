@@ -77,19 +77,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
     @Override
     public T withProperty(String propertyName) {
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
-            ExtensionElements elements = element.getBaseElement().getExtensionElements();
-            boolean hasProperty = false;
-            if (elements != null) {
-                Query<CamundaProperties> query = elements.getElementsQuery()
-                        .filterByType(CamundaProperties.class);
-                if (query.count() > 0) {
-                    Collection<CamundaProperty> properties = query
-                            .singleResult()
-                            .getCamundaProperties();
-                    hasProperty = properties.stream().anyMatch(p -> p.getCamundaName() != null && p.getCamundaName().equals(propertyName));
-                }
-            }
-
+            boolean hasProperty = hasProperty(propertyName, element);
             String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
             return new EvaluationResult<>(hasProperty, element,
                     hasProperty ? "present at " + elementName : "not present at " + elementName);
@@ -154,5 +142,21 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
         return onlyFlag ?
                 numberOfSuccesses == results.size() :
                 numberOfSuccesses > 0;
+    }
+
+    private boolean hasProperty(String propertyName, BpmnElement element) {
+        ExtensionElements elements = element.getBaseElement().getExtensionElements();
+        if (elements == null) {
+            return false;
+        }
+        Query<CamundaProperties> query = elements.getElementsQuery()
+                .filterByType(CamundaProperties.class);
+        if (query.count() == 0) {
+            return false;
+        }
+        Collection<CamundaProperty> properties = query
+                .singleResult()
+                .getCamundaProperties();
+        return properties.stream().anyMatch(p -> p.getCamundaName() != null && p.getCamundaName().equals(propertyName));
     }
 }

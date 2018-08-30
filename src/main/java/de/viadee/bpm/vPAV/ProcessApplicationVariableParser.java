@@ -59,7 +59,7 @@ public class ProcessApplicationVariableParser {
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
 
 
-        FileScanner fileScanner = new FileScanner(new HashMap<>());
+        FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.JAVAPATH);
         OuterProcessVariablesScanner variableScanner = readOuterProcessVariables(fileScanner);
 
         BpmnScanner bpmnScanner = createScanner(modelFile);
