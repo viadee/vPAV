@@ -70,31 +70,19 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
             return new EvaluationResult<>(clazz.isInstance(element.getBaseElement()), element,
                     element.getBaseElement().getClass().getSimpleName());
         };
-        final String description = String.format("of type %s", clazz.getSimpleName());
+        final String description = String.format("of type '%s'", clazz.getSimpleName());
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
     @Override
     public T withProperty(String propertyName) {
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
-            ExtensionElements elements = element.getBaseElement().getExtensionElements();
-            boolean hasProperty = false;
-            if (elements != null) {
-                Query<CamundaProperties> query = elements.getElementsQuery()
-                        .filterByType(CamundaProperties.class);
-                if (query.count() > 0) {
-                    Collection<CamundaProperty> properties = query
-                            .singleResult()
-                            .getCamundaProperties();
-                    hasProperty = properties.stream().anyMatch(p -> p.getCamundaName() != null && p.getCamundaName().equals(propertyName));
-                }
-            }
-
+            boolean hasProperty = hasProperty(propertyName, element);
             String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
             return new EvaluationResult<>(hasProperty, element,
-                    hasProperty ? "present at " + elementName : "not present at " + elementName);
+                    hasProperty ? "present at '" + elementName + "'" : "not present at '" + elementName + "'");
         };
-        final String description = String.format("with property %s", propertyName);
+        final String description = String.format("with property '%s'", propertyName);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
@@ -104,7 +92,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
             String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
             return new EvaluationResult<>(elementName.startsWith(prefix), element, elementName);
         };
-        final String description = String.format("with prefix %s", prefix);
+        final String description = String.format("with prefix '%s'", prefix);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
@@ -114,7 +102,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
             String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
             return new EvaluationResult<>(elementName.endsWith(postfix), element, elementName);
         };
-        final String description = String.format("with postfix %s", postfix);
+        final String description = String.format("with postfix '%s'", postfix);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
@@ -124,7 +112,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
             String elementName = element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
             return new EvaluationResult<>(Pattern.matches(regex, elementName), element, elementName);
         };
-        final String description = String.format("with name matching %s", regex);
+        final String description = String.format("with name matching '%s'", regex);
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
@@ -154,5 +142,21 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
         return onlyFlag ?
                 numberOfSuccesses == results.size() :
                 numberOfSuccesses > 0;
+    }
+
+    private boolean hasProperty(String propertyName, BpmnElement element) {
+        ExtensionElements elements = element.getBaseElement().getExtensionElements();
+        if (elements == null) {
+            return false;
+        }
+        Query<CamundaProperties> query = elements.getElementsQuery()
+                .filterByType(CamundaProperties.class);
+        if (query.count() == 0) {
+            return false;
+        }
+        Collection<CamundaProperty> properties = query
+                .singleResult()
+                .getCamundaProperties();
+        return properties.stream().anyMatch(p -> p.getCamundaName() != null && p.getCamundaName().equals(propertyName));
     }
 }

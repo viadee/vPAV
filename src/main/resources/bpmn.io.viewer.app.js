@@ -301,7 +301,7 @@ function createCardForVariableOperations(operations, title) {
 
 // Add single issue to the ignoreIssues list
 function addIssue(issue){         
-    ignoredIssues[issue[0]] = '#' + issue[1].substring(0,29) + "..";
+    ignoredIssues[issue[0]] = '#' + issue[1];
     issue[2].disabled = true;
 }
 
@@ -838,5 +838,3 @@ controller.init();
 document.getElementById('vPAV').innerHTML = vPavVersion;
 showUnlocatedCheckers();
 
-
->>>>>>> Demo adjustments including check on property
