@@ -1,6 +1,6 @@
 Data Flow Checker
 =================================
-The Data Flow Checker validates accesses of process variables against defined data flow rules.
+The Data Flow Checker evaluates DFVL rules and generates issues for rule violations. See xyz on how to define DFVL rules.
 
 
 ## Assumptions
@@ -13,20 +13,15 @@ The rule should be configured as follows:
   <name>DataFlowChecker</name>
   <state>true</state>
 </rule>
-
 ```
 
 Additionally, data flow rules need to be defined and set that are evaluated by the checker.
 ```java
-public class InitialProcessVariables extends InitialProcessVariablesBase {
-
-    String filename;
-    
-}
+Collection<DataFlowRule> rules = Arrays.asList(...);
+ProcessApplicationValidator.setDataFlowRules(rules);
+Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelErrors();
 ```
 
 ## Error messages
 Error messages are dynamically created based on the user-defined rule.
-
-## Examples
 
