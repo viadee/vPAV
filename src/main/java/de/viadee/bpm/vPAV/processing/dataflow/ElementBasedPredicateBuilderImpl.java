@@ -70,7 +70,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
             return new EvaluationResult<>(clazz.isInstance(element.getBaseElement()), element,
                     element.getBaseElement().getClass().getSimpleName());
         };
-        final String description = String.format("of type '%s'", clazz);
+        final String description = String.format("of type '%s'", clazz.getSimpleName());
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }
 
