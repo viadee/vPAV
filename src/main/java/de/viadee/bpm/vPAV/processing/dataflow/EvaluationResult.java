@@ -40,51 +40,51 @@ import java.util.Optional;
  * @param <T>
  */
 public class EvaluationResult<T> {
-    private String message;
-    private boolean result;
+  private String message;
+  private boolean result;
 
-    private T evaluatedVariable;
+  private T evaluatedVariable;
 
-    static <T> EvaluationResult<T> forViolation(String message, T evaluatedVariable) {
-        return new EvaluationResult<>(false, evaluatedVariable, message.isEmpty() ? null : message);
-    }
+  static <T> EvaluationResult<T> forViolation(String message, T evaluatedVariable) {
+    return new EvaluationResult<>(false, evaluatedVariable, message.isEmpty() ? null : message);
+  }
 
-    static <T> EvaluationResult<T> forViolation(T evaluatedVariable) {
-        return new EvaluationResult<>(false, evaluatedVariable, null);
-    }
+  static <T> EvaluationResult<T> forViolation(T evaluatedVariable) {
+    return new EvaluationResult<>(false, evaluatedVariable, null);
+  }
 
-    static <T> EvaluationResult<T> forSuccess(T evaluatedVariable) {
-        return new EvaluationResult<>(true, evaluatedVariable);
-    }
+  static <T> EvaluationResult<T> forSuccess(T evaluatedVariable) {
+    return new EvaluationResult<>(true, evaluatedVariable);
+  }
 
-    static <T> EvaluationResult<T> forSuccess(String message, T evaluatedVariable) {
-        return new EvaluationResult<>(true, evaluatedVariable, message.isEmpty() ? null : message);
-    }
+  static <T> EvaluationResult<T> forSuccess(String message, T evaluatedVariable) {
+    return new EvaluationResult<>(true, evaluatedVariable, message.isEmpty() ? null : message);
+  }
 
-    public EvaluationResult(boolean result, T evaluatedVariable, String message) {
-        this.message = message;
-        this.result = result;
-        this.evaluatedVariable = evaluatedVariable;
-    }
+  public EvaluationResult(boolean result, T evaluatedVariable, String message) {
+    this.message = message;
+    this.result = result;
+    this.evaluatedVariable = evaluatedVariable;
+  }
 
-    public EvaluationResult(boolean result, T evaluatedVariable) {
-        this.result = result;
-        this.evaluatedVariable = evaluatedVariable;
-    }
+  public EvaluationResult(boolean result, T evaluatedVariable) {
+    this.result = result;
+    this.evaluatedVariable = evaluatedVariable;
+  }
 
-    public boolean isFulfilled() {
-        return result;
-    }
+  public boolean isFulfilled() {
+    return result;
+  }
 
-    public T getEvaluatedVariable() {
-        return evaluatedVariable;
-    }
+  public T getEvaluatedVariable() {
+    return evaluatedVariable;
+  }
 
-    public Optional<String> getMessage() {
-        return Optional.ofNullable(message);
-    }
+  public Optional<String> getMessage() {
+    return Optional.ofNullable(message);
+  }
 
-    public EvaluationResult<T> inverse() {
-        return new EvaluationResult<>(!result, evaluatedVariable, message);
-    }
+  public EvaluationResult<T> inverse() {
+    return new EvaluationResult<>(!result, evaluatedVariable, message);
+  }
 }

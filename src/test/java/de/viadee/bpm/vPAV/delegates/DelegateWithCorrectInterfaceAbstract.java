@@ -33,6 +33,4 @@ package de.viadee.bpm.vPAV.delegates;
 
 import org.camunda.bpm.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
 
-public class DelegateWithCorrectInterfaceAbstract extends AbstractBpmnActivityBehavior {
-
-}
+public class DelegateWithCorrectInterfaceAbstract extends AbstractBpmnActivityBehavior {}

@@ -37,24 +37,24 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
  * Initial step builder for building data flow rules. Optionally starts with constraint definition or immediate condition.
  */
 public interface ProcessVariableSet {
-    /**
-     * Begins a predicate construction to define a constraint.
-     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
-     */
-    ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> thatAre();
-    /**
-     * Method to define a custom constraint.
-     * @return next step builder
-     */
-    ConstrainedProcessVariableSet thatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
-    /**
-     * Begins a predicate construction to define a condition.
-     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
-     */
-    ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe();
-    /**
-     * Method to define a custom condition.
-     * @return next step builder
-     */
-    ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
+  /**
+   * Begins a predicate construction to define a constraint.
+   * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
+   */
+  ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> thatAre();
+  /**
+   * Method to define a custom constraint.
+   * @return next step builder
+   */
+  ConstrainedProcessVariableSet thatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
+  /**
+   * Begins a predicate construction to define a condition.
+   * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
+   */
+  ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe();
+  /**
+   * Method to define a custom condition.
+   * @return next step builder
+   */
+  ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
 }

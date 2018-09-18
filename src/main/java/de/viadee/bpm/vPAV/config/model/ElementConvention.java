@@ -33,36 +33,39 @@ package de.viadee.bpm.vPAV.config.model;
 
 public class ElementConvention {
 
-    private String name;
+  private String name;
 
-    private String description;
+  private String description;
 
-    private ElementFieldTypes elementFieldTypes;
+  private ElementFieldTypes elementFieldTypes;
 
-    private String pattern;
+  private String pattern;
 
-    public ElementConvention(final String name, final ElementFieldTypes elementFieldTypes, final String description,
-            final String pattern) {
-        super();
-        this.name = name;
-        this.description = description;
-        this.elementFieldTypes = elementFieldTypes;
-        this.pattern = pattern;
-    }
+  public ElementConvention(
+      final String name,
+      final ElementFieldTypes elementFieldTypes,
+      final String description,
+      final String pattern) {
+    super();
+    this.name = name;
+    this.description = description;
+    this.elementFieldTypes = elementFieldTypes;
+    this.pattern = pattern;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public ElementFieldTypes getElementFieldTypes() {
-        return elementFieldTypes;
-    }
+  public ElementFieldTypes getElementFieldTypes() {
+    return elementFieldTypes;
+  }
 
-    public String getPattern() {
-        return pattern;
-    }
+  public String getPattern() {
+    return pattern;
+  }
 }

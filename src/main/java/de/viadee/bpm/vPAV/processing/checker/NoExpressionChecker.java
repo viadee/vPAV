@@ -60,130 +60,168 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class NoExpressionChecker extends AbstractElementChecker {
 
-    public NoExpressionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+  public NoExpressionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+    super(rule, bpmnScanner);
+  }
+
+  /**
+   * Check if ServiceTasks, BusinessRuleTasks, SendTasks and ScriptTasks use expressions against best practices
+   *
+   * @return issues
+   */
+  @Override
+  public Collection<CheckerIssue> check(BpmnElement element) {
+
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    final BaseElement baseElement = element.getBaseElement();
+
+    final Map<String, Setting> settings = rule.getSettings();
+
+    if (baseElement instanceof ServiceTask
+        || baseElement instanceof BusinessRuleTask
+        || baseElement instanceof SendTask
+        || baseElement instanceof ScriptTask) {
+
+      // read attributes from task
+      final String implementationAttr = bpmnScanner.getImplementation(baseElement.getId());
+
+      if (implementationAttr != null
+          && implementationAttr.equals(BpmnConstants.CAMUNDA_EXPRESSION)
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        issues.addAll(
+            IssueWriter.createIssue(
+                rule,
+                CriticalityEnum.WARNING,
+                element,
+                String.format(
+                    "Usage of expressions in '%s' is against best practices.",
+                    CheckName.checkName(baseElement))));
+      }
+
+      // get the execution listener
+      final ArrayList<String> listener =
+          bpmnScanner.getListener(
+              baseElement.getId(), BpmnConstants.ATTR_EX, BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+
+      if (!listener.isEmpty()
+          && listener.size() > 0
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        addIssue(element, issues, baseElement);
+      }
+
+    } else if (baseElement instanceof IntermediateThrowEvent
+        || baseElement instanceof EndEvent
+        || baseElement instanceof StartEvent) {
+
+      // read attributes from event
+      final String implementationAttrEvent =
+          bpmnScanner.getEventImplementation(baseElement.getId());
+
+      if (implementationAttrEvent != null
+          && implementationAttrEvent.contains(BpmnConstants.CAMUNDA_EXPRESSION)
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        issues.addAll(
+            IssueWriter.createIssue(
+                rule,
+                CriticalityEnum.WARNING,
+                element,
+                String.format(
+                    "Usage of expression in event '%s' is against best practices.",
+                    CheckName.checkName(baseElement))));
+      }
+
+      // get the execution listener
+      final ArrayList<String> listener =
+          bpmnScanner.getListener(
+              baseElement.getId(), BpmnConstants.ATTR_EX, BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+
+      if (!listener.isEmpty()
+          && listener.size() > 0
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        addIssue(element, issues, baseElement);
+      }
+
+    } else if (baseElement instanceof SequenceFlow) {
+
+      // get the execution listener
+      final ArrayList<String> listener =
+          bpmnScanner.getListener(
+              baseElement.getId(), BpmnConstants.ATTR_EX, BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+      if (!listener.isEmpty()
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        addIssue(element, issues, baseElement);
+      }
+
+    } else if (baseElement instanceof ExclusiveGateway) {
+      // get the execution listener
+      final ArrayList<String> listener =
+          bpmnScanner.getListener(
+              baseElement.getId(), BpmnConstants.ATTR_EX, BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+      if (!listener.isEmpty()
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        addIssue(element, issues, baseElement);
+      }
+    } else if (baseElement instanceof UserTask) {
+      // get the execution listener
+      final ArrayList<String> listener =
+          bpmnScanner.getListener(
+              baseElement.getId(), BpmnConstants.ATTR_EX, BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+      if (!listener.isEmpty()
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        addIssue(element, issues, baseElement);
+      }
+
+      // get the task listener
+      final ArrayList<String> taskListener =
+          bpmnScanner.getListener(
+              baseElement.getId(), BpmnConstants.ATTR_EX, BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+      if (!taskListener.isEmpty()
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        addIssue(element, issues, baseElement);
+      }
+
+    } else if (baseElement instanceof ManualTask) {
+      // get the execution listener
+      final ArrayList<String> listener =
+          bpmnScanner.getListener(
+              baseElement.getId(), BpmnConstants.ATTR_EX, BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+      if (!listener.isEmpty()
+          && !settings.containsKey(
+              baseElement.getElementType().getInstanceType().getSimpleName())) {
+        addIssue(element, issues, baseElement);
+      }
     }
 
-    /**
-     * Check if ServiceTasks, BusinessRuleTasks, SendTasks and ScriptTasks use expressions against best practices
-     *
-     * @return issues
-     */
-    @Override
-    public Collection<CheckerIssue> check(BpmnElement element) {
+    return issues;
+  }
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement baseElement = element.getBaseElement();     
-        
-
-        final Map<String, Setting> settings = rule.getSettings();
-
-        if (baseElement instanceof ServiceTask || baseElement instanceof BusinessRuleTask
-                || baseElement instanceof SendTask || baseElement instanceof ScriptTask) {
-
-            // read attributes from task
-            final String implementationAttr = bpmnScanner.getImplementation(baseElement.getId());
-
-            if (implementationAttr != null && implementationAttr.equals(BpmnConstants.CAMUNDA_EXPRESSION)
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                        String.format("Usage of expressions in '%s' is against best practices.",
-                                CheckName.checkName(baseElement))));
-            }
-
-            // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
-
-            if (!listener.isEmpty() && listener.size() > 0
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
-
-        } else if (baseElement instanceof IntermediateThrowEvent
-                || baseElement instanceof EndEvent || baseElement instanceof StartEvent) {
-
-            // read attributes from event
-            final String implementationAttrEvent = bpmnScanner.getEventImplementation(baseElement.getId());
-
-            if (implementationAttrEvent != null && implementationAttrEvent.contains(BpmnConstants.CAMUNDA_EXPRESSION)
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                        String.format("Usage of expression in event '%s' is against best practices.",
-                                CheckName.checkName(baseElement))));
-            }
-
-            // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
-
-            if (!listener.isEmpty() && listener.size() > 0
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
-
-        } else if (baseElement instanceof SequenceFlow) {
-
-            // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
-            if (!listener.isEmpty()
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
-
-        } else if (baseElement instanceof ExclusiveGateway) {
-            // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
-            if (!listener.isEmpty()
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
-        } else if (baseElement instanceof UserTask) {
-            // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
-            if (!listener.isEmpty()
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
-
-            // get the task listener
-            final ArrayList<String> taskListener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
-            if (!taskListener.isEmpty()
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
-
-        } else if (baseElement instanceof ManualTask) {
-            // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
-            if (!listener.isEmpty()
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
-        }
-
-        return issues;
-    }
-
-    /**
-     * Adds an issue to the collection
-     *
-     * @param element
-     *            BpmnElement to be added
-     * @param issues
-     *            Collection of issues
-     * @param baseElement
-     *            BaseElement
-     */
-    private void addIssue(BpmnElement element, final Collection<CheckerIssue> issues, final BaseElement baseElement) {
-        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                String.format("Usage of expression in listeners for '%s' is against best practices.",
-                        CheckName.checkName(baseElement))));
-    }
-
+  /**
+   * Adds an issue to the collection
+   *
+   * @param element
+   *            BpmnElement to be added
+   * @param issues
+   *            Collection of issues
+   * @param baseElement
+   *            BaseElement
+   */
+  private void addIssue(
+      BpmnElement element, final Collection<CheckerIssue> issues, final BaseElement baseElement) {
+    issues.addAll(
+        IssueWriter.createIssue(
+            rule,
+            CriticalityEnum.WARNING,
+            element,
+            String.format(
+                "Usage of expression in listeners for '%s' is against best practices.",
+                CheckName.checkName(baseElement))));
+  }
 }

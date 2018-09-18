@@ -58,287 +58,330 @@ import static org.mockito.Mockito.when;
 
 public class ElementBasedPredicateBuilderImplTest {
 
-    @Test
-    public void testWithPrefixDoesNotFilterCorrectPrefix() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("ext_name").build());
+  @Test
+  public void testWithPrefixDoesNotFilterCorrectPrefix() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().withName("ext_name").build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withPrefix("ext_");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withPrefix("ext_");
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("ext_name"));
-    }
+    assertThat(result.isFulfilled(), is(true));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("ext_name"));
+  }
 
-    @Test
-    public void testWithPrefixFiltersIncorrectPrefix() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("int_name").build());
+  @Test
+  public void testWithPrefixFiltersIncorrectPrefix() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().withName("int_name").build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withPrefix("ext_");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withPrefix("ext_");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("int_name"));
-    }
+    assertThat(result.isFulfilled(), is(false));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("int_name"));
+  }
 
-        @Test
-    public void testWithPostfixDoesNotFilterCorrectPostfix() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("name_post").build());
+  @Test
+  public void testWithPostfixDoesNotFilterCorrectPostfix() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().withName("name_post").build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withPostfix("_post");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withPostfix("_post");
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("name_post"));
-    }
+    assertThat(result.isFulfilled(), is(true));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("name_post"));
+  }
 
-    @Test
-    public void testWithPostfixFiltersIncorrectPostfix() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("name_nopost").build());
+  @Test
+  public void testWithPostfixFiltersIncorrectPostfix() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().withName("name_nopost").build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withPostfix("_post");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withPostfix("_post");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("name_nopost"));
-    }
+    assertThat(result.isFulfilled(), is(false));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("name_nopost"));
+  }
 
-    @Test
-    public void testOfTypeDoesNotFilterCorrectType() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().ofType(UserTask.class).build());
+  @Test
+  public void testOfTypeDoesNotFilterCorrectType() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().ofType(UserTask.class).build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).ofType(UserTask.class);
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).ofType(UserTask.class);
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString(UserTask.class.getSimpleName()));
-    }
+    assertThat(result.isFulfilled(), is(true));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString(UserTask.class.getSimpleName()));
+  }
 
-    @Test
-    public void testOfTypeFiltersIncorrectType() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().ofType(ServiceTask.class).build());
+  @Test
+  public void testOfTypeFiltersIncorrectType() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().ofType(ServiceTask.class).build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).ofType(UserTask.class);
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).ofType(UserTask.class);
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString(ServiceTask.class.getSimpleName()));
-    }
+    assertThat(result.isFulfilled(), is(false));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString(ServiceTask.class.getSimpleName()));
+  }
 
-    @Test
-    public void testWithPropertyDoesNotFilterCorrectProperty() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withProperty("correctProperty").build());
+  @Test
+  public void testWithPropertyDoesNotFilterCorrectProperty() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().withProperty("correctProperty").build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("present at 'element'"));
-    }
+    assertThat(result.isFulfilled(), is(true));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("present at 'element'"));
+  }
 
-    @Test
-    public void testWithPropertyFiltersIncorrectProperty() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withProperty("incorrectProperty").build());
+  @Test
+  public void testWithPropertyFiltersIncorrectProperty() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().withProperty("incorrectProperty").build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("not present at 'element'"));
-    }
+    assertThat(result.isFulfilled(), is(false));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("not present at 'element'"));
+  }
 
-    @Test
-    public void testWithPropertyFiltersWithoutAnyProperty() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().build());
+  @Test
+  public void testWithPropertyFiltersWithoutAnyProperty() {
+    List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("not present at 'element'"));
-    }
+    assertThat(result.isFulfilled(), is(false));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("not present at 'element'"));
+  }
 
-    @Test
-    public void testWithNameMatchingDoesNotFilterMatch() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("hasAMATCH9").build());
+  @Test
+  public void testWithNameMatchingDoesNotFilterMatch() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().withName("hasAMATCH9").build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withNameMatching(".*MATCH[0-9][A-Y]?");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withNameMatching(".*MATCH[0-9][A-Y]?");
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("hasAMATCH9"));
-    }
+    assertThat(result.isFulfilled(), is(true));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("hasAMATCH9"));
+  }
 
-    @Test
-    public void testWithNameMatchingFiltersNoMatch() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("hasNoMATC9").build());
+  @Test
+  public void testWithNameMatchingFiltersNoMatch() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(new BpmnElementBuilder().withName("hasNoMATC9").build());
 
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withNameMatching(".*MATCH[0-9][A-Y]?");
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(bpmnElements).withNameMatching(".*MATCH[0-9][A-Y]?");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("hasNoMATC9"));
-    }
+    assertThat(result.isFulfilled(), is(false));
+    assertThat(result.getMessage().isPresent(), is(true));
+    assertThat(result.getMessage().get(), containsString("hasNoMATC9"));
+  }
 
-    @Test
-    public void testThatFulfillDoesFilterCorrectlyForOnlyFlagInCaseOfSuccess() {
-        List<BpmnElement> bpmnElements = Arrays.asList(
-                new BpmnElementBuilder().withName("e1").ofType(ServiceTask.class).build(),
-                new BpmnElementBuilder().withName("e2").ofType(ServiceTask.class).build(),
-                new BpmnElementBuilder().withName("e3").ofType(ServiceTask.class).build()
-        );
-        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
-            EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
-            assertThat(result.isFulfilled(), is(true));
-            assertThat(result.getMessage().isPresent(), is(true));
-            assertThat(result.getMessage().get(), is("e1, e2, e3"));
-            return new Object();
+  @Test
+  public void testThatFulfillDoesFilterCorrectlyForOnlyFlagInCaseOfSuccess() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(
+            new BpmnElementBuilder().withName("e1").ofType(ServiceTask.class).build(),
+            new BpmnElementBuilder().withName("e2").ofType(ServiceTask.class).build(),
+            new BpmnElementBuilder().withName("e3").ofType(ServiceTask.class).build());
+    Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter =
+        predicate -> {
+          EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
+          assertThat(result.isFulfilled(), is(true));
+          assertThat(result.getMessage().isPresent(), is(true));
+          assertThat(result.getMessage().get(), is("e1, e2, e3"));
+          return new Object();
         };
-        Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
-        ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, true, ""
-        );
+    Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
+    ElementBasedPredicateBuilderImpl<Object> predicateBuilder =
+        new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider, true, "");
 
-        predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(e ->
-                new EvaluationResult<>(ServiceTask.class.isInstance(e.getBaseElement()),
-                        e, e.getBaseElement().getAttributeValue("name")), ""));
-    }
-    @Test
-    public void testThatFulfillDoesFilterCorrectlyForOnlyFlagInCaseOfFailure() {
-        List<BpmnElement> bpmnElements = Arrays.asList(
-                new BpmnElementBuilder().withName("e1").ofType(ServiceTask.class).build(),
-                new BpmnElementBuilder().withName("e2").ofType(UserTask.class).build(),
-                new BpmnElementBuilder().withName("e3").ofType(ServiceTask.class).build()
-        );
-        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
-            EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
-            assertThat(result.isFulfilled(), is(false));
-            assertThat(result.getMessage().isPresent(), is(true));
-            assertThat(result.getMessage().get(), is("e2"));
-            return new Object();
+    predicateBuilder.thatFulfill(
+        new DescribedPredicateEvaluator<>(
+            e ->
+                new EvaluationResult<>(
+                    ServiceTask.class.isInstance(e.getBaseElement()),
+                    e,
+                    e.getBaseElement().getAttributeValue("name")),
+            ""));
+  }
+
+  @Test
+  public void testThatFulfillDoesFilterCorrectlyForOnlyFlagInCaseOfFailure() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(
+            new BpmnElementBuilder().withName("e1").ofType(ServiceTask.class).build(),
+            new BpmnElementBuilder().withName("e2").ofType(UserTask.class).build(),
+            new BpmnElementBuilder().withName("e3").ofType(ServiceTask.class).build());
+    Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter =
+        predicate -> {
+          EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
+          assertThat(result.isFulfilled(), is(false));
+          assertThat(result.getMessage().isPresent(), is(true));
+          assertThat(result.getMessage().get(), is("e2"));
+          return new Object();
         };
-        Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
-        ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, true, ""
-        );
+    Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
+    ElementBasedPredicateBuilderImpl<Object> predicateBuilder =
+        new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider, true, "");
 
-        predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(e ->
-                new EvaluationResult<>(ServiceTask.class.isInstance(e.getBaseElement()),
-                        e, e.getBaseElement().getAttributeValue("name")), ""));
-    }
+    predicateBuilder.thatFulfill(
+        new DescribedPredicateEvaluator<>(
+            e ->
+                new EvaluationResult<>(
+                    ServiceTask.class.isInstance(e.getBaseElement()),
+                    e,
+                    e.getBaseElement().getAttributeValue("name")),
+            ""));
+  }
 
-    @Test
-    public void testThatFulfillSetsCorrectDescription() {
-        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("e1").build());
+  @Test
+  public void testThatFulfillSetsCorrectDescription() {
+    List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withName("e1").build());
 
-        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
-            assertThat(predicate.getDescription(), is("all elements fulfilling this"));
-            return new Object();
+    Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter =
+        predicate -> {
+          assertThat(predicate.getDescription(), is("all elements fulfilling this"));
+          return new Object();
         };
-        Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
-        ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, false, "all elements"
-        );
+    Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
+    ElementBasedPredicateBuilderImpl<Object> predicateBuilder =
+        new ElementBasedPredicateBuilderImpl<>(
+            conditionSetter, elementProvider, false, "all elements");
 
-        predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(EvaluationResult::forViolation, "fulfilling this"));
-    }
+    predicateBuilder.thatFulfill(
+        new DescribedPredicateEvaluator<>(EvaluationResult::forViolation, "fulfilling this"));
+  }
 
-    @Test
-    public void testThatFulfillIncludesAllSuccessMessagesIfSuccess() {
-        List<BpmnElement> bpmnElements = Arrays.asList(
-                new BpmnElementBuilder().withName("e1").ofType(ServiceTask.class).build(),
-                new BpmnElementBuilder().withName("e2").ofType(UserTask.class).build(),
-                new BpmnElementBuilder().withName("e3").ofType(ServiceTask.class).build()
-        );
-        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
-            EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
-            assertThat(predicate.getDescription(), is("all elements fulfilling this"));
-            assertThat(result.isFulfilled(), is(true));
-            assertThat(result.getMessage().isPresent(), is(true));
-            assertThat(result.getMessage().get(), is("e1, e3"));
-            return new Object();
+  @Test
+  public void testThatFulfillIncludesAllSuccessMessagesIfSuccess() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(
+            new BpmnElementBuilder().withName("e1").ofType(ServiceTask.class).build(),
+            new BpmnElementBuilder().withName("e2").ofType(UserTask.class).build(),
+            new BpmnElementBuilder().withName("e3").ofType(ServiceTask.class).build());
+    Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter =
+        predicate -> {
+          EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
+          assertThat(predicate.getDescription(), is("all elements fulfilling this"));
+          assertThat(result.isFulfilled(), is(true));
+          assertThat(result.getMessage().isPresent(), is(true));
+          assertThat(result.getMessage().get(), is("e1, e3"));
+          return new Object();
         };
-        Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
-        ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, false, "all elements"
-        );
+    Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
+    ElementBasedPredicateBuilderImpl<Object> predicateBuilder =
+        new ElementBasedPredicateBuilderImpl<>(
+            conditionSetter, elementProvider, false, "all elements");
 
-        predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(e ->
-                new EvaluationResult<>(ServiceTask.class.isInstance(e.getBaseElement()),
-                        e, e.getBaseElement().getAttributeValue("name")), "fulfilling this"));
-    }
+    predicateBuilder.thatFulfill(
+        new DescribedPredicateEvaluator<>(
+            e ->
+                new EvaluationResult<>(
+                    ServiceTask.class.isInstance(e.getBaseElement()),
+                    e,
+                    e.getBaseElement().getAttributeValue("name")),
+            "fulfilling this"));
+  }
 
-    @Test
-    public void testThatFulfillIncludesAllViolationsForNonSuccess() {
-        List<BpmnElement> bpmnElements = Arrays.asList(
-                new BpmnElementBuilder().withName("e1").build(),
-                new BpmnElementBuilder().withName("e2").build(),
-                new BpmnElementBuilder().withName("e3").build()
-        );
-        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
-            EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
-            assertThat(result.isFulfilled(), is(false));
-            assertThat(result.getMessage().isPresent(), is(true));
-            assertThat(result.getMessage().get(), is("e1, e2, e3"));
-            return new Object();
+  @Test
+  public void testThatFulfillIncludesAllViolationsForNonSuccess() {
+    List<BpmnElement> bpmnElements =
+        Arrays.asList(
+            new BpmnElementBuilder().withName("e1").build(),
+            new BpmnElementBuilder().withName("e2").build(),
+            new BpmnElementBuilder().withName("e3").build());
+    Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter =
+        predicate -> {
+          EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
+          assertThat(result.isFulfilled(), is(false));
+          assertThat(result.getMessage().isPresent(), is(true));
+          assertThat(result.getMessage().get(), is("e1, e2, e3"));
+          return new Object();
         };
-        Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
-        ElementBasedPredicateBuilderImpl<Object> predicateBuilder = new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, false, ""
-        );
+    Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
+    ElementBasedPredicateBuilderImpl<Object> predicateBuilder =
+        new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider, false, "");
 
-        predicateBuilder.thatFulfill(new DescribedPredicateEvaluator<>(e ->
-                EvaluationResult.forViolation(e.getBaseElement().getAttributeValue("name"), e), ""));
+    predicateBuilder.thatFulfill(
+        new DescribedPredicateEvaluator<>(
+            e -> EvaluationResult.forViolation(e.getBaseElement().getAttributeValue("name"), e),
+            ""));
+  }
+
+  private static ElementBasedPredicateBuilderImpl<EvaluationResult<ProcessVariable>>
+      createPredicateBuilderOn(List<BpmnElement> bpmnElements) {
+    Function<DescribedPredicateEvaluator<ProcessVariable>, EvaluationResult<ProcessVariable>>
+        conditionSetter = predicate -> predicate.evaluate(new ProcessVariable(""));
+    Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
+    return new ElementBasedPredicateBuilderImpl<>(
+        conditionSetter, elementProvider, false, "element description");
+  }
+
+  private class BpmnElementBuilder {
+    private String name = "element";
+    private Class clazz = BaseElement.class;
+    private String property;
+
+    BpmnElementBuilder withName(String name) {
+      this.name = name;
+      return this;
     }
 
-    private static ElementBasedPredicateBuilderImpl<EvaluationResult<ProcessVariable>> createPredicateBuilderOn(List<BpmnElement> bpmnElements) {
-        Function<DescribedPredicateEvaluator<ProcessVariable>, EvaluationResult<ProcessVariable>> conditionSetter = predicate ->
-                predicate.evaluate(new ProcessVariable(""));
-        Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
-        return new ElementBasedPredicateBuilderImpl<>(
-                conditionSetter, elementProvider, false,  "element description");
+    BpmnElementBuilder ofType(Class clazz) {
+      this.clazz = clazz;
+      return this;
     }
 
-    private class BpmnElementBuilder {
-        private String name = "element";
-        private Class clazz = BaseElement.class;
-        private String property;
-
-        BpmnElementBuilder withName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        BpmnElementBuilder ofType(Class clazz) {
-            this.clazz = clazz;
-            return this;
-        }
-
-        BpmnElementBuilder withProperty(String property) {
-            this.property = property;
-            return this;
-        }
-
-        BpmnElement build() {
-            BaseElement baseElement = (BaseElement) mock(clazz);
-            when(baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)).thenReturn(name);
-            // mocking a property is not so nice, but I could not find a nicer way
-            if (property != null) {
-                CamundaProperty camundaProperty = mock(CamundaProperty.class);
-                when(camundaProperty.getCamundaName()).thenReturn(property);
-
-                CamundaProperties properties = mock(CamundaProperties.class);
-                when(properties.getCamundaProperties()).thenReturn(Arrays.asList(camundaProperty));
-
-                Query query = mock(Query.class);
-                when(query.count()).thenReturn(1);
-                when(query.filterByType(CamundaProperties.class)).thenReturn(query);
-                when(query.singleResult()).thenReturn(properties);
-
-                ExtensionElements elements = mock(ExtensionElements.class);
-                when(elements.getElementsQuery()).thenReturn(query);
-                when(baseElement.getExtensionElements()).thenReturn(elements);
-            }
-            return new BpmnElement("processDefinition", baseElement);
-        }
+    BpmnElementBuilder withProperty(String property) {
+      this.property = property;
+      return this;
     }
+
+    BpmnElement build() {
+      BaseElement baseElement = (BaseElement) mock(clazz);
+      when(baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)).thenReturn(name);
+      // mocking a property is not so nice, but I could not find a nicer way
+      if (property != null) {
+        CamundaProperty camundaProperty = mock(CamundaProperty.class);
+        when(camundaProperty.getCamundaName()).thenReturn(property);
+
+        CamundaProperties properties = mock(CamundaProperties.class);
+        when(properties.getCamundaProperties()).thenReturn(Arrays.asList(camundaProperty));
+
+        Query query = mock(Query.class);
+        when(query.count()).thenReturn(1);
+        when(query.filterByType(CamundaProperties.class)).thenReturn(query);
+        when(query.singleResult()).thenReturn(properties);
+
+        ExtensionElements elements = mock(ExtensionElements.class);
+        when(elements.getElementsQuery()).thenReturn(query);
+        when(baseElement.getExtensionElements()).thenReturn(elements);
+      }
+      return new BpmnElement("processDefinition", baseElement);
+    }
+  }
 }

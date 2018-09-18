@@ -61,33 +61,34 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ProcessVariableReaderStaticTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private static Logger logger = Logger.getLogger(ProcessVariableReaderStaticTest.class.getName());
+  private static Logger logger = Logger.getLogger(ProcessVariableReaderStaticTest.class.getName());
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-    }
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+  }
 
-    @Test
-    public void testSootReachingMethod() throws ParserConfigurationException, SAXException, IOException {
+  @Test
+  public void testSootReachingMethod()
+      throws ParserConfigurationException, SAXException, IOException {
 
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrorsFromClassloader(cl);
+    ProcessApplicationValidator pav = new ProcessApplicationValidator();
+    pav.findModelErrorsFromClassloader(cl);
 
-        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(
+    final Map<String, ProcessVariableOperation> variables =
+        new JavaReaderStatic()
+            .getVariablesFromJavaDelegate(
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
 
-        assertEquals(3, variables.size());
-
-    }
-
+    assertEquals(3, variables.size());
+  }
 }

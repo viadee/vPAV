@@ -35,74 +35,78 @@ import java.util.ArrayList;
 
 public class Setting {
 
-    private String name;
+  private String name;
 
-    private String value;
+  private String value;
 
-    private ArrayList<String> scriptPlaces = new ArrayList<String>();
+  private ArrayList<String> scriptPlaces = new ArrayList<String>();
 
-    private String type;
+  private String type;
 
-    private String id;
+  private String id;
 
-    private boolean required;
+  private boolean required;
 
-    /**
-     *
-     * @param name
-     *            Name of the setting
-     * @param scriptPlace
-     *            Allowed places for scripts
-     * @param type
-     *            Type of task
-     * @param value
-     *            Value of setting
-     * @param id
-     *            Id of certain task
-     * @param required
-     *            Boolean to specify the explicit need for a certain extension key
-     */
-    public Setting(final String name, final String scriptPlace, final String type, final String id,
-            final boolean required, final String value) {
-        super();
-        this.name = name;
-        this.value = value;
-        this.type = type;
-        this.id = id;
-        this.required = required;
-        if (scriptPlace != null)
-            scriptPlaces.add(scriptPlace);
-    }
+  /**
+   *
+   * @param name
+   *            Name of the setting
+   * @param scriptPlace
+   *            Allowed places for scripts
+   * @param type
+   *            Type of task
+   * @param value
+   *            Value of setting
+   * @param id
+   *            Id of certain task
+   * @param required
+   *            Boolean to specify the explicit need for a certain extension key
+   */
+  public Setting(
+      final String name,
+      final String scriptPlace,
+      final String type,
+      final String id,
+      final boolean required,
+      final String value) {
+    super();
+    this.name = name;
+    this.value = value;
+    this.type = type;
+    this.id = id;
+    this.required = required;
+    if (scriptPlace != null) scriptPlaces.add(scriptPlace);
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getValue() {
-        return value;
-    }
+  public String getValue() {
+    return value;
+  }
 
-    public String getType() {
-        return type;
-    }
+  public String getType() {
+    return type;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public boolean getRequired() {
-        return required;
-    }
+  public boolean getRequired() {
+    return required;
+  }
 
-    public ArrayList<String> getScriptPlaces() {
-        return scriptPlaces;
-    }
+  public ArrayList<String> getScriptPlaces() {
+    return scriptPlaces;
+  }
 
-    public void addScriptPlace(String place) {
-        scriptPlaces.add(place);
-    }
+  public void addScriptPlace(String place) {
+    scriptPlaces.add(place);
+  }
 
-    public void setScriptPlace(ArrayList<String> scriptPlaces) {
-        this.scriptPlaces = scriptPlaces;
-    }
+  public void setScriptPlace(ArrayList<String> scriptPlaces) {
+    this.scriptPlaces = scriptPlaces;
+  }
 }

@@ -51,118 +51,115 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class XmlConfigReaderTest {
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+  }
+
+  /**
+   * Test loading a correct config file
+   *
+   * @throws ConfigReaderException
+   */
+  @Test()
+  public void testLoadingCorrectXMLConfigFile() throws ConfigReaderException {
+    // Given
+    XmlConfigReader reader = new XmlConfigReader();
+
+    // When
+    Map<String, Rule> result = reader.read(ConfigConstants.RULESET);
+
+    // Then
+    assertFalse("No rules could be read", result.isEmpty());
+  }
+
+  /**
+   * Test loading a non-existing config file and check for defaults
+   *
+   * @throws ConfigReaderException
+   */
+  @Test()
+  public void testLoadingNonExistingXMLConfigFile() throws ConfigReaderException {
+    // Given
+    XmlConfigReader reader = new XmlConfigReader();
+    Map<String, Rule> result = null;
+
+    // When
+    try {
+      result = reader.read("non-existing.xml");
+      assertTrue("Exception expected, but no one was thrown.", result != null);
+    } catch (ConfigReaderException e) {
+      // load DefaultRuleSet
+      result = reader.read("ruleSetDefault.xml");
+
+      // Default rules correct
+      assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
+      assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());
+      assertFalse("False Default ruleSet ", result.get("VersioningChecker").isActive());
+      assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").isActive());
+      //            assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
+      assertFalse(
+          "False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").isActive());
+      assertFalse("False Default ruleSet ", result.get("TaskNamingConventionChecker").isActive());
     }
+  }
 
-    /**
-     * Test loading a correct config file
-     *
-     * @throws ConfigReaderException
-     */
-    @Test()
-    public void testLoadingCorrectXMLConfigFile() throws ConfigReaderException {
-        // Given
-        XmlConfigReader reader = new XmlConfigReader();
+  /**
+   * Test loading an incorrect config file (rulename empty)
+   *
+   *
+   */
+  @Test(expected = ConfigReaderException.class)
+  public void testLoadingIncorrectXMLNameConfigFile() throws ConfigReaderException {
+    // Given
+    XmlConfigReader reader = new XmlConfigReader();
 
-        // When
-        Map<String, Rule> result = reader.read(ConfigConstants.RULESET);
+    // When Then
+    reader.read("ruleSetIncorrectName.xml");
+  }
 
-        // Then
-        assertFalse("No rules could be read", result.isEmpty());
-    }
+  /**
+   * Test loading an incorrect config file (no xml)
+   *
+   *
+   */
+  @Test(expected = ConfigReaderException.class)
+  public void testLoadingIncorrectXMLConfigFile() throws ConfigReaderException {
+    // Given
+    XmlConfigReader reader = new XmlConfigReader();
 
-    /**
-     * Test loading a non-existing config file and check for defaults
-     *
-     * @throws ConfigReaderException
-     */
-    @Test()
-    public void testLoadingNonExistingXMLConfigFile() throws ConfigReaderException {
-        // Given
-        XmlConfigReader reader = new XmlConfigReader();
-        Map<String, Rule> result = null;
+    // When Then
+    reader.read("ruleSetIncorrect.xml");
+  }
 
-        // When
-        try {
-            result = reader.read("non-existing.xml");
-            assertTrue("Exception expected, but no one was thrown.", result != null);
-        } catch (ConfigReaderException e) {
-            // load DefaultRuleSet
-            result = reader.read("ruleSetDefault.xml");
+  @Test()
+  public void testBooleanForTypeOfProcessVariableModelReader() throws ConfigReaderException {
 
-            // Default rules correct
-            assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
-            assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("VersioningChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").isActive());
-//            assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("TaskNamingConventionChecker").isActive());
+    // Given
+    XmlConfigReader reader = new XmlConfigReader();
+
+    // When
+    Map<String, Rule> result = reader.read(ConfigConstants.RULESETDEFAULT);
+
+    // Then
+    boolean isStatic = false;
+    Rule rule = result.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
+    if (rule != null) {
+      Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
+      if (setting != null) {
+        String value = setting.getValue();
+        if (setting.getValue().equals("true")) {
+          isStatic = true;
         }
+      }
     }
-
-    /**
-     * Test loading an incorrect config file (rulename empty)
-     *
-     *
-     */
-    @Test(expected = ConfigReaderException.class)
-    public void testLoadingIncorrectXMLNameConfigFile() throws ConfigReaderException {
-        // Given
-        XmlConfigReader reader = new XmlConfigReader();
-
-        // When Then
-        reader.read("ruleSetIncorrectName.xml");
-
-    }
-
-    /**
-     * Test loading an incorrect config file (no xml)
-     *
-     *
-     */
-    @Test(expected = ConfigReaderException.class)
-    public void testLoadingIncorrectXMLConfigFile() throws ConfigReaderException {
-        // Given
-        XmlConfigReader reader = new XmlConfigReader();
-
-        // When Then
-        reader.read("ruleSetIncorrect.xml");
-
-    }
-
-    @Test()
-    public void testBooleanForTypeOfProcessVariableModelReader() throws ConfigReaderException {
-
-        // Given
-        XmlConfigReader reader = new XmlConfigReader();
-
-        // When
-        Map<String, Rule> result = reader.read(ConfigConstants.RULESETDEFAULT);
-
-        // Then
-        boolean isStatic = false;
-        Rule rule = result.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
-        if (rule != null) {
-            Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
-            if (setting != null) {
-                String value = setting.getValue();
-                if (setting.getValue().equals("true")) {
-                    isStatic = true;
-                }
-            }
-        }
-        assertTrue(isStatic);
-
-    }
-
+    assertTrue(isStatic);
+  }
 }

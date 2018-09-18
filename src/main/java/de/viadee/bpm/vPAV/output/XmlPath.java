@@ -41,8 +41,7 @@ public class XmlPath {
 
   private Collection<XmlPathElement> elements;
 
-  public XmlPath() {
-  }
+  public XmlPath() {}
 
   public XmlPath(final Collection<XmlPathElement> elements) {
     this.elements = elements;

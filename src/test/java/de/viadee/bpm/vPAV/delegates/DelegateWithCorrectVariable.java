@@ -36,9 +36,9 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 
 public class DelegateWithCorrectVariable implements JavaDelegate {
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
+  @Override
+  public void execute(DelegateExecution execution) throws Exception {
 
-        execution.getVariable("ext_Blub");
-    }
+    execution.getVariable("ext_Blub");
+  }
 }

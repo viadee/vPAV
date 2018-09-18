@@ -62,76 +62,77 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 public class ProcessVariablesModelCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static BpmnModelInstance modelInstance;
+  private static BpmnModelInstance modelInstance;
 
-    private static ModelChecker checker;
+  private static ModelChecker checker;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws ParserConfigurationException, SAXException, IOException {
-        RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+  @BeforeClass
+  public static void setup() throws ParserConfigurationException, SAXException, IOException {
+    RuntimeConfig.getInstance().setTest(true);
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
 
-        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
-        final File processdefinition = new File(PATH);
+    final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
+    final File processdefinition = new File(PATH);
 
-        // parse bpmn model
-        modelInstance = Bpmn.readModelFromFile(processdefinition);
+    // parse bpmn model
+    modelInstance = Bpmn.readModelFromFile(processdefinition);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-        // create data flow graphs
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
-                processdefinition.getPath(), new ArrayList<String>());
+    final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+    // create data flow graphs
+    final Collection<IGraph> graphCollection =
+        graphBuilder.createProcessGraph(
+            modelInstance, processdefinition.getPath(), new ArrayList<String>());
 
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
-                .createInvalidPaths(graphCollection);
+    // calculate invalid paths based on data flow graphs
+    final Map<AnomalyContainer, List<Path>> invalidPathMap =
+        graphBuilder.createInvalidPaths(graphCollection);
 
-        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
-        checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+    final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
+    checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+  }
+
+  /**
+   * Case: there is an empty script reference
+   */
+  @Test
+  public void testProcessVariablesModelChecker() {
+    final Collection<CheckerIssue> issues = checker.check(modelInstance);
+
+    if (issues.size() == 0) {
+      Assert.fail("there should be generated an issue");
     }
 
-    /**
-     * Case: there is an empty script reference
-     */
-    @Test
-    public void testProcessVariablesModelChecker() {
-        final Collection<CheckerIssue> issues = checker.check(modelInstance);
+    Iterator<CheckerIssue> iterator = issues.iterator();
+    final CheckerIssue issue1 = iterator.next();
+    Assert.assertEquals("SequenceFlow_0bi6kaa", issue1.getElementId());
+    Assert.assertEquals("geloeschteVariable", issue1.getVariable());
+    Assert.assertEquals("DU", issue1.getAnomaly().toString());
+    final CheckerIssue issue2 = iterator.next();
+    Assert.assertEquals("SequenceFlow_0btqo3y", issue2.getElementId());
+    Assert.assertEquals("jepppa", issue2.getVariable());
+    Assert.assertEquals("DD", issue2.getAnomaly().toString());
+    final CheckerIssue issue3 = iterator.next();
+    Assert.assertEquals("ServiceTask_05g4a96", issue3.getElementId());
+    Assert.assertEquals("intHallo", issue3.getVariable().toString());
+    Assert.assertEquals("UR", issue3.getAnomaly().toString());
+    final CheckerIssue issue4 = iterator.next();
+    Assert.assertEquals("BusinessRuleTask_119jb6t", issue4.getElementId());
+    Assert.assertEquals("hallo2", issue4.getVariable());
+    Assert.assertEquals("UR", issue4.getAnomaly().toString());
+  }
 
-        if (issues.size() == 0) {
-            Assert.fail("there should be generated an issue");
-        }
-
-        Iterator<CheckerIssue> iterator = issues.iterator();
-        final CheckerIssue issue1 = iterator.next();
-        Assert.assertEquals("SequenceFlow_0bi6kaa", issue1.getElementId());
-        Assert.assertEquals("geloeschteVariable", issue1.getVariable());
-        Assert.assertEquals("DU", issue1.getAnomaly().toString());
-        final CheckerIssue issue2 = iterator.next();
-        Assert.assertEquals("SequenceFlow_0btqo3y", issue2.getElementId());
-        Assert.assertEquals("jepppa", issue2.getVariable());
-        Assert.assertEquals("DD", issue2.getAnomaly().toString());
-        final CheckerIssue issue3 = iterator.next();
-        Assert.assertEquals("ServiceTask_05g4a96", issue3.getElementId());
-        Assert.assertEquals("intHallo", issue3.getVariable().toString());
-        Assert.assertEquals("UR", issue3.getAnomaly().toString());
-        final CheckerIssue issue4 = iterator.next();
-        Assert.assertEquals("BusinessRuleTask_119jb6t", issue4.getElementId());
-        Assert.assertEquals("hallo2", issue4.getVariable());
-        Assert.assertEquals("UR", issue4.getAnomaly().toString());
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
-    }
+  @AfterClass
+  public static void tearDown() {
+    RuntimeConfig.getInstance().setTest(false);
+  }
 }

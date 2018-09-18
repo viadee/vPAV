@@ -44,83 +44,93 @@ import java.util.stream.Stream;
  * Also contains evaluation logic.
  */
 class SimpleDataFlowRule implements DataFlowRule {
-    private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE = "Rule '%s' was violated %s times%s:\n";
-    private static final String RULE_DESCRIPTION_TEMPLATE = "Process variables%s should be %s%s";
-    private static final String VIOLATION_TEMPLATE = "'%s' needed to be %s%s";
-    private final DescribedPredicateEvaluator<ProcessVariable> constraint;
-    private final DescribedPredicateEvaluator<ProcessVariable> condition;
-    private String reason;
-    private CriticalityEnum criticality = CriticalityEnum.ERROR;
+  private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE =
+      "Rule '%s' was violated %s times%s:\n";
+  private static final String RULE_DESCRIPTION_TEMPLATE = "Process variables%s should be %s%s";
+  private static final String VIOLATION_TEMPLATE = "'%s' needed to be %s%s";
+  private final DescribedPredicateEvaluator<ProcessVariable> constraint;
+  private final DescribedPredicateEvaluator<ProcessVariable> condition;
+  private String reason;
+  private CriticalityEnum criticality = CriticalityEnum.ERROR;
 
-    SimpleDataFlowRule(DescribedPredicateEvaluator<ProcessVariable> constraint, DescribedPredicateEvaluator<ProcessVariable> condition) {
-        this.constraint = constraint;
-        this.condition = condition;
+  SimpleDataFlowRule(
+      DescribedPredicateEvaluator<ProcessVariable> constraint,
+      DescribedPredicateEvaluator<ProcessVariable> condition) {
+    this.constraint = constraint;
+    this.condition = condition;
+  }
+
+  public Collection<EvaluationResult<ProcessVariable>> evaluate(
+      Collection<ProcessVariable> variables) {
+    Stream<ProcessVariable> variableStream = variables.stream();
+    if (constraint != null)
+      variableStream = variableStream.filter(p -> constraint.evaluate(p).isFulfilled());
+    List<EvaluationResult<ProcessVariable>> results =
+        variableStream.map(condition::evaluate).collect(Collectors.toList());
+    return results;
+  }
+
+  public void check(Collection<ProcessVariable> variables) {
+    assertNoViolations(evaluate(variables));
+  }
+
+  private void assertNoViolations(Collection<EvaluationResult<ProcessVariable>> result) {
+    List<EvaluationResult<ProcessVariable>> violations =
+        result.stream().filter(r -> !r.isFulfilled()).collect(Collectors.toList());
+    if (violations.size() > 0) {
+      String ruleDescription = createRuleDescriptionMessage(violations.size());
+
+      String violationsString =
+          violations.stream().map(this::getViolationMessageFor).collect(Collectors.joining("\n"));
+      throw new AssertionError(ruleDescription + violationsString);
     }
+  }
 
-    public Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables) {
-        Stream<ProcessVariable> variableStream = variables.stream();
-        if (constraint != null)
-            variableStream = variableStream.filter(p -> constraint.evaluate(p).isFulfilled());
-        List<EvaluationResult<ProcessVariable>> results = variableStream
-                .map(condition::evaluate)
-                .collect(Collectors.toList());
-        return results;
-    }
+  public String getRuleDescription() {
+    String constraintDescription =
+        constraint != null ? " that are " + constraint.getDescription() : "";
+    String reasonMessage = reason != null ? " because " + reason : "";
+    return String.format(
+        RULE_DESCRIPTION_TEMPLATE,
+        constraintDescription,
+        condition.getDescription(),
+        reasonMessage);
+  }
 
-    public void check(Collection<ProcessVariable> variables) {
-        assertNoViolations(evaluate(variables));
-    }
+  @Override
+  public CriticalityEnum getCriticality() {
+    return criticality;
+  }
 
-    private void assertNoViolations(Collection<EvaluationResult<ProcessVariable>> result) {
-        List<EvaluationResult<ProcessVariable>> violations = result.stream()
-                .filter(r -> !r.isFulfilled())
-                .collect(Collectors.toList());
-        if (violations.size() > 0) {
-            String ruleDescription = createRuleDescriptionMessage(violations.size());
+  @Override
+  public DataFlowRule because(String reason) {
+    this.reason = reason;
+    return this;
+  }
 
-            String violationsString = violations.stream()
-                    .map(this::getViolationMessageFor)
-                    .collect(Collectors.joining("\n"));
-            throw new AssertionError( ruleDescription + violationsString);
-        }
-    }
+  @Override
+  public DataFlowRule withCriticality(CriticalityEnum criticality) {
+    this.criticality = criticality;
+    return this;
+  }
 
-    public String getRuleDescription() {
-        String constraintDescription = constraint != null ?
-                " that are " + constraint.getDescription() :
-                "";
-        String reasonMessage = reason != null ? " because " + reason : "";
-        return String.format(RULE_DESCRIPTION_TEMPLATE, constraintDescription, condition.getDescription(), reasonMessage);
-    }
+  private String createRuleDescriptionMessage(int violationCount) {
+    String criticalityMessage = criticality != null ? " [Criticality: " + criticality + "]" : "";
+    return String.format(
+        RULE_VIOLATION_DESCRIPTION_TEMPLATE,
+        getRuleDescription(),
+        violationCount,
+        criticalityMessage);
+  }
 
-    @Override
-    public CriticalityEnum getCriticality() {
-        return criticality;
-    }
-
-    @Override
-    public DataFlowRule because(String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
-    public DataFlowRule withCriticality(CriticalityEnum criticality) {
-        this.criticality = criticality;
-        return this;
-    }
-
-    private String createRuleDescriptionMessage(int violationCount) {
-        String criticalityMessage = criticality != null ? " [Criticality: " + criticality + "]": "";
-        return String.format(RULE_VIOLATION_DESCRIPTION_TEMPLATE, getRuleDescription(), violationCount, criticalityMessage);
-    }
-
-    @Override
-    public String getViolationMessageFor(EvaluationResult<ProcessVariable> result) {
-        String violationMessage = result.getMessage().isPresent() ?
-                " but was " + result.getMessage().get() :
-                "";
-        return String.format(VIOLATION_TEMPLATE,
-                result.getEvaluatedVariable().getName(), condition.getDescription(), violationMessage);
-    }
+  @Override
+  public String getViolationMessageFor(EvaluationResult<ProcessVariable> result) {
+    String violationMessage =
+        result.getMessage().isPresent() ? " but was " + result.getMessage().get() : "";
+    return String.format(
+        VIOLATION_TEMPLATE,
+        result.getEvaluatedVariable().getName(),
+        condition.getDescription(),
+        violationMessage);
+  }
 }

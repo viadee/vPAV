@@ -60,74 +60,79 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ProcessVariableReaderStrategyPatternTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-        final URL[] classUrls = { classUrl, resourcesUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    RuntimeConfig.getInstance().setTest(true);
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java/");
+    final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+    final URL[] classUrls = {classUrl, resourcesUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+  }
+
+  @AfterClass
+  public static void tearDown() {
+    RuntimeConfig.getInstance().setTest(false);
+  }
+
+  @Test()
+  public void testStrategyPatternProcessVariableReaderStatic()
+      throws ParserConfigurationException, SAXException, IOException {
+
+    boolean isStatic = true;
+
+    ProcessApplicationValidator pav = new ProcessApplicationValidator();
+    pav.findModelErrors();
+
+    final String PATH =
+        BASE_PATH + "ProcessVariableStaticReaderTest_RecogniseVariablesInClassStatic.bpmn";
+
+    JavaReaderContext pvc = new JavaReaderContext();
+    if (isStatic) {
+      pvc.setJavaReadingStrategy(new JavaReaderStatic());
+    } else {
+      pvc.setJavaReadingStrategy(new JavaReaderRegex());
     }
 
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
+    final Map<String, ProcessVariableOperation> variables =
+        pvc.readJavaDelegate(
+            "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
+
+    assertEquals(
+        "Static reader should not find 4 variables since one of them is in a comment",
+        3,
+        variables.size());
+  }
+
+  @Test()
+  public void testStrategyPatternProcessVariableReaderRegex()
+      throws ParserConfigurationException, SAXException, IOException {
+
+    boolean isStatic = false;
+
+    final String PATH =
+        BASE_PATH + "ProcessVariableStaticReaderTest_RecogniseVariablesInClassStatic.bpmn";
+
+    JavaReaderContext pvc = new JavaReaderContext();
+    if (isStatic) {
+      pvc.setJavaReadingStrategy(new JavaReaderStatic());
+    } else {
+      pvc.setJavaReadingStrategy(new JavaReaderRegex());
     }
 
-    @Test()
-    public void testStrategyPatternProcessVariableReaderStatic()
-            throws ParserConfigurationException, SAXException, IOException {
+    final Map<String, ProcessVariableOperation> variables =
+        pvc.readJavaDelegate(
+            "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
 
-        boolean isStatic = true;
-
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrors();
-
-        final String PATH = BASE_PATH + "ProcessVariableStaticReaderTest_RecogniseVariablesInClassStatic.bpmn";
-
-        JavaReaderContext pvc = new JavaReaderContext();
-        if (isStatic) {
-            pvc.setJavaReadingStrategy(new JavaReaderStatic());
-        } else {
-            pvc.setJavaReadingStrategy(new JavaReaderRegex());
-        }
-
-        final Map<String, ProcessVariableOperation> variables = pvc
-                .readJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
-
-        assertEquals("Static reader should not find 4 variables since one of them is in a comment", 3,
-                variables.size());
-
-    }
-
-    @Test()
-    public void testStrategyPatternProcessVariableReaderRegex()
-            throws ParserConfigurationException, SAXException, IOException {
-
-        boolean isStatic = false;
-
-        final String PATH = BASE_PATH + "ProcessVariableStaticReaderTest_RecogniseVariablesInClassStatic.bpmn";
-
-        JavaReaderContext pvc = new JavaReaderContext();
-        if (isStatic) {
-            pvc.setJavaReadingStrategy(new JavaReaderStatic());
-        } else {
-            pvc.setJavaReadingStrategy(new JavaReaderRegex());
-        }
-
-        final Map<String, ProcessVariableOperation> variables = pvc
-                .readJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
-
-        assertEquals("RegEx reader should find 4 variables including a false positive in a comment", 4,
-                variables.size());
-
-    }
-
+    assertEquals(
+        "RegEx reader should find 4 variables including a false positive in a comment",
+        4,
+        variables.size());
+  }
 }

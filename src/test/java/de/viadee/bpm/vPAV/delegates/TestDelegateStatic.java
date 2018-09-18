@@ -35,24 +35,22 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 
 public class TestDelegateStatic implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
+  @Override
+  public void execute(DelegateExecution execution) throws Exception {
 
-        final String variableName = "ProcessVariable1";
-        execution.setVariable(variableName, true);
+    final String variableName = "ProcessVariable1";
+    execution.setVariable(variableName, true);
 
-        // TODO Auto-generated method stub
-        /* execution.setVariable("dshfhdsfhfds", true); */
-        String bla = (String) execution.getVariable("ProcessVariable2");
+    // TODO Auto-generated method stub
+    /* execution.setVariable("dshfhdsfhfds", true); */
+    String bla = (String) execution.getVariable("ProcessVariable2");
 
-        int a = 1;
-        final String variableName2 = "ProcessVariable3";
-        if (a == 1) {
-            execution.setVariable(variableName2, true);
-
-        }
-
-        execution.removeVariable(variableName2);
-
+    int a = 1;
+    final String variableName2 = "ProcessVariable3";
+    if (a == 1) {
+      execution.setVariable(variableName2, true);
     }
+
+    execution.removeVariable(variableName2);
+  }
 }

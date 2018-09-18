@@ -38,52 +38,51 @@ import java.util.Map;
 import soot.toolkits.graph.Block;
 
 /**
- * 
+ *
  * helper class storing information for Data-flow analysis algorithm
- * 
- * 
+ *
+ *
  *
  */
 public class OutSetCFG {
 
-    private List<VariableBlock> variableBlocks;
+  private List<VariableBlock> variableBlocks;
 
-    public OutSetCFG(List<VariableBlock> vbs) {
+  public OutSetCFG(List<VariableBlock> vbs) {
 
-        this.variableBlocks = vbs;
+    this.variableBlocks = vbs;
+  }
+
+  public VariableBlock getVariableBlock(Block b) {
+
+    for (VariableBlock vb : variableBlocks) {
+
+      if (vb.getBlock().equals(b)) {
+        return vb;
+      }
     }
+    return null;
+  }
 
-    public VariableBlock getVariableBlock(Block b) {
+  public void addVariableBlock(VariableBlock vb) {
 
-        for (VariableBlock vb : variableBlocks) {
+    this.variableBlocks.add(vb);
+  }
 
-            if (vb.getBlock().equals(b)) {
-                return vb;
-            }
-        }
-        return null;
+  public Map<String, ProcessVariableOperation> getAllProcessVariables() {
+
+    Map<String, ProcessVariableOperation> variables =
+        new HashMap<String, ProcessVariableOperation>();
+
+    for (VariableBlock vb : variableBlocks) {
+
+      variables.putAll(vb.getProcessVariablesMapped());
     }
+    return variables;
+  }
 
-    public void addVariableBlock(VariableBlock vb) {
+  public List<VariableBlock> getAllVariableBlocks() {
 
-        this.variableBlocks.add(vb);
-    }
-
-    public Map<String, ProcessVariableOperation> getAllProcessVariables() {
-
-        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
-
-        for (VariableBlock vb : variableBlocks) {
-
-            variables.putAll(vb.getProcessVariablesMapped());
-
-        }
-        return variables;
-    }
-
-    public List<VariableBlock> getAllVariableBlocks() {
-
-        return variableBlocks;
-    }
-
+    return variableBlocks;
+  }
 }

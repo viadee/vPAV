@@ -50,61 +50,63 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class OverlapChecker extends AbstractElementChecker {
 
-    public OverlapChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
-    }
-    
-    private Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
+  public OverlapChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+    super(rule, bpmnScanner);
+  }
 
-    /**
-     * Check for redundant edges between common elements (double or more flows instead of one)
-     *
-     * @return issues
-     */
+  private Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
 
-    @Override
-    public Collection<CheckerIssue> check(BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement bpmnElement = element.getBaseElement();
+  /**
+   * Check for redundant edges between common elements (double or more flows instead of one)
+   *
+   * @return issues
+   */
+  @Override
+  public Collection<CheckerIssue> check(BpmnElement element) {
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    final BaseElement bpmnElement = element.getBaseElement();
 
-        if (bpmnElement instanceof SequenceFlow) {
+    if (bpmnElement instanceof SequenceFlow) {
 
-            final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
+      final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
 
-            if (getSequenceFlowList().isEmpty()) {
-                addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
-            }
+      if (getSequenceFlowList().isEmpty()) {
+        addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+      }
 
-            for (Map.Entry<String, ArrayList<String>> entry : getSequenceFlowList().entrySet()) {
-                // Check whether targetRef & sourceRef of current item exist in global list
-                if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                            String.format(
-                                    Messages.getString("OverlapChecker.0"), //$NON-NLS-1$
-                                    CheckName.checkName(bpmnElement))));
-                    return issues;
-                }
-            }
-
-            if (!getSequenceFlowList().containsKey(bpmnElement.getId())) {
-                addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
-            }
-
+      for (Map.Entry<String, ArrayList<String>> entry : getSequenceFlowList().entrySet()) {
+        // Check whether targetRef & sourceRef of current item exist in global list
+        if (sequenceFlowDef.equals(entry.getValue())
+            && !bpmnElement.getId().equals(entry.getKey())) {
+          issues.addAll(
+              IssueWriter.createIssue(
+                  rule,
+                  CriticalityEnum.ERROR,
+                  element,
+                  String.format(
+                      Messages.getString("OverlapChecker.0"), //$NON-NLS-1$
+                      CheckName.checkName(bpmnElement))));
+          return issues;
         }
+      }
 
-        return issues;
+      if (!getSequenceFlowList().containsKey(bpmnElement.getId())) {
+        addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+      }
     }
 
-	public Map<String, ArrayList<String>> getSequenceFlowList() {
-		return sequenceFlowList;
-	}
+    return issues;
+  }
 
-	public void addToSequenceFlowList(String id, ArrayList<String> sequenceFlowList) {
-		this.sequenceFlowList.put(id, sequenceFlowList);
-	}
+  public Map<String, ArrayList<String>> getSequenceFlowList() {
+    return sequenceFlowList;
+  }
 
-	public void resetSequenceFlowList() {
-		this.sequenceFlowList.clear();
-	}
+  public void addToSequenceFlowList(String id, ArrayList<String> sequenceFlowList) {
+    this.sequenceFlowList.put(id, sequenceFlowList);
+  }
 
+  public void resetSequenceFlowList() {
+    this.sequenceFlowList.clear();
+  }
 }

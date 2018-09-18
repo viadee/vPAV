@@ -59,77 +59,84 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
 public class ProcessVariableOperationReaderTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-        final URL[] classUrls = { classUrl, resourcesUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);        
-    }
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    RuntimeConfig.getInstance().setTest(true);
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java/");
+    final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+    final URL[] classUrls = {classUrl, resourcesUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+  }
 
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
-    }
+  @AfterClass
+  public static void tearDown() {
+    RuntimeConfig.getInstance().setTest(false);
+  }
 
-    @Test
-    public void testRecogniseVariablesInClass() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
+  @Test
+  public void testRecogniseVariablesInClass()
+      throws ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> allServiceTasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> allServiceTasks =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+    final ProcessVariableReader variableReader =
+        new ProcessVariableReader(null, new BpmnScanner(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
+    final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
+    final Map<String, ProcessVariableOperation> variables =
+        variableReader.getVariablesFromElement(element);
 
-        Assert.assertEquals(2, variables.size());
-    }
+    Assert.assertEquals(2, variables.size());
+  }
 
-    @Test
-    public void testRecogniseInputOutputAssociations() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
+  @Test
+  public void testRecogniseInputOutputAssociations()
+      throws ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<CallActivity> allServiceTasks = modelInstance
-                .getModelElementsByType(CallActivity.class);
+    final Collection<CallActivity> allServiceTasks =
+        modelInstance.getModelElementsByType(CallActivity.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+    final ProcessVariableReader variableReader =
+        new ProcessVariableReader(null, new BpmnScanner(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
+    final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
+    final Map<String, ProcessVariableOperation> variables =
+        variableReader.getVariablesFromElement(element);
 
-        final ProcessVariableOperation nameOfVariableInMainProcess = variables
-                .get("nameOfVariableInMainProcess");
-        Assert.assertNotNull(nameOfVariableInMainProcess);
-        Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess.getOperation());
+    final ProcessVariableOperation nameOfVariableInMainProcess =
+        variables.get("nameOfVariableInMainProcess");
+    Assert.assertNotNull(nameOfVariableInMainProcess);
+    Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess.getOperation());
 
-        final ProcessVariableOperation nameOfVariableInMainProcess2 = variables
-                .get("nameOfVariableInMainProcess2");
-        Assert.assertNotNull(nameOfVariableInMainProcess2);
-        Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess2.getOperation());
+    final ProcessVariableOperation nameOfVariableInMainProcess2 =
+        variables.get("nameOfVariableInMainProcess2");
+    Assert.assertNotNull(nameOfVariableInMainProcess2);
+    Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess2.getOperation());
 
-        final ProcessVariableOperation someVariableInMainProcess = variables.get("someVariableInMainProcess");
-        Assert.assertNotNull(someVariableInMainProcess);
-        Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess.getOperation());
+    final ProcessVariableOperation someVariableInMainProcess =
+        variables.get("someVariableInMainProcess");
+    Assert.assertNotNull(someVariableInMainProcess);
+    Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess.getOperation());
 
-        final ProcessVariableOperation someVariableInMainProcess2 = variables.get("someVariableInMainProcess2");
-        Assert.assertNotNull(someVariableInMainProcess2);
-        Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.getOperation());
-    }
+    final ProcessVariableOperation someVariableInMainProcess2 =
+        variables.get("someVariableInMainProcess2");
+    Assert.assertNotNull(someVariableInMainProcess2);
+    Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.getOperation());
+  }
 }
-

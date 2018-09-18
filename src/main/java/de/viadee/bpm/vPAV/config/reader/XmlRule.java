@@ -39,90 +39,95 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "rule")
-@XmlType(propOrder = { "name", "state", "description", "settings", "elementConventions", "modelConventions" })
+@XmlType(
+  propOrder = {"name", "state", "description", "settings", "elementConventions", "modelConventions"}
+)
 public class XmlRule {
 
-    private String name;
+  private String name;
 
-    private String description;
+  private String description;
 
-    private boolean state;
+  private boolean state;
 
-    private Collection<XmlSetting> settings;
+  private Collection<XmlSetting> settings;
 
-    private Collection<XmlElementConvention> elementConventions;
+  private Collection<XmlElementConvention> elementConventions;
 
-    private Collection<XmlModelConvention> modelConventions;
+  private Collection<XmlModelConvention> modelConventions;
 
-    public XmlRule() {
-    }
+  public XmlRule() {}
 
-    public XmlRule(String name, boolean state, String description, final Collection<XmlSetting> settings,
-            final Collection<XmlElementConvention> elementConventions,
-            final Collection<XmlModelConvention> modelConventions) {
-        super();
-        this.name = name;
-        this.state = state;
-        this.description = description;
-        this.settings = settings;
-        this.elementConventions = elementConventions;
-        this.modelConventions = modelConventions;
-    }
+  public XmlRule(
+      String name,
+      boolean state,
+      String description,
+      final Collection<XmlSetting> settings,
+      final Collection<XmlElementConvention> elementConventions,
+      final Collection<XmlModelConvention> modelConventions) {
+    super();
+    this.name = name;
+    this.state = state;
+    this.description = description;
+    this.settings = settings;
+    this.elementConventions = elementConventions;
+    this.modelConventions = modelConventions;
+  }
 
-    @XmlElement(name = "name", required = true)
-    public String getName() {
-        return name;
-    }
+  @XmlElement(name = "name", required = true)
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    @XmlElement(name = "state", required = true)
-    public boolean isState() {
-        return state;
-    }
+  @XmlElement(name = "state", required = true)
+  public boolean isState() {
+    return state;
+  }
 
-    public void setState(boolean state) {
-        this.state = state;
-    }
+  public void setState(boolean state) {
+    this.state = state;
+  }
 
-    @XmlElement(name = "description", required = false)
-    public String getDescription() {
-        return description;
-    }
+  @XmlElement(name = "description", required = false)
+  public String getDescription() {
+    return description;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    @XmlElementWrapper(name = "settings")
-    @XmlElement(name = "setting", required = false)
-    public Collection<XmlSetting> getSettings() {
-        return settings;
-    }
+  @XmlElementWrapper(name = "settings")
+  @XmlElement(name = "setting", required = false)
+  public Collection<XmlSetting> getSettings() {
+    return settings;
+  }
 
-    public void setSettings(Collection<XmlSetting> settings) {
-        this.settings = settings;
-    }
+  public void setSettings(Collection<XmlSetting> settings) {
+    this.settings = settings;
+  }
 
-    @XmlElementWrapper(name = "elementConventions")
-    @XmlElement(name = "elementConvention", required = false)
-    public Collection<XmlElementConvention> getElementConventions() {
-        return elementConventions;
-    }
+  @XmlElementWrapper(name = "elementConventions")
+  @XmlElement(name = "elementConvention", required = false)
+  public Collection<XmlElementConvention> getElementConventions() {
+    return elementConventions;
+  }
 
-    public void setElementConventions(Collection<XmlElementConvention> elementConventions) {
-        this.elementConventions = elementConventions;
-    }
+  public void setElementConventions(Collection<XmlElementConvention> elementConventions) {
+    this.elementConventions = elementConventions;
+  }
 
-    @XmlElementWrapper(name = "modelConventions")
-    @XmlElement(name = "modelConvention", required = false)
-    public Collection<XmlModelConvention> getModelConventions() {
-        return modelConventions;
-    }
+  @XmlElementWrapper(name = "modelConventions")
+  @XmlElement(name = "modelConvention", required = false)
+  public Collection<XmlModelConvention> getModelConventions() {
+    return modelConventions;
+  }
 
-    public void setModelConventions(Collection<XmlModelConvention> modelConventions) {
-        this.modelConventions = modelConventions;
-    }
+  public void setModelConventions(Collection<XmlModelConvention> modelConventions) {
+    this.modelConventions = modelConventions;
+  }
 }

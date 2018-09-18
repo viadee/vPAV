@@ -40,71 +40,68 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
  * University of Washington, Computer Science and Engineering, Course 373, Winter 2011, Jessica Miller A utility class
  * that attaches "bookkeeping" information to a vertex. used when searching the graph for a path between two vertices
  */
-
 public class VertexInfo {
 
-    /** The vertex itself. */
-    private BpmnElement vertex;
+  /** The vertex itself. */
+  private BpmnElement vertex;
 
-    /** A mark for whether this vertex has been visited. Useful for path searching. */
-    private boolean visited;
+  /** A mark for whether this vertex has been visited. Useful for path searching. */
+  private boolean visited;
 
-    private Map<String, Void> visitedVariables;
+  private Map<String, Void> visitedVariables;
 
-    /**
-     * Constructs information for the given vertex.
-     *
-     * @param vertex
-     *            BpmnElement
-     * 
-     */
+  /**
+   * Constructs information for the given vertex.
+   *
+   * @param vertex
+   *            BpmnElement
+   *
+   */
+  public VertexInfo(final BpmnElement vertex) {
+    this.vertex = vertex;
+    this.visitedVariables = new HashMap<String, Void>();
+    this.clear();
+  }
 
-    public VertexInfo(final BpmnElement vertex) {
-        this.vertex = vertex;
-        this.visitedVariables = new HashMap<String, Void>();
-        this.clear();
-    }
+  /**
+   * Puts variable into Map
+   *
+   * @param varName
+   *            Name of variable
+   */
+  public void visitVariable(final String varName) {
+    visitedVariables.put(varName, null);
+  }
 
-    /**
-     * Puts variable into Map
-     * 
-     * @param varName
-     *            Name of variable
-     */
-    public void visitVariable(final String varName) {
-        visitedVariables.put(varName, null);
-    }
+  /**
+   * Checks whether a variable has been visited
+   *
+   * @param varName
+   *            Name of variable
+   * @return true/false
+   */
+  public boolean variableVisited(final String varName) {
+    return visitedVariables.containsKey(varName);
+  }
 
-    /**
-     * Checks whether a variable has been visited
-     * 
-     * @param varName
-     *            Name of variable
-     * @return true/false
-     */
-    public boolean variableVisited(final String varName) {
-        return visitedVariables.containsKey(varName);
-    }
+  /** Resets the visited field. */
+  public void clear() {
+    setVisited(false);
+  }
 
-    /** Resets the visited field. */
-    public void clear() {
-        setVisited(false);
-    }
+  public void setVisited(final boolean visited) {
+    this.visited = visited;
+  }
 
-    public void setVisited(final boolean visited) {
-        this.visited = visited;
-    }
+  public boolean getVisited() {
+    return visited;
+  }
 
-    public boolean getVisited() {
-        return visited;
-    }
+  public void setVertex(final BpmnElement vertex) {
+    this.vertex = vertex;
+  }
 
-    public void setVertex(final BpmnElement vertex) {
-        this.vertex = vertex;
-    }
-
-    public BpmnElement getVertex() {
-        return vertex;
-    }
-
+  public BpmnElement getVertex() {
+    return vertex;
+  }
 }

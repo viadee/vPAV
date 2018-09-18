@@ -69,137 +69,142 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
  */
 public class ProcessVariablesNameConventionCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static ElementChecker checker;
+  private static ElementChecker checker;
 
-    private static Map<String, String> beanMapping;
+  private static Map<String, String> beanMapping;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        RuntimeConfig.getInstance().setTest(true);
-        beanMapping = new HashMap<String, String>();
-        beanMapping.put("myBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
-        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
-        checker = new ProcessVariablesNameConventionChecker(createRule(), null);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    RuntimeConfig.getInstance().setTest(true);
+    beanMapping = new HashMap<String, String>();
+    beanMapping.put("myBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
+    RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+    checker = new ProcessVariablesNameConventionChecker(createRule(), null);
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java/");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
+
+  @AfterClass
+  public static void tearDown() {
+    RuntimeConfig.getInstance().setTest(false);
+  }
+
+  /**
+   * case: internal and external process variables follows the conventions
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   */
+  @Test
+  public void testCorrectProcessVariableNames()
+      throws ParserConfigurationException, SAXException, IOException {
+    final String PATH =
+        BASE_PATH
+            + "ProcessVariablesNameConventionCheckerTest_CorrectProcessVariablesNamingConvention.bpmn";
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
+
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    for (final BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      Map<String, ProcessVariableOperation> variables =
+          new ProcessVariableReader(null, new BpmnScanner(PATH)).getVariablesFromElement(element);
+      element.setProcessVariables(variables);
+
+      issues.addAll(checker.check(element));
     }
 
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
+    assertEquals(0, issues.size());
+  }
+
+  /**
+   * case: recognise variables which are against the naming conventions (internal/external)
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   */
+  @Test
+  public void testWrongProcessVariableNames()
+      throws ParserConfigurationException, SAXException, IOException {
+    final String PATH =
+        BASE_PATH
+            + "ProcessVariablesNameConventionCheckerTest_WrongProcessVariablesNamingConvention.bpmn";
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
+
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    for (final BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      Map<String, ProcessVariableOperation> variables =
+          new ProcessVariableReader(null, new BpmnScanner(PATH)).getVariablesFromElement(element);
+      element.setProcessVariables(variables);
+
+      issues.addAll(checker.check(element));
+    }
+    int externalConventions = 0;
+    int internalConventions = 0;
+    for (CheckerIssue issue : issues) {
+      if (issue.getMessage().contains("external")) {
+        externalConventions++;
+      }
+      if (issue.getMessage().contains("internal")) {
+        internalConventions++;
+      }
     }
 
-    /**
-     * case: internal and external process variables follows the conventions
-     * 
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     */
-    @Test
-    public void testCorrectProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH
-                + "ProcessVariablesNameConventionCheckerTest_CorrectProcessVariablesNamingConvention.bpmn";
+    assertEquals(4, issues.size());
+    assertEquals(1, internalConventions);
+    assertEquals(3, externalConventions);
+  }
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+  /**
+   * Creates the configuration rule
+   *
+   * @return rule
+   */
+  private static Rule createRule() {
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+    final Collection<String> fieldTypeNames = new ArrayList<String>();
+    fieldTypeNames.add("Class");
+    fieldTypeNames.add("ExternalScript");
+    fieldTypeNames.add("DelegateExpression");
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        for (final BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
-                    .getVariablesFromElement(element);
-            element.setProcessVariables(variables);
+    final ElementFieldTypes internalTypes = new ElementFieldTypes(fieldTypeNames, true);
 
-            issues.addAll(checker.check(element));
-        }
+    final ElementConvention internalElementConvention =
+        new ElementConvention("internal", internalTypes, null, "int_[a-zA-Z]+");
 
-        assertEquals(0, issues.size());
-    }
+    final ElementFieldTypes externalTypes = new ElementFieldTypes(fieldTypeNames, false);
 
-    /**
-     * case: recognise variables which are against the naming conventions (internal/external)
-     * 
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     */
-    @Test
-    public void testWrongProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH
-                + "ProcessVariablesNameConventionCheckerTest_WrongProcessVariablesNamingConvention.bpmn";
+    final ElementConvention externalElementConvention =
+        new ElementConvention("external", externalTypes, null, "ext_[a-zA-Z]+");
+    elementConventions.add(internalElementConvention);
+    elementConventions.add(externalElementConvention);
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    final Rule rule =
+        new Rule(
+            "ProcessVariablesNameConventionChecker", true, null, null, elementConventions, null);
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        for (final BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
-                    .getVariablesFromElement(element);
-            element.setProcessVariables(variables);
-
-            issues.addAll(checker.check(element));
-        }
-        int externalConventions = 0;
-        int internalConventions = 0;
-        for (CheckerIssue issue : issues) {
-            if (issue.getMessage().contains("external")) {
-                externalConventions++;
-            }
-            if (issue.getMessage().contains("internal")) {
-                internalConventions++;
-            }
-        }
-
-        assertEquals(4, issues.size());
-        assertEquals(1, internalConventions);
-        assertEquals(3, externalConventions);
-    }
-
-    /**
-     * Creates the configuration rule
-     *
-     * @return rule
-     */
-    private static Rule createRule() {
-
-        final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
-        final Collection<String> fieldTypeNames = new ArrayList<String>();
-        fieldTypeNames.add("Class");
-        fieldTypeNames.add("ExternalScript");
-        fieldTypeNames.add("DelegateExpression");
-
-        final ElementFieldTypes internalTypes = new ElementFieldTypes(fieldTypeNames, true);
-
-        final ElementConvention internalElementConvention = new ElementConvention("internal",
-                internalTypes, null, "int_[a-zA-Z]+");
-
-        final ElementFieldTypes externalTypes = new ElementFieldTypes(fieldTypeNames, false);
-
-        final ElementConvention externalElementConvention = new ElementConvention("external",
-                externalTypes, null, "ext_[a-zA-Z]+");
-        elementConventions.add(internalElementConvention);
-        elementConventions.add(externalElementConvention);
-
-        final Rule rule = new Rule("ProcessVariablesNameConventionChecker", true, null, null,
-                elementConventions, null);
-
-        return rule;
-    }
+    return rule;
+  }
 }

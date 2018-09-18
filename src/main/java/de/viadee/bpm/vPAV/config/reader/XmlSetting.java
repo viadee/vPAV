@@ -37,86 +37,90 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 @XmlRootElement(name = "setting")
-@XmlType(propOrder = { "name", "script", "type", "id", "required", "value" })
+@XmlType(propOrder = {"name", "script", "type", "id", "required", "value"})
 public class XmlSetting {
 
-    private String name;
+  private String name;
 
-    private String value;
+  private String value;
 
-    private String script;
+  private String script;
 
-    private String type;
+  private String type;
 
-    private String id;
+  private String id;
 
-    private boolean required;
+  private boolean required;
 
-    public XmlSetting() {
-    }
+  public XmlSetting() {}
 
-    public XmlSetting(final String name, final String script, final String type, final String id,
-            final boolean required, final String value) {
-        super();
-        this.required = required;
-        this.name = name;
-        this.value = value;
-        this.type = type;
-        this.script = script;
-        this.id = id;
-    }
+  public XmlSetting(
+      final String name,
+      final String script,
+      final String type,
+      final String id,
+      final boolean required,
+      final String value) {
+    super();
+    this.required = required;
+    this.name = name;
+    this.value = value;
+    this.type = type;
+    this.script = script;
+    this.id = id;
+  }
 
-    @XmlAttribute(name = "name", required = true)
-    public String getName() {
-        return name;
-    }
+  @XmlAttribute(name = "name", required = true)
+  public String getName() {
+    return name;
+  }
 
-    @XmlAttribute(name = "script", required = false)
-    public String getScript() {
-        return script;
-    }
+  @XmlAttribute(name = "script", required = false)
+  public String getScript() {
+    return script;
+  }
 
-    @XmlAttribute(name = "type", required = true)
-    public String getType() {
-        return type;
-    }
+  @XmlAttribute(name = "type", required = true)
+  public String getType() {
+    return type;
+  }
 
-    @XmlAttribute(name = "id", required = false)
-    public String getId() {
-        return id;
-    }
+  @XmlAttribute(name = "id", required = false)
+  public String getId() {
+    return id;
+  }
 
-    @XmlAttribute(name = "required", required = false)
-    public boolean getRequired() {
-        return required;
-    }
+  @XmlAttribute(name = "required", required = false)
+  public boolean getRequired() {
+    return required;
+  }
 
-    @XmlValue
-    public String getValue() {
-        return value;
-    }
+  @XmlValue
+  public String getValue() {
+    return value;
+  }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 
-    public void setValue(final String value) {
-        this.value = value;
-    }
+  public void setValue(final String value) {
+    this.value = value;
+  }
 
-    public void setScript(final String script) {
-        this.script = script;
-    }
+  public void setScript(final String script) {
+    this.script = script;
+  }
 
-    public void setType(final String type) {
-        this.type = type;
-    }
+  public void setType(final String type) {
+    this.type = type;
+  }
 
-    public void setId(final String id) {
-        this.id = id;
-    }
+  public void setId(final String id) {
+    this.id = id;
+  }
 
-    public void setRequired(final boolean required) {
-        this.required = required;
-    }
+  public void setRequired(final boolean required) {
+    this.required = required;
+  }
 }

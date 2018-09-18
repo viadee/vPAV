@@ -61,97 +61,97 @@ import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
  */
 public class CheckerFactoryTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private final static Setting setting = new Setting("WrongChecker", null, null, null, false,
-            "de.viadee.vPAV_checker_plugin");
+  private final static Setting setting =
+      new Setting("WrongChecker", null, null, null, false, "de.viadee.vPAV_checker_plugin");
 
-    private static Map<String, Setting> settings = new HashMap<String, Setting>();
+  private static Map<String, Setting> settings = new HashMap<String, Setting>();
 
-    private static Map<String, Rule> rules = new HashMap<String, Rule>();
+  private static Map<String, Rule> rules = new HashMap<String, Rule>();
 
-    private final String PATH = BASE_PATH + "CheckerFactoryTest.bpmn";
+  private final String PATH = BASE_PATH + "CheckerFactoryTest.bpmn";
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
-    }
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
 
-    /**
-     * Test correct viadee checker 'JavaDelegateChecker'
-     *
-     * @throws ConfigItemNotFoundException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @Test
-    public void testCorrectInternalChecker()
-            throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
-        Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
-        rules.put("JavaDelegateChecker", rule);
-        CheckerFactory checkerFactory = new CheckerFactory();
+  /**
+   * Test correct viadee checker 'JavaDelegateChecker'
+   *
+   * @throws ConfigItemNotFoundException
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   * @throws IOException
+   */
+  @Test
+  public void testCorrectInternalChecker()
+      throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
+    Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
+    rules.put("JavaDelegateChecker", rule);
+    CheckerFactory checkerFactory = new CheckerFactory();
 
-        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH));
+    Collection<ElementChecker> cElChecker =
+        checkerFactory.createCheckerInstances(rules, null, new BpmnScanner(PATH));
 
-        assertTrue("Collection of Checker should not be empty", !cElChecker.isEmpty());
-    }
+    assertTrue("Collection of Checker should not be empty", !cElChecker.isEmpty());
+  }
 
-    /**
-     * Test wrong internal checker
-     *
-     * @throws ConfigItemNotFoundException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @Test
-    public void testIncorrectInternalChecker()
-            throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
-        Rule rule = new Rule("WrongChecker", true, null, null, null, null);
-        rules.put("WrongChecker", rule);
-        CheckerFactory checkerFactory = new CheckerFactory();
-        
-        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH));
+  /**
+   * Test wrong internal checker
+   *
+   * @throws ConfigItemNotFoundException
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   * @throws IOException
+   */
+  @Test
+  public void testIncorrectInternalChecker()
+      throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
+    Rule rule = new Rule("WrongChecker", true, null, null, null, null);
+    rules.put("WrongChecker", rule);
+    CheckerFactory checkerFactory = new CheckerFactory();
 
-        assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
-    }
+    Collection<ElementChecker> cElChecker =
+        checkerFactory.createCheckerInstances(rules, null, new BpmnScanner(PATH));
 
-    /**
-     * Test wrong external Checker
-     *
-     * @throws ConfigItemNotFoundException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    @Test
-    public void testIncorrectExternalChecker()
-            throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
-        settings.put("external_Location", setting);
-        Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
-        rules.put("WrongChecker", rule);
-        CheckerFactory checkerFactory = new CheckerFactory();
-        
-        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH));
+    assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
+  }
 
-        assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
-    }
+  /**
+   * Test wrong external Checker
+   *
+   * @throws ConfigItemNotFoundException
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   * @throws IOException
+   */
+  @Test
+  public void testIncorrectExternalChecker()
+      throws ConfigItemNotFoundException, ParserConfigurationException, SAXException, IOException {
+    settings.put("external_Location", setting);
+    Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
+    rules.put("WrongChecker", rule);
+    CheckerFactory checkerFactory = new CheckerFactory();
 
-    @After
-    public void clearLists() {
-        rules.clear();
-        settings.clear();
-    }
+    Collection<ElementChecker> cElChecker =
+        checkerFactory.createCheckerInstances(rules, null, new BpmnScanner(PATH));
+
+    assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
+  }
+
+  @After
+  public void clearLists() {
+    rules.clear();
+    settings.clear();
+  }
 }

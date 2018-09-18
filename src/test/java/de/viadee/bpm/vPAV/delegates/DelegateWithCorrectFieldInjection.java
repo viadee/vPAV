@@ -38,22 +38,21 @@ import org.camunda.bpm.engine.impl.el.FixedValue;
 
 public class DelegateWithCorrectFieldInjection implements JavaDelegate {
 
-    public FixedValue test;
+  public FixedValue test;
 
-    public Expression varTwo;
+  public Expression varTwo;
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        // TODO Auto-generated method stub
+  @Override
+  public void execute(DelegateExecution execution) throws Exception {
+    // TODO Auto-generated method stub
 
-    }
+  }
 
-    public void setTest(FixedValue t) {
-        this.test = t;
-    }
+  public void setTest(FixedValue t) {
+    this.test = t;
+  }
 
-    public void setVarTwo(Expression e) {
-        this.varTwo = e;
-    }
-
+  public void setVarTwo(Expression e) {
+    this.varTwo = e;
+  }
 }

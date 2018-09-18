@@ -52,44 +52,53 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 
 public class TaskNamingConventionChecker extends AbstractElementChecker {
 
-    public TaskNamingConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
-    }
+  public TaskNamingConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+    super(rule, bpmnScanner);
+  }
 
-    /**
-     * Check if elements adhere to a configurable naming convention
-     *
-     * @return issues
-     */
-    @Override
-    public Collection<CheckerIssue> check(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement baseElement = element.getBaseElement();
+  /**
+   * Check if elements adhere to a configurable naming convention
+   *
+   * @return issues
+   */
+  @Override
+  public Collection<CheckerIssue> check(final BpmnElement element) {
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    final BaseElement baseElement = element.getBaseElement();
 
-        if (baseElement instanceof Task) {
-            final Collection<ElementConvention> elementConventions = rule.getElementConventions();
-            if (elementConventions == null || elementConventions.size() < 1
-                    || elementConventions.size() > 1) {
-                throw new ProcessingException(
-                        "task naming convention checker must have one element convention!"); //$NON-NLS-1$
-            }
-            final String patternString = elementConventions.iterator().next().getPattern();
-            final String taskName = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
-            if (taskName != null && taskName.trim().length() > 0) {
-                final Pattern pattern = Pattern.compile(patternString);
-                Matcher matcher = pattern.matcher(taskName);
-                if (!matcher.matches()) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                            String.format(Messages.getString("TaskNamingConventionChecker.1"), taskName), //$NON-NLS-1$
-                            elementConventions.iterator().next().getDescription()));
-                }
-            } else {
-
-                issues.addAll(
-                        IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                Messages.getString("TaskNamingConventionChecker.2"))); //$NON-NLS-1$
-            }
+    if (baseElement instanceof Task) {
+      final Collection<ElementConvention> elementConventions = rule.getElementConventions();
+      if (elementConventions == null
+          || elementConventions.size() < 1
+          || elementConventions.size() > 1) {
+        throw new ProcessingException(
+            "task naming convention checker must have one element convention!"); //$NON-NLS-1$
+      }
+      final String patternString = elementConventions.iterator().next().getPattern();
+      final String taskName = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
+      if (taskName != null && taskName.trim().length() > 0) {
+        final Pattern pattern = Pattern.compile(patternString);
+        Matcher matcher = pattern.matcher(taskName);
+        if (!matcher.matches()) {
+          issues.addAll(
+              IssueWriter.createIssue(
+                  rule,
+                  CriticalityEnum.WARNING,
+                  element,
+                  String.format(
+                      Messages.getString("TaskNamingConventionChecker.1"), taskName), //$NON-NLS-1$
+                  elementConventions.iterator().next().getDescription()));
         }
-        return issues;
+      } else {
+
+        issues.addAll(
+            IssueWriter.createIssue(
+                rule,
+                CriticalityEnum.WARNING,
+                element,
+                Messages.getString("TaskNamingConventionChecker.2"))); //$NON-NLS-1$
+      }
     }
+    return issues;
+  }
 }

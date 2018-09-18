@@ -36,16 +36,16 @@ import org.camunda.bpm.engine.impl.pvm.delegate.SignallableActivityBehavior;
 
 public class DelegateWithCorrectInterfaceSignal implements SignallableActivityBehavior {
 
-    @Override
-    public void execute(ActivityExecution execution) throws Exception {
-        // TODO Auto-generated method stub
+  @Override
+  public void execute(ActivityExecution execution) throws Exception {
+    // TODO Auto-generated method stub
 
-    }
+  }
 
-    @Override
-    public void signal(ActivityExecution execution, String signalEvent, Object signalData) throws Exception {
-        // TODO Auto-generated method stub
+  @Override
+  public void signal(ActivityExecution execution, String signalEvent, Object signalData)
+      throws Exception {
+    // TODO Auto-generated method stub
 
-    }
-
+  }
 }

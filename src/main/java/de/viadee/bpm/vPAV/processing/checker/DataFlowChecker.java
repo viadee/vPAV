@@ -43,26 +43,37 @@ import java.util.Collection;
 
 public class DataFlowChecker implements ModelChecker {
 
-    private Rule rule;
-    private Collection<DataFlowRule> dataFlowRules;
-    private Collection<ProcessVariable> processVariables;
+  private Rule rule;
+  private Collection<DataFlowRule> dataFlowRules;
+  private Collection<ProcessVariable> processVariables;
 
-    public DataFlowChecker(Rule rule, Collection<DataFlowRule> dataFlowRules, Collection<ProcessVariable> processVariables) {
-        this.rule = rule;
-        this.dataFlowRules = dataFlowRules;
-        this.processVariables = processVariables;
-    }
+  public DataFlowChecker(
+      Rule rule,
+      Collection<DataFlowRule> dataFlowRules,
+      Collection<ProcessVariable> processVariables) {
+    this.rule = rule;
+    this.dataFlowRules = dataFlowRules;
+    this.processVariables = processVariables;
+  }
 
-    @Override
-    public Collection<CheckerIssue> check(BpmnModelInstance processdefinition) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        for (DataFlowRule dataFlowRule : dataFlowRules) {
-            dataFlowRule.evaluate(processVariables).stream()
-                    .filter(r-> !r.isFulfilled())
-                    .map(r -> IssueWriter.createIssue(rule, dataFlowRule.getRuleDescription(), dataFlowRule.getCriticality(),
-                            r.getEvaluatedVariable(), dataFlowRule.getViolationMessageFor(r)))
-                    .forEach(issues::addAll);
-        }
-        return issues;
+  @Override
+  public Collection<CheckerIssue> check(BpmnModelInstance processdefinition) {
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    for (DataFlowRule dataFlowRule : dataFlowRules) {
+      dataFlowRule
+          .evaluate(processVariables)
+          .stream()
+          .filter(r -> !r.isFulfilled())
+          .map(
+              r ->
+                  IssueWriter.createIssue(
+                      rule,
+                      dataFlowRule.getRuleDescription(),
+                      dataFlowRule.getCriticality(),
+                      r.getEvaluatedVariable(),
+                      dataFlowRule.getViolationMessageFor(r)))
+          .forEach(issues::addAll);
     }
+    return issues;
+  }
 }

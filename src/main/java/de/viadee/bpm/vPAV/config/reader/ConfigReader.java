@@ -37,5 +37,5 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 
 public interface ConfigReader {
 
-    Map<String, Rule> read(final String file) throws ConfigReaderException;
+  Map<String, Rule> read(final String file) throws ConfigReaderException;
 }

@@ -65,102 +65,108 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
  */
 public class OuterProcessVariablesTestOperation {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+  }
+
+  /**
+   * checks outer variables set on process start by key
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   */
+  @Test
+  public void testStartProcessByKey()
+      throws ParserConfigurationException, SAXException, IOException {
+    //// Given...
+    final String PATH = BASE_PATH + "OuterProcessVariablesTest_StartProcessByKey.bpmn";
+    final File processdefinition = new File(PATH);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+    final Map<String, Collection<String>> processIdToVariables =
+        new HashMap<String, Collection<String>>();
+    processIdToVariables.put("OuterProcessVariablesTest", Arrays.asList(new String[] {"a"}));
+
+    //// When...
+    final ElementGraphBuilder graphBuilder =
+        new ElementGraphBuilder(null, null, null, processIdToVariables, new BpmnScanner(PATH));
+    // create data flow graphs
+    graphBuilder.createProcessGraph(
+        modelInstance, processdefinition.getPath(), new ArrayList<String>());
+
+    //// Then...
+    // select start event from process and check variable
+    final BpmnElement element = graphBuilder.getElement("StartEvent_0m79sut");
+    final Map<String, ProcessVariableOperation> variables = element.getProcessVariables();
+    if (variables == null) {
+      fail("there are no outer variables set on data flow graph");
+    }
+    if (!variables.containsKey("a")) {
+      fail("variable a is not set on data flow graph");
+    }
+  }
+
+  /**
+   * checks outer process variables set on process start by message and message correlation
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   */
+  @Test
+  public void testMessageCorrelation()
+      throws ParserConfigurationException, SAXException, IOException {
+    /// Given
+    final String PATH = BASE_PATH + "OuterProcessVariablesTest_MessageCorrelation.bpmn";
+    final File processdefinition = new File(PATH);
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+
+    final Map<String, Collection<String>> messageIdToVariables =
+        new HashMap<String, Collection<String>>();
+    messageIdToVariables.put("startMessage", Arrays.asList(new String[] {"a"}));
+    messageIdToVariables.put("intermediateMessage", Arrays.asList(new String[] {"b"}));
+
+    /// When
+    final ElementGraphBuilder graphBuilder =
+        new ElementGraphBuilder(null, null, messageIdToVariables, null, new BpmnScanner(PATH));
+    // create data flow graphs
+    graphBuilder.createProcessGraph(
+        modelInstance, processdefinition.getPath(), new ArrayList<String>());
+
+    /// Then
+    // select start event from process and check variable
+    final BpmnElement startEvent = graphBuilder.getElement("StartEvent_05bq8nu");
+    final Map<String, ProcessVariableOperation> startVariables = startEvent.getProcessVariables();
+    if (startVariables == null) {
+      fail("there are no outer variables set on data flow graph (message start event)");
     }
 
-    /**
-     * checks outer variables set on process start by key
-     * 
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     */
-    @Test
-    public void testStartProcessByKey() throws ParserConfigurationException, SAXException, IOException {
-        //// Given...
-        final String PATH = BASE_PATH + "OuterProcessVariablesTest_StartProcessByKey.bpmn";
-        final File processdefinition = new File(PATH);
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
-        final Map<String, Collection<String>> processIdToVariables = new HashMap<String, Collection<String>>();
-        processIdToVariables.put("OuterProcessVariablesTest", Arrays.asList(new String[] { "a" }));
-
-        //// When...
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null,
-                processIdToVariables, new BpmnScanner(PATH));
-        // create data flow graphs
-        graphBuilder.createProcessGraph(modelInstance, processdefinition.getPath(), new ArrayList<String>());
-
-        //// Then...
-        // select start event from process and check variable
-        final BpmnElement element = graphBuilder.getElement("StartEvent_0m79sut");
-        final Map<String, ProcessVariableOperation> variables = element.getProcessVariables();
-        if (variables == null) {
-            fail("there are no outer variables set on data flow graph");
-        }
-        if (!variables.containsKey("a")) {
-            fail("variable a is not set on data flow graph");
-        }
+    if (!startVariables.containsKey("a")) {
+      fail("variable a is not set on data flow graph (message start event)");
     }
 
-    /**
-     * checks outer process variables set on process start by message and message correlation
-     * 
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     */
-    @Test
-    public void testMessageCorrelation() throws ParserConfigurationException, SAXException, IOException {
-        /// Given
-        final String PATH = BASE_PATH + "OuterProcessVariablesTest_MessageCorrelation.bpmn";
-        final File processdefinition = new File(PATH);
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
-
-        final Map<String, Collection<String>> messageIdToVariables = new HashMap<String, Collection<String>>();
-        messageIdToVariables.put("startMessage", Arrays.asList(new String[] { "a" }));
-        messageIdToVariables.put("intermediateMessage", Arrays.asList(new String[] { "b" }));
-
-        /// When
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null,
-                messageIdToVariables, null, new BpmnScanner(PATH));
-        // create data flow graphs
-        graphBuilder.createProcessGraph(modelInstance, processdefinition.getPath(), new ArrayList<String>());
-
-        /// Then
-        // select start event from process and check variable
-        final BpmnElement startEvent = graphBuilder.getElement("StartEvent_05bq8nu");
-        final Map<String, ProcessVariableOperation> startVariables = startEvent.getProcessVariables();
-        if (startVariables == null) {
-            fail("there are no outer variables set on data flow graph (message start event)");
-        }
-
-        if (!startVariables.containsKey("a")) {
-            fail("variable a is not set on data flow graph (message start event)");
-        }
-
-        // select intermediate event from process and check variable
-        final BpmnElement intermediateEvent = graphBuilder.getElement("IntermediateCatchEvent_103fbi3");
-        final Map<String, ProcessVariableOperation> intermediateVariables = intermediateEvent
-                .getProcessVariables();
-        if (intermediateVariables == null) {
-            fail("there are no outer variables set on data flow graph (message intermediate event)");
-        }
-        if (!intermediateVariables.containsKey("b")) {
-            fail("variable b is not set on data flow graph (message intermediate event)");
-        }
+    // select intermediate event from process and check variable
+    final BpmnElement intermediateEvent = graphBuilder.getElement("IntermediateCatchEvent_103fbi3");
+    final Map<String, ProcessVariableOperation> intermediateVariables =
+        intermediateEvent.getProcessVariables();
+    if (intermediateVariables == null) {
+      fail("there are no outer variables set on data flow graph (message intermediate event)");
     }
+    if (!intermediateVariables.containsKey("b")) {
+      fail("variable b is not set on data flow graph (message intermediate event)");
+    }
+  }
 }

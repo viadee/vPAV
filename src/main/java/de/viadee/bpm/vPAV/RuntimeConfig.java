@@ -48,167 +48,184 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class RuntimeConfig {
 
-    private static RuntimeConfig instance;
+  private static RuntimeConfig instance;
 
-    private ApplicationContext ctx;
+  private ApplicationContext ctx;
 
-    private Map<String, String> beanMap;
+  private Map<String, String> beanMap;
 
-    private ClassLoader classLoader;
+  private ClassLoader classLoader;
 
-    private ResourceBundle resourceBundle;
+  private ResourceBundle resourceBundle;
 
-    private boolean test = false; // TODO: Replace with parameterized method calls, to improve separation of test and production code
+  private boolean test =
+      false; // TODO: Replace with parameterized method calls, to improve separation of test and production code
 
-    private static Logger logger = Logger.getLogger(RuntimeConfig.class.getName());
+  private static Logger logger = Logger.getLogger(RuntimeConfig.class.getName());
 
-    private final String[] viadeeRules = { "XorConventionChecker",
-            "TimerExpressionChecker", "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker",
-            "EmbeddedGroovyScriptChecker", "VersioningChecker", "DmnTaskChecker", "ProcessVariablesModelChecker",
-            "ProcessVariablesNameConventionChecker", "TaskNamingConventionChecker", "ElementIdConventionChecker",
-            "MessageEventChecker", "FieldInjectionChecker", "BoundaryErrorChecker", "ExtensionChecker",
-            "OverlapChecker", "SignalEventChecker", "CreateOutputHTML", "DataFlowChecker" };
+  private final String[] viadeeRules = {
+    "XorConventionChecker",
+    "TimerExpressionChecker",
+    "JavaDelegateChecker",
+    "NoScriptChecker",
+    "NoExpressionChecker",
+    "EmbeddedGroovyScriptChecker",
+    "VersioningChecker",
+    "DmnTaskChecker",
+    "ProcessVariablesModelChecker",
+    "ProcessVariablesNameConventionChecker",
+    "TaskNamingConventionChecker",
+    "ElementIdConventionChecker",
+    "MessageEventChecker",
+    "FieldInjectionChecker",
+    "BoundaryErrorChecker",
+    "ExtensionChecker",
+    "OverlapChecker",
+    "SignalEventChecker",
+    "CreateOutputHTML",
+    "DataFlowChecker"
+  };
 
-    private ArrayList<String> allActiveRules = new ArrayList<>();
+  private ArrayList<String> allActiveRules = new ArrayList<>();
 
-    private RuntimeConfig() {
+  private RuntimeConfig() {}
+
+  public static RuntimeConfig getInstance() {
+    if (RuntimeConfig.instance == null) {
+      RuntimeConfig.instance = new RuntimeConfig();
+    }
+    return RuntimeConfig.instance;
+  }
+
+  public String findBeanByName(String string) {
+    if (string != null && !string.isEmpty() && beanMap != null && !beanMap.isEmpty()) {
+      return beanMap.get(string);
+    } else return null;
+  }
+
+  public void setBeanMapping(Map<String, String> beanMap) {
+    this.beanMap = beanMap;
+  }
+
+  public Map<String, String> getBeanMapping() {
+    return beanMap;
+  }
+
+  public void setClassLoader(ClassLoader classLoader) {
+    this.classLoader = classLoader;
+  }
+
+  public ClassLoader getClassLoader() {
+    return classLoader;
+  }
+
+  public boolean isTest() {
+    return test;
+  }
+
+  public void setTest(boolean test) {
+    this.test = test;
+  }
+
+  public ArrayList<String> getActiveRules() {
+    return allActiveRules;
+  }
+
+  public String[] getViadeeRules() {
+    return viadeeRules;
+  }
+
+  public void addActiveRules(Map<String, Rule> rules) {
+    for (Map.Entry<String, Rule> entry : rules.entrySet()) {
+      Rule rule = entry.getValue();
+      if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET))
+        allActiveRules.add(rule.getName());
+    }
+  }
+
+  public void setApplicationContext(ApplicationContext ctx) {
+    this.ctx = ctx;
+  }
+
+  public ApplicationContext getApplicationContext() {
+    return ctx;
+  }
+
+  /**
+   * Retrieve locale from ruleSet. If locale can not be retrieved, use system locale
+   *
+   * @param rules
+   *            RuleSet Rules from ruleset
+   * @throws MalformedURLException
+   *             Exception if ResourceBundle could not be loaded
+   */
+  public void retrieveLocale(Map<String, Rule> rules) throws MalformedURLException {
+    try {
+      final Rule rule = rules.get("language");
+      final Map<String, Setting> settings = rule.getSettings();
+      if (settings.get("locale").getValue().equals("de")) {
+        getResource("de_DE");
+      } else if (settings.get("locale").getValue().equals("en")) {
+        getResource("en_US");
+      }
+    } catch (NullPointerException e) {
+      if (Locale.getDefault().toString().equals("de_DE")) {
+        logger.warning(
+            "Could not retrieve localization from ruleSet.xml. Default localization: de_DE.");
+        getResource("de_DE");
+      } else {
+        logger.warning(
+            "Could not retrieve localization from ruleSet.xml. Default localization: en_US.");
+        getResource("en_US");
+      }
+    }
+  }
+
+  /**
+   * Set base directory and set ResourceBundle
+   *
+   * @param locale
+   *            Locale extracted from ruleSet or either default system locale Localization
+   * @throws MalformedURLException
+   *             Exception if ResourceBundle could not be loaded
+   */
+  public void getResource(final String locale) throws MalformedURLException {
+    setResourceBundle(fromClassLoader("messages_" + locale));
+  }
+
+  /**
+   * Retrieves ResourceBundle from base directy and returns it to RuntimeConfig
+   *
+   * @param dir
+   *            Base directory
+   * @param bundleName
+   *            Bundle name for localization
+   * @return ResourceBundle
+   * @throws MalformedURLException
+   */
+  private static ResourceBundle fromClassLoader(final String bundleName)
+      throws MalformedURLException {
+
+    URL[] urls;
+    URLClassLoader ucl;
+    if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
+      ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
+    } else {
+      ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
     }
 
-    public static RuntimeConfig getInstance() {
-        if (RuntimeConfig.instance == null) {
-            RuntimeConfig.instance = new RuntimeConfig();
-        }
-        return RuntimeConfig.instance;
-    }
+    urls = ucl.getURLs();
 
-    public String findBeanByName(String string) {
-        if (string != null && !string.isEmpty() && beanMap != null && !beanMap.isEmpty()) {
-            return beanMap.get(string);
-        } else
-            return null;
-    }
+    ClassLoader loader = new URLClassLoader(urls);
 
-    public void setBeanMapping(Map<String, String> beanMap) {
-        this.beanMap = beanMap;
-    }
+    return ResourceBundle.getBundle(bundleName, Locale.getDefault(), loader);
+  }
 
-    public Map<String, String> getBeanMapping() {
-        return beanMap;
-    }
+  public ResourceBundle getResourceBundle() {
+    return resourceBundle;
+  }
 
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
-
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }  
-
-    public boolean isTest() {
-        return test;
-    }
-
-    public void setTest(boolean test) {
-        this.test = test;
-    }
-
-    public ArrayList<String> getActiveRules() {
-        return allActiveRules;
-    }
-
-    public String[] getViadeeRules() {
-        return viadeeRules;
-    }
-
-    public void addActiveRules(Map<String, Rule> rules) {
-        for (Map.Entry<String, Rule> entry : rules.entrySet()) {
-            Rule rule = entry.getValue();
-            if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET))
-                allActiveRules.add(rule.getName());
-        }
-    }
-
-    public void setApplicationContext(ApplicationContext ctx) {
-        this.ctx = ctx;
-    }
-
-    public ApplicationContext getApplicationContext() {
-        return ctx;
-    }
-
-    /**
-     * Retrieve locale from ruleSet. If locale can not be retrieved, use system locale
-     * 
-     * @param rules
-     *            RuleSet Rules from ruleset
-     * @throws MalformedURLException
-     *             Exception if ResourceBundle could not be loaded
-     */
-    public void retrieveLocale(Map<String, Rule> rules) throws MalformedURLException {
-        try {
-            final Rule rule = rules.get("language");
-            final Map<String, Setting> settings = rule.getSettings();
-            if (settings.get("locale").getValue().equals("de")) {
-                getResource("de_DE");
-            } else if (settings.get("locale").getValue().equals("en")) {
-                getResource("en_US");
-            }
-        } catch (NullPointerException e) {
-            if (Locale.getDefault().toString().equals("de_DE")) {
-                logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: de_DE.");
-                getResource("de_DE");
-            } else {
-                logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: en_US.");
-                getResource("en_US");
-            }
-        }
-    }
-
-    /**
-     * Set base directory and set ResourceBundle
-     * 
-     * @param locale
-     *            Locale extracted from ruleSet or either default system locale Localization
-     * @throws MalformedURLException
-     *             Exception if ResourceBundle could not be loaded
-     */
-    public void getResource(final String locale) throws MalformedURLException {
-        setResourceBundle(fromClassLoader("messages_" + locale));
-    }
-
-    /**
-     * Retrieves ResourceBundle from base directy and returns it to RuntimeConfig
-     * 
-     * @param dir
-     *            Base directory
-     * @param bundleName
-     *            Bundle name for localization
-     * @return ResourceBundle
-     * @throws MalformedURLException
-     */
-    private static ResourceBundle fromClassLoader(final String bundleName) throws MalformedURLException {
-
-        URL[] urls;
-        URLClassLoader ucl;
-        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
-            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
-        } else {
-            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
-        }
-
-        urls = ucl.getURLs();
-
-        ClassLoader loader = new URLClassLoader(urls);
-
-        return ResourceBundle.getBundle(bundleName, Locale.getDefault(), loader);
-    }
-
-    public ResourceBundle getResourceBundle() {
-        return resourceBundle;
-    }
-
-    public void setResourceBundle(ResourceBundle resourceBundle) {
-        this.resourceBundle = resourceBundle;
-    }
-
+  public void setResourceBundle(ResourceBundle resourceBundle) {
+    this.resourceBundle = resourceBundle;
+  }
 }

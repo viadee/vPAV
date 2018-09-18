@@ -37,58 +37,64 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
 class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicateBuilder<T> {
 
-    private final Function<DescribedPredicateEvaluator<ProcessVariable>, T> constraintSetter;
+  private final Function<DescribedPredicateEvaluator<ProcessVariable>, T> constraintSetter;
 
-    ProcessVariablePredicateBuilderImpl(Function<DescribedPredicateEvaluator<ProcessVariable>, T> constraintSetter) {
-        this.constraintSetter = constraintSetter;
-    }
+  ProcessVariablePredicateBuilderImpl(
+      Function<DescribedPredicateEvaluator<ProcessVariable>, T> constraintSetter) {
+    this.constraintSetter = constraintSetter;
+  }
 
-    @Override
-    public ProcessVariablePredicateBuilder<T> not() {
-        return new ProcessVariablePredicateBuilderImpl<>(predicate -> constraintSetter.apply(predicate.inverse()));
-    }
+  @Override
+  public ProcessVariablePredicateBuilder<T> not() {
+    return new ProcessVariablePredicateBuilderImpl<>(
+        predicate -> constraintSetter.apply(predicate.inverse()));
+  }
 
-    @Override
-    public OperationBasedPredicateBuilder<T> deleted() {
-        return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getDeletes, "deleted");
-    }
+  @Override
+  public OperationBasedPredicateBuilder<T> deleted() {
+    return new OperationBasedPredicateBuilderImpl<>(
+        constraintSetter, ProcessVariable::getDeletes, "deleted");
+  }
 
-    @Override
-    public OperationBasedPredicateBuilder<T> read() {
-        return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getReads, "read");
-    }
+  @Override
+  public OperationBasedPredicateBuilder<T> read() {
+    return new OperationBasedPredicateBuilderImpl<>(
+        constraintSetter, ProcessVariable::getReads, "read");
+  }
 
-    @Override
-    public OperationBasedPredicateBuilder<T> written() {
-        return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getWrites, "written");
-    }
+  @Override
+  public OperationBasedPredicateBuilder<T> written() {
+    return new OperationBasedPredicateBuilderImpl<>(
+        constraintSetter, ProcessVariable::getWrites, "written");
+  }
 
-    @Override
-    public OperationBasedPredicateBuilder<T> accessed() {
-        return new OperationBasedPredicateBuilderImpl<>(constraintSetter, ProcessVariable::getOperations, "accessed");
-    }
+  @Override
+  public OperationBasedPredicateBuilder<T> accessed() {
+    return new OperationBasedPredicateBuilderImpl<>(
+        constraintSetter, ProcessVariable::getOperations, "accessed");
+  }
 
-    @Override
-    public T prefixed(String prefix) {
-        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p ->
-                new EvaluationResult<>(p.getName().startsWith(prefix), p);
-        final String description = String.format("prefixed with '%s'", prefix);
-        return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
-    }
+  @Override
+  public T prefixed(String prefix) {
+    final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator =
+        p -> new EvaluationResult<>(p.getName().startsWith(prefix), p);
+    final String description = String.format("prefixed with '%s'", prefix);
+    return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+  }
 
-    @Override
-    public T postfixed(String postfix) {
-        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p ->
-                new EvaluationResult<>(p.getName().endsWith(postfix), p);
-        final String description = String.format("postfixed with '%s'", postfix);
-        return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
-    }
+  @Override
+  public T postfixed(String postfix) {
+    final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator =
+        p -> new EvaluationResult<>(p.getName().endsWith(postfix), p);
+    final String description = String.format("postfixed with '%s'", postfix);
+    return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+  }
 
-    @Override
-    public T matching(String regex) {
-        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p ->
-                new EvaluationResult<>(p.getName().matches(regex), p);
-        final String description = String.format("matching with '%s'", regex);
-        return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
-    }
+  @Override
+  public T matching(String regex) {
+    final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator =
+        p -> new EvaluationResult<>(p.getName().matches(regex), p);
+    final String description = String.format("matching with '%s'", regex);
+    return constraintSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+  }
 }

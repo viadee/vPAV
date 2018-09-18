@@ -58,151 +58,151 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
 public class MessageEventCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static MessageEventChecker checker;
+  private static MessageEventChecker checker;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private final Rule rule = new Rule("MessageEventChecker", true, null, null, null, null);
+  private final Rule rule = new Rule("MessageEventChecker", true, null, null, null, null);
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
+
+  /**
+   * Case: StartEvent has been set with correct message
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testStartEvent() throws ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "MessageEventChecker_testStartEvent.bpmn";
+    checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
+
+    // parse bpmn model
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
+
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: StartEvent has been set with correct message
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testStartEvent() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "MessageEventChecker_testStartEvent.bpmn";
-        checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() > 0) {
+      Assert.fail("correct model generates an issue");
+    }
+  }
 
-        // parse bpmn model
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: StartEvent has been set with message and expression
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testStartEventWithExpression()
+      throws ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "MessageEventChecker_testStartEventWithExpression.bpmn";
+    checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() > 0) {
-            Assert.fail("correct model generates an issue");
-        }
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: StartEvent has been set with message and expression
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testStartEventWithExpression() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "MessageEventChecker_testStartEventWithExpression.bpmn";
-        checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() != 1) {
+      Assert.fail("model should generate an issue");
+    }
+  }
 
-        // parse bpmn model
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: EndEvent has been set with wrong message
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testEndEvent() throws ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "MessageEventChecker_testEndEvent.bpmn";
+    checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() != 1) {
-            Assert.fail("model should generate an issue");
-        }
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: EndEvent has been set with wrong message
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testEndEvent() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "MessageEventChecker_testEndEvent.bpmn";
-        checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() != 1) {
+      Assert.fail("collection with the issues is bigger or smaller as expected");
+    }
+  }
 
-        // parse bpmn model
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: Mixed events with several faults
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testMixedEvents() throws ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "MessageEventChecker_testMixedEvents.bpmn";
+    checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() != 1) {
-            Assert.fail("collection with the issues is bigger or smaller as expected");
-        }
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Mixed events with several faults
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testMixedEvents() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "MessageEventChecker_testMixedEvents.bpmn";
-        checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
-
-        // parse bpmn model
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
-
-        if (issues.size() != 1) {
-            Assert.fail("collection with the issues is bigger or smaller as expected");
-        }
+    if (issues.size() != 1) {
+      Assert.fail("collection with the issues is bigger or smaller as expected");
     }
-
+  }
 }

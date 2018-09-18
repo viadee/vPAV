@@ -34,12 +34,12 @@ package de.viadee.bpm.vPAV.delegates;
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-public class BoundaryErrorEventDelegateCorrect implements org.camunda.bpm.engine.delegate.JavaDelegate {
+public class BoundaryErrorEventDelegateCorrect
+    implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        // TODO Auto-generated method stub
-        throw new BpmnError("123");
-    }
-
+  @Override
+  public void execute(DelegateExecution execution) throws Exception {
+    // TODO Auto-generated method stub
+    throw new BpmnError("123");
+  }
 }

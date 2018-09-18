@@ -44,29 +44,28 @@ import org.junit.Test;
 
 public class FileScannerTest {
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private static Logger logger = Logger.getLogger(FileScannerTest.class.getName());
+  private static Logger logger = Logger.getLogger(FileScannerTest.class.getName());
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-    }
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+  }
 
-    @Test
-    public void testSootPathLoading() {
+  @Test
+  public void testSootPathLoading() {
 
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrors();
+    ProcessApplicationValidator pav = new ProcessApplicationValidator();
+    pav.findModelErrors();
 
-        String sootPath = FileScanner.getSootPath();
+    String sootPath = FileScanner.getSootPath();
 
-        System.out.println(sootPath);
-    }
-
+    System.out.println(sootPath);
+  }
 }

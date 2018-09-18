@@ -46,8 +46,7 @@ public class XmlPathElement {
   @XmlAttribute(name = "name")
   private String name;
 
-  public XmlPathElement() {
-  }
+  public XmlPathElement() {}
 
   public XmlPathElement(final String id, final String name) {
     this.id = id;

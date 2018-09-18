@@ -35,15 +35,13 @@ import java.util.MissingResourceException;
 
 public class Messages {
 
-    private Messages() {
-    }
+  private Messages() {}
 
-    public static String getString(final String key) {
-        try {
-            return RuntimeConfig.getInstance().getResourceBundle().getString(key);
-        } catch (MissingResourceException e) {
-            return '!' + key + '!';
-        }
+  public static String getString(final String key) {
+    try {
+      return RuntimeConfig.getInstance().getResourceBundle().getString(key);
+    } catch (MissingResourceException e) {
+      return '!' + key + '!';
     }
-
+  }
 }

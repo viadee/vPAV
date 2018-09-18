@@ -52,167 +52,165 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
 public class BpmnScannerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    /**
-     * Case: BPMN-Model in Version 1
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testModelVersionV1() throws SAXException, IOException, ParserConfigurationException {
-        final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
-        final String impClass = "camunda:delegateExpression";
+  /**
+   * Case: BPMN-Model in Version 1
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testModelVersionV1() throws SAXException, IOException, ParserConfigurationException {
+    final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
+    final String impClass = "camunda:delegateExpression";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        String imp = scanner.getImplementation(element.getBaseElement().getId());
+    BpmnScanner scanner = new BpmnScanner(PATH);
+    String imp = scanner.getImplementation(element.getBaseElement().getId());
 
-        assertTrue("Get unexpected implementation", imp.equals(impClass));
-    }
+    assertTrue("Get unexpected implementation", imp.equals(impClass));
+  }
 
-    /**
-     * Case: BPMN-Model in Version 2
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testModelVersionV2() throws SAXException, IOException, ParserConfigurationException {
-        final String PATH = BASE_PATH + "BPMN_Model_Version_V2.bpmn";
-        final String impEx = "camunda:class";
+  /**
+   * Case: BPMN-Model in Version 2
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testModelVersionV2() throws SAXException, IOException, ParserConfigurationException {
+    final String PATH = BASE_PATH + "BPMN_Model_Version_V2.bpmn";
+    final String impEx = "camunda:class";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        String imp = scanner.getImplementation(element.getBaseElement().getId());
+    BpmnScanner scanner = new BpmnScanner(PATH);
+    String imp = scanner.getImplementation(element.getBaseElement().getId());
 
-        assertTrue("Get unexpected implementation", imp.equals(impEx));
-    }
+    assertTrue("Get unexpected implementation", imp.equals(impEx));
+  }
 
-    /**
-     * Case: BPMN-Model in Version 3
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testModelVersionV3() throws SAXException, IOException, ParserConfigurationException {
-        final String PATH = BASE_PATH + "BPMN_Model_Version_V3.bpmn";
-        final String impDel = "camunda:expression";
+  /**
+   * Case: BPMN-Model in Version 3
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testModelVersionV3() throws SAXException, IOException, ParserConfigurationException {
+    final String PATH = BASE_PATH + "BPMN_Model_Version_V3.bpmn";
+    final String impDel = "camunda:expression";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        String imp = scanner.getImplementation(element.getBaseElement().getId());
+    BpmnScanner scanner = new BpmnScanner(PATH);
+    String imp = scanner.getImplementation(element.getBaseElement().getId());
 
-        assertTrue("Get unexpected implementation", imp.equals(impDel));
-    }
+    assertTrue("Get unexpected implementation", imp.equals(impDel));
+  }
 
-    /**
-     * Case: Test getScriptType
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testGetScriptType() throws SAXException, IOException, ParserConfigurationException {
-        final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
-        final String scriptType = "inputParameter";
+  /**
+   * Case: Test getScriptType
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testGetScriptType() throws SAXException, IOException, ParserConfigurationException {
+    final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
+    final String scriptType = "inputParameter";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        ArrayList<String> scripts = scanner.getScriptTypes(element.getBaseElement().getId());
+    BpmnScanner scanner = new BpmnScanner(PATH);
+    ArrayList<String> scripts = scanner.getScriptTypes(element.getBaseElement().getId());
 
-        assertTrue("Get unexpected implementation", scripts.contains(scriptType));
-    }
+    assertTrue("Get unexpected implementation", scripts.contains(scriptType));
+  }
 
-    /**
-     * Case: Test getXorGateWays
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testGetXorGateWays() throws SAXException, IOException, ParserConfigurationException {
-        final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
-        final String gatewayId = "ExclusiveGateway_Id";
+  /**
+   * Case: Test getXorGateWays
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testGetXorGateWays() throws SAXException, IOException, ParserConfigurationException {
+    final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
+    final String gatewayId = "ExclusiveGateway_Id";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<Gateway> baseElements = modelInstance
-                .getModelElementsByType(Gateway.class);
+    final Collection<Gateway> baseElements = modelInstance.getModelElementsByType(Gateway.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        String gwId = scanner.getXorGateWays(element.getBaseElement().getId());
+    BpmnScanner scanner = new BpmnScanner(PATH);
+    String gwId = scanner.getXorGateWays(element.getBaseElement().getId());
 
-        assertTrue("Get unexpected Element", gwId.equals(gatewayId));
-    }
+    assertTrue("Get unexpected Element", gwId.equals(gatewayId));
+  }
 
-    /**
-     * Case: Test getOutgoing
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testGetOutgoing() throws SAXException, IOException, ParserConfigurationException {
-        final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
-        final int anzOut = 2;
+  /**
+   * Case: Test getOutgoing
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testGetOutgoing() throws SAXException, IOException, ParserConfigurationException {
+    final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
+    final int anzOut = 2;
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<Gateway> baseElements = modelInstance
-                .getModelElementsByType(Gateway.class);
+    final Collection<Gateway> baseElements = modelInstance.getModelElementsByType(Gateway.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        int out = scanner.getOutgoing(element.getBaseElement().getId());
+    BpmnScanner scanner = new BpmnScanner(PATH);
+    int out = scanner.getOutgoing(element.getBaseElement().getId());
 
-        assertTrue("More or less outgoing sequentflows as expected", out == anzOut);
-    }
+    assertTrue("More or less outgoing sequentflows as expected", out == anzOut);
+  }
 }

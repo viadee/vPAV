@@ -43,8 +43,7 @@ public class XmlCheckerIssues {
 
   private List<XmlCheckerIssue> issues = new ArrayList<XmlCheckerIssue>();
 
-  public XmlCheckerIssues() {
-  }
+  public XmlCheckerIssues() {}
 
   public XmlCheckerIssues(final List<XmlCheckerIssue> issues) {
     this.issues = issues;

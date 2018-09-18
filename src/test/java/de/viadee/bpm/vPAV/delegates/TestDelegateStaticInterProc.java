@@ -35,20 +35,20 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 
 public class TestDelegateStaticInterProc implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
+  @Override
+  public void execute(DelegateExecution execution) throws Exception {
 
-        final String variableName = "ProcessVariable1";
-        execution.setVariable(variableName, true);
+    final String variableName = "ProcessVariable1";
+    execution.setVariable(variableName, true);
 
-        // TODO Auto-generated method stub
-        /* execution.setVariable("dshfhdsfhfds", true); */
-        execution.getVariable("ProcessVariable2");
+    // TODO Auto-generated method stub
+    /* execution.setVariable("dshfhdsfhfds", true); */
+    execution.getVariable("ProcessVariable2");
 
-        final String variableName2 = "ProcessVariable3";
-        execution.setVariable(variableName2, true);
+    final String variableName2 = "ProcessVariable3";
+    execution.setVariable(variableName2, true);
 
-        TestInterProcAnother tipa = new TestInterProcAnother();
-        tipa.doSomething(execution);
-    }
+    TestInterProcAnother tipa = new TestInterProcAnother();
+    tipa.doSomething(execution);
+  }
 }

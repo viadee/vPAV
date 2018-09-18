@@ -37,66 +37,69 @@ import java.util.Map;
 
 public class Rule {
 
-    private String name;
+  private String name;
 
-    private boolean isActive;
+  private boolean isActive;
 
-    private String ruleDescription;
+  private String ruleDescription;
 
-    private Map<String, Setting> settings;
+  private Map<String, Setting> settings;
 
-    private Collection<ElementConvention> elementConventions;
+  private Collection<ElementConvention> elementConventions;
 
-    private ArrayList<ModelConvention> modelConventions;
+  private ArrayList<ModelConvention> modelConventions;
 
-    public Rule(final String name, final boolean isActive, final String ruleDescription,
-            final Map<String, Setting> settings,
-            final Collection<ElementConvention> elementConventions,
-            final ArrayList<ModelConvention> modelConventions) {
-        super();
-        this.name = name;
-        this.isActive = isActive;
-        this.ruleDescription = ruleDescription;
-        this.settings = settings;
-        this.elementConventions = elementConventions;
-        this.modelConventions = modelConventions;
+  public Rule(
+      final String name,
+      final boolean isActive,
+      final String ruleDescription,
+      final Map<String, Setting> settings,
+      final Collection<ElementConvention> elementConventions,
+      final ArrayList<ModelConvention> modelConventions) {
+    super();
+    this.name = name;
+    this.isActive = isActive;
+    this.ruleDescription = ruleDescription;
+    this.settings = settings;
+    this.elementConventions = elementConventions;
+    this.modelConventions = modelConventions;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public boolean isActive() {
+    return isActive;
+  }
+
+  public String getRuleDescription() {
+    return ruleDescription;
+  }
+
+  public Map<String, Setting> getSettings() {
+    return settings;
+  }
+
+  public Collection<ElementConvention> getElementConventions() {
+    return elementConventions;
+  }
+
+  public ArrayList<ModelConvention> getModelConventions() {
+    return modelConventions;
+  }
+
+  public ArrayList<String> getWhiteList() {
+    final ArrayList<String> whiteList = new ArrayList<String>();
+    for (ModelConvention modelConvention : modelConventions) {
+      if (modelConvention.getType() != null) {
+        whiteList.add(modelConvention.getType());
+      }
     }
+    return whiteList;
+  }
 
-    public String getName() {
-        return name;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public String getRuleDescription() {
-        return ruleDescription;
-    }
-
-    public Map<String, Setting> getSettings() {
-        return settings;
-    }
-
-    public Collection<ElementConvention> getElementConventions() {
-        return elementConventions;
-    }
-
-    public ArrayList<ModelConvention> getModelConventions() {
-        return modelConventions;
-    }
-
-    public ArrayList<String> getWhiteList() {
-        final ArrayList<String> whiteList = new ArrayList<String>();
-        for (ModelConvention modelConvention : modelConventions) {
-            if (modelConvention.getType() != null) {
-                whiteList.add(modelConvention.getType());
-            }
-        }
-        return whiteList;
-    }
-
-    public void deactivate() {
-        isActive = false;
-    }
+  public void deactivate() {
+    isActive = false;
+  }
 }

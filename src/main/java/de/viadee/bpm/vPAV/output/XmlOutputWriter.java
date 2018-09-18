@@ -57,74 +57,86 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
  */
 public class XmlOutputWriter implements IssueOutputWriter {
 
-    /**
-     * Writes the result as XML to the vPAV output folder
-     *
-     * @param issues
-     *            Contains the list of found issues
-     * @throws OutputWriterException
-     *             Occurs if output can not be written
-     */
-    @Override
-    public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
+  /**
+   * Writes the result as XML to the vPAV output folder
+   *
+   * @param issues
+   *            Contains the list of found issues
+   * @throws OutputWriterException
+   *             Occurs if output can not be written
+   */
+  @Override
+  public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
 
-        Writer writer = null;
-        try {
-            writer = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(ConfigConstants.VALIDATION_XML_OUTPUT), "utf-8"));
-            final JAXBContext context = JAXBContext.newInstance(XmlCheckerIssues.class);
-            final Marshaller m = context.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.marshal(transformToXmlDatastructure(issues), writer);
-        } catch (final UnsupportedEncodingException e) {
-            throw new OutputWriterException("unsupported encoding");
-        } catch (final FileNotFoundException e) {
-            throw new OutputWriterException("output file couldn't be generated");
-        } catch (final JAXBException e) {
-            throw new OutputWriterException("xml output couldn't be generated (jaxb-error)");
-        } finally {
-            try {
-                writer.close();
-            } catch (Exception ex) {
-                /* ignore */}
-        }
+    Writer writer = null;
+    try {
+      writer =
+          new BufferedWriter(
+              new OutputStreamWriter(
+                  new FileOutputStream(ConfigConstants.VALIDATION_XML_OUTPUT), "utf-8"));
+      final JAXBContext context = JAXBContext.newInstance(XmlCheckerIssues.class);
+      final Marshaller m = context.createMarshaller();
+      m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+      m.marshal(transformToXmlDatastructure(issues), writer);
+    } catch (final UnsupportedEncodingException e) {
+      throw new OutputWriterException("unsupported encoding");
+    } catch (final FileNotFoundException e) {
+      throw new OutputWriterException("output file couldn't be generated");
+    } catch (final JAXBException e) {
+      throw new OutputWriterException("xml output couldn't be generated (jaxb-error)");
+    } finally {
+      try {
+        writer.close();
+      } catch (Exception ex) {
+        /* ignore */ }
     }
+  }
 
-    /**
-     * Transforms the given issues into XML datastructure
-     *
-     * @param issues
-     * @return
-     */
-    private static XmlCheckerIssues transformToXmlDatastructure(
-            final Collection<CheckerIssue> issues) {
-        XmlCheckerIssues xmlIssues = new XmlCheckerIssues();
-        for (final CheckerIssue issue : issues) {
-            final List<XmlPath> xmlPaths = new ArrayList<XmlPath>();
-            final List<Path> invalidPaths = issue.getInvalidPaths();
-            if (invalidPaths != null) {
-                for (final Path path : invalidPaths) {
-                    List<BpmnElement> elements = path.getElements();
-                    List<XmlPathElement> pathElements = new ArrayList<XmlPathElement>();
-                    for (final BpmnElement element : elements) {
-                        String elementName = element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
-                        if (elementName != null) {
-                            // filter newlines
-                            elementName = elementName.replace("\n", "");
-                        }
-                        pathElements.add(new XmlPathElement(element.getBaseElement().getId(), elementName));
-                    }
-                    xmlPaths.add(new XmlPath(pathElements));
-                }
+  /**
+   * Transforms the given issues into XML datastructure
+   *
+   * @param issues
+   * @return
+   */
+  private static XmlCheckerIssues transformToXmlDatastructure(
+      final Collection<CheckerIssue> issues) {
+    XmlCheckerIssues xmlIssues = new XmlCheckerIssues();
+    for (final CheckerIssue issue : issues) {
+      final List<XmlPath> xmlPaths = new ArrayList<XmlPath>();
+      final List<Path> invalidPaths = issue.getInvalidPaths();
+      if (invalidPaths != null) {
+        for (final Path path : invalidPaths) {
+          List<BpmnElement> elements = path.getElements();
+          List<XmlPathElement> pathElements = new ArrayList<XmlPathElement>();
+          for (final BpmnElement element : elements) {
+            String elementName =
+                element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
+            if (elementName != null) {
+              // filter newlines
+              elementName = elementName.replace("\n", "");
             }
-            final String elementName = issue.getElementName();
-            xmlIssues.addIssue(new XmlCheckerIssue(issue.getId(), issue.getRuleName(), issue.getRuleDescription(),
-                    issue.getClassification().name(), issue.getBpmnFile(), issue.getResourceFile(),
-                    issue.getElementId(), elementName == null ? null : elementName.replace("\n", ""),
-                    issue.getMessage(), issue.getElementDescription(), issue.getVariable(),
-                    issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription(),
-                    xmlPaths.isEmpty() ? null : xmlPaths));
+            pathElements.add(new XmlPathElement(element.getBaseElement().getId(), elementName));
+          }
+          xmlPaths.add(new XmlPath(pathElements));
         }
-        return xmlIssues;
+      }
+      final String elementName = issue.getElementName();
+      xmlIssues.addIssue(
+          new XmlCheckerIssue(
+              issue.getId(),
+              issue.getRuleName(),
+              issue.getRuleDescription(),
+              issue.getClassification().name(),
+              issue.getBpmnFile(),
+              issue.getResourceFile(),
+              issue.getElementId(),
+              elementName == null ? null : elementName.replace("\n", ""),
+              issue.getMessage(),
+              issue.getElementDescription(),
+              issue.getVariable(),
+              issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription(),
+              xmlPaths.isEmpty() ? null : xmlPaths));
     }
+    return xmlIssues;
+  }
 }

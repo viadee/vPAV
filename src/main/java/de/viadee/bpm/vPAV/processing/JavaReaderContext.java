@@ -40,14 +40,19 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class JavaReaderContext {
 
-    private JavaReader javaReaderStrategy;
+  private JavaReader javaReaderStrategy;
 
-    public void setJavaReadingStrategy(JavaReader readingStrategy) {
-        this.javaReaderStrategy = readingStrategy;
-    }
+  public void setJavaReadingStrategy(JavaReader readingStrategy) {
+    this.javaReaderStrategy = readingStrategy;
+  }
 
-    public Map<String, ProcessVariableOperation> readJavaDelegate(final String classFile, final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
-        return javaReaderStrategy.getVariablesFromJavaDelegate(classFile, element, chapter, fieldType, scopeId);
-    }
+  public Map<String, ProcessVariableOperation> readJavaDelegate(
+      final String classFile,
+      final BpmnElement element,
+      final ElementChapter chapter,
+      final KnownElementFieldType fieldType,
+      final String scopeId) {
+    return javaReaderStrategy.getVariablesFromJavaDelegate(
+        classFile, element, chapter, fieldType, scopeId);
+  }
 }

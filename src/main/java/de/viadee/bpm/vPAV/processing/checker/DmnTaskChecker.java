@@ -56,65 +56,78 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
-    public DmnTaskChecker(final Rule rule, BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
-    }
+  public DmnTaskChecker(final Rule rule, BpmnScanner bpmnScanner) {
+    super(rule, bpmnScanner);
+  }
 
-    /**
-     * Check a BusinessRuleTask for a DMN reference
-     *
-     * @return issues
-     */
-    @Override
-    public Collection<CheckerIssue> check(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement bpmnElement = element.getBaseElement();
-        if (bpmnElement instanceof BusinessRuleTask) {
-            // read attributes from task
-            final String implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
-        
-            final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF);
-            if (implementationAttr != null) {
-                // check if DMN reference is not empty
-                if (implementationAttr.equals(BpmnConstants.CAMUNDA_DMN)) {
-                    if (dmnAttr == null || dmnAttr.trim().length() == 0) {
-                        // Error, because no delegateExpression has been configured
-                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                String.format(Messages.getString("DmnTaskChecker.0"), //$NON-NLS-1$
-                                        CheckName.checkName(bpmnElement))));
-                    } else {
-                        issues.addAll(checkDMNFile(element, dmnAttr));
-                    }
-                }
-            }
+  /**
+   * Check a BusinessRuleTask for a DMN reference
+   *
+   * @return issues
+   */
+  @Override
+  public Collection<CheckerIssue> check(final BpmnElement element) {
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    final BaseElement bpmnElement = element.getBaseElement();
+    if (bpmnElement instanceof BusinessRuleTask) {
+      // read attributes from task
+      final String implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
+
+      final String dmnAttr =
+          bpmnElement.getAttributeValueNs(
+              BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF);
+      if (implementationAttr != null) {
+        // check if DMN reference is not empty
+        if (implementationAttr.equals(BpmnConstants.CAMUNDA_DMN)) {
+          if (dmnAttr == null || dmnAttr.trim().length() == 0) {
+            // Error, because no delegateExpression has been configured
+            issues.addAll(
+                IssueWriter.createIssue(
+                    rule,
+                    CriticalityEnum.ERROR,
+                    element,
+                    String.format(
+                        Messages.getString("DmnTaskChecker.0"), //$NON-NLS-1$
+                        CheckName.checkName(bpmnElement))));
+          } else {
+            issues.addAll(checkDMNFile(element, dmnAttr));
+          }
         }
-        return issues;
+      }
     }
+    return issues;
+  }
 
-    /**
-     * Check if the referenced DMN in a BusinessRuleTask exists
-     *
-     * @param element
-     *            BpmnElement
-     * @param dmnName
-     *            Name of DMN-File
-     * @return issues
-     */
-    private Collection<CheckerIssue> checkDMNFile(final BpmnElement element, final String dmnName) {
+  /**
+   * Check if the referenced DMN in a BusinessRuleTask exists
+   *
+   * @param element
+   *            BpmnElement
+   * @param dmnName
+   *            Name of DMN-File
+   * @return issues
+   */
+  private Collection<CheckerIssue> checkDMNFile(final BpmnElement element, final String dmnName) {
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement bpmnElement = element.getBaseElement();
-        final String dmnPath = dmnName.replaceAll("\\.", "/") + ".dmn"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    final BaseElement bpmnElement = element.getBaseElement();
+    final String dmnPath =
+        dmnName.replaceAll("\\.", "/") + ".dmn"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-        // If a dmn path has been found, check the correctness
-        URL urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnPath);
+    // If a dmn path has been found, check the correctness
+    URL urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnPath);
 
-        if (urlDMN == null) {
-            // Throws an error, if the class was not found
-            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                    String.format(Messages.getString("DmnTaskChecker.4"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
-        }
-        return issues;
+    if (urlDMN == null) {
+      // Throws an error, if the class was not found
+      issues.addAll(
+          IssueWriter.createIssue(
+              rule,
+              CriticalityEnum.ERROR,
+              element,
+              String.format(
+                  Messages.getString("DmnTaskChecker.4"),
+                  CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
     }
+    return issues;
+  }
 }

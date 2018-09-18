@@ -53,71 +53,77 @@ import java.util.*;
 
 public class ProcessApplicationVariableParser {
 
-    public static Collection<ProcessVariable> parseProcessVariables(File modelFile, ApplicationContext ctx) {
-        RuntimeConfig.getInstance().setApplicationContext(ctx);
-        RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
-        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+  public static Collection<ProcessVariable> parseProcessVariables(
+      File modelFile, ApplicationContext ctx) {
+    RuntimeConfig.getInstance().setApplicationContext(ctx);
+    RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
+    RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
 
+    FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.JAVAPATH);
+    OuterProcessVariablesScanner variableScanner = readOuterProcessVariables(fileScanner);
 
-        FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.JAVAPATH);
-        OuterProcessVariablesScanner variableScanner = readOuterProcessVariables(fileScanner);
+    BpmnScanner bpmnScanner = createScanner(modelFile);
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(modelFile);
 
-        BpmnScanner bpmnScanner = createScanner(modelFile);
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(modelFile);
+    // hold bpmn elements
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        // hold bpmn elements
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    final ElementGraphBuilder graphBuilder =
+        new ElementGraphBuilder(
+            fileScanner.getDecisionRefToPathMap(),
+            fileScanner.getProcessIdToPathMap(),
+            variableScanner.getMessageIdToVariableMap(),
+            variableScanner.getProcessIdToVariableMap(),
+            bpmnScanner);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(fileScanner.getDecisionRefToPathMap(),
-                fileScanner.getProcessIdToPathMap(), variableScanner.getMessageIdToVariableMap(),
-                variableScanner.getProcessIdToVariableMap(), bpmnScanner);
+    // create data flow graphs for bpmn model
+    final Collection<IGraph> graphCollection =
+        graphBuilder.createProcessGraph(modelInstance, modelFile.getPath(), new ArrayList<>());
 
-        // create data flow graphs for bpmn model
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
-                modelFile.getPath(), new ArrayList<>());
+    // add data flow information to graph and calculate invalid paths
+    final Map<AnomalyContainer, List<Path>> invalidPathMap =
+        graphBuilder.createInvalidPaths(graphCollection);
 
-        // add data flow information to graph and calculate invalid paths
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
-                .createInvalidPaths(graphCollection);
+    final Collection<BpmnElement> bpmnElements =
+        BpmnModelDispatcher.getBpmnElements(modelFile, baseElements, graphBuilder);
 
-        final Collection<BpmnElement> bpmnElements =
-                BpmnModelDispatcher.getBpmnElements(modelFile, baseElements, graphBuilder);
+    return BpmnModelDispatcher.getProcessVariables(bpmnElements);
+  }
 
-        return BpmnModelDispatcher.getProcessVariables(bpmnElements);
-	}
-
-	/**
-	 * Scan process variables in external classes, which are not referenced from
-	 * model
-	 *
-	 * @param fileScanner
-	 *            FileScanner
-	 */
-	private static OuterProcessVariablesScanner readOuterProcessVariables(final FileScanner fileScanner) throws RuntimeException {
-		try {
-            OuterProcessVariablesScanner variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
-			variableScanner.scanProcessVariables();
-			return variableScanner;
-		} catch (final IOException e) {
-			throw new RuntimeException("Outer process variables couldn't be read", e);
-		}
-	}
-
-	/**
-     *
-     * @param processdefinition
-     *            Holds the path to the BPMN model
-     * @return BpmnScanner
-     */
-    private static BpmnScanner createScanner(final File processdefinition) {
-        // create BPMNScanner
-        BpmnScanner bpmnScanner;
-        try {
-            bpmnScanner = new BpmnScanner(processdefinition.getPath());
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new RuntimeException("Model couldn't be parsed");
-        }
-        return bpmnScanner;
+  /**
+   * Scan process variables in external classes, which are not referenced from
+   * model
+   *
+   * @param fileScanner
+   *            FileScanner
+   */
+  private static OuterProcessVariablesScanner readOuterProcessVariables(
+      final FileScanner fileScanner) throws RuntimeException {
+    try {
+      OuterProcessVariablesScanner variableScanner =
+          new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
+      variableScanner.scanProcessVariables();
+      return variableScanner;
+    } catch (final IOException e) {
+      throw new RuntimeException("Outer process variables couldn't be read", e);
     }
+  }
+
+  /**
+   *
+   * @param processdefinition
+   *            Holds the path to the BPMN model
+   * @return BpmnScanner
+   */
+  private static BpmnScanner createScanner(final File processdefinition) {
+    // create BPMNScanner
+    BpmnScanner bpmnScanner;
+    try {
+      bpmnScanner = new BpmnScanner(processdefinition.getPath());
+    } catch (ParserConfigurationException | SAXException | IOException e) {
+      throw new RuntimeException("Model couldn't be parsed");
+    }
+    return bpmnScanner;
+  }
 }

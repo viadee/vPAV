@@ -37,48 +37,47 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
  * University of Washington, Computer Science and Engineering, Course 373, Winter 2011, Jessica Miller Representation of
  * a directed graph edge
  */
-
 public class Edge {
 
-    private BpmnElement from, to;
+  private BpmnElement from, to;
 
-    private int weight;
+  private int weight;
 
-    public Edge(BpmnElement from, BpmnElement to, int weight) {
-        if (from == null || to == null) {
-            throw new IllegalArgumentException("null");
-        }
-        this.from = from;
-        this.to = to;
-        this.weight = weight;
+  public Edge(BpmnElement from, BpmnElement to, int weight) {
+    if (from == null || to == null) {
+      throw new IllegalArgumentException("null");
     }
+    this.from = from;
+    this.to = to;
+    this.weight = weight;
+  }
 
-    public void setFrom(final BpmnElement from) {
-        this.from = from;
-    }
+  public void setFrom(final BpmnElement from) {
+    this.from = from;
+  }
 
-    public BpmnElement getFrom() {
-        return from;
-    }
+  public BpmnElement getFrom() {
+    return from;
+  }
 
-    public void setTo(final BpmnElement to) {
-        this.to = to;
-    }
+  public void setTo(final BpmnElement to) {
+    this.to = to;
+  }
 
-    public BpmnElement getTo() {
-        return to;
-    }
+  public BpmnElement getTo() {
+    return to;
+  }
 
-    public void setWeight(final int weight) {
-        this.weight = weight;
-    }
+  public void setWeight(final int weight) {
+    this.weight = weight;
+  }
 
-    public int getWeight() {
-        return weight;
-    }
+  public int getWeight() {
+    return weight;
+  }
 
-    @Override
-    public String toString() {
-        return from + " -> " + to;
-    }
+  @Override
+  public String toString() {
+    return from + " -> " + to;
+  }
 }

@@ -46,30 +46,28 @@ import de.viadee.bpm.vPAV.config.reader.XmlConfigReaderTest;
 
 public class AbstractRunnerTest {
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private static Logger logger = Logger.getLogger(XmlConfigReaderTest.class.getName());
+  private static Logger logger = Logger.getLogger(XmlConfigReaderTest.class.getName());
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-    }
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+  }
 
-    @Test
-    public void testStaticConfiguration() {
+  @Test
+  public void testStaticConfiguration() {
 
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrors();
+    ProcessApplicationValidator pav = new ProcessApplicationValidator();
+    pav.findModelErrors();
 
-        boolean isStatic = Runner.getIsStatic();
+    boolean isStatic = Runner.getIsStatic();
 
-        assertEquals(true, isStatic);
-
-    }
-
+    assertEquals(true, isStatic);
+  }
 }

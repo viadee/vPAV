@@ -40,7 +40,10 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public interface JavaReader {
 
-    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String scopeId);
+  public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(
+      final String classFile,
+      final BpmnElement element,
+      final ElementChapter chapter,
+      final KnownElementFieldType fieldType,
+      final String scopeId);
 }

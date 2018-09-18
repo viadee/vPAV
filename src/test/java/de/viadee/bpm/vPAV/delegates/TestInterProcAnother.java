@@ -35,12 +35,12 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 
 public class TestInterProcAnother {
 
-    public void doSomething(DelegateExecution execution) {
+  public void doSomething(DelegateExecution execution) {
 
-        execution.setVariable("abotherClass", "var");
+    execution.setVariable("abotherClass", "var");
 
-        TestInterProcOther other = new TestInterProcOther();
+    TestInterProcOther other = new TestInterProcOther();
 
-        other.doSomethingElse(execution);
-    }
+    other.doSomethingElse(execution);
+  }
 }

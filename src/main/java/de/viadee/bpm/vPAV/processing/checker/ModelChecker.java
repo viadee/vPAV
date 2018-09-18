@@ -43,5 +43,5 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
  */
 public interface ModelChecker {
 
-    Collection<CheckerIssue> check(final BpmnModelInstance processdefinition);
+  Collection<CheckerIssue> check(final BpmnModelInstance processdefinition);
 }

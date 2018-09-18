@@ -34,7 +34,7 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 import java.util.Collection;
 /**
  * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- * 
+ *
  * A basic graph interface.
  */
 import java.util.List;

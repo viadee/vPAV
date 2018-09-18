@@ -41,51 +41,58 @@ import static org.junit.Assert.assertThat;
 
 public class ProcessVariablePredicateBuilderImplTest {
 
-    @Test
-    public void testPrefixedDoesNotFilterPrefixedVariable() {
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(new ProcessVariable("pre_fulfilled")).prefixed("pre_");
+  @Test
+  public void testPrefixedDoesNotFilterPrefixedVariable() {
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(new ProcessVariable("pre_fulfilled")).prefixed("pre_");
 
-        assertThat(result.isFulfilled(), is(true));
-    }
+    assertThat(result.isFulfilled(), is(true));
+  }
 
-    @Test
-    public void testPrefixedFiltersNotPrefixedVariable() {
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(new ProcessVariable("no_prefix")).prefixed("pre_");
+  @Test
+  public void testPrefixedFiltersNotPrefixedVariable() {
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(new ProcessVariable("no_prefix")).prefixed("pre_");
 
-        assertThat(result.isFulfilled(), is(false));
-    }
+    assertThat(result.isFulfilled(), is(false));
+  }
 
-    @Test
-    public void testPostfixedDoesNotFilterPostfixedVariable() {
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(new ProcessVariable("pre_fulfilled_post")).postfixed("_post");
+  @Test
+  public void testPostfixedDoesNotFilterPostfixedVariable() {
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(new ProcessVariable("pre_fulfilled_post")).postfixed("_post");
 
-        assertThat(result.isFulfilled(), is(true));
-    }
+    assertThat(result.isFulfilled(), is(true));
+  }
 
-    @Test
-    public void testPostfixedFiltersNotPostfixedVariable() {
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(new ProcessVariable("no_postfix")).postfixed("_post");
+  @Test
+  public void testPostfixedFiltersNotPostfixedVariable() {
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(new ProcessVariable("no_postfix")).postfixed("_post");
 
-        assertThat(result.isFulfilled(), is(false));
-    }
+    assertThat(result.isFulfilled(), is(false));
+  }
 
-    @Test
-    public void testMatchingDoesNotFilterMatchingVariable() {
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(new ProcessVariable("ext_name")).matching("ext_[a-z]+");
+  @Test
+  public void testMatchingDoesNotFilterMatchingVariable() {
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(new ProcessVariable("ext_name")).matching("ext_[a-z]+");
 
-        assertThat(result.isFulfilled(), is(true));
-    }
+    assertThat(result.isFulfilled(), is(true));
+  }
 
-    @Test
-    public void testMatchingFiltersNotMatchingVariable() {
-        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(new ProcessVariable("ext_Name")).matching("ext_[a-z]+");
+  @Test
+  public void testMatchingFiltersNotMatchingVariable() {
+    EvaluationResult<ProcessVariable> result =
+        createPredicateBuilderOn(new ProcessVariable("ext_Name")).matching("ext_[a-z]+");
 
-        assertThat(result.isFulfilled(), is(false));
-    }
+    assertThat(result.isFulfilled(), is(false));
+  }
 
-    private static ProcessVariablePredicateBuilderImpl<EvaluationResult<ProcessVariable>> createPredicateBuilderOn(ProcessVariable variable) {
-        Function<DescribedPredicateEvaluator<ProcessVariable>, EvaluationResult<ProcessVariable>> conditionSetter = predicate ->
-                predicate.evaluate(variable);
-        return new ProcessVariablePredicateBuilderImpl<>(conditionSetter);
-    }
+  private static ProcessVariablePredicateBuilderImpl<EvaluationResult<ProcessVariable>>
+      createPredicateBuilderOn(ProcessVariable variable) {
+    Function<DescribedPredicateEvaluator<ProcessVariable>, EvaluationResult<ProcessVariable>>
+        conditionSetter = predicate -> predicate.evaluate(variable);
+    return new ProcessVariablePredicateBuilderImpl<>(conditionSetter);
+  }
 }

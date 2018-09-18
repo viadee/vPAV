@@ -41,5 +41,5 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
  */
 public interface ElementChecker {
 
-    Collection<CheckerIssue> check(final BpmnElement element);
+  Collection<CheckerIssue> check(final BpmnElement element);
 }

@@ -36,10 +36,9 @@ import org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution;
 
 public class DelegateWithInterfaceActivityBehavior implements ActivityBehavior {
 
-    @Override
-    public void execute(ActivityExecution execution) throws Exception {
-        // TODO Auto-generated method stub
+  @Override
+  public void execute(ActivityExecution execution) throws Exception {
+    // TODO Auto-generated method stub
 
-    }
-
+  }
 }

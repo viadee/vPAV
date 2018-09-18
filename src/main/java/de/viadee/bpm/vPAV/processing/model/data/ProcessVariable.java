@@ -42,52 +42,52 @@ import java.util.List;
  */
 public class ProcessVariable {
 
-    private final String name;
-    private final List<ProcessVariableOperation> operations;
-    private final List<ProcessVariableOperation> writes;
-    private final List<ProcessVariableOperation> reads;
-    private final List<ProcessVariableOperation> deletes;
+  private final String name;
+  private final List<ProcessVariableOperation> operations;
+  private final List<ProcessVariableOperation> writes;
+  private final List<ProcessVariableOperation> reads;
+  private final List<ProcessVariableOperation> deletes;
 
-    public ProcessVariable(String name) {
-        this.name = name;
-        this.operations = new ArrayList<>();
-        this.writes = new ArrayList<>();
-        this.reads = new ArrayList<>();
-        this.deletes = new ArrayList<>();
-    }
+  public ProcessVariable(String name) {
+    this.name = name;
+    this.operations = new ArrayList<>();
+    this.writes = new ArrayList<>();
+    this.reads = new ArrayList<>();
+    this.deletes = new ArrayList<>();
+  }
 
-    public void addWrite(ProcessVariableOperation operation) {
-        operations.add(operation);
-        writes.add(operation);
-    }
+  public void addWrite(ProcessVariableOperation operation) {
+    operations.add(operation);
+    writes.add(operation);
+  }
 
-    public void addRead(ProcessVariableOperation operation) {
-        operations.add(operation);
-        reads.add(operation);
-    }
+  public void addRead(ProcessVariableOperation operation) {
+    operations.add(operation);
+    reads.add(operation);
+  }
 
-    public void addDelete(ProcessVariableOperation operation) {
-        operations.add(operation);
-        deletes.add(operation);
-    }
+  public void addDelete(ProcessVariableOperation operation) {
+    operations.add(operation);
+    deletes.add(operation);
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public List<ProcessVariableOperation> getWrites() {
-        return writes;
-    }
+  public List<ProcessVariableOperation> getWrites() {
+    return writes;
+  }
 
-    public List<ProcessVariableOperation> getReads() {
-        return reads;
-    }
+  public List<ProcessVariableOperation> getReads() {
+    return reads;
+  }
 
-    public List<ProcessVariableOperation> getDeletes() {
-        return deletes;
-    }
+  public List<ProcessVariableOperation> getDeletes() {
+    return deletes;
+  }
 
-    public List<ProcessVariableOperation> getOperations() {
-        return operations;
-    }
+  public List<ProcessVariableOperation> getOperations() {
+    return operations;
+  }
 }

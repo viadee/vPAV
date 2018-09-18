@@ -65,152 +65,152 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
  */
 public class NoExpressionCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static NoExpressionChecker checker;
+  private static NoExpressionChecker checker;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private static Map<String, Setting> setting = new HashMap<String, Setting>();
+  private static Map<String, Setting> setting = new HashMap<String, Setting>();
 
-    private final Rule rule = new Rule("NoExpressionChecker", true, null, setting, null, null);
+  private final Rule rule = new Rule("NoExpressionChecker", true, null, setting, null, null);
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
+
+  /**
+   * Case: Tasks without Expressions
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testTaskWithoutExpression()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "NoExpressionChecker_WithoutExpressions.bpmn";
+    checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
+
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Tasks without Expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testTaskWithoutExpression()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "NoExpressionChecker_WithoutExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() > 0) {
+      Assert.fail("correct model generates an issue");
+    }
+  }
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: Tasks with Expressions
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testTaskWithExpression()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "NoExpressionChecker_WithExpressions.bpmn";
+    checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() > 0) {
-            Assert.fail("correct model generates an issue");
-        }
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Tasks with Expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testTaskWithExpression()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "NoExpressionChecker_WithExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() != 2) {
+      Assert.fail("correct model generates an issue");
+    }
+  }
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: Events with Expressions
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testEventsWithExpression()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "NoExpressionChecker_EventsWithExpressions.bpmn";
+    checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() != 2) {
-            Assert.fail("correct model generates an issue");
-        }
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Events with Expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testEventsWithExpression()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "NoExpressionChecker_EventsWithExpressions.bpmn";
-        checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() != 3) {
+      Assert.fail("model should generate 3 issues");
+    }
+  }
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: Sequenceflow with Expressions
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testSequenceFlowWithExpression()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "NoExpressionChecker_SequenceFlowWithExpression.bpmn";
+    checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() != 3) {
-            Assert.fail("model should generate 3 issues");
-        }
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Sequenceflow with Expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testSequenceFlowWithExpression()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "NoExpressionChecker_SequenceFlowWithExpression.bpmn";
-        checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
-
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
-
-        if (issues.size() != 1) {
-            Assert.fail("model should generate 3 issues");
-        }
+    if (issues.size() != 1) {
+      Assert.fail("model should generate 3 issues");
     }
+  }
 }

@@ -41,36 +41,36 @@ import org.springframework.context.ApplicationContext;
  */
 public class BeanMappingGenerator {
 
-    /**
-     * Generates bean mapping HashMap for jUnit start
-     *
-     * @param ctx
-     *            ApplicationContext
-     * @return beanNameToClassMap contains beanmapping
-     */
-    public static Map<String, String> generateBeanMappingFile(final ApplicationContext ctx) {
+  /**
+   * Generates bean mapping HashMap for jUnit start
+   *
+   * @param ctx
+   *            ApplicationContext
+   * @return beanNameToClassMap contains beanmapping
+   */
+  public static Map<String, String> generateBeanMappingFile(final ApplicationContext ctx) {
 
-        final Map<String, String> beanNameToClassMap = new HashMap<String, String>();
+    final Map<String, String> beanNameToClassMap = new HashMap<String, String>();
 
-        // read bean names
-        final String[] beanDefinitionNames = ctx.getBeanDefinitionNames();
-        for (final String beanName : beanDefinitionNames) {
-            // don't add spring own classes
-            if (!beanName.startsWith("org.springframework")) {
-                final Object obj = ctx.getBean(beanName);
-                if (obj != null) {
-                    if (obj.getClass().getName().contains("$$")) {
-                        String name = obj.getClass().getName();
-                        while (name.contains("$$")) {
-                            name = name.substring(0, name.lastIndexOf("$$"));
-                        }
-                        beanNameToClassMap.put(beanName, name);
-                    } else {
-                        beanNameToClassMap.put(beanName, obj.getClass().getName());
-                    }
-                }
+    // read bean names
+    final String[] beanDefinitionNames = ctx.getBeanDefinitionNames();
+    for (final String beanName : beanDefinitionNames) {
+      // don't add spring own classes
+      if (!beanName.startsWith("org.springframework")) {
+        final Object obj = ctx.getBean(beanName);
+        if (obj != null) {
+          if (obj.getClass().getName().contains("$$")) {
+            String name = obj.getClass().getName();
+            while (name.contains("$$")) {
+              name = name.substring(0, name.lastIndexOf("$$"));
             }
+            beanNameToClassMap.put(beanName, name);
+          } else {
+            beanNameToClassMap.put(beanName, obj.getClass().getName());
+          }
         }
-        return beanNameToClassMap;
+      }
     }
+    return beanNameToClassMap;
+  }
 }

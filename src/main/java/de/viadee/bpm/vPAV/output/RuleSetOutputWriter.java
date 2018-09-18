@@ -66,109 +66,118 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
  */
 public class RuleSetOutputWriter {
 
-    /**
-     * Writes the effective ruleSet to the vPAV output folder to provide traceability
-     *
-     * @param rules
-     *            Contains the actual configuration of rules
-     * @throws OutputWriterException
-     *             Occurs if output can not be written
-     */
-    public void write(Map<String, Rule> rules) throws OutputWriterException {
-        Writer writer = null;
+  /**
+   * Writes the effective ruleSet to the vPAV output folder to provide traceability
+   *
+   * @param rules
+   *            Contains the actual configuration of rules
+   * @throws OutputWriterException
+   *             Occurs if output can not be written
+   */
+  public void write(Map<String, Rule> rules) throws OutputWriterException {
+    Writer writer = null;
 
-        Path path = Paths.get(ConfigConstants.EFFECTIVE_RULESET);
-        if (path.toFile().exists())
-            path.toFile().delete();
+    Path path = Paths.get(ConfigConstants.EFFECTIVE_RULESET);
+    if (path.toFile().exists()) path.toFile().delete();
 
-        try {
-            writer = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(ConfigConstants.EFFECTIVE_RULESET), "utf-8"));
-            final JAXBContext context = JAXBContext.newInstance(XmlRuleSet.class);
-            final Marshaller m = context.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.marshal(transformToXmlDatastructure(rules), writer);
-        } catch (final UnsupportedEncodingException e) {
-            throw new OutputWriterException("unsupported encoding");
-        } catch (final FileNotFoundException e) {
-            throw new OutputWriterException("Effective config file couldn't be generated");
-        } catch (final JAXBException e) {
-            throw new OutputWriterException("xml output (effective config file) couldn't be generated (jaxb-error)");
-        } finally {
-            try {
-                writer.close();
-            } catch (Exception ex) {
-                /* ignore */}
-        }
+    try {
+      writer =
+          new BufferedWriter(
+              new OutputStreamWriter(
+                  new FileOutputStream(ConfigConstants.EFFECTIVE_RULESET), "utf-8"));
+      final JAXBContext context = JAXBContext.newInstance(XmlRuleSet.class);
+      final Marshaller m = context.createMarshaller();
+      m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+      m.marshal(transformToXmlDatastructure(rules), writer);
+    } catch (final UnsupportedEncodingException e) {
+      throw new OutputWriterException("unsupported encoding");
+    } catch (final FileNotFoundException e) {
+      throw new OutputWriterException("Effective config file couldn't be generated");
+    } catch (final JAXBException e) {
+      throw new OutputWriterException(
+          "xml output (effective config file) couldn't be generated (jaxb-error)");
+    } finally {
+      try {
+        writer.close();
+      } catch (Exception ex) {
+        /* ignore */ }
     }
+  }
 
-    /**
-     * Reads the final ruleSet and recreates a XML file
-     *
-     * @param rules
-     * @return xmlRuleSet
-     */
-    private static XmlRuleSet transformToXmlDatastructure(final Map<String, Rule> rules) {
-        XmlRuleSet xmlRuleSet = new XmlRuleSet();
-        Collection<XmlRule> xmlRules = new ArrayList<XmlRule>();
+  /**
+   * Reads the final ruleSet and recreates a XML file
+   *
+   * @param rules
+   * @return xmlRuleSet
+   */
+  private static XmlRuleSet transformToXmlDatastructure(final Map<String, Rule> rules) {
+    XmlRuleSet xmlRuleSet = new XmlRuleSet();
+    Collection<XmlRule> xmlRules = new ArrayList<XmlRule>();
 
-        for (Map.Entry<String, Rule> entry : rules.entrySet()) {
-            Rule rule = entry.getValue();
+    for (Map.Entry<String, Rule> entry : rules.entrySet()) {
+      Rule rule = entry.getValue();
 
-            // Get XmlModelConventions
-            Collection<XmlModelConvention> xModelConventions = new ArrayList<XmlModelConvention>();
-            for (ModelConvention modCon : rule.getModelConventions()) {
-                XmlModelConvention xmlMoCon = new XmlModelConvention(modCon.getType());
-                xModelConventions.add(xmlMoCon);
-            }
+      // Get XmlModelConventions
+      Collection<XmlModelConvention> xModelConventions = new ArrayList<XmlModelConvention>();
+      for (ModelConvention modCon : rule.getModelConventions()) {
+        XmlModelConvention xmlMoCon = new XmlModelConvention(modCon.getType());
+        xModelConventions.add(xmlMoCon);
+      }
 
-            // Get XmlElementConvention
-            Collection<XmlElementConvention> xElementConventions = new ArrayList<XmlElementConvention>();
-            for (ElementConvention elCon : rule.getElementConventions()) {
-                ElementFieldTypes eFT = elCon.getElementFieldTypes();
-                if (eFT != null) {
-                    Collection<String> cElFieTy = eFT.getElementFieldTypes();
-                    XmlElementFieldTypes xmlElFieTy = new XmlElementFieldTypes(cElFieTy,
-                            elCon.getElementFieldTypes().isExcluded());
-                    XmlElementConvention xmlElCon = new XmlElementConvention(elCon.getName(), xmlElFieTy,
-                            elCon.getDescription(), elCon.getPattern());
-                    xElementConventions.add(xmlElCon);
-                } else {
-                    XmlElementConvention xmlElCon = new XmlElementConvention(elCon.getName(), null,
-                            elCon.getDescription(), elCon.getPattern());
-                    xElementConventions.add(xmlElCon);
-                }
-            }
-
-            // Get XmlSettings
-            Collection<XmlSetting> xSettings = new ArrayList<XmlSetting>();
-            for (Map.Entry<String, Setting> sEntry : rule.getSettings().entrySet()) {
-                Setting s = sEntry.getValue();
-
-                if (!sEntry.getValue().getScriptPlaces().isEmpty()) {
-                    for (String place : sEntry.getValue().getScriptPlaces()) {
-                        XmlSetting xmlSetting = new XmlSetting(s.getName(), place, s.getType(), s.getId(),
-                                s.getRequired(),
-                                s.getValue());
-                        xSettings.add(xmlSetting);
-                    }
-                } else {
-                    XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getId(), s.getRequired(),
-                            s.getValue());
-                    xSettings.add(xmlSetting);
-                }
-            }
-
-            // create xmlRule
-            XmlRule xRule = new XmlRule(rule.getName(), rule.isActive(), rule.getRuleDescription(),
-                    xSettings.isEmpty() ? null : xSettings,
-                    xElementConventions.isEmpty() ? null : xElementConventions,
-                    xModelConventions.isEmpty() ? null : xModelConventions);
-
-            // add xmlRule to Collection
-            xmlRules.add(xRule);
+      // Get XmlElementConvention
+      Collection<XmlElementConvention> xElementConventions = new ArrayList<XmlElementConvention>();
+      for (ElementConvention elCon : rule.getElementConventions()) {
+        ElementFieldTypes eFT = elCon.getElementFieldTypes();
+        if (eFT != null) {
+          Collection<String> cElFieTy = eFT.getElementFieldTypes();
+          XmlElementFieldTypes xmlElFieTy =
+              new XmlElementFieldTypes(cElFieTy, elCon.getElementFieldTypes().isExcluded());
+          XmlElementConvention xmlElCon =
+              new XmlElementConvention(
+                  elCon.getName(), xmlElFieTy, elCon.getDescription(), elCon.getPattern());
+          xElementConventions.add(xmlElCon);
+        } else {
+          XmlElementConvention xmlElCon =
+              new XmlElementConvention(
+                  elCon.getName(), null, elCon.getDescription(), elCon.getPattern());
+          xElementConventions.add(xmlElCon);
         }
-        xmlRuleSet.setRules(xmlRules);
-        return xmlRuleSet;
+      }
+
+      // Get XmlSettings
+      Collection<XmlSetting> xSettings = new ArrayList<XmlSetting>();
+      for (Map.Entry<String, Setting> sEntry : rule.getSettings().entrySet()) {
+        Setting s = sEntry.getValue();
+
+        if (!sEntry.getValue().getScriptPlaces().isEmpty()) {
+          for (String place : sEntry.getValue().getScriptPlaces()) {
+            XmlSetting xmlSetting =
+                new XmlSetting(
+                    s.getName(), place, s.getType(), s.getId(), s.getRequired(), s.getValue());
+            xSettings.add(xmlSetting);
+          }
+        } else {
+          XmlSetting xmlSetting =
+              new XmlSetting(
+                  s.getName(), null, s.getType(), s.getId(), s.getRequired(), s.getValue());
+          xSettings.add(xmlSetting);
+        }
+      }
+
+      // create xmlRule
+      XmlRule xRule =
+          new XmlRule(
+              rule.getName(),
+              rule.isActive(),
+              rule.getRuleDescription(),
+              xSettings.isEmpty() ? null : xSettings,
+              xElementConventions.isEmpty() ? null : xElementConventions,
+              xModelConventions.isEmpty() ? null : xModelConventions);
+
+      // add xmlRule to Collection
+      xmlRules.add(xRule);
     }
+    xmlRuleSet.setRules(xmlRules);
+    return xmlRuleSet;
+  }
 }

@@ -38,61 +38,58 @@ import java.util.Map;
 import soot.toolkits.graph.Block;
 
 /**
- * 
+ *
  * helper class storing information for data-flow analysis assigns ProcessVariables to basic blocks of the control-flow
  * graph
- * 
+ *
  *
  */
 public class VariableBlock {
 
-    private Block block;
+  private Block block;
 
-    private List<ProcessVariableOperation> usedProcessVariables;
+  private List<ProcessVariableOperation> usedProcessVariables;
 
-    public VariableBlock(Block block, List<ProcessVariableOperation> pvs) {
-        this.block = block;
-        this.usedProcessVariables = pvs;
+  public VariableBlock(Block block, List<ProcessVariableOperation> pvs) {
+    this.block = block;
+    this.usedProcessVariables = pvs;
+  }
+
+  public void setBlock(Block block) {
+
+    this.block = block;
+  }
+
+  public Block getBlock() {
+    return block;
+  }
+
+  public List<ProcessVariableOperation> getAllProcessVariables() {
+    return usedProcessVariables;
+  }
+
+  public void addProcessVariable(ProcessVariableOperation processVariable) {
+    this.usedProcessVariables.add(processVariable);
+  }
+
+  public void addUsed(List<ProcessVariableOperation> usedVariables) {}
+
+  public Map<String, ProcessVariableOperation> getProcessVariablesMapped() {
+
+    Map<String, ProcessVariableOperation> variables =
+        new HashMap<String, ProcessVariableOperation>();
+    for (ProcessVariableOperation pv : usedProcessVariables) {
+
+      variables.put(pv.getName(), pv);
     }
 
-    public void setBlock(Block block) {
+    return variables;
+  }
 
-        this.block = block;
+  public void addAllProcessVariables(List<ProcessVariableOperation> pvs) {
+    for (ProcessVariableOperation pv : pvs) {
+
+      addProcessVariable(pv);
     }
-
-    public Block getBlock() {
-        return block;
-    }
-
-    public List<ProcessVariableOperation> getAllProcessVariables() {
-        return usedProcessVariables;
-    }
-
-    public void addProcessVariable(ProcessVariableOperation processVariable) {
-        this.usedProcessVariables.add(processVariable);
-    }
-
-    public void addUsed(List<ProcessVariableOperation> usedVariables) {
-
-    }
-
-    public Map<String, ProcessVariableOperation> getProcessVariablesMapped() {
-
-        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
-        for (ProcessVariableOperation pv : usedProcessVariables) {
-
-            variables.put(pv.getName(), pv);
-        }
-
-        return variables;
-    }
-
-    public void addAllProcessVariables(List<ProcessVariableOperation> pvs) {
-        for (ProcessVariableOperation pv : pvs) {
-
-            addProcessVariable(pv);
-        }
-
-    }
-
+  }
 }

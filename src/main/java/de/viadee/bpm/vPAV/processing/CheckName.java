@@ -43,40 +43,39 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
  */
 public class CheckName {
 
-    /**
-     * Checks the name of a BaseElement and returns the identifier if no name is specified
-     *
-     * @param baseElement
-     *            Holds the BaseElement of a given BPMN element
-     * @return identifier
-     */
-    public static String checkName(final BaseElement baseElement) {
+  /**
+   * Checks the name of a BaseElement and returns the identifier if no name is specified
+   *
+   * @param baseElement
+   *            Holds the BaseElement of a given BPMN element
+   * @return identifier
+   */
+  public static String checkName(final BaseElement baseElement) {
 
-        String identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_NAME);
+    String identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_NAME);
 
-        if (identifier == null || identifier == "") {
-            identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_ID);
-        }
-
-        return identifier;
+    if (identifier == null || identifier == "") {
+      identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_ID);
     }
 
-    /**
-     * Checks the name of a Timer and returns the identifier if no name is specified
-     *
-     * @param element
-     *            Holds the element of a given timerEvent
-     * @return identifier
-     */
-    public static String checkTimer(final Element element) {
+    return identifier;
+  }
 
-        String identifier = element.getAttribute(BpmnConstants.ATTR_NAME);
+  /**
+   * Checks the name of a Timer and returns the identifier if no name is specified
+   *
+   * @param element
+   *            Holds the element of a given timerEvent
+   * @return identifier
+   */
+  public static String checkTimer(final Element element) {
 
-        if (identifier == null || identifier == "") {
-            identifier = element.getAttribute(BpmnConstants.ATTR_ID);
-        }
+    String identifier = element.getAttribute(BpmnConstants.ATTR_NAME);
 
-        return identifier;
+    if (identifier == null || identifier == "") {
+      identifier = element.getAttribute(BpmnConstants.ATTR_ID);
     }
 
+    return identifier;
+  }
 }

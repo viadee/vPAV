@@ -37,11 +37,10 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 
 public class DelegateWithNoSetter implements JavaDelegate {
 
-    public Expression test;
+  public Expression test;
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        // TODO Auto-generated method stub
-    }
-
+  @Override
+  public void execute(DelegateExecution execution) throws Exception {
+    // TODO Auto-generated method stub
+  }
 }

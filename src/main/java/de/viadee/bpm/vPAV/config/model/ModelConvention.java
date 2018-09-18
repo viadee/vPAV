@@ -33,15 +33,14 @@ package de.viadee.bpm.vPAV.config.model;
 
 public class ModelConvention {
 
-    private String type;
+  private String type;
 
-    public ModelConvention(final String type) {
-        super();
-        this.type = type;
-    }
+  public ModelConvention(final String type) {
+    super();
+    this.type = type;
+  }
 
-    public String getType() {
-        return type;
-    }
-
+  public String getType() {
+    return type;
+  }
 }

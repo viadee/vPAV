@@ -58,87 +58,86 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
 public class OverlapCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static OverlapChecker checker;
+  private static OverlapChecker checker;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private final Rule rule = new Rule("OverlapChecker", true, null, null, null, null);
+  private final Rule rule = new Rule("OverlapChecker", true, null, null, null, null);
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
+
+  /**
+   * Case: Correct model
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testModelWithNoOverlap()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "OverlapChecker_Correct.bpmn";
+    checker = new OverlapChecker(rule, new BpmnScanner(PATH));
+
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
+
+    for (BaseElement event : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, event);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Correct model
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testModelWithNoOverlap()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "OverlapChecker_Correct.bpmn";
-        checker = new OverlapChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() > 0) {
+      Assert.fail("correct model generates an issue");
+    }
+  }
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: Incorrect model with overlapping sequence flows
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testModelWithOverlap()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "OverlapChecker_Wrong.bpmn";
+    checker = new OverlapChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
-            issues.addAll(checker.check(element));
-        }
-       
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() > 0) {
-            Assert.fail("correct model generates an issue");
-        }
+    for (BaseElement event : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, event);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Incorrect model with overlapping sequence flows
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testModelWithOverlap()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "OverlapChecker_Wrong.bpmn";
-        checker = new OverlapChecker(rule, new BpmnScanner(PATH));
-
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
-            issues.addAll(checker.check(element));
-        }
-
-        if (issues.size() != 1) {
-            Assert.fail("Incorrect model should generate an issue");
-        }
+    if (issues.size() != 1) {
+      Assert.fail("Incorrect model should generate an issue");
     }
+  }
 }

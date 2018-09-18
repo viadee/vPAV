@@ -36,16 +36,15 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 
 public class DelegateWithWrongType implements JavaDelegate {
 
-    public String test;
+  public String test;
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        // TODO Auto-generated method stub
+  @Override
+  public void execute(DelegateExecution execution) throws Exception {
+    // TODO Auto-generated method stub
 
-    }
+  }
 
-    public void setTest(String t) {
-        this.test = t;
-    }
-
+  public void setTest(String t) {
+    this.test = t;
+  }
 }

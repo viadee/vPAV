@@ -41,31 +41,34 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class JavaReaderRegex implements JavaReader {
 
-    public static final Logger LOGGER = Logger.getLogger(JavaReaderRegex.class.getName());
+  public static final Logger LOGGER = Logger.getLogger(JavaReaderRegex.class.getName());
 
-    /**
-     * Checks a java delegate for process variable references (read/write).
-     *
-     * Constraints: Method examine only variables in java delegate and not in the method references process variables
-     * with names, which only could be determined at runtime, can't be analysed. e.g.
-     * execution.setVariable(execution.getActivityId() + "-" + execution.getEventName(), true)
-     *
-     * @param classFile
-     *            - name of JavaDelegate class
-     * @param element
-     *            - Bpmn element
-     * @return variables - Process Variables
-     */
-    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String scopeId) {
-        // convert package format in a concrete path to the java class (.java)
-        String filePath = "";
-        if (classFile != null && classFile.trim().length() > 0) {
-            filePath = classFile.replaceAll("\\.", "/") + ".java";
-        }
-        final Map<String, ProcessVariableOperation> variables = ResourceFileReader.readResourceFile(filePath, element,
-                chapter, fieldType, scopeId);
-        return variables;
+  /**
+   * Checks a java delegate for process variable references (read/write).
+   *
+   * Constraints: Method examine only variables in java delegate and not in the method references process variables
+   * with names, which only could be determined at runtime, can't be analysed. e.g.
+   * execution.setVariable(execution.getActivityId() + "-" + execution.getEventName(), true)
+   *
+   * @param classFile
+   *            - name of JavaDelegate class
+   * @param element
+   *            - Bpmn element
+   * @return variables - Process Variables
+   */
+  public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(
+      final String classFile,
+      final BpmnElement element,
+      final ElementChapter chapter,
+      final KnownElementFieldType fieldType,
+      final String scopeId) {
+    // convert package format in a concrete path to the java class (.java)
+    String filePath = "";
+    if (classFile != null && classFile.trim().length() > 0) {
+      filePath = classFile.replaceAll("\\.", "/") + ".java";
     }
+    final Map<String, ProcessVariableOperation> variables =
+        ResourceFileReader.readResourceFile(filePath, element, chapter, fieldType, scopeId);
+    return variables;
+  }
 }

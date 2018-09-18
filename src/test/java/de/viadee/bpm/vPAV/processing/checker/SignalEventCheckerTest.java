@@ -62,87 +62,86 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
  */
 public class SignalEventCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static SignalEventChecker checker;
+  private static SignalEventChecker checker;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private final Rule rule = new Rule("SignalEventChecker", true, null, null, null, null);
+  private final Rule rule = new Rule("SignalEventChecker", true, null, null, null, null);
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
+
+  /**
+   * Case: Tasks without Expressions
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testCorrectModel()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "SignalEventChecker_Correct.bpmn";
+    checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
+
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
+
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Tasks without Expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testCorrectModel()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "SignalEventChecker_Correct.bpmn";
-        checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() > 0) {
+      Assert.fail("correct model generates an issue");
+    }
+  }
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: Multiple SignalStartEvents with the same signal name
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testWrongModel()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "SignalEventChecker_Wrong.bpmn";
+    checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() > 0) {
-            Assert.fail("correct model generates an issue");
-        }
+    for (BaseElement baseElement : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, baseElement);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Multiple SignalStartEvents with the same signal name
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testWrongModel()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "SignalEventChecker_Wrong.bpmn";
-        checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
-
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
-            issues.addAll(checker.check(element));
-        }
-
-        if (issues.size() != 1) {
-            Assert.fail("incorrect model should generate an issue");
-        }
+    if (issues.size() != 1) {
+      Assert.fail("incorrect model should generate an issue");
     }
-
+  }
 }

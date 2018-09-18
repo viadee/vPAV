@@ -63,115 +63,115 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
  */
 public class FieldInjectionCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static FieldInjectionChecker checker;
+  private static FieldInjectionChecker checker;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private final Rule rule = new Rule("FieldInjectionChecker", true, null, null, null, null);
+  private final Rule rule = new Rule("FieldInjectionChecker", true, null, null, null, null);
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
 
-        // Bean-Mapping
-        final Map<String, String> beanMapping = new HashMap<String, String>();
-        beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.delegates.DelegateWithWrongType");
-        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+    // Bean-Mapping
+    final Map<String, String> beanMapping = new HashMap<String, String>();
+    beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.delegates.DelegateWithWrongType");
+    RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
+
+  /**
+   * Case: JavaDelegate with correct implemented fieldInjection variable
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testCorrectFieldInjection()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "FieldInjectionCheckerTest_CorrectFieldInjection.bpmn";
+    checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
+
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+    final Collection<CheckerIssue> issues = checker.check(element);
+
+    if (issues.size() > 0) {
+      Assert.fail("correct java delegate generates an issue");
     }
+  }
 
-    /**
-     * Case: JavaDelegate with correct implemented fieldInjection variable
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testCorrectFieldInjection()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "FieldInjectionCheckerTest_CorrectFieldInjection.bpmn";
-        checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
+  /**
+   * Case: Type of fieldInjection variable is incorrect
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testWrongTypeOfFieldInjection()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "FieldInjectionCheckerTest_WrongType.bpmn";
+    checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.check(element);
+    final Collection<CheckerIssue> issues = checker.check(element);
 
-        if (issues.size() > 0) {
-            Assert.fail("correct java delegate generates an issue");
-        }
+    if (issues.size() != 1) {
+      Assert.fail("wrong type doesn't generate an issue");
     }
+  }
 
-    /**
-     * Case: Type of fieldInjection variable is incorrect
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testWrongTypeOfFieldInjection()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "FieldInjectionCheckerTest_WrongType.bpmn";
-        checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
+  /**
+   * Case: No setter method for variable
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testNoSetterMethod()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "FieldInjectionCheckerTest_NoSetter.bpmn";
+    checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.check(element);
+    final Collection<CheckerIssue> issues = checker.check(element);
 
-        if (issues.size() != 1) {
-            Assert.fail("wrong type doesn't generate an issue");
-        }
+    if (issues.size() != 1) {
+      Assert.fail("no setter method doesn't generate an issue");
     }
-
-    /**
-     * Case: No setter method for variable
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testNoSetterMethod()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "FieldInjectionCheckerTest_NoSetter.bpmn";
-        checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
-
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
-
-        final Collection<CheckerIssue> issues = checker.check(element);
-
-        if (issues.size() != 1) {
-            Assert.fail("no setter method doesn't generate an issue");
-        }
-    }
+  }
 }

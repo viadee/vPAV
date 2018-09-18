@@ -53,143 +53,144 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
 public class EmbeddedGroovyScriptCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static ElementChecker checker;
+  private static ElementChecker checker;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final Rule rule = new Rule("EmbeddedGroovyScriptChecker", true, null, null, null, null);
-        checker = new EmbeddedGroovyScriptChecker(rule, null);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
+    final Rule rule = new Rule("EmbeddedGroovyScriptChecker", true, null, null, null, null);
+    checker = new EmbeddedGroovyScriptChecker(rule, null);
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
+
+  /**
+   * Case: there is an empty script reference
+   */
+  @Test
+  public void testEmptyScriptReference() {
+    final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptReference.bpmn";
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<ScriptTask> baseElements =
+        modelInstance.getModelElementsByType(ScriptTask.class);
+
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+    final Collection<CheckerIssue> issues = checker.check(element);
+
+    if (issues.size() == 0) {
+      Assert.fail("there should be generated an issue");
     }
+    Assert.assertEquals(
+        "There is an empty script reference", issues.iterator().next().getMessage());
+  }
 
-    /**
-     * Case: there is an empty script reference
-     */
-    @Test
-    public void testEmptyScriptReference() {
-        final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptReference.bpmn";
+  /**
+   * Case: there is no script format for given script
+   */
+  @Test
+  public void testEmptyScriptFormat() {
+    final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptFormat.bpmn";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ScriptTask> baseElements = modelInstance
-                .getModelElementsByType(ScriptTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.check(element);
+    final Collection<CheckerIssue> issues = checker.check(element);
 
-        if (issues.size() == 0) {
-            Assert.fail("there should be generated an issue");
-        }
-        Assert.assertEquals("There is an empty script reference",
-                issues.iterator().next().getMessage());
+    if (issues.size() == 0) {
+      Assert.fail("there should be generated an issue");
     }
+    Assert.assertEquals(
+        "There is no script format for given script", issues.iterator().next().getMessage());
+  }
 
-    /**
-     * Case: there is no script format for given script
-     */
-    @Test
-    public void testEmptyScriptFormat() {
-        final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptFormat.bpmn";
+  /**
+   * Case: there is no script content for given script format
+   */
+  @Test
+  public void testEmptyScript() {
+    final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScript.bpmn";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.check(element);
+    final Collection<CheckerIssue> issues = checker.check(element);
 
-        if (issues.size() == 0) {
-            Assert.fail("there should be generated an issue");
-        }
-        Assert.assertEquals("There is no script format for given script",
-                issues.iterator().next().getMessage());
+    if (issues.size() == 0) {
+      Assert.fail("there should be generated an issue");
     }
+    Assert.assertEquals(
+        "There is no script content for given script format",
+        issues.iterator().next().getMessage());
+  }
 
-    /**
-     * Case: there is no script content for given script format
-     */
-    @Test
-    public void testEmptyScript() {
-        final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScript.bpmn";
+  /**
+   * Case: invalid script for groovy script format
+   */
+  @Test
+  public void testInvalidGroovyScript() {
+    final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_InvalidGroovyScript.bpmn";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    final Collection<ServiceTask> baseElements =
+        modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        final Collection<CheckerIssue> issues = checker.check(element);
+    final Collection<CheckerIssue> issues = checker.check(element);
 
-        if (issues.size() == 0) {
-            Assert.fail("there should be generated an issue");
-        }
-        Assert.assertEquals("There is no script content for given script format",
-                issues.iterator().next().getMessage());
+    if (issues.size() == 0) {
+      Assert.fail("there should be generated an issue");
     }
+    final String message = issues.iterator().next().getMessage();
+    Assert.assertTrue(message.startsWith("startup failed:"));
+  }
 
-    /**
-     * Case: invalid script for groovy script format
-     */
-    @Test
-    public void testInvalidGroovyScript() {
-        final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_InvalidGroovyScript.bpmn";
+  /**
+   * Case: there is no script content for given script format in TaskListener (userTask)
+   */
+  @Test
+  public void testTaskListener() {
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptTaskListener.bpmn";
 
-        final Collection<ServiceTask> baseElements = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+    final Collection<Task> baseElements = modelInstance.getModelElementsByType(Task.class);
 
-        final Collection<CheckerIssue> issues = checker.check(element);
+    final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
 
-        if (issues.size() == 0) {
-            Assert.fail("there should be generated an issue");
-        }
-        final String message = issues.iterator().next().getMessage();
-        Assert.assertTrue(message.startsWith("startup failed:"));
+    final Collection<CheckerIssue> issues = checker.check(element);
+
+    if (issues.size() == 0) {
+      Assert.fail("there should be generated an issue");
     }
-
-    /**
-     * Case: there is no script content for given script format in TaskListener (userTask)
-     */
-    @Test
-    public void testTaskListener() {
-
-        final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptTaskListener.bpmn";
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<Task> baseElements = modelInstance
-                .getModelElementsByType(Task.class);
-
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
-
-        final Collection<CheckerIssue> issues = checker.check(element);
-
-        if (issues.size() == 0) {
-            Assert.fail("there should be generated an issue");
-        }
-        Assert.assertEquals("There is no script content for given script format",
-                issues.iterator().next().getMessage());
-    }
+    Assert.assertEquals(
+        "There is no script content for given script format",
+        issues.iterator().next().getMessage());
+  }
 }

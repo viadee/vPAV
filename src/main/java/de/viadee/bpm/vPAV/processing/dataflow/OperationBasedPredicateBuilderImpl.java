@@ -41,69 +41,75 @@ import java.util.stream.Collectors;
 
 class OperationBasedPredicateBuilderImpl<T> implements OperationBasedPredicateBuilder<T> {
 
-    private final Function<DescribedPredicateEvaluator<ProcessVariable>, T> conditionSetter;
-    private final Function<ProcessVariable, List<ProcessVariableOperation>> operationProvider;
-    private final String operationDescription;
+  private final Function<DescribedPredicateEvaluator<ProcessVariable>, T> conditionSetter;
+  private final Function<ProcessVariable, List<ProcessVariableOperation>> operationProvider;
+  private final String operationDescription;
 
-    OperationBasedPredicateBuilderImpl(
-            Function<DescribedPredicateEvaluator<ProcessVariable>, T> conditionSetter,
-            Function<ProcessVariable, List<ProcessVariableOperation>> operationProvider,
-            String operationDescription) {
-        this.conditionSetter = conditionSetter;
-        this.operationProvider = operationProvider;
-        this.operationDescription = operationDescription;
-    }
+  OperationBasedPredicateBuilderImpl(
+      Function<DescribedPredicateEvaluator<ProcessVariable>, T> conditionSetter,
+      Function<ProcessVariable, List<ProcessVariableOperation>> operationProvider,
+      String operationDescription) {
+    this.conditionSetter = conditionSetter;
+    this.operationProvider = operationProvider;
+    this.operationDescription = operationDescription;
+  }
 
-    @Override
-    public T exactly(int n) {
-        final String times = n == 1 ? "time" : "times";
-        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
-            Integer operationsCount = operationProvider.apply(p).size();
-            return new EvaluationResult<>(operationsCount == n, p, operationsCount.toString());
+  @Override
+  public T exactly(int n) {
+    final String times = n == 1 ? "time" : "times";
+    final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator =
+        p -> {
+          Integer operationsCount = operationProvider.apply(p).size();
+          return new EvaluationResult<>(operationsCount == n, p, operationsCount.toString());
         };
-        final String description = String.format("%s exactly %s %s", operationDescription, n, times);
-        return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
-    }
+    final String description = String.format("%s exactly %s %s", operationDescription, n, times);
+    return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+  }
 
-    @Override
-    public T atLeast(int n) {
-        final String times = n == 1 ? "time" : "times";
-        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
-            Integer operationsCount = operationProvider.apply(p).size();
-            return new EvaluationResult<>(operationsCount >= n, p, operationsCount.toString());
+  @Override
+  public T atLeast(int n) {
+    final String times = n == 1 ? "time" : "times";
+    final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator =
+        p -> {
+          Integer operationsCount = operationProvider.apply(p).size();
+          return new EvaluationResult<>(operationsCount >= n, p, operationsCount.toString());
         };
-        final String description = String.format("%s at least %s %s", operationDescription, n, times);
-        return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
-    }
+    final String description = String.format("%s at least %s %s", operationDescription, n, times);
+    return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+  }
 
-    @Override
-    public T atMost(int n) {
-        final String times = n == 1 ? "time" : "times";
-        final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator = p -> {
-            Integer operationsCount = operationProvider.apply(p).size();
-            return new EvaluationResult<>(operationsCount <= n, p, operationsCount.toString());
+  @Override
+  public T atMost(int n) {
+    final String times = n == 1 ? "time" : "times";
+    final Function<ProcessVariable, EvaluationResult<ProcessVariable>> evaluator =
+        p -> {
+          Integer operationsCount = operationProvider.apply(p).size();
+          return new EvaluationResult<>(operationsCount <= n, p, operationsCount.toString());
         };
-        final String description = String.format("%s at most %s %s", operationDescription, n, times);
-        return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
-    }
+    final String description = String.format("%s at most %s %s", operationDescription, n, times);
+    return conditionSetter.apply(new DescribedPredicateEvaluator<>(evaluator, description));
+  }
 
-    @Override
-    public ElementBasedPredicateBuilder<T> byModelElements() {
-        final Function<ProcessVariable, List<BpmnElement>> elementProvider = createElementProvider();
-        return new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider, false,
-                operationDescription + " by model elements");
-    }
+  @Override
+  public ElementBasedPredicateBuilder<T> byModelElements() {
+    final Function<ProcessVariable, List<BpmnElement>> elementProvider = createElementProvider();
+    return new ElementBasedPredicateBuilderImpl<>(
+        conditionSetter, elementProvider, false, operationDescription + " by model elements");
+  }
 
-    @Override
-    public ElementBasedPredicateBuilder<T> onlyByModelElements() {
-        final Function<ProcessVariable, List<BpmnElement>> elementProvider = createElementProvider();
-        return new ElementBasedPredicateBuilderImpl<>(conditionSetter, elementProvider, true,
-                operationDescription + " by model elements");
-    }
+  @Override
+  public ElementBasedPredicateBuilder<T> onlyByModelElements() {
+    final Function<ProcessVariable, List<BpmnElement>> elementProvider = createElementProvider();
+    return new ElementBasedPredicateBuilderImpl<>(
+        conditionSetter, elementProvider, true, operationDescription + " by model elements");
+  }
 
-    private Function<ProcessVariable, List<BpmnElement>> createElementProvider() {
-        return p -> operationProvider.apply(p).stream()
-                .map(ProcessVariableOperation::getElement)
-                .collect(Collectors.toList());
-    }
+  private Function<ProcessVariable, List<BpmnElement>> createElementProvider() {
+    return p ->
+        operationProvider
+            .apply(p)
+            .stream()
+            .map(ProcessVariableOperation::getElement)
+            .collect(Collectors.toList());
+  }
 }

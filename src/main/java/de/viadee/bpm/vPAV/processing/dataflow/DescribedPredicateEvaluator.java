@@ -42,85 +42,90 @@ import java.util.stream.Stream;
  */
 public class DescribedPredicateEvaluator<T> {
 
-    private final Function<T, EvaluationResult<T>> predicateEvaluator;
-    private final String description;
+  private final Function<T, EvaluationResult<T>> predicateEvaluator;
+  private final String description;
 
-    public DescribedPredicateEvaluator(Function<T, EvaluationResult<T>> predicateEvaluator, String description) {
-        this.predicateEvaluator = predicateEvaluator;
-        this.description = description;
-    }
+  public DescribedPredicateEvaluator(
+      Function<T, EvaluationResult<T>> predicateEvaluator, String description) {
+    this.predicateEvaluator = predicateEvaluator;
+    this.description = description;
+  }
 
-    public EvaluationResult<T> evaluate(T value) {
-        return predicateEvaluator.apply(value);
-    }
+  public EvaluationResult<T> evaluate(T value) {
+    return predicateEvaluator.apply(value);
+  }
 
-    /**
-     * Predicate description used to generate rule descriptions.
-     * @return predicate description
-     */
-    public String getDescription() {
-        return description;
-    }
+  /**
+   * Predicate description used to generate rule descriptions.
+   * @return predicate description
+   */
+  public String getDescription() {
+    return description;
+  }
 
-    /**
-     * Combines this predicate with another on disjunctively
-     * @param other
-     * @return combined predicate
-     */
-    public DescribedPredicateEvaluator<T> or(DescribedPredicateEvaluator<T> other) {
-        Function<T, EvaluationResult<T>> orPredicateEvaluator = (T) ->
-        {
-            EvaluationResult<T> result1 = this.evaluate(T);
-            EvaluationResult<T> result2 = other.evaluate(T);
-            boolean isCombinedViolation = !result1.isFulfilled() && !result2.isFulfilled();
+  /**
+   * Combines this predicate with another on disjunctively
+   * @param other
+   * @return combined predicate
+   */
+  public DescribedPredicateEvaluator<T> or(DescribedPredicateEvaluator<T> other) {
+    Function<T, EvaluationResult<T>> orPredicateEvaluator =
+        (T) -> {
+          EvaluationResult<T> result1 = this.evaluate(T);
+          EvaluationResult<T> result2 = other.evaluate(T);
+          boolean isCombinedViolation = !result1.isFulfilled() && !result2.isFulfilled();
 
-            return createEvaluationResult(result1, result2, isCombinedViolation);
+          return createEvaluationResult(result1, result2, isCombinedViolation);
         };
-        return new DescribedPredicateEvaluator<>(orPredicateEvaluator, description + " or " + other.description);
-    }
+    return new DescribedPredicateEvaluator<>(
+        orPredicateEvaluator, description + " or " + other.description);
+  }
 
+  /**
+   * Combines this predicate with another on conjunctively
+   * @param other
+   * @return combined predicate
+   */
+  public DescribedPredicateEvaluator<T> and(DescribedPredicateEvaluator other) {
+    Function<T, EvaluationResult<T>> andPredicateEvaluator =
+        (T) -> {
+          EvaluationResult<T> result1 = this.evaluate(T);
+          EvaluationResult<T> result2 = other.evaluate(T);
+          boolean isCombinedViolation = !result1.isFulfilled() || !result2.isFulfilled();
 
-    /**
-     * Combines this predicate with another on conjunctively
-     * @param other
-     * @return combined predicate
-     */
-    public DescribedPredicateEvaluator<T> and(DescribedPredicateEvaluator other) {
-        Function<T, EvaluationResult<T>> andPredicateEvaluator = (T) ->
-        {
-            EvaluationResult<T> result1 = this.evaluate(T);
-            EvaluationResult<T> result2 = other.evaluate(T);
-            boolean isCombinedViolation = !result1.isFulfilled() || !result2.isFulfilled();
-
-            return createEvaluationResult(result1, result2, isCombinedViolation);
+          return createEvaluationResult(result1, result2, isCombinedViolation);
         };
-        return new DescribedPredicateEvaluator<>(andPredicateEvaluator, description + " and " + other.description);
-    }
+    return new DescribedPredicateEvaluator<>(
+        andPredicateEvaluator, description + " and " + other.description);
+  }
 
-    /**
-     * Inverses this predicate.
-     * @return Inversed predicate
-     */
-    public DescribedPredicateEvaluator<T> inverse() {
-        return new DescribedPredicateEvaluator<>(T -> predicateEvaluator.apply(T).inverse(), "not " + description);
-    }
+  /**
+   * Inverses this predicate.
+   * @return Inversed predicate
+   */
+  public DescribedPredicateEvaluator<T> inverse() {
+    return new DescribedPredicateEvaluator<>(
+        T -> predicateEvaluator.apply(T).inverse(), "not " + description);
+  }
 
-    private EvaluationResult<T> createEvaluationResult(EvaluationResult<T> result1, EvaluationResult<T> result2, boolean isCombinedViolation) {
-        if (isCombinedViolation) {
-            String violationMessage = Stream.of(result1, result2)
-                    .filter(r -> !r.isFulfilled())
-                    .filter(r -> r.getMessage().isPresent())
-                    .map(r -> r.getMessage().get())
-                    .collect(Collectors.joining(" and "));
-            return EvaluationResult.forViolation(violationMessage, result1.getEvaluatedVariable());
-        } else {
-            String successMessage = Stream.of(result1, result2)
-                    .filter(EvaluationResult::isFulfilled)
-                    .filter(r -> r.getMessage().isPresent())
-                    .map(r -> r.getMessage().get())
-                    .collect(Collectors.joining(" and "));
-            return EvaluationResult.forSuccess(successMessage, result1.getEvaluatedVariable());
-        }
+  private EvaluationResult<T> createEvaluationResult(
+      EvaluationResult<T> result1, EvaluationResult<T> result2, boolean isCombinedViolation) {
+    if (isCombinedViolation) {
+      String violationMessage =
+          Stream.of(result1, result2)
+              .filter(r -> !r.isFulfilled())
+              .filter(r -> r.getMessage().isPresent())
+              .map(r -> r.getMessage().get())
+              .collect(Collectors.joining(" and "));
+      return EvaluationResult.forViolation(violationMessage, result1.getEvaluatedVariable());
+    } else {
+      String successMessage =
+          Stream.of(result1, result2)
+              .filter(EvaluationResult::isFulfilled)
+              .filter(r -> r.getMessage().isPresent())
+              .map(r -> r.getMessage().get())
+              .collect(Collectors.joining(" and "));
+      return EvaluationResult.forSuccess(successMessage, result1.getEvaluatedVariable());
     }
-
+  }
 }

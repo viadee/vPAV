@@ -37,38 +37,38 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
  * Second step builder for building data flow rules. Optionally defines additional constraint or continues with condition.
  */
 public interface ConstrainedProcessVariableSet {
-    /**
-     * Begins a predicate construction to define an additional constraint and
-     * combine it disjunctively after its creation with existing one.
-     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
-     */
-    ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> orThatAre();
-    /**
-     * Begins a predicate construction to define an additional constraint and
-     * combine it conjunctively after its creation with existing one.
-     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
-     */
-    ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> andThatAre();
-    /**
-     * Method to define a custom constraint and
-     * combine it disjunctively after its creation with existing one.
-     * @return Same step builder as this is not a stage transition.
-     */
-    ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
-    /**
-     * Method to define a custom constraint and
-     * combine it conjunctively after its creation with existing one.
-     * @return Same step builder as this is not a stage transition.
-     */
-    ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
-    /**
-     * Begins a predicate construction to define a condition
-     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
-     */
-    ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe();
-    /**
-     * Method to define a custom condition.
-     * @return next step builder
-     */
-    ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
+  /**
+   * Begins a predicate construction to define an additional constraint and
+   * combine it disjunctively after its creation with existing one.
+   * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
+   */
+  ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> orThatAre();
+  /**
+   * Begins a predicate construction to define an additional constraint and
+   * combine it conjunctively after its creation with existing one.
+   * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
+   */
+  ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> andThatAre();
+  /**
+   * Method to define a custom constraint and
+   * combine it disjunctively after its creation with existing one.
+   * @return Same step builder as this is not a stage transition.
+   */
+  ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
+  /**
+   * Method to define a custom constraint and
+   * combine it conjunctively after its creation with existing one.
+   * @return Same step builder as this is not a stage transition.
+   */
+  ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
+  /**
+   * Begins a predicate construction to define a condition
+   * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
+   */
+  ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe();
+  /**
+   * Method to define a custom condition.
+   * @return next step builder
+   */
+  ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
 }

@@ -34,108 +34,83 @@ package de.viadee.bpm.vPAV.processing.model.data;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 
 /**
- * 
+ *
  * enum storing Camunda methods of ProcessVariable operations.
- * 
+ *
  * name and numberOfArgBoxes are for identification locationOfBox and operationType are for finding and storing the
  * ProcessVariable
  *
  */
 public enum CamundaProcessVariableFunctions {
+  SetVariable("setVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.WRITE),
+  SetVariable2("setVariable", CamundaMethodServices.RUNTIME, 3, 1, VariableOperation.WRITE),
+  GetVariable("getVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.READ),
+  GetVariable2("getVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.READ),
+  RemoveVariable("removeVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.DELETE),
+  SetVariableS("setVariable", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
+  GetVariableS("getVariable", CamundaMethodServices.SCOPE, 1, 1, VariableOperation.READ),
+  SetVariabelL("setVariableLocal", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE);
 
-    SetVariable("setVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.WRITE), SetVariable2(
-            "setVariable",
-            CamundaMethodServices.RUNTIME,
-            3,
-            1,
-            VariableOperation.WRITE), GetVariable(
-                    "getVariable",
-                    CamundaMethodServices.DELEGATE,
-                    1,
-                    1,
-                    VariableOperation.READ), GetVariable2(
-                            "getVariable",
-                            CamundaMethodServices.DELEGATE,
-                            2,
-                            1,
-                            VariableOperation.READ), RemoveVariable(
-                                    "removeVariable",
-                                    CamundaMethodServices.DELEGATE,
-                                    1,
-                                    1,
-                                    VariableOperation.DELETE),
-    SetVariableS("setVariable", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
-    GetVariableS("getVariable",
-            CamundaMethodServices.SCOPE,
-            1,
-            1,
-            VariableOperation.READ),
-    SetVariabelL("setVariableLocal",
-            CamundaMethodServices.SCOPE,
-            2,
-            1,
-            VariableOperation.WRITE);
+  private String name;
 
-    private String name;
+  private String service;
 
-    private String service;
+  private int numberOfArgBoxes;
 
-    private int numberOfArgBoxes;
+  private int locationOfBox;
 
-    private int locationOfBox;
+  private VariableOperation operationType;
 
-    private VariableOperation operationType;
+  /**
+   *
+   * @param name
+   *            - of the Camunda method
+   * @param number
+   *            - of parameter the method takes
+   * @param loc
+   *            - which parameter is the ProcessVariable name
+   * @param type
+   *            - VariableOperation
+   */
+  private CamundaProcessVariableFunctions(
+      final String name, final String service, int number, int loc, VariableOperation type) {
+    this.name = name;
+    this.service = service;
+    this.numberOfArgBoxes = number;
+    this.locationOfBox = loc;
+    this.operationType = type;
+  }
 
-    /**
-     * 
-     * @param name
-     *            - of the Camunda method
-     * @param number
-     *            - of parameter the method takes
-     * @param loc
-     *            - which parameter is the ProcessVariable name
-     * @param type
-     *            - VariableOperation
-     */
-    private CamundaProcessVariableFunctions(final String name, final String service, int number, int loc,
-            VariableOperation type) {
-        this.name = name;
-        this.service = service;
-        this.numberOfArgBoxes = number;
-        this.locationOfBox = loc;
-        this.operationType = type;
+  public String getName() {
+    return name;
+  }
+
+  public String getService() {
+    return service;
+  }
+
+  public int getNumberOfArgBoxes() {
+    return numberOfArgBoxes;
+  }
+
+  public int getLocation() {
+    return locationOfBox;
+  }
+
+  public VariableOperation getOperationType() {
+    return operationType;
+  }
+
+  public static CamundaProcessVariableFunctions findByNameAndNumberOfBoxes(
+      final String name, final String service, int numberOfBoxes) {
+
+    for (CamundaProcessVariableFunctions f : values()) {
+      if (f.getName().equals(name)
+          && f.getNumberOfArgBoxes() == numberOfBoxes
+          && f.getService().equals(service)) {
+        return f;
+      }
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public int getNumberOfArgBoxes() {
-        return numberOfArgBoxes;
-    }
-
-    public int getLocation() {
-        return locationOfBox;
-    }
-
-    public VariableOperation getOperationType() {
-        return operationType;
-    }
-
-    public static CamundaProcessVariableFunctions findByNameAndNumberOfBoxes(final String name, final String service,
-            int numberOfBoxes) {
-
-        for (CamundaProcessVariableFunctions f : values()) {
-            if (f.getName().equals(name) && f.getNumberOfArgBoxes() == numberOfBoxes
-                    && f.getService().equals(service)) {
-                return f;
-            }
-        }
-        return null;
-    }
-
+    return null;
+  }
 }

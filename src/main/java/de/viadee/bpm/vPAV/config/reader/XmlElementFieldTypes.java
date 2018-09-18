@@ -39,15 +39,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "elementFieldTypes")
-@XmlType(propOrder = { "elementFieldTypes", "excluded" })
+@XmlType(propOrder = {"elementFieldTypes", "excluded"})
 public class XmlElementFieldTypes {
 
   private Collection<String> elementFieldTypes;
 
   private boolean excluded;
 
-  public XmlElementFieldTypes() {
-  }
+  public XmlElementFieldTypes() {}
 
   public XmlElementFieldTypes(final Collection<String> elementFieldTypes, final boolean excluded) {
     super();

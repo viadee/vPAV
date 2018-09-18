@@ -36,25 +36,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "modelConvention")
-@XmlType(propOrder = { "type" })
+@XmlType(propOrder = {"type"})
 public class XmlModelConvention {
 
-    private String type;
+  private String type;
 
-    public XmlModelConvention() {
-    }
+  public XmlModelConvention() {}
 
-    public XmlModelConvention(final String type) {
-        super();
-        this.type = type;
-    }
+  public XmlModelConvention(final String type) {
+    super();
+    this.type = type;
+  }
 
-    @XmlAttribute(name = "type", required = true)
-    public String getType() {
-        return type;
-    }
+  @XmlAttribute(name = "type", required = true)
+  public String getType() {
+    return type;
+  }
 
-    public void setType(final String type) {
-        this.type = type;
-    }
+  public void setType(final String type) {
+    this.type = type;
+  }
 }

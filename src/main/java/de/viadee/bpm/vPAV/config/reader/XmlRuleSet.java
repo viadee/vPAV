@@ -41,8 +41,7 @@ public class XmlRuleSet {
 
   private Collection<XmlRule> rules;
 
-  public XmlRuleSet() {
-  }
+  public XmlRuleSet() {}
 
   public XmlRuleSet(Collection<XmlRule> rules) {
     super();

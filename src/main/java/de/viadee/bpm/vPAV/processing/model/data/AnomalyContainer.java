@@ -43,7 +43,10 @@ public class AnomalyContainer {
 
   private ProcessVariableOperation variable;
 
-  public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId,
+  public AnomalyContainer(
+      final String name,
+      final Anomaly anomaly,
+      final String elementId,
       final ProcessVariableOperation variable) {
     this.name = name;
     this.anomaly = anomaly;

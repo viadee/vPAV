@@ -62,122 +62,119 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
  */
 public class TimerExpressionCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+  private static final String BASE_PATH = "src/test/resources/";
 
-    private static TimerExpressionChecker checker;
+  private static TimerExpressionChecker checker;
 
-    private static ClassLoader cl;
+  private static ClassLoader cl;
 
-    private final Rule rule = new Rule("TimerExpressionChecker", true, null, null, null, null);
+  private final Rule rule = new Rule("TimerExpressionChecker", true, null, null, null, null);
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
+  @BeforeClass
+  public static void setup() throws MalformedURLException {
 
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+    final File file = new File(".");
+    final String currentPath = file.toURI().toURL().toString();
+    final URL classUrl = new URL(currentPath + "src/test/java");
+    final URL[] classUrls = {classUrl};
+    cl = new URLClassLoader(classUrls);
+    RuntimeConfig.getInstance().setClassLoader(cl);
+    RuntimeConfig.getInstance().getResource("en_US");
+  }
+
+  /**
+   * Case: TimerExpression in start event is correct
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testTimerExpression_Correct()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Correct.bpmn";
+    checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
+
+    for (BaseElement event : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, event);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: TimerExpression in start event is correct
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
+    if (issues.size() > 0) {
+      Assert.fail("correct timer expression generates an issue");
+    }
+  }
 
-    @Test
-    public void testTimerExpression_Correct()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Correct.bpmn";
-        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+  /**
+   * Case: TimerExpression in start event is wrong
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testTimerExpression_Wrong()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong.bpmn";
+    checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
-            issues.addAll(checker.check(element));
-        }
-
-        if (issues.size() > 0) {
-            Assert.fail("correct timer expression generates an issue");
-        }
+    for (BaseElement event : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, event);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: TimerExpression in start event is wrong
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testTimerExpression_Wrong()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong.bpmn";
-        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+    if (issues.size() != 1) {
+      Assert.fail("wrong timer expression should generate an issue");
+    }
+  }
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+  /**
+   * Case: Several timer expressions
+   *
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   * @throws XPathExpressionException
+   */
+  @Test
+  public void testTimerExpressions()
+      throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    final String PATH = BASE_PATH + "TimerExpressionCheckerTest.bpmn";
+    checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+    // parse bpmn model
+    final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
-            issues.addAll(checker.check(element));
-        }
+    final Collection<BaseElement> baseElements =
+        modelInstance.getModelElementsByType(BaseElement.class);
 
-        if (issues.size() != 1) {
-            Assert.fail("wrong timer expression should generate an issue");
-        }
+    for (BaseElement event : baseElements) {
+      final BpmnElement element = new BpmnElement(PATH, event);
+      issues.addAll(checker.check(element));
     }
 
-    /**
-     * Case: Several timer expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testTimerExpressions()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest.bpmn";
-        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
-
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
-
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
-            issues.addAll(checker.check(element));
-        }
-
-        if (issues.size() != 2) {
-            Assert.fail("model should consist of two issues");
-        }
-
+    if (issues.size() != 2) {
+      Assert.fail("model should consist of two issues");
     }
-
+  }
 }
