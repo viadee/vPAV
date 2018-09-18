@@ -5,6 +5,9 @@ Please stick to the following basic principles:
 When opening a new issue please 
 * search for duplicates
 * describe clearly which behavior you get and what you were expecting
+  * which behavior you get
+  * what you were expecting
+  * how it can be reproduced
 ## Contributing code
 Please submit a Pull Request if you want to contribute changes to the source code. 
 

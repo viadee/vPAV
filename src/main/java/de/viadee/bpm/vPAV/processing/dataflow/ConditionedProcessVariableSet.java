@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,33 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
+/**
+ * Last step builder for building data flow rules. Optionally defines additional condition, reason, criticality
+ * or continues with rule evaluation.
+ */
 public interface ConditionedProcessVariableSet extends DataFlowRule {
+    /**
+     * Begins a predicate construction to define an additional condition and
+     * combine it conjunctively after its creation with existing one.
+     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
+     */
     ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> andShouldBe();
+    /**
+     * Begins a predicate construction to define an additional condition and
+     * combine it disjunctively after its creation with existing one.
+     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
+     */
     ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> orShouldBe();
+    /**
+     * Method to define a custom condition and
+     * combine it conjunctively after its creation with existing one.
+     * @return Same step builder as this is not a stage transition.
+     */
     ConditionedProcessVariableSet andShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
+    /**
+     * Method to define a custom condition and
+     * combine it disjunctively after its creation with existing one.
+     * @return Same step builder as this is not a stage transition.
+     */
     ConditionedProcessVariableSet orShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
 }

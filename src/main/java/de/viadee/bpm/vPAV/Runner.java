@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,10 +51,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -70,7 +69,9 @@ import de.viadee.bpm.vPAV.output.RuleSetOutputWriter;
 import de.viadee.bpm.vPAV.output.XmlOutputWriter;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 public class Runner {
 
@@ -302,9 +303,11 @@ public class Runner {
 				throw new RuntimeException("Output couldn't be written", e);
 			}
 		} else {
-			final IssueOutputWriter jsOutputWriter = new JsOutputWriter();
 			try {
+				final JsOutputWriter jsOutputWriter = new JsOutputWriter();
+				jsOutputWriter.prepareMaps(this.getWrongCheckersMap(), this.getIgnoredIssuesMap(), this.getModelPath());
 				jsOutputWriter.write(filteredIssues);
+				jsOutputWriter.writeVars(elements, processVariables);
 			} catch (OutputWriterException e) {
 				throw new RuntimeException("JavaScript File couldn't be written", e);
 			}

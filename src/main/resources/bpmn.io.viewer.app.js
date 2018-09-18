@@ -301,7 +301,7 @@ function createCardForVariableOperations(operations, title) {
 
 // Add single issue to the ignoreIssues list
 function addIssue(issue){         
-    ignoredIssues[issue[0]] = '#' + issue[1].substring(0,29) + "..";
+    ignoredIssues[issue[0]] = '#' + issue[1];
     issue[2].disabled = true;
 }
 
@@ -357,10 +357,7 @@ function createIssueTable(bpmnFile, tableContent) {
 
             //ruleName
             myCell = document.createElement("td");
-            let ruleDescription = issue.ruleDescription !== undefined ?
-                `${issue.ruleName}: '${issue.ruleDescription}'` :
-                issue.ruleName;
-            myText = document.createTextNode(ruleDescription);
+            myText = document.createTextNode(issue.ruleName);
             myCell.setAttribute("id", issue.classification) // mark cell
 
             //create link for default checkers
@@ -437,7 +434,7 @@ function createIssueTable(bpmnFile, tableContent) {
 
                     var b = document.createElement("a");
                     b.appendChild(myText);
-                    b.setAttribute("onclick", "showPath('" + issue.id + "','" + x + "', '" + path_text + "')");
+                    b.setAttribute("onclick", "controller.showPath('" + issue.id + "','" + x + "', '" + path_text + "')");
                     b.setAttribute("href", "#");
 
                     myCell.appendChild(b);
@@ -837,5 +834,4 @@ const controller = createViewController();
 controller.init();
 document.getElementById('vPAV').innerHTML = vPavVersion;
 showUnlocatedCheckers();
-
 

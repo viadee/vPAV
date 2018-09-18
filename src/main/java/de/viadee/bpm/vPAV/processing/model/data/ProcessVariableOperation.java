@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 package de.viadee.bpm.vPAV.processing.model.data;
 
 /**
- * Represents a process variable with some meaningful information.
+ * Represents a process variable operation with some meaningful information.
  *
  */
 public class ProcessVariableOperation {

@@ -87,6 +87,8 @@ public class FileScanner {
     private static String scheme = null;
 
     private static StringBuilder sootPath = new StringBuilder();
+    
+    private static Collection<String> sootPaths = new ArrayList<String>();
 
     private static boolean isDirectory = false;
 
@@ -210,16 +212,16 @@ public class FileScanner {
         if (sootPathCurrent != null) {
         	if (System.getProperty("os.name").startsWith("Windows")) {
         		sootPathCurrent = sootPathCurrent.replace("file:/", "");
-                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\");
-                sootPath.append(';');
-                sootPath.append(sootPathCurrent);
-                sootPath.append(';');
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");;
+                if (!sootPaths.contains(sootPathCurrent)) {                	
+                	sootPaths.add(sootPathCurrent);
+                }
         	} else {
         		sootPathCurrent = sootPathCurrent.replace("file:", "");
-                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\");
-                sootPath.append(":");
-                sootPath.append(sootPathCurrent);
-                sootPath.append(":");
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");;
+                if (!sootPaths.contains(sootPathCurrent)) {                	
+                	sootPaths.add(sootPathCurrent);
+                }
         	}        	            
         }     
     }
@@ -489,7 +491,16 @@ public class FileScanner {
      *
      * @return - Concatenated String of jars' local paths
      */
-    public static String getSootPath() {
-        return sootPath.toString();
+    public static String getSootPath() {    	
+    	for (String entry : sootPaths) {
+    		if (System.getProperty("os.name").startsWith("Windows")) {
+    			sootPath.append(entry);
+    			sootPath.append(";");
+    		} else {
+    			sootPath.append(entry);
+    			sootPath.append(":");
+    		}    		
+    	}
+        return sootPath.toString().substring(0, sootPath.toString().length() - 1);
     }
 }

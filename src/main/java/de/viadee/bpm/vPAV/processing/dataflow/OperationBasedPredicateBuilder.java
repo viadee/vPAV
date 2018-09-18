@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,38 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+/**
+ * Second step builder for building predicates to define constraints and condition.
+ * @param <T> Captures return type after predicate is constructed and represents the stage of rule building.
+ */
 public interface OperationBasedPredicateBuilder<T> {
+    /**
+     * Returns predicate based on exact operation quantity.
+     * @return Step builder of next rule building stage
+     */
     T exactly(int n);
+    /**
+     * Returns predicate based on minimal operation quantity.
+     * @return Step builder of next rule building stage
+     */
     T atLeast(int n);
+    /**
+     * Returns predicate based on maximal operation quantity.
+     * @return Step builder of next rule building stage
+     */
     T atMost(int n);
+    /**
+     * Specifies that predicate filters operations based on elements.
+     * This method is inclusive making one element fulfilling the following element based predicate
+     * also fulfill the entire predicate.
+     * @return next predicate step builder
+     */
     ElementBasedPredicateBuilder<T> byModelElements();
+    /**
+     * Specifies that predicate filters operations based on elements.
+     * This method is exclusive so that all elements fulfilling the following element based predicate
+     * need to be fulfilled for the predicate to be true.
+     * @return next predicate step builder
+     */
     ElementBasedPredicateBuilder<T> onlyByModelElements();
 }

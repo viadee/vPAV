@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Implementation of a data flow rule containing all necessary data for evaluating it.
+ * Also contains evaluation logic.
+ */
 class SimpleDataFlowRule implements DataFlowRule {
     private static final String RULE_VIOLATION_DESCRIPTION_TEMPLATE = "Rule '%s' was violated %s times%s:\n";
     private static final String RULE_DESCRIPTION_TEMPLATE = "Process variables%s should be %s%s";

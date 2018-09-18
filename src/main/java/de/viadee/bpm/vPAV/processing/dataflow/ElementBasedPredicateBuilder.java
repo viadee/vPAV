@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,39 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
+/**
+ * Third and last step builder for building predicates to define constraints and condition.
+ * @param <T> Captures return type after predicate is constructed and represents the stage of rule building.
+ */
 public interface ElementBasedPredicateBuilder<T> {
+    /**
+     * Returns predicate with operation location based on type.
+     * @return Step builder of next rule building stage
+     */
     T ofType(Class clazz);
+    /**
+     * Returns predicate with operation location based on camunda:property.
+     * @return Step builder of next rule building stage
+     */
+    T withProperty(String propertyName);
+    /**
+     * Returns predicate with operation location based on prefix, e.g. "ext_"
+     * @return Step builder of next rule building stage
+     */
     T withPrefix(String prefix);
+    /**
+     * Returns predicate with operation location based on postfix, e.g. "_ext"
+     * @return Step builder of next rule building stage
+     */
     T withPostfix(String postfix);
+    /**
+     * Returns predicate with operation location based on pattern match
+     * @return Step builder of next rule building stage
+     */
     T withNameMatching(String regex);
+    /**
+     * Method to define a custom predicate for filtering elements.
+     * @return Step builder of next rule building stage
+     */
     T thatFulfill(DescribedPredicateEvaluator<BpmnElement> predicate);
 }

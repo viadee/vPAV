@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,17 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import org.camunda.bpm.model.bpmn.impl.instance.camunda.CamundaPropertyImpl;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.UserTask;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperties;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperty;
+import org.camunda.bpm.model.dmn.impl.instance.ExtensionElementsImpl;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -103,7 +110,7 @@ public class ElementBasedPredicateBuilderImplTest {
 
         assertThat(result.isFulfilled(), is(true));
         assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString(UserTask.class.getName()));
+        assertThat(result.getMessage().get(), containsString(UserTask.class.getSimpleName()));
     }
 
     @Test
@@ -114,7 +121,40 @@ public class ElementBasedPredicateBuilderImplTest {
 
         assertThat(result.isFulfilled(), is(false));
         assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString(ServiceTask.class.getName()));
+        assertThat(result.getMessage().get(), containsString(ServiceTask.class.getSimpleName()));
+    }
+
+    @Test
+    public void testWithPropertyDoesNotFilterCorrectProperty() {
+        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withProperty("correctProperty").build());
+
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
+
+        assertThat(result.isFulfilled(), is(true));
+        assertThat(result.getMessage().isPresent(), is(true));
+        assertThat(result.getMessage().get(), containsString("present at 'element'"));
+    }
+
+    @Test
+    public void testWithPropertyFiltersIncorrectProperty() {
+        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().withProperty("incorrectProperty").build());
+
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
+
+        assertThat(result.isFulfilled(), is(false));
+        assertThat(result.getMessage().isPresent(), is(true));
+        assertThat(result.getMessage().get(), containsString("not present at 'element'"));
+    }
+
+    @Test
+    public void testWithPropertyFiltersWithoutAnyProperty() {
+        List<BpmnElement> bpmnElements = Arrays.asList(new BpmnElementBuilder().build());
+
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
+
+        assertThat(result.isFulfilled(), is(false));
+        assertThat(result.getMessage().isPresent(), is(true));
+        assertThat(result.getMessage().get(), containsString("not present at 'element'"));
     }
 
     @Test
@@ -261,6 +301,7 @@ public class ElementBasedPredicateBuilderImplTest {
     private class BpmnElementBuilder {
         private String name = "element";
         private Class clazz = BaseElement.class;
+        private String property;
 
         BpmnElementBuilder withName(String name) {
             this.name = name;
@@ -272,9 +313,31 @@ public class ElementBasedPredicateBuilderImplTest {
             return this;
         }
 
+        BpmnElementBuilder withProperty(String property) {
+            this.property = property;
+            return this;
+        }
+
         BpmnElement build() {
             BaseElement baseElement = (BaseElement) mock(clazz);
             when(baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)).thenReturn(name);
+            // mocking a property is not so nice, but I could not find a nicer way
+            if (property != null) {
+                CamundaProperty camundaProperty = mock(CamundaProperty.class);
+                when(camundaProperty.getCamundaName()).thenReturn(property);
+
+                CamundaProperties properties = mock(CamundaProperties.class);
+                when(properties.getCamundaProperties()).thenReturn(Arrays.asList(camundaProperty));
+
+                Query query = mock(Query.class);
+                when(query.count()).thenReturn(1);
+                when(query.filterByType(CamundaProperties.class)).thenReturn(query);
+                when(query.singleResult()).thenReturn(properties);
+
+                ExtensionElements elements = mock(ExtensionElements.class);
+                when(elements.getElementsQuery()).thenReturn(query);
+                when(baseElement.getExtensionElements()).thenReturn(elements);
+            }
             return new BpmnElement("processDefinition", baseElement);
         }
     }

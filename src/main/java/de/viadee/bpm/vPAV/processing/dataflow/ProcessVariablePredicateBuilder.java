@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,13 +31,50 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+/**
+ * Initial step builder for building predicates to define constraints and condition.
+ * @param <T> Captures return type after predicate is constructed and represents the stage of rule building.
+ */
 public interface ProcessVariablePredicateBuilder<T> {
+    /**
+     * Negates a predicate.
+     * @return this as negation does not lead to next stage.
+     */
     ProcessVariablePredicateBuilder<T> not();
+
+    /**
+     * Specifies operation and continues with next stages.
+     * @return next predicate step builder
+     */
     OperationBasedPredicateBuilder<T> deleted();
+    /**
+     * Specifies operation and continues with next stages.
+     * @return next predicate step builder
+     */
     OperationBasedPredicateBuilder<T> read();
+    /**
+     * Specifies operation and continues with next stages.
+     * @return next predicate step builder
+     */
     OperationBasedPredicateBuilder<T> written();
+    /**
+     * Specifies operation and continues with next stages.
+     * @return next predicate step builder
+     */
     OperationBasedPredicateBuilder<T> accessed();
+    /**
+     * Returns predicate based on process variable name prefix, e.g. "ext_".
+     * @return Step builder of next rule building stage
+     */
     T prefixed(String prefix);
+    /**
+     * Returns predicate based on process variable name prefix, e.g. "_ext".
+     * @return Step builder of next rule building stage
+     */
     T postfixed(String postfix);
+    /**
+     * Returns predicate based on process variable name matching a RegEx.
+     * @return Step builder of next rule building stage
+     */
     T matching(String regex);
 }

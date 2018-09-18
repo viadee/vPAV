@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,10 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a process variable including its name and operations split into reads, writes and deletes.
+ * Can also be considered as a grouping of process variable operations by name.
+ */
 public class ProcessVariable {
 
     private final String name;

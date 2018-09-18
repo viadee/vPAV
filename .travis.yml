@@ -1,10 +1,5 @@
 language: java
 install: 
-addons:
-  sonarcloud:
-    organization: "viadee" 
-script: 
-  - mvn install -DskipTests=false -Dmaven.javadoc.skip=true
-  - sonar-scanner
-
-
+script: mvn install -DskipTests=false -Dmaven.javadoc.skip=true
+notifications:
+    slack: viadee:RkhVsV7eSLSkL7v5Tck1ernR
