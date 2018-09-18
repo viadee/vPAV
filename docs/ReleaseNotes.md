@@ -1,15 +1,73 @@
 # Release notes
 
-## 2.5.2-SNAPSHOT
+## 2.7.0
 
 ### Features
-**vPAV-168** Added information for severity, added unique issue ID to modal
+[**Issue 69**](https://github.com/viadee/vPAV/issues/69) Integration of static process variable analysis (limited scope)  
+[**Issue 78**](https://github.com/viadee/vPAV/issues/78) Further enhancements for the DataFlowChecker  
+
+### Fixes
+[**Issue 75**](https://github.com/viadee/vPAV/issues/75) Fixed bugged output in case no errors have been found
+
+### Misc
+
+## 2.6.1
+
+### Features
+
+### Fixes
+[**Issue 64**](https://github.com/viadee/vPAV/issues/64) Fixed varying issue ids due to usage of path separators  
+[**Issue 48**](https://github.com/viadee/vPAV/issues/48) Fixed a bug where validation failed due to wrong folder reference  
+
+### Misc
+[**Issue 56**](https://github.com/viadee/vPAV/issues/56) Refactored checker singletons due to wrong output  
+[**Issue 47**](https://github.com/viadee/vPAV/issues/47) OWASP check added and cleaned  
+
+## 2.6.0
+
+### Features
+[**Issue 46**](https://github.com/viadee/vPAV/issues/46) Added a DSL to formulate rules in order to validate data flows  
+[**Issue 28**](https://github.com/viadee/vPAV/issues/28) Added visualization of reads/writes of process variables (data flow) to HTML output  
+[**Issue 43**](https://github.com/viadee/vPAV/issues/43) Creation of HTML output now optional  
+
+### Fixes
+[**Issue 58**](https://github.com/viadee/vPAV/issues/58) Fixed duplicated entries in HTML output table  
+[**Issue 53**](https://github.com/viadee/vPAV/issues/53) Fixed wrongly created issues by IssueWriter  
+
+### Misc
+
+## 2.5.4
+
+### Features
+
+### Fixes
+[**Issue 20**](https://github.com/viadee/vPAV/issues/20) Fixed bugged visual HTML output under OSX  
+[**Issue 37**](https://github.com/viadee/vPAV/issues/37) Fixed a bug, where only the first issue on a modal was added to the list  
+
+### Misc
+[**Issue 39**](https://github.com/viadee/vPAV/issues/39) Analysis of process variables now only performed if checker is activated  
+[**Issue 26**](https://github.com/viadee/vPAV/issues/26) Added example JUnit test for external checker. 
+
+## 2.5.3
+
+### Features
+
+### Fixes
+
+### Misc
+[**Issue 25**](https://github.com/viadee/vPAV/issues/25) Refactoring of checker initialization  
+[**Issue 24**](https://github.com/viadee/vPAV/issues/24) Redesigned behavior of VersioningChecker for package-based versioning. 
+
+## 2.5.2
+
+### Features
+**vPAV-168** Added information for severity, added unique issue ID to modal  
 
 ### Fixes
 
 ### Misc
 
-## 2.5.1-SNAPSHOT
+## 2.5.1
 
 ### Features
 
@@ -22,7 +80,7 @@
 **vPAV-183** SonarQube cleanup  
 **vPAV-174** Changed logos and other visuals  
 
-## 2.5.0-SNAPSHOT
+## 2.5.0
 
 ### Features
 **vPAV-167** Added localization for DE and EN  
@@ -34,7 +92,7 @@
 **vPAV-187** Changed from BSD4 to BSD3 license  
 **vPAV-172** Refactored CheckerIssue creation  
 
-## 2.4.4-SNAPSHOT
+## 2.4.4
 
 ### Features
 **vPAV-176** Added check for redundant sequence flows  
@@ -59,7 +117,7 @@
 **vPAV-164** Extended documentation for CheckerIssue  
 **vPAV-169** Added JUnit test for external checker + documentation  
 
-## 2.4.2-SNAPSHOT
+## 2.4.2
 
 ### Features
 **vPAV-156** Added check for expressions in MessageStartEvents  
@@ -74,7 +132,7 @@
 **vPAV-159** Added SonarQube analysis  
 **vPAV-162** Added more detailed description for whitglisting issues  
 
-## 2.4.1-SNAPSHOT
+## 2.4.1
 
 ### Features
 **vPAV-161** Added possibility for downloading the model
@@ -85,7 +143,7 @@
 ### Misc
 **vPAV-158** Cleaned internal maven warnings
 
-## 2.4.0-SNAPSHOT
+## 2.4.0
 
 ### Features
 **vPAV-135** Added FieldInjectionChecker
@@ -98,7 +156,7 @@
 **vPAV-100** Added more documentation  
 **vPAV-149** Check test coverage
 
-## 2.3.0-SNAPSHOT
+## 2.3.0
 
 ### Features
 **vPAV-139** Added success stories to output  
@@ -117,7 +175,7 @@
 **vPAV-147** Refactoring BPMNScanner  
 **vPAV-151** Cleaned up internal docu
 
-## 2.2.3-SNAPSHOT
+## 2.2.3
 
 ### Features
 
@@ -130,7 +188,7 @@
 **vPAV-134** Cleaned up Glasbruchprozess for testing/presentation purposes  
 **vPAV-122** Stopped support as Maven-Plugin  
 
-## 2.2.2-SNAPSHOT
+## 2.2.2
 
 ### Features
 **vPAV-133** MessageEvents now checked for field "Implementation"  
@@ -145,7 +203,7 @@
 **vPAV-132** Check code coverage  
 **vPAV-101** Translation to english  
 
-## 2.2.1-SNAPSHOT
+## 2.2.1
 
 ### Features
 **vPAV-65** ExpressionChecker added  
@@ -159,7 +217,7 @@
 **vPAV-109** Updated Camunda projects to latest vPAV version  
 **vPAV-126** Fixed NullPointer for missing messages in MessageEvents  
 
-## 2.2.0-SNAPSHOT
+## 2.2.0
 
 ### Features
 **vPAV-93** TimerExpressionChecker added  
@@ -182,7 +240,7 @@
 **vPAV-106** Moved output to subfolder of /target and renamed output files  
 **vPAV-107** Overhauled styling of HTML output  
 
-## 2.1.0-SNAPSHOT
+## 2.1.0
 
 ### Features
 
