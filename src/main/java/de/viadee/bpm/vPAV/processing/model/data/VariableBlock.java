@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,63 +31,68 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import soot.toolkits.graph.Block;
 
 /**
- * Represents a process variable including its name and operations split into reads, writes and deletes.
- * Can also be considered as a grouping of process variable operations by name.
+ * 
+ * helper class storing information for data-flow analysis assigns ProcessVariables to basic blocks of the control-flow
+ * graph
+ * 
+ *
  */
-public class ProcessVariable {
+public class VariableBlock {
 
-    private final String name;
-    private final List<ProcessVariableOperation> operations;
-    private final List<ProcessVariableOperation> writes;
-    private final List<ProcessVariableOperation> reads;
-    private final List<ProcessVariableOperation> deletes;
+    private Block block;
 
-    public ProcessVariable(String name) {
-        this.name = name;
-        this.operations = new ArrayList<>();
-        this.writes = new ArrayList<>();
-        this.reads = new ArrayList<>();
-        this.deletes = new ArrayList<>();
+    private List<ProcessVariableOperation> usedProcessVariables;
+
+    public VariableBlock(Block block, List<ProcessVariableOperation> pvs) {
+        this.block = block;
+        this.usedProcessVariables = pvs;
     }
 
-    public void addWrite(ProcessVariableOperation operation) {
-        operations.add(operation);
-        writes.add(operation);
+    public void setBlock(Block block) {
+
+        this.block = block;
     }
 
-    public void addRead(ProcessVariableOperation operation) {
-        operations.add(operation);
-        reads.add(operation);
+    public Block getBlock() {
+        return block;
     }
 
-    public void addDelete(ProcessVariableOperation operation) {
-        operations.add(operation);
-        deletes.add(operation);
+    public List<ProcessVariableOperation> getAllProcessVariables() {
+        return usedProcessVariables;
     }
 
-    public String getName() {
-        return name;
+    public void addProcessVariable(ProcessVariableOperation processVariable) {
+        this.usedProcessVariables.add(processVariable);
     }
 
-    public List<ProcessVariableOperation> getWrites() {
-        return writes;
+    public void addUsed(List<ProcessVariableOperation> usedVariables) {
+
     }
 
-    public List<ProcessVariableOperation> getReads() {
-        return reads;
+    public Map<String, ProcessVariableOperation> getProcessVariablesMapped() {
+
+        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+        for (ProcessVariableOperation pv : usedProcessVariables) {
+
+            variables.put(pv.getName(), pv);
+        }
+
+        return variables;
     }
 
-    public List<ProcessVariableOperation> getDeletes() {
-        return deletes;
+    public void addAllProcessVariables(List<ProcessVariableOperation> pvs) {
+        for (ProcessVariableOperation pv : pvs) {
+
+            addProcessVariable(pv);
+        }
+
     }
 
-    public List<ProcessVariableOperation> getOperations() {
-        return operations;
-    }
 }

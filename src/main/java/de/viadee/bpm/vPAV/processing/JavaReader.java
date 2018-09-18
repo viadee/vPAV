@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,32 +29,18 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.dataflow;
+package de.viadee.bpm.vPAV.processing;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import java.util.Map;
 
-/**
- * Initial step builder for building data flow rules. Optionally starts with constraint definition or immediate condition.
- */
-public interface ProcessVariableSet {
-    /**
-     * Begins a predicate construction to define a constraint.
-     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
-     */
-    ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> thatAre();
-    /**
-     * Method to define a custom constraint.
-     * @return next step builder
-     */
-    ConstrainedProcessVariableSet thatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
-    /**
-     * Begins a predicate construction to define a condition.
-     * @return First builder of predicate construction and specifying next stage of rule building with generic parameter.
-     */
-    ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe();
-    /**
-     * Method to define a custom condition.
-     * @return next step builder
-     */
-    ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+
+public interface JavaReader {
+
+    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
+            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+            final String scopeId);
 }

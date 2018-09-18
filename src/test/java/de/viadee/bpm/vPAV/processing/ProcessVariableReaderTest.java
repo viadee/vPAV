@@ -41,7 +41,6 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
@@ -55,9 +54,11 @@ import org.xml.sax.SAXException;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
-public class ProcessVariableOperationReaderTest {
+public class ProcessVariableReaderTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
@@ -72,7 +73,7 @@ public class ProcessVariableOperationReaderTest {
         final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
         final URL[] classUrls = { classUrl, resourcesUrl };
         cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);        
+        RuntimeConfig.getInstance().setClassLoader(cl);
     }
 
     @AfterClass
@@ -132,4 +133,3 @@ public class ProcessVariableOperationReaderTest {
         Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.getOperation());
     }
 }
-

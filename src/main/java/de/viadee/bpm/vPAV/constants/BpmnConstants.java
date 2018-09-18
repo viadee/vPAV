@@ -305,6 +305,8 @@ public class BpmnConstants {
 
     public static final String VPAV_NO_ISSUES_ELEMENTS = "noIssuesElements";
 
+    public static final String PROCESS_VARIABLE_MODEL_CHECKER = "ProcessVariablesModelChecker";
+
     private BpmnConstants() {
     }
 

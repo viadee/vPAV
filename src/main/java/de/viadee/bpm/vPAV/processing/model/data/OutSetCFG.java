@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,63 +31,59 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import soot.toolkits.graph.Block;
 
 /**
- * Represents a process variable including its name and operations split into reads, writes and deletes.
- * Can also be considered as a grouping of process variable operations by name.
+ * 
+ * helper class storing information for Data-flow analysis algorithm
+ * 
+ * 
+ *
  */
-public class ProcessVariable {
+public class OutSetCFG {
 
-    private final String name;
-    private final List<ProcessVariableOperation> operations;
-    private final List<ProcessVariableOperation> writes;
-    private final List<ProcessVariableOperation> reads;
-    private final List<ProcessVariableOperation> deletes;
+    private List<VariableBlock> variableBlocks;
 
-    public ProcessVariable(String name) {
-        this.name = name;
-        this.operations = new ArrayList<>();
-        this.writes = new ArrayList<>();
-        this.reads = new ArrayList<>();
-        this.deletes = new ArrayList<>();
+    public OutSetCFG(List<VariableBlock> vbs) {
+
+        this.variableBlocks = vbs;
     }
 
-    public void addWrite(ProcessVariableOperation operation) {
-        operations.add(operation);
-        writes.add(operation);
+    public VariableBlock getVariableBlock(Block b) {
+
+        for (VariableBlock vb : variableBlocks) {
+
+            if (vb.getBlock().equals(b)) {
+                return vb;
+            }
+        }
+        return null;
     }
 
-    public void addRead(ProcessVariableOperation operation) {
-        operations.add(operation);
-        reads.add(operation);
+    public void addVariableBlock(VariableBlock vb) {
+
+        this.variableBlocks.add(vb);
     }
 
-    public void addDelete(ProcessVariableOperation operation) {
-        operations.add(operation);
-        deletes.add(operation);
+    public Map<String, ProcessVariableOperation> getAllProcessVariables() {
+
+        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+
+        for (VariableBlock vb : variableBlocks) {
+
+            variables.putAll(vb.getProcessVariablesMapped());
+
+        }
+        return variables;
     }
 
-    public String getName() {
-        return name;
+    public List<VariableBlock> getAllVariableBlocks() {
+
+        return variableBlocks;
     }
 
-    public List<ProcessVariableOperation> getWrites() {
-        return writes;
-    }
-
-    public List<ProcessVariableOperation> getReads() {
-        return reads;
-    }
-
-    public List<ProcessVariableOperation> getDeletes() {
-        return deletes;
-    }
-
-    public List<ProcessVariableOperation> getOperations() {
-        return operations;
-    }
 }

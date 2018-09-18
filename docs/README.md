@@ -109,18 +109,37 @@ an visual version based on  [BPMN.io](https://bpmn.io/) of all errors and warnin
 ### Visual output
 The header contains the name of the current model. Below the heading, you can select a different model of the project to be displayed.
 You can zoom in and out with the mouse wheel and move the model by click and hold.
+
+There are two different view modes with each providing a different overlay for the model and tables with additional information.
+
+To find the visual output, check the created vPAV folder inside your project's target folder. Open the **validationResult.html** with any browser to explore your process model and the found issues.
+####Issue Overlay
 In the BPMN model, the elements with errors are highlighted. Error categories are indicated by color. 
 An overlay specifies the number of errors found on an element. Details can be seen by clicking on the overlay.
 All errors are laid out in a table below the model. Clicking on the _rulename opens_ the corresponding documentation.
 Clicking on the _Element-Id_ or _invalid sequenzflow_ marks the corresponding element(s) in the model.
 
-To find the visual output, check the created vPAV folder inside your project's target folder. Open the **validationResult.html** with any browser to explore your process model and the found issues.
+##### Model
+![Model](img/model-issue-overlay.png "Browsable Model from BPMN.io")
 
-### Model
-![Model](img/model.png "Browsable Model from BPMN.io")
+##### Issue Table
+![Issue Table](img/issue-table.png "Table with listed information for all issues")
 
-### Issue Table
-![Issue Table](img/table.png "Table with listed information for all issues")
+#### Variable Overlay
+
+In the BPMN model, all detected operations to process variables are highlighted. 
+An overlay specifies the number of reads, writes and deletes.
+By clicking on the overlay further information can be obtained including the names of process variables and exact location of operation.
+A table below the model lists all process variable and their operations.
+Clicking on the process variable name highlights all model elements with operations to this variables.
+Clicking on element IDs marks the corresponding element in the model.
+
+
+##### Model
+![Model](img/model-variable-overlay.png "Browsable Model from BPMN.io")
+
+##### Issue Table
+![Issue Table](img/variable-table.png "Table with listed information for all process variables")
 
 ## Requirements
 - JDK 8

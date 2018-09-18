@@ -36,11 +36,36 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
 import java.util.Collection;
 
+/**
+ * Data flow rule that can be evaluated in two different ways.
+ * Also represents last stage of rule building construction with the option to define reason and criticality.
+ */
 public interface DataFlowRule {
+    /**
+     * Method to define a reason.
+     * @return Same step builder as this is not a stage transition.
+     */
     DataFlowRule because(String reason);
+    /**
+     * Method to define criticality.
+     * Also implying issue type for vPAV validation.
+     * @return Same step builder as this is not a stage transition.
+     */
     DataFlowRule withCriticality(CriticalityEnum criticality);
 
+    /**
+     * Evaluates rule on the set of process variables.
+     * If at least one process variable violates the rule, an AssertionError is thrown
+     * including a rule description and listing rule violations.
+     * @param variables process variables to evaluate rule on.
+     * @throws AssertionError in case at least one violation exists.
+     */
     void check(Collection<ProcessVariable> variables);
+    /**
+     * Evaluates rule on the set of process variables.
+     * EvaluationResult for each validated process variable is returned.
+     * @param variables process variables to evaluate rule on.
+     */
     Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables);
     String getRuleDescription();
     String getViolationMessageFor(EvaluationResult<ProcessVariable> result);

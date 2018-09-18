@@ -112,6 +112,8 @@ public final class ConfigConstants {
     public static final String MESSAGE = "message";
 
     public static final String CRITICALITY = "Criticality";
+    
+    public static final String USE_STATIC_ANALYSIS_BOOLEAN = "UseStaticAnalysisBoolean";
 
     public static final String CREATE_OUTPUT_RULE = "CreateOutputHTML";
 

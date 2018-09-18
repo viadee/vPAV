@@ -37,11 +37,22 @@ import org.springframework.util.Assert;
 
 import java.util.Collection;
 
+/**
+ * Implements all stages of data flow rule construction.
+ * Unifying implementation in one class eases management of construction state.
+ *
+ * Only reason for it to be public is the static method "processVariables()" providing an elegant
+ * entry point to start definition of data flow rules.
+ */
 public class DataFlowRuleBuilder implements ProcessVariableSet, ConditionedProcessVariableSet, ConstrainedProcessVariableSet, DataFlowRule {
 
     private DescribedPredicateEvaluator<ProcessVariable> condition;
     private DescribedPredicateEvaluator<ProcessVariable> constraint;
 
+    /**
+     * Entry point to start definition of data flow rules.
+     * @return initial step builder of rule building
+     */
     public static ProcessVariableSet processVariables() {
         return new DataFlowRuleBuilder();
     }
