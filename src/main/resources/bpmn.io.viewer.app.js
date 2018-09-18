@@ -357,10 +357,7 @@ function createIssueTable(bpmnFile, tableContent) {
 
             //ruleName
             myCell = document.createElement("td");
-            let ruleDescription = issue.ruleDescription !== undefined ?
-                `${issue.ruleName}: '${issue.ruleDescription}'` :
-                issue.ruleName;
-            myText = document.createTextNode(ruleDescription);
+            myText = document.createTextNode(issue.ruleName);
             myCell.setAttribute("id", issue.classification) // mark cell
 
             //create link for default checkers
