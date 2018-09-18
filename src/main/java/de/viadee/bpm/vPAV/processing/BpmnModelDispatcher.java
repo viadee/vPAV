@@ -192,7 +192,7 @@ public class BpmnModelDispatcher {
      * @param processdefinition
      *            bpmn file
      */
-    private Collection<BpmnElement> getBpmnElements(
+    public static Collection<BpmnElement> getBpmnElements(
             File processdefinition, Collection<BaseElement> baseElements, ElementGraphBuilder graphBuilder) {
         List<BpmnElement> elements = new ArrayList<>();
         for (final BaseElement baseElement : baseElements) {
@@ -210,7 +210,7 @@ public class BpmnModelDispatcher {
      * @param elements
      *            Collection of BPMN elements
      */
-    private Collection<ProcessVariable> getProcessVariables(Collection<BpmnElement> elements) {
+    public static Collection<ProcessVariable> getProcessVariables(Collection<BpmnElement> elements) {
         // write variables containing elements
         // first, we need to inverse mapping to process variable -> operations (including element)
         final Map<String, ProcessVariable> processVariables = new HashMap<>();

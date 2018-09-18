@@ -36,6 +36,10 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a process variable including its name and operations split into reads, writes and deletes.
+ * Can also be considered as a grouping of process variable operations by name.
+ */
 public class ProcessVariable {
 
     private final String name;

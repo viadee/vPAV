@@ -35,6 +35,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Representing a predicate to define constraints and conditions with.
+ * Contains logic for evaluation returning an EvaluationResult object including a result message.
+ * @param <T>
+ */
 public class DescribedPredicateEvaluator<T> {
 
     private final Function<T, EvaluationResult<T>> predicateEvaluator;
@@ -49,10 +54,19 @@ public class DescribedPredicateEvaluator<T> {
         return predicateEvaluator.apply(value);
     }
 
+    /**
+     * Predicate description used to generate rule descriptions.
+     * @return predicate description
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Combines this predicate with another on disjunctively
+     * @param other
+     * @return combined predicate
+     */
     public DescribedPredicateEvaluator<T> or(DescribedPredicateEvaluator<T> other) {
         Function<T, EvaluationResult<T>> orPredicateEvaluator = (T) ->
         {
@@ -66,6 +80,11 @@ public class DescribedPredicateEvaluator<T> {
     }
 
 
+    /**
+     * Combines this predicate with another on conjunctively
+     * @param other
+     * @return combined predicate
+     */
     public DescribedPredicateEvaluator<T> and(DescribedPredicateEvaluator other) {
         Function<T, EvaluationResult<T>> andPredicateEvaluator = (T) ->
         {
@@ -78,6 +97,10 @@ public class DescribedPredicateEvaluator<T> {
         return new DescribedPredicateEvaluator<>(andPredicateEvaluator, description + " and " + other.description);
     }
 
+    /**
+     * Inverses this predicate.
+     * @return Inversed predicate
+     */
     public DescribedPredicateEvaluator<T> inverse() {
         return new DescribedPredicateEvaluator<>(T -> predicateEvaluator.apply(T).inverse(), "not " + description);
     }
