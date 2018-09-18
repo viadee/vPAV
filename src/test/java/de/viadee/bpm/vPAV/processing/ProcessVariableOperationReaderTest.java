@@ -132,3 +132,4 @@ public class ProcessVariableOperationReaderTest {
         Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.getOperation());
     }
 }
+
