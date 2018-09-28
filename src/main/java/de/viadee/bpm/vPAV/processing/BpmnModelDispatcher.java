@@ -32,7 +32,11 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.checker.*;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
@@ -77,7 +81,7 @@ public class BpmnModelDispatcher {
      *            ruleSet
      * @return issues
      */
-    public ModelDispatchResult dispatchWithVariables(final File processdefinition,
+    public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processdefinition,
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,
             final Map<String, Collection<String>> processIdToVariables,
@@ -97,8 +101,18 @@ public class BpmnModelDispatcher {
                 processIdToPathMap, messageIdToVariables,
                 processIdToVariables, bpmnScanner);
 
+        
+        // Depending on Regex/Static analysis, find Process Variables from Java Delegate
+        JavaReaderContext jvc = new JavaReaderContext();
+             
+        if (getIsStatic(conf)) {
+            jvc.setJavaReadingStrategy(new JavaReaderStatic());
+        } else {
+            jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        }
+        
         // create data flow graphs for bpmn model
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
+        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
                 processdefinition.getPath(), new ArrayList<>());
 
         // add data flow information to graph and calculate invalid paths
@@ -306,6 +320,22 @@ public class BpmnModelDispatcher {
 
         return checkerCollection;
     }
+    
+    /**
+	 * Based on the RuleSet config file, set the usage of Static Analysis to true.
+	 * Based on the boolean value the // * Process Variables are collected with
+	 * Regex or Static Analysis // * // * @param rules // * @return //
+	 */
+	private boolean getIsStatic(Map<String, Rule> rules) {
+		boolean isStatic = false;
+		Rule rule = rules.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
+		if (rule != null) {
+			Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
+			if (setting != null && setting.getValue().equals("true"))
+				isStatic = true;
+		}
+		return isStatic;
+	}
 
     private String getClassName(Class<?> clazz) {
         return clazz.getSimpleName();

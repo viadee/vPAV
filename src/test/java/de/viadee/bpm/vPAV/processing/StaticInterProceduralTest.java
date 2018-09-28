@@ -35,6 +35,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,6 +45,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -72,10 +74,11 @@ public class StaticInterProceduralTest {
     @Test
     public void testInterProceduralAnalysis() throws ParserConfigurationException, SAXException, IOException {
         // Given
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         runner.viadeeProcessApplicationValidator(ConfigConstants.TEST_JAVAPATH);
 
         // When
-        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(
+        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null);
         // Then
         assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,

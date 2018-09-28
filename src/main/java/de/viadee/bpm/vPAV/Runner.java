@@ -51,15 +51,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import de.viadee.bpm.vPAV.processing.model.data.*;
-
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
-import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueOutputWriter;
 import de.viadee.bpm.vPAV.output.JsOutputWriter;
@@ -69,9 +63,11 @@ import de.viadee.bpm.vPAV.output.RuleSetOutputWriter;
 import de.viadee.bpm.vPAV.output.XmlOutputWriter;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
-import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
 public class Runner {
 
@@ -188,10 +184,6 @@ public class Runner {
 			logger.warning("Could not read language files. No localization available");
 		}
 
-		// set boolean value for ProcessVariableReader: with Static Code Analysis or
-		// without(Regex)?
-		setIsStatic(rules);
-
 		return rules;
 	}
 
@@ -236,7 +228,7 @@ public class Runner {
 	 * Initializes the variableScanner to scan and read outer process variables with
 	 * the current javaResources
 	 */
-	private void getProcessVariables(Map<String, Rule> rules) {
+	private void getProcessVariables(final Map<String, Rule> rules) {
 		if (rules.get("ProcessVariablesModelChecker").isActive()
 				|| rules.get("ProcessVariablesNameConventionChecker").isActive()
 				|| rules.get("DataFlowChecker").isActive()) {
@@ -627,7 +619,7 @@ public class Runner {
 		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
 		ModelDispatchResult dispatchResult;
 		if (variableScanner != null) {
-			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(new File(ConfigConstants.BASEPATH + processdef),
+			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, new File(ConfigConstants.BASEPATH + processdef),
 					fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
 					variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
 					dataFlowRules, fileScanner.getResourcesNewestVersions(), rules);
@@ -680,21 +672,7 @@ public class Runner {
 		return ignoredIssuesMap;
 	}
 
-	/**
-	 * Based on the RuleSet config file, set the usage of Static Analysis to true.
-	 * Based on the boolean value the // * Process Variables are collected with
-	 * Regex or Static Analysis // * // * @param rules // * @return //
-	 */
-	private static boolean setIsStatic(Map<String, Rule> rules) {
-		Rule rule = rules.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
-		if (rule != null) {
-			Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
-			if (setting != null && setting.getValue().equals("true"))
-				isStatic = true;
-		}
-		return isStatic;
-	}
-
+	
 	public Set<String> getModelPath() {
 		return getFileScanner().getProcessdefinitions();
 	}

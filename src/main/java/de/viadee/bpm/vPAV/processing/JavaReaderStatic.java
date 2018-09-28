@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,7 +93,7 @@ public class JavaReaderStatic implements JavaReader {
      *            - Scope of the element
      * @return - Map of Process Variables
      */
-    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
+    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner, final String classFile,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String scopeId) {
 
@@ -104,7 +105,8 @@ public class JavaReaderStatic implements JavaReader {
       
             System.setProperty("soot.class.path", sootPath);
 
-            final Set<String> classPaths = FileScanner.getJavaResourcesFileInputStream();
+            final Set<String> classPaths = fileScanner.getJavaResourcesFileInputStream();
+            //final ArrayList<String>
             final String delegateMethodName = "execute";
 
             variables.putAll(
@@ -323,6 +325,7 @@ public class JavaReaderStatic implements JavaReader {
                     String methodName = src.tgt().getName();
 
                     String className = src.tgt().getDeclaringClass().getName();
+                    // Only visit methods from other classes
                     if (!className.equals(oldClassName)) {
                     	if (System.getProperty("os.name").startsWith("Windows")) {
                     		className = className.replace(".", "\\") + ".java";
@@ -464,75 +467,121 @@ public class JavaReaderStatic implements JavaReader {
      */
     private void addAnomaliesFoundInPathsRecursive(final BpmnElement element, Block currentBlock,
             LinkedList<String> currentPath, final OutSetCFG outSet,
-            LinkedList<ProcessVariableOperation> predecessorVaribalesList, String edge) {
+            LinkedList<ProcessVariableOperation> predecessorVariablesList, String edge) {
 
         // List<AnomalyContainer> foundAnomalies = new ArrayList<AnomalyContainer>();
-        currentPath.add(edge);
-
+    	if (edge != null && edge != "") {
+    		currentPath.add(edge);	
+    	}
+        
         // get the VariableBlock
         VariableBlock variableBlock = outSet.getVariableBlock(currentBlock);
 
         // set IN + this Variables as OUT
         LinkedList<ProcessVariableOperation> usedVariables = new LinkedList<ProcessVariableOperation>();
         usedVariables.addAll(variableBlock.getAllProcessVariables());
-
-        // Based on last appearance of Variable decide on UR, DD, DU anomaly
+        
+        // prepare for statement by statement comparison
+        Set<ProcessVariableOperation> pvSet = new HashSet<ProcessVariableOperation>(usedVariables);
+        for (ProcessVariableOperation pV : pvSet) {
+        	// create unique lists for operations on same variable
+        	LinkedList<ProcessVariableOperation> innerList = new LinkedList<ProcessVariableOperation>();
+        	for (ProcessVariableOperation variable : usedVariables) { 
+        		if (pV.getName().equals(variable.getName())) {
+        			innerList.add(variable);
+        		}
+        	}
+        	checkStatementByStatement(element, innerList);
+        }
+        
+        // Based on last appearance of Variable decide on UR, DD, DU anomaly        
         for (ProcessVariableOperation variable : usedVariables) {
-            if (predecessorVaribalesList.lastIndexOf(variable) >= 0) {
-
-                ProcessVariableOperation lastApperance = predecessorVaribalesList
-                        .get(predecessorVaribalesList.lastIndexOf(variable));
-                if (urSourceCode(lastApperance, variable)) {
-                    element.addSourceCodeAnomaly(new AnomalyContainer(variable.getName(), Anomaly.UR,
-                            element.getBaseElement().getId(), variable));
-                }
-
-                if (ddSourceCode(lastApperance, variable)) {
-                    element.addSourceCodeAnomaly(new AnomalyContainer(variable.getName(), Anomaly.DD,
-                            element.getBaseElement().getId(), variable));
-                }
-
-                if (duSourceCode(lastApperance, variable)) {
-                    element.addSourceCodeAnomaly(new AnomalyContainer(variable.getName(), Anomaly.DU,
-                            element.getBaseElement().getId(), variable));
-                }
-            }
+            if (predecessorVariablesList.lastIndexOf(variable) >= 0) {
+                ProcessVariableOperation lastAppearance = predecessorVariablesList
+                        .get(predecessorVariablesList.lastIndexOf(variable));
+                checkAnomaly(element, variable, lastAppearance);
+            }            
         }
 
-        // Prepare new chain of Variables including this Block's variables for
-        // successors
-        predecessorVaribalesList.addAll(usedVariables);
+        // Prepare new chain of Variables including this Block's variables for successors
+        predecessorVariablesList.addAll(usedVariables);
 
-        List<Block> sucessors = currentBlock.getSuccs();
-        for (Block sucessor : sucessors) {
-            String newEdge = currentBlock.toShortString() + sucessor.toShortString();
-            int occurance = Collections.frequency(currentPath, newEdge);
-            if (occurance < 2) {
-                addAnomaliesFoundInPathsRecursive(element, sucessor, currentPath, outSet, predecessorVaribalesList,
+        List<Block> successors = currentBlock.getSuccs();
+        for (Block successor : successors) {
+            String newEdge = currentBlock.toShortString() + successor.toShortString();
+            int occurrence = Collections.frequency(currentPath, newEdge);
+            if (occurrence < 2) {
+                addAnomaliesFoundInPathsRecursive(element, successor, currentPath, outSet, predecessorVariablesList,
                         newEdge);
             }
         }
 
         currentPath.removeLast();
         for (ProcessVariableOperation pv : variableBlock.getAllProcessVariables()) {
-            predecessorVaribalesList.removeLastOccurrence(pv);
+        	predecessorVariablesList.removeLastOccurrence(pv);
         }
 
     }
 
     /**
+     * Checks for anomalies occurring between elements
+     * 
+     * @param element Current BpmnElement
+     * @param innerList List of all variable operations (same name) 
+     */
+	private void checkStatementByStatement(final BpmnElement element, final LinkedList<ProcessVariableOperation> innerList) {
+		
+		if (innerList.size() >= 2) {
+			ProcessVariableOperation prev = null;
+			for (ProcessVariableOperation curr : innerList) {
+				if (prev == null) {
+					prev = curr;
+					continue;
+				}				
+				checkAnomaly(element, curr, prev);
+			}
+		}
+
+	}
+
+	/**
+     * Check for dataflow anomaly between current and previous variable operation
+     * 
+     * @param element Current BpmnElement
+     * @param curr current operation 
+     * @param last previous operation
+     */
+	private void checkAnomaly(final BpmnElement element, ProcessVariableOperation curr,
+			ProcessVariableOperation last) {
+		if (urSourceCode(last, curr)) {
+		    element.addSourceCodeAnomaly(new AnomalyContainer(curr.getName(), Anomaly.UR,
+		            element.getBaseElement().getId(), curr));
+		}
+
+		if (ddSourceCode(last, curr)) {
+		    element.addSourceCodeAnomaly(new AnomalyContainer(curr.getName(), Anomaly.DD,
+		            element.getBaseElement().getId(), curr));
+		}
+
+		if (duSourceCode(last, curr)) {
+		    element.addSourceCodeAnomaly(new AnomalyContainer(curr.getName(), Anomaly.DU,
+		            element.getBaseElement().getId(), curr));
+		}
+	}
+
+    /**
      * UR anomaly: second last operation of PV is DELETE, last operation is READ
      * 
-     * @param lastApperance
+     * @param prev
      *            - Previous ProcessVariable
-     * @param currentApperance
+     * @param curr
      *            - Current ProcessVariable
      * @return - true/false
      */
-    private boolean urSourceCode(final ProcessVariableOperation lastApperance,
-            final ProcessVariableOperation currentApperance) {
-        if (currentApperance.getOperation().equals(VariableOperation.READ)
-                && lastApperance.getOperation().equals(VariableOperation.DELETE)) {
+    private boolean urSourceCode(final ProcessVariableOperation prev,
+            final ProcessVariableOperation curr) {
+        if (curr.getOperation().equals(VariableOperation.READ)
+                && prev.getOperation().equals(VariableOperation.DELETE)) {
             return true;
         }
         return false;
@@ -541,14 +590,14 @@ public class JavaReaderStatic implements JavaReader {
     /**
      * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
      * 
-     * @param last
+     * @param prev
      *            - Previous ProcessVariable
-     * @param pv
+     * @param curr
      *            - Current ProcessVariable
      * @return - true/false
      */
-    private boolean ddSourceCode(final ProcessVariableOperation last, final ProcessVariableOperation pv) {
-        if (pv.getOperation().equals(VariableOperation.WRITE) && last.getOperation().equals(VariableOperation.WRITE)) {
+    private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+        if (curr.getOperation().equals(VariableOperation.WRITE) && prev.getOperation().equals(VariableOperation.WRITE)) {
             return true;
         }
         return false;
@@ -557,14 +606,14 @@ public class JavaReaderStatic implements JavaReader {
     /**
      * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
      * 
-     * @param last
+     * @param prev
      *            - Previous ProcessVariable
-     * @param pv
+     * @param curr
      *            - Current ProcessVariable
      * @return - true/false
      */
-    private boolean duSourceCode(final ProcessVariableOperation last, final ProcessVariableOperation pv) {
-        if (pv.getOperation().equals(VariableOperation.DELETE) && last.getOperation().equals(VariableOperation.WRITE)) {
+    private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+        if (curr.getOperation().equals(VariableOperation.DELETE) && prev.getOperation().equals(VariableOperation.WRITE)) {
             return true;
         }
         return false;
