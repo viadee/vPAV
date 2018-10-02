@@ -48,6 +48,7 @@ public enum CamundaProcessVariableFunctions {
     GetVariable("getVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.READ), 
     GetVariable2("getVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.READ), 
     RemoveVariable("removeVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.DELETE),
+    RemoveVariable2("removeVariable", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
     SetVariableS("setVariable", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
     GetVariableS("getVariable", CamundaMethodServices.SCOPE, 1, 1, VariableOperation.READ),
     SetVariabelL("setVariableLocal", CamundaMethodServices.SCOPE, 2, 1,VariableOperation.WRITE);

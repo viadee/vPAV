@@ -88,7 +88,7 @@ public class BpmnModelDispatcher {
             final Collection<DataFlowRule> dataFlowRules,
             final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
 
-        BpmnScanner bpmnScanner = createScanner(processdefinition);
+        final BpmnScanner bpmnScanner = createScanner(processdefinition);
         
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
@@ -110,7 +110,7 @@ public class BpmnModelDispatcher {
         } else {
             jvc.setJavaReadingStrategy(new JavaReaderRegex());
         }
-        
+              
         // create data flow graphs for bpmn model
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
                 processdefinition.getPath(), new ArrayList<>());

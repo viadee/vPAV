@@ -34,6 +34,8 @@ package de.viadee.bpm.vPAV.constants;
 public class CamundaMethodServices {
 
     public static final String DELEGATE = "org.camunda.bpm.engine.delegate.DelegateExecution";
+    
+    public static final String DELEGATE_TASK = "org.camunda.bpm.engine.delegate.DelegateTask";
 
     public static final String RUNTIME = "org.camunda.bpm.engine.RuntimeService";
 
