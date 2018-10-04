@@ -207,8 +207,8 @@ public class BpmnModelDispatcher {
      *            bpmn file
      */
     public static Collection<BpmnElement> getBpmnElements(
-            File processdefinition, Collection<BaseElement> baseElements, ElementGraphBuilder graphBuilder) {
-        List<BpmnElement> elements = new ArrayList<>();
+            final File processdefinition, final Collection<BaseElement> baseElements, final ElementGraphBuilder graphBuilder) {
+        final List<BpmnElement> elements = new ArrayList<>();
         for (final BaseElement baseElement : baseElements) {
             BpmnElement element = graphBuilder.getElement(baseElement.getId());
             if (element == null) {

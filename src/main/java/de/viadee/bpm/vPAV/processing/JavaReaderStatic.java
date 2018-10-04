@@ -161,7 +161,6 @@ public class JavaReaderStatic implements JavaReader {
 
 		// Add Java code level anomalies to BpmnElement so later it is included into
 		try {
-
 			addAnomaliesFoundInSourceCode(element, outSet);
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -595,7 +594,7 @@ public class JavaReaderStatic implements JavaReader {
 	 *            previous operation
 	 */
 	private void checkAnomaly(final BpmnElement element, ProcessVariableOperation curr, ProcessVariableOperation last) {
-		if (urSourceCode(last, curr)) {
+		if (urSourceCode(last, curr)) {			
 			element.addSourceCodeAnomaly(
 					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
 		}
