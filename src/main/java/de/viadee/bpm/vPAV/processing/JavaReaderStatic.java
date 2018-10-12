@@ -197,7 +197,6 @@ public class JavaReaderStatic implements JavaReader {
     		className = className.replace("/", ".").replace(".java", "");
     	}
         
-
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
 
@@ -214,6 +213,8 @@ public class JavaReaderStatic implements JavaReader {
 			RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap"); 
 			VoidType returnType = VoidType.v();	
 			
+			SootMethod method = null;
+			
             switch (methodName) {
 			case "execute":
 				parameterTypes.add((Type)delegateExecutionType);
@@ -229,23 +230,29 @@ public class JavaReaderStatic implements JavaReader {
 				break;				
 			case "mapInputVariables":  
 				parameterTypes.add((Type)delegateExecutionType);
-				parameterTypes.add((Type)mapVariablesType);				
+				parameterTypes.add((Type)mapVariablesType);	
 				break;			
 			case "mapOutputVariables":	
 				parameterTypes.add((Type)delegateExecutionType);
 				parameterTypes.add((Type)mapVariablesType);
 				break;				
-			default:
+			default:				
 				break;
 			}                        
                  
-            SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type)returnType);
+            method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type)returnType);
 
             if (method != null) {  
             	outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
     					outSet, originalBlock, method);  
+            } else {
+            	method = sootClass.getMethodByNameUnsafe(methodName);
+            	if (method != null) {
+            		outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+        					outSet, originalBlock, method);
             	} else {
             		LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
+            	}            		
             }            
         } else {
             LOGGER.warning("Class " + classFile + " was not found by Soot");
