@@ -114,6 +114,8 @@ public class JavaReaderStatic implements JavaReader {
 			final ArrayList<String> delegateMethods = new ArrayList<>();
 			delegateMethods.add("execute");
 			delegateMethods.add("notify");
+			delegateMethods.add("mapInputVariables");
+			delegateMethods.add("mapInputVariables");
 
 			for (String delegateMethodName : delegateMethods) {
 				variables.putAll(classFetcher(classPaths, classFile, delegateMethodName, classFile, element, chapter,
@@ -146,8 +148,8 @@ public class JavaReaderStatic implements JavaReader {
 	 *            - Scope of the element
 	 * @return
 	 */
-	public Map<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths, String className,
-			String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
+	public Map<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths, final String className,
+			final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId) {
 
 		Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
@@ -185,10 +187,9 @@ public class JavaReaderStatic implements JavaReader {
      * @return
      */
     public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className,
-            String methodName,
-            final String classFile, final BpmnElement element, final ElementChapter chapter,
+            final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId,
-            OutSetCFG outSet, VariableBlock originalBlock) {
+            OutSetCFG outSet, final VariableBlock originalBlock) {
 
     	if (System.getProperty("os.name").startsWith("Windows")) {
     		className = className.replace("\\", ".").replace(".java", "");
@@ -206,30 +207,45 @@ public class JavaReaderStatic implements JavaReader {
             sootClass.setApplicationClass();
             Scene.v().loadNecessaryClasses();      
                         
-            // Retrieve the method and its body
-            
+            // Retrieve the method and its body based on the used interface       
             List<Type> parameterTypes = new ArrayList<Type>();
-            RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution");           
-            VoidType returnType = VoidType.v();			
+            RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"); 
+			RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
+			RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap"); 
+			VoidType returnType = VoidType.v();	
 			
-			parameterTypes.add((Type)delegateExecutionType);
-   
-			SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type)returnType);
+            switch (methodName) {
+			case "execute":
+				parameterTypes.add((Type)delegateExecutionType);
+				break;
+			case "notify":
+				for (SootClass clazz : sootClass.getInterfaces()) {
+					if (clazz.getName().equals("org.camunda.bpm.engine.delegate.TaskListener")) {
+						parameterTypes.add((Type)delegateTaskType);
+					} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.ExecutionListener")) {
+						parameterTypes.add((Type)delegateExecutionType);
+					}
+				}
+				break;				
+			case "mapInputVariables":  
+				parameterTypes.add((Type)delegateExecutionType);
+				parameterTypes.add((Type)mapVariablesType);				
+				break;			
+			case "mapOutputVariables":	
+				parameterTypes.add((Type)delegateExecutionType);
+				parameterTypes.add((Type)mapVariablesType);
+				break;				
+			default:
+				break;
+			}                        
+                 
+            SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type)returnType);
 
-            if (method == null) {
-            	RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
-            	parameterTypes.clear();
-            	parameterTypes.add((Type)delegateTaskType);
-            	method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type)returnType);
-            	if (method != null) {
-                	outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-    					outSet, originalBlock, method);
-                } else {
-                	LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
-                }  
-            } else {
+            if (method != null) {  
             	outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-    					outSet, originalBlock, method);
+    					outSet, originalBlock, method);  
+            	} else {
+            		LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
             }            
         } else {
             LOGGER.warning("Class " + classFile + " was not found by Soot");
@@ -441,6 +457,8 @@ public class JavaReaderStatic implements JavaReader {
 		CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
 				.findByNameAndNumberOfBoxes(functionName, baseBox, numberOfArg);
 
+		
+		
 		if (foundMethod != null) {
 
 			int location = foundMethod.getLocation() - 1;
