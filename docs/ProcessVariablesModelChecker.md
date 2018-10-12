@@ -24,24 +24,23 @@ The rule should be configured as follows:
 
 ```
 
-Additionally, it should be configured where to find the process variables which are used at runtime
-The location points at the target folder as starting point and searches recursively for the class "InitialProcessVariables" 
-```xml
-<rule>
-	<name>ProcessVariablesLocation</name>
-	<state>false</state>
-	<settings>
-		<setting name="location">de/viasurance/kfzglasbruch</setting>
-	</settings>		
-</rule>
-```
+Important: All variables used at runtime should be declared beforehand to maximize correctness of the conducted analysis. The declaration has to be done in a class called "InitialProcessVariables". This class can be either a separate class or inner class. 
 
-In the class "InitialProcessVariables" all variables used at runtime should be declared in order to evaluate them.
 ```java
 public class InitialProcessVariables extends InitialProcessVariablesBase {
 
     String filename;
     
+}
+```
+
+```java
+public class Example {
+
+   class InitialProcessVariables extends InitialProcessVariablesBase {
+
+   	String filename;
+    }    
 }
 ```
 
