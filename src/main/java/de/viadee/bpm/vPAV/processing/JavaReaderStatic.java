@@ -115,7 +115,7 @@ public class JavaReaderStatic implements JavaReader {
 			delegateMethods.add("execute");
 			delegateMethods.add("notify");
 			delegateMethods.add("mapInputVariables");
-			delegateMethods.add("mapInputVariables");
+			delegateMethods.add("mapOutputVariables");
 
 			for (String delegateMethodName : delegateMethods) {
 				variables.putAll(classFetcher(classPaths, classFile, delegateMethodName, classFile, element, chapter,
