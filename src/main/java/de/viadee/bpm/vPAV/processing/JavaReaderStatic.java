@@ -157,7 +157,7 @@ public class JavaReaderStatic implements JavaReader {
 		OutSetCFG outSet = new OutSetCFG(new ArrayList<VariableBlock>());
 
 		classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-				outSet, null);
+				outSet, null, new ArrayList<String>());
 
 		processVariables.putAll(outSet.getAllProcessVariables());
 
@@ -172,100 +172,171 @@ public class JavaReaderStatic implements JavaReader {
 
 	}
 
+
 	/**
-     *
-     * Recursive call to find Camunda methods in other classes, called from the JavaDelegate.
-     *
-     * @param classPaths - Set of classes that is included in inter-procedural analysis
-     * @param className -  name of currently analysed class
-     * @param methodName - name of currently analysed method
-     * @param classFile -  location path of class
-     * @param element - Bpmn element
-     * @param chapter - ElementChapter
-     * @param fieldType - KnownElementFieldType
-     * @param scopeId - Scope of the element
-     * @return
-     */
+	 * 
+	 * @param classPaths
+	 * @param className
+	 * @param methodName
+	 * @param classFile
+	 * @param element
+	 * @param chapter
+	 * @param fieldType
+	 * @param scopeId
+	 * @param outSet
+	 * @param originalBlock
+	 * @param visitedClasses
+	 * @return
+	 */
     public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className,
             final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId,
-            OutSetCFG outSet, final VariableBlock originalBlock) {
+            OutSetCFG outSet, final VariableBlock originalBlock, final ArrayList<String> visitedClasses) {
 
-    	if (System.getProperty("os.name").startsWith("Windows")) {
-    		className = className.replace("\\", ".").replace(".java", "");
-    	} else {
-    		className = className.replace("/", ".").replace(".java", "");
-    	}
-        
-        Options.v().set_whole_program(true);
-        Options.v().set_allow_phantom_refs(true);
+    	if (!visitedClasses.contains(className)) {	
+        	if (System.getProperty("os.name").startsWith("Windows")) {
+        		className = className.replace("\\", ".").replace(".java", "");
+        	} else {
+        		className = className.replace("/", ".").replace(".java", "");
+        	}
+        	
+        	visitedClasses.add(className);
+            
+            Options.v().set_whole_program(true);
+            Options.v().set_allow_phantom_refs(true);
+            
+            SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
-        SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
+            if (sootClass != null) {
+            	
+                sootClass.setApplicationClass();
+                Scene.v().loadNecessaryClasses();      
+                            
+                // Retrieve the method and its body based on the used interface       
+                List<Type> parameterTypes = new ArrayList<Type>();
+                RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"); 
+    			RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
+    			RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap"); 
+    			VoidType returnType = VoidType.v();	
+    						
+                switch (methodName) {
+    			case "execute":
+    				parameterTypes.add((Type)delegateExecutionType);
+    				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
+    				break;
+    			case "notify":
+    				for (SootClass clazz : sootClass.getInterfaces()) {
+    					if (clazz.getName().equals("org.camunda.bpm.engine.delegate.TaskListener")) {
+    						parameterTypes.add((Type)delegateTaskType);
+    					} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.ExecutionListener")) {
+    						parameterTypes.add((Type)delegateExecutionType);
+    					}
+    				}
+    				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
+    				break;				
+    			case "mapInputVariables":  
+    				parameterTypes.add((Type)delegateExecutionType);
+    				parameterTypes.add((Type)mapVariablesType);	
+    				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
+    				break;			
+    			case "mapOutputVariables":	
+    				parameterTypes.add((Type)delegateExecutionType);
+    				parameterTypes.add((Type)mapVariablesType);
+    				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
+    				break;				
+    			default:
+    				outSet = retrieveCustomMethod(sootClass, classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, visitedClasses);
+    				break;
+    			}
 
-        if (sootClass != null) {
-            sootClass.setApplicationClass();
-            Scene.v().loadNecessaryClasses();      
-                        
-            // Retrieve the method and its body based on the used interface       
-            List<Type> parameterTypes = new ArrayList<Type>();
-            RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"); 
-			RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
-			RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap"); 
-			VoidType returnType = VoidType.v();	
-			
-			SootMethod method = null;
-			
-            switch (methodName) {
-			case "execute":
-				parameterTypes.add((Type)delegateExecutionType);
-				break;
-			case "notify":
-				for (SootClass clazz : sootClass.getInterfaces()) {
-					if (clazz.getName().equals("org.camunda.bpm.engine.delegate.TaskListener")) {
-						parameterTypes.add((Type)delegateTaskType);
-					} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.ExecutionListener")) {
-						parameterTypes.add((Type)delegateExecutionType);
-					}
-				}
-				break;				
-			case "mapInputVariables":  
-				parameterTypes.add((Type)delegateExecutionType);
-				parameterTypes.add((Type)mapVariablesType);	
-				break;			
-			case "mapOutputVariables":	
-				parameterTypes.add((Type)delegateExecutionType);
-				parameterTypes.add((Type)mapVariablesType);
-				break;				
-			default:				
-				break;
-			}                        
-                 
-            method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type)returnType);
-
-            if (method != null) {  
-            	outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-    					outSet, originalBlock, method);  
             } else {
-            	method = sootClass.getMethodByNameUnsafe(methodName);
-            	if (method != null) {
-            		outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-        					outSet, originalBlock, method);
-            	} else {
-            		LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
-            	}            		
-            }            
-        } else {
-            LOGGER.warning("Class " + classFile + " was not found by Soot");
-        }
-
+                LOGGER.warning("Class " + classFile + " was not found by Soot");
+            }
+    	}    
+    	
         return outSet;
 
     }
 
-	private OutSetCFG fetchMethodBody(final Set<String> classPaths, String className, String methodName,
+	/**
+	 * 
+	 * @param classPaths
+	 * @param className
+	 * @param methodName
+	 * @param classFile
+	 * @param element
+	 * @param chapter
+	 * @param fieldType
+	 * @param scopeId
+	 * @param outSet
+	 * @param originalBlock
+	 * @param sootClass
+	 * @param parameterTypes
+	 * @param returnType
+	 * @param visitedClasses
+	 * @return
+	 */
+	private OutSetCFG retrieveMethod(final Set<String> classPaths, String className, final String methodName,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet, VariableBlock originalBlock,
-			SootMethod method) {
+			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
+			final VariableBlock originalBlock, final SootClass sootClass, final List<Type> parameterTypes, 
+			final VoidType returnType, final ArrayList<String> visitedClasses) {
+		
+		SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type)returnType);
+		
+		if (method != null) {  
+			outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+					outSet, originalBlock, method, visitedClasses);  
+		} else {
+			method = sootClass.getMethodByNameUnsafe(methodName);
+			if (method != null) {
+				outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+						outSet, originalBlock, method, visitedClasses);
+			} else { 
+				LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");       		
+			}            		
+		}
+		return outSet;
+	}
+
+	
+	
+	private OutSetCFG retrieveCustomMethod(final SootClass sootClass, final Set<String> classPaths, String className,
+            final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
+            final KnownElementFieldType fieldType, final String scopeId,
+            OutSetCFG outSet, final VariableBlock originalBlock, final ArrayList<String> visitedClasses) {			
+		
+		for (SootMethod method : sootClass.getMethods()) {
+			outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+					outSet, originalBlock, method, visitedClasses);			
+		}
+		return outSet;
+	}
+
+	/**
+     * 
+     * @param classPaths
+     * @param className
+     * @param methodName
+     * @param classFile
+     * @param element
+     * @param chapter
+     * @param fieldType
+     * @param scopeId
+     * @param outSet
+     * @param originalBlock
+     * @param method
+     * @return
+     */
+	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className, final String methodName,
+			final String classFile, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet, final VariableBlock originalBlock,
+			final SootMethod method, final ArrayList<String> visitedClasses) {
 
 		final Body body = method.retrieveActiveBody();
 
@@ -278,12 +349,13 @@ public class JavaReaderStatic implements JavaReader {
 
 		PackManager.v().getPack("cg").apply();
 		CallGraph cg = Scene.v().getCallGraph();
+
 		final List<Block> graphHeads = graph.getHeads();
 		final List<Block> graphTails = graph.getTails();
 
 		for (Block head : graphHeads) {
 			outSet = graphIterator(classPaths, cg, graph, head, graphTails, outSet, element, chapter, fieldType,
-					classFile, scopeId, originalBlock, className);
+					classFile, scopeId, originalBlock, className, visitedClasses);
 		}
 
 		return outSet;
@@ -317,7 +389,7 @@ public class JavaReaderStatic implements JavaReader {
 	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, Block head,
 			List<Block> blockTails, OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock originalBlock, String oldClassName) {
+			VariableBlock originalBlock, String oldClassName, final ArrayList<String> visitedClasses) {
 
 		final Iterator<Block> graphIterator = graph.iterator();
 
@@ -327,7 +399,7 @@ public class JavaReaderStatic implements JavaReader {
 
 			// Collect the functions Unit by Unit via the blockIterator
 			final VariableBlock vb = blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-					scopeId, originalBlock, oldClassName);
+					scopeId, originalBlock, oldClassName, visitedClasses);
 
 			// depending if ouset already has that Block, only add varibles,
 			// if not, then add the whole vb
@@ -365,7 +437,7 @@ public class JavaReaderStatic implements JavaReader {
 	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
 			OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock variableBlock, String oldClassName) {
+			VariableBlock variableBlock, String oldClassName, final ArrayList<String> visitedClasses) {
 
 		if (variableBlock == null) {
 			variableBlock = new VariableBlock(block, new ArrayList<ProcessVariableOperation>());
@@ -385,8 +457,8 @@ public class JavaReaderStatic implements JavaReader {
 				while (sources.hasNext()) {
 					src = (Edge) sources.next();
 					String methodName = src.tgt().getName();
-
 					String className = src.tgt().getDeclaringClass().getName();
+					
 					// Only visit methods from other classes
 					if (!className.equals(oldClassName)) {
 						if (System.getProperty("os.name").startsWith("Windows")) {
@@ -394,13 +466,14 @@ public class JavaReaderStatic implements JavaReader {
 						} else {
 							className = className.replace(".", "/") + ".java";
 						}
+						
+						if (classPaths.contains(className) || className.contains("$")) {
+							if (!visitedClasses.contains(className)) {
+								G.reset();
 
-						if (classPaths.contains(className)) {
-							G.reset();
-
-							classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
-									fieldType, scopeId, outSet, variableBlock);
-
+								classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
+										fieldType, scopeId, outSet, variableBlock, visitedClasses);
+							}
 						}
 					}
 				}
@@ -431,7 +504,8 @@ public class JavaReaderStatic implements JavaReader {
 
 			}
 		}
-
+		
+		visitedClasses.clear();
 		return variableBlock;
 	}
 
