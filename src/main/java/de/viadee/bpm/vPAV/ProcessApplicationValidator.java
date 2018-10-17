@@ -51,10 +51,10 @@ public class ProcessApplicationValidator {
     }
 
     /**
-     * find issues with given ApplicationContext (Spring)
+     * Find issues with given ApplicationContext (Spring)
      *
      * @param ctx
-     *            spring context
+     *           - Spring context
      * @return all issues
      */
     public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
@@ -68,10 +68,10 @@ public class ProcessApplicationValidator {
     }
 
     /**
-     * find issues with given ApplicationContext (Spring)
+     * Find issues with given ApplicationContext (Spring)
      *
      * @param ctx
-     *            spring context
+     *            - Spring context
      * @return issues with status error
      */
     public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {
@@ -85,7 +85,7 @@ public class ProcessApplicationValidator {
     }
 
     /**
-     * find model errors without spring context
+     * Find model errors without spring context
      *
      * @return all issues
      */
@@ -98,7 +98,7 @@ public class ProcessApplicationValidator {
     }
 
     /**
-     * find model errors without spring context
+     * Find model errors without spring context
      *
      * @return issues with status error
      */
@@ -114,6 +114,8 @@ public class ProcessApplicationValidator {
      * Find model errors without spring context. Alternative method for testing purposes, to allow using a classloader
      * that includes example delegates in /src/test/java etc.
      *
+     * @param classloader 
+     * - ClassLoader that holds delegates etc.
      * @return issues with status error
      */
     public static Collection<CheckerIssue> findModelErrorsFromClassloader(ClassLoader classloader) {
@@ -125,10 +127,12 @@ public class ProcessApplicationValidator {
     }
 
     /**
-     * filter an issue collection by status
+     * Filter an issue collection by status
      *
      * @param filteredIssues
+     * - Filtered issues
      * @param status
+     * - Criticality to be sorted with
      * @return issues with status
      */
     private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues,
@@ -143,6 +147,11 @@ public class ProcessApplicationValidator {
         return filteredErrors;
     }
 
+    /**
+     * Creates a new runner and returns it
+     * 
+     * @return Runner
+     */
     private static Runner createRunner() {
         Runner runner = new Runner();
         runner.setDataFlowRules(dataFlowRules);

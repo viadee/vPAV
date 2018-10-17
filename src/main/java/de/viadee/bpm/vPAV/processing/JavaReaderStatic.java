@@ -79,15 +79,17 @@ public class JavaReaderStatic implements JavaReader {
 	public static final Logger LOGGER = Logger.getLogger(JavaReaderStatic.class.getName());
 
 	/**
-	 * Checks a java delegate for process variable references with Static code
+	 * Checks a java delegate for process variable references with static code
 	 * analysis (read/write/delete).
 	 *
 	 * Constraints: names, which only could be determined at runtime, can't be
 	 * analyzed. e.g. execution.setVariable(execution.getActivityId() + "-" +
 	 * execution.getEventName(), true)
 	 *
+	 * @param fileScanner
+	 * 			  - FileScanner
 	 * @param classFile
-	 *            - name of the class
+	 *            - Name of the class
 	 * @param element
 	 *            - Bpmn element
 	 * @param chapter
@@ -96,7 +98,7 @@ public class JavaReaderStatic implements JavaReader {
 	 *            - KnownElementFieldType
 	 * @param scopeId
 	 *            - Scope of the element
-	 * @return - Map of Process Variables
+	 * @return - Map of process variables from the referenced delegate
 	 */
 	public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
@@ -133,11 +135,11 @@ public class JavaReaderStatic implements JavaReader {
 	 * @param classPaths
 	 *            - Set of classes that is included in inter-procedural analysis
 	 * @param className
-	 *            - name of currently analysed class
+	 *            - Name of currently analysed class
 	 * @param methodName
-	 *            - name of currently analysed method
+	 *            - Name of currently analysed method
 	 * @param classFile
-	 *            - location path of class
+	 *            - Location path of class
 	 * @param element
 	 *            - Bpmn element
 	 * @param chapter
@@ -146,7 +148,7 @@ public class JavaReaderStatic implements JavaReader {
 	 *            - KnownElementFieldType
 	 * @param scopeId
 	 *            - Scope of the element
-	 * @return
+	 * @return - Map of process variables for a given class
 	 */
 	public Map<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths, final String className,
 			final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
@@ -172,21 +174,32 @@ public class JavaReaderStatic implements JavaReader {
 
 	}
 
-
 	/**
+	 * Recursively follow call hierarchy and obtain method bodies
 	 * 
 	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
 	 * @param className
+	 *            - Name of currently analysed class
 	 * @param methodName
+	 *            - Name of currently analysed method
 	 * @param classFile
+	 *            - Location path of class
 	 * @param element
+	 *            - Bpmn element
 	 * @param chapter
+	 *            - ElementChapter
 	 * @param fieldType
+	 *            - KnownElementFieldType
 	 * @param scopeId
+	 *            - Scope of the element
 	 * @param outSet
+	 * 			  - Callgraph information
 	 * @param originalBlock
+	 * - VariableBlock
 	 * @param visitedClasses
-	 * @return
+	 * - List to hold information which class has been visited (avoid circular references that lead to a StackOverflow)
+	 * @return OutSetCFG which contains data flow information
 	 */
     public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className,
             final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
@@ -261,24 +274,41 @@ public class JavaReaderStatic implements JavaReader {
         return outSet;
 
     }
+    
 
 	/**
 	 * 
+	 * Retrieve given camunda methods to obtain a Soot representation of said method to analyse its body 
+	 * 
 	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
 	 * @param className
+	 *            - Name of currently analysed class
 	 * @param methodName
+	 *            - Name of currently analysed method
 	 * @param classFile
+	 *            - Location path of class
 	 * @param element
+	 *            - Bpmn element
 	 * @param chapter
+	 *            - ElementChapter
 	 * @param fieldType
+	 *            - KnownElementFieldType
 	 * @param scopeId
+	 *            - Scope of the element
 	 * @param outSet
+	 * 			  - Callgraph information
 	 * @param originalBlock
+	 * - VariableBlock
 	 * @param sootClass
+	 * - Soot representation of given class
 	 * @param parameterTypes
+	 * - Soot representation of parameters
 	 * @param returnType
+	 * - Soot Representation of return type
 	 * @param visitedClasses
-	 * @return
+	 * - List of visited classes to avoid circular references
+	 * @return OutSetCFG which contains data flow information
 	 */
 	private OutSetCFG retrieveMethod(final Set<String> classPaths, String className, final String methodName,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
@@ -304,7 +334,40 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	
-	
+	/**
+	 * 
+	 * Retrieve given custom methods to obtain a Soot representation of said method to analyse its body
+	 * 
+	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
+	 * @param className
+	 *            - Name of currently analysed class
+	 * @param methodName
+	 *            - Name of currently analysed method
+	 * @param classFile
+	 *            - Location path of class
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param scopeId
+	 *            - Scope of the element
+	 * @param outSet
+	 * 			  - Callgraph information
+	 * @param originalBlock
+	 * - VariableBlock
+	 * @param sootClass
+	 * - Soot representation of given class
+	 * @param parameterTypes
+	 * - Soot representation of parameters
+	 * @param returnType
+	 * - Soot Representation of return type
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return OutSetCFG which contains data flow information
+	 */
 	private OutSetCFG retrieveCustomMethod(final SootClass sootClass, final Set<String> classPaths, String className,
             final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId,
@@ -316,22 +379,39 @@ public class JavaReaderStatic implements JavaReader {
 		}
 		return outSet;
 	}
+	
 
+	
 	/**
-     * 
-     * @param classPaths
-     * @param className
-     * @param methodName
-     * @param classFile
-     * @param element
-     * @param chapter
-     * @param fieldType
-     * @param scopeId
-     * @param outSet
-     * @param originalBlock
-     * @param method
-     * @return
-     */
+	 * 
+	 * Retrieve given custom methods to obtain a Soot representation of said method to analyse its body
+	 * 
+	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
+	 * @param className
+	 *            - Name of currently analysed class
+	 * @param methodName
+	 *            - Name of currently analysed method
+	 * @param classFile
+	 *            - Location path of class
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param scopeId
+	 *            - Scope of the element
+	 * @param outSet
+	 * 			  - Callgraph information
+	 * @param originalBlock
+	 * - VariableBlock
+	 * @param method
+	 * - Soot representation of a given method
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return OutSetCFG which contains data flow information
+	 */
 	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className, final String methodName,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet, final VariableBlock originalBlock,
@@ -364,7 +444,10 @@ public class JavaReaderStatic implements JavaReader {
 	 * Iterate through the control-flow graph with an iterative data-flow analysis
 	 * logic
 	 *
-	 *
+	 * @param classPaths
+	 * - Set of classes that is included in inter-procedural analysis
+	 * @param cg
+	 * - Soot CallGraph
 	 * @param graph
 	 *            - Control Flow graph of method
 	 * @param head
@@ -383,7 +466,13 @@ public class JavaReaderStatic implements JavaReader {
 	 *            - ResourceFilePath for ProcessVariableOperation
 	 * @param scopeId
 	 *            - Scope of BpmnElement
-	 * @return
+	 * @param originalBlock
+	 * - VariableBlock
+	 * @param oldClassName
+	 * - Classname
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return OutSetCFG which contains data flow information
 	 */
 	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, Block head,
 			List<Block> blockTails, OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
@@ -400,7 +489,7 @@ public class JavaReaderStatic implements JavaReader {
 			final VariableBlock vb = blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
 					scopeId, originalBlock, oldClassName, visitedClasses);
 
-			// depending if ouset already has that Block, only add varibles,
+			// depending if outset already has that Block, only add varibles,
 			// if not, then add the whole vb
 
 			if (outSet.getVariableBlock(vb.getBlock()) == null) {
@@ -417,9 +506,13 @@ public class JavaReaderStatic implements JavaReader {
 	 * in Assign statement or Invoke statement Constraint: Only String constants can
 	 * be precisely recognized.
 	 *
+	 * @param classPaths
+	 * - Set of classes that is included in inter-procedural analysis
+	 * @param cg
+	 * - Soot CallGraph
 	 * @param block
 	 *            - Block from CFG
-	 * @param InSet
+	 * @param outSet
 	 *            - OUT set of CFG
 	 * @param element
 	 *            - BpmnElement
@@ -431,7 +524,13 @@ public class JavaReaderStatic implements JavaReader {
 	 *            - ResourceFilePath for ProcessVariableOperation
 	 * @param scopeId
 	 *            - Scope of BpmnElement
-	 * @return
+	 * @param variableBlock
+	 * - VariableBlock
+	 * @param oldClassName
+	 * - Classname
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return VariableBlock
 	 */
 	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
 			OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
@@ -440,8 +539,8 @@ public class JavaReaderStatic implements JavaReader {
 
 		if (variableBlock == null) {
 			variableBlock = new VariableBlock(block, new ArrayList<ProcessVariableOperation>());
-
 		}
+		
 		final Iterator<Unit> unitIt = block.iterator();
 
 		Unit unit;
@@ -537,8 +636,6 @@ public class JavaReaderStatic implements JavaReader {
 		CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
 				.findByNameAndNumberOfBoxes(functionName, baseBox, numberOfArg);
 
-		
-		
 		if (foundMethod != null) {
 
 			int location = foundMethod.getLocation() - 1;
@@ -555,25 +652,18 @@ public class JavaReaderStatic implements JavaReader {
 		}
 	}
 
+	
 	/**
-	 *
+	 * 
 	 * Find anomalies inside a Bpmn element as well.
 	 * 
 	 * @param element
 	 *            - BpmnElement
-	 * @param graph
-	 *            - CFG of method
 	 * @param outSet
 	 *            - OUT set of CFG
-	 * @param graphHeads
-	 *            - Starting Blocks of CFG
-	 * @param graphTails
-	 *            - End Blocks of CFG
 	 */
 	private void addAnomaliesFoundInSourceCode(final BpmnElement element, final OutSetCFG outSet) {
-
 		for (VariableBlock vb : outSet.getAllVariableBlocks()) {
-
 			if (vb.getBlock().getIndexInMethod() == 0) {
 				addAnomaliesFoundInPathsRecursive(element, vb.getBlock(), new LinkedList<String>(), outSet,
 						new LinkedList<ProcessVariableOperation>(), "");
@@ -593,14 +683,14 @@ public class JavaReaderStatic implements JavaReader {
 	 *            - List of so far visited Blocks
 	 * @param outSet
 	 *            - OUT set of CFG
-	 * @param predecessorVaribalesList
+	 * @param predecessorVariablesList
 	 *            - Chain of Process Variables along the path
 	 * @param edge
 	 *            - Current edge between two Blocks
 	 */
-	private void addAnomaliesFoundInPathsRecursive(final BpmnElement element, Block currentBlock,
-			LinkedList<String> currentPath, final OutSetCFG outSet,
-			LinkedList<ProcessVariableOperation> predecessorVariablesList, String edge) {
+	private void addAnomaliesFoundInPathsRecursive(final BpmnElement element, final Block currentBlock,
+			final LinkedList<String> currentPath, final OutSetCFG outSet,
+			final LinkedList<ProcessVariableOperation> predecessorVariablesList, final String edge) {
 
 		// List<AnomalyContainer> foundAnomalies = new ArrayList<AnomalyContainer>();
 		if (edge != null && edge != "") {

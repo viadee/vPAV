@@ -109,7 +109,10 @@ public final class ProcessVariableReader {
 
     /**
      * Examining an bpmn element for variables
-     *
+     * @param context
+     * - JavaReaderContext (static vs regex)
+     * @param fileScanner
+     * - FileScanner
      * @param element
      *            BpmnElement
      * @return processVariables returns processVariables

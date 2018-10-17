@@ -101,16 +101,14 @@ public class Runner {
 
 	private static boolean isStatic = false;
 
+
 	/**
-	 * Main method which represents lifecycle of the validation process Calls main
+	 * Main method which represents lifecycle of the validation process. Calls main
 	 * functions
+	 * 
+	 * @param javaScanPath Main entry path. Normally src/main/java
 	 */
-
 	public void viadeeProcessApplicationValidator(final String javaScanPath) {
-
-		// 0
-		processVariables = new ArrayList<>();
-		elements = new ArrayList<>();
 
 		// 1
 		rules = readConfig();

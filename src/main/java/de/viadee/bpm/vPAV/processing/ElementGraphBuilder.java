@@ -116,7 +116,10 @@ public class ElementGraphBuilder {
 
     /**
      * Create data flow graphs for a model
-     *
+     * @param context
+     *  - JavaReaderContext (static vs. regex)
+     * @param fileScanner
+     * - FileScanner
      * @param modelInstance
      *            BpmnModelInstance
      * @param processdefinition

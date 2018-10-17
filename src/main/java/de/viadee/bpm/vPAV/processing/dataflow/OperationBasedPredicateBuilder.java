@@ -38,16 +38,22 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 public interface OperationBasedPredicateBuilder<T> {
     /**
      * Returns predicate based on exact operation quantity.
+     * @param n
+     * - Operation quantity
      * @return Step builder of next rule building stage
      */
     T exactly(int n);
     /**
      * Returns predicate based on minimal operation quantity.
+     * @param n
+     * - Operation quantity
      * @return Step builder of next rule building stage
      */
     T atLeast(int n);
     /**
      * Returns predicate based on maximal operation quantity.
+     * @param n
+     * - Operation quantity
      * @return Step builder of next rule building stage
      */
     T atMost(int n);
