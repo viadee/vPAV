@@ -199,8 +199,6 @@ public class JavaReaderStatic implements JavaReader {
         	} else {
         		className = className.replace("/", ".").replace(".java", "");
         	}
-        	
-        	visitedClasses.add(className);
             
             Options.v().set_whole_program(true);
             Options.v().set_allow_phantom_refs(true);
@@ -249,6 +247,7 @@ public class JavaReaderStatic implements JavaReader {
     						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
     				break;				
     			default:
+    				visitedClasses.add(className);
     				outSet = retrieveCustomMethod(sootClass, classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
     						outSet, originalBlock, visitedClasses);
     				break;
@@ -458,6 +457,7 @@ public class JavaReaderStatic implements JavaReader {
 					src = (Edge) sources.next();
 					String methodName = src.tgt().getName();
 					String className = src.tgt().getDeclaringClass().getName();
+					String origClassName = className;
 					
 					// Only visit methods from other classes
 					if (!className.equals(oldClassName)) {
@@ -468,7 +468,7 @@ public class JavaReaderStatic implements JavaReader {
 						}
 						
 						if (classPaths.contains(className) || className.contains("$")) {
-							if (!visitedClasses.contains(className)) {
+							if (!visitedClasses.contains(origClassName)) {
 								G.reset();
 
 								classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
@@ -505,7 +505,6 @@ public class JavaReaderStatic implements JavaReader {
 			}
 		}
 		
-		visitedClasses.clear();
 		return variableBlock;
 	}
 
