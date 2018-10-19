@@ -367,7 +367,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
     myRow.appendChild(createTableHeader("th_paths", "Invalid Sequenceflow"));
     myTHead.appendChild(myRow);
     myTable.appendChild(myTHead);
-
+    
     //fill table with all issuesof current model
     for (let issue of tableContent) {
         if (issue.bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
@@ -415,7 +415,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             //based on selection show button
             if (mode == tableViewModes.ISSUES) {
                 myCell.appendChild(b);
-                myCell.appendChild(c);
+                myCell.appendChild(c);                
             }            
 
             //link to docu            
@@ -709,6 +709,15 @@ const overlayViewModes = Object.freeze({
 
 function createViewController() {
     let ctrl = {};
+
+    var doc = document.getElementById("viewModeNavBar");
+    let globalDownloadButton = document.createElement("button");
+    globalDownloadButton.setAttribute("type", "button");
+    globalDownloadButton.setAttribute("class", "btn btn-viadee global-download");
+    globalDownloadButton.setAttribute("onclick", "downloadFile()");
+    globalDownloadButton.innerHTML = "Download ignoreIssues";
+    doc.appendChild(globalDownloadButton);
+
     /**
      * bpmn-js-seed
      *

@@ -151,6 +151,11 @@ a:hover {
 	left: 1em;
 }
 
+.global-download {
+	position: absolute;
+	right: 1em;
+}
+
 .badge-pill-cursor {
 	cursor: pointer;
 	-webkit-appearance: none !important;
