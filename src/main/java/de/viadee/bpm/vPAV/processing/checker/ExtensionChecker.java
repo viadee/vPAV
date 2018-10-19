@@ -291,6 +291,7 @@ public class ExtensionChecker extends AbstractElementChecker {
      *
      * @param setting
      *            Certain setting out of all settings
+     * @return true/false
      */
     public boolean checkMisconfiguration(Setting setting) {
 

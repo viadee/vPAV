@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -56,7 +57,7 @@ public class JavaReaderRegex implements JavaReader {
      *            - Bpmn element
      * @return variables - Process Variables
      */
-    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
+    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner, final String classFile,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String scopeId) {
         // convert package format in a concrete path to the java class (.java)

@@ -64,16 +64,22 @@ public interface ProcessVariablePredicateBuilder<T> {
     OperationBasedPredicateBuilder<T> accessed();
     /**
      * Returns predicate based on process variable name prefix, e.g. "ext_".
+     * @param prefix
+     * - Prefix to be checked
      * @return Step builder of next rule building stage
      */
     T prefixed(String prefix);
     /**
      * Returns predicate based on process variable name prefix, e.g. "_ext".
+     * @param postfix
+     * - Postfix to be checked
      * @return Step builder of next rule building stage
      */
     T postfixed(String postfix);
     /**
      * Returns predicate based on process variable name matching a RegEx.
+     * @param regex
+     * Regex to do pattern matching
      * @return Step builder of next rule building stage
      */
     T matching(String regex);

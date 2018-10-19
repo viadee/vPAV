@@ -43,12 +43,16 @@ import java.util.Collection;
 public interface DataFlowRule {
     /**
      * Method to define a reason.
+     * @param reason
+     * - Reason
      * @return Same step builder as this is not a stage transition.
      */
     DataFlowRule because(String reason);
     /**
      * Method to define criticality.
      * Also implying issue type for vPAV validation.
+     * @param criticality
+     * - Criticality of rule
      * @return Same step builder as this is not a stage transition.
      */
     DataFlowRule withCriticality(CriticalityEnum criticality);
@@ -57,17 +61,26 @@ public interface DataFlowRule {
      * Evaluates rule on the set of process variables.
      * If at least one process variable violates the rule, an AssertionError is thrown
      * including a rule description and listing rule violations.
-     * @param variables process variables to evaluate rule on.
+     * @param variables
+     * - process variables to evaluate rule on.
      * @throws AssertionError in case at least one violation exists.
      */
     void check(Collection<ProcessVariable> variables);
     /**
      * Evaluates rule on the set of process variables.
      * EvaluationResult for each validated process variable is returned.
-     * @param variables process variables to evaluate rule on.
+     * @param variables 
+     * -process variables to evaluate rule on.
+     * @return Collection of EvalutionResults for variables
      */
     Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables);
     String getRuleDescription();
+    /**
+     * 
+     * @param result
+     * - EvaluationResult
+     * @return Violation message
+     */
     String getViolationMessageFor(EvaluationResult<ProcessVariable> result);
     CriticalityEnum getCriticality();
 }

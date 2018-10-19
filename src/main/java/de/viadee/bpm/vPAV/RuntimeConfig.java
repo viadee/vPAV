@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -53,6 +54,8 @@ public class RuntimeConfig {
     private ApplicationContext ctx;
 
     private Map<String, String> beanMap;
+    
+    private Map<String, Rule> activeRuleSet = new HashMap<>();
 
     private ClassLoader classLoader;
 
@@ -124,10 +127,15 @@ public class RuntimeConfig {
         for (Map.Entry<String, Rule> entry : rules.entrySet()) {
             Rule rule = entry.getValue();
             if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET))
+            	activeRuleSet.put(entry.getKey(), entry.getValue());
                 allActiveRules.add(rule.getName());
         }
     }
-
+    
+    public Map<String, Rule> getActiveRuleSet() {
+    	return activeRuleSet;
+    }
+    
     public void setApplicationContext(ApplicationContext ctx) {
         this.ctx = ctx;
     }

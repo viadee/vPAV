@@ -44,6 +44,8 @@ public interface ProcessVariableSet {
     ProcessVariablePredicateBuilder<ConstrainedProcessVariableSet> thatAre();
     /**
      * Method to define a custom constraint.
+     * @param constraint
+     * - Constraint that is fulfilled
      * @return next step builder
      */
     ConstrainedProcessVariableSet thatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
@@ -54,6 +56,8 @@ public interface ProcessVariableSet {
     ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe();
     /**
      * Method to define a custom condition.
+     * @param condition
+     * - Condition that should be fulfilled
      * @return next step builder
      */
     ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);

@@ -79,6 +79,8 @@ public class IssueWriter {
      *
      * @param rule
      *            Rule
+     * @param ruleDescription
+     * Description of the rule, if specified           
      * @param classification
      *            CriticalityEnum
      * @param variable
@@ -87,7 +89,7 @@ public class IssueWriter {
      *            Errormessage
      * @return Issues
      */
-    public static Collection<CheckerIssue> createIssue(final Rule rule, String ruleDescription, final CriticalityEnum classification,
+    public static Collection<CheckerIssue> createIssue(final Rule rule, final String ruleDescription, final CriticalityEnum classification,
             final ProcessVariable variable, final String message) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

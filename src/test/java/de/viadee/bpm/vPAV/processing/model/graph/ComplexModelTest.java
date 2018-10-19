@@ -58,8 +58,12 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderContext;
+import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 
 public class ComplexModelTest {
@@ -91,8 +95,11 @@ public class ComplexModelTest {
      */
     @Test
     public void testGraphOnComplexModel() throws ParserConfigurationException, SAXException, IOException {
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
         final File processdefinition = new File(PATH);
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
@@ -113,7 +120,7 @@ public class ComplexModelTest {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, null, null, null,
                 new BpmnScanner(PATH));
         // create data flow graphs
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
+        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
                 processdefinition.getPath(), new ArrayList<String>());
 
         long estimatedTime = System.currentTimeMillis() - startTime;

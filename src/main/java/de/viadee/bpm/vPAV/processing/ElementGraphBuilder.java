@@ -61,6 +61,7 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -115,7 +116,10 @@ public class ElementGraphBuilder {
 
     /**
      * Create data flow graphs for a model
-     *
+     * @param context
+     *  - JavaReaderContext (static vs. regex)
+     * @param fileScanner
+     * - FileScanner
      * @param modelInstance
      *            BpmnModelInstance
      * @param processdefinition
@@ -124,9 +128,9 @@ public class ElementGraphBuilder {
      *            calledElementHierarchy
      * @return graphCollection returns graphCollection
      */
-    public Collection<IGraph> createProcessGraph(final BpmnModelInstance modelInstance, final String processdefinition,
+    public Collection<IGraph> createProcessGraph(final JavaReaderContext context, final FileScanner fileScanner, final BpmnModelInstance modelInstance, final String processdefinition,
             final Collection<String> calledElementHierarchy) {
-
+    	
         final Collection<IGraph> graphCollection = new ArrayList<IGraph>();
 
         final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
@@ -153,13 +157,14 @@ public class ElementGraphBuilder {
                     callActivities.add(callActivity);
                 } else if (element instanceof SubProcess) {
                     final SubProcess subprocess = (SubProcess) element;
-                    addElementsSubprocess(subProcesses, flows, boundaryEvents, graph, subprocess, processdefinition);
-                }
+                    addElementsSubprocess(context, fileScanner, subProcesses, flows, boundaryEvents, graph, subprocess, processdefinition);
+                }                               
+       
                 // initialize element
                 final BpmnElement node = new BpmnElement(processdefinition, element);
                 // examine process variables and save it with access operation
                 final Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(decisionRefToPathMap,
-                        bpmnScanner).getVariablesFromElement(node);
+                        bpmnScanner).getVariablesFromElement(context, fileScanner, node);
                 // examine process variables for element and set it
                 node.setProcessVariables(variables);
 
@@ -190,8 +195,8 @@ public class ElementGraphBuilder {
 
             // resolve call activities and integrate called processes
             for (final CallActivity callActivity : callActivities) {
-                integrateCallActivityFlow(processdefinition, modelInstance, callActivity, graph,
-                        calledElementHierarchy);
+                integrateCallActivityFlow(context, fileScanner, processdefinition, modelInstance, callActivity, graph,
+                        calledElementHierarchy); 
             }
 
             graphCollection.add(graph);
@@ -200,6 +205,7 @@ public class ElementGraphBuilder {
         return graphCollection;
     }
 
+    
     /**
      * Add process variables on start event for a specific process id
      *
@@ -357,7 +363,7 @@ public class ElementGraphBuilder {
      * @param processdefinitionPath
      * @param cl
      */
-    private void addElementsSubprocess(final Collection<SubProcess> subProcesses, final Collection<SequenceFlow> flows,
+    private void addElementsSubprocess(final JavaReaderContext context, final FileScanner fileScanner, final Collection<SubProcess> subProcesses, final Collection<SequenceFlow> flows,
             final Collection<BoundaryEvent> events, final IGraph graph, final SubProcess process,
             final String processdefinitionPath) {
         subProcesses.add(process);
@@ -365,7 +371,7 @@ public class ElementGraphBuilder {
         for (final FlowElement subElement : subElements) {
             if (subElement instanceof SubProcess) {
                 final SubProcess subProcess = (SubProcess) subElement;
-                addElementsSubprocess(subProcesses, flows, events, graph, subProcess, processdefinitionPath);
+                addElementsSubprocess(context, fileScanner, subProcesses, flows, events, graph, subProcess, processdefinitionPath);
             } else if (subElement instanceof SequenceFlow) {
                 final SequenceFlow flow = (SequenceFlow) subElement;
                 flows.add(flow);
@@ -377,7 +383,7 @@ public class ElementGraphBuilder {
             final BpmnElement node = new BpmnElement(processdefinitionPath, subElement);
             // determine process variables with operations
             final Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(decisionRefToPathMap,
-                    bpmnScanner).getVariablesFromElement(node);
+                    bpmnScanner).getVariablesFromElement(context, fileScanner, node);
             // set process variables for the node
             node.setProcessVariables(variables);
             // mention the element
@@ -397,7 +403,7 @@ public class ElementGraphBuilder {
      * @param classLoader
      * @param calledElementHierarchy
      */
-    private void integrateCallActivityFlow(final String processdefinition, final BpmnModelInstance modelInstance,
+    private void integrateCallActivityFlow(final JavaReaderContext context, final FileScanner fileScanner, final String processdefinition, final BpmnModelInstance modelInstance,
             final CallActivity callActivity, final IGraph graph, final Collection<String> calledElementHierarchy) {
 
         final String calledElement = callActivity.getCalledElement();
@@ -429,9 +435,9 @@ public class ElementGraphBuilder {
             final String callActivityPath = processIdToPathMap.get(calledElement);
             if (callActivityPath != null) {
                 // 3) load process and transform it into a data flow graph
-                final Collection<IGraph> subgraphs = createSubDataFlowsFromCallActivity(
+                final Collection<IGraph> subgraphs = createSubDataFlowsFromCallActivity(context, fileScanner,
                         RuntimeConfig.getInstance().getClassLoader(), calledElementHierarchy, callActivityPath);
-
+                
                 for (final IGraph subgraph : subgraphs) {
                     // look only on the called process!
                     if (subgraph.getProcessId().equals(calledElement)) {
@@ -536,7 +542,7 @@ public class ElementGraphBuilder {
      * @param callActivityPath
      * @return
      */
-    private Collection<IGraph> createSubDataFlowsFromCallActivity(final ClassLoader classLoader,
+    private Collection<IGraph> createSubDataFlowsFromCallActivity(final JavaReaderContext context, FileScanner fileScanner, final ClassLoader classLoader,
             final Collection<String> calledElementHierarchy, final String callActivityPath) {
         // read called process
         final BpmnModelInstance submodel = Bpmn.readModelFromFile(new File(callActivityPath));
@@ -544,7 +550,7 @@ public class ElementGraphBuilder {
         // transform process into data flow
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
                 messageIdToVariables, processIdToVariables, bpmnScanner);
-        final Collection<IGraph> subgraphs = graphBuilder.createProcessGraph(submodel, callActivityPath,
+        final Collection<IGraph> subgraphs = graphBuilder.createProcessGraph(context, fileScanner, submodel, callActivityPath,
                 calledElementHierarchy);
         return subgraphs;
     }

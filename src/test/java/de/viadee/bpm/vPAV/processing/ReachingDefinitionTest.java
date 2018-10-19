@@ -31,41 +31,31 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ReachingDefinitionTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
-
     private static ClassLoader cl;
-
-    private static Logger logger = Logger.getLogger(ReachingDefinitionTest.class.getName());
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -81,10 +71,10 @@ public class ReachingDefinitionTest {
     @Test
     public void testSootReachingMethod() throws ParserConfigurationException, SAXException, IOException {
 
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrorsFromClassloader(cl);
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        ProcessApplicationValidator.findModelErrorsFromClassloader(cl);
 
-        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(
+        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner, 
                 "de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", null, null, null, null);
 
         assertEquals(3, variables.size());
