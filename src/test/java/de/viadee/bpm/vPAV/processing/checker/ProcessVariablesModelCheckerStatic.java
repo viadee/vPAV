@@ -94,8 +94,7 @@ public class ProcessVariablesModelCheckerStatic {
         final JavaReaderContext jvc = new JavaReaderContext();
         jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
-        final ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrors();
+        ProcessApplicationValidator.findModelErrors();
 
         // parse bpmn model
         modelInstance = Bpmn.readModelFromFile(processdefinition);

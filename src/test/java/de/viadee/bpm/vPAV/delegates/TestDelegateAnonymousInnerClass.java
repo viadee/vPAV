@@ -29,38 +29,28 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.delegates;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+abstract class TestAnonymousInnerClass {  
+	  abstract void test();  
+}  
 
-public class FileScannerTest {
-
-    private static ClassLoader cl;
-
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-    }
-
-    @Test
-    public void testSootPathLoading() {
-
-        ProcessApplicationValidator.findModelErrors();
-
-        String sootPath = FileScanner.getSootPath();
-
-        System.out.println(sootPath);
-    }
-
+public class TestDelegateAnonymousInnerClass implements org.camunda.bpm.engine.delegate.JavaDelegate {
+	
+	@Override
+	public void execute(DelegateExecution execution) throws Exception {
+		
+		TestAnonymousInnerClass taic = new TestAnonymousInnerClass() {
+			@Override
+			void test() {				
+				execution.setVariable("test", true);
+				execution.getVariable("test1");
+				execution.removeVariable("test2");
+			}			
+		};
+		
+		taic.test();
+	}
 }

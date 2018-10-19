@@ -31,52 +31,77 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
-public class ProcessVariableReaderStaticTest {
+public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
+	
+	
+	private static final String BASE_PATH = "src/test/resources/";
 
     private static ClassLoader cl;
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
+        RuntimeConfig.getInstance().setTest(true);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
+        final URL classUrl = new URL(currentPath + "src/test/java/");
+        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+        final URL[] classUrls = { classUrl, resourcesUrl };
         cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().setClassLoader(cl);        
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        RuntimeConfig.getInstance().setTest(false);
     }
 
     @Test
-    public void testSootReachingMethod() throws ParserConfigurationException, SAXException, IOException {
+    public void testRecogniseVariablesInInnerAnonymousClass() throws ParserConfigurationException, SAXException, IOException {
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        ProcessApplicationValidator.findModelErrorsFromClassloader(cl);
+        final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
-        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        assertEquals(3, variables.size());
+        final Collection<ServiceTask> allServiceTasks = modelInstance
+                .getModelElementsByType(ServiceTask.class);
 
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+
+        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
+        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(jvc, fileScanner, element);
+
+        Assert.assertEquals(3, variables.size());
     }
+
 
 }

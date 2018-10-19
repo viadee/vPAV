@@ -72,8 +72,7 @@ public class ReachingDefinitionTest {
     public void testSootReachingMethod() throws ParserConfigurationException, SAXException, IOException {
 
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrorsFromClassloader(cl);
+        ProcessApplicationValidator.findModelErrorsFromClassloader(cl);
 
         final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner, 
                 "de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", null, null, null, null);
