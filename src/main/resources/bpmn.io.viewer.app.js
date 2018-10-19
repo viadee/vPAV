@@ -189,10 +189,22 @@ function createIssueDialog(elements) {
                     var dCardIssueId = document.createElement("p");
                     dCardIssueId.setAttribute("class", "card-issueId issue-id");
 
-                    var dCardIssueButton = document.createElement("button");
-                    dCardIssueButton.setAttribute("class", "btn btn-viadee issue-button");
-                    dCardIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardIssueButton]));
-                    dCardIssueButton.innerHTML = "Add Issue";
+                    var dCardIssueButtons = document.createElement("p");
+
+                    var dCardAddIssueButton = document.createElement("button");
+                    var dCardRemoveIssueButton = document.createElement("button");
+
+                    dCardAddIssueButton.setAttribute("class", "btn btn-viadee issue-button");
+                    dCardAddIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
+                    dCardAddIssueButton.innerHTML = "Add Issue";
+
+                    dCardRemoveIssueButton.setAttribute("class", "btn btn-viadee issue-button");
+                    dCardRemoveIssueButton.disabled = true;
+                    dCardRemoveIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
+                    dCardRemoveIssueButton.innerHTML = "Remove Issue";
+
+                    dCardIssueButtons.appendChild(dCardAddIssueButton);
+                    dCardIssueButtons.appendChild(dCardRemoveIssueButton);
 
                     var oImg = document.createElement("img");
                     oImg.setAttribute('src', 'img/' + issue.classification.toLowerCase() + '.png');
@@ -215,8 +227,8 @@ function createIssueDialog(elements) {
                     if (issue.elementDescription)
                         dCardBody.appendChild(dCardElementDescription);
                     dCardBody.appendChild(dCardIssueId);
+                    dCardBody.appendChild(dCardIssueButtons);
                     dCard.appendChild(dCardBody);
-                    dCardBody.appendChild(dCardIssueButton);
 
                     dialogContent.appendChild(dCard);
                 }
