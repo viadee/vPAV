@@ -300,9 +300,17 @@ function createCardForVariableOperations(operations, title) {
 }
 
 // Add single issue to the ignoreIssues list
-function addIssue(issue){         
+function addIssue(issue){        
     ignoredIssues[issue[0]] = '#' + issue[1];
     issue[2].disabled = true;
+    issue[3].disabled = false
+}
+
+// Remove single issue from ignoreIssues list
+function removeIssue(issue){
+    delete ignoredIssues[issue[0]]
+    issue[2].disabled = false;
+    issue[3].disabled = true
 }
 
 // download the ignoreIssues file 
@@ -359,14 +367,23 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
 
-            //button to add issue
-            var tableIssueButton = document.createElement("button");
-            tableIssueButton.setAttribute("class", "btn btn-viadee issue-button-table");
-            tableIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, tableIssueButton]));
-            tableIssueButton.innerHTML = "Add Issue";
+            //buttons to add and remove issue
+            var addIssueButton = document.createElement("button");
+            addIssueButton.setAttribute("class", "btn btn-viadee issue-button-table-add");
+
+            var removeIssueButton = document.createElement("button");
+            removeIssueButton.setAttribute("class", "btn btn-viadee issue-button-table-remove");
+
+            addIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
+            addIssueButton.innerHTML = "Add Issue";
             var b = document.createElement("a");
-            b.appendChild(tableIssueButton);
-            
+            b.appendChild(addIssueButton);
+           
+            removeIssueButton.setAttribute("disabled", true);
+            removeIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
+            removeIssueButton.innerHTML = "Remove Issue";
+            var c = document.createElement("a");
+            c.appendChild(removeIssueButton);
 
             myCell.setAttribute("id", issue.classification) // mark cell
 
@@ -386,6 +403,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             //based on selection show button
             if (mode == tableViewModes.ISSUES) {
                 myCell.appendChild(b);
+                myCell.appendChild(c);
             }            
 
             //link to docu            
