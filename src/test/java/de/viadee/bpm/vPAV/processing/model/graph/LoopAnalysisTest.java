@@ -38,6 +38,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,8 +52,12 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderContext;
+import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 
@@ -81,15 +86,18 @@ public class LoopAnalysisTest {
      */
     @Test
     public void testLoop() throws ParserConfigurationException, SAXException, IOException {
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "LoopAnalysisTest_TestLoop.bpmn";
         final File processdefinition = new File(PATH);
-
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
         // create data flow graphs
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
+        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
                 processdefinition.getPath(), new ArrayList<String>());
 
         graphBuilder.createInvalidPaths(graphCollection);

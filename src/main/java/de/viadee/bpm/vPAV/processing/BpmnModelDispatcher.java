@@ -31,23 +31,42 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.processing.checker.*;
-import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
-import de.viadee.bpm.vPAV.processing.model.data.*;
-import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
-import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.checker.CheckerFactory;
+import de.viadee.bpm.vPAV.processing.checker.DataFlowChecker;
+import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
+import de.viadee.bpm.vPAV.processing.checker.ModelChecker;
+import de.viadee.bpm.vPAV.processing.checker.ProcessVariablesModelChecker;
+import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
  * Calls model and element checkers for a concrete bpmn processdefinition
@@ -57,34 +76,37 @@ public class BpmnModelDispatcher {
 	
 	private Map<String, String> incorrectCheckers = new HashMap<>();
 	
-    /**
-     * The BpmnModelDispatcher reads a model and creates a collection of all elements. Iterates through collection and
+	/**
+	 * The BpmnModelDispatcher reads a model and creates a collection of all elements. Iterates through collection and
      * checks each element for validity Additionally a graph is created to check for invalid paths.
-     *
-     * @param processdefinition
-     *            Holds the path to the BPMN model
-     * @param decisionRefToPathMap
-     *            decisionRefToPathMap
-     * @param processIdToPathMap
-     *            Map of prozessId to bpmn file
-     * @param messageIdToVariables
-     *            Map of messages and their variables
-     * @param processIdToVariables
-     *            map of processId with their variables
-     * @param resourcesNewestVersions
-     *            collection with newest versions of class files
-     * @param conf
-     *            ruleSet
-     * @return issues
-     */
-    public ModelDispatchResult dispatchWithVariables(final File processdefinition,
+	 * @param fileScanner
+	 * - FileScanner
+	 * @param processdefinition
+	 * - Holds the path to the BPMN model
+	 * @param decisionRefToPathMap
+	 * - DecisionRefToPathMap
+	 * @param processIdToPathMap
+	 * - Map of processId to BPMN file
+	 * @param messageIdToVariables
+	 * - Map of messages and their variables
+	 * @param processIdToVariables
+	 * - Map of processId and their variables
+	 * @param dataFlowRules
+	 * - DataFlowRules to be checked for
+	 * @param resourcesNewestVersions
+	 * - Collection with newest versions of class files
+	 * @param conf
+	 * - ruleSet
+	 * @return issues
+	 */
+    public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processdefinition,
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Map<String, Collection<String>> messageIdToVariables,
             final Map<String, Collection<String>> processIdToVariables,
             final Collection<DataFlowRule> dataFlowRules,
             final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
 
-        BpmnScanner bpmnScanner = createScanner(processdefinition);
+        final BpmnScanner bpmnScanner = createScanner(processdefinition);
         
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
@@ -97,8 +119,18 @@ public class BpmnModelDispatcher {
                 processIdToPathMap, messageIdToVariables,
                 processIdToVariables, bpmnScanner);
 
+        
+        // Depending on Regex/Static analysis, find Process Variables from Java Delegate
+        JavaReaderContext jvc = new JavaReaderContext();
+             
+        if (getIsStatic(conf)) {
+            jvc.setJavaReadingStrategy(new JavaReaderStatic());
+        } else {
+            jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        }
+              
         // create data flow graphs for bpmn model
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
+        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
                 processdefinition.getPath(), new ArrayList<>());
 
         // add data flow information to graph and calculate invalid paths
@@ -191,10 +223,11 @@ public class BpmnModelDispatcher {
      *            graphBuilder
      * @param processdefinition
      *            bpmn file
+     *            @return Collection of BpmnElements
      */
     public static Collection<BpmnElement> getBpmnElements(
-            File processdefinition, Collection<BaseElement> baseElements, ElementGraphBuilder graphBuilder) {
-        List<BpmnElement> elements = new ArrayList<>();
+            final File processdefinition, final Collection<BaseElement> baseElements, final ElementGraphBuilder graphBuilder) {
+        final List<BpmnElement> elements = new ArrayList<>();
         for (final BaseElement baseElement : baseElements) {
             BpmnElement element = graphBuilder.getElement(baseElement.getId());
             if (element == null) {
@@ -209,6 +242,7 @@ public class BpmnModelDispatcher {
     /**
      * @param elements
      *            Collection of BPMN elements
+     *            @return Collection of process variables
      */
     public static Collection<ProcessVariable> getProcessVariables(Collection<BpmnElement> elements) {
         // write variables containing elements
@@ -306,6 +340,22 @@ public class BpmnModelDispatcher {
 
         return checkerCollection;
     }
+    
+    /**
+	 * Based on the RuleSet config file, set the usage of Static Analysis to true.
+	 * Based on the boolean value the // * Process Variables are collected with
+	 * Regex or Static Analysis // * // * @param rules // * @return //
+	 */
+	private boolean getIsStatic(Map<String, Rule> rules) {
+		boolean isStatic = false;
+		Rule rule = rules.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
+		if (rule != null) {
+			Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
+			if (setting != null && setting.getValue().equals("true"))
+				isStatic = true;
+		}
+		return isStatic;
+	}
 
     private String getClassName(Class<?> clazz) {
         return clazz.getSimpleName();

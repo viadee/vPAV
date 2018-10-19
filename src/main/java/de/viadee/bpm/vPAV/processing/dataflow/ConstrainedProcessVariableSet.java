@@ -52,12 +52,16 @@ public interface ConstrainedProcessVariableSet {
     /**
      * Method to define a custom constraint and
      * combine it disjunctively after its creation with existing one.
+     * @param constraint
+     * - Constraint to be appended disjunctively
      * @return Same step builder as this is not a stage transition.
      */
     ConstrainedProcessVariableSet orThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
     /**
      * Method to define a custom constraint and
      * combine it conjunctively after its creation with existing one.
+     * @param constraint
+     * - Constraint to be appended conjunctively
      * @return Same step builder as this is not a stage transition.
      */
     ConstrainedProcessVariableSet andThatAre(DescribedPredicateEvaluator<ProcessVariable> constraint);
@@ -68,6 +72,8 @@ public interface ConstrainedProcessVariableSet {
     ProcessVariablePredicateBuilder<ConditionedProcessVariableSet> shouldBe();
     /**
      * Method to define a custom condition.
+     * @param condition
+     * - Condition that should be fulfilled
      * @return next step builder
      */
     ConditionedProcessVariableSet shouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);

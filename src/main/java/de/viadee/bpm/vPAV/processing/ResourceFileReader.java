@@ -63,6 +63,12 @@ public class ResourceFileReader {
      *            - Name of Java Delegate class
      * @param element
      *            - Bpmn element
+     * @param chapter
+     * - ElementChapter 
+     * @param fieldType
+     * - KnownElementFieldType
+     * @param scopeId
+     * - Scope
      * @return variables - found Process Variables
      */
     public static Map<String, ProcessVariableOperation> readResourceFile(final String fileName,
@@ -203,7 +209,7 @@ public class ResourceFileReader {
      *            - Scope
      * @param code
      *            - cleaned code
-     * @return
+     * @return Map of process variable operations
      */
     public static Map<String, ProcessVariableOperation> searchWrittenProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,

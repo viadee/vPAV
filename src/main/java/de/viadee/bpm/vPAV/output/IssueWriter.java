@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,8 @@ public class IssueWriter {
      *
      * @param rule
      *            Rule
+     * @param ruleDescription
+     * Description of the rule, if specified           
      * @param classification
      *            CriticalityEnum
      * @param variable
@@ -87,7 +89,7 @@ public class IssueWriter {
      *            Errormessage
      * @return Issues
      */
-    public static Collection<CheckerIssue> createIssue(final Rule rule, String ruleDescription, final CriticalityEnum classification,
+    public static Collection<CheckerIssue> createIssue(final Rule rule, final String ruleDescription, final CriticalityEnum classification,
             final ProcessVariable variable, final String message) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();

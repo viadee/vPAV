@@ -204,6 +204,8 @@ public class JsOutputWriter implements IssueOutputWriter {
      *
      * @param elements
      *            Collection of BPMN elements across all models
+     * @param processVariables
+     * Collection of process variables
      * @throws OutputWriterException
      *             javascript couldnt be written
      */

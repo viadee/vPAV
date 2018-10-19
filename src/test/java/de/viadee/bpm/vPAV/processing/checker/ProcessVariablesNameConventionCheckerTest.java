@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,10 +54,14 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.JavaReaderContext;
+import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -107,9 +111,11 @@ public class ProcessVariablesNameConventionCheckerTest {
      */
     @Test
     public void testCorrectProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH
                 + "ProcessVariablesNameConventionCheckerTest_CorrectProcessVariablesNamingConvention.bpmn";
-
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
@@ -120,7 +126,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
             Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
-                    .getVariablesFromElement(element);
+                    .getVariablesFromElement(jvc, fileScanner, element);
             element.setProcessVariables(variables);
 
             issues.addAll(checker.check(element));
@@ -138,9 +144,12 @@ public class ProcessVariablesNameConventionCheckerTest {
      */
     @Test
     public void testWrongProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH
                 + "ProcessVariablesNameConventionCheckerTest_WrongProcessVariablesNamingConvention.bpmn";
-
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
@@ -151,7 +160,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
             Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
-                    .getVariablesFromElement(element);
+                    .getVariablesFromElement(jvc, fileScanner, element);
             element.setProcessVariables(variables);
 
             issues.addAll(checker.check(element));
@@ -203,3 +212,4 @@ public class ProcessVariablesNameConventionCheckerTest {
         return rule;
     }
 }
+

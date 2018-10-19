@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -291,6 +291,7 @@ public class ExtensionChecker extends AbstractElementChecker {
      *
      * @param setting
      *            Certain setting out of all settings
+     * @return true/false
      */
     public boolean checkMisconfiguration(Setting setting) {
 
@@ -325,3 +326,4 @@ public class ExtensionChecker extends AbstractElementChecker {
 	
 
 }
+

@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -280,8 +280,15 @@ public class OuterProcessVariablesScanner {
                         return null;
                     }
                 };
-                InputStream in = RuntimeConfig.getInstance().getClassLoader()
-                        .getResourceAsStream(splittedFilePath[0] + "$InitialProcessVariables.class");
+                
+                InputStream in = null;
+                if (splittedFilePath[0].contains(ConfigConstants.INITIAL_VARIABLES)) {
+                	in = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(filePath.replace(".java", ".class"));
+                } else {
+                	in = RuntimeConfig.getInstance().getClassLoader()
+                             .getResourceAsStream(splittedFilePath[0] + "$InitialProcessVariables.class");
+                }
+               
                 if (in != null) {
                     ClassReader classReader = new ClassReader(in);
                     classReader.accept(cl, 0);

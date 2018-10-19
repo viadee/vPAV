@@ -37,6 +37,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -53,7 +54,9 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
@@ -82,7 +85,10 @@ public class ProcessVariableOperationReaderTest {
 
     @Test
     public void testRecogniseVariablesInClass() throws ParserConfigurationException, SAXException, IOException {
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -93,15 +99,18 @@ public class ProcessVariableOperationReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
+        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(jvc, fileScanner, element);
 
         Assert.assertEquals(2, variables.size());
     }
 
     @Test
     public void testRecogniseInputOutputAssociations() throws ParserConfigurationException, SAXException, IOException {
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
-
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
@@ -111,7 +120,7 @@ public class ProcessVariableOperationReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(element);
+        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(jvc, fileScanner, element);
 
         final ProcessVariableOperation nameOfVariableInMainProcess = variables
                 .get("nameOfVariableInMainProcess");

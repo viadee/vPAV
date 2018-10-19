@@ -120,6 +120,8 @@ public class FileScanner {
             versioningScheme = loadVersioningScheme(rules);
         } catch (ConfigItemNotFoundException e) {
             LOGGER.log(Level.WARNING, "Versioning Scheme could not be loaded.", e);
+        } catch (NullPointerException e) {
+        	LOGGER.log(Level.SEVERE, "RuleSet appears to be null", e);
         }
 
         // get file paths of java files
@@ -475,7 +477,7 @@ public class FileScanner {
         return scheme;
     }
 
-    public static Set<String> getJavaResourcesFileInputStream() {
+    public Set<String> getJavaResourcesFileInputStream() {
         return javaResourcesFileInputStream;
     }
 

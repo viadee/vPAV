@@ -53,12 +53,16 @@ public interface ConditionedProcessVariableSet extends DataFlowRule {
     /**
      * Method to define a custom condition and
      * combine it conjunctively after its creation with existing one.
+     * @param condition
+     * - Condition that is to be appended conjunctively
      * @return Same step builder as this is not a stage transition.
      */
     ConditionedProcessVariableSet andShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);
     /**
      * Method to define a custom condition and
      * combine it disjunctively after its creation with existing one.
+     * @param condition
+     * - Condition that is to be appended disjunctively
      * @return Same step builder as this is not a stage transition.
      */
     ConditionedProcessVariableSet orShouldBe(DescribedPredicateEvaluator<ProcessVariable> condition);

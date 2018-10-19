@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2018, viadee Unternehmensberatung GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,8 @@ package de.viadee.bpm.vPAV.constants;
  */
 
 public final class ConfigConstants {
+	
+	  public static final String INITIAL_VARIABLES = "InitialProcessVariables";
 
     public static final String RULESET = "ruleSet.xml";
 

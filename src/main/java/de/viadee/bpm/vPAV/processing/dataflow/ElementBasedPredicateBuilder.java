@@ -40,31 +40,43 @@ import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 public interface ElementBasedPredicateBuilder<T> {
     /**
      * Returns predicate with operation location based on type.
+     * @param clazz
+     * - Class 
      * @return Step builder of next rule building stage
      */
     T ofType(Class clazz);
     /**
      * Returns predicate with operation location based on camunda:property.
+     * @param propertyName
+     * - Property name of camunda:property
      * @return Step builder of next rule building stage
      */
     T withProperty(String propertyName);
     /**
      * Returns predicate with operation location based on prefix, e.g. "ext_"
+     * @param prefix
+     * - Prefix to check for
      * @return Step builder of next rule building stage
      */
     T withPrefix(String prefix);
     /**
      * Returns predicate with operation location based on postfix, e.g. "_ext"
+     * @param postfix
+     * - Postfix to check for
      * @return Step builder of next rule building stage
      */
     T withPostfix(String postfix);
     /**
      * Returns predicate with operation location based on pattern match
+     * @param regex
+     * - Regex to do pattern matching
      * @return Step builder of next rule building stage
      */
     T withNameMatching(String regex);
     /**
      * Method to define a custom predicate for filtering elements.
+     * @param predicate
+     * - Predicate that has to be fulfilled
      * @return Step builder of next rule building stage
      */
     T thatFulfill(DescribedPredicateEvaluator<BpmnElement> predicate);

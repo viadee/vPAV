@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,10 +56,13 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import soot.Body;
 import soot.G;
 import soot.PackManager;
+import soot.RefType;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.Type;
 import soot.Unit;
+import soot.VoidType;
 import soot.jimple.AssignStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.StringConstant;
@@ -72,502 +76,777 @@ import soot.toolkits.graph.ClassicCompleteBlockGraph;
 
 public class JavaReaderStatic implements JavaReader {
 
-    public static final Logger LOGGER = Logger.getLogger(JavaReaderStatic.class.getName());
+	public static final Logger LOGGER = Logger.getLogger(JavaReaderStatic.class.getName());
 
-    /**
-     * Checks a java delegate for process variable references with Static code analysis (read/write/delete).
-     *
-     * Constraints: names, which only could be determined at runtime, can't be analyzed. e.g.
-     * execution.setVariable(execution.getActivityId() + "-" + execution.getEventName(), true)
-     *
-     * @param classFile
-     *            - name of the class
-     * @param element
-     *            - Bpmn element
-     * @param chapter
-     *            - ElementChapter
-     * @param fieldType
-     *            - KnownElementFieldType
-     * @param scopeId
-     *            - Scope of the element
-     * @return - Map of Process Variables
-     */
-    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final String classFile,
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String scopeId) {
+	/**
+	 * Checks a java delegate for process variable references with static code
+	 * analysis (read/write/delete).
+	 *
+	 * Constraints: names, which only could be determined at runtime, can't be
+	 * analyzed. e.g. execution.setVariable(execution.getActivityId() + "-" +
+	 * execution.getEventName(), true)
+	 *
+	 * @param fileScanner
+	 * 			  - FileScanner
+	 * @param classFile
+	 *            - Name of the class
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param scopeId
+	 *            - Scope of the element
+	 * @return - Map of process variables from the referenced delegate
+	 */
+	public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
+			final String classFile, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId) {
 
-        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+		final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
 
-        if (classFile != null && classFile.trim().length() > 0) {
+		if (classFile != null && classFile.trim().length() > 0) {
+			
+			final String sootPath = FileScanner.getSootPath();
 
-            final String sootPath = FileScanner.getSootPath();
-      
-            System.setProperty("soot.class.path", sootPath);
+			System.setProperty("soot.class.path", sootPath);
 
-            final Set<String> classPaths = FileScanner.getJavaResourcesFileInputStream();
-            final String delegateMethodName = "execute";
+			final Set<String> classPaths = fileScanner.getJavaResourcesFileInputStream();
+			final ArrayList<String> delegateMethods = new ArrayList<>();
+			delegateMethods.add("execute");
+			delegateMethods.add("notify");
+			delegateMethods.add("mapInputVariables");
+			delegateMethods.add("mapOutputVariables");
 
-            variables.putAll(
-                    classFetcher(classPaths, classFile, delegateMethodName, classFile, element, chapter, fieldType,
-                            scopeId));
-        }
-        return variables;
-    }
+			for (String delegateMethodName : delegateMethods) {
+				variables.putAll(classFetcher(classPaths, classFile, delegateMethodName, classFile, element, chapter,
+						fieldType, scopeId));
+			}
+		}
+		return variables;
+	}
 
-    /**
-     *
-     * Starting by the main JavaDelegate statically analyse the classes implemented for the bpmn element.
-     *
-     * @param classPaths - Set of classes that is included in inter-procedural analysis
-     * @param className - name of currently analysed class
-     * @param methodName - name of currently analysed method
-     * @param classFile - location path of class
-     * @param element - Bpmn element
-     * @param chapter - ElementChapter
-     * @param fieldType - KnownElementFieldType
-     * @param scopeId - Scope of the element
-     * @return
-     */
-    public Map<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths, String className,
-            String methodName,
-            final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String scopeId) {
+	/**
+	 *
+	 * Starting by the main JavaDelegate statically analyse the classes implemented
+	 * for the bpmn element.
+	 *
+	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
+	 * @param className
+	 *            - Name of currently analysed class
+	 * @param methodName
+	 *            - Name of currently analysed method
+	 * @param classFile
+	 *            - Location path of class
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param scopeId
+	 *            - Scope of the element
+	 * @return - Map of process variables for a given class
+	 */
+	public Map<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths, final String className,
+			final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId) {
 
-        Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
+		Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
 
-        OutSetCFG outSet = new OutSetCFG(new ArrayList<VariableBlock>());
+		OutSetCFG outSet = new OutSetCFG(new ArrayList<VariableBlock>());
 
-        classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter,
-                fieldType, scopeId, outSet, null);
+		classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+				outSet, null, new ArrayList<String>());
 
-        processVariables.putAll(outSet.getAllProcessVariables());
+		processVariables.putAll(outSet.getAllProcessVariables());
 
-        // Add Java code level anomalies to BpmnElement so later it is included into
-        try {
+		// Add Java code level anomalies to BpmnElement so later it is included into
+		try {
+			addAnomaliesFoundInSourceCode(element, outSet);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 
-            addAnomaliesFoundInSourceCode(element, outSet);
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
+		return processVariables;
 
-        return processVariables;
+	}
 
-    }
-
-    /**
-     *
-     * Recursive call to find Camunda methods in other classes, called from the JavaDelegate.
-     *
-     * @param classPaths - Set of classes that is included in inter-procedural analysis
-     * @param className -  name of currently analysed class
-     * @param methodName - name of currently analysed method
-     * @param classFile -  location path of class
-     * @param element - Bpmn element
-     * @param chapter - ElementChapter
-     * @param fieldType - KnownElementFieldType
-     * @param scopeId - Scope of the element
-     * @return
-     */
+	/**
+	 * Recursively follow call hierarchy and obtain method bodies
+	 * 
+	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
+	 * @param className
+	 *            - Name of currently analysed class
+	 * @param methodName
+	 *            - Name of currently analysed method
+	 * @param classFile
+	 *            - Location path of class
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param scopeId
+	 *            - Scope of the element
+	 * @param outSet
+	 * 			  - Callgraph information
+	 * @param originalBlock
+	 * - VariableBlock
+	 * @param visitedClasses
+	 * - List to hold information which class has been visited (avoid circular references that lead to a StackOverflow)
+	 * @return OutSetCFG which contains data flow information
+	 */
     public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className,
-            String methodName,
-            final String classFile, final BpmnElement element, final ElementChapter chapter,
+            final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId,
-            OutSetCFG outSet, VariableBlock originalBlock) {
+            OutSetCFG outSet, final VariableBlock originalBlock, final ArrayList<String> visitedClasses) {
 
-    	if (System.getProperty("os.name").startsWith("Windows")) {
-    		className = className.replace("\\", ".").replace(".java", "");
-    	} else {
-    		className = className.replace("/", ".").replace(".java", "");
-    	}
-        
+    	if (!visitedClasses.contains(className)) {	
+        	if (System.getProperty("os.name").startsWith("Windows")) {
+        		className = className.replace("\\", ".").replace(".java", "");
+        	} else {
+        		className = className.replace("/", ".").replace(".java", "");
+        	}
+            
+            Options.v().set_whole_program(true);
+            Options.v().set_allow_phantom_refs(true);
+            
+            SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
-        Options.v().set_whole_program(true);
-        Options.v().set_allow_phantom_refs(true);
-
-        SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
-
-        if (sootClass != null) {
-            sootClass.setApplicationClass();
-            Scene.v().loadNecessaryClasses();
-
-            // Retrieve the method and its body
-            SootMethod method = sootClass.getMethodByNameUnsafe(methodName);
-            if (method != null) {
-                final Body body = method.retrieveActiveBody();
-
-                BlockGraph graph = new ClassicCompleteBlockGraph(body);
-
-                // Prepare call graph for inter-procedural recursive call
-                List<SootMethod> entryPoints = new ArrayList<SootMethod>();
-                entryPoints.add(method);
-                Scene.v().setEntryPoints(entryPoints);
-
-                PackManager.v().getPack("cg").apply();
-                CallGraph cg = Scene.v().getCallGraph();
-                final List<Block> graphHeads = graph.getHeads();
-                final List<Block> graphTails = graph.getTails();
-
-                for (Block head : graphHeads) {
-
-                    outSet = graphIterator(classPaths, cg, graph, head, graphTails, outSet, element, chapter, fieldType,
-                            classFile, scopeId, originalBlock, className);
-                }
-
-                // variables.putAll(outSet.getAllProcessVariables());
+            if (sootClass != null) {
+            	
+                sootClass.setApplicationClass();
+                Scene.v().loadNecessaryClasses();      
+                            
+                // Retrieve the method and its body based on the used interface       
+                List<Type> parameterTypes = new ArrayList<Type>();
+                RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"); 
+    			RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
+    			RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap"); 
+    			VoidType returnType = VoidType.v();	
+    						
+                switch (methodName) {
+    			case "execute":
+    				parameterTypes.add((Type)delegateExecutionType);
+    				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
+    				break;
+    			case "notify":
+    				for (SootClass clazz : sootClass.getInterfaces()) {
+    					if (clazz.getName().equals("org.camunda.bpm.engine.delegate.TaskListener")) {
+    						parameterTypes.add((Type)delegateTaskType);
+    					} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.ExecutionListener")) {
+    						parameterTypes.add((Type)delegateExecutionType);
+    					}
+    				}
+    				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
+    				break;				
+    			case "mapInputVariables":  
+    				parameterTypes.add((Type)delegateExecutionType);
+    				parameterTypes.add((Type)mapVariablesType);	
+    				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
+    				break;			
+    			case "mapOutputVariables":	
+    				parameterTypes.add((Type)delegateExecutionType);
+    				parameterTypes.add((Type)mapVariablesType);
+    				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);       
+    				break;				
+    			default:
+    				visitedClasses.add(className);
+    				outSet = retrieveCustomMethod(sootClass, classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+    						outSet, originalBlock, visitedClasses);
+    				break;
+    			}
 
             } else {
-                LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
+                LOGGER.warning("Class " + classFile + " was not found by Soot");
             }
-        } else {
-            LOGGER.warning("Class " + classFile + " was not found by Soot");
-        }
-
+    	}    
+    	
         return outSet;
 
     }
+    
 
-    /**
-     * Iterate through the control-flow graph with an iterative data-flow analysis logic
-     *
-     *
-     * @param graph
-     *            - Control Flow graph of method
-     * @param head
-     *            - Starting Block of the CFG
-     * @param blockTails
-     *            - List of End Blocks of CFG
-     * @param outSet
-     *            - OUT set of CFG
-     * @param element
-     *            - Bpmn element
-     * @param chapter
-     *            - ElementChapter
-     * @param fieldType
-     *            - KnownElementFieldType
-     * @param filePath
-     *            - ResourceFilePath for ProcessVariableOperation
-     * @param scopeId
-     *            - Scope of BpmnElement
-     * @return
-     */
-    private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, Block head,
-            List<Block> blockTails, OutSetCFG outSet,
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String filePath, final String scopeId, VariableBlock originalBlock, String oldClassName) {
+	/**
+	 * 
+	 * Retrieve given camunda methods to obtain a Soot representation of said method to analyse its body 
+	 * 
+	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
+	 * @param className
+	 *            - Name of currently analysed class
+	 * @param methodName
+	 *            - Name of currently analysed method
+	 * @param classFile
+	 *            - Location path of class
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param scopeId
+	 *            - Scope of the element
+	 * @param outSet
+	 * 			  - Callgraph information
+	 * @param originalBlock
+	 * - VariableBlock
+	 * @param sootClass
+	 * - Soot representation of given class
+	 * @param parameterTypes
+	 * - Soot representation of parameters
+	 * @param returnType
+	 * - Soot Representation of return type
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return OutSetCFG which contains data flow information
+	 */
+	private OutSetCFG retrieveMethod(final Set<String> classPaths, String className, final String methodName,
+			final String classFile, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
+			final VariableBlock originalBlock, final SootClass sootClass, final List<Type> parameterTypes, 
+			final VoidType returnType, final ArrayList<String> visitedClasses) {
+		
+		SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type)returnType);
+		
+		if (method != null) {  
+			outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+					outSet, originalBlock, method, visitedClasses);  
+		} else {
+			method = sootClass.getMethodByNameUnsafe(methodName);
+			if (method != null) {
+				outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+						outSet, originalBlock, method, visitedClasses);
+			} else { 
+				LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");       		
+			}            		
+		}
+		return outSet;
+	}
 
-        final Iterator<Block> graphIterator = graph.iterator();
+	
+	/**
+	 * 
+	 * Retrieve given custom methods to obtain a Soot representation of said method to analyse its body
+	 * 
+	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
+	 * @param className
+	 *            - Name of currently analysed class
+	 * @param methodName
+	 *            - Name of currently analysed method
+	 * @param classFile
+	 *            - Location path of class
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param scopeId
+	 *            - Scope of the element
+	 * @param outSet
+	 * 			  - Callgraph information
+	 * @param originalBlock
+	 * - VariableBlock
+	 * @param sootClass
+	 * - Soot representation of given class
+	 * @param parameterTypes
+	 * - Soot representation of parameters
+	 * @param returnType
+	 * - Soot Representation of return type
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return OutSetCFG which contains data flow information
+	 */
+	private OutSetCFG retrieveCustomMethod(final SootClass sootClass, final Set<String> classPaths, String className,
+            final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
+            final KnownElementFieldType fieldType, final String scopeId,
+            OutSetCFG outSet, final VariableBlock originalBlock, final ArrayList<String> visitedClasses) {			
+		
+		for (SootMethod method : sootClass.getMethods()) {
+			outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+					outSet, originalBlock, method, visitedClasses);			
+		}
+		return outSet;
+	}
+	
 
-        Block block;
-        while (graphIterator.hasNext()) {
-            block = graphIterator.next();
+	
+	/**
+	 * 
+	 * Retrieve given custom methods to obtain a Soot representation of said method to analyse its body
+	 * 
+	 * @param classPaths
+	 *            - Set of classes that is included in inter-procedural analysis
+	 * @param className
+	 *            - Name of currently analysed class
+	 * @param methodName
+	 *            - Name of currently analysed method
+	 * @param classFile
+	 *            - Location path of class
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param scopeId
+	 *            - Scope of the element
+	 * @param outSet
+	 * 			  - Callgraph information
+	 * @param originalBlock
+	 * - VariableBlock
+	 * @param method
+	 * - Soot representation of a given method
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return OutSetCFG which contains data flow information
+	 */
+	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className, final String methodName,
+			final String classFile, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet, final VariableBlock originalBlock,
+			final SootMethod method, final ArrayList<String> visitedClasses) {
 
-            // Collect the functions Unit by Unit via the blockIterator
-            final VariableBlock vb = blockIteraror(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-                    scopeId, originalBlock, oldClassName);
+		final Body body = method.retrieveActiveBody();
 
-            // depending if ouset already has that Block, only add varibles,
-            // if not, then add the whole vb
+		BlockGraph graph = new ClassicCompleteBlockGraph(body);
 
-            if (outSet.getVariableBlock(vb.getBlock()) == null) {
-                outSet.addVariableBlock(vb);
+		// Prepare call graph for inter-procedural recursive call
+		List<SootMethod> entryPoints = new ArrayList<SootMethod>();
+		entryPoints.add(method);
+		Scene.v().setEntryPoints(entryPoints);
 
-            }
-        }
+		PackManager.v().getPack("cg").apply();
+		CallGraph cg = Scene.v().getCallGraph();
 
-        return outSet;
-    }
+		final List<Block> graphHeads = graph.getHeads();
+		final List<Block> graphTails = graph.getTails();
 
-    /**
-     * Iterator through the source code line by line, collecting the ProcessVariables Camunda methods are interface
-     * invocations appearing either in Assign statement or Invoke statement Constraint: Only String constants can be
-     * precisely recognized.
-     *
-     * @param block
-     *            - Block from CFG
-     * @param InSet
-     *            - OUT set of CFG
-     * @param element
-     *            - BpmnElement
-     * @param chapter
-     *            - ElementChapter
-     * @param fieldType
-     *            - KnownElementFieldType
-     * @param filePath
-     *            - ResourceFilePath for ProcessVariableOperation
-     * @param scopeId
-     *            - Scope of BpmnElement
-     * @return
-     */
-    private VariableBlock blockIteraror(final Set<String> classPaths, final CallGraph cg, final Block block,
-            OutSetCFG outSet, final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String filePath,
-            final String scopeId, VariableBlock variableBlock, String oldClassName) {
+		for (Block head : graphHeads) {
+			outSet = graphIterator(classPaths, cg, graph, head, graphTails, outSet, element, chapter, fieldType,
+					classFile, scopeId, originalBlock, className, visitedClasses);
+		}
 
-        if (variableBlock == null) {
-            variableBlock = new VariableBlock(block, new ArrayList<ProcessVariableOperation>());
+		return outSet;
+	}
 
-        }
-        final Iterator<Unit> unitIt = block.iterator();
+	/**
+	 * Iterate through the control-flow graph with an iterative data-flow analysis
+	 * logic
+	 *
+	 * @param classPaths
+	 * - Set of classes that is included in inter-procedural analysis
+	 * @param cg
+	 * - Soot CallGraph
+	 * @param graph
+	 *            - Control Flow graph of method
+	 * @param head
+	 *            - Starting Block of the CFG
+	 * @param blockTails
+	 *            - List of End Blocks of CFG
+	 * @param outSet
+	 *            - OUT set of CFG
+	 * @param element
+	 *            - Bpmn element
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param filePath
+	 *            - ResourceFilePath for ProcessVariableOperation
+	 * @param scopeId
+	 *            - Scope of BpmnElement
+	 * @param originalBlock
+	 * - VariableBlock
+	 * @param oldClassName
+	 * - Classname
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return OutSetCFG which contains data flow information
+	 */
+	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, Block head,
+			List<Block> blockTails, OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
+			VariableBlock originalBlock, String oldClassName, final ArrayList<String> visitedClasses) {
 
-        Unit unit;
-        while (unitIt.hasNext()) {
-            unit = unitIt.next();
+		final Iterator<Block> graphIterator = graph.iterator();
 
-            if (cg != null & (unit instanceof InvokeStmt || unit instanceof AssignStmt)) {
+		Block block;
+		while (graphIterator.hasNext()) {
+			block = graphIterator.next();
 
-                Iterator<soot.jimple.toolkits.callgraph.Edge> sources = cg.edgesOutOf(unit);
+			// Collect the functions Unit by Unit via the blockIterator
+			final VariableBlock vb = blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
+					scopeId, originalBlock, oldClassName, visitedClasses);
 
-                Edge src;
-                while (sources.hasNext()) {
-                    src = (Edge) sources.next();
-                    String methodName = src.tgt().getName();
+			// depending if outset already has that Block, only add varibles,
+			// if not, then add the whole vb
 
-                    String className = src.tgt().getDeclaringClass().getName();
-                    if (!className.equals(oldClassName)) {
-                    	if (System.getProperty("os.name").startsWith("Windows")) {
-                    		className = className.replace(".", "\\") + ".java";
-                    	} else {
-                    		className = className.replace(".", "/") + ".java";
-                    	}
-                        
+			if (outSet.getVariableBlock(vb.getBlock()) == null) {
+				outSet.addVariableBlock(vb);
+			}
+		}
 
-                        if (classPaths.contains(className)) {
-                            G.reset();
+		return outSet;
+	}
 
-                            classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
-                                    fieldType,
-                                    scopeId, outSet, variableBlock);
+	/**
+	 * Iterator through the source code line by line, collecting the
+	 * ProcessVariables Camunda methods are interface invocations appearing either
+	 * in Assign statement or Invoke statement Constraint: Only String constants can
+	 * be precisely recognized.
+	 *
+	 * @param classPaths
+	 * - Set of classes that is included in inter-procedural analysis
+	 * @param cg
+	 * - Soot CallGraph
+	 * @param block
+	 *            - Block from CFG
+	 * @param outSet
+	 *            - OUT set of CFG
+	 * @param element
+	 *            - BpmnElement
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param filePath
+	 *            - ResourceFilePath for ProcessVariableOperation
+	 * @param scopeId
+	 *            - Scope of BpmnElement
+	 * @param variableBlock
+	 * - VariableBlock
+	 * @param oldClassName
+	 * - Classname
+	 * @param visitedClasses
+	 * - List of visited classes to avoid circular references
+	 * @return VariableBlock
+	 */
+	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
+			OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
+			VariableBlock variableBlock, String oldClassName, final ArrayList<String> visitedClasses) {
 
-                        }
-                    }
-                }
+		if (variableBlock == null) {
+			variableBlock = new VariableBlock(block, new ArrayList<ProcessVariableOperation>());
+		}
+		
+		final Iterator<Unit> unitIt = block.iterator();
 
-                if (unit instanceof InvokeStmt) {
+		Unit unit;
+		while (unitIt.hasNext()) {
+			unit = unitIt.next();
 
-                    if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+			if (cg != null & (unit instanceof InvokeStmt || unit instanceof AssignStmt)) {
 
-                        JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox()
-                                .getValue();
-                        if (expr != null) {
-                            parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId);
-                        }
+				Iterator<soot.jimple.toolkits.callgraph.Edge> sources = cg.edgesOutOf(unit);
 
-                    }
-                }
-            }
-            if (unit instanceof AssignStmt) {
+				Edge src;
+				while (sources.hasNext()) {
+					src = (Edge) sources.next();
+					String methodName = src.tgt().getName();
+					String className = src.tgt().getDeclaringClass().getName();
+					String origClassName = className;
+					
+					// Only visit methods from other classes
+					if (!className.equals(oldClassName)) {
+						if (System.getProperty("os.name").startsWith("Windows")) {
+							className = className.replace(".", "\\") + ".java";
+						} else {
+							className = className.replace(".", "/") + ".java";
+						}
+						
+						if (classPaths.contains(className) || className.contains("$")) {
+							if (!visitedClasses.contains(origClassName)) {
+								G.reset();
 
-                if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
+								classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
+										fieldType, scopeId, outSet, variableBlock, visitedClasses);
+							}
+						}
+					}
+				}
 
-                    JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
+				if (unit instanceof InvokeStmt) {
 
-                    if (expr != null) {
-                        parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId);
-                    }
-                }
+					if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
 
-            }
-        }
+						JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox()
+								.getValue();
+						if (expr != null) {
+							parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId);
+						}
 
-        return variableBlock;
-    }
+					}
+				}
+			}
+			if (unit instanceof AssignStmt) {
 
-    /**
-     *
-     * Special parsing of statements to find Process Variable operations.
-     * 
-     * @param expr
-     *            - Expression Unit from Statement
-     * @param variableBlock
-     *            - current VariableBlock
-     * @param element
-     *            - BpmnElement
-     * @param chapter
-     *            - ElementChapter
-     * @param fieldType
-     *            - KnownElementFieldType
-     * @param filePath
-     *            - ResourceFilePath for ProcessVariableOperation
-     * @param scopeId
-     *            - Scope of BpmnElement
-     */
-    private void parseExpression(JInterfaceInvokeExpr expr, VariableBlock variableBlock, BpmnElement element,
-            ElementChapter chapter, KnownElementFieldType fieldType, String filePath, String scopeId) {
+				if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
 
-        String functionName = expr.getMethodRef().name();
-        int numberOfArg = expr.getArgCount();
-        String baseBox = expr.getBaseBox().getValue().getType().toString();
+					JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 
-        CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
-                .findByNameAndNumberOfBoxes(functionName, baseBox, numberOfArg);
+					if (expr != null) {
+						parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId);
+					}
+				}
 
-        if (foundMethod != null) {
+			}
+		}
+		
+		return variableBlock;
+	}
 
-            int location = foundMethod.getLocation() - 1;
-            VariableOperation type = foundMethod.getOperationType();
+	/**
+	 *
+	 * Special parsing of statements to find Process Variable operations.
+	 * 
+	 * @param expr
+	 *            - Expression Unit from Statement
+	 * @param variableBlock
+	 *            - current VariableBlock
+	 * @param element
+	 *            - BpmnElement
+	 * @param chapter
+	 *            - ElementChapter
+	 * @param fieldType
+	 *            - KnownElementFieldType
+	 * @param filePath
+	 *            - ResourceFilePath for ProcessVariableOperation
+	 * @param scopeId
+	 *            - Scope of BpmnElement
+	 */
+	private void parseExpression(JInterfaceInvokeExpr expr, VariableBlock variableBlock, BpmnElement element,
+			ElementChapter chapter, KnownElementFieldType fieldType, String filePath, String scopeId) {
 
-            if (expr.getArgBox(location).getValue() instanceof StringConstant) {
+		String functionName = expr.getMethodRef().name();
+		int numberOfArg = expr.getArgCount();
+		String baseBox = expr.getBaseBox().getValue().getType().toString();
 
-                StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
-                String name = variableName.value;
+		CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
+				.findByNameAndNumberOfBoxes(functionName, baseBox, numberOfArg);
 
-                variableBlock
-                        .addProcessVariable(new ProcessVariableOperation(name,
-                                element, chapter, fieldType, filePath, type, scopeId));
-            }
-        }
-    }
+		if (foundMethod != null) {
 
-    /**
-     *
-     * Find anomalies inside a Bpmn element as well.
-     * 
-     * @param element
-     *            - BpmnElement
-     * @param graph
-     *            - CFG of method
-     * @param outSet
-     *            - OUT set of CFG
-     * @param graphHeads
-     *            - Starting Blocks of CFG
-     * @param graphTails
-     *            - End Blocks of CFG
-     */
-    private void addAnomaliesFoundInSourceCode(final BpmnElement element,
-            final OutSetCFG outSet) {
+			int location = foundMethod.getLocation() - 1;
+			VariableOperation type = foundMethod.getOperationType();
 
-        for (VariableBlock vb : outSet.getAllVariableBlocks()) {
+			if (expr.getArgBox(location).getValue() instanceof StringConstant) {
 
-            if (vb.getBlock().getIndexInMethod() == 0) {
-                addAnomaliesFoundInPathsRecursive(element, vb.getBlock(), new LinkedList<String>(), outSet,
-                        new LinkedList<ProcessVariableOperation>(), "");
-            }
-        }
-    }
+				StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
+				String name = variableName.value;
 
-    /**
-     *
-     * Build LinkedList of ProcessVariableOperations recursively based on CFG paths.
-     * 
-     * @param element
-     *            - BpmnElement
-     * @param currentBlock
-     *            - Block from CFG
-     * @param currentPath
-     *            - List of so far visited Blocks
-     * @param outSet
-     *            - OUT set of CFG
-     * @param predecessorVaribalesList
-     *            - Chain of Process Variables along the path
-     * @param edge
-     *            - Current edge between two Blocks
-     */
-    private void addAnomaliesFoundInPathsRecursive(final BpmnElement element, Block currentBlock,
-            LinkedList<String> currentPath, final OutSetCFG outSet,
-            LinkedList<ProcessVariableOperation> predecessorVaribalesList, String edge) {
+				variableBlock.addProcessVariable(
+						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
+			}
+		}
+	}
 
-        // List<AnomalyContainer> foundAnomalies = new ArrayList<AnomalyContainer>();
-        currentPath.add(edge);
+	
+	/**
+	 * 
+	 * Find anomalies inside a Bpmn element as well.
+	 * 
+	 * @param element
+	 *            - BpmnElement
+	 * @param outSet
+	 *            - OUT set of CFG
+	 */
+	private void addAnomaliesFoundInSourceCode(final BpmnElement element, final OutSetCFG outSet) {
+		for (VariableBlock vb : outSet.getAllVariableBlocks()) {
+			if (vb.getBlock().getIndexInMethod() == 0) {
+				addAnomaliesFoundInPathsRecursive(element, vb.getBlock(), new LinkedList<String>(), outSet,
+						new LinkedList<ProcessVariableOperation>(), "");
+			}
+		}
+	}
 
-        // get the VariableBlock
-        VariableBlock variableBlock = outSet.getVariableBlock(currentBlock);
+	/**
+	 *
+	 * Build LinkedList of ProcessVariableOperations recursively based on CFG paths.
+	 * 
+	 * @param element
+	 *            - BpmnElement
+	 * @param currentBlock
+	 *            - Block from CFG
+	 * @param currentPath
+	 *            - List of so far visited Blocks
+	 * @param outSet
+	 *            - OUT set of CFG
+	 * @param predecessorVariablesList
+	 *            - Chain of Process Variables along the path
+	 * @param edge
+	 *            - Current edge between two Blocks
+	 */
+	private void addAnomaliesFoundInPathsRecursive(final BpmnElement element, final Block currentBlock,
+			final LinkedList<String> currentPath, final OutSetCFG outSet,
+			final LinkedList<ProcessVariableOperation> predecessorVariablesList, final String edge) {
 
-        // set IN + this Variables as OUT
-        LinkedList<ProcessVariableOperation> usedVariables = new LinkedList<ProcessVariableOperation>();
-        usedVariables.addAll(variableBlock.getAllProcessVariables());
+		// List<AnomalyContainer> foundAnomalies = new ArrayList<AnomalyContainer>();
+		if (edge != null && edge != "") {
+			currentPath.add(edge);
+		}
 
-        // Based on last appearance of Variable decide on UR, DD, DU anomaly
-        for (ProcessVariableOperation variable : usedVariables) {
-            if (predecessorVaribalesList.lastIndexOf(variable) >= 0) {
+		// get the VariableBlock
+		VariableBlock variableBlock = outSet.getVariableBlock(currentBlock);
 
-                ProcessVariableOperation lastApperance = predecessorVaribalesList
-                        .get(predecessorVaribalesList.lastIndexOf(variable));
-                if (urSourceCode(lastApperance, variable)) {
-                    element.addSourceCodeAnomaly(new AnomalyContainer(variable.getName(), Anomaly.UR,
-                            element.getBaseElement().getId(), variable));
-                }
+		// set IN + this Variables as OUT
+		LinkedList<ProcessVariableOperation> usedVariables = new LinkedList<ProcessVariableOperation>();
+		usedVariables.addAll(variableBlock.getAllProcessVariables());
 
-                if (ddSourceCode(lastApperance, variable)) {
-                    element.addSourceCodeAnomaly(new AnomalyContainer(variable.getName(), Anomaly.DD,
-                            element.getBaseElement().getId(), variable));
-                }
+		// prepare for statement by statement comparison
+		Set<ProcessVariableOperation> pvSet = new HashSet<ProcessVariableOperation>(usedVariables);
+		for (ProcessVariableOperation pV : pvSet) {
+			// create unique lists for operations on same variable
+			LinkedList<ProcessVariableOperation> innerList = new LinkedList<ProcessVariableOperation>();
+			for (ProcessVariableOperation variable : usedVariables) {
+				if (pV.getName().equals(variable.getName())) {
+					innerList.add(variable);
+				}
+			}
+			checkStatementByStatement(element, innerList);
+		}
 
-                if (duSourceCode(lastApperance, variable)) {
-                    element.addSourceCodeAnomaly(new AnomalyContainer(variable.getName(), Anomaly.DU,
-                            element.getBaseElement().getId(), variable));
-                }
-            }
-        }
+		// Based on last appearance of Variable decide on UR, DD, DU anomaly
+		for (ProcessVariableOperation variable : usedVariables) {
+			if (predecessorVariablesList.lastIndexOf(variable) >= 0) {
+				ProcessVariableOperation lastAppearance = predecessorVariablesList
+						.get(predecessorVariablesList.lastIndexOf(variable));
+				checkAnomaly(element, variable, lastAppearance);
+			}
+		}
 
-        // Prepare new chain of Variables including this Block's variables for
-        // successors
-        predecessorVaribalesList.addAll(usedVariables);
+		// Prepare new chain of Variables including this Block's variables for
+		// successors
+		predecessorVariablesList.addAll(usedVariables);
 
-        List<Block> sucessors = currentBlock.getSuccs();
-        for (Block sucessor : sucessors) {
-            String newEdge = currentBlock.toShortString() + sucessor.toShortString();
-            int occurance = Collections.frequency(currentPath, newEdge);
-            if (occurance < 2) {
-                addAnomaliesFoundInPathsRecursive(element, sucessor, currentPath, outSet, predecessorVaribalesList,
-                        newEdge);
-            }
-        }
+		List<Block> successors = currentBlock.getSuccs();
+		for (Block successor : successors) {
+			String newEdge = currentBlock.toShortString() + successor.toShortString();
+			int occurrence = Collections.frequency(currentPath, newEdge);
+			if (occurrence < 2) {
+				addAnomaliesFoundInPathsRecursive(element, successor, currentPath, outSet, predecessorVariablesList,
+						newEdge);
+			}
+		}
 
-        currentPath.removeLast();
-        for (ProcessVariableOperation pv : variableBlock.getAllProcessVariables()) {
-            predecessorVaribalesList.removeLastOccurrence(pv);
-        }
+		currentPath.removeLast();
+		for (ProcessVariableOperation pv : variableBlock.getAllProcessVariables()) {
+			predecessorVariablesList.removeLastOccurrence(pv);
+		}
 
-    }
+	}
 
-    /**
-     * UR anomaly: second last operation of PV is DELETE, last operation is READ
-     * 
-     * @param lastApperance
-     *            - Previous ProcessVariable
-     * @param currentApperance
-     *            - Current ProcessVariable
-     * @return - true/false
-     */
-    private boolean urSourceCode(final ProcessVariableOperation lastApperance,
-            final ProcessVariableOperation currentApperance) {
-        if (currentApperance.getOperation().equals(VariableOperation.READ)
-                && lastApperance.getOperation().equals(VariableOperation.DELETE)) {
-            return true;
-        }
-        return false;
-    }
+	/**
+	 * Checks for anomalies occurring between elements
+	 * 
+	 * @param element
+	 *            Current BpmnElement
+	 * @param innerList
+	 *            List of all variable operations (same name)
+	 */
+	private void checkStatementByStatement(final BpmnElement element,
+			final LinkedList<ProcessVariableOperation> innerList) {
 
-    /**
-     * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
-     * 
-     * @param last
-     *            - Previous ProcessVariable
-     * @param pv
-     *            - Current ProcessVariable
-     * @return - true/false
-     */
-    private boolean ddSourceCode(final ProcessVariableOperation last, final ProcessVariableOperation pv) {
-        if (pv.getOperation().equals(VariableOperation.WRITE) && last.getOperation().equals(VariableOperation.WRITE)) {
-            return true;
-        }
-        return false;
-    }
+		if (innerList.size() >= 2) {
+			ProcessVariableOperation prev = null;
+			for (ProcessVariableOperation curr : innerList) {
+				if (prev == null) {
+					prev = curr;
+					continue;
+				}
+				checkAnomaly(element, curr, prev);
+			}
+		}
 
-    /**
-     * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
-     * 
-     * @param last
-     *            - Previous ProcessVariable
-     * @param pv
-     *            - Current ProcessVariable
-     * @return - true/false
-     */
-    private boolean duSourceCode(final ProcessVariableOperation last, final ProcessVariableOperation pv) {
-        if (pv.getOperation().equals(VariableOperation.DELETE) && last.getOperation().equals(VariableOperation.WRITE)) {
-            return true;
-        }
-        return false;
-    }
+	}
+
+	/**
+	 * Check for dataflow anomaly between current and previous variable operation
+	 * 
+	 * @param element
+	 *            Current BpmnElement
+	 * @param curr
+	 *            current operation
+	 * @param last
+	 *            previous operation
+	 */
+	private void checkAnomaly(final BpmnElement element, ProcessVariableOperation curr, ProcessVariableOperation last) {
+		if (urSourceCode(last, curr)) {			
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
+		}
+
+		if (ddSourceCode(last, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(), curr));
+		}
+
+		if (duSourceCode(last, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(), curr));
+		}
+	}
+
+	/**
+	 * UR anomaly: second last operation of PV is DELETE, last operation is READ
+	 * 
+	 * @param prev
+	 *            - Previous ProcessVariable
+	 * @param curr
+	 *            - Current ProcessVariable
+	 * @return - true/false
+	 */
+	private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		if (curr.getOperation().equals(VariableOperation.READ)
+				&& prev.getOperation().equals(VariableOperation.DELETE)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
+	 * 
+	 * @param prev
+	 *            - Previous ProcessVariable
+	 * @param curr
+	 *            - Current ProcessVariable
+	 * @return - true/false
+	 */
+	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		if (curr.getOperation().equals(VariableOperation.WRITE)
+				&& prev.getOperation().equals(VariableOperation.WRITE)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
+	 * 
+	 * @param prev
+	 *            - Previous ProcessVariable
+	 * @param curr
+	 *            - Current ProcessVariable
+	 * @return - true/false
+	 */
+	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		if (curr.getOperation().equals(VariableOperation.DELETE)
+				&& prev.getOperation().equals(VariableOperation.WRITE)) {
+			return true;
+		}
+		return false;
+	}
 
 }

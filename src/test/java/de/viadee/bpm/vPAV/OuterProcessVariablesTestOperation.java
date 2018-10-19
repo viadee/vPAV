@@ -52,7 +52,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderContext;
+import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
@@ -89,8 +92,12 @@ public class OuterProcessVariablesTestOperation {
     @Test
     public void testStartProcessByKey() throws ParserConfigurationException, SAXException, IOException {
         //// Given...
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "OuterProcessVariablesTest_StartProcessByKey.bpmn";
         final File processdefinition = new File(PATH);
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
         final Map<String, Collection<String>> processIdToVariables = new HashMap<String, Collection<String>>();
@@ -100,7 +107,7 @@ public class OuterProcessVariablesTestOperation {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null,
                 processIdToVariables, new BpmnScanner(PATH));
         // create data flow graphs
-        graphBuilder.createProcessGraph(modelInstance, processdefinition.getPath(), new ArrayList<String>());
+        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance, processdefinition.getPath(), new ArrayList<String>());
 
         //// Then...
         // select start event from process and check variable
@@ -124,8 +131,11 @@ public class OuterProcessVariablesTestOperation {
     @Test
     public void testMessageCorrelation() throws ParserConfigurationException, SAXException, IOException {
         /// Given
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "OuterProcessVariablesTest_MessageCorrelation.bpmn";
         final File processdefinition = new File(PATH);
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
@@ -138,7 +148,7 @@ public class OuterProcessVariablesTestOperation {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null,
                 messageIdToVariables, null, new BpmnScanner(PATH));
         // create data flow graphs
-        graphBuilder.createProcessGraph(modelInstance, processdefinition.getPath(), new ArrayList<String>());
+        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance, processdefinition.getPath(), new ArrayList<String>());
 
         /// Then
         // select start event from process and check variable

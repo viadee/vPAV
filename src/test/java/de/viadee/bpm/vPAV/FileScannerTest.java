@@ -31,13 +31,10 @@
  */
 package de.viadee.bpm.vPAV;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.logging.Logger;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,8 +42,6 @@ import org.junit.Test;
 public class FileScannerTest {
 
     private static ClassLoader cl;
-
-    private static Logger logger = Logger.getLogger(FileScannerTest.class.getName());
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -61,8 +56,7 @@ public class FileScannerTest {
     @Test
     public void testSootPathLoading() {
 
-        ProcessApplicationValidator pav = new ProcessApplicationValidator();
-        pav.findModelErrors();
+        ProcessApplicationValidator.findModelErrors();
 
         String sootPath = FileScanner.getSootPath();
 

@@ -39,6 +39,7 @@ import java.util.stream.Stream;
  * Representing a predicate to define constraints and conditions with.
  * Contains logic for evaluation returning an EvaluationResult object including a result message.
  * @param <T>
+ * - Generic parameter
  */
 public class DescribedPredicateEvaluator<T> {
 
@@ -64,7 +65,7 @@ public class DescribedPredicateEvaluator<T> {
 
     /**
      * Combines this predicate with another on disjunctively
-     * @param other
+     * @param other Other predicate
      * @return combined predicate
      */
     public DescribedPredicateEvaluator<T> or(DescribedPredicateEvaluator<T> other) {
@@ -82,7 +83,7 @@ public class DescribedPredicateEvaluator<T> {
 
     /**
      * Combines this predicate with another on conjunctively
-     * @param other
+     * @param other Other predicate
      * @return combined predicate
      */
     public DescribedPredicateEvaluator<T> and(DescribedPredicateEvaluator other) {
