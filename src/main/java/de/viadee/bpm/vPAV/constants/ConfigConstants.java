@@ -37,7 +37,7 @@ package de.viadee.bpm.vPAV.constants;
 
 public final class ConfigConstants {
 	
-	public static final String INITIAL_VARIABLES = "InitialProcessVariables";
+	  public static final String INITIAL_VARIABLES = "InitialProcessVariables";
 
     public static final String RULESET = "ruleSet.xml";
 

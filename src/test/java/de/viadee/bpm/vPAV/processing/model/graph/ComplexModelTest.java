@@ -203,3 +203,4 @@ public class ComplexModelTest {
         RuntimeConfig.getInstance().setTest(false);
     }
 }
+

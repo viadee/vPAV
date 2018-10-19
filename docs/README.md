@@ -113,6 +113,7 @@ You can zoom in and out with the mouse wheel and move the model by click and hol
 There are two different view modes with each providing a different overlay for the model and tables with additional information.
 
 To find the visual output, check the created vPAV folder inside your project's target folder. Open the **validationResult.html** with any browser to explore your process model and the found issues.
+
 #### Issue Overlay
 In the BPMN model, the elements with errors are highlighted. Error categories are indicated by color. 
 An overlay specifies the number of errors found on an element. Details can be seen by clicking on the overlay.
@@ -357,7 +358,7 @@ All licenses of reused components can be found on the [maven site](http://rawgit
 
 **BSD 3-Clause License** <br/>
 
-Copyright (c) 2018, viadee IT-Unternehmensberatung GmbH
+Copyright (c) 2018, viadee IT-Unternehmensberatung AG
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

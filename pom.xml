@@ -5,7 +5,7 @@
 	<groupId>de.viadee</groupId>
 	<artifactId>viadeeProcessApplicationValidator</artifactId>
 
-	<version>2.7.1-SNAPSHOT</version>
+	<version>2.7.1</version>
 
 	<packaging>maven-plugin</packaging>
 
@@ -27,7 +27,7 @@
 
 
 	<organization>
-		<name>viadee Unternehmensberatung GmbH</name>
+		<name>viadee Unternehmensberatung AG</name>
 		<url>http://www.viadee.de</url>
 	</organization>
 
@@ -35,37 +35,37 @@
 		<developer>
 			<name>Frank Koehne</name>
 			<email>Frank.Koehne@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Claus Usener</name>
 			<email>Claus-Alexander.Usener@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Marcel Flasskamp</name>
 			<email>Marcel.Flasskamp@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Sascha Di Bernardo</name>
 			<email>Sascha.DiBernardo@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Petra Horvath</name>
 			<email>Petra.Horvath@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Lars Beyer</name>
 			<email>Lars.Beyer@viadee.de</email>
-			<organization>viadee Unternehmensberatung GmbH</organization>
+			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
 	</developers>
@@ -300,7 +300,7 @@
 				<configuration>
 					<header>src/main/resources/BSD3-license.txt</header>
 					<properties>
-						<owner>viadee Unternehmensberatung GmbH</owner>
+						<owner>viadee Unternehmensberatung AG</owner>
 						<inceptionYear>2018</inceptionYear>
 						<email>Frank.Koehne@viadee.de</email>
 					</properties>
@@ -367,6 +367,25 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+   				<groupId>org.jacoco</groupId>
+   				<artifactId>jacoco-maven-plugin</artifactId>
+   				<version>0.8.2</version>
+   				<executions>
+			        <execution>
+			            <goals>
+			                <goal>prepare-agent</goal>
+			            </goals>
+			        </execution>
+			        <execution>
+			            <id>report</id>
+			            <phase>prepare-package</phase>
+			            <goals>
+			                <goal>report</goal>
+			            </goals>
+			        </execution>
+			    </executions>
+     			</plugin>	
 		</plugins>
 	</build>
 
