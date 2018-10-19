@@ -332,9 +332,9 @@ function createTableHeader(id, content) {
 }
 
 //create issue table
-function createIssueTable(bpmnFile, tableContent) {
+function createIssueTable(bpmnFile, tableContent, mode) {    
     var myTable = document.getElementById("table");
-    myTable.setAttribute("class", "table table-issues table-row table-bordered .table-responsive")
+    myTable.setAttribute("class", "table table-issues table-row table-bordered .table-responsive");
     let myTHead = document.createElement("thead");
     let myRow = document.createElement("tr");
     myRow.setAttribute("id", "tr_ueberschriften");
@@ -358,11 +358,21 @@ function createIssueTable(bpmnFile, tableContent) {
             //ruleName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
+
+            //button to add issue
+            var tableIssueButton = document.createElement("button");
+            tableIssueButton.setAttribute("class", "btn btn-viadee issue-button-table");
+            tableIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, tableIssueButton]));
+            tableIssueButton.innerHTML = "Add Issue";
+            var b = document.createElement("a");
+            b.appendChild(tableIssueButton);
+            
+
             myCell.setAttribute("id", issue.classification) // mark cell
 
             //create link for default checkers
             var a = document.createElement("a");
-            a.appendChild(myText);
+            a.appendChild(myText);            
 
             defaultCheckers.forEach(element => {
                 if (issue.ruleName == element.rulename) {
@@ -372,6 +382,11 @@ function createIssueTable(bpmnFile, tableContent) {
             });
 
             myCell.appendChild(a);
+            
+            //based on selection show button
+            if (mode == tableViewModes.ISSUES) {
+                myCell.appendChild(b);
+            }            
 
             //link to docu            
             myRow.appendChild(myCell);
@@ -651,20 +666,19 @@ function setFocus(name) {
     document.getElementById(name).focus();
 }
 
+const tableViewModes = Object.freeze({
+    ISSUES:   Symbol("issues"),
+    NO_ISSUES:  Symbol("no issues"),
+    VARIABLES: Symbol("process variables")
+});
+
+const overlayViewModes = Object.freeze({
+    ISSUES:   Symbol("issues"),
+    VARIABLES:  Symbol("process variables"),
+});
+
 function createViewController() {
     let ctrl = {};
-
-    const tableViewModes = Object.freeze({
-        ISSUES:   Symbol("issues"),
-        NO_ISSUES:  Symbol("no issues"),
-        VARIABLES: Symbol("process variables")
-    });
-
-    const overlayViewModes = Object.freeze({
-        ISSUES:   Symbol("issues"),
-        VARIABLES:  Symbol("process variables"),
-    });
-
     /**
      * bpmn-js-seed
      *
@@ -708,14 +722,14 @@ function createViewController() {
         } else if (countIssues(diagramName, elementsToMark) > 0) {
             if (tableViewMode === tableViewModes.ISSUES) {
                 document.getElementById("showAllIssues").setAttribute("class", "nav-link table-selector active");
-                createIssueTable(diagramName, elementsToMark);
+                createIssueTable(diagramName, elementsToMark, tableViewMode);
             } else {
                 document.getElementById("showSuccess").setAttribute("class", "nav-link table-selector active");
-                createIssueTable(diagramName, noIssuesElements);
+                createIssueTable(diagramName, noIssuesElements, tableViewMode);
             }
         } else {
             document.getElementById("showAllIssues").setAttribute("class", "nav-link table-selector active");
-            createIssueTable(diagramName, noIssuesElements);
+            createIssueTable(diagramName, noIssuesElements, tableViewMode);
         }
         createFooter();
     }

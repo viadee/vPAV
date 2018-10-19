@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -214,13 +214,13 @@ public class FileScanner {
         if (sootPathCurrent != null) {
         	if (System.getProperty("os.name").startsWith("Windows")) {
         		sootPathCurrent = sootPathCurrent.replace("file:/", "");
-                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");;
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
                 if (!sootPaths.contains(sootPathCurrent)) {                	
                 	sootPaths.add(sootPathCurrent);
                 }
         	} else {
         		sootPathCurrent = sootPathCurrent.replace("file:", "");
-                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");;
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
                 if (!sootPaths.contains(sootPathCurrent)) {                	
                 	sootPaths.add(sootPathCurrent);
                 }

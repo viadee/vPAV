@@ -96,6 +96,13 @@ a:hover {
 	height: 45px; 
 }
 
+.issue-button-table {
+	float: left;
+	width: 50%;
+	margin-top: .1rem;
+	height: 45px; 
+}
+
 .issue-id {
 	float: left;
 	width: 75%;
