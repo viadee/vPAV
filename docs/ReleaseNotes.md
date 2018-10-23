@@ -1,5 +1,16 @@
 # Release notes
 
+## 2.7.1
+
+### Features
+[**Issue 76**](https://github.com/viadee/vPAV/issues/76) Extended the scope of the ProcessVariableChecker  
+
+### Fixes
+
+### Misc
+[**Issue 83**](https://github.com/viadee/vPAV/issues/83) Cleaned and updated JavaDoc  
+[**Issue 79**](https://github.com/viadee/vPAV/issues/79) Checked proper functionality with additional build tools (e.g. Gradle)  
+
 ## 2.7.0
 
 ### Features
