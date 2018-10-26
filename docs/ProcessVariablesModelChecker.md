@@ -29,7 +29,7 @@ Important: All variables used at runtime should be declared beforehand to maximi
 ```java
 public class InitialProcessVariables extends InitialProcessVariablesBase {
 
-    public String filename;
+    String filename;
     
 }
 ```
@@ -39,7 +39,7 @@ public class Example {
 
    class InitialProcessVariables extends InitialProcessVariablesBase {
 
-   	public String filename;
+   	String filename;
     }    
 }
 ```
