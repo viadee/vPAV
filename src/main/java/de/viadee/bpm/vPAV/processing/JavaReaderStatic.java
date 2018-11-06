@@ -69,6 +69,7 @@ import soot.jimple.AssignStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.JInterfaceInvokeExpr;
+import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
@@ -144,7 +145,7 @@ public class JavaReaderStatic implements JavaReader {
 			final String sootPath = FileScanner.getSootPath();
 			System.setProperty("soot.class.path", sootPath);
 			
-			className = cleanString(className);
+			className = cleanString(className, true);
             
             Options.v().set_whole_program(true);
             Options.v().set_allow_phantom_refs(true);
@@ -175,14 +176,15 @@ public class JavaReaderStatic implements JavaReader {
 	 */
 	private void checkWriteAccess(final Body body, final SootMethod method, final OuterProcessVariablesScanner scanner, 
 			final BpmnElement element, final String resourceFilePath) {
+		
+		final Map<String, ProcessVariableOperation> initialOperations = new HashMap<>();
 
     	for (String location : scanner.getInitialProcessVariablesLocation()) {
-    		location = cleanString(location);
+    		location = cleanString(location, true);
     		location = "new " + location.replace(".java", "") + "$InitialProcessVariables";
-    		
+
     		String assignment = "";
     		String invoke = "";
-    		
     		
     		final PatchingChain<Unit> pc = body.getUnits();
     		for (Unit unit : pc) {            	
@@ -197,27 +199,30 @@ public class JavaReaderStatic implements JavaReader {
                 	if (rightBox.equals(assignment)) {
                 		invoke = leftBox;
                 	}
-                	if (leftBox.toString().contains(location.replace("new ", "")) && leftBox.toString().contains(invoke)) {
+                	if (leftBox.contains(location.replace("new ", "")) && leftBox.contains(invoke)) {
                 		if (scanner.getInitialProcessVariables().contains(((AssignStmt) unit).getFieldRef().getFieldRef().name())) {
-                			final String name = ((AssignStmt) unit).getFieldRef().getFieldRef().name();                			
-                			if (checkCreationOfVariableMap()) {
-                				element.setProcessVariable(name, new ProcessVariableOperation(name, element, ElementChapter.Code, KnownElementFieldType.Process, resourceFilePath, VariableOperation.WRITE, element.getBaseElement().getId()));
-                			}
+                			final String name = ((AssignStmt) unit).getFieldRef().getFieldRef().name();  
+                			initialOperations.put(name, new ProcessVariableOperation(name, element, ElementChapter.Code, KnownElementFieldType.Process, resourceFilePath, VariableOperation.WRITE, element.getBaseElement().getId()));
                 		}
                 	}
+                	
+                	if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JVirtualInvokeExpr) {
+
+                		final JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
+
+    					if (expr != null) {
+    						String functionName = expr.getMethodRef().name();
+    						if (functionName.equals("createVariableMap")) {
+    							element.setProcessVariables(initialOperations);
+    						}
+    					}
+    				}
                 } 
-            }
+            }  		
     	}
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	private boolean checkCreationOfVariableMap() {
-		//TODO: Check if createVariableMap is called
-		return false;
-	}
+
 
 	/**
 	 *
@@ -299,7 +304,7 @@ public class JavaReaderStatic implements JavaReader {
             OutSetCFG outSet, final VariableBlock originalBlock, final ArrayList<String> visitedClasses) {
 
     	if (!visitedClasses.contains(className)) {	
-        	className = cleanString(className);
+        	className = cleanString(className, true);
             
             Options.v().set_whole_program(true);
             Options.v().set_allow_phantom_refs(true);
@@ -644,11 +649,7 @@ public class JavaReaderStatic implements JavaReader {
 					
 					// Only visit methods from other classes
 					if (!className.equals(oldClassName)) {
-						if (System.getProperty("os.name").startsWith("Windows")) {
-							className = className.replace(".", "\\") + ".java";
-						} else {
-							className = className.replace(".", "/") + ".java";
-						}
+						className = cleanString(className, false);
 						
 						if (classPaths.contains(className) || className.contains("$")) {
 							if (!visitedClasses.contains(origClassName)) {
@@ -690,6 +691,7 @@ public class JavaReaderStatic implements JavaReader {
 		
 		return variableBlock;
 	}
+
 
 	/**
 	 *
@@ -940,13 +942,30 @@ public class JavaReaderStatic implements JavaReader {
 	 * @param className Classname to be stripped of unused chars
 	 * @return cleaned String
 	 */
-	private String cleanString(String className) {
-		if (System.getProperty("os.name").startsWith("Windows")) {
-			className = className.replace("\\", ".").replace(".java", "");
+	private String cleanString(String className, boolean dot) {
+		final String replaceDot = ".";
+		final String replaceEmpty = "";
+		final String replaceSingleBackSlash = "\\";
+		final String replaceSingleForwardSlash = "/";
+		final String replaceDotJava = ".java"; 
+		
+		if (dot) {
+			if (System.getProperty("os.name").startsWith("Windows")) {
+				className = className.replace(replaceSingleBackSlash, replaceDot).replace(replaceDotJava,replaceEmpty);
+			} else {
+				className = className.replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotJava,replaceEmpty);
+			}
 		} else {
-			className = className.replace("/", ".").replace(".java", "");
+			if (System.getProperty("os.name").startsWith("Windows")) {
+				className.replace(replaceDot, replaceSingleBackSlash);
+				className = String.join(replaceEmpty, replaceDotJava);
+			} else {
+				className = className.replace(replaceDot, replaceSingleForwardSlash);
+				className = String.join(replaceEmpty, replaceDotJava);
+			}
 		}
 		return className;
+
 	}
 
 }
