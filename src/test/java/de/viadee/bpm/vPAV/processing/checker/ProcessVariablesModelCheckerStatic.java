@@ -44,6 +44,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import de.viadee.bpm.vPAV.*;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
@@ -52,10 +53,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
-import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -88,6 +85,7 @@ public class ProcessVariablesModelCheckerStatic {
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
 
+        final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";
         final File processdefinition = new File(PATH);
@@ -102,7 +100,7 @@ public class ProcessVariablesModelCheckerStatic {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
         // create data flow graphs
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-                processdefinition.getPath(), new ArrayList<String>());
+                processdefinition.getPath(), new ArrayList<String>(), scanner);
 
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder

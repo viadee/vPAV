@@ -44,6 +44,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Assert;
@@ -83,6 +84,7 @@ public class CallActivityTest {
 
     @Test
     public void testEmbedding() throws ParserConfigurationException, SAXException, IOException {
+        final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
         final File processdefinition = new File(PATH);
@@ -104,7 +106,7 @@ public class CallActivityTest {
         // create data flow graphs
         final Collection<String> calledElementHierarchy = new ArrayList<String>();
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-                processdefinition.getPath(), calledElementHierarchy);
+                processdefinition.getPath(), calledElementHierarchy, scanner);
 
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder

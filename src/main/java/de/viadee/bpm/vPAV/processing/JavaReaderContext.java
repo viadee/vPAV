@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import java.util.Map;
 
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -51,4 +52,10 @@ public class JavaReaderContext {
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
         return javaReaderStrategy.getVariablesFromJavaDelegate(fileScanner, classFile, element, chapter, fieldType, scopeId);
     }
+    
+    public Map<String, ProcessVariableOperation> readClass(final String className, final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath){
+    	return javaReaderStrategy.getVariablesFromClass(className, scanner, element, resourceFilePath);
+    }
+
+    
 }

@@ -42,6 +42,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -100,11 +101,11 @@ public class BpmnModelDispatcher {
 	 * @return issues
 	 */
     public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processdefinition,
-            final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
-            final Map<String, Collection<String>> messageIdToVariables,
-            final Map<String, Collection<String>> processIdToVariables,
-            final Collection<DataFlowRule> dataFlowRules,
-            final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
+                                                     final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
+                                                     final OuterProcessVariablesScanner scanner,
+                                                     final Collection<DataFlowRule> dataFlowRules,
+                                                     final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
+
 
         final BpmnScanner bpmnScanner = createScanner(processdefinition);
         
@@ -116,8 +117,8 @@ public class BpmnModelDispatcher {
                 .getModelElementsByType(BaseElement.class);
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap,
-                processIdToPathMap, messageIdToVariables,
-                processIdToVariables, bpmnScanner);
+                processIdToPathMap, scanner.getMessageIdToVariableMap(),
+                scanner.getProcessIdToVariableMap(), bpmnScanner);
 
         
         // Depending on Regex/Static analysis, find Process Variables from Java Delegate
@@ -131,7 +132,7 @@ public class BpmnModelDispatcher {
               
         // create data flow graphs for bpmn model
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-                processdefinition.getPath(), new ArrayList<>());
+                processdefinition.getPath(), new ArrayList<>(), scanner);
 
         // add data flow information to graph and calculate invalid paths
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder

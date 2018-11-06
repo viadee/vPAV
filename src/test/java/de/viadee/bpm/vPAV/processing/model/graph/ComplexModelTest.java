@@ -44,6 +44,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
@@ -95,7 +96,8 @@ public class ComplexModelTest {
      */
     @Test
     public void testGraphOnComplexModel() throws ParserConfigurationException, SAXException, IOException {
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+    	final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
         final File processdefinition = new File(PATH);
         final JavaReaderContext jvc = new JavaReaderContext();
@@ -121,7 +123,7 @@ public class ComplexModelTest {
                 new BpmnScanner(PATH));
         // create data flow graphs
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-                processdefinition.getPath(), new ArrayList<String>());
+                processdefinition.getPath(), new ArrayList<String>(), scanner);
 
         long estimatedTime = System.currentTimeMillis() - startTime;
         System.out.println("Graph creation: " + estimatedTime + "ms");

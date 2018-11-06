@@ -575,12 +575,12 @@ public class Runner {
 	 *
 	 * @param rules
 	 *            all rules of ruleSet.xml
-	 * @param beanMapping
-	 *            beanMapping if spring context is available
 	 * @param fileScanner
 	 *            fileScanner
 	 * @param variableScanner
-	 *            variablenScanner
+	 *            variableScanner
+	 * @param dataFlowRules
+	 * 			  dataFlowRules
 	 * @return foundIssues
 	 * @throws ConfigItemNotFoundException
 	 *             ConfigItem not found
@@ -618,8 +618,7 @@ public class Runner {
 		ModelDispatchResult dispatchResult;
 		if (variableScanner != null) {
 			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, new File(ConfigConstants.BASEPATH + processdef),
-					fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
-					variableScanner.getMessageIdToVariableMap(), variableScanner.getProcessIdToVariableMap(),
+					fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(), variableScanner,
 					dataFlowRules, fileScanner.getResourcesNewestVersions(), rules);
 		} else {
 			dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(

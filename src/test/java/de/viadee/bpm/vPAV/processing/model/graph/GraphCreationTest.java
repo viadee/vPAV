@@ -44,6 +44,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
@@ -97,7 +98,8 @@ public class GraphCreationTest {
      */
     @Test
     public void testGraph() throws ParserConfigurationException, SAXException, IOException {
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
         final File processdefinition = new File(PATH);
         final JavaReaderContext jvc = new JavaReaderContext();
@@ -109,7 +111,7 @@ public class GraphCreationTest {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
         // create data flow graphs
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-                processdefinition.getPath(), new ArrayList<String>());
+                processdefinition.getPath(), new ArrayList<String>(), scanner);
 
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder

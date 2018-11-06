@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -56,6 +57,7 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import soot.Body;
 import soot.G;
 import soot.PackManager;
+import soot.PatchingChain;
 import soot.RefType;
 import soot.Scene;
 import soot.SootClass;
@@ -125,6 +127,96 @@ public class JavaReaderStatic implements JavaReader {
 			}
 		}
 		return variables;
+	}
+
+    /**
+     *
+     * Retrieves variables from a class
+     *
+     * @param className
+     * @param scanner
+     * @return
+     */
+	public Map<String, ProcessVariableOperation> getVariablesFromClass (String className, final OuterProcessVariablesScanner scanner, 
+			final BpmnElement element, final String resourceFilePath) {
+		
+		if (className != null && className.trim().length() > 0) {			
+			final String sootPath = FileScanner.getSootPath();
+			System.setProperty("soot.class.path", sootPath);
+			
+			className = cleanString(className);
+            
+            Options.v().set_whole_program(true);
+            Options.v().set_allow_phantom_refs(true);
+            
+            SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
+
+            if (sootClass != null) {            	
+                sootClass.setApplicationClass();
+                Scene.v().loadNecessaryClasses();                  
+                for (SootMethod method : sootClass.getMethods()) {
+                	final Body body = method.retrieveActiveBody();
+                	checkWriteAccess(body, method, scanner, element, resourceFilePath);
+        		}
+            }						
+		}
+				
+		return null;
+	}
+
+
+	/**
+	 * 
+	 * @param body
+	 * @param method
+	 * @param scanner
+	 * @param element
+	 * @param resourceFilePath
+	 */
+	private void checkWriteAccess(final Body body, final SootMethod method, final OuterProcessVariablesScanner scanner, 
+			final BpmnElement element, final String resourceFilePath) {
+
+    	for (String location : scanner.getInitialProcessVariablesLocation()) {
+    		location = cleanString(location);
+    		location = "new " + location.replace(".java", "") + "$InitialProcessVariables";
+    		
+    		String assignment = "";
+    		String invoke = "";
+    		
+    		
+    		final PatchingChain<Unit> pc = body.getUnits();
+    		for (Unit unit : pc) {            	
+            	if (unit instanceof AssignStmt) {
+                	final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
+                	final String leftBox = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
+                	
+                	if (rightBox.equals(location)) {
+                		assignment = leftBox;
+                	}    
+                	
+                	if (rightBox.equals(assignment)) {
+                		invoke = leftBox;
+                	}
+                	if (leftBox.toString().contains(location.replace("new ", "")) && leftBox.toString().contains(invoke)) {
+                		if (scanner.getInitialProcessVariables().contains(((AssignStmt) unit).getFieldRef().getFieldRef().name())) {
+                			final String name = ((AssignStmt) unit).getFieldRef().getFieldRef().name();                			
+                			if (checkCreationOfVariableMap()) {
+                				element.setProcessVariable(name, new ProcessVariableOperation(name, element, ElementChapter.Code, KnownElementFieldType.Process, resourceFilePath, VariableOperation.WRITE, element.getBaseElement().getId()));
+                			}
+                		}
+                	}
+                } 
+            }
+    	}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	private boolean checkCreationOfVariableMap() {
+		//TODO: Check if createVariableMap is called
+		return false;
 	}
 
 	/**
@@ -207,11 +299,7 @@ public class JavaReaderStatic implements JavaReader {
             OutSetCFG outSet, final VariableBlock originalBlock, final ArrayList<String> visitedClasses) {
 
     	if (!visitedClasses.contains(className)) {	
-        	if (System.getProperty("os.name").startsWith("Windows")) {
-        		className = className.replace("\\", ".").replace(".java", "");
-        	} else {
-        		className = className.replace("/", ".").replace(".java", "");
-        	}
+        	className = cleanString(className);
             
             Options.v().set_whole_program(true);
             Options.v().set_allow_phantom_refs(true);
@@ -299,13 +387,13 @@ public class JavaReaderStatic implements JavaReader {
 	 * @param outSet
 	 * 			  - Callgraph information
 	 * @param originalBlock
-	 * - VariableBlock
+	 *            - VariableBlock
 	 * @param sootClass
-	 * - Soot representation of given class
+	 *            - Soot representation of given class
 	 * @param parameterTypes
-	 * - Soot representation of parameters
+	 *            - Soot representation of parameters
 	 * @param returnType
-	 * - Soot Representation of return type
+	 *            - Soot Representation of return type
 	 * @param visitedClasses
 	 * - List of visited classes to avoid circular references
 	 * @return OutSetCFG which contains data flow information
@@ -357,13 +445,9 @@ public class JavaReaderStatic implements JavaReader {
 	 * @param outSet
 	 * 			  - Callgraph information
 	 * @param originalBlock
-	 * - VariableBlock
+	 *            - VariableBlock
 	 * @param sootClass
-	 * - Soot representation of given class
-	 * @param parameterTypes
-	 * - Soot representation of parameters
-	 * @param returnType
-	 * - Soot Representation of return type
+	 *            - Soot representation of given class
 	 * @param visitedClasses
 	 * - List of visited classes to avoid circular references
 	 * @return OutSetCFG which contains data flow information
@@ -525,11 +609,11 @@ public class JavaReaderStatic implements JavaReader {
 	 * @param scopeId
 	 *            - Scope of BpmnElement
 	 * @param variableBlock
-	 * - VariableBlock
+	 * 			  - VariableBlock
 	 * @param oldClassName
-	 * - Classname
+	 * 			  - Classname
 	 * @param visitedClasses
-	 * - List of visited classes to avoid circular references
+	 * 			  - List of visited classes to avoid circular references
 	 * @return VariableBlock
 	 */
 	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
@@ -847,6 +931,22 @@ public class JavaReaderStatic implements JavaReader {
 			return true;
 		}
 		return false;
+	}
+
+	
+	/**
+	 * Strips unnecessary characters and returns cleaned name
+	 * 
+	 * @param className Classname to be stripped of unused chars
+	 * @return cleaned String
+	 */
+	private String cleanString(String className) {
+		if (System.getProperty("os.name").startsWith("Windows")) {
+			className = className.replace("\\", ".").replace(".java", "");
+		} else {
+			className = className.replace("/", ".").replace(".java", "");
+		}
+		return className;
 	}
 
 }
