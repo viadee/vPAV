@@ -199,6 +199,7 @@ public class JavaReaderStatic implements JavaReader {
                 	if (rightBox.equals(assignment)) {
                 		invoke = leftBox;
                 	}
+
                 	if (leftBox.contains(location.replace("new ", "")) && leftBox.contains(invoke)) {
                 		if (scanner.getInitialProcessVariables().contains(((AssignStmt) unit).getFieldRef().getFieldRef().name())) {
                 			final String name = ((AssignStmt) unit).getFieldRef().getFieldRef().name();  

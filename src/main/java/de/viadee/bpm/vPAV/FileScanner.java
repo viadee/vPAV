@@ -109,6 +109,12 @@ public class FileScanner {
         scanner.setIncludes(new String[] { ConfigConstants.JAVA_FILE_PATTERN });
         scanner.scan();
         javaResourcesFileInputStream = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+        
+        scanner.setBasedir("target/generated-sources/");
+        // get file paths of process definitions
+        scanner.setIncludes(new String[] { ConfigConstants.JAVA_FILE_PATTERN });
+        scanner.scan();
+        javaResourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles())); 
 
         // get mapping from process id to file path
         processIdToPathMap = createProcessIdToPathMap(processdefinitions);

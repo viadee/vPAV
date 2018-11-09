@@ -88,10 +88,8 @@ public class BpmnModelDispatcher {
 	 * - DecisionRefToPathMap
 	 * @param processIdToPathMap
 	 * - Map of processId to BPMN file
-	 * @param messageIdToVariables
-	 * - Map of messages and their variables
-	 * @param processIdToVariables
-	 * - Map of processId and their variables
+	 * @param scanner
+     * - OuterProcessVariableScanner
 	 * @param dataFlowRules
 	 * - DataFlowRules to be checked for
 	 * @param resourcesNewestVersions
