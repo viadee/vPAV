@@ -1,9 +1,31 @@
 # Release notes
 
+## 2.7.2
+
+### Features
+[**Issue 88**](https://github.com/viadee/vPAV/issues/88) Dynamically assess initial state of process variables to enhance accuracy  
+[**Issue 91**](https://github.com/viadee/vPAV/issues/91) Retrieve possible entry points to correctly inject initial process variable status
+
+### Fixes
+
+### Misc
+[**Issue 73**](https://github.com/viadee/vPAV/issues/73) Improved usability of HTML output to interactively add/remove issues
+
+## 2.7.1
+
+### Features
+[**Issue 76**](https://github.com/viadee/vPAV/issues/76) Extendend the implementation of Soot to broaden scope of ProcessVariableModelChecker 
+
+### Fixes
+
+### Misc
+[**Issue 83**](https://github.com/viadee/vPAV/issues/83) Cleaned JavaDoc and source code  
+[**Issue 79**](https://github.com/viadee/vPAV/issues/79) Checked the support for build tools such as Gradle
+
 ## 2.7.0
 
 ### Features
-[**Issue 69**](https://github.com/viadee/vPAV/issues/69) Integration of static process variable analysis (limited scope)  
+[**Issue 69**](https://github.com/viadee/vPAV/issues/69) Integration of static process variable analysis (limited scope)   
 [**Issue 78**](https://github.com/viadee/vPAV/issues/78) Further enhancements for the DataFlowChecker  
 
 ### Fixes
