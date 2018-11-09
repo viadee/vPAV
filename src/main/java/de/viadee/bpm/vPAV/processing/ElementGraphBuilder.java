@@ -143,10 +143,6 @@ public class ElementGraphBuilder {
             final Collection<SubProcess> subProcesses = new ArrayList<SubProcess>();
             final Collection<CallActivity> callActivities = new ArrayList<CallActivity>();
 
-            final BpmnElement mainProcess = new BpmnElement(processdefinition, process);
-
-            checkInitialVariableOperations(context, scanner, mainProcess, processdefinition);
-    
             for (final FlowElement element : elements) {
                 if (element instanceof SequenceFlow) {
                     // mention sequence flows
@@ -183,6 +179,8 @@ public class ElementGraphBuilder {
                 if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
                     // add process variables for start event, which set by call
                     // startProcessInstanceByKey
+                    checkInitialVariableOperations(context, scanner, node, processdefinition);
+
                     final String processId = node.getBaseElement().getParentElement()
                             .getAttributeValue(BpmnConstants.ATTR_ID);
                     addProcessVariablesByStartForProcessId(node, processId);
