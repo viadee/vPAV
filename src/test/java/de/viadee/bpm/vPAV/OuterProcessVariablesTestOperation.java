@@ -92,7 +92,8 @@ public class OuterProcessVariablesTestOperation {
     @Test
     public void testStartProcessByKey() throws ParserConfigurationException, SAXException, IOException {
         //// Given...
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "OuterProcessVariablesTest_StartProcessByKey.bpmn";
         final File processdefinition = new File(PATH);
         final JavaReaderContext jvc = new JavaReaderContext();
@@ -107,7 +108,7 @@ public class OuterProcessVariablesTestOperation {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null,
                 processIdToVariables, new BpmnScanner(PATH));
         // create data flow graphs
-        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance, processdefinition.getPath(), new ArrayList<String>());
+        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance, processdefinition.getPath(), new ArrayList<String>(), scanner);
 
         //// Then...
         // select start event from process and check variable
@@ -131,6 +132,7 @@ public class OuterProcessVariablesTestOperation {
     @Test
     public void testMessageCorrelation() throws ParserConfigurationException, SAXException, IOException {
         /// Given
+        final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "OuterProcessVariablesTest_MessageCorrelation.bpmn";
         final File processdefinition = new File(PATH);
@@ -148,7 +150,7 @@ public class OuterProcessVariablesTestOperation {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null,
                 messageIdToVariables, null, new BpmnScanner(PATH));
         // create data flow graphs
-        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance, processdefinition.getPath(), new ArrayList<String>());
+        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance, processdefinition.getPath(), new ArrayList<String>(), scanner);
 
         /// Then
         // select start event from process and check variable

@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,15 +42,19 @@ public class TestDelegateAnonymousInnerClass implements org.camunda.bpm.engine.d
 	@Override
 	public void execute(DelegateExecution execution) throws Exception {
 		
+		execution.removeVariable("test");
+		
 		TestAnonymousInnerClass taic = new TestAnonymousInnerClass() {
 			@Override
 			void test() {				
-				execution.setVariable("test", true);
-				execution.getVariable("test1");
+				execution.getVariable("test");
+				execution.setVariable("test1", true);
 				execution.removeVariable("test2");
 			}			
 		};
 		
 		taic.test();
+		
+		execution.getVariable("test1");
 	}
 }

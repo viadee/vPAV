@@ -189,10 +189,22 @@ function createIssueDialog(elements) {
                     var dCardIssueId = document.createElement("p");
                     dCardIssueId.setAttribute("class", "card-issueId issue-id");
 
-                    var dCardIssueButton = document.createElement("button");
-                    dCardIssueButton.setAttribute("class", "btn btn-viadee issue-button");
-                    dCardIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardIssueButton]));
-                    dCardIssueButton.innerHTML = "Add Issue";
+                    var dCardIssueButtons = document.createElement("p");
+
+                    var dCardAddIssueButton = document.createElement("button");
+                    var dCardRemoveIssueButton = document.createElement("button");
+
+                    dCardAddIssueButton.setAttribute("class", "btn btn-viadee issue-button");
+                    dCardAddIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
+                    dCardAddIssueButton.innerHTML = "Add Issue";
+
+                    dCardRemoveIssueButton.setAttribute("class", "btn btn-viadee issue-button");
+                    dCardRemoveIssueButton.disabled = true;
+                    dCardRemoveIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
+                    dCardRemoveIssueButton.innerHTML = "Remove Issue";
+
+                    dCardIssueButtons.appendChild(dCardAddIssueButton);
+                    dCardIssueButtons.appendChild(dCardRemoveIssueButton);
 
                     var oImg = document.createElement("img");
                     oImg.setAttribute('src', 'img/' + issue.classification.toLowerCase() + '.png');
@@ -215,8 +227,8 @@ function createIssueDialog(elements) {
                     if (issue.elementDescription)
                         dCardBody.appendChild(dCardElementDescription);
                     dCardBody.appendChild(dCardIssueId);
+                    dCardBody.appendChild(dCardIssueButtons);
                     dCard.appendChild(dCardBody);
-                    dCardBody.appendChild(dCardIssueButton);
 
                     dialogContent.appendChild(dCard);
                 }
@@ -300,9 +312,17 @@ function createCardForVariableOperations(operations, title) {
 }
 
 // Add single issue to the ignoreIssues list
-function addIssue(issue){         
+function addIssue(issue){        
     ignoredIssues[issue[0]] = '#' + issue[1];
     issue[2].disabled = true;
+    issue[3].disabled = false
+}
+
+// Remove single issue from ignoreIssues list
+function removeIssue(issue){
+    delete ignoredIssues[issue[0]]
+    issue[2].disabled = false;
+    issue[3].disabled = true
 }
 
 // download the ignoreIssues file 
@@ -332,9 +352,9 @@ function createTableHeader(id, content) {
 }
 
 //create issue table
-function createIssueTable(bpmnFile, tableContent) {
+function createIssueTable(bpmnFile, tableContent, mode) {    
     var myTable = document.getElementById("table");
-    myTable.setAttribute("class", "table table-issues table-row table-bordered .table-responsive")
+    myTable.setAttribute("class", "table table-issues table-row table-bordered .table-responsive");
     let myTHead = document.createElement("thead");
     let myRow = document.createElement("tr");
     myRow.setAttribute("id", "tr_ueberschriften");
@@ -347,7 +367,7 @@ function createIssueTable(bpmnFile, tableContent) {
     myRow.appendChild(createTableHeader("th_paths", "Invalid Sequenceflow"));
     myTHead.appendChild(myRow);
     myTable.appendChild(myTHead);
-
+    
     //fill table with all issuesof current model
     for (let issue of tableContent) {
         if (issue.bpmnFile == ("src\\main\\resources\\" + bpmnFile)) {
@@ -358,11 +378,30 @@ function createIssueTable(bpmnFile, tableContent) {
             //ruleName
             myCell = document.createElement("td");
             myText = document.createTextNode(issue.ruleName);
+
+            //buttons to add and remove issue
+            var addIssueButton = document.createElement("button");
+            addIssueButton.setAttribute("class", "btn btn-viadee issue-button-table-add");
+
+            var removeIssueButton = document.createElement("button");
+            removeIssueButton.setAttribute("class", "btn btn-viadee issue-button-table-remove");
+
+            addIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
+            addIssueButton.innerHTML = "Add Issue";
+            var b = document.createElement("a");
+            b.appendChild(addIssueButton);
+           
+            removeIssueButton.setAttribute("disabled", true);
+            removeIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
+            removeIssueButton.innerHTML = "Remove Issue";
+            var c = document.createElement("a");
+            c.appendChild(removeIssueButton);
+
             myCell.setAttribute("id", issue.classification) // mark cell
 
             //create link for default checkers
             var a = document.createElement("a");
-            a.appendChild(myText);
+            a.appendChild(myText);            
 
             defaultCheckers.forEach(element => {
                 if (issue.ruleName == element.rulename) {
@@ -372,6 +411,12 @@ function createIssueTable(bpmnFile, tableContent) {
             });
 
             myCell.appendChild(a);
+            
+            //based on selection show button
+            if (mode == tableViewModes.ISSUES) {
+                myCell.appendChild(b);
+                myCell.appendChild(c);                
+            }            
 
             //link to docu            
             myRow.appendChild(myCell);
@@ -651,19 +696,27 @@ function setFocus(name) {
     document.getElementById(name).focus();
 }
 
+const tableViewModes = Object.freeze({
+    ISSUES:   Symbol("issues"),
+    NO_ISSUES:  Symbol("no issues"),
+    VARIABLES: Symbol("process variables")
+});
+
+const overlayViewModes = Object.freeze({
+    ISSUES:   Symbol("issues"),
+    VARIABLES:  Symbol("process variables"),
+});
+
 function createViewController() {
     let ctrl = {};
 
-    const tableViewModes = Object.freeze({
-        ISSUES:   Symbol("issues"),
-        NO_ISSUES:  Symbol("no issues"),
-        VARIABLES: Symbol("process variables")
-    });
-
-    const overlayViewModes = Object.freeze({
-        ISSUES:   Symbol("issues"),
-        VARIABLES:  Symbol("process variables"),
-    });
+    var doc = document.getElementById("viewModeNavBar");
+    let globalDownloadButton = document.createElement("button");
+    globalDownloadButton.setAttribute("type", "button");
+    globalDownloadButton.setAttribute("class", "btn btn-viadee global-download");
+    globalDownloadButton.setAttribute("onclick", "downloadFile()");
+    globalDownloadButton.innerHTML = "Download ignoreIssues";
+    doc.appendChild(globalDownloadButton);
 
     /**
      * bpmn-js-seed
@@ -708,14 +761,14 @@ function createViewController() {
         } else if (countIssues(diagramName, elementsToMark) > 0) {
             if (tableViewMode === tableViewModes.ISSUES) {
                 document.getElementById("showAllIssues").setAttribute("class", "nav-link table-selector active");
-                createIssueTable(diagramName, elementsToMark);
+                createIssueTable(diagramName, elementsToMark, tableViewMode);
             } else {
                 document.getElementById("showSuccess").setAttribute("class", "nav-link table-selector active");
-                createIssueTable(diagramName, noIssuesElements);
+                createIssueTable(diagramName, noIssuesElements, tableViewMode);
             }
         } else {
             document.getElementById("showAllIssues").setAttribute("class", "nav-link table-selector active");
-            createIssueTable(diagramName, noIssuesElements);
+            createIssueTable(diagramName, noIssuesElements, tableViewMode);
         }
         createFooter();
     }

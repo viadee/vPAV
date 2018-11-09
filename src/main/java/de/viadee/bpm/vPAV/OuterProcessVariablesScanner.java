@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,10 @@ public class OuterProcessVariablesScanner {
 
     private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
 
+    private Collection<String> initialProcessVariables = new ArrayList<String>();
+    
+    private Collection<String> initialProcessVariablesLocation = new ArrayList<String>();
+
     public OuterProcessVariablesScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
     }
@@ -87,10 +91,13 @@ public class OuterProcessVariablesScanner {
                     final Collection<String> initialProcessVariablesInFilePath = readVariablesOfInnerClassInitialProcessVariables(
                             filePath);
                     if (!initialProcessVariablesInFilePath.isEmpty()) {
+                        initialProcessVariables.addAll(initialProcessVariablesInFilePath);
+                        initialProcessVariablesLocation.add(filePath);
                         // if correlateMessage and startProcessInstanceByMessage called
                         // together in one class take the intersection to avoid duplicates
                         final Set<String> messageIds = new HashSet<String>();
                         messageIds.addAll(checkStartProcessByMessageIdPattern(content));
+                        messageIds.addAll(checkStartProcessByMessageAndProcessDefinitionId(content));
                         messageIds.addAll(checkCorrelateMessagePattern(content));
                         for (final String messageId : messageIds) {
                             if (messageIdToVariableMap.containsKey(messageId)) {
@@ -107,7 +114,11 @@ public class OuterProcessVariablesScanner {
                                 messageIdToVariableMap.put(messageId, initialProcessVariablesInFilePath);
                             }
                         }
-                        final Collection<String> processIds = checkStartProcessByKeyPattern(content);
+                        
+                        final Set<String> processIds = new HashSet<String>();
+                        processIds.addAll(checkStartProcessByKeyPattern(content));
+                        processIds.addAll(checkStartProcessByIdPattern(content));                      
+                        
                         for (final String processId : processIds) {
                             processIdToVariableMap.put(processId, initialProcessVariablesInFilePath);
                         }
@@ -117,7 +128,18 @@ public class OuterProcessVariablesScanner {
         }
     }
 
+    
     /**
+     * get list of locations where initial process variables have been found 
+     * 
+     * @return returns list of locations
+     */
+    public Collection<String> getInitialProcessVariablesLocation() {
+		return initialProcessVariablesLocation;
+	}
+
+
+	/**
      * get mapping for message id
      *
      * @return messageIdToVariableMap returns messageIdToVariableMap
@@ -138,8 +160,8 @@ public class OuterProcessVariablesScanner {
     /**
      * read resource file
      *
-     * @param fileName
-     *            Name of file
+     * @param filePath
+     *            path of the file
      * @return methodBody returns methodBody
      */
     private String readResourceFile(final String filePath) {
@@ -201,6 +223,57 @@ public class OuterProcessVariablesScanner {
 
         return messageIds;
     }
+    
+    /**
+     * check pattern for startProcessInstanceById
+     *
+     * @param code
+     * @return message ids
+     */
+    private Collection<String> checkStartProcessByIdPattern(final String code) {
+
+        // remove special characters from code
+        final String FILTER_PATTERN = "'|\"| ";
+        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
+        
+        // search locations where variables are read
+        final Pattern pattern = Pattern.compile("\\.startProcessInstanceById\\((\\w+),(.*)");
+        final Matcher matcher = pattern.matcher(cleanedCode);
+
+        final Collection<String> processIds = new ArrayList<String>();
+        while (matcher.find()) {
+            final String match = matcher.group(1);
+            processIds.add(match);
+        }
+
+        return processIds;
+    }
+    
+    
+    /**
+     * check pattern for startProcessInstanceByMessageAndProcessDefinitionId
+     *
+     * @param code
+     * @return message ids
+     */
+    private Collection<String> checkStartProcessByMessageAndProcessDefinitionId(final String code) {
+
+        // remove special characters from code
+        final String FILTER_PATTERN = "'|\"| ";
+        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
+        
+        // search locations where variables are read
+        final Pattern pattern = Pattern.compile("\\.startProcessInstanceByMessageAndProcessDefinitionId\\((\\w+),(.*)");
+        final Matcher matcher = pattern.matcher(cleanedCode);
+
+        final Collection<String> messageAndProcessIds = new ArrayList<String>();
+        while (matcher.find()) {
+            final String match = matcher.group(1);
+            messageAndProcessIds.add(match);
+        }
+
+        return messageAndProcessIds;
+    }
 
     /**
      * check pattern for startProcessInstanceByKey
@@ -253,7 +326,7 @@ public class OuterProcessVariablesScanner {
     }
 
     /**
-     * For given filePath returns fields of inner class InitialProcessVariables. This class is used to initialize the
+     * For given filePath returns fields of class InitialProcessVariables (either separate or inner class). This class is used to initialize the
      * process
      *
      * @param filePath
@@ -296,5 +369,10 @@ public class OuterProcessVariablesScanner {
             }
         }
         return processVariables;
+    }
+
+
+    public Collection<String> getInitialProcessVariables() {
+        return initialProcessVariables;
     }
 }

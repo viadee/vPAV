@@ -47,7 +47,8 @@ public enum KnownElementFieldType {
                                                                             "Camunda:Out"), OutputParameter(
                                                                                     "Output Parameters"), Signal(
                                                                                             "Signal Name"), Message(
-                                                                                                    "Message Name");
+                                                                                                    "Message Name"),
+                                                                                                    Process("Process");
 
     private String description;
 

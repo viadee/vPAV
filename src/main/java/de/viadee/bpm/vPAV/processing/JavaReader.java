@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung GmbH
+ * Copyright © 2018, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import java.util.Map;
 
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -44,4 +45,7 @@ public interface JavaReader {
     public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner, final String classFile,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String scopeId);
+
+	public Map<String, ProcessVariableOperation> getVariablesFromClass(final String className, final OuterProcessVariablesScanner scanner, 
+			final BpmnElement element, final String resourceFilePath);
 }
