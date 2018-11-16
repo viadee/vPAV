@@ -148,12 +148,12 @@ public class FileScanner {
 			String path = urlTargetClass.toString();
 			addStringToSootPath(path);
 		}
-
-		if (System.getProperty("os.name").startsWith("Windows")) {
-			sootPath = new StringBuilder(sootPath.toString().replace("/;", ";").replace(";;", ";"));
-		} else {
-			sootPath = new StringBuilder(sootPath.toString().replace("/;", "").replace(";", ":"));
-		}
+//
+//		if (System.getProperty("os.name").startsWith("Windows")) {
+//			sootPath = new StringBuilder(sootPath.toString().replace("/;", ";").replace(";;", ";"));
+//		} else {
+//			sootPath = new StringBuilder(sootPath.toString().replace("/;", "").replace(";", ":"));
+//		}
 
 		for (URL url : urls) {
 			// retrieve all jars during runtime and pass them to get class files
@@ -175,7 +175,7 @@ public class FileScanner {
 				}
 			}
 		}
-
+		
 		// get mapping from decision reference to file path
 		scanner.setBasedir(ConfigConstants.BASEPATH);
 		scanner.setIncludes(new String[] { ConfigConstants.DMN_FILE_PATTERN });
@@ -188,6 +188,7 @@ public class FileScanner {
 				// also add groovy files to included files
 				scanner.setIncludes(new String[] { ConfigConstants.SCRIPT_FILE_PATTERN });
 				scanner.scan();
+
 				includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
 				// filter files by versioningSchema
