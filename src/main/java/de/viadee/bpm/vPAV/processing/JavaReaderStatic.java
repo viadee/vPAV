@@ -213,7 +213,7 @@ public class JavaReaderStatic implements JavaReader {
 							final String name = ((AssignStmt) unit).getFieldRef().getFieldRef().name();
 							initialOperations.put(name,
 									new ProcessVariableOperation(name, element, ElementChapter.Code,
-											KnownElementFieldType.Process, resourceFilePath, VariableOperation.WRITE,
+											KnownElementFieldType.Initial, resourceFilePath, VariableOperation.WRITE,
 											element.getBaseElement().getId()));
 						}
 					}

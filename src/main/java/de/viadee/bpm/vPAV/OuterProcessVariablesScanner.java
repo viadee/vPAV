@@ -59,7 +59,6 @@ import groovyjarjarasm.asm.Opcodes;
 /**
  * scan process variables, which are set in outer java classes
  *
- * important TODO: variables to bpmn element (message correlation)
  */
 public class OuterProcessVariablesScanner {
 
