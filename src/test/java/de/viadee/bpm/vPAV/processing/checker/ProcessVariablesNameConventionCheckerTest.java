@@ -41,6 +41,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -125,7 +126,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
+            LinkedHashMap<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
                     .getVariablesFromElement(jvc, fileScanner, element);
             element.setProcessVariables(variables);
 
@@ -159,7 +160,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            Map<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
+            LinkedHashMap<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
                     .getVariablesFromElement(jvc, fileScanner, element);
             element.setProcessVariables(variables);
 

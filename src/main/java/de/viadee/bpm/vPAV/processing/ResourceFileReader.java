@@ -34,8 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,248 +53,248 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
 public class ResourceFileReader {
 
-    public static final Logger LOGGER = Logger.getLogger(ResourceFileReader.class.getName());
+	public static final Logger LOGGER = Logger.getLogger(ResourceFileReader.class.getName());
 
-    /**
-     * Reads a resource file from class path
-     *
-     * @param fileName
-     *            - Name of Java Delegate class
-     * @param element
-     *            - Bpmn element
-     * @param chapter
-     * - ElementChapter 
-     * @param fieldType
-     * - KnownElementFieldType
-     * @param scopeId
-     * - Scope
-     * @return variables - found Process Variables
-     */
-    public static Map<String, ProcessVariableOperation> readResourceFile(final String fileName,
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String scopeId) {
-        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
-        if (fileName != null && fileName.trim().length() > 0) {
-            try {
-                final DirectoryScanner directoryScanner = new DirectoryScanner();
+	/**
+	 * Reads a resource file from class path
+	 *
+	 * @param fileName
+	 *            Name of Java Delegate class
+	 * @param element
+	 *            Bpmn element
+	 * @param chapter
+	 *            ElementChapter
+	 * @param fieldType
+	 *            KnownElementFieldType
+	 * @param scopeId
+	 *            Scope
+	 * @return variables
+	 */
+	public static LinkedHashMap<String, ProcessVariableOperation> readResourceFile(final String fileName,
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String scopeId) {
+		LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		if (fileName != null && fileName.trim().length() > 0) {
+			try {
+				final DirectoryScanner directoryScanner = new DirectoryScanner();
 
-                if (RuntimeConfig.getInstance().isTest()) {
-                    if (fileName.endsWith(".java"))
-                        directoryScanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
-                    else
-                        directoryScanner.setBasedir(ConfigConstants.TEST_BASEPATH);
-                } else {
-                    if (fileName.endsWith(".java"))
-                        directoryScanner.setBasedir(ConfigConstants.JAVAPATH);
-                    else
-                        directoryScanner.setBasedir(ConfigConstants.BASEPATH);
-                }
+				if (RuntimeConfig.getInstance().isTest()) {
+					if (fileName.endsWith(".java"))
+						directoryScanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
+					else
+						directoryScanner.setBasedir(ConfigConstants.TEST_BASEPATH);
+				} else {
+					if (fileName.endsWith(".java"))
+						directoryScanner.setBasedir(ConfigConstants.JAVAPATH);
+					else
+						directoryScanner.setBasedir(ConfigConstants.BASEPATH);
+				}
 
-                Resource s = directoryScanner.getResource(fileName);
+				Resource s = directoryScanner.getResource(fileName);
 
-                if (s.isExists()) {
+				if (s.isExists()) {
 
-                    InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
+					InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
 
-                    final String methodBody = IOUtils.toString(resource);
-                    variables = searchProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId,
-                            methodBody);
-                } else {
-                    LOGGER.warning("Class " + fileName + " does not exist");
-                }
-            } catch (final IOException ex) {
-                throw new RuntimeException("resource '" + fileName + "' could not be read: " + ex.getMessage());
-            }
+					final String methodBody = IOUtils.toString(resource);
+					variables = searchProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId,
+							methodBody);
+				} else {
+					LOGGER.warning("Class " + fileName + " does not exist");
+				}
+			} catch (final IOException ex) {
+				throw new RuntimeException("resource '" + fileName + "' could not be read: " + ex.getMessage());
+			}
 
-        }
+		}
 
-        return variables;
-    }
+		return variables;
+	}
 
-    /**
-     * Examine java code for process variables
-     *
-     * @param element
-     *            - Bpmn element
-     * @param chapter
-     *            - ElementChapter
-     * @param fieldType
-     *            - KnownElementFieldType
-     * @param fileName
-     *            - class name
-     * @param scopeId
-     *            - Scope
-     * @param code
-     *            - cleaned source code
-     * @return - found Process Variables
-     */
-    public static Map<String, ProcessVariableOperation> searchProcessVariablesInCode(final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
-            final String scopeId, final String code) {
+	/**
+	 * Examine java code for process variables
+	 *
+	 * @param element
+	 *            Bpmn element
+	 * @param chapter
+	 *            ElementChapter
+	 * @param fieldType
+	 *            KnownElementFieldType
+	 * @param fileName
+	 *            class name
+	 * @param scopeId
+	 *            Scope
+	 * @param code
+	 *            cleaned source code
+	 * @return found Process Variables
+	 */
+	public static LinkedHashMap<String, ProcessVariableOperation> searchProcessVariablesInCode(
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String fileName, final String scopeId, final String code) {
 
-        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
-        variables.putAll(searchReadProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
-        variables.putAll(searchWrittenProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
-        variables.putAll(searchRemovedProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
+		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		variables.putAll(searchReadProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
+		variables.putAll(searchWrittenProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
+		variables.putAll(searchRemovedProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
 
-        return variables;
-    }
+		return variables;
+	}
 
-    /**
-     * Search read process variables
-     *
-     * @param element
-     *            - Bpmn element
-     * @param chapter
-     *            - ElementChapter
-     * @param fieldType
-     *            - KnownElementFieldType
-     * @param fileName
-     *            - class name
-     * @param scopeId
-     *            - Scope
-     * @param code
-     *            - cleaned source code
-     * @return - found Process Variables
-     */
-    public static Map<String, ProcessVariableOperation> searchReadProcessVariablesInCode(final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
-            final String scopeId, final String code) {
+	/**
+	 * Search read process variables
+	 *
+	 * @param element
+	 *            Bpmn element
+	 * @param chapter
+	 *            ElementChapter
+	 * @param fieldType
+	 *            KnownElementFieldType
+	 * @param fileName
+	 *            class name
+	 * @param scopeId
+	 *            Scope
+	 * @param code
+	 *            cleaned source code
+	 * @return found Process Variables
+	 */
+	public static LinkedHashMap<String, ProcessVariableOperation> searchReadProcessVariablesInCode(
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String fileName, final String scopeId, final String code) {
 
-        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
 
-        // remove special characters from code
-        final String FILTER_PATTERN = "'|\"| ";
-        final String COMMENT_PATTERN = "//.*";
-        final String IMPORT_PATTERN = "import .*";
-        final String PACKAGE_PATTERN = "package .*";
-        final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
-                .replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
+		// remove special characters from code
+		final String FILTER_PATTERN = "'|\"| ";
+		final String COMMENT_PATTERN = "//.*";
+		final String IMPORT_PATTERN = "import .*";
+		final String PACKAGE_PATTERN = "package .*";
+		final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
+				.replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
 
-        // search locations where variables are read
-        final Pattern getVariablePatternRuntimeService = Pattern.compile("\\.getVariable\\((.*),(\\w+)\\)");
-        final Matcher matcherRuntimeService = getVariablePatternRuntimeService.matcher(cleanedCode);
+		// search locations where variables are read
+		final Pattern getVariablePatternRuntimeService = Pattern.compile("\\.getVariable\\((.*),(\\w+)\\)");
+		final Matcher matcherRuntimeService = getVariablePatternRuntimeService.matcher(cleanedCode);
 
-        while (matcherRuntimeService.find()) {
-            final String match = matcherRuntimeService.group(2);
-            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
-                    VariableOperation.READ, scopeId));
-        }
+		while (matcherRuntimeService.find()) {
+			final String match = matcherRuntimeService.group(2);
+			variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
+					VariableOperation.READ, scopeId));
+		}
 
-        final Pattern getVariablePatternDelegateExecution = Pattern.compile("\\.getVariable\\((\\w+)\\)");
-        final Matcher matcherDelegateExecution = getVariablePatternDelegateExecution.matcher(cleanedCode);
+		final Pattern getVariablePatternDelegateExecution = Pattern.compile("\\.getVariable\\((\\w+)\\)");
+		final Matcher matcherDelegateExecution = getVariablePatternDelegateExecution.matcher(cleanedCode);
 
-        while (matcherDelegateExecution.find()) {
-            final String match = matcherDelegateExecution.group(1);
-            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
-                    VariableOperation.READ, scopeId));
-        }
+		while (matcherDelegateExecution.find()) {
+			final String match = matcherDelegateExecution.group(1);
+			variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
+					VariableOperation.READ, scopeId));
+		}
 
-        return variables;
-    }
+		return variables;
+	}
 
-    /**
-     * Search written process variables
-     *
-     * @param element
-     *            - Bpmn element
-     * @param chapter
-     *            - ElementChapter
-     * @param fieldType
-     *            - KnownElementFieldType
-     * @param fileName
-     *            - Name of file
-     * @param scopeId
-     *            - Scope
-     * @param code
-     *            - cleaned code
-     * @return Map of process variable operations
-     */
-    public static Map<String, ProcessVariableOperation> searchWrittenProcessVariablesInCode(final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
-            final String scopeId, final String code) {
+	/**
+	 * Search written process variables
+	 *
+	 * @param element
+	 *            Bpmn element
+	 * @param chapter
+	 *            ElementChapter
+	 * @param fieldType
+	 *            KnownElementFieldType
+	 * @param fileName
+	 *            Name of file
+	 * @param scopeId
+	 *            Scope
+	 * @param code
+	 *            cleaned code
+	 * @return Map of process variable operations
+	 */
+	public static LinkedHashMap<String, ProcessVariableOperation> searchWrittenProcessVariablesInCode(
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String fileName, final String scopeId, final String code) {
 
-        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
 
-        // remove special characters from code
-        final String FILTER_PATTERN = "'|\"| ";
-        final String COMMENT_PATTERN = "//.*";
-        final String IMPORT_PATTERN = "import .*";
-        final String PACKAGE_PATTERN = "package .*";
-        final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
-                .replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
+		// remove special characters from code
+		final String FILTER_PATTERN = "'|\"| ";
+		final String COMMENT_PATTERN = "//.*";
+		final String IMPORT_PATTERN = "import .*";
+		final String PACKAGE_PATTERN = "package .*";
+		final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
+				.replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
 
-        // search locations where variables are written
-        final Pattern setVariablePatternRuntimeService = Pattern.compile("\\.setVariable\\((.*),(\\w+),(.*)\\)");
-        final Matcher matcherPatternRuntimeService = setVariablePatternRuntimeService.matcher(cleanedCode);
-        while (matcherPatternRuntimeService.find()) {
-            final String match = matcherPatternRuntimeService.group(2);
-            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
-                    VariableOperation.WRITE, scopeId));
-        }
+		// search locations where variables are written
+		final Pattern setVariablePatternRuntimeService = Pattern.compile("\\.setVariable\\((.*),(\\w+),(.*)\\)");
+		final Matcher matcherPatternRuntimeService = setVariablePatternRuntimeService.matcher(cleanedCode);
+		while (matcherPatternRuntimeService.find()) {
+			final String match = matcherPatternRuntimeService.group(2);
+			variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
+					VariableOperation.WRITE, scopeId));
+		}
 
-        final Pattern setVariablePatternDelegateExecution = Pattern.compile("\\.setVariable\\((\\w+),(.*)\\)");
-        final Matcher matcherPatternDelegateExecution = setVariablePatternDelegateExecution.matcher(cleanedCode);
-        while (matcherPatternDelegateExecution.find()) {
-            final String match = matcherPatternDelegateExecution.group(1);
-            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
-                    VariableOperation.WRITE, scopeId));
-        }
+		final Pattern setVariablePatternDelegateExecution = Pattern.compile("\\.setVariable\\((\\w+),(.*)\\)");
+		final Matcher matcherPatternDelegateExecution = setVariablePatternDelegateExecution.matcher(cleanedCode);
+		while (matcherPatternDelegateExecution.find()) {
+			final String match = matcherPatternDelegateExecution.group(1);
+			variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
+					VariableOperation.WRITE, scopeId));
+		}
 
-        return variables;
-    }
+		return variables;
+	}
 
-    /**
-     * Search removed process variables
-     *
-     * @param element
-     *            - BpmnElement
-     * @param chapter
-     *            - ElementChapter
-     * @param fieldType
-     *            - KnownElementFieldType
-     * @param fileName
-     *            - Name of file
-     * @param scopeId
-     *            - Scope
-     * @param code
-     *            - cleaned source code
-     * @return - found Process Variables
-     */
-    public static Map<String, ProcessVariableOperation> searchRemovedProcessVariablesInCode(final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
-            final String scopeId, final String code) {
+	/**
+	 * Search removed process variables
+	 *
+	 * @param element
+	 *            BpmnElement
+	 * @param chapter
+	 *            ElementChapter
+	 * @param fieldType
+	 *            KnownElementFieldType
+	 * @param fileName
+	 *            Name of file
+	 * @param scopeId
+	 *            Scope
+	 * @param code
+	 *            cleaned source code
+	 * @return found Process Variables
+	 */
+	public static LinkedHashMap<String, ProcessVariableOperation> searchRemovedProcessVariablesInCode(
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String fileName, final String scopeId, final String code) {
 
-        final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
 
-        // remove special characters from code
-        final String FILTER_PATTERN = "'|\"| ";
-        final String COMMENT_PATTERN = "//.*";
-        final String IMPORT_PATTERN = "import .*";
-        final String PACKAGE_PATTERN = "package .*";
-        final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
-                .replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
+		// remove special characters from code
+		final String FILTER_PATTERN = "'|\"| ";
+		final String COMMENT_PATTERN = "//.*";
+		final String IMPORT_PATTERN = "import .*";
+		final String PACKAGE_PATTERN = "package .*";
+		final String cleanedCode = code.replaceAll(COMMENT_PATTERN, "").replaceAll(IMPORT_PATTERN, "")
+				.replaceAll(PACKAGE_PATTERN, "").replaceAll(FILTER_PATTERN, "");
 
-        // search locations where variables are removed
-        final Pattern removeVariablePatternRuntimeService = Pattern.compile("\\.removeVariable\\((.*),(\\w+)\\)");
-        final Matcher matcherRuntimeService = removeVariablePatternRuntimeService.matcher(cleanedCode);
+		// search locations where variables are removed
+		final Pattern removeVariablePatternRuntimeService = Pattern.compile("\\.removeVariable\\((.*),(\\w+)\\)");
+		final Matcher matcherRuntimeService = removeVariablePatternRuntimeService.matcher(cleanedCode);
 
-        while (matcherRuntimeService.find()) {
-            final String match = matcherRuntimeService.group(2);
-            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
-                    VariableOperation.DELETE, scopeId));
-        }
+		while (matcherRuntimeService.find()) {
+			final String match = matcherRuntimeService.group(2);
+			variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
+					VariableOperation.DELETE, scopeId));
+		}
 
-        final Pattern removeVariablePatternDelegateExecution = Pattern.compile("\\.removeVariable\\((\\w+)\\)");
-        final Matcher matcherDelegateExecution = removeVariablePatternDelegateExecution.matcher(cleanedCode);
+		final Pattern removeVariablePatternDelegateExecution = Pattern.compile("\\.removeVariable\\((\\w+)\\)");
+		final Matcher matcherDelegateExecution = removeVariablePatternDelegateExecution.matcher(cleanedCode);
 
-        while (matcherDelegateExecution.find()) {
-            final String match = matcherDelegateExecution.group(1);
-            variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
-                    VariableOperation.DELETE, scopeId));
-        }
+		while (matcherDelegateExecution.find()) {
+			final String match = matcherDelegateExecution.group(1);
+			variables.put(match, new ProcessVariableOperation(match, element, chapter, fieldType, fileName,
+					VariableOperation.DELETE, scopeId));
+		}
 
-        return variables;
-    }
+		return variables;
+	}
 
 }

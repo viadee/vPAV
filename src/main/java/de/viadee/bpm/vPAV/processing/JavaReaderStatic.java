@@ -31,15 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 import de.viadee.bpm.vPAV.FileScanner;
@@ -103,11 +95,11 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Scope of the element
 	 * @return Map of process variables from the referenced delegate
 	 */
-	public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
+	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId) {
 
-		final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<>();
 
 		if (classFile != null && classFile.trim().length() > 0) {
 
@@ -138,12 +130,16 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Name of the class that potentially declares process variables
 	 * @param scanner
 	 *            OuterProcessVariablesScanner
+	 * @param element
+	 *            BpmnElement
+	 * @param resourceFilePath
+	 *            Path of the BPMN model
 	 * @return Map of process variable operations
 	 */
-	public Map<String, ProcessVariableOperation> getVariablesFromClass(String className,
+	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(String className,
 			final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
 
-		final Map<String, ProcessVariableOperation> initialOperations = new HashMap<>();
+		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 
 		if (className != null && className.trim().length() > 0) {
 			final String sootPath = FileScanner.getSootPath();
@@ -170,6 +166,8 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	/**
+	 * 
+	 * Checks for WRITE operations on process variables
 	 * 
 	 * @param body
 	 *            Soot representation of a method's body
@@ -239,8 +237,8 @@ public class JavaReaderStatic implements JavaReader {
 
 	/**
 	 *
-	 * Starting by the main JavaDelegate statically analyse the classes implemented
-	 * for the bpmn element.
+	 * Starting by the main JavaDelegate, statically analyses the classes
+	 * implemented for the bpmn element.
 	 *
 	 * @param classPaths
 	 *            Set of classes that is included in inter-procedural analysis
@@ -662,14 +660,15 @@ public class JavaReaderStatic implements JavaReader {
 					String className = src.tgt().getDeclaringClass().getName();
 					className = cleanString(className, false);
 
-					if (methodName.equals("getLogger") || (methodName.equals("<clinit>") && cleanString(className, true).equals(oldClassName))) {
+					if (methodName.equals("getLogger")
+							|| (methodName.equals("<clinit>") && cleanString(className, true).equals(oldClassName))) {
 						continue;
 					}
-					
+
 					if (classPaths.contains(className) || className.contains("$")) {
 						G.reset();
-						classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
-								fieldType, scopeId, outSet, variableBlock, visitedClasses);
+						classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
+								scopeId, outSet, variableBlock, visitedClasses);
 
 					}
 				}
