@@ -31,7 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
 import de.viadee.bpm.vPAV.FileScanner;
@@ -43,36 +43,61 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class JavaReaderRegex implements JavaReader {
 
-    public static final Logger LOGGER = Logger.getLogger(JavaReaderRegex.class.getName());
+	public static final Logger LOGGER = Logger.getLogger(JavaReaderRegex.class.getName());
 
-    /**
-     * Checks a java delegate for process variable references (read/write).
-     *
-     * Constraints: Method examine only variables in java delegate and not in the method references process variables
-     * with names, which only could be determined at runtime, can't be analysed. e.g.
-     * execution.setVariable(execution.getActivityId() + "-" + execution.getEventName(), true)
-     *
-     * @param classFile
-     *            - name of JavaDelegate class
-     * @param element
-     *            - Bpmn element
-     * @return variables - Process Variables
-     */
-    public Map<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner, final String classFile,
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String scopeId) {
-        // convert package format in a concrete path to the java class (.java)
-        String filePath = "";
-        if (classFile != null && classFile.trim().length() > 0) {
-            filePath = classFile.replaceAll("\\.", "/") + ".java";
-        }
-        final Map<String, ProcessVariableOperation> variables = ResourceFileReader.readResourceFile(filePath, element,
-                chapter, fieldType, scopeId);
-        return variables;
-    }
-
+	/**
+	 * Checks a java delegate for process variable references (read/write/delete).
+	 * Contraints: This method only examines variables in a java delegate that can
+	 * be resolved prior runtime (static code analysis).
+	 * 
+	 *
+	 * @param fileScanner
+	 *            FileScanner
+	 * @param classFile
+	 *            JavaDelegate class name
+	 * @param element
+	 *            BpmnElement
+	 * @param chapter
+	 *            ElementChapter
+	 * @param fieldType
+	 *            KnownElementFieldType
+	 * @param scopeId
+	 *            ScopeId
+	 * 
+	 * @return Process Variables
+	 */
 	@Override
-	public Map<String, ProcessVariableOperation> getVariablesFromClass(final String className, final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
+			final String classFile, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId) {
+		// convert package format in a concrete path to the java class (.java)
+		String filePath = "";
+		if (classFile != null && classFile.trim().length() > 0) {
+			filePath = classFile.replaceAll("\\.", "/") + ".java";
+		}
+		final LinkedHashMap<String, ProcessVariableOperation> variables = ResourceFileReader.readResourceFile(filePath,
+				element, chapter, fieldType, scopeId);
+		return variables;
+	}
+
+	/**
+	 *
+	 * Unused implementation
+	 * 
+	 * @param className
+	 *            Class name to be scanned
+	 * @param scanner
+	 *            OuterProcessVariableScanner
+	 * @param element
+	 *            BpmnElement
+	 * @param resourceFilePath
+	 *            Path of the BPMN model
+	 *
+	 * @return Process Variables
+	 */
+	@Override
+	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
+			final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,7 +66,7 @@ public class BpmnElement {
     /* out interface for call activity */
     private Collection<String> outCa;
 
-    private Map<String, ProcessVariableOperation> processVariables;
+    private LinkedHashMap<String, ProcessVariableOperation> processVariables;
 
     // collecting anomalies found on Java code level
     private List<AnomalyContainer> sourceCodeAnomalies = new ArrayList<AnomalyContainer>();
@@ -73,7 +74,7 @@ public class BpmnElement {
     public BpmnElement(final String processdefinition, final BaseElement element) {
         this.processdefinition = processdefinition;
         this.baseElement = element;
-        this.processVariables = new HashMap<String, ProcessVariableOperation>();
+        this.processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
     }
 
     public String getProcessdefinition() {
@@ -88,7 +89,7 @@ public class BpmnElement {
         return processVariables;
     }
 
-    public void setProcessVariables(final Map<String, ProcessVariableOperation> variables) {
+    public void setProcessVariables(final LinkedHashMap<String, ProcessVariableOperation> variables) {
         this.processVariables = variables;
     }
 

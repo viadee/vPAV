@@ -48,7 +48,7 @@ public enum KnownElementFieldType {
                                                                                     "Output Parameters"), Signal(
                                                                                             "Signal Name"), Message(
                                                                                                     "Message Name"),
-                                                                                                    Process("Process");
+                                                                                                    Initial("Initial");
 
     private String description;
 

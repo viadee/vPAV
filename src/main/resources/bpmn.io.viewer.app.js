@@ -272,7 +272,7 @@ function createVariableDialog(processVariable) {
         var dCardTitle = document.createElement("h5");
         dCardTitle.setAttribute("class", "card-header");
         let elementName = processVariable.elementName !== undefined ? processVariable.elementName : processVariable.elementId;
-        dCardTitle.innerHTML = `'${elementName}' accesses the following to process variables:`;
+        dCardTitle.innerHTML = `'${elementName}' accesses the following process variables:`;
         dCard.appendChild(dCardTitle);
 
         if (processVariable.read.length > 0)

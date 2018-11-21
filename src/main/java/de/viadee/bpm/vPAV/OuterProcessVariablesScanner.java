@@ -59,7 +59,6 @@ import groovyjarjarasm.asm.Opcodes;
 /**
  * scan process variables, which are set in outer java classes
  *
- * important TODO: variables to bpmn element (message correlation)
  */
 public class OuterProcessVariablesScanner {
 
@@ -85,7 +84,7 @@ public class OuterProcessVariablesScanner {
      */
     public void scanProcessVariables() throws IOException {
         for (final String filePath : javaResources) {
-            if (!filePath.startsWith("javax")) {
+            if (!filePath.startsWith("javax")) { 
                 final String content = readResourceFile(filePath);
                 if (content != null) {
                     final Collection<String> initialProcessVariablesInFilePath = readVariablesOfInnerClassInitialProcessVariables(
@@ -212,12 +211,12 @@ public class OuterProcessVariablesScanner {
         final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
 
         // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.startProcessInstanceByMessage\\((\\w+),(.*)");
+        final Pattern pattern = Pattern.compile("\\.(startProcessInstanceByMessage)(\\()([a-z0-9_.]+)(,.?)*(\\n?)([a-z0-9_.()])*(,?)([a-z0-9_.()])*\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(cleanedCode);
 
         final Collection<String> messageIds = new ArrayList<String>();
         while (matcher.find()) {
-            final String match = matcher.group(1);
+            final String match = matcher.group(3);
             messageIds.add(match);
         }
 
@@ -237,12 +236,12 @@ public class OuterProcessVariablesScanner {
         final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
         
         // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.startProcessInstanceById\\((\\w+),(.*)");
+        final Pattern pattern = Pattern.compile("\\.(startProcessInstanceById)(\\()([a-z0-9_.]+)(,.?)*(\\n?)([a-z0-9_.()])*(,?)([a-z0-9_.()])*\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(cleanedCode);
 
         final Collection<String> processIds = new ArrayList<String>();
         while (matcher.find()) {
-            final String match = matcher.group(1);
+            final String match = matcher.group(3);
             processIds.add(match);
         }
 
@@ -263,12 +262,12 @@ public class OuterProcessVariablesScanner {
         final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
         
         // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.startProcessInstanceByMessageAndProcessDefinitionId\\((\\w+),(.*)");
+        final Pattern pattern = Pattern.compile("\\.(startProcessInstanceByMessageAndProcessDefinitionId)(\\()([a-z0-9_.]+)(,.?)*(\\n?)([a-z0-9_.()])*(,?)([a-z0-9_.()])*\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(cleanedCode);
 
         final Collection<String> messageAndProcessIds = new ArrayList<String>();
         while (matcher.find()) {
-            final String match = matcher.group(1);
+            final String match = matcher.group(3);
             messageAndProcessIds.add(match);
         }
 
@@ -288,12 +287,12 @@ public class OuterProcessVariablesScanner {
         final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
 
         // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.startProcessInstanceByKey\\((\\w+),(.*)");
+        final Pattern pattern = Pattern.compile("\\.(startProcessInstanceByKey)(\\()([a-z0-9_.]+)(,.?)*(\\n?)([a-z0-9_.()])*(,?)([a-z0-9_.()])*\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(cleanedCode);
 
         final Collection<String> processIds = new ArrayList<String>();
         while (matcher.find()) {
-            final String match = matcher.group(1);
+            final String match = matcher.group(3);
             processIds.add(match);
         }
 

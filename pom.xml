@@ -5,14 +5,12 @@
 	<groupId>de.viadee</groupId>
 	<artifactId>viadeeProcessApplicationValidator</artifactId>
 
-	<version>2.7.2</version>
+	<version>2.7.3</version>
 
-	<packaging>maven-plugin</packaging>
-
-	<name>viadee Process Application Validator - Maven Plugin</name>
+	<name>viadee Process Application Validator</name>
 
 	<description>The tool checks Camunda projects for consistency and discovers errors in process-driven applications. 
-	Called as a Maven plugin or JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the 
+	Called as a JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the 
 	sourcecode of an underlying java project, such as a delegate reference to a non-existing java class or a non-existing Spring bean.
   	</description>
 
@@ -283,17 +281,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.5</version>
-				<configuration>
-					<goalPrefix>viadeeProcessApplicationValidator</goalPrefix>
-					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<version>3.0</version>
@@ -355,7 +342,7 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>3.2.1</version>
+				<version>3.3.4</version>
 				<configuration>
 					<failBuildOnCVSS>7</failBuildOnCVSS>
 				</configuration>
