@@ -126,8 +126,11 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            LinkedHashMap<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
-                    .getVariablesFromElement(jvc, fileScanner, element);
+            ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+            
+            final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>(); 
+            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, variables));
+            
             element.setProcessVariables(variables);
 
             issues.addAll(checker.check(element));
@@ -160,8 +163,11 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            LinkedHashMap<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
-                    .getVariablesFromElement(jvc, fileScanner, element);
+            ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+            
+            final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>(); 
+            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, variables));
+            
             element.setProcessVariables(variables);
 
             issues.addAll(checker.check(element));

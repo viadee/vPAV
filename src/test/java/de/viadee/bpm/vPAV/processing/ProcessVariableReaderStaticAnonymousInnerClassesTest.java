@@ -38,7 +38,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -98,7 +98,9 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final Map<String, ProcessVariableOperation> variables = variableReader.getVariablesFromElement(jvc, fileScanner, element);
+        
+        final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>(); 
+        variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, variables));
 
         Assert.assertEquals(3, variables.size());
     }

@@ -35,7 +35,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -137,7 +136,7 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return Map of process variable operations
 	 */
 	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(String className,
-			final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
 
 		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 
@@ -180,7 +179,7 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return Map of process variable operations
 	 */
 	private Map<String, ProcessVariableOperation> checkWriteAccess(final Body body,
-			final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
 
 		final Map<String, ProcessVariableOperation> initialOperations = new HashMap<>();
 

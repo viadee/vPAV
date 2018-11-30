@@ -29,31 +29,47 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.model.data;
 
-import java.util.*;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import java.util.Collection;
+import java.util.Map;
 
-public class JavaReaderContext {
+/**
+ * Represents an inital process variable operation.
+ *
+ */
+public class InitialProcessVariableOperation {
 
-    private JavaReader javaReaderStrategy;
+    private String filePath;
 
-    public void setJavaReadingStrategy(JavaReader readingStrategy) {
-        this.javaReaderStrategy = readingStrategy;
+    private Map<String, Boolean> initialProcessVariables;
+
+    private Map<String, Collection<String>> messageIdToVariableMap;
+
+    private boolean initialized;
+
+    public InitialProcessVariableOperation(final String filePath, final Map<String, Boolean> initialProcessVariables,
+                                           final Map<String, Collection<String>> messageIdToVariableMap) {
+        super();
+        this.filePath = filePath;
+        this.initialProcessVariables = initialProcessVariables;
+        this.messageIdToVariableMap = messageIdToVariableMap;
+        this.initialized = initialized;
     }
 
-    public LinkedHashMap<String, ProcessVariableOperation> readJavaDelegate(final FileScanner fileScanner, final String classFile, final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
-        return javaReaderStrategy.getVariablesFromJavaDelegate(fileScanner, classFile, element, chapter, fieldType, scopeId);
-    }
-    
-    public LinkedHashMap<String, ProcessVariableOperation> readClass(final String className, final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath){
-    	return javaReaderStrategy.getVariablesFromClass(className, scanner, element, resourceFilePath);
+
+    public String getFilePath() { return filePath; }
+
+    public Map<String, Boolean> getInitialProcessVariables() {
+        return initialProcessVariables;
     }
 
-    
+    public Map<String, Collection<String>> getMessageIdToVariableMap() {
+        return messageIdToVariableMap;
+    }
+
+    public boolean isInitialized() {
+        return initialized;
+    }
+
 }

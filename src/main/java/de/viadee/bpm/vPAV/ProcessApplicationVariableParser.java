@@ -48,6 +48,7 @@ import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
@@ -60,7 +61,7 @@ public class ProcessApplicationVariableParser {
 
 
         FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.JAVAPATH);
-        OuterProcessVariablesScanner variableScanner = readOuterProcessVariables(fileScanner);
+        ProcessVariablesScanner variableScanner = readOuterProcessVariables(fileScanner);
 
         BpmnScanner bpmnScanner = createScanner(modelFile);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(modelFile);
@@ -86,9 +87,9 @@ public class ProcessApplicationVariableParser {
 	 * @param fileScanner
 	 *            FileScanner
 	 */
-	private static OuterProcessVariablesScanner readOuterProcessVariables(final FileScanner fileScanner) throws RuntimeException {
+	private static ProcessVariablesScanner readOuterProcessVariables(final FileScanner fileScanner) throws RuntimeException {
 		try {
-            OuterProcessVariablesScanner variableScanner = new OuterProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
+            ProcessVariablesScanner variableScanner = new ProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
 			variableScanner.scanProcessVariables();
 			return variableScanner;
 		} catch (final IOException e) {

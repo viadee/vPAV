@@ -120,9 +120,7 @@ public final class ProcessVariableReader {
 	 * @return processVariables returns processVariables
 	 */
 	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromElement(final JavaReaderContext context,
-			final FileScanner fileScanner, final BpmnElement element) {
-
-		final LinkedHashMap<String, ProcessVariableOperation> processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+			final FileScanner fileScanner, final BpmnElement element, final LinkedHashMap<String, ProcessVariableOperation> processVariables) {
 
 		// 1) Search variables in task
 		processVariables.putAll(getVariablesFromTask(context, fileScanner, element));

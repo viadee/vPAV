@@ -33,7 +33,6 @@ package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
@@ -109,7 +108,7 @@ public class ElementGraphBuilder {
 	 */
 	public Collection<IGraph> createProcessGraph(final JavaReaderContext context, final FileScanner fileScanner,
 			final BpmnModelInstance modelInstance, final String processdefinition,
-			final Collection<String> calledElementHierarchy, final OuterProcessVariablesScanner scanner) {
+			final Collection<String> calledElementHierarchy, final ProcessVariablesScanner scanner) {
 
 		final Collection<IGraph> graphCollection = new ArrayList<IGraph>();
 
@@ -141,11 +140,30 @@ public class ElementGraphBuilder {
 							processdefinition);
 				}
 
+				// Ordered map to hold operations in correct order
+				final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<>();
+
 				// initialize element
 				final BpmnElement node = new BpmnElement(processdefinition, element);
+
+				// retrieve initial variable operation (should be WRITE)
+				if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
+					// add process variables for start event, which set by call
+					// startProcessInstanceByKey
+					variables.putAll(checkInitialVariableOperations(context, scanner, node, processdefinition, variables));
+
+					node.setProcessVariables(variables);
+
+					final String processId = node.getBaseElement().getParentElement()
+							.getAttributeValue(BpmnConstants.ATTR_ID);
+					addProcessVariablesByStartForProcessId(node, processId);
+
+					graph.addStartNode(node);
+				}
+
 				// examine process variables and save it with access operation
-				final LinkedHashMap<String, ProcessVariableOperation> variables = new ProcessVariableReader(
-						decisionRefToPathMap, bpmnScanner).getVariablesFromElement(context, fileScanner, node);
+				final ProcessVariableReader reader  = new ProcessVariableReader(decisionRefToPathMap, bpmnScanner);
+				variables.putAll(reader.getVariablesFromElement(context, fileScanner, node, variables));
 				// examine process variables for element and set it
 				node.setProcessVariables(variables);
 
@@ -154,20 +172,9 @@ public class ElementGraphBuilder {
 				if (element.getElementType().getBaseType().getBaseType().getTypeName()
 						.equals(BpmnModelConstants.BPMN_ELEMENT_EVENT)) {
 					// add variables for message event (set by outer class)
-					addProcessVariablesForMessageName(element, node, context, scanner, processdefinition);
+//					addProcessVariablesForMessageName(element, node, context, scanner, processdefinition);
 				}
 
-				if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
-					// add process variables for start event, which set by call
-					// startProcessInstanceByKey
-					checkInitialVariableOperations(context, scanner, node, processdefinition);
-
-					final String processId = node.getBaseElement().getParentElement()
-							.getAttributeValue(BpmnConstants.ATTR_ID);
-					addProcessVariablesByStartForProcessId(node, processId);
-
-					graph.addStartNode(node);
-				}
 				if (element.getElementType().getTypeName().equals(BpmnConstants.ENDEVENT)) {
 					graph.addEndNode(node);
 				}
@@ -197,11 +204,13 @@ public class ElementGraphBuilder {
 	 * @param scanner
 	 *            OuterProcessVariableScanner
 	 */
-	private void checkInitialVariableOperations(final JavaReaderContext jvc, final OuterProcessVariablesScanner scanner,
-			final BpmnElement element, final String resourceFilePath) {
+	private LinkedHashMap<String, ProcessVariableOperation> checkInitialVariableOperations(final JavaReaderContext jvc, final ProcessVariablesScanner scanner,
+			final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables) {
 		for (final String clazz : scanner.getInitialProcessVariablesLocation()) {
-			jvc.readClass(clazz, scanner, element, resourceFilePath);
+			variables.putAll(jvc.readClass(clazz, scanner, element, resourceFilePath));
 		}
+
+		return variables;
 	}
 
 	/**
@@ -235,7 +244,7 @@ public class ElementGraphBuilder {
 	 *            BpmnElement
 	 */
 	private void addProcessVariablesForMessageName(final FlowElement element, final BpmnElement node,
-			final JavaReaderContext jvc, final OuterProcessVariablesScanner scanner, final String resourceFilePath) {
+			final JavaReaderContext jvc, final ProcessVariablesScanner scanner, final String resourceFilePath) {
 		if (messageIdToVariables != null) {
 			if (element instanceof Event) {
 				final Event event = (Event) element;
@@ -252,7 +261,7 @@ public class ElementGraphBuilder {
 									for (final String varName : outerVariables) {
 										// Check which outerVariables have been written
 
-										checkInitialVariableOperations(jvc, scanner, node, resourceFilePath);
+//										checkInitialVariableOperations(jvc, scanner, node, resourceFilePath);
 
 										node.setProcessVariable(varName,
 												new ProcessVariableOperation(varName, node,
@@ -402,8 +411,9 @@ public class ElementGraphBuilder {
 			// add elements of the sub process as nodes
 			final BpmnElement node = new BpmnElement(processdefinitionPath, subElement);
 			// determine process variables with operations
-			final LinkedHashMap<String, ProcessVariableOperation> variables = new ProcessVariableReader(
-					decisionRefToPathMap, bpmnScanner).getVariablesFromElement(context, fileScanner, node);
+			final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<>();
+			variables.putAll(
+					new ProcessVariableReader(decisionRefToPathMap, bpmnScanner).getVariablesFromElement(context, fileScanner, node, variables));
 			// set process variables for the node
 			node.setProcessVariables(variables);
 			// mention the element
@@ -436,7 +446,7 @@ public class ElementGraphBuilder {
 	private void integrateCallActivityFlow(final JavaReaderContext context, final FileScanner fileScanner,
 			final String processdefinition, final BpmnModelInstance modelInstance, final CallActivity callActivity,
 			final IGraph graph, final Collection<String> calledElementHierarchy,
-			final OuterProcessVariablesScanner scanner) {
+			final ProcessVariablesScanner scanner) {
 
 		final String calledElement = callActivity.getCalledElement();
 
@@ -592,7 +602,7 @@ public class ElementGraphBuilder {
 	 */
 	private Collection<IGraph> createSubDataFlowsFromCallActivity(final JavaReaderContext context,
 			FileScanner fileScanner, final Collection<String> calledElementHierarchy, final String callActivityPath,
-			final OuterProcessVariablesScanner scanner) {
+			final ProcessVariablesScanner scanner) {
 		// read called process
 		final BpmnModelInstance submodel = Bpmn.readModelFromFile(new File(callActivityPath));
 

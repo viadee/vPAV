@@ -42,7 +42,6 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -102,7 +101,7 @@ public class BpmnModelDispatcher {
 	 */
 	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processdefinition,
 			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
-			final OuterProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
+			final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
 			final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
 
 		final BpmnScanner bpmnScanner = createScanner(processdefinition);

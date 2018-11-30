@@ -34,7 +34,6 @@ package de.viadee.bpm.vPAV.processing;
 import java.util.*;
 
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -46,6 +45,6 @@ public interface JavaReader {
 																						  final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 																						  final String scopeId);
 
-	LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className, final OuterProcessVariablesScanner scanner,
+	LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className, final ProcessVariablesScanner scanner,
 			final BpmnElement element, final String resourceFilePath);
 }

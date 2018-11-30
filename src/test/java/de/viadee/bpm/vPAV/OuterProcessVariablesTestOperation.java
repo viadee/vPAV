@@ -56,6 +56,7 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderContext;
 import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
@@ -92,7 +93,7 @@ public class OuterProcessVariablesTestOperation {
     @Test
     public void testStartProcessByKey() throws ParserConfigurationException, SAXException, IOException {
         //// Given...
-        final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "OuterProcessVariablesTest_StartProcessByKey.bpmn";
         final File processdefinition = new File(PATH);
@@ -132,7 +133,7 @@ public class OuterProcessVariablesTestOperation {
     @Test
     public void testMessageCorrelation() throws ParserConfigurationException, SAXException, IOException {
         /// Given
-        final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "OuterProcessVariablesTest_MessageCorrelation.bpmn";
         final File processdefinition = new File(PATH);

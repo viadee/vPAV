@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.processing;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,6 +50,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
 
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import groovyjarjarasm.asm.ClassReader;
 import groovyjarjarasm.asm.ClassVisitor;
@@ -60,7 +61,7 @@ import groovyjarjarasm.asm.Opcodes;
  * scan process variables, which are set in outer java classes
  *
  */
-public class OuterProcessVariablesScanner {
+public class ProcessVariablesScanner {
 
     private Set<String> javaResources;
 
@@ -72,7 +73,7 @@ public class OuterProcessVariablesScanner {
     
     private Collection<String> initialProcessVariablesLocation = new ArrayList<String>();
 
-    public OuterProcessVariablesScanner(final Set<String> javaResources) {
+    public ProcessVariablesScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
     }
 

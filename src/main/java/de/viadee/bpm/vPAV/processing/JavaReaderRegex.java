@@ -35,7 +35,6 @@ import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -97,7 +96,7 @@ public class JavaReaderRegex implements JavaReader {
 	 */
 	@Override
 	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
-			final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
 		// TODO Auto-generated method stub
 		return null;
 	}

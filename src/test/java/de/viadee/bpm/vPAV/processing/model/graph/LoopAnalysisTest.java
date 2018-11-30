@@ -44,7 +44,6 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Assert;
@@ -59,6 +58,7 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderContext;
 import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 
@@ -87,7 +87,7 @@ public class LoopAnalysisTest {
      */
     @Test
     public void testLoop() throws ParserConfigurationException, SAXException, IOException {
-        final OuterProcessVariablesScanner scanner = new OuterProcessVariablesScanner(null);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "LoopAnalysisTest_TestLoop.bpmn";
         final File processdefinition = new File(PATH);
