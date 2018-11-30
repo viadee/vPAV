@@ -31,8 +31,19 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
+
+import org.camunda.bpm.engine.variable.VariableMap;
 
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
@@ -136,7 +147,8 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return Map of process variable operations
 	 */
 	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(String className,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
+			final String entryPoint) {
 
 		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 
@@ -156,7 +168,7 @@ public class JavaReaderStatic implements JavaReader {
 				Scene.v().loadNecessaryClasses();
 				for (SootMethod method : sootClass.getMethods()) {
 					final Body body = method.retrieveActiveBody();
-					initialOperations.putAll(checkWriteAccess(body, scanner, element, resourceFilePath));
+					initialOperations.putAll(checkWriteAccess(body, scanner, element, resourceFilePath, entryPoint));
 				}
 			}
 		}
@@ -179,51 +191,52 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return Map of process variable operations
 	 */
 	private Map<String, ProcessVariableOperation> checkWriteAccess(final Body body,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
+			final String entryPoint) {
 
 		final Map<String, ProcessVariableOperation> initialOperations = new HashMap<>();
 
-		for (String location : scanner.getInitialProcessVariablesLocation()) {
-			location = cleanString(location, true);
-			location = "new " + location.replace(".java", "") + "$InitialProcessVariables";
+		String assignment = "";
+		String invoke = "";
 
-			String assignment = "";
-			String invoke = "";
-
-			final PatchingChain<Unit> pc = body.getUnits();
-			for (Unit unit : pc) {
+		final PatchingChain<Unit> pc = body.getUnits();
+		for (Unit unit : pc) {
+			if (unit instanceof AssignStmt || unit instanceof InvokeStmt) {
 				if (unit instanceof AssignStmt) {
 					final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
 					final String leftBox = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
 
-					if (rightBox.equals(location)) {
+					if (rightBox.contains("org.camunda.bpm.engine.variable.VariableMap createVariables")) {
 						assignment = leftBox;
 					}
-
-					if (rightBox.equals(assignment)) {
-						invoke = leftBox;
-					}
-
-					if (leftBox.contains(location.replace("new ", "")) && leftBox.contains(invoke)) {
-						if (scanner.getInitialProcessVariables()
-								.contains(((AssignStmt) unit).getFieldRef().getFieldRef().name())) {
-							final String name = ((AssignStmt) unit).getFieldRef().getFieldRef().name();
-							initialOperations.put(name,
-									new ProcessVariableOperation(name, element, ElementChapter.Code,
+					
+					if (rightBox.contains(assignment)) {
+						if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
+							final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
+							if (expr != null) {							
+								if (expr.getMethodRef().declaringClass().equals(Scene.v().forceResolve(VariableMap.class.getName(), SootClass.SIGNATURES))) {
+									initialOperations.put(expr.getArg(0).toString(), new ProcessVariableOperation(expr.getArg(0).toString(), element, ElementChapter.Code,
 											KnownElementFieldType.Initial, resourceFilePath, VariableOperation.WRITE,
 											element.getBaseElement().getId()));
-						}
+									assignment = leftBox;
+								}
+							}
+						}						
 					}
-
-					if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JVirtualInvokeExpr) {
-
-						final JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox()
-								.getValue();
-
-						if (expr != null) {
-							String functionName = expr.getMethodRef().name();
-							if (functionName.equals("createVariableMap")) {
-								return initialOperations;
+					
+					if (rightBox.contains(entryPoint) && rightBox.contains(assignment)) {
+						return initialOperations;
+					}
+				}							
+				
+				if (unit instanceof InvokeStmt) {
+					if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+						final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
+						if (expr != null) {							
+							if (expr.getMethodRef().declaringClass().equals(Scene.v().forceResolve(Map.class.getName(), SootClass.SIGNATURES))) {
+								initialOperations.put(expr.getArg(0).toString(), new ProcessVariableOperation(expr.getArg(0).toString(), element, ElementChapter.Code,
+										KnownElementFieldType.Initial, resourceFilePath, VariableOperation.WRITE,
+										element.getBaseElement().getId()));
 							}
 						}
 					}

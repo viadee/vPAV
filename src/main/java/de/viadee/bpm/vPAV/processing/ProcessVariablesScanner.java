@@ -72,8 +72,10 @@ public class ProcessVariablesScanner {
     private Collection<String> initialProcessVariables = new ArrayList<String>();
     
     private Collection<String> initialProcessVariablesLocation = new ArrayList<String>();
+    
+    private Set<String> entryPoints = new HashSet<String>();
 
-    public ProcessVariablesScanner(final Set<String> javaResources) {
+	public ProcessVariablesScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
     }
 
@@ -128,6 +130,14 @@ public class ProcessVariablesScanner {
         }
     }
 
+    /**
+     * get list of entryPoints where initial process variables have been injected 
+     * 
+     * @return returns list of entryPoints
+     */
+    public Set<String> getEntryPoints() {
+		return entryPoints;
+	}
     
     /**
      * get list of locations where initial process variables have been found 
@@ -219,6 +229,7 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(3);
             messageIds.add(match);
+            entryPoints.add("startProcessInstanceByMessage");
         }
 
         return messageIds;
@@ -244,6 +255,7 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(3);
             processIds.add(match);
+            entryPoints.add("startProcessInstanceById");
         }
 
         return processIds;
@@ -270,6 +282,7 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(3);
             messageAndProcessIds.add(match);
+            entryPoints.add("startProcessInstanceByMessageAndProcessDefinitionId");
         }
 
         return messageAndProcessIds;
@@ -295,6 +308,7 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(3);
             processIds.add(match);
+            entryPoints.add("startProcessInstanceByKey");
         }
 
         return processIds;

@@ -96,7 +96,7 @@ public class JavaReaderRegex implements JavaReader {
 	 */
 	@Override
 	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath, final String entryPoint) {
 		// TODO Auto-generated method stub
 		return null;
 	}

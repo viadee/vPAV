@@ -31,24 +31,49 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import org.camunda.bpm.model.bpmn.instance.Activity;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
+import org.camunda.bpm.model.bpmn.instance.CallActivity;
+import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.Event;
+import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
+import org.camunda.bpm.model.bpmn.instance.FlowElement;
+import org.camunda.bpm.model.bpmn.instance.Message;
+import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
+import org.camunda.bpm.model.bpmn.instance.ParallelGateway;
+import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
+import org.camunda.bpm.model.bpmn.instance.StartEvent;
+import org.camunda.bpm.model.bpmn.instance.SubProcess;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
+
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.*;
-import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
-
-import java.io.File;
-import java.util.*;
 
 /**
  * Creates data flow graph based on a bpmn model
@@ -150,8 +175,10 @@ public class ElementGraphBuilder {
 				if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
 					// add process variables for start event, which set by call
 					// startProcessInstanceByKey
-					variables.putAll(checkInitialVariableOperations(context, scanner, node, processdefinition, variables));
-
+					for (String entryPoint : scanner.getEntryPoints()) {
+						variables.putAll(checkInitialVariableOperations(context, scanner, node, processdefinition, variables, entryPoint));
+					}
+					
 					node.setProcessVariables(variables);
 
 					final String processId = node.getBaseElement().getParentElement()
@@ -205,9 +232,9 @@ public class ElementGraphBuilder {
 	 *            OuterProcessVariableScanner
 	 */
 	private LinkedHashMap<String, ProcessVariableOperation> checkInitialVariableOperations(final JavaReaderContext jvc, final ProcessVariablesScanner scanner,
-			final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables) {
+			final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables, final String entryPoint) {
 		for (final String clazz : scanner.getInitialProcessVariablesLocation()) {
-			variables.putAll(jvc.readClass(clazz, scanner, element, resourceFilePath));
+			variables.putAll(jvc.readClass(clazz, scanner, element, resourceFilePath, entryPoint));
 		}
 
 		return variables;
