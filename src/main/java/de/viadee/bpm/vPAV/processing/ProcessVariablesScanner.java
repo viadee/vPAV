@@ -33,29 +33,28 @@ package de.viadee.bpm.vPAV.processing;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
 
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import groovyjarjarasm.asm.ClassReader;
-import groovyjarjarasm.asm.ClassVisitor;
-import groovyjarjarasm.asm.FieldVisitor;
-import groovyjarjarasm.asm.Opcodes;
+import soot.Body;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.options.Options;
 
 /**
  * scan process variables, which are set in outer java classes
@@ -68,12 +67,12 @@ public class ProcessVariablesScanner {
     private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<String, Collection<String>>();
 
     private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
-
-    private Collection<String> initialProcessVariables = new ArrayList<String>();
     
-    private Collection<String> initialProcessVariablesLocation = new ArrayList<String>();
+    private Set<String> initialProcessVariablesLocation = new HashSet<String>();
     
-    private Set<String> entryPoints = new HashSet<String>();
+    private Set<String> processEntryPoints = new HashSet<String>();
+    
+    private Set<String> methodEntryPoints = new HashSet<String>();
 
 	public ProcessVariablesScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
@@ -90,40 +89,38 @@ public class ProcessVariablesScanner {
             if (!filePath.startsWith("javax")) { 
                 final String content = readResourceFile(filePath);
                 if (content != null) {
-                    final Collection<String> initialProcessVariablesInFilePath = readVariablesOfInnerClassInitialProcessVariables(
-                            filePath);
-                    if (!initialProcessVariablesInFilePath.isEmpty()) {
-                        initialProcessVariables.addAll(initialProcessVariablesInFilePath);
-                        initialProcessVariablesLocation.add(filePath);
-                        // if correlateMessage and startProcessInstanceByMessage called
-                        // together in one class take the intersection to avoid duplicates
-                        final Set<String> messageIds = new HashSet<String>();
-                        messageIds.addAll(checkStartProcessByMessageIdPattern(content));
-                        messageIds.addAll(checkStartProcessByMessageAndProcessDefinitionId(content));
-                        messageIds.addAll(checkCorrelateMessagePattern(content));
-                        for (final String messageId : messageIds) {
-                            if (messageIdToVariableMap.containsKey(messageId)) {
-                                // if messageId is already set, create intersection of variables and overwrite map
-                                // item
-                                final Collection<String> existingProcessVariables = messageIdToVariableMap
-                                        .get(messageId);                                
-                                final List<String> intersectionProcessVariables = existingProcessVariables.stream()
-                                        .filter(initialProcessVariablesInFilePath::contains)
-                                        .collect(Collectors.toList());
-                                
-                                messageIdToVariableMap.put(messageId, intersectionProcessVariables);
-                            } else {
-                                messageIdToVariableMap.put(messageId, initialProcessVariablesInFilePath);
-                            }
+                    // if correlateMessage and startProcessInstanceByMessage called
+                    // together in one class take the intersection to avoid duplicates
+                    final Set<String> messageIds = new HashSet<String>();
+                    messageIds.addAll(checkStartProcessByMessageIdPattern(content, filePath));
+                    messageIds.addAll(checkStartProcessByMessageAndProcessDefinitionId(content, filePath));
+                    messageIds.addAll(checkCorrelateMessagePattern(content, filePath));
+                    for (final String messageId : messageIds) {
+                        if (messageIdToVariableMap.containsKey(messageId)) {
+                            // if messageId is already set, create intersection of variables and overwrite map
+                            // item
+                            final Collection<String> existingProcessVariables = messageIdToVariableMap
+                                    .get(messageId);                                
+//                            final List<String> intersectionProcessVariables = existingProcessVariables.stream()
+//                                    .filter(initialProcessVariablesInFilePath::contains)
+//                                    .collect(Collectors.toList());
+                            
+//                            messageIdToVariableMap.put(messageId, intersectionProcessVariables);
+                        } else {
+//                            messageIdToVariableMap.put(messageId, initialProcessVariablesInFilePath);
                         }
-                        
-                        final Set<String> processIds = new HashSet<String>();
-                        processIds.addAll(checkStartProcessByKeyPattern(content));
-                        processIds.addAll(checkStartProcessByIdPattern(content));                      
-                        
-                        for (final String processId : processIds) {
-                            processIdToVariableMap.put(processId, initialProcessVariablesInFilePath);
-                        }
+                    }
+        
+                    final Set<String> processIds = new HashSet<String>();
+                    processIds.addAll(checkStartProcessByKeyPattern(content, filePath));
+                    processIds.addAll(checkStartProcessByIdPattern(content, filePath));                      
+                    
+                    for (final String processId : processIds) {
+//                        processIdToVariableMap.put(processId, initialProcessVariablesInFilePath);
+                    }
+                    
+                    if (!messageIds.isEmpty() || !processIds.isEmpty()) {
+                    	retrieveMethod(filePath);
                     }
                 }
             }
@@ -131,12 +128,82 @@ public class ProcessVariablesScanner {
     }
 
     /**
-     * get list of entryPoints where initial process variables have been injected 
+     * 
+     * @param filePath
+     */
+	private void retrieveMethod(final String filePath) {
+		final String sootPath = FileScanner.getSootPath();
+		System.setProperty("soot.class.path", sootPath);
+
+		Options.v().set_whole_program(true);
+		Options.v().set_allow_phantom_refs(true);
+
+		SootClass sootClass = Scene.v().forceResolve(cleanString(filePath, true), SootClass.SIGNATURES);
+
+		if (sootClass != null) {
+			sootClass.setApplicationClass();
+			Scene.v().loadNecessaryClasses();
+			for (SootMethod method : sootClass.getMethods()) {
+				final Body body = method.retrieveActiveBody();
+				for (String entryPoint : processEntryPoints) {
+					if (body.toString().contains(entryPoint)) {
+						methodEntryPoints.add(method.getName());
+					}
+				}
+			}
+		}
+	}
+
+	
+	/**
+	 * Strips unnecessary characters and returns cleaned name
+	 * 
+	 * @param className
+	 *            Classname to be stripped of unused chars
+	 * @return cleaned String
+	 */
+	private String cleanString(String className, boolean dot) {
+		final String replaceDot = ".";
+		final String replaceEmpty = "";
+		final String replaceSingleBackSlash = "\\";
+		final String replaceSingleForwardSlash = "/";
+		final String replaceDotJava = ".java";
+
+		if (dot) {
+			if (System.getProperty("os.name").startsWith("Windows")) {
+				className = className.replace(replaceSingleBackSlash, replaceDot).replace(replaceDotJava, replaceEmpty);
+			} else {
+				className = className.replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotJava,
+						replaceEmpty);
+			}
+		} else {
+			if (System.getProperty("os.name").startsWith("Windows")) {
+				className = className.replace(replaceDot, replaceSingleBackSlash);
+				className = className.concat(replaceDotJava);
+			} else {
+				className = className.replace(replaceDot, replaceSingleForwardSlash);
+				className = className.concat(replaceDotJava);
+			}
+		}
+		return className;
+	}
+	
+    /**
+     * get list of processEntryPoints where initial process variables have been injected 
+     * 
+     * @return returns list of processEntryPoints
+     */
+    public Set<String> getProcessEntryPoints() {
+		return processEntryPoints;
+	}
+    
+    /**
+     * get list of methodEntryPoints where initial process variables have been injected 
      * 
      * @return returns list of entryPoints
      */
-    public Set<String> getEntryPoints() {
-		return entryPoints;
+    public Set<String> getMethodEntryPoints() {
+		return methodEntryPoints;
 	}
     
     /**
@@ -190,19 +257,15 @@ public class ProcessVariablesScanner {
                 Resource s = scanner.getResource(filePath);
 
                 if (s.isExists()) {
-
                     InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
-
                     methodBody = IOUtils.toString(resource);
-
                 } else {
-
+                	
                 }
             } catch (final IOException ex) {
                 throw new RuntimeException(
                         "resource '" + filePath + "' could not be read: " + ex.getMessage());
             }
-
         }
 
         return methodBody;
@@ -215,7 +278,7 @@ public class ProcessVariablesScanner {
      * @param code
      * @return message ids
      */
-    private Collection<String> checkStartProcessByMessageIdPattern(final String code) {
+    private Collection<String> checkStartProcessByMessageIdPattern(final String code, final String filePath) {
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
@@ -229,7 +292,8 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(3);
             messageIds.add(match);
-            entryPoints.add("startProcessInstanceByMessage");
+            processEntryPoints.add("startProcessInstanceByMessage");
+            initialProcessVariablesLocation.add(filePath);
         }
 
         return messageIds;
@@ -241,7 +305,7 @@ public class ProcessVariablesScanner {
      * @param code
      * @return message ids
      */
-    private Collection<String> checkStartProcessByIdPattern(final String code) {
+    private Collection<String> checkStartProcessByIdPattern(final String code, final String filePath) {
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
@@ -255,7 +319,8 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(3);
             processIds.add(match);
-            entryPoints.add("startProcessInstanceById");
+            processEntryPoints.add("startProcessInstanceById");
+            initialProcessVariablesLocation.add(filePath);
         }
 
         return processIds;
@@ -268,7 +333,7 @@ public class ProcessVariablesScanner {
      * @param code
      * @return message ids
      */
-    private Collection<String> checkStartProcessByMessageAndProcessDefinitionId(final String code) {
+    private Collection<String> checkStartProcessByMessageAndProcessDefinitionId(final String code, final String filePath) {
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
@@ -282,7 +347,8 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(3);
             messageAndProcessIds.add(match);
-            entryPoints.add("startProcessInstanceByMessageAndProcessDefinitionId");
+            processEntryPoints.add("startProcessInstanceByMessageAndProcessDefinitionId");
+            initialProcessVariablesLocation.add(filePath);
         }
 
         return messageAndProcessIds;
@@ -294,7 +360,7 @@ public class ProcessVariablesScanner {
      * @param code
      * @return process keys
      */
-    private Collection<String> checkStartProcessByKeyPattern(final String code) {
+    private Collection<String> checkStartProcessByKeyPattern(final String code, final String filePath) {
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
@@ -308,7 +374,8 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(3);
             processIds.add(match);
-            entryPoints.add("startProcessInstanceByKey");
+            processEntryPoints.add("startProcessInstanceByKey");
+            initialProcessVariablesLocation.add(filePath);
         }
 
         return processIds;
@@ -320,7 +387,7 @@ public class ProcessVariablesScanner {
      * @param code
      * @return message ids
      */
-    private Collection<String> checkCorrelateMessagePattern(final String code) {
+    private Collection<String> checkCorrelateMessagePattern(final String code, final String filePath) {
 
         // remove special characters from code
         final String FILTER_PATTERN = "'|\"| ";
@@ -334,59 +401,10 @@ public class ProcessVariablesScanner {
         while (matcher.find()) {
             final String match = matcher.group(1);
             messageIds.add(match);
+            initialProcessVariablesLocation.add(filePath);
         }
 
         return messageIds;
     }
 
-    /**
-     * For given filePath returns fields of class InitialProcessVariables (either separate or inner class). This class is used to initialize the
-     * process
-     *
-     * @param filePath
-     * @return
-     * @throws IOException
-     */
-    private Collection<String> readVariablesOfInnerClassInitialProcessVariables(final String filePath)
-            throws IOException {
-
-        final Collection<String> processVariables = new ArrayList<String>();
-
-        if (filePath != null) {
-            final String[] splittedFilePath = filePath.split("\\.");
-            if (splittedFilePath.length > 0) {
-                ClassVisitor cl = new ClassVisitor(Opcodes.ASM4) {
-
-                    @Override
-                    public FieldVisitor visitField(int access, String name, String desc, String signature,
-                            Object value) {
-                        if (!name.startsWith("this")) {
-                            processVariables.add(name);
-                        }
-                        super.visitField(access, name, desc, signature, value);
-                        return null;
-                    }
-                };
-                
-                InputStream in = null;
-                if (splittedFilePath[0].contains(ConfigConstants.INITIAL_VARIABLES)) {
-                	in = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(filePath.replace(".java", ".class"));
-                } else {
-                	in = RuntimeConfig.getInstance().getClassLoader()
-                             .getResourceAsStream(splittedFilePath[0] + "$InitialProcessVariables.class");
-                }
-               
-                if (in != null) {
-                    ClassReader classReader = new ClassReader(in);
-                    classReader.accept(cl, 0);
-                }
-            }
-        }
-        return processVariables;
-    }
-
-
-    public Collection<String> getInitialProcessVariables() {
-        return initialProcessVariables;
-    }
 }

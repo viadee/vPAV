@@ -175,7 +175,7 @@ public class ElementGraphBuilder {
 				if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
 					// add process variables for start event, which set by call
 					// startProcessInstanceByKey
-					for (String entryPoint : scanner.getEntryPoints()) {
+					for (String entryPoint : scanner.getProcessEntryPoints()) {
 						variables.putAll(checkInitialVariableOperations(context, scanner, node, processdefinition, variables, entryPoint));
 					}
 					
@@ -197,9 +197,10 @@ public class ElementGraphBuilder {
 				// mention element
 				elementMap.put(element.getId(), node);
 				if (element.getElementType().getBaseType().getBaseType().getTypeName()
-						.equals(BpmnModelConstants.BPMN_ELEMENT_EVENT)) {
+						.equals(BpmnModelConstants.BPMN_ELEMENT_EVENT) && element.getElementType().getBaseType().getBaseType().getTypeName()
+						.equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)) {
 					// add variables for message event (set by outer class)
-//					addProcessVariablesForMessageName(element, node, context, scanner, processdefinition);
+					addProcessVariablesForMessageName(element, node, context, scanner, processdefinition);
 				}
 
 				if (element.getElementType().getTypeName().equals(BpmnConstants.ENDEVENT)) {

@@ -71,7 +71,6 @@ import soot.jimple.AssignStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.JInterfaceInvokeExpr;
-import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
@@ -196,54 +195,66 @@ public class JavaReaderStatic implements JavaReader {
 
 		final Map<String, ProcessVariableOperation> initialOperations = new HashMap<>();
 
-		String assignment = "";
-		String invoke = "";
+		for (String method : scanner.getMethodEntryPoints()) {
 
-		final PatchingChain<Unit> pc = body.getUnits();
-		for (Unit unit : pc) {
-			if (unit instanceof AssignStmt || unit instanceof InvokeStmt) {
-				if (unit instanceof AssignStmt) {
-					final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
-					final String leftBox = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
+			if (body.getMethod().getName().equals(method)) {
 
-					if (rightBox.contains("org.camunda.bpm.engine.variable.VariableMap createVariables")) {
-						assignment = leftBox;
-					}
-					
-					if (rightBox.contains(assignment)) {
-						if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
-							final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
-							if (expr != null) {							
-								if (expr.getMethodRef().declaringClass().equals(Scene.v().forceResolve(VariableMap.class.getName(), SootClass.SIGNATURES))) {
-									initialOperations.put(expr.getArg(0).toString(), new ProcessVariableOperation(expr.getArg(0).toString(), element, ElementChapter.Code,
-											KnownElementFieldType.Initial, resourceFilePath, VariableOperation.WRITE,
-											element.getBaseElement().getId()));
-									assignment = leftBox;
+				String assignment = "";
+
+				final PatchingChain<Unit> pc = body.getUnits();
+				for (Unit unit : pc) {
+					if (unit instanceof AssignStmt || unit instanceof InvokeStmt) {
+						if (unit instanceof AssignStmt) {
+							final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
+							final String leftBox = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
+
+							if (rightBox.contains("org.camunda.bpm.engine.variable.VariableMap createVariables")) {
+								assignment = leftBox;
+							}
+
+							if (rightBox.contains(assignment)) {
+								if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
+									final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
+											.getRightOpBox().getValue();
+									if (expr != null) {
+										if (expr.getMethodRef().declaringClass().equals(Scene.v()
+												.forceResolve(VariableMap.class.getName(), SootClass.SIGNATURES))) {
+											initialOperations.put(expr.getArg(0).toString(),
+													new ProcessVariableOperation(expr.getArg(0).toString(), element,
+															ElementChapter.Code, KnownElementFieldType.Initial,
+															resourceFilePath, VariableOperation.WRITE,
+															element.getBaseElement().getId()));
+											assignment = leftBox;
+										}
+									}
 								}
 							}
-						}						
-					}
-					
-					if (rightBox.contains(entryPoint) && rightBox.contains(assignment)) {
-						return initialOperations;
-					}
-				}							
-				
-				if (unit instanceof InvokeStmt) {
-					if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
-						final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
-						if (expr != null) {							
-							if (expr.getMethodRef().declaringClass().equals(Scene.v().forceResolve(Map.class.getName(), SootClass.SIGNATURES))) {
-								initialOperations.put(expr.getArg(0).toString(), new ProcessVariableOperation(expr.getArg(0).toString(), element, ElementChapter.Code,
-										KnownElementFieldType.Initial, resourceFilePath, VariableOperation.WRITE,
-										element.getBaseElement().getId()));
+
+							if (rightBox.contains(entryPoint) && rightBox.contains(assignment)) {
+								return initialOperations;
+							}
+						}
+
+						if (unit instanceof InvokeStmt) {
+							if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+								final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
+										.getInvokeExprBox().getValue();
+								if (expr != null) {
+									if (expr.getMethodRef().declaringClass().equals(
+											Scene.v().forceResolve(Map.class.getName(), SootClass.SIGNATURES))) {
+										initialOperations.put(expr.getArg(0).toString(),
+												new ProcessVariableOperation(expr.getArg(0).toString(), element,
+														ElementChapter.Code, KnownElementFieldType.Initial,
+														resourceFilePath, VariableOperation.WRITE,
+														element.getBaseElement().getId()));
+									}
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-
 		return initialOperations;
 	}
 
@@ -987,7 +998,6 @@ public class JavaReaderStatic implements JavaReader {
 			}
 		}
 		return className;
-
 	}
 
 }
