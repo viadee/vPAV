@@ -31,107 +31,69 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.Resource;
 
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.options.Options;
 
-/**
- * scan process variables, which are set in outer java classes
- *
- */
 public class ProcessVariablesScanner {
 
-    private Set<String> javaResources;
+	private Set<String> javaResources;
 
-    private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<String, Collection<String>>();
+	private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<String, Collection<String>>();
 
-    private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
-    
-    private Set<String> initialProcessVariablesLocation = new HashSet<String>();
-    
-    private Set<String> processEntryPoints = new HashSet<String>();
-    
-    private Set<String> methodEntryPoints = new HashSet<String>();
+	private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
+
+	private Map<String, String> entryPoints = new HashMap<String, String>();
+
+	private Set<String> initialProcessVariablesLocation = new HashSet<String>();
+
+	private Set<String> camundaProcessEntryPoints = new HashSet<String>();
 
 	public ProcessVariablesScanner(final Set<String> javaResources) {
-        this.javaResources = javaResources;
-    }
+		this.javaResources = javaResources;
+		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID);
+		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY);
+		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE);
+		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF);
+	}
 
-    /**
-     * scan variables
-     *
-     * @throws IOException
-     *             possible exception if filepath can not be resolved
-     */
-    public void scanProcessVariables() throws IOException {
-        for (final String filePath : javaResources) {
-            if (!filePath.startsWith("javax")) { 
-                final String content = readResourceFile(filePath);
-                if (content != null) {
-                    // if correlateMessage and startProcessInstanceByMessage called
-                    // together in one class take the intersection to avoid duplicates
-                    final Set<String> messageIds = new HashSet<String>();
-                    messageIds.addAll(checkStartProcessByMessageIdPattern(content, filePath));
-                    messageIds.addAll(checkStartProcessByMessageAndProcessDefinitionId(content, filePath));
-                    messageIds.addAll(checkCorrelateMessagePattern(content, filePath));
-                    for (final String messageId : messageIds) {
-                        if (messageIdToVariableMap.containsKey(messageId)) {
-                            // if messageId is already set, create intersection of variables and overwrite map
-                            // item
-                            final Collection<String> existingProcessVariables = messageIdToVariableMap
-                                    .get(messageId);                                
-//                            final List<String> intersectionProcessVariables = existingProcessVariables.stream()
-//                                    .filter(initialProcessVariablesInFilePath::contains)
-//                                    .collect(Collectors.toList());
-                            
-//                            messageIdToVariableMap.put(messageId, intersectionProcessVariables);
-                        } else {
-//                            messageIdToVariableMap.put(messageId, initialProcessVariablesInFilePath);
-                        }
-                    }
-        
-                    final Set<String> processIds = new HashSet<String>();
-                    processIds.addAll(checkStartProcessByKeyPattern(content, filePath));
-                    processIds.addAll(checkStartProcessByIdPattern(content, filePath));                      
-                    
-                    for (final String processId : processIds) {
-//                        processIdToVariableMap.put(processId, initialProcessVariablesInFilePath);
-                    }
-                    
-                    if (!messageIds.isEmpty() || !processIds.isEmpty()) {
-                    	retrieveMethod(filePath);
-                    }
-                }
-            }
-        }
-    }
+	/**
+	 * scan java resources for variables and retrieve important information such as
+	 * message ids and entrypoints
+	 *
+	 * @throws IOException
+	 *             possible exception if filepath can not be resolved
+	 */
+	public void scanProcessVariables() throws IOException {
+		for (final String filePath : javaResources) {
+			if (!filePath.startsWith("javax")) {
+				final Set<String> messageIds = new HashSet<String>();
+				final Set<String> processIds = new HashSet<String>();
+				retrieveMethod(filePath, messageIds, processIds);
+			}
+		}
+	}
 
-    /**
-     * 
-     * @param filePath
-     */
-	private void retrieveMethod(final String filePath) {
+	/**
+	 * Retrieve the method name which contains the entrypoint (e.g.
+	 * "startProcessByXYZ")
+	 * 
+	 * @param filePath
+	 *            fully qualified path to the java class
+	 * @return
+	 */
+	private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
 		final String sootPath = FileScanner.getSootPath();
 		System.setProperty("soot.class.path", sootPath);
 
@@ -140,29 +102,37 @@ public class ProcessVariablesScanner {
 
 		SootClass sootClass = Scene.v().forceResolve(cleanString(filePath, true), SootClass.SIGNATURES);
 
-		if (sootClass != null) {
+		if (sootClass != null && !sootClass.isInterface()) {
 			sootClass.setApplicationClass();
 			Scene.v().loadNecessaryClasses();
 			for (SootMethod method : sootClass.getMethods()) {
-				final Body body = method.retrieveActiveBody();
-				for (String entryPoint : processEntryPoints) {
-					if (body.toString().contains(entryPoint)) {
-						methodEntryPoints.add(method.getName());
+				if (method.hasActiveBody()) {
+					final Body body = method.retrieveActiveBody();
+					for (String entryPoint : camundaProcessEntryPoints) {
+						if (body.toString().contains(entryPoint)) {
+							entryPoints.put(entryPoint, method.getName());
+							initialProcessVariablesLocation.add(filePath);
+							messageIds.add(entryPoint);
+						}
+						if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
+							processIds.add(entryPoint);
+						}
 					}
 				}
 			}
 		}
 	}
 
-	
 	/**
 	 * Strips unnecessary characters and returns cleaned name
 	 * 
 	 * @param className
 	 *            Classname to be stripped of unused chars
+	 * @param dot
+	 *            Replace dots
 	 * @return cleaned String
 	 */
-	private String cleanString(String className, boolean dot) {
+	static String cleanString(String className, boolean dot) {
 		final String replaceDot = ".";
 		final String replaceEmpty = "";
 		final String replaceSingleBackSlash = "\\";
@@ -187,224 +157,42 @@ public class ProcessVariablesScanner {
 		}
 		return className;
 	}
-	
-    /**
-     * get list of processEntryPoints where initial process variables have been injected 
-     * 
-     * @return returns list of processEntryPoints
-     */
-    public Set<String> getProcessEntryPoints() {
-		return processEntryPoints;
+
+	/**
+	 * get list of entrypoints (process message, method) where process variables
+	 * have been found
+	 * 
+	 * @return returns list of locations
+	 */
+	public Map<String, String> getEntryPoints() {
+		return entryPoints;
 	}
-    
-    /**
-     * get list of methodEntryPoints where initial process variables have been injected 
-     * 
-     * @return returns list of entryPoints
-     */
-    public Set<String> getMethodEntryPoints() {
-		return methodEntryPoints;
-	}
-    
-    /**
-     * get list of locations where initial process variables have been found 
-     * 
-     * @return returns list of locations
-     */
-    public Collection<String> getInitialProcessVariablesLocation() {
+
+	/**
+	 * get list of locations where initial process variables have been found
+	 * 
+	 * @return returns list of locations
+	 */
+	public Collection<String> getInitialProcessVariablesLocation() {
 		return initialProcessVariablesLocation;
 	}
 
+	/**
+	 * get mapping for message id
+	 *
+	 * @return messageIdToVariableMap returns messageIdToVariableMap
+	 */
+	public Map<String, Collection<String>> getMessageIdToVariableMap() {
+		return messageIdToVariableMap;
+	}
 
 	/**
-     * get mapping for message id
-     *
-     * @return messageIdToVariableMap returns messageIdToVariableMap
-     */
-    public Map<String, Collection<String>> getMessageIdToVariableMap() {
-        return messageIdToVariableMap;
-    }
-
-    /**
-     * get mapping for process id
-     *
-     * @return processIdToVariableMap returns processIdToVariableMap
-     */
-    public Map<String, Collection<String>> getProcessIdToVariableMap() {
-        return processIdToVariableMap;
-    }
-
-    /**
-     * read resource file
-     *
-     * @param filePath
-     *            path of the file
-     * @return methodBody returns methodBody
-     */
-    private String readResourceFile(final String filePath) {
-        String methodBody = "";
-
-        if (filePath != null && filePath.trim().length() > 0) {
-            try {
-                final DirectoryScanner scanner = new DirectoryScanner();
-
-                if (RuntimeConfig.getInstance().isTest()) {
-                    scanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
-                } else {
-                    scanner.setBasedir(ConfigConstants.JAVAPATH);
-                }
-
-                Resource s = scanner.getResource(filePath);
-
-                if (s.isExists()) {
-                    InputStreamReader resource = new InputStreamReader(new FileInputStream(s.toString()));
-                    methodBody = IOUtils.toString(resource);
-                } else {
-                	
-                }
-            } catch (final IOException ex) {
-                throw new RuntimeException(
-                        "resource '" + filePath + "' could not be read: " + ex.getMessage());
-            }
-        }
-
-        return methodBody;
-
-    }
-
-    /**
-     * check pattern for startProcessInstanceByMessage
-     *
-     * @param code
-     * @return message ids
-     */
-    private Collection<String> checkStartProcessByMessageIdPattern(final String code, final String filePath) {
-
-        // remove special characters from code
-        final String FILTER_PATTERN = "'|\"| ";
-        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
-
-        // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.(startProcessInstanceByMessage)(\\()([a-z0-9_.]+)(,.?)*(\\n?)([a-z0-9_.()])*(,?)([a-z0-9_.()])*\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        final Matcher matcher = pattern.matcher(cleanedCode);
-
-        final Collection<String> messageIds = new ArrayList<String>();
-        while (matcher.find()) {
-            final String match = matcher.group(3);
-            messageIds.add(match);
-            processEntryPoints.add("startProcessInstanceByMessage");
-            initialProcessVariablesLocation.add(filePath);
-        }
-
-        return messageIds;
-    }
-    
-    /**
-     * check pattern for startProcessInstanceById
-     *
-     * @param code
-     * @return message ids
-     */
-    private Collection<String> checkStartProcessByIdPattern(final String code, final String filePath) {
-
-        // remove special characters from code
-        final String FILTER_PATTERN = "'|\"| ";
-        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
-        
-        // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.(startProcessInstanceById)(\\()([a-z0-9_.]+)(,.?)*(\\n?)([a-z0-9_.()])*(,?)([a-z0-9_.()])*\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        final Matcher matcher = pattern.matcher(cleanedCode);
-
-        final Collection<String> processIds = new ArrayList<String>();
-        while (matcher.find()) {
-            final String match = matcher.group(3);
-            processIds.add(match);
-            processEntryPoints.add("startProcessInstanceById");
-            initialProcessVariablesLocation.add(filePath);
-        }
-
-        return processIds;
-    }
-    
-    
-    /**
-     * check pattern for startProcessInstanceByMessageAndProcessDefinitionId
-     *
-     * @param code
-     * @return message ids
-     */
-    private Collection<String> checkStartProcessByMessageAndProcessDefinitionId(final String code, final String filePath) {
-
-        // remove special characters from code
-        final String FILTER_PATTERN = "'|\"| ";
-        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
-        
-        // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.(startProcessInstanceByMessageAndProcessDefinitionId)(\\()([a-z0-9_.]+)(,.?)*(\\n?)([a-z0-9_.()])*(,?)([a-z0-9_.()])*\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        final Matcher matcher = pattern.matcher(cleanedCode);
-
-        final Collection<String> messageAndProcessIds = new ArrayList<String>();
-        while (matcher.find()) {
-            final String match = matcher.group(3);
-            messageAndProcessIds.add(match);
-            processEntryPoints.add("startProcessInstanceByMessageAndProcessDefinitionId");
-            initialProcessVariablesLocation.add(filePath);
-        }
-
-        return messageAndProcessIds;
-    }
-
-    /**
-     * check pattern for startProcessInstanceByKey
-     *
-     * @param code
-     * @return process keys
-     */
-    private Collection<String> checkStartProcessByKeyPattern(final String code, final String filePath) {
-
-        // remove special characters from code
-        final String FILTER_PATTERN = "'|\"| ";
-        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
-
-        // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.(startProcessInstanceByKey)(\\()([a-z0-9_.]+)(,.?)*(\\n?)([a-z0-9_.()])*(,?)([a-z0-9_.()])*\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        final Matcher matcher = pattern.matcher(cleanedCode);
-
-        final Collection<String> processIds = new ArrayList<String>();
-        while (matcher.find()) {
-            final String match = matcher.group(3);
-            processIds.add(match);
-            processEntryPoints.add("startProcessInstanceByKey");
-            initialProcessVariablesLocation.add(filePath);
-        }
-
-        return processIds;
-    }
-
-    /**
-     * check pattern for correlateMessage
-     *
-     * @param code
-     * @return message ids
-     */
-    private Collection<String> checkCorrelateMessagePattern(final String code, final String filePath) {
-
-        // remove special characters from code
-        final String FILTER_PATTERN = "'|\"| ";
-        final String cleanedCode = code.replaceAll(FILTER_PATTERN, "");
-
-        // search locations where variables are read
-        final Pattern pattern = Pattern.compile("\\.correlateMessage\\((\\w+),(.*)");
-        final Matcher matcher = pattern.matcher(cleanedCode);
-
-        final Collection<String> messageIds = new ArrayList<String>();
-        while (matcher.find()) {
-            final String match = matcher.group(1);
-            messageIds.add(match);
-            initialProcessVariablesLocation.add(filePath);
-        }
-
-        return messageIds;
-    }
+	 * get mapping for process id
+	 *
+	 * @return processIdToVariableMap returns processIdToVariableMap
+	 */
+	public Map<String, Collection<String>> getProcessIdToVariableMap() {
+		return processIdToVariableMap;
+	}
 
 }

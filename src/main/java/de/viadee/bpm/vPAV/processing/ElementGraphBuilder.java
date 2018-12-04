@@ -39,20 +39,17 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.Activity;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.EndEvent;
-import org.camunda.bpm.model.bpmn.instance.Event;
 import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.FlowElement;
-import org.camunda.bpm.model.bpmn.instance.Message;
-import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 import org.camunda.bpm.model.bpmn.instance.ParallelGateway;
 import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
@@ -66,10 +63,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
@@ -175,16 +169,11 @@ public class ElementGraphBuilder {
 				if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
 					// add process variables for start event, which set by call
 					// startProcessInstanceByKey
-					for (String entryPoint : scanner.getProcessEntryPoints()) {
-						variables.putAll(checkInitialVariableOperations(context, scanner, node, processdefinition, variables, entryPoint));
+					for (Entry<String, String> entry : scanner.getEntryPoints().entrySet()) {
+						variables.putAll(checkInitialVariableOperations(context, scanner, node, processdefinition, variables, entry));
 					}
 					
 					node.setProcessVariables(variables);
-
-					final String processId = node.getBaseElement().getParentElement()
-							.getAttributeValue(BpmnConstants.ATTR_ID);
-					addProcessVariablesByStartForProcessId(node, processId);
-
 					graph.addStartNode(node);
 				}
 
@@ -196,12 +185,6 @@ public class ElementGraphBuilder {
 
 				// mention element
 				elementMap.put(element.getId(), node);
-				if (element.getElementType().getBaseType().getBaseType().getTypeName()
-						.equals(BpmnModelConstants.BPMN_ELEMENT_EVENT) && element.getElementType().getBaseType().getBaseType().getTypeName()
-						.equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)) {
-					// add variables for message event (set by outer class)
-					addProcessVariablesForMessageName(element, node, context, scanner, processdefinition);
-				}
 
 				if (element.getElementType().getTypeName().equals(BpmnConstants.ENDEVENT)) {
 					graph.addEndNode(node);
@@ -233,77 +216,14 @@ public class ElementGraphBuilder {
 	 *            OuterProcessVariableScanner
 	 */
 	private LinkedHashMap<String, ProcessVariableOperation> checkInitialVariableOperations(final JavaReaderContext jvc, final ProcessVariablesScanner scanner,
-			final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables, final String entryPoint) {
+			final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables, final Entry<String, String> entry) {
 		for (final String clazz : scanner.getInitialProcessVariablesLocation()) {
-			variables.putAll(jvc.readClass(clazz, scanner, element, resourceFilePath, entryPoint));
+			variables.putAll(jvc.readClass(clazz, scanner, element, resourceFilePath, entry));
 		}
 
 		return variables;
 	}
 
-	/**
-	 * Add process variables on start event for a specific process id
-	 *
-	 * @param node
-	 *            Current BPMN Element
-	 * @param processId
-	 *            Current Process ID
-	 */
-	private void addProcessVariablesByStartForProcessId(final BpmnElement node, final String processId) {
-		if (processIdToVariables != null && processId != null) {
-			final Collection<String> outerVariables = processIdToVariables.get(processId);
-			// add variables
-			if (outerVariables != null) {
-				for (final String varName : outerVariables) {
-					node.setProcessVariable(varName,
-							new ProcessVariableOperation(varName, node, ElementChapter.OutstandingVariable,
-									KnownElementFieldType.Class, null, VariableOperation.WRITE, ""));
-				}
-			}
-		}
-	}
-
-	/**
-	 * Add process variables on event for a specific message name
-	 *
-	 * @param element
-	 *            FlowElement
-	 * @param node
-	 *            BpmnElement
-	 */
-	private void addProcessVariablesForMessageName(final FlowElement element, final BpmnElement node,
-			final JavaReaderContext jvc, final ProcessVariablesScanner scanner, final String resourceFilePath) {
-		if (messageIdToVariables != null) {
-			if (element instanceof Event) {
-				final Event event = (Event) element;
-				final Collection<MessageEventDefinition> messageEventDefinitions = event
-						.getChildElementsByType(MessageEventDefinition.class);
-				if (messageEventDefinitions != null) {
-					for (MessageEventDefinition eventDef : messageEventDefinitions) {
-						if (eventDef != null) {
-							final Message message = eventDef.getMessage();
-							if (message != null) {
-								final String messageName = message.getName();
-								final Collection<String> outerVariables = messageIdToVariables.get(messageName);
-								if (outerVariables != null) {
-									for (final String varName : outerVariables) {
-										// Check which outerVariables have been written
-
-//										checkInitialVariableOperations(jvc, scanner, node, resourceFilePath);
-
-										node.setProcessVariable(varName,
-												new ProcessVariableOperation(varName, node,
-														ElementChapter.OutstandingVariable, KnownElementFieldType.Class,
-														null, VariableOperation.WRITE, ""));
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 
 	public BpmnElement getElement(final String id) {
 		return elementMap.get(id);

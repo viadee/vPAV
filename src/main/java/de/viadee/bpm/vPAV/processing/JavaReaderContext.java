@@ -32,6 +32,8 @@
 package de.viadee.bpm.vPAV.processing;
 
 import java.util.*;
+import java.util.Map.Entry;
+
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -51,8 +53,8 @@ public class JavaReaderContext {
         return javaReaderStrategy.getVariablesFromJavaDelegate(fileScanner, classFile, element, chapter, fieldType, scopeId);
     }
     
-    public LinkedHashMap<String, ProcessVariableOperation> readClass(final String className, final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath, final String entryPoint){
-    	return javaReaderStrategy.getVariablesFromClass(className, scanner, element, resourceFilePath, entryPoint);
+    public LinkedHashMap<String, ProcessVariableOperation> readClass(final String className, final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath, final Entry<String, String> entry){
+    	return javaReaderStrategy.getVariablesFromClass(className, scanner, element, resourceFilePath, entry);
     }
 
     
