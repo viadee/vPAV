@@ -5,4 +5,9 @@
       <gav regex="true">^org\.slf4j:slf4j-api:.*$</gav>
       <cve>CVE-2018-8088</cve>
     </suppress>
+    <suppress>
+        <notes>this vulnerability is in slf4j-ext-*.jar (org.slf4j.ext.EventData), which we don't have in classpath</notes>
+        <gav regex="true">^org\.slf4j:slf4j-simple:.*$</gav>
+        <cve>CVE-2018-8088</cve>
+    </suppress>
 </suppressions>
