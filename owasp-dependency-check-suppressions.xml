@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+    <suppress>
+      <notes>this vulnerability is in slf4j-ext-*.jar (org.slf4j.ext.EventData), which we don't have in classpath</notes>
+      <gav regex="true">^org\.slf4j:slf4j-api:.*$</gav>
+      <cve>CVE-2018-8088</cve>
+    </suppress>
+</suppressions>

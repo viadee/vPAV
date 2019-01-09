@@ -344,6 +344,9 @@
 				<artifactId>dependency-check-maven</artifactId>
 				<version>3.3.4</version>
 				<configuration>
+					<suppressionFiles>
+						<suppressionFile>owasp-dependency-check-suppressions.xml</suppressionFile>
+					</suppressionFiles>
 					<failBuildOnCVSS>7</failBuildOnCVSS>
 				</configuration>
 				<executions>
