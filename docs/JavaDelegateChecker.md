@@ -5,7 +5,7 @@ Service Tasks, Send Tasks, Receive Tasks, Script Tasks or Business Rule Tasks:
 - Wrong reference to Java Class
 - Wrong reference in Bean mapping
 - Wrong or no interfaces (Needs to be *JavaDelegate*, *SignallableActivityBehavior*, *AbstractBpmnActivityBehavior*)
-- If delegate does not implement one of the interfaces directly it needs to contain the string "AbstractBpmnActivityBehavior" in its name
+- If delegate does not implement one of the interfaces directly it needs to extend the class "AbstractBpmnActivityBehavior"
 - Interface *ActivityBehaviour* should not be used
 - No reference to a Java Class or Delegate (Bean)
 - No implementation specified
