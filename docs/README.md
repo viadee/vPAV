@@ -349,12 +349,15 @@ Status of the development branch: [![Build Status](https://travis-ci.org/viadee/
 
 ## Licenses
 All licenses of reused components can be found on the [maven site](http://rawgit.com/viadee/vPAV/master/docs/MavenSite/project-info.html)
-</br> Additionally we use the following third-party dependencies, that are not distributed via maven:
+
+</br> Additionally we use the following third-party dependencies, that are not covered via maven-found licences:
 - [BPMN.io](https://bpmn.io/license/) tool under the bpmn.io license. 
 - [Bootstrap](https://github.com/twbs/bootstrap/blob/v4-dev/LICENSE) licensed under MIT
 - [jQuery](https://jquery.org/license/) licensed under MIT
 - [PopperJS](https://github.com/FezVrasta/popper.js/blob/master/LICENSE.md) licensed under MIT
+- [Soot](https://github.com/Sable/soot) licensed under a LGPL 2.1  license
 
+Soot and bpmn.io provide the basis for the two most exciting features of the validator, i.e. finding inconsistencies in the data and control flow across model and code an the visualization thereof. We would like to explicitly thank these two communities for their continued effort.
 
 **BSD 3-Clause License** <br/>
 
