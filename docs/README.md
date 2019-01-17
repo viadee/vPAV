@@ -357,7 +357,7 @@ All licenses of reused components can be found on the [maven site](http://rawgit
 - [PopperJS](https://github.com/FezVrasta/popper.js/blob/master/LICENSE.md) licensed under MIT
 - [Soot](https://github.com/Sable/soot) licensed under a LGPL 2.1  license
 
-Soot and bpmn.io provide the basis for the two most exciting features of the validator, i.e. finding inconsistencies in the data and control flow across model and code an the visualization thereof. We would like explicitly thank these two communities for their contiued effort.
+Soot and bpmn.io provide the basis for the two most exciting features of the validator, i.e. finding inconsistencies in the data and control flow across model and code an the visualization thereof. We would like to explicitly thank these two communities for their continued effort.
 
 **BSD 3-Clause License** <br/>
 
