@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -169,8 +168,10 @@ public class ElementGraphBuilder {
 				if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
 					// add process variables for start event, which set by call
 					// startProcessInstanceByKey
-					for (Entry<String, String> entry : scanner.getEntryPoints().entrySet()) {
-						variables.putAll(checkInitialVariableOperations(context, scanner, node, processdefinition, variables, entry));
+					for (Map.Entry<String, Map<String, String>> entry : scanner.getEntryPoints().entrySet()) {
+						for (Map.Entry<String, String> innerEntry : entry.getValue().entrySet()) {
+							variables.putAll(checkInitialVariableOperations(innerEntry.getValue(), context, scanner, node, processdefinition, variables, entry));
+						}
 					}
 					
 					node.setProcessVariables(variables);
@@ -215,12 +216,9 @@ public class ElementGraphBuilder {
 	 * @param scanner
 	 *            OuterProcessVariableScanner
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> checkInitialVariableOperations(final JavaReaderContext jvc, final ProcessVariablesScanner scanner,
-			final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables, final Entry<String, String> entry) {
-		for (final String clazz : scanner.getInitialProcessVariablesLocation()) {
-			variables.putAll(jvc.readClass(clazz, scanner, element, resourceFilePath, entry));
-		}
-
+	private LinkedHashMap<String, ProcessVariableOperation> checkInitialVariableOperations(final String clazz, final JavaReaderContext jvc, final ProcessVariablesScanner scanner,
+			final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables, final Map.Entry<String, Map<String, String>> entry) {
+		variables.putAll(jvc.readClass(clazz, scanner, element, resourceFilePath, entry));
 		return variables;
 	}
 

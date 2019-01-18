@@ -53,7 +53,7 @@ public class JavaReaderContext {
         return javaReaderStrategy.getVariablesFromJavaDelegate(fileScanner, classFile, element, chapter, fieldType, scopeId);
     }
     
-    public LinkedHashMap<String, ProcessVariableOperation> readClass(final String className, final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath, final Entry<String, String> entry){
+    public LinkedHashMap<String, ProcessVariableOperation> readClass(final String className, final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath, final Map.Entry<String, Map<String, String>> entry){
     	return javaReaderStrategy.getVariablesFromClass(className, scanner, element, resourceFilePath, entry);
     }
 

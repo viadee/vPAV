@@ -31,7 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -40,42 +40,27 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class StaticInterProceduralTest {
 
-    private static Runner runner;
-
-    private static ClassLoader oldClassLoader;
-
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        // Prepare for post-test cleanup
-        oldClassLoader = RuntimeConfig.getInstance().getClassLoader();
         RuntimeConfig.getInstance().setClassLoader(StaticInterProceduralTest.class.getClassLoader());
         RuntimeConfig.getInstance().setTest(true);
-        runner = new Runner();
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setClassLoader(oldClassLoader);
     }
 
     @Test
     public void testInterProceduralAnalysis() throws ParserConfigurationException, SAXException, IOException {
         // Given
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        runner.viadeeProcessApplicationValidator(ConfigConstants.TEST_JAVAPATH);
 
         // When
         final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
@@ -83,7 +68,6 @@ public class StaticInterProceduralTest {
         // Then
         assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
                 variables.size());
-
     }
 
 }

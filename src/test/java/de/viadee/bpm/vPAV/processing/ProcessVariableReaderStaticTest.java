@@ -38,11 +38,17 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -51,11 +57,14 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ProcessVariableReaderStaticTest {
 
     private static ClassLoader cl;
+    
+    private static final String BASE_PATH = "src/test/resources/";
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -74,6 +83,41 @@ public class ProcessVariableReaderStaticTest {
 
         final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
+
+        assertEquals(3, variables.size());
+
+    }
+    
+    @Test
+    public void findInitialProcessVariables() throws ParserConfigurationException, SAXException, IOException {
+        ProcessApplicationValidator.findModelErrorsFromClassloader(cl);
+                
+        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<StartEvent> startElement = modelInstance
+                .getModelElementsByType(StartEvent.class);
+
+        final BpmnElement element = new BpmnElement(PATH, startElement.iterator().next());
+
+        
+        final Map<String, Map<String, String>> outerMap = new HashMap<String, Map<String, String>>();
+        final Map<String, String> innerMap = new HashMap<String, String>();
+        innerMap.put("startProcess", "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java");
+        outerMap.put("startProcessInstanceByMessage", innerMap);
+        
+        final Map<String, ProcessVariableOperation> variables = new HashMap<>();
+        final Set<String> resources = new HashSet<String>();
+        resources.add("");
+        
+        ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
+  
+        for (Map.Entry<String, Map<String, String>> entry : outerMap.entrySet()) {
+        	variables.putAll(new JavaReaderStatic().getVariablesFromClass(
+            		"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables", scanner, element, null, entry));
+        }
 
         assertEquals(3, variables.size());
 

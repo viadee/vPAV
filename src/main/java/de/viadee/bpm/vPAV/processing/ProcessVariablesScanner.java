@@ -54,9 +54,7 @@ public class ProcessVariablesScanner {
 
 	private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
 
-	private Map<String, String> entryPoints = new HashMap<String, String>();
-
-	private Set<String> initialProcessVariablesLocation = new HashSet<String>();
+	private Map<String, Map<String, String>> entryPoints = new HashMap<String, Map<String, String>>();
 
 	private Set<String> camundaProcessEntryPoints = new HashSet<String>();
 
@@ -106,19 +104,20 @@ public class ProcessVariablesScanner {
 			sootClass.setApplicationClass();
 			Scene.v().loadNecessaryClasses();
 			for (SootMethod method : sootClass.getMethods()) {
-				if (method.hasActiveBody()) {
+//				if (method.hasActiveBody()) {
 					final Body body = method.retrieveActiveBody();
 					for (String entryPoint : camundaProcessEntryPoints) {
 						if (body.toString().contains(entryPoint)) {
-							entryPoints.put(entryPoint, method.getName());
-							initialProcessVariablesLocation.add(filePath);
+							final Map<String, String> innerMap = new HashMap<String, String>();
+							innerMap.put(method.getName(), filePath);
+							entryPoints.put(entryPoint, innerMap);
 							messageIds.add(entryPoint);
 						}
 						if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
 							processIds.add(entryPoint);
 						}
 					}
-				}
+//				}
 			}
 		}
 	}
@@ -164,17 +163,8 @@ public class ProcessVariablesScanner {
 	 * 
 	 * @return returns list of locations
 	 */
-	public Map<String, String> getEntryPoints() {
+	public Map<String, Map<String, String>> getEntryPoints() {
 		return entryPoints;
-	}
-
-	/**
-	 * get list of locations where initial process variables have been found
-	 * 
-	 * @return returns list of locations
-	 */
-	public Collection<String> getInitialProcessVariablesLocation() {
-		return initialProcessVariablesLocation;
 	}
 
 	/**
