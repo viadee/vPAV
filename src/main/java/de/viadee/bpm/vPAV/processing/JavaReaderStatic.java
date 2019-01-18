@@ -211,7 +211,7 @@ public class JavaReaderStatic implements JavaReader {
 							assignment = leftBox;
 						}		
 						
-						if (rightBox.contains(map.getKey()) && rightBox.contains("123")) {
+						if (rightBox.contains(map.getKey()) && rightBox.contains(invoke)) {
 							return initialOperations;
 						}			
 						
