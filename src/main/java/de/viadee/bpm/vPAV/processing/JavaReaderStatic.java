@@ -224,17 +224,8 @@ public class JavaReaderStatic implements JavaReader {
 									initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
 									invoke = leftBox;
 								}
-								if (expr.getMethodRef().name().equals(map.getKey())) {
-									if (!assignment.isEmpty()) {
-										if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
-											return initialOperations;
-										}
-										if (expr.getArgBox(2).getValue().toString().equals(invoke)) {
-											return initialOperations;
-										}
-									}									
-								}
-							}
+                                if (checkArgBoxes(map, assignment, invoke, expr)) return initialOperations;
+                            }
 						}
 					}	
 					if (unit instanceof InvokeStmt) {
@@ -242,17 +233,8 @@ public class JavaReaderStatic implements JavaReader {
 							final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
 									.getInvokeExprBox().getValue();
 							if (expr != null) {
-								if (expr.getMethodRef().name().equals(map.getKey())) {
-									if (!assignment.isEmpty()) {
-										if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
-											return initialOperations;
-										}
-										if (expr.getArgBox(2).getValue().toString().equals(invoke)) {
-											return initialOperations;
-										}
-									}									
-								}
-							}
+                                if (checkArgBoxes(map, assignment, invoke, expr)) return initialOperations;
+                            }
 						}
 					}
 				}
@@ -261,7 +243,31 @@ public class JavaReaderStatic implements JavaReader {
 		return initialOperations;
 	}
 
-	/**
+    /**
+     *
+     * Check whether or not the second or third argument contain a reference to the variable map
+     *
+     * @param map Current entry
+     * @param assignment Current assigned variable
+     * @param invoke Current invocation
+     * @param expr Current expression
+     * @return True/False based on whether the second or third argument refers to the variable map
+     */
+    private boolean checkArgBoxes(Map.Entry<String, Map<String, String>> map, String assignment, String invoke, JInterfaceInvokeExpr expr) {
+        if (expr.getMethodRef().name().equals(map.getKey())) {
+            if (!assignment.isEmpty()) {
+                if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
+                    return true;
+                }
+                if (expr.getArgBox(2).getValue().toString().equals(invoke)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
 	 *
 	 * Starting by the main JavaDelegate, statically analyses the classes
 	 * implemented for the bpmn element.
@@ -439,15 +445,15 @@ public class JavaReaderStatic implements JavaReader {
 			final VariableBlock originalBlock, final SootClass sootClass, final List<Type> parameterTypes,
 			final VoidType returnType) {
 
-		SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type) returnType);
+		SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
 		if (method != null) {
-			outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
+			outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType, scopeId,
 					outSet, originalBlock, method);
 		} else {
 			method = sootClass.getMethodByNameUnsafe(methodName);
 			if (method != null) {
-				outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType,
+				outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType,
 						scopeId, outSet, originalBlock, method);
 			} else {
 				LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
@@ -492,7 +498,7 @@ public class JavaReaderStatic implements JavaReader {
 
 		for (SootMethod method : sootClass.getMethods()) {
 			if (method.getName().equals(methodName)) {
-				outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType,
+				outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType,
 						scopeId, outSet, originalBlock, method);
 			}
 		}
@@ -508,8 +514,6 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Set of classes that is included in inter-procedural analysis
 	 * @param className
 	 *            Name of currently analysed class
-	 * @param methodName
-	 *            Name of currently analysed method
 	 * @param classFile
 	 *            Location path of class
 	 * @param element
@@ -528,7 +532,7 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Soot representation of a given method
 	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className, final String methodName,
+	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
 			final VariableBlock originalBlock, final SootMethod method) {
@@ -546,10 +550,9 @@ public class JavaReaderStatic implements JavaReader {
 		CallGraph cg = Scene.v().getCallGraph();
 
 		final List<Block> graphHeads = graph.getHeads();
-		final List<Block> graphTails = graph.getTails();
 
 		for (Block head : graphHeads) {
-			outSet = graphIterator(classPaths, cg, graph, head, graphTails, outSet, element, chapter, fieldType,
+			outSet = graphIterator(classPaths, cg, graph, outSet, element, chapter, fieldType,
 					classFile, scopeId, originalBlock, className);
 		}
 
@@ -566,10 +569,6 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Soot CallGraph
 	 * @param graph
 	 *            Control Flow graph of method
-	 * @param head
-	 *            Starting Block of the CFG
-	 * @param blockTails
-	 *            List of End Blocks of CFG
 	 * @param outSet
 	 *            OUT set of CFG
 	 * @param element
@@ -588,8 +587,8 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Classname
 	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, Block head,
-			List<Block> blockTails, OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
+	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph,
+            OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
 			VariableBlock originalBlock, String oldClassName) {
 
@@ -665,7 +664,7 @@ public class JavaReaderStatic implements JavaReader {
 
 				Edge src;
 				while (sources.hasNext()) {
-					src = (Edge) sources.next();
+					src = sources.next();
 					String methodName = src.tgt().getName();
 					String className = src.tgt().getDeclaringClass().getName();
 					className = cleanString(className, false);
@@ -769,7 +768,7 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Current BPMN Element
 	 * @param resourceFilePath
 	 *            Filepath of model
-	 * @return
+	 * @return inital operations
 	 */
 	private Map<String, ProcessVariableOperation> parseInitialExpression(final JInterfaceInvokeExpr expr, final BpmnElement element,
 			final String resourceFilePath) {
