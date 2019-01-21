@@ -31,13 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import soot.Body;
@@ -45,6 +38,9 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.options.Options;
+
+import java.io.IOException;
+import java.util.*;
 
 public class ProcessVariablesScanner {
 

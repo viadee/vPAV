@@ -31,9 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-import java.util.List;
-
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+
+import java.util.List;
 
 public class Path {
 

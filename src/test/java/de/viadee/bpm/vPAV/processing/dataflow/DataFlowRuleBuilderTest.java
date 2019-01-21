@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static de.viadee.bpm.vPAV.processing.dataflow.DataFlowRuleBuilder.processVariables;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 

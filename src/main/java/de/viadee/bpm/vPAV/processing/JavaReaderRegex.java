@@ -31,15 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class JavaReaderRegex implements JavaReader {
 

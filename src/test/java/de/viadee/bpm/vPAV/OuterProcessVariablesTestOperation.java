@@ -31,12 +31,12 @@
  */
 package de.viadee.bpm.vPAV;
 
+import org.junit.BeforeClass;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-
-import org.junit.BeforeClass;
 
 /**
  * unit test checks, whether outer variables on data flow graph will be set

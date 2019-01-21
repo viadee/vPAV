@@ -31,34 +31,19 @@
  */
 package de.viadee.bpm.vPAV.output;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import de.viadee.bpm.vPAV.config.model.*;
+import de.viadee.bpm.vPAV.config.reader.*;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
-import de.viadee.bpm.vPAV.config.model.ElementConvention;
-import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
-import de.viadee.bpm.vPAV.config.model.ModelConvention;
-import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.model.Setting;
-import de.viadee.bpm.vPAV.config.reader.XmlElementConvention;
-import de.viadee.bpm.vPAV.config.reader.XmlElementFieldTypes;
-import de.viadee.bpm.vPAV.config.reader.XmlModelConvention;
-import de.viadee.bpm.vPAV.config.reader.XmlRule;
-import de.viadee.bpm.vPAV.config.reader.XmlRuleSet;
-import de.viadee.bpm.vPAV.config.reader.XmlSetting;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 /**
  * Ergebnisse aus dem Checker in ein definiertes XML-Format schreiben

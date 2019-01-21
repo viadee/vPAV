@@ -31,12 +31,12 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-
-import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 /**
  * Class for holding issues (errors, warnings, infos) from the checkers. Used to

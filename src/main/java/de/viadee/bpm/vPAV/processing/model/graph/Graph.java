@@ -36,23 +36,15 @@ package de.viadee.bpm.vPAV.processing.model.graph;
  *
  * A class for a directed graph. Implemented by an adjacency list representation of a graph.
  */
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.InOutState;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+
+import java.util.*;
 
 public class Graph implements IGraph {
 

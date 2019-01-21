@@ -31,12 +31,11 @@
  */
 package de.viadee.bpm.vPAV.output;
 
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
 @XmlRootElement(name = "issue")
 @XmlType(propOrder = { "id", "ruleName", "ruleDescription", "bpmnFile", "resourceFile", "classification", "elementId",

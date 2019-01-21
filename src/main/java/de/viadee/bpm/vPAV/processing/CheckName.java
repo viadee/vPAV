@@ -31,10 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.w3c.dom.Element;
-
-import de.viadee.bpm.vPAV.constants.BpmnConstants;
 
 /**
  *

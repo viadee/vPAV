@@ -31,11 +31,11 @@
  */
 package de.viadee.bpm.vPAV.delegates;
 
-import java.util.Map;
-
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.variable.Variables;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
 
 
 public class TestDelegateStaticInitialProcessVariables {
