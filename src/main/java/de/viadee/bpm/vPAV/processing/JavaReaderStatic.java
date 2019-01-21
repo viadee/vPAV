@@ -190,7 +190,7 @@ public class JavaReaderStatic implements JavaReader {
 							final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
 									.getRightOpBox().getValue();
 							if (expr != null) {
-								if (expr.getMethodRef().declaringClass().equals(Scene.v()
+								if (expr.getMethodRef().getDeclaringClass().equals(Scene.v()
 										.forceResolve(VariableMap.class.getName(), SootClass.SIGNATURES))) {
 									initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
 									invoke = leftBox;
@@ -225,7 +225,7 @@ public class JavaReaderStatic implements JavaReader {
      * @return True/False based on whether the second or third argument refers to the variable map
      */
     private boolean checkArgBoxes(Map.Entry<String, Map<String, String>> map, String assignment, String invoke, JInterfaceInvokeExpr expr) {
-        if (expr.getMethodRef().name().equals(map.getKey())) {
+        if (expr.getMethodRef().getName().equals(map.getKey())) {
             if (!assignment.isEmpty()) {
                 if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
                     return true;
@@ -705,7 +705,7 @@ public class JavaReaderStatic implements JavaReader {
 	private void parseExpression(JInterfaceInvokeExpr expr, VariableBlock variableBlock, BpmnElement element,
 			ElementChapter chapter, KnownElementFieldType fieldType, String filePath, String scopeId) {
 
-		String functionName = expr.getMethodRef().name();
+		String functionName = expr.getMethodRef().getName();
 		int numberOfArg = expr.getArgCount();
 		String baseBox = expr.getBaseBox().getValue().getType().toString();
 
@@ -746,7 +746,7 @@ public class JavaReaderStatic implements JavaReader {
 
 		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 		
-		final String functionName = expr.getMethodRef().name();
+		final String functionName = expr.getMethodRef().getName();
 		final int numberOfArg = expr.getArgCount();
 		final String baseBox = expr.getBaseBox().getValue().getType().toString();
 
