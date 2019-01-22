@@ -29,34 +29,39 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.beans;
+package de.viadee.bpm.vPAV.delegates;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
+import org.camunda.bpm.engine.RuntimeService;
+import org.camunda.bpm.engine.variable.Variables;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Map;
 
-public abstract class InitialProcessVariablesBase {
 
-    /**
-     * Creates a map which contains fields and their respective value
-     *
-     * @return Map of variables
-     * @throws IllegalArgumentException
-     *             If the object is not an instance of the class or interface
-     * @throws IllegalAccessException
-     *             If the field is inaccessible
-     */
-    public Map<String, Object> createVariableMap() throws IllegalArgumentException, IllegalAccessException {
-        final Map<String, Object> map = new HashMap<String, Object>();
-        final Field[] fields = this.getClass().getDeclaredFields();
-        for (final Field field : fields) {
-            if (!field.getName().startsWith("this")) {
-                final Object fieldValue = field.get(this);
-                if (fieldValue != null) {
-                    map.put(field.getName(), fieldValue);
-                }
-            }
-        }
-        return map;
-    }
+public class TestDelegateStaticInitialProcessVariables {
+	
+	@Autowired
+	private RuntimeService runtimeService;
+	
+	private String ext_kunde;
+
+    private String ext_vsnr;
+
+    private String ext_kfz;
+
+	
+	public void startProcess() {
+		
+		ext_kunde = "kunde_12345";
+		ext_vsnr = "vsnr_12345";
+		ext_kfz = "kfz_12345";
+		
+        final Map<String, Object> processVariables = Variables.createVariables()
+                .putValue("kunde", ext_kunde)
+                .putValue("vsnr", ext_vsnr)
+                .putValue("kfz", ext_kfz);              
+
+        runtimeService.startProcessInstanceByMessage("schadensmeldungKfzGlasbruch", processVariables);
+	}
+    
 }

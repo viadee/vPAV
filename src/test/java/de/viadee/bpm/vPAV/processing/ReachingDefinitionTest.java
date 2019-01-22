@@ -48,7 +48,6 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -69,16 +68,10 @@ public class ReachingDefinitionTest {
     }
 
     @Test
-    public void testSootReachingMethod() throws ParserConfigurationException, SAXException, IOException {
-
+    public void testSootReachingMethod() {
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        ProcessApplicationValidator.findModelErrorsFromClassloader(cl);
-
         final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner, 
                 "de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", null, null, null, null);
-
         assertEquals(3, variables.size());
-
     }
-
 }

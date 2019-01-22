@@ -31,10 +31,10 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import java.util.Collection;
-
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+
+import java.util.Collection;
 
 /**
  * Checks bpmn models for defined characteristics

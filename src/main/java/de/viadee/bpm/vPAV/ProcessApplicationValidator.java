@@ -31,16 +31,15 @@
  */
 package de.viadee.bpm.vPAV;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import org.springframework.context.ApplicationContext;
-
 import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
+import org.springframework.context.ApplicationContext;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class ProcessApplicationValidator {
 

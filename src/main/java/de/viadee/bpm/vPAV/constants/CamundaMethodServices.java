@@ -42,5 +42,17 @@ public class CamundaMethodServices {
     public static final String SCOPE = "org.camunda.bpm.engine.delegate.VariableScope";
     
     public static final String VARIABLE_MAP = "org.camunda.bpm.engine.variable.VariableMap";
+    
+    public static final String START_PROCESS_INSTANCE_BY_MESSAGE = "startProcessInstanceByMessage";
+    
+    public static final String START_PROCESS_INSTANCE_BY_ID = "startProcessInstanceById";
+    
+    public static final String START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF = "startProcessInstanceByMessageAndProcessDefinitionId";
+    
+    public static final String START_PROCESS_INSTANCE_BY_KEY = "startProcessInstanceByKey";
+    
+    public static final String CORRELATE_MESSAGE = "createMessageCorrelation";
+    
+
    
 }

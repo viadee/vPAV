@@ -31,10 +31,10 @@
  */
 package de.viadee.bpm.vPAV.beans;
 
+import org.springframework.context.ApplicationContext;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.context.ApplicationContext;
 
 /**
  * Helper methods for Maven Plugin CamundaStaticValidator

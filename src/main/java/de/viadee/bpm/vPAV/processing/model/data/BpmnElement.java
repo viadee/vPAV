@@ -31,16 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+
+import java.util.*;
 
 /**
  * Represents an BPMN element

@@ -31,14 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
-
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -49,6 +41,13 @@ import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Checks, whether a business rule task with dmn implementation is valid

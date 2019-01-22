@@ -31,6 +31,12 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
+import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.*;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,17 +44,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.config.model.ElementConvention;
-import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
-import de.viadee.bpm.vPAV.config.model.ModelConvention;
-import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.model.Setting;
 
 /**
  * Used to read the config file (ruleSet.xml) and extract the configured rules

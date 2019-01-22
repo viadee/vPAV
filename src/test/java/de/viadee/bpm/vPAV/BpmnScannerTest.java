@@ -31,16 +31,7 @@
  */
 package de.viadee.bpm.vPAV;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Gateway;
@@ -48,7 +39,14 @@ import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import static org.junit.Assert.assertTrue;
 
 public class BpmnScannerTest {
 

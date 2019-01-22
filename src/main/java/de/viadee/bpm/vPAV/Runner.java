@@ -31,43 +31,28 @@
  */
 package de.viadee.bpm.vPAV;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.output.IssueOutputWriter;
-import de.viadee.bpm.vPAV.output.JsOutputWriter;
-import de.viadee.bpm.vPAV.output.JsonOutputWriter;
-import de.viadee.bpm.vPAV.output.OutputWriterException;
-import de.viadee.bpm.vPAV.output.RuleSetOutputWriter;
-import de.viadee.bpm.vPAV.output.XmlOutputWriter;
+import de.viadee.bpm.vPAV.output.*;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class Runner {
 
@@ -75,7 +60,7 @@ public class Runner {
 
 	private FileScanner fileScanner;
 
-	private OuterProcessVariablesScanner variableScanner;
+	private ProcessVariablesScanner variableScanner;
 
 	private Collection<CheckerIssue> issues;
 
@@ -230,7 +215,7 @@ public class Runner {
 		if (rules.get("ProcessVariablesModelChecker").isActive()
 				|| rules.get("ProcessVariablesNameConventionChecker").isActive()
 				|| rules.get("DataFlowChecker").isActive()) {
-			variableScanner = new OuterProcessVariablesScanner(getFileScanner().getJavaResourcesFileInputStream());
+			variableScanner = new ProcessVariablesScanner(getFileScanner().getJavaResourcesFileInputStream());
 			readOuterProcessVariables(variableScanner);
 			setCheckProcessVariables(true);
 		} else {
@@ -320,10 +305,7 @@ public class Runner {
 	}
 
 	/**
-	 * Delete files from destinations
-	 *
-	 * @param destinations
-	 *            List of destinations who will be deleted
+	 * Delete files from validation folder
 	 */
 	private void deleteFiles() {
 		File index = new File(ConfigConstants.VALIDATION_FOLDER);
@@ -586,7 +568,7 @@ public class Runner {
 	 *             ConfigItem not found
 	 */
 	private Collection<CheckerIssue> checkModels(final Map<String, Rule> rules, final FileScanner fileScanner,
-			final OuterProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules)
+			final ProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules)
 			throws RuntimeException {
 		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
@@ -601,8 +583,6 @@ public class Runner {
 	 *
 	 * @param rules
 	 *            all rules of ruleSet.xml
-	 * @param beanMapping
-	 *            beanMapping if spring context is available
 	 * @param processdef
 	 *            processdefintion
 	 * @param fileScanner
@@ -612,7 +592,7 @@ public class Runner {
 	 * @return modelIssues
 	 */
 	private Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processdef,
-			final FileScanner fileScanner, final OuterProcessVariablesScanner variableScanner,
+			final FileScanner fileScanner, final ProcessVariablesScanner variableScanner,
 			Collection<DataFlowRule> dataFlowRules) {
 		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
 		ModelDispatchResult dispatchResult;
@@ -641,7 +621,7 @@ public class Runner {
 	 * @throws IOException
 	 *             Outer process variables couldn't be read
 	 */
-	private void readOuterProcessVariables(final OuterProcessVariablesScanner scanner) throws RuntimeException {
+	private void readOuterProcessVariables(final ProcessVariablesScanner scanner) throws RuntimeException {
 		try {
 			scanner.scanProcessVariables();
 		} catch (final IOException e) {

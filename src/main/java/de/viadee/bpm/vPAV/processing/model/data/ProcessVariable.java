@@ -31,8 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-
 import java.util.ArrayList;
 import java.util.List;
 

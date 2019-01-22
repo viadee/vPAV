@@ -31,9 +31,9 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import java.util.Map;
-
 import de.viadee.bpm.vPAV.config.model.Rule;
+
+import java.util.Map;
 
 public interface ConfigReader {
 

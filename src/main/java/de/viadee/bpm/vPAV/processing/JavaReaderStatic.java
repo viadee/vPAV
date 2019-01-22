@@ -31,43 +31,24 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.*;
-import java.util.logging.Logger;
-
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
-import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.OutSetCFG;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableBlock;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
-import soot.Body;
-import soot.G;
-import soot.PackManager;
-import soot.PatchingChain;
-import soot.RefType;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Type;
-import soot.Unit;
-import soot.VoidType;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.processing.model.data.*;
+import org.camunda.bpm.engine.variable.VariableMap;
+import soot.*;
 import soot.jimple.AssignStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.JInterfaceInvokeExpr;
-import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
 import soot.toolkits.graph.Block;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.ClassicCompleteBlockGraph;
+
+import java.util.*;
+import java.util.logging.Logger;
 
 public class JavaReaderStatic implements JavaReader {
 
@@ -137,7 +118,8 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return Map of process variable operations
 	 */
 	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(String className,
-			final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
+			final Map.Entry<String, Map<String, String>> map) {
 
 		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 
@@ -156,12 +138,15 @@ public class JavaReaderStatic implements JavaReader {
 				sootClass.setApplicationClass();
 				Scene.v().loadNecessaryClasses();
 				for (SootMethod method : sootClass.getMethods()) {
-					final Body body = method.retrieveActiveBody();
-					initialOperations.putAll(checkWriteAccess(body, scanner, element, resourceFilePath));
+					for (Map.Entry<String, String> entry : map.getValue().entrySet()) {
+						if (method.getName().equals(entry.getKey())) {
+							final Body body = method.retrieveActiveBody();
+							initialOperations.putAll(checkWriteAccess(body, element, resourceFilePath, map));
+						}
+					}
 				}
 			}
 		}
-
 		return initialOperations;
 	}
 
@@ -171,71 +156,89 @@ public class JavaReaderStatic implements JavaReader {
 	 * 
 	 * @param body
 	 *            Soot representation of a method's body
-	 * @param scanner
-	 *            OuterProcessVariableScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param resourceFilePath
 	 *            Path of the BPMN model
 	 * @return Map of process variable operations
 	 */
-	private Map<String, ProcessVariableOperation> checkWriteAccess(final Body body,
-			final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+	private Map<String, ProcessVariableOperation> checkWriteAccess(final Body body, final BpmnElement element,
+			final String resourceFilePath, final Map.Entry<String, Map<String, String>> map) {
 
-		final Map<String, ProcessVariableOperation> initialOperations = new HashMap<>();
+		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 
-		for (String location : scanner.getInitialProcessVariablesLocation()) {
-			location = cleanString(location, true);
-			location = "new " + location.replace(".java", "") + "$InitialProcessVariables";
-
-			String assignment = "";
-			String invoke = "";
-
-			final PatchingChain<Unit> pc = body.getUnits();
-			for (Unit unit : pc) {
-				if (unit instanceof AssignStmt) {
-					final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
-					final String leftBox = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
-
-					if (rightBox.equals(location)) {
-						assignment = leftBox;
-					}
-
-					if (rightBox.equals(assignment)) {
-						invoke = leftBox;
-					}
-
-					if (leftBox.contains(location.replace("new ", "")) && leftBox.contains(invoke)) {
-						if (scanner.getInitialProcessVariables()
-								.contains(((AssignStmt) unit).getFieldRef().getFieldRef().name())) {
-							final String name = ((AssignStmt) unit).getFieldRef().getFieldRef().name();
-							initialOperations.put(name,
-									new ProcessVariableOperation(name, element, ElementChapter.Code,
-											KnownElementFieldType.Initial, resourceFilePath, VariableOperation.WRITE,
-											element.getBaseElement().getId()));
+		for (Map.Entry<String, String> entry : map.getValue().entrySet()) {
+			if (body.getMethod().getName().equals(entry.getKey())) {
+				final PatchingChain<Unit> pc = body.getUnits();
+				String assignment = "";
+				String invoke = "";
+				
+				for (Unit unit : pc) {
+					if (unit instanceof AssignStmt) {
+						final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
+						final String leftBox = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
+						
+						if (rightBox.contains(CamundaMethodServices.VARIABLE_MAP + " createVariables()")) {
+							assignment = leftBox;
+						}		
+						
+						if (rightBox.contains(map.getKey()) && rightBox.contains(invoke)) {
+							return initialOperations;
+						}			
+						
+						if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
+							final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
+									.getRightOpBox().getValue();
+							if (expr != null) {
+								if (expr.getMethodRef().getDeclaringClass().equals(Scene.v()
+										.forceResolve(VariableMap.class.getName(), SootClass.SIGNATURES))) {
+									initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
+									invoke = leftBox;
+								}
+                                if (checkArgBoxes(map, assignment, invoke, expr)) return initialOperations;
+                            }
 						}
-					}
-
-					if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JVirtualInvokeExpr) {
-
-						final JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox()
-								.getValue();
-
-						if (expr != null) {
-							String functionName = expr.getMethodRef().name();
-							if (functionName.equals("createVariableMap")) {
-								return initialOperations;
-							}
+					}	
+					if (unit instanceof InvokeStmt) {
+						if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+							final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
+									.getInvokeExprBox().getValue();
+							if (expr != null) {
+                                if (checkArgBoxes(map, assignment, invoke, expr)) return initialOperations;
+                            }
 						}
 					}
 				}
 			}
-		}
-
+		}		
 		return initialOperations;
 	}
 
-	/**
+    /**
+     *
+     * Check whether or not the second or third argument contain a reference to the variable map
+     *
+     * @param map Current entry
+     * @param assignment Current assigned variable
+     * @param invoke Current invocation
+     * @param expr Current expression
+     * @return True/False based on whether the second or third argument refers to the variable map
+     */
+    private boolean checkArgBoxes(Map.Entry<String, Map<String, String>> map, String assignment, String invoke, JInterfaceInvokeExpr expr) {
+        if (expr.getMethodRef().getName().equals(map.getKey())) {
+            if (!assignment.isEmpty()) {
+                if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
+                    return true;
+                }
+                if (expr.getArgBox(2).getValue().toString().equals(invoke)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
 	 *
 	 * Starting by the main JavaDelegate, statically analyses the classes
 	 * implemented for the bpmn element.
@@ -267,7 +270,7 @@ public class JavaReaderStatic implements JavaReader {
 		OutSetCFG outSet = new OutSetCFG(new ArrayList<VariableBlock>());
 
 		classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-				outSet, null, new ArrayList<String>());
+				outSet, null);
 
 		processVariables.putAll(outSet.getAllProcessVariables());
 
@@ -305,75 +308,69 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Callgraph information
 	 * @param originalBlock
 	 *            VariableBlock
-	 * @param visitedClasses
-	 *            List to hold information which class has been visited (avoid
-	 *            circular references that lead to a StackOverflow)
 	 * @return OutSetCFG which contains data flow information
 	 */
 	public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
-			final VariableBlock originalBlock, final ArrayList<String> visitedClasses) {
+			final VariableBlock originalBlock) {
 
-		if (!visitedClasses.contains(className)) {
-			className = cleanString(className, true);
+		className = cleanString(className, true);
 
-			Options.v().set_whole_program(true);
-			Options.v().set_allow_phantom_refs(true);
+		Options.v().set_whole_program(true);
+		Options.v().set_allow_phantom_refs(true);
 
-			SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
+		SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
-			if (sootClass != null) {
+		if (sootClass != null) {
 
-				sootClass.setApplicationClass();
-				Scene.v().loadNecessaryClasses();
+			sootClass.setApplicationClass();
+			Scene.v().loadNecessaryClasses();
 
-				// Retrieve the method and its body based on the used interface
-				List<Type> parameterTypes = new ArrayList<Type>();
-				RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution");
-				RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
-				RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap");
-				VoidType returnType = VoidType.v();
+			// Retrieve the method and its body based on the used interface
+			List<Type> parameterTypes = new ArrayList<Type>();
+			RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution");
+			RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
+			RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap");
+			VoidType returnType = VoidType.v();
 
-				switch (methodName) {
-				case "execute":
-					parameterTypes.add((Type) delegateExecutionType);
-					outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType,
-							scopeId, outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);
-					break;
-				case "notify":
-					for (SootClass clazz : sootClass.getInterfaces()) {
-						if (clazz.getName().equals("org.camunda.bpm.engine.delegate.TaskListener")) {
-							parameterTypes.add((Type) delegateTaskType);
-						} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.ExecutionListener")) {
-							parameterTypes.add((Type) delegateExecutionType);
-						}
+			switch (methodName) {
+			case "execute":
+				parameterTypes.add((Type) delegateExecutionType);
+				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType,
+						scopeId, outSet, originalBlock, sootClass, parameterTypes, returnType);
+				break;
+			case "notify":
+				for (SootClass clazz : sootClass.getInterfaces()) {
+					if (clazz.getName().equals("org.camunda.bpm.engine.delegate.TaskListener")) {
+						parameterTypes.add((Type) delegateTaskType);
+					} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.ExecutionListener")) {
+						parameterTypes.add((Type) delegateExecutionType);
 					}
-					outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType,
-							scopeId, outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);
-					break;
-				case "mapInputVariables":
-					parameterTypes.add((Type) delegateExecutionType);
-					parameterTypes.add((Type) mapVariablesType);
-					outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType,
-							scopeId, outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);
-					break;
-				case "mapOutputVariables":
-					parameterTypes.add((Type) delegateExecutionType);
-					parameterTypes.add((Type) mapVariablesType);
-					outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType,
-							scopeId, outSet, originalBlock, sootClass, parameterTypes, returnType, visitedClasses);
-					break;
-				default:
-					visitedClasses.add(className);
-					outSet = retrieveCustomMethod(sootClass, classPaths, className, methodName, classFile, element,
-							chapter, fieldType, scopeId, outSet, originalBlock, visitedClasses);
-					break;
 				}
-
-			} else {
-				LOGGER.warning("Class " + classFile + " was not found by Soot");
+				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType,
+						scopeId, outSet, originalBlock, sootClass, parameterTypes, returnType);
+				break;
+			case "mapInputVariables":
+				parameterTypes.add((Type) delegateExecutionType);
+				parameterTypes.add((Type) mapVariablesType);
+				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType,
+						scopeId, outSet, originalBlock, sootClass, parameterTypes, returnType);
+				break;
+			case "mapOutputVariables":
+				parameterTypes.add((Type) delegateExecutionType);
+				parameterTypes.add((Type) mapVariablesType);
+				outSet = retrieveMethod(classPaths, className, methodName, classFile, element, chapter, fieldType,
+						scopeId, outSet, originalBlock, sootClass, parameterTypes, returnType);
+				break;
+			default:
+				outSet = retrieveCustomMethod(sootClass, classPaths, className, methodName, classFile, element, chapter,
+						fieldType, scopeId, outSet, originalBlock);
+				break;
 			}
+
+		} else {
+			LOGGER.warning("Class " + classFile + " was not found by Soot");
 		}
 
 		return outSet;
@@ -411,26 +408,24 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Soot representation of parameters
 	 * @param returnType
 	 *            Soot Representation of return type
-	 * @param visitedClasses
-	 *            List of visited classes to avoid circular references
 	 * @return OutSetCFG which contains data flow information
 	 */
 	private OutSetCFG retrieveMethod(final Set<String> classPaths, String className, final String methodName,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
 			final VariableBlock originalBlock, final SootClass sootClass, final List<Type> parameterTypes,
-			final VoidType returnType, final ArrayList<String> visitedClasses) {
+			final VoidType returnType) {
 
-		SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, (Type) returnType);
+		SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
 		if (method != null) {
-			outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-					outSet, originalBlock, method, visitedClasses);
+			outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType, scopeId,
+					outSet, originalBlock, method);
 		} else {
 			method = sootClass.getMethodByNameUnsafe(methodName);
 			if (method != null) {
-				outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType,
-						scopeId, outSet, originalBlock, method, visitedClasses);
+				outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType,
+						scopeId, outSet, originalBlock, method);
 			} else {
 				LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
 			}
@@ -465,19 +460,17 @@ public class JavaReaderStatic implements JavaReader {
 	 *            VariableBlock
 	 * @param sootClass
 	 *            Soot representation of given class
-	 * @param visitedClasses
-	 *            List of visited classes to avoid circular references
 	 * @return OutSetCFG which contains data flow information
 	 */
 	private OutSetCFG retrieveCustomMethod(final SootClass sootClass, final Set<String> classPaths, String className,
 			final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
-			final VariableBlock originalBlock, final ArrayList<String> visitedClasses) {
+			final VariableBlock originalBlock) {
 
 		for (SootMethod method : sootClass.getMethods()) {
 			if (method.getName().equals(methodName)) {
-				outSet = fetchMethodBody(classPaths, className, methodName, classFile, element, chapter, fieldType,
-						scopeId, outSet, originalBlock, method, visitedClasses);
+				outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType,
+						scopeId, outSet, originalBlock, method);
 			}
 		}
 		return outSet;
@@ -492,8 +485,6 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Set of classes that is included in inter-procedural analysis
 	 * @param className
 	 *            Name of currently analysed class
-	 * @param methodName
-	 *            Name of currently analysed method
 	 * @param classFile
 	 *            Location path of class
 	 * @param element
@@ -510,14 +501,12 @@ public class JavaReaderStatic implements JavaReader {
 	 *            VariableBlock
 	 * @param method
 	 *            Soot representation of a given method
-	 * @param visitedClasses
-	 *            List of visited classes to avoid circular references
 	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className, final String methodName,
+	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
-			final VariableBlock originalBlock, final SootMethod method, final ArrayList<String> visitedClasses) {
+			final VariableBlock originalBlock, final SootMethod method) {
 
 		final Body body = method.retrieveActiveBody();
 
@@ -532,11 +521,10 @@ public class JavaReaderStatic implements JavaReader {
 		CallGraph cg = Scene.v().getCallGraph();
 
 		final List<Block> graphHeads = graph.getHeads();
-		final List<Block> graphTails = graph.getTails();
 
 		for (Block head : graphHeads) {
-			outSet = graphIterator(classPaths, cg, graph, head, graphTails, outSet, element, chapter, fieldType,
-					classFile, scopeId, originalBlock, className, visitedClasses);
+			outSet = graphIterator(classPaths, cg, graph, outSet, element, chapter, fieldType,
+					classFile, scopeId, originalBlock, className);
 		}
 
 		return outSet;
@@ -552,10 +540,6 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Soot CallGraph
 	 * @param graph
 	 *            Control Flow graph of method
-	 * @param head
-	 *            Starting Block of the CFG
-	 * @param blockTails
-	 *            List of End Blocks of CFG
 	 * @param outSet
 	 *            OUT set of CFG
 	 * @param element
@@ -572,14 +556,12 @@ public class JavaReaderStatic implements JavaReader {
 	 *            VariableBlock
 	 * @param oldClassName
 	 *            Classname
-	 * @param visitedClasses
-	 *            List of visited classes to avoid circular references
 	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, Block head,
-			List<Block> blockTails, OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
+	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph,
+            OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock originalBlock, String oldClassName, final ArrayList<String> visitedClasses) {
+			VariableBlock originalBlock, String oldClassName) {
 
 		final Iterator<Block> graphIterator = graph.iterator();
 
@@ -589,7 +571,7 @@ public class JavaReaderStatic implements JavaReader {
 
 			// Collect the functions Unit by Unit via the blockIterator
 			final VariableBlock vb = blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-					scopeId, originalBlock, oldClassName, visitedClasses);
+					scopeId, originalBlock, oldClassName);
 
 			// depending if outset already has that Block, only add varibles,
 			// if not, then add the whole vb
@@ -630,14 +612,12 @@ public class JavaReaderStatic implements JavaReader {
 	 *            VariableBlock
 	 * @param oldClassName
 	 *            Classname
-	 * @param visitedClasses
-	 *            List of visited classes to avoid circular references
 	 * @return VariableBlock
 	 */
 	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
 			OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock variableBlock, String oldClassName, final ArrayList<String> visitedClasses) {
+			VariableBlock variableBlock, String oldClassName) {
 
 		if (variableBlock == null) {
 			variableBlock = new VariableBlock(block, new ArrayList<ProcessVariableOperation>());
@@ -655,7 +635,7 @@ public class JavaReaderStatic implements JavaReader {
 
 				Edge src;
 				while (sources.hasNext()) {
-					src = (Edge) sources.next();
+					src = sources.next();
 					String methodName = src.tgt().getName();
 					String className = src.tgt().getDeclaringClass().getName();
 					className = cleanString(className, false);
@@ -668,7 +648,7 @@ public class JavaReaderStatic implements JavaReader {
 					if (classPaths.contains(className) || className.contains("$")) {
 						G.reset();
 						classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
-								scopeId, outSet, variableBlock, visitedClasses);
+								scopeId, outSet, variableBlock);
 
 					}
 				}
@@ -725,7 +705,7 @@ public class JavaReaderStatic implements JavaReader {
 	private void parseExpression(JInterfaceInvokeExpr expr, VariableBlock variableBlock, BpmnElement element,
 			ElementChapter chapter, KnownElementFieldType fieldType, String filePath, String scopeId) {
 
-		String functionName = expr.getMethodRef().name();
+		String functionName = expr.getMethodRef().getName();
 		int numberOfArg = expr.getArgCount();
 		String baseBox = expr.getBaseBox().getValue().getType().toString();
 
@@ -746,6 +726,45 @@ public class JavaReaderStatic implements JavaReader {
 						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * Parsing of initially discovered statements to find Process Variable
+	 * operations.
+	 * 
+	 * @param expr
+	 *            Expression Unit from Statement
+	 * @param element
+	 *            Current BPMN Element
+	 * @param resourceFilePath
+	 *            Filepath of model
+	 * @return inital operations
+	 */
+	private Map<String, ProcessVariableOperation> parseInitialExpression(final JInterfaceInvokeExpr expr, final BpmnElement element,
+			final String resourceFilePath) {
+
+		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
+		
+		final String functionName = expr.getMethodRef().getName();
+		final int numberOfArg = expr.getArgCount();
+		final String baseBox = expr.getBaseBox().getValue().getType().toString();
+
+		final CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
+				.findByNameAndNumberOfBoxes(functionName, baseBox, numberOfArg);
+
+		if (foundMethod != null) {
+			final int location = foundMethod.getLocation() - 1;
+			final VariableOperation type = foundMethod.getOperationType();
+			if (expr.getArgBox(location).getValue() instanceof StringConstant) {	
+				final StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
+				final String name = variableName.value;
+				initialOperations.put(name, new ProcessVariableOperation(expr.getArg(0).toString(), element,
+						ElementChapter.Code, KnownElementFieldType.Initial, resourceFilePath, type,
+						element.getBaseElement().getId()));
+			} 
+		}
+		return initialOperations;
 	}
 
 	/**
@@ -952,30 +971,8 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return cleaned String
 	 */
 	private String cleanString(String className, boolean dot) {
-		final String replaceDot = ".";
-		final String replaceEmpty = "";
-		final String replaceSingleBackSlash = "\\";
-		final String replaceSingleForwardSlash = "/";
-		final String replaceDotJava = ".java";
-
-		if (dot) {
-			if (System.getProperty("os.name").startsWith("Windows")) {
-				className = className.replace(replaceSingleBackSlash, replaceDot).replace(replaceDotJava, replaceEmpty);
-			} else {
-				className = className.replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotJava,
-						replaceEmpty);
-			}
-		} else {
-			if (System.getProperty("os.name").startsWith("Windows")) {
-				className = className.replace(replaceDot, replaceSingleBackSlash);
-				className = className.concat(replaceDotJava);
-			} else {
-				className = className.replace(replaceDot, replaceSingleForwardSlash);
-				className = className.concat(replaceDotJava);
-			}
-		}
+		className = ProcessVariablesScanner.cleanString(className, dot);
 		return className;
-
 	}
 
 }

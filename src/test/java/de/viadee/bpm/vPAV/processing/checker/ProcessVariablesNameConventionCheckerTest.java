@@ -31,29 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -67,6 +44,23 @@ import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * unit tests for ProcessVariablesNameConventionChecker
@@ -126,8 +120,11 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            LinkedHashMap<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
-                    .getVariablesFromElement(jvc, fileScanner, element);
+            ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+            
+            final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>(); 
+            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, variables));
+            
             element.setProcessVariables(variables);
 
             issues.addAll(checker.check(element));
@@ -160,8 +157,11 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            LinkedHashMap<String, ProcessVariableOperation> variables = new ProcessVariableReader(null, new BpmnScanner(PATH))
-                    .getVariablesFromElement(jvc, fileScanner, element);
+            ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+            
+            final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>(); 
+            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, variables));
+            
             element.setProcessVariables(variables);
 
             issues.addAll(checker.check(element));

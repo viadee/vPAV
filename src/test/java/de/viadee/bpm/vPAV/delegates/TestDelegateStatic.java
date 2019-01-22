@@ -43,7 +43,7 @@ public class TestDelegateStatic implements org.camunda.bpm.engine.delegate.JavaD
 
         // TODO Auto-generated method stub
         /* execution.setVariable("dshfhdsfhfds", true); */
-        String bla = (String) execution.getVariable("ProcessVariable2");
+        execution.getVariable("ProcessVariable2");
 
         int a = 1;
         final String variableName2 = "ProcessVariable3";
