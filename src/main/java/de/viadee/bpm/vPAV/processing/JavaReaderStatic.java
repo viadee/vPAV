@@ -204,6 +204,10 @@ public class JavaReaderStatic implements JavaReader {
 							final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
 									.getInvokeExprBox().getValue();
 							if (expr != null) {
+								if (expr.getMethodRef().getDeclaringClass().equals(Scene.v()
+										.forceResolve(Map.class.getName(), SootClass.SIGNATURES))) {
+									initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
+								}
                                 if (checkArgBoxes(map, assignment, invoke, expr)) return initialOperations;
                             }
 						}
@@ -218,14 +222,14 @@ public class JavaReaderStatic implements JavaReader {
      *
      * Check whether or not the second or third argument contain a reference to the variable map
      *
-     * @param map Current entry
+     * @param entry Current entry
      * @param assignment Current assigned variable
      * @param invoke Current invocation
      * @param expr Current expression
      * @return True/False based on whether the second or third argument refers to the variable map
      */
-    private boolean checkArgBoxes(Map.Entry<String, Map<String, String>> map, String assignment, String invoke, JInterfaceInvokeExpr expr) {
-        if (expr.getMethodRef().getName().equals(map.getKey())) {
+    private boolean checkArgBoxes(final Map.Entry<String, Map<String, String>> entry, final String assignment, final String invoke, final JInterfaceInvokeExpr expr) {
+        if (expr.getMethodRef().getName().equals(entry.getKey())) {
             if (!assignment.isEmpty()) {
                 if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
                     return true;
