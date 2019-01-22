@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -149,11 +149,17 @@ public class ElementGraphBuilder {
 
                 // retrieve initial variable operation (should be WRITE)
                 if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
+                    final ArrayList<String> messageRefs = bpmnScanner.getMessageRefs(element.getId());
+                    String messageName = "";
+                    if (messageRefs.size() == 1) {
+                        messageName = bpmnScanner.getMessageName(messageRefs.get(0));
+                    }
                     // add process variables for start event, which set by call
                     // startProcessInstanceByKey
-                    for (Map.Entry<String, Map<String, String>> entry : scanner.getEntryPoints().entrySet()) {
-                        for (Map.Entry<String, String> innerEntry : entry.getValue().entrySet()) {
-                            variables.putAll(checkInitialVariableOperations(innerEntry.getValue(), context, scanner, node, processdefinition, variables, entry));
+
+                    for (EntryPoint ep : scanner.getEntryPoints()) {
+                        if (ep.getMessageName().equals(messageName)){
+                            variables.putAll(checkInitialVariableOperations(ep, context, scanner, node, processdefinition, variables));
                         }
                     }
                     graph.addStartNode(node);
@@ -192,8 +198,9 @@ public class ElementGraphBuilder {
     /**
      *
      * Checks for initial variable operations (esp. initializations of variables)
-     * @param clazz
-     * 	Class name
+     *
+     * @param entryPoint
+     * Current entrypoint (most likely rest controller classes)
      * @param jvc
      *            JavaReaderContext
      * @param scanner
@@ -204,13 +211,11 @@ public class ElementGraphBuilder {
      * Current BPMN location
      * @param variables
      * Map of Process Variables
-     * @param entry
-     * Current entrypoint (most likely rest controller classes)
-     * @return
+     * @return initial operations
      */
-    private LinkedHashMap<String, ProcessVariableOperation> checkInitialVariableOperations(final String clazz, final JavaReaderContext jvc, final ProcessVariablesScanner scanner,
-                                                                                           final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables, final Map.Entry<String, Map<String, String>> entry) {
-        variables.putAll(jvc.readClass(clazz, scanner, element, resourceFilePath, entry));
+    private LinkedHashMap<String, ProcessVariableOperation> checkInitialVariableOperations(final EntryPoint entryPoint, final JavaReaderContext jvc, final ProcessVariablesScanner scanner,
+                                                                                           final BpmnElement element, final String resourceFilePath, final LinkedHashMap<String, ProcessVariableOperation> variables) {
+        variables.putAll(jvc.readClass(entryPoint.getClassName(), scanner, element, resourceFilePath, entryPoint));
         return variables;
     }
 

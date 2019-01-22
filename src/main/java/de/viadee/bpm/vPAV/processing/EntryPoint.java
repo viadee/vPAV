@@ -29,32 +29,54 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.delegates;
+package de.viadee.bpm.vPAV.processing;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
+public class EntryPoint {
 
-public class TestDelegateReachingDef implements org.camunda.bpm.engine.delegate.JavaDelegate {
+    private String className;
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
+    private String methodName;
 
-        final String variableName = "ProcessVariable1";
-        execution.setVariable(variableName, true);
+    private String messageName;
 
-        // TODO Auto-generated method stub
-        /* execution.setVariable("dshfhdsfhfds", true); */
-        String bla = (String) execution.getVariable("ProcessVariable2");
+    private String entryPoint;
 
-        int a = 1;
-        final String variableName2 = "ProcessVariable3";
-        if (a == 1) {
-            execution.setVariable(variableName2, true);
-            execution.removeVariable(variableName);
-
-        }
-
-        execution.removeVariable(variableName2);
-
+    public EntryPoint(final String className, final String methodName, final String messageName, final String entryPoint) {
+        this.className = className;
+        this.methodName = methodName;
+        this.messageName = messageName;
+        this.entryPoint = entryPoint;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getMessageName() {
+        return messageName;
+    }
+
+    public void setMessageName(String messageName) {
+        this.messageName = messageName;
+    }
+
+    public String getEntryPoint() {
+        return entryPoint;
+    }
+
+    public void setEntryPoint(String entryPoint) {
+        this.entryPoint = entryPoint;
+    }
 }

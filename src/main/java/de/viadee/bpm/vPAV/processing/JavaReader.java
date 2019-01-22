@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@ import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 public interface JavaReader {
 
@@ -48,5 +47,5 @@ public interface JavaReader {
 
 	LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
 			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
-			final Map.Entry<String, Map<String, String>> entry);
+			final EntryPoint entry);
 }

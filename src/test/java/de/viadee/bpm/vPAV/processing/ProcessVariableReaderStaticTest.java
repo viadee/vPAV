@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,22 +91,16 @@ public class ProcessVariableReaderStaticTest {
 
         final BpmnElement element = new BpmnElement(PATH, startElement.iterator().next());
 
-        
-        final Map<String, Map<String, String>> outerMap = new HashMap<String, Map<String, String>>();
-        final Map<String, String> innerMap = new HashMap<String, String>();
-        innerMap.put("startProcess", "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java");
-        outerMap.put("startProcessInstanceByMessage", innerMap);
-        
+        final EntryPoint entry = new EntryPoint("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java","startProcess", "schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage");
         final Map<String, ProcessVariableOperation> variables = new HashMap<>();
         final Set<String> resources = new HashSet<String>();
         resources.add("");
         
         ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
-  
-        for (Map.Entry<String, Map<String, String>> entry : outerMap.entrySet()) {
-        	variables.putAll(new JavaReaderStatic().getVariablesFromClass(
+
+        variables.putAll(new JavaReaderStatic().getVariablesFromClass(
             		"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables", scanner, element, null, entry));
-        }
+
 
         assertEquals(3, variables.size());
 
