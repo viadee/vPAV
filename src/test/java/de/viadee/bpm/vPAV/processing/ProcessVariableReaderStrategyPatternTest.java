@@ -31,8 +31,17 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import static org.junit.Assert.assertEquals;
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.ProcessApplicationValidator;
+import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -41,18 +50,7 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import static org.junit.Assert.assertEquals;
 
 public class ProcessVariableReaderStrategyPatternTest {
 
@@ -76,13 +74,10 @@ public class ProcessVariableReaderStrategyPatternTest {
     }
 
     @Test()
-    public void testStrategyPatternProcessVariableReaderStatic()
-            throws ParserConfigurationException, SAXException, IOException {
+    public void testStrategyPatternProcessVariableReaderStatic() {
 
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         boolean isStatic = true;
-
-        ProcessApplicationValidator.findModelErrors();
 
         final JavaReaderContext pvc = new JavaReaderContext();
         if (isStatic) {
@@ -100,8 +95,7 @@ public class ProcessVariableReaderStrategyPatternTest {
     }
 
     @Test()
-    public void testStrategyPatternProcessVariableReaderRegex()
-            throws ParserConfigurationException, SAXException, IOException {
+    public void testStrategyPatternProcessVariableReaderRegex() {
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         boolean isStatic = false;        
 

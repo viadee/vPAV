@@ -31,9 +31,9 @@
  */
 package de.viadee.bpm.vPAV.output;
 
-import java.util.Collection;
-
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+
+import java.util.Collection;
 
 public interface IssueOutputWriter {
 

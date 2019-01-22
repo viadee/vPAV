@@ -31,10 +31,10 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 
 /**
  * University of Washington, Computer Science and Engineering, Course 373, Winter 2011, Jessica Miller A utility class

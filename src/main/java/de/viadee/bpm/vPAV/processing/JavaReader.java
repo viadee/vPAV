@@ -31,21 +31,22 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.*;
-
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public interface JavaReader {
 
-    LinkedHashMap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner, final String classFile,
-																						  final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-																						  final String scopeId);
+	LinkedHashMap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
+			final String classFile, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId);
 
-	LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className, final OuterProcessVariablesScanner scanner,
-			final BpmnElement element, final String resourceFilePath);
+	LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
+			final Map.Entry<String, Map<String, String>> entry);
 }

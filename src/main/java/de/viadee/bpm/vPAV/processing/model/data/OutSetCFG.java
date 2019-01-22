@@ -31,11 +31,11 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import soot.toolkits.graph.Block;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import soot.toolkits.graph.Block;
 
 /**
  * 

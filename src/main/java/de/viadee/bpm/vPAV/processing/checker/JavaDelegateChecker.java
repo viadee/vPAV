@@ -31,16 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
-import org.camunda.bpm.model.bpmn.instance.SendTask;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.camunda.bpm.model.bpmn.instance.UserTask;
-
 import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
@@ -55,6 +45,11 @@ import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import org.camunda.bpm.model.bpmn.instance.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Class JavaDelegateChecker
@@ -91,10 +86,10 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         // read attributes from task
         if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
                 || bpmnElement instanceof SendTask)) {
-        	implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());  
+            implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
         }
-            
-        
+
+
         if (bpmnElement instanceof UserTask) {
             taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_DEL,
                     BpmnConstants.CAMUNDA_TASKLISTENER);
@@ -195,9 +190,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                             String.format(Messages.getString("JavaDelegateChecker.8"), //$NON-NLS-1$
                                     bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME))));
                 }
-            }
-
-            else if (implementationAttr.equals(BpmnConstants.IMPLEMENTATION))
+            } else if (implementationAttr.equals(BpmnConstants.IMPLEMENTATION))
                 if (dmnAttr == null && classAttr == null && delegateExprAttr == null
                         && exprAttr == null && typeAttr == null) {
                     // No technical attributes have been added
@@ -273,7 +266,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
      * @return issues
      */
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
-            ArrayList<String> aDelegate, ArrayList<String> aExpression, boolean taskListener) {
+                                                   ArrayList<String> aDelegate, ArrayList<String> aExpression, boolean taskListener) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         String location = ""; //$NON-NLS-1$
         if (taskListener)
@@ -346,7 +339,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
      * @return issues
      */
     private Collection<CheckerIssue> checkClassFile(final BpmnElement element, final String className,
-            final boolean listener, final boolean taskListener) {
+                                                    final boolean listener, final boolean taskListener) {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         final BaseElement bpmnElement = element.getBaseElement();
@@ -386,7 +379,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                         interfaceImplemented = true;
                         if (_interface.getName().contains(BpmnConstants.INTERFACE_ACTIVITY_BEHAVIOUR)
                                 && !_interface.getName()
-                                        .contains(BpmnConstants.INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR)) {
+                                .contains(BpmnConstants.INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR)) {
                             // ActivityBehavior is not a very good practice and should be avoided as much as possible
                             issues.add(
                                     IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.INFO, classPath, element,

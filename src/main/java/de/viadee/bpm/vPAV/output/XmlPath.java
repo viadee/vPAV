@@ -31,10 +31,9 @@
  */
 package de.viadee.bpm.vPAV.output;
 
-import java.util.Collection;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collection;
 
 @XmlRootElement(name = "path")
 public class XmlPath {

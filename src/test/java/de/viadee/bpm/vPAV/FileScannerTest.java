@@ -31,13 +31,16 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.config.model.Rule;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
+import java.util.HashMap;
 
 public class FileScannerTest {
 
@@ -56,11 +59,17 @@ public class FileScannerTest {
     @Test
     public void testSootPathLoading() {
 
-        ProcessApplicationValidator.findModelErrors();
 
+        new FileScanner(new HashMap<String, Rule>(), "src/test/java");
+        String testTarget = "target/test-classes";
         String sootPath = FileScanner.getSootPath();
+        boolean contains = false;
 
-        System.out.println(sootPath);
+        if (sootPath.contains(testTarget)) {
+            contains = true;
+        }
+
+        Assert.assertTrue("SootPath should contain 'target/test-classes'.", contains);
     }
 
 }

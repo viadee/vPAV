@@ -31,17 +31,17 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+
 import java.util.Collection;
-/**
- * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- * 
- * A basic graph interface.
- */
 import java.util.List;
 import java.util.Map;
 
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+/*
+ * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
+ * A basic graph interface.
+ */
 
 public interface IGraph {
 

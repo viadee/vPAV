@@ -31,10 +31,9 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import java.util.Collection;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collection;
 
 @XmlRootElement(name = "ruleSet")
 public class XmlRuleSet {

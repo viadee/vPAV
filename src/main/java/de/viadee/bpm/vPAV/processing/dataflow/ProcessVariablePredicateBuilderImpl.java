@@ -31,9 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import java.util.function.Function;
-
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+
+import java.util.function.Function;
 
 class ProcessVariablePredicateBuilderImpl<T> implements ProcessVariablePredicateBuilder<T> {
 

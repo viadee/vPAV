@@ -31,12 +31,11 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import java.util.Collection;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Collection;
 
 @XmlRootElement(name = "elementFieldTypes")
 @XmlType(propOrder = { "elementFieldTypes", "excluded" })

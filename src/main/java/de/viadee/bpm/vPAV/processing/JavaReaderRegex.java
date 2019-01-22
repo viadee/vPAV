@@ -31,15 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.LinkedHashMap;
-import java.util.logging.Logger;
-
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.OuterProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class JavaReaderRegex implements JavaReader {
 
@@ -81,23 +81,12 @@ public class JavaReaderRegex implements JavaReader {
 	}
 
 	/**
-	 *
 	 * Unused implementation
-	 * 
-	 * @param className
-	 *            Class name to be scanned
-	 * @param scanner
-	 *            OuterProcessVariableScanner
-	 * @param element
-	 *            BpmnElement
-	 * @param resourceFilePath
-	 *            Path of the BPMN model
-	 *
-	 * @return Process Variables
 	 */
 	@Override
 	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
-			final OuterProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
+			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
+			final Map.Entry<String, Map<String, String>> entry) {
 		// TODO Auto-generated method stub
 		return null;
 	}
