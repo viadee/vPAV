@@ -47,8 +47,6 @@ import java.net.URLClassLoader;
  */
 public class OuterProcessVariablesTestOperation {
 
-    private static final String BASE_PATH = "src/test/resources/";
-
     private static ClassLoader cl;
 
     @BeforeClass

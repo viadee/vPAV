@@ -523,9 +523,9 @@ public class JavaReaderStatic implements JavaReader {
 
 		final List<Block> graphHeads = graph.getHeads();
 
-		for (Block head : graphHeads) {
+        for (int i = 0; i < graphHeads.size(); i++) {
 			outSet = graphIterator(classPaths, cg, graph, outSet, element, chapter, fieldType,
-					classFile, scopeId, originalBlock, className);
+                    classFile, scopeId, originalBlock, className);
 		}
 
 		return outSet;

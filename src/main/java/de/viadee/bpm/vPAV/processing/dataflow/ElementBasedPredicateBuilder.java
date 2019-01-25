@@ -44,7 +44,7 @@ public interface ElementBasedPredicateBuilder<T> {
      * - Class 
      * @return Step builder of next rule building stage
      */
-    T ofType(Class clazz);
+    T ofType(Class<?> clazz);
     /**
      * Returns predicate with operation location based on camunda:property.
      * @param propertyName

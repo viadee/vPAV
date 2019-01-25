@@ -97,15 +97,15 @@ public class ProcessApplicationVariableParser {
 
 	/**
      *
-     * @param processdefinition
+     * @param processDefinition
      *            Holds the path to the BPMN model
      * @return BpmnScanner
      */
-    private static BpmnScanner createScanner(final File processdefinition) {
+    private static BpmnScanner createScanner(final File processDefinition) {
         // create BPMNScanner
         BpmnScanner bpmnScanner;
         try {
-            bpmnScanner = new BpmnScanner(processdefinition.getPath());
+            bpmnScanner = new BpmnScanner(processDefinition.getPath());
         } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new RuntimeException("Model couldn't be parsed");
         }

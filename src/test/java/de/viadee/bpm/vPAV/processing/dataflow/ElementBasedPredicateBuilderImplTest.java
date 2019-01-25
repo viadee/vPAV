@@ -297,7 +297,7 @@ public class ElementBasedPredicateBuilderImplTest {
 
     private class BpmnElementBuilder {
         private String name = "element";
-        private Class clazz = BaseElement.class;
+        private Class<?> clazz = BaseElement.class;
         private String property;
 
         BpmnElementBuilder withName(String name) {
@@ -305,7 +305,7 @@ public class ElementBasedPredicateBuilderImplTest {
             return this;
         }
 
-        BpmnElementBuilder ofType(Class clazz) {
+        BpmnElementBuilder ofType(Class<?> clazz) {
             this.clazz = clazz;
             return this;
         }
@@ -315,7 +315,8 @@ public class ElementBasedPredicateBuilderImplTest {
             return this;
         }
 
-        BpmnElement build() {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+		BpmnElement build() {
             BaseElement baseElement = (BaseElement) mock(clazz);
             when(baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME)).thenReturn(name);
             // mocking a property is not so nice, but I could not find a nicer way

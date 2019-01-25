@@ -191,11 +191,6 @@ public class OperationBasedPredicateBuilderImplTest {
     private class ProcessVariableOperationBuilder {
         private VariableOperation operationType = VariableOperation.WRITE;
 
-        ProcessVariableOperationBuilder withOperation(VariableOperation operationType) {
-            this.operationType = operationType;
-            return this;
-        }
-
         ProcessVariableOperation build() {
             return new ProcessVariableOperation("name", new BpmnElement("", null), null,
                     null, "", operationType, "");

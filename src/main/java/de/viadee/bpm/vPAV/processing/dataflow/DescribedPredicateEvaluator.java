@@ -86,7 +86,7 @@ public class DescribedPredicateEvaluator<T> {
      * @param other Other predicate
      * @return combined predicate
      */
-    public DescribedPredicateEvaluator<T> and(DescribedPredicateEvaluator other) {
+    public DescribedPredicateEvaluator<T> and(DescribedPredicateEvaluator<T> other) {
         Function<T, EvaluationResult<T>> andPredicateEvaluator = (T) ->
         {
             EvaluationResult<T> result1 = this.evaluate(T);

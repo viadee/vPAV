@@ -57,7 +57,7 @@ import java.util.*;
  */
 public class ElementGraphBuilder {
 
-    private Map<String, BpmnElement> elementMap = new HashMap<String, BpmnElement>();
+    private Map<String, BpmnElement> elementMap = new HashMap<>();
 
     private Map<String, String> processIdToPathMap;
 
@@ -99,8 +99,8 @@ public class ElementGraphBuilder {
      *            FileScanner
      * @param modelInstance
      *            BpmnModelInstance
-     * @param processdefinition
-     *            processdefinitions
+     * @param processDefinition
+     *            processDefinition
      * @param calledElementHierarchy
      *            calledElementHierarchy
      * @param scanner
@@ -108,19 +108,19 @@ public class ElementGraphBuilder {
      * @return graphCollection returns graphCollection
      */
     public Collection<IGraph> createProcessGraph(final JavaReaderContext context, final FileScanner fileScanner,
-                                                 final BpmnModelInstance modelInstance, final String processdefinition,
+                                                 final BpmnModelInstance modelInstance, final String processDefinition,
                                                  final Collection<String> calledElementHierarchy, final ProcessVariablesScanner scanner) {
 
-        final Collection<IGraph> graphCollection = new ArrayList<IGraph>();
+        final Collection<IGraph> graphCollection = new ArrayList<>();
 
         final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
         for (final Process process : processes) {
             final IGraph graph = new Graph(process.getId());
             final Collection<FlowElement> elements = process.getFlowElements();
-            final Collection<SequenceFlow> flows = new ArrayList<SequenceFlow>();
-            final Collection<BoundaryEvent> boundaryEvents = new ArrayList<BoundaryEvent>();
-            final Collection<SubProcess> subProcesses = new ArrayList<SubProcess>();
-            final Collection<CallActivity> callActivities = new ArrayList<CallActivity>();
+            final Collection<SequenceFlow> flows = new ArrayList<>();
+            final Collection<BoundaryEvent> boundaryEvents = new ArrayList<>();
+            final Collection<SubProcess> subProcesses = new ArrayList<>();
+            final Collection<CallActivity> callActivities = new ArrayList<>();
 
             for (final FlowElement element : elements) {
                 if (element instanceof SequenceFlow) {
@@ -138,14 +138,14 @@ public class ElementGraphBuilder {
                 } else if (element instanceof SubProcess) {
                     final SubProcess subprocess = (SubProcess) element;
                     addElementsSubprocess(context, fileScanner, subProcesses, flows, boundaryEvents, graph, subprocess,
-                            processdefinition);
+                            processDefinition);
                 }
 
                 // Ordered map to hold operations in correct order
                 final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<>();
 
                 // initialize element
-                final BpmnElement node = new BpmnElement(processdefinition, element);
+                final BpmnElement node = new BpmnElement(processDefinition, element);
 
                 // retrieve initial variable operation (should be WRITE)
                 if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
@@ -159,7 +159,7 @@ public class ElementGraphBuilder {
 
                     for (EntryPoint ep : scanner.getEntryPoints()) {
                         if (ep.getMessageName().equals(messageName)){
-                            variables.putAll(checkInitialVariableOperations(ep, context, scanner, node, processdefinition, variables));
+                            variables.putAll(checkInitialVariableOperations(ep, context, scanner, node, processDefinition, variables));
                         }
                     }
                     graph.addStartNode(node);
@@ -185,7 +185,7 @@ public class ElementGraphBuilder {
 
             // resolve call activities and integrate called processes
             for (final CallActivity callActivity : callActivities) {
-                integrateCallActivityFlow(context, fileScanner, processdefinition, modelInstance, callActivity, graph,
+                integrateCallActivityFlow(context, fileScanner, processDefinition, modelInstance, callActivity, graph,
                         calledElementHierarchy, scanner);
             }
 
@@ -200,7 +200,7 @@ public class ElementGraphBuilder {
      * Checks for initial variable operations (esp. initializations of variables)
      *
      * @param entryPoint
-     * Current entrypoint (most likely rest controller classes)
+     * Current entryPoint (most likely rest controller classes)
      * @param jvc
      *            JavaReaderContext
      * @param scanner
@@ -232,7 +232,7 @@ public class ElementGraphBuilder {
      * @return invalidPathMap returns invalidPathMap
      */
     public Map<AnomalyContainer, List<Path>> createInvalidPaths(final Collection<IGraph> graphCollection) {
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = new HashMap<AnomalyContainer, List<Path>>();
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = new HashMap<>();
 
         for (final IGraph g : graphCollection) {
             // add data flow information to graph
@@ -248,7 +248,7 @@ public class ElementGraphBuilder {
                         // reverse order for a better readability
                         Collections.reverse(path.getElements());
                     }
-                    invalidPathMap.put(anomaly, new ArrayList<Path>(paths));
+                    invalidPathMap.put(anomaly, new ArrayList<>(paths));
                 }
             }
         }
@@ -404,8 +404,8 @@ public class ElementGraphBuilder {
         if (processIdToPathMap != null && processIdToPathMap.get(calledElement) != null) {
 
             // 1) read in- and output variables from call activity
-            final Collection<String> inVariables = new ArrayList<String>();
-            final Collection<String> outVariables = new ArrayList<String>();
+            final Collection<String> inVariables = new ArrayList<>();
+            final Collection<String> outVariables = new ArrayList<>();
             readCallActivityDataInterfaces(callActivity, inVariables, outVariables);
 
             // 2) add parallel gateways before and after the call activity in the main data
@@ -456,7 +456,7 @@ public class ElementGraphBuilder {
         final ParallelGateway element2 = modelInstance.newInstance(ParallelGateway.class);
         element2.setAttributeValue(BpmnConstants.ATTR_ID, "_gw_out", true);
 
-        final List<BpmnElement> elements = new ArrayList<BpmnElement>();
+        final List<BpmnElement> elements = new ArrayList<>();
         final BpmnElement parallelGateway1 = new BpmnElement(null, element1);
         final BpmnElement parallelGateway2 = new BpmnElement(null, element2);
         elements.add(parallelGateway1);
@@ -544,17 +544,19 @@ public class ElementGraphBuilder {
      * @return Collection of IGraphs (subgraphs)
      */
     private Collection<IGraph> createSubDataFlowsFromCallActivity(final JavaReaderContext context,
-                                                                  FileScanner fileScanner, final Collection<String> calledElementHierarchy, final String callActivityPath,
+                                                                  final FileScanner fileScanner,
+                                                                  final Collection<String> calledElementHierarchy,
+                                                                  final String callActivityPath,
                                                                   final ProcessVariablesScanner scanner) {
         // read called process
-        final BpmnModelInstance submodel = Bpmn.readModelFromFile(new File(callActivityPath));
+        final BpmnModelInstance subModel = Bpmn.readModelFromFile(new File(callActivityPath));
 
         // transform process into data flow
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
                 messageIdToVariables, processIdToVariables, bpmnScanner);
-        final Collection<IGraph> subgraphs = graphBuilder.createProcessGraph(context, fileScanner, submodel,
+        final Collection<IGraph> subGraphs = graphBuilder.createProcessGraph(context, fileScanner, subModel,
                 callActivityPath, calledElementHierarchy, scanner);
-        return subgraphs;
+        return subGraphs;
     }
 
     /**

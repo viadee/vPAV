@@ -64,7 +64,7 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
     }
 
     @Override
-    public T ofType(Class clazz) {
+    public T ofType(Class<?> clazz) {
         final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
             return new EvaluationResult<>(clazz.isInstance(element.getBaseElement()), element,
                     element.getBaseElement().getClass().getSimpleName());

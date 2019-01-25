@@ -80,11 +80,11 @@ public class CheckerFactory {
 					&& !rule.getKey().equals("DataFlowChecker")) { //$NON-NLS-1$
 				try {					
 					if (!rule.getKey().equals("VersioningChecker")) { //$NON-NLS-1$
-						Class clazz = Class.forName(fullyQualifiedName);
+						Class<?> clazz = Class.forName(fullyQualifiedName);
 						Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class);
 						checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner));
 					} else {
-						Class clazz = Class.forName(fullyQualifiedName);
+						Class<?> clazz = Class.forName(fullyQualifiedName);
 						Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class, Collection.class);
 						checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner, resourcesNewestVersions));
 					}
