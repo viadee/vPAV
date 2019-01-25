@@ -203,6 +203,17 @@ public class ProcessVariablesScanner {
 		return className;
 	}
 
+
+    /**
+     * get list of intermediate entrypoints (process message, method) where process variables
+     * have been found
+     *
+     * @return returns list of locations
+     */
+    public List<EntryPoint> getIntermediateEntryPoints() {
+        return intermediateEntryPoints;
+    }
+
 	/**
 	 * get list of entrypoints (process message, method) where process variables
 	 * have been found

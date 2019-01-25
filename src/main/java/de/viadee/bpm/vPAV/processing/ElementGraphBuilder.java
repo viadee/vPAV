@@ -165,6 +165,22 @@ public class ElementGraphBuilder {
                     graph.addStartNode(node);
                 }
 
+                if (element.getElementType().getTypeName().equals(BpmnConstants.RECEIVETASK)) {
+                    final ArrayList<String> messageRefs = bpmnScanner.getMessageRefs(element.getId());
+                    String messageName = "";
+                    if (messageRefs.size() == 1) {
+                        messageName = bpmnScanner.getMessageName(messageRefs.get(0));
+                    }
+                    // add process variables for start event, which set by call
+                    // startProcessInstanceByKey
+
+                    for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {
+                        if (ep.getMessageName().equals(messageName)){
+                            variables.putAll(checkInitialVariableOperations(ep, context, scanner, node, processDefinition, variables));
+                        }
+                    }
+                }
+
                 // examine process variables and save it with access operation
                 final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, bpmnScanner);
                 variables.putAll(reader.getVariablesFromElement(context, fileScanner, node, variables));

@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.engine.variable.VariableMap;
@@ -192,7 +193,7 @@ public class JavaReaderStatic implements JavaReader {
                                 initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
                                 invoke = leftBox;
                             }
-                            if (checkArgBoxes(entryPoint, assignment, invoke, expr)) return initialOperations;
+                            if (checkArgBoxes(entryPoint, assignment, invoke, expr, element)) return initialOperations;
                         }
                     }
                 }
@@ -205,7 +206,7 @@ public class JavaReaderStatic implements JavaReader {
                                     .forceResolve(Map.class.getName(), SootClass.SIGNATURES))) {
                                 initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
                             }
-                            if (checkArgBoxes(entryPoint, assignment, invoke, expr)) return initialOperations;
+                            if (checkArgBoxes(entryPoint, assignment, invoke, expr, element)) return initialOperations;
                         }
                     }
                 }
@@ -225,15 +226,23 @@ public class JavaReaderStatic implements JavaReader {
      * @param expr Current expression
      * @return True/False based on whether the second or third argument refers to the variable map
      */
-    private boolean checkArgBoxes(final EntryPoint entry, final String assignment, final String invoke, final JInterfaceInvokeExpr expr) {
+    private boolean checkArgBoxes(final EntryPoint entry, final String assignment, final String invoke,
+								  final JInterfaceInvokeExpr expr, final BpmnElement element) {
         if (expr.getMethodRef().getName().equals(entry.getEntryPoint())) {
             if (!assignment.isEmpty()) {
-                if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
-                    return true;
-                }
-                if (expr.getArgBox(2).getValue().toString().equals(invoke)) {
-                    return true;
-                }
+            	if (element.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.RECEIVETASK)) {
+            		String message = expr.getArgBox(0).getValue().toString().replaceAll("\"","");
+					if (message.equals(entry.getMessageName())) {
+						return true;
+					}
+				} else {
+					if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
+						return true;
+					}
+					if (expr.getArgBox(2).getValue().toString().equals(invoke)) {
+						return true;
+					}
+				}
             }
         }
         return false;
