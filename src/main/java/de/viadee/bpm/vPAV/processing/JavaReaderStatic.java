@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
@@ -77,11 +79,11 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Scope of the element
 	 * @return Map of process variables from the referenced delegate
 	 */
-	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
+	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<>();
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
 		if (classFile != null && classFile.trim().length() > 0) {
 
@@ -118,11 +120,11 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Path of the BPMN model
 	 * @return Map of process variable operations
 	 */
-	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromClass(String className,
+	public ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className,
 			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
 			final EntryPoint entryPoint) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
+		final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
 		if (className != null && className.trim().length() > 0) {
 			final String sootPath = FileScanner.getSootPath();
@@ -139,10 +141,10 @@ public class JavaReaderStatic implements JavaReader {
 				sootClass.setApplicationClass();
 				Scene.v().loadNecessaryClasses();
 				for (SootMethod method : sootClass.getMethods()) {
-				    if (method.getName().equals(entryPoint.getMethodName())) {
-                        final Body body = method.retrieveActiveBody();
-				        initialOperations.putAll(checkWriteAccess(body, element, resourceFilePath, entryPoint));
-                    }
+					if (method.getName().equals(entryPoint.getMethodName())) {
+						final Body body = method.retrieveActiveBody();
+						initialOperations.putAll(checkWriteAccess(body, element, resourceFilePath, entryPoint));
+					}
 				}
 			}
 		}
@@ -161,77 +163,85 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Path of the BPMN model
 	 * @return Map of process variable operations
 	 */
-	private Map<String, ProcessVariableOperation> checkWriteAccess(final Body body, final BpmnElement element,
+	private ListMultimap<String, ProcessVariableOperation> checkWriteAccess(final Body body, final BpmnElement element,
 			final String resourceFilePath, final EntryPoint entryPoint) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
+		final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
-        if (body.getMethod().getName().equals(entryPoint.getMethodName())) {
-            final PatchingChain<Unit> pc = body.getUnits();
-            String assignment = "";
-            String invoke = "";
+		if (body.getMethod().getName().equals(entryPoint.getMethodName())) {
+			final PatchingChain<Unit> pc = body.getUnits();
+			String assignment = "";
+			String invoke = "";
 
-            for (Unit unit : pc) {
-                if (unit instanceof AssignStmt) {
-                    final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
-                    final String leftBox = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
+			for (Unit unit : pc) {
+				if (unit instanceof AssignStmt) {
+					final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
+					final String leftBox = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
 
-                    if (rightBox.contains(CamundaMethodServices.VARIABLE_MAP + " createVariables()")) {
-                        assignment = leftBox;
-                    }
+					if (rightBox.contains(CamundaMethodServices.VARIABLE_MAP + " createVariables()")) {
+						assignment = leftBox;
+					}
 
-                    if (rightBox.contains(entryPoint.getEntryPoint()) && rightBox.contains(invoke)) {
-                        return initialOperations;
-                    }
+					if (rightBox.contains(entryPoint.getEntryPoint()) && rightBox.contains(invoke)) {
+						return initialOperations;
+					}
 
-                    if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
-                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
-                                .getRightOpBox().getValue();
-                        if (expr != null) {
-                            if (expr.getMethodRef().getDeclaringClass().equals(Scene.v()
-                                    .forceResolve(VariableMap.class.getName(), SootClass.SIGNATURES))) {
-                                initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
-                                invoke = leftBox;
-                            }
-                            if (checkArgBoxes(entryPoint, assignment, invoke, expr, element)) return initialOperations;
-                        }
-                    }
-                }
-                if (unit instanceof InvokeStmt) {
-                    if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
-                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
-                                .getInvokeExprBox().getValue();
-                        if (expr != null) {
-                            if (expr.getMethodRef().getDeclaringClass().equals(Scene.v()
-                                    .forceResolve(Map.class.getName(), SootClass.SIGNATURES))) {
-                                initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
-                            }
-                            if (checkArgBoxes(entryPoint, assignment, invoke, expr, element)) return initialOperations;
-                        }
-                    }
-                }
-            }
-        }
+					if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
+						final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox()
+								.getValue();
+						if (expr != null) {
+							if (expr.getMethodRef().getDeclaringClass().equals(
+									Scene.v().forceResolve(VariableMap.class.getName(), SootClass.SIGNATURES))) {
+								initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
+								invoke = leftBox;
+							}
+							if (checkArgBoxes(entryPoint, assignment, invoke, expr, element))
+								return initialOperations;
+						}
+					}
+				}
+				if (unit instanceof InvokeStmt) {
+					if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+						final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox()
+								.getValue();
+						if (expr != null) {
+							if (expr.getMethodRef().getDeclaringClass()
+									.equals(Scene.v().forceResolve(Map.class.getName(), SootClass.SIGNATURES))) {
+								initialOperations.putAll(parseInitialExpression(expr, element, resourceFilePath));
+							}
+							if (checkArgBoxes(entryPoint, assignment, invoke, expr, element))
+								return initialOperations;
+						}
+					}
+				}
+			}
+		}
 
 		return initialOperations;
 	}
 
-    /**
-     *
-     * Check whether or not the second or third argument contain a reference to the variable map
-     *
-     * @param entry Current entry
-     * @param assignment Current assigned variable
-     * @param invoke Current invocation
-     * @param expr Current expression
-     * @return True/False based on whether the second or third argument refers to the variable map
-     */
-    private boolean checkArgBoxes(final EntryPoint entry, final String assignment, final String invoke,
-								  final JInterfaceInvokeExpr expr, final BpmnElement element) {
-        if (expr.getMethodRef().getName().equals(entry.getEntryPoint())) {
-            if (!assignment.isEmpty()) {
-            	if (element.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.RECEIVETASK)) {
-            		String message = expr.getArgBox(0).getValue().toString().replaceAll("\"","");
+	/**
+	 *
+	 * Check whether or not the second or third argument contain a reference to the
+	 * variable map
+	 *
+	 * @param entry
+	 *            Current entry
+	 * @param assignment
+	 *            Current assigned variable
+	 * @param invoke
+	 *            Current invocation
+	 * @param expr
+	 *            Current expression
+	 * @return True/False based on whether the second or third argument refers to
+	 *         the variable map
+	 */
+	private boolean checkArgBoxes(final EntryPoint entry, final String assignment, final String invoke,
+			final JInterfaceInvokeExpr expr, final BpmnElement element) {
+		if (expr.getMethodRef().getName().equals(entry.getEntryPoint())) {
+			if (!assignment.isEmpty()) {
+				if (element.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.RECEIVETASK)) {
+					String message = expr.getArgBox(0).getValue().toString().replaceAll("\"", "");
 					if (message.equals(entry.getMessageName())) {
 						return true;
 					}
@@ -243,12 +253,12 @@ public class JavaReaderStatic implements JavaReader {
 						return true;
 					}
 				}
-            }
-        }
-        return false;
-    }
+			}
+		}
+		return false;
+	}
 
-    /**
+	/**
 	 *
 	 * Starting by the main JavaDelegate, statically analyses the classes
 	 * implemented for the bpmn element.
@@ -271,24 +281,20 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Scope of the element
 	 * @return Map of process variables for a given class
 	 */
-	public Map<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths, final String className,
-			final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String scopeId) {
+	public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
+			final String className, final String methodName, final String classFile, final BpmnElement element,
+			final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
 
-		Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
+		ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
 		OutSetCFG outSet = new OutSetCFG(new ArrayList<VariableBlock>());
 
 		classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
 				outSet, null);
 
-		processVariables.putAll(outSet.getAllProcessVariables());
-
-		// Add Java code level anomalies to BpmnElement so later it is included into
-		try {
+		if (outSet.getAllProcessVariables().size() > 0) {
+			processVariables.putAll(outSet.getAllProcessVariables());
 			addAnomaliesFoundInSourceCode(element, outSet);
-		} catch (Exception e) {
-			// TODO: handle exception
 		}
 
 		return processVariables;
@@ -429,13 +435,13 @@ public class JavaReaderStatic implements JavaReader {
 		SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
 		if (method != null) {
-			outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType, scopeId,
-					outSet, originalBlock, method);
+			outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType, scopeId, outSet,
+					originalBlock, method);
 		} else {
 			method = sootClass.getMethodByNameUnsafe(methodName);
 			if (method != null) {
-				outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType,
-						scopeId, outSet, originalBlock, method);
+				outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType, scopeId, outSet,
+						originalBlock, method);
 			} else {
 				LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
 			}
@@ -479,8 +485,8 @@ public class JavaReaderStatic implements JavaReader {
 
 		for (SootMethod method : sootClass.getMethods()) {
 			if (method.getName().equals(methodName)) {
-				outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType,
-						scopeId, outSet, originalBlock, method);
+				outSet = fetchMethodBody(classPaths, className, classFile, element, chapter, fieldType, scopeId, outSet,
+						originalBlock, method);
 			}
 		}
 		return outSet;
@@ -513,10 +519,9 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Soot representation of a given method
 	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className,
-			final String classFile, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
-			final VariableBlock originalBlock, final SootMethod method) {
+	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String className, final String classFile,
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String scopeId, OutSetCFG outSet, final VariableBlock originalBlock, final SootMethod method) {
 
 		final Body body = method.retrieveActiveBody();
 
@@ -532,9 +537,9 @@ public class JavaReaderStatic implements JavaReader {
 
 		final List<Block> graphHeads = graph.getHeads();
 
-        for (int i = 0; i < graphHeads.size(); i++) {
-			outSet = graphIterator(classPaths, cg, graph, outSet, element, chapter, fieldType,
-                    classFile, scopeId, originalBlock, className);
+		for (int i = 0; i < graphHeads.size(); i++) {
+			outSet = graphIterator(classPaths, cg, graph, outSet, element, chapter, fieldType, classFile, scopeId,
+					originalBlock, className);
 		}
 
 		return outSet;
@@ -568,10 +573,9 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Classname
 	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph,
-            OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock originalBlock, String oldClassName) {
+	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, OutSetCFG outSet,
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String filePath, final String scopeId, VariableBlock originalBlock, String oldClassName) {
 
 		final Iterator<Block> graphIterator = graph.iterator();
 
@@ -730,7 +734,7 @@ public class JavaReaderStatic implements JavaReader {
 			if (expr.getArgBox(location).getValue() instanceof StringConstant) {
 
 				StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
-				String name = variableName.value.replaceAll("\"","");
+				String name = variableName.value.replaceAll("\"", "");
 
 				variableBlock.addProcessVariable(
 						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
@@ -751,11 +755,11 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Filepath of model
 	 * @return inital operations
 	 */
-	private Map<String, ProcessVariableOperation> parseInitialExpression(final JInterfaceInvokeExpr expr, final BpmnElement element,
-			final String resourceFilePath) {
+	private ListMultimap<String, ProcessVariableOperation> parseInitialExpression(final JInterfaceInvokeExpr expr,
+			final BpmnElement element, final String resourceFilePath) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
-		
+		final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
+
 		final String functionName = expr.getMethodRef().getName();
 		final int numberOfArg = expr.getArgCount();
 		final String baseBox = expr.getBaseBox().getValue().getType().toString();
@@ -766,13 +770,12 @@ public class JavaReaderStatic implements JavaReader {
 		if (foundMethod != null) {
 			final int location = foundMethod.getLocation() - 1;
 			final VariableOperation type = foundMethod.getOperationType();
-			if (expr.getArgBox(location).getValue() instanceof StringConstant) {	
+			if (expr.getArgBox(location).getValue() instanceof StringConstant) {
 				final StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
-				final String name = variableName.value.replaceAll("\"","");
-				initialOperations.put(name, new ProcessVariableOperation(name, element,
-						ElementChapter.Code, KnownElementFieldType.Initial, resourceFilePath, type,
-						element.getBaseElement().getId()));
-			} 
+				final String name = variableName.value.replaceAll("\"", "");
+				initialOperations.put(name, new ProcessVariableOperation(name, element, ElementChapter.Code,
+						KnownElementFieldType.Initial, resourceFilePath, type, element.getBaseElement().getId()));
+			}
 		}
 		return initialOperations;
 	}
@@ -864,7 +867,10 @@ public class JavaReaderStatic implements JavaReader {
 			}
 		}
 
-		currentPath.removeLast();
+		if (!currentPath.isEmpty()) {
+			currentPath.removeLast();
+		}
+	
 		for (ProcessVariableOperation pv : variableBlock.getAllProcessVariables()) {
 			predecessorVariablesList.removeLastOccurrence(pv);
 		}

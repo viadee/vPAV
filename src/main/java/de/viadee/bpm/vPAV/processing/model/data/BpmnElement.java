@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import java.util.*;
@@ -59,7 +61,7 @@ public class BpmnElement {
     /* out interface for call activity */
     private Collection<String> outCa;
 
-    private LinkedHashMap<String, ProcessVariableOperation> processVariables;
+    private ListMultimap<String, ProcessVariableOperation> processVariables;
 
     // collecting anomalies found on Java code level
     private List<AnomalyContainer> sourceCodeAnomalies = new ArrayList<AnomalyContainer>();
@@ -67,7 +69,7 @@ public class BpmnElement {
     public BpmnElement(final String processdefinition, final BaseElement element) {
         this.processdefinition = processdefinition;
         this.baseElement = element;
-        this.processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+        this.processVariables = ArrayListMultimap.create();
     }
 
     public String getProcessdefinition() {
@@ -78,11 +80,11 @@ public class BpmnElement {
         return baseElement;
     }
 
-    public Map<String, ProcessVariableOperation> getProcessVariables() {
+    public ListMultimap<String, ProcessVariableOperation> getProcessVariables() {
         return processVariables;
     }
 
-    public void setProcessVariables(final LinkedHashMap<String, ProcessVariableOperation> variables) {
+    public void setProcessVariables(final ListMultimap<String, ProcessVariableOperation> variables) {
         this.processVariables = variables;
     }
 
@@ -234,17 +236,18 @@ public class BpmnElement {
         }
         final List<AnomalyContainer> anomalies = new ArrayList<AnomalyContainer>();
         for (final String variableName : variableNames) {
+        	final List<ProcessVariableOperation> list = processVariables.get(variableName);
             if (ur(variableName)) {
                 anomalies.add(new AnomalyContainer(variableName, Anomaly.UR, baseElement.getId(),
-                        processVariables.get(variableName)));
+                        processVariables.get(variableName).get(list.size() - 1)));
             }
             if (du(variableName)) {
                 anomalies.add(new AnomalyContainer(variableName, Anomaly.DU, baseElement.getId(),
-                        processVariables.get(variableName)));
+                        processVariables.get(variableName).get(list.size() - 1)));
             }
             if (dd(variableName)) {
                 anomalies.add(new AnomalyContainer(variableName, Anomaly.DD, baseElement.getId(),
-                        processVariables.get(variableName)));
+                        processVariables.get(variableName).get(list.size() - 1)));
             }
         }
         anomalyMap.put(this, anomalies);

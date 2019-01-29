@@ -31,11 +31,11 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import soot.toolkits.graph.Block;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 
@@ -72,27 +72,14 @@ public class VariableBlock {
         this.usedProcessVariables.add(processVariable);
     }
 
-    public void addUsed(List<ProcessVariableOperation> usedVariables) {
+    public ListMultimap<String, ProcessVariableOperation> getProcessVariablesMapped() {
 
-    }
-
-    public Map<String, ProcessVariableOperation> getProcessVariablesMapped() {
-
-        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+    	ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         for (ProcessVariableOperation pv : usedProcessVariables) {
-
             variables.put(pv.getName(), pv);
         }
 
         return variables;
-    }
-
-    public void addAllProcessVariables(List<ProcessVariableOperation> pvs) {
-        for (ProcessVariableOperation pv : pvs) {
-
-            addProcessVariable(pv);
-        }
-
     }
 
 }

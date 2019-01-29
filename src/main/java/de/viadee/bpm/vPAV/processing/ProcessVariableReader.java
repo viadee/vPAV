@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -55,7 +57,10 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import javax.el.ELException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,14 +91,13 @@ public final class ProcessVariableReader {
 	 *            FileScanner
 	 * @param element
 	 *            BpmnElement
-	 * @param processVariables
-	 *            process variable operation
 	 * @return returns processVariables
 	 */
-	public LinkedHashMap<String, ProcessVariableOperation> getVariablesFromElement(final JavaReaderContext context,
-			final FileScanner fileScanner, final BpmnElement element,
-			final LinkedHashMap<String, ProcessVariableOperation> processVariables) {
-
+	public ListMultimap<String, ProcessVariableOperation> getVariablesFromElement(final JavaReaderContext context,
+			final FileScanner fileScanner, final BpmnElement element) {
+		
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
+		
 		// 1) Search variables in task
 		processVariables.putAll(getVariablesFromTask(context, fileScanner, element));
 		// 2) Search variables in sequence flow
@@ -116,8 +120,8 @@ public final class ProcessVariableReader {
 	 *            BpmnElement
 	 * @return processVariables returns processVariables
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> getVariablesFromNames(final BpmnElement element) {
-		final LinkedHashMap<String, ProcessVariableOperation> processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+	private ListMultimap<String, ProcessVariableOperation> getVariablesFromNames(final BpmnElement element) {
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
 		final BpmnModelElementInstance scopeElement = baseElement.getScope();
 
@@ -207,8 +211,8 @@ public final class ProcessVariableReader {
 	 * @return Map of ProcessVariable
 	 *
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> getVariablesFromParameters(final BpmnElement element) {
-		final LinkedHashMap<String, ProcessVariableOperation> processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+	private ListMultimap<String, ProcessVariableOperation> getVariablesFromParameters(final BpmnElement element) {
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
 		final BpmnModelElementInstance scopeElement = baseElement.getScope();
 
@@ -263,10 +267,10 @@ public final class ProcessVariableReader {
 	 *            BpmnElement
 	 * @return variables
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> searchExtensionsElements(final JavaReaderContext context,
+	private ListMultimap<String, ProcessVariableOperation> searchExtensionsElements(final JavaReaderContext context,
 			final FileScanner fileScanner, final BpmnElement element) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
 		final BpmnModelElementInstance scopeElement = baseElement.getScope();
 		String scopeElementId = null;
@@ -308,11 +312,11 @@ public final class ProcessVariableReader {
 	 *            Scope ID
 	 * @return variables
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> getVariablesFromExecutionListener(
+	private ListMultimap<String, ProcessVariableOperation> getVariablesFromExecutionListener(
 			final JavaReaderContext context, final FileScanner fileScanner, final BpmnElement element,
 			final ExtensionElements extensionElements, final String scopeId) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		List<CamundaExecutionListener> listenerList = extensionElements.getElementsQuery()
 				.filterByType(CamundaExecutionListener.class).list();
 		for (final CamundaExecutionListener listener : listenerList) {
@@ -369,11 +373,11 @@ public final class ProcessVariableReader {
 	 *            ScopeId
 	 * @return variables
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> getVariablesFromTaskListener(
+	private ListMultimap<String, ProcessVariableOperation> getVariablesFromTaskListener(
 			final JavaReaderContext context, final FileScanner fileScanner, final BpmnElement element,
 			final ExtensionElements extensionElements, final String scopeId) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		List<CamundaTaskListener> listenerList = extensionElements.getElementsQuery()
 				.filterByType(CamundaTaskListener.class).list();
 		for (final CamundaTaskListener listener : listenerList) {
@@ -424,10 +428,10 @@ public final class ProcessVariableReader {
 	 *            ScopeElementId
 	 * @return variables
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> getVariablesFromFormData(final BpmnElement element,
+	private ListMultimap<String, ProcessVariableOperation> getVariablesFromFormData(final BpmnElement element,
 			final ExtensionElements extensionElements, final String scopeElementId) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
 		final Query<CamundaFormData> formDataQuery = extensionElements.getElementsQuery()
 				.filterByType(CamundaFormData.class);
@@ -458,10 +462,10 @@ public final class ProcessVariableReader {
 	 *            ScopeId
 	 * @return variables
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> searchVariablesInInputOutputExtensions(
+	private ListMultimap<String, ProcessVariableOperation> searchVariablesInInputOutputExtensions(
 			final BpmnElement element, final ExtensionElements extensionElements, final String scopeId) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> processVariables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
 		final BaseElement baseElement = element.getBaseElement();
 
@@ -501,10 +505,10 @@ public final class ProcessVariableReader {
 	 *            BpmnElement
 	 * @return variables
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> searchVariablesFromSequenceFlow(
+	private ListMultimap<String, ProcessVariableOperation> searchVariablesFromSequenceFlow(
 			final JavaReaderContext context, final FileScanner fileScanner, final BpmnElement element) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
 		if (baseElement instanceof SequenceFlow) {
 			final SequenceFlow flow = (SequenceFlow) baseElement;
@@ -551,10 +555,10 @@ public final class ProcessVariableReader {
 	 *            BpmnElement
 	 * @return variables
 	 */
-	private Map<String, ProcessVariableOperation> getVariablesFromTask(final JavaReaderContext context,
+	private ListMultimap<String, ProcessVariableOperation> getVariablesFromTask(final JavaReaderContext context,
 			final FileScanner fileScanner, final BpmnElement element) {
 
-		final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
 		final BaseElement baseElement = element.getBaseElement();
 		BpmnModelElementInstance scopeElement = baseElement.getScope();
@@ -693,10 +697,10 @@ public final class ProcessVariableReader {
 	 *            BpmnElement
 	 * @return variables
 	 */
-	private Map<String, ProcessVariableOperation> searchVariablesInMultiInstanceTask(final JavaReaderContext context,
+	private ListMultimap<String, ProcessVariableOperation> searchVariablesInMultiInstanceTask(final JavaReaderContext context,
 			final FileScanner fileScanner, final BpmnElement element) {
 
-		final Map<String, ProcessVariableOperation> processVariables = new HashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
 		final BaseElement baseElement = element.getBaseElement();
 		BpmnModelElementInstance scopeElement = baseElement.getScope();
@@ -759,11 +763,11 @@ public final class ProcessVariableReader {
 	 *            ScopeId
 	 * @return variables
 	 */
-	private Map<String, ProcessVariableOperation> getVariablesFromGroovyScript(final String groovyFile,
+	private ListMultimap<String, ProcessVariableOperation> getVariablesFromGroovyScript(final String groovyFile,
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String scopeId) {
 
-		final Map<String, ProcessVariableOperation> variables = ResourceFileReader.readResourceFile(groovyFile, element,
+		final ListMultimap<String, ProcessVariableOperation> variables = ResourceFileReader.readResourceFile(groovyFile, element,
 				chapter, fieldType, scopeId);
 		return variables;
 	}
@@ -785,11 +789,11 @@ public final class ProcessVariableReader {
 	 *            ScopeID
 	 * @return
 	 */
-	private Map<String, ProcessVariableOperation> readDmnFile(final String decisionId, final String fileName,
+	private ListMultimap<String, ProcessVariableOperation> readDmnFile(final String decisionId, final String fileName,
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String scopeId) {
 
-		final Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
 		if (fileName != null && fileName.trim().length() > 0) {
 			final InputStream resource = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(fileName);
@@ -835,10 +839,10 @@ public final class ProcessVariableReader {
 	 * @return variables
 	 * @throws ProcessingException
 	 */
-	private LinkedHashMap<String, ProcessVariableOperation> findVariablesInExpression(final JavaReaderContext context,
+	private ListMultimap<String, ProcessVariableOperation> findVariablesInExpression(final JavaReaderContext context,
 			final FileScanner fileScanner, final String expression, final BpmnElement element,
 			final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
-		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
 		// HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
 		// ${dateTime().plusWeeks(1).toDate()}

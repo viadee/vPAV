@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.*;
@@ -41,7 +43,6 @@ import org.apache.tools.ant.types.Resource;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,10 +66,10 @@ public class ResourceFileReader {
 	 *            Scope
 	 * @return variables
 	 */
-	public static LinkedHashMap<String, ProcessVariableOperation> readResourceFile(final String fileName,
+	public static ListMultimap<String, ProcessVariableOperation> readResourceFile(final String fileName,
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String scopeId) {
-		LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		if (fileName != null && fileName.trim().length() > 0) {
 			try {
 				final DirectoryScanner directoryScanner = new DirectoryScanner();
@@ -123,11 +124,11 @@ public class ResourceFileReader {
 	 *            cleaned source code
 	 * @return found Process Variables
 	 */
-	public static LinkedHashMap<String, ProcessVariableOperation> searchProcessVariablesInCode(
+	public static ListMultimap<String, ProcessVariableOperation> searchProcessVariablesInCode(
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String fileName, final String scopeId, final String code) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(searchReadProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
 		variables.putAll(searchWrittenProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
 		variables.putAll(searchRemovedProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code));
@@ -152,11 +153,11 @@ public class ResourceFileReader {
 	 *            cleaned source code
 	 * @return found Process Variables
 	 */
-	public static LinkedHashMap<String, ProcessVariableOperation> searchReadProcessVariablesInCode(
+	public static ListMultimap<String, ProcessVariableOperation> searchReadProcessVariablesInCode(
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String fileName, final String scopeId, final String code) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
 		// remove special characters from code
 		final String FILTER_PATTERN = "'|\"| ";
@@ -205,11 +206,11 @@ public class ResourceFileReader {
 	 *            cleaned code
 	 * @return Map of process variable operations
 	 */
-	public static LinkedHashMap<String, ProcessVariableOperation> searchWrittenProcessVariablesInCode(
+	public static ListMultimap<String, ProcessVariableOperation> searchWrittenProcessVariablesInCode(
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String fileName, final String scopeId, final String code) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
 		// remove special characters from code
 		final String FILTER_PATTERN = "'|\"| ";
@@ -256,11 +257,11 @@ public class ResourceFileReader {
 	 *            cleaned source code
 	 * @return found Process Variables
 	 */
-	public static LinkedHashMap<String, ProcessVariableOperation> searchRemovedProcessVariablesInCode(
+	public static ListMultimap<String, ProcessVariableOperation> searchRemovedProcessVariablesInCode(
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String fileName, final String scopeId, final String code) {
 
-		final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>();
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
 		// remove special characters from code
 		final String FILTER_PATTERN = "'|\"| ";

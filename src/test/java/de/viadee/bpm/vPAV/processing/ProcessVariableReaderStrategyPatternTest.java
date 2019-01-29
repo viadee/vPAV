@@ -31,84 +31,106 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import static org.junit.Assert.assertEquals;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import static org.junit.Assert.assertEquals;
 
 public class ProcessVariableReaderStrategyPatternTest {
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-        final URL[] classUrls = { classUrl, resourcesUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-    }
+	private static final String BASE_PATH = "src/test/resources/";
 
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
-    }
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		RuntimeConfig.getInstance().setTest(true);
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java/");
+		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+		final URL[] classUrls = { classUrl, resourcesUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+	}
 
-    @Test()
-    public void testStrategyPatternProcessVariableReaderStatic() {
+	@AfterClass
+	public static void tearDown() {
+		RuntimeConfig.getInstance().setTest(false);
+	}
 
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        boolean isStatic = true;
+	@Test()
+	public void testStrategyPatternProcessVariableReaderStatic() {
 
-        final JavaReaderContext pvc = new JavaReaderContext();
-        if (isStatic) {
-            pvc.setJavaReadingStrategy(new JavaReaderStatic());
-        } else {
-            pvc.setJavaReadingStrategy(new JavaReaderRegex());
-        }
+		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
 
-        final Map<String, ProcessVariableOperation> variables = pvc
-                .readJavaDelegate(fileScanner, "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        assertEquals("Static reader should not find 4 variables since one of them is in a comment", 3,
-                variables.size());
+		final Collection<ServiceTask> tasks = modelInstance
+				.getModelElementsByType(ServiceTask.class);
 
-    }
+		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
 
-    @Test()
-    public void testStrategyPatternProcessVariableReaderRegex() {
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        boolean isStatic = false;        
+		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
 
-        final JavaReaderContext pvc = new JavaReaderContext();
-        if (isStatic) {
-            pvc.setJavaReadingStrategy(new JavaReaderStatic());
-        } else {
-            pvc.setJavaReadingStrategy(new JavaReaderRegex());
-        }
+		final JavaReaderContext pvc = new JavaReaderContext();
 
-        final Map<String, ProcessVariableOperation> variables = pvc
-                .readJavaDelegate(fileScanner, "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
+		pvc.setJavaReadingStrategy(new JavaReaderStatic());
 
-        assertEquals("RegEx reader should find 4 variables including a false positive in a comment", 4,
-                variables.size());
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+		variables.putAll(pvc.readJavaDelegate(fileScanner, "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element,
+				null, null, null));
 
-    }
+		assertEquals("Static reader should not find 4 variables since one of them is in a comment", 3,
+				variables.asMap().size());
+
+	}
+
+	@Test()
+	public void testStrategyPatternProcessVariableReaderRegex() {
+
+		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
+
+		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+
+		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+
+		final JavaReaderContext pvc = new JavaReaderContext();
+
+		pvc.setJavaReadingStrategy(new JavaReaderRegex());
+
+
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+		variables.putAll(pvc.readJavaDelegate(fileScanner, "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element,
+				null, null, null));
+
+		assertEquals("RegEx reader should find 4 variables including a false positive in a comment", 4,
+				variables.asMap().size());
+
+	}
 
 }
