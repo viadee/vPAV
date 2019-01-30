@@ -232,8 +232,6 @@ public class ElementGraphBuilder {
 	 *            Current BPMN element
 	 * @param resourceFilePath
 	 *            Current BPMN location
-	 * @param variables
-	 *            Map of Process Variables
 	 * @return initial operations
 	 */
 	private ListMultimap<String, ProcessVariableOperation> checkInitialVariableOperations(final EntryPoint entryPoint,
