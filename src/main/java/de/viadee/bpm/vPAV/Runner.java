@@ -37,7 +37,6 @@ import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.*;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
-import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -46,7 +45,6 @@ import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,9 +64,9 @@ public class Runner {
 
 	private Collection<CheckerIssue> filteredIssues;
 
-	private Map<String, Rule> rules = new HashMap<String, Rule>();
+	private Map<String, Rule> rules = new HashMap<>();
 
-	private Map<String, String> ignoredIssuesMap = new HashMap<String, String>();
+	private Map<String, String> ignoredIssuesMap = new HashMap<>();
 
 	private Map<String, String> fileMapping = createFileFolderMapping();
 
@@ -86,12 +84,12 @@ public class Runner {
 
 	private static boolean isStatic = false;
 
-
 	/**
 	 * Main method which represents lifecycle of the validation process. Calls main
 	 * functions
 	 * 
-	 * @param javaScanPath Main entry path. Normally src/main/java
+	 * @param javaScanPath
+	 *            Main entry path. Normally src/main/java
 	 */
 	public void viadeeProcessApplicationValidator(final String javaScanPath) {
 
@@ -161,11 +159,7 @@ public class Runner {
 
 		rules.remove(ConfigConstants.HASPARENTRULESET);
 
-		try {
-			RuntimeConfig.getInstance().retrieveLocale(rules);
-		} catch (MalformedURLException e) {
-			logger.warning("Could not read language files. No localization available");
-		}
+		RuntimeConfig.getInstance().retrieveLocale(rules);
 
 		return rules;
 	}
@@ -205,7 +199,6 @@ public class Runner {
 
 		return finalRules;
 	}
-
 
 	/**
 	 * Initializes the variableScanner to scan and read outer process variables with
@@ -562,17 +555,15 @@ public class Runner {
 	 * @param variableScanner
 	 *            variableScanner
 	 * @param dataFlowRules
-	 * 			  dataFlowRules
-	 * @return foundIssues
-	 * @throws ConfigItemNotFoundException
-	 *             ConfigItem not found
+	 *            dataFlowRules
+	 * @return foundIssues ConfigItem not found
 	 */
 	private Collection<CheckerIssue> checkModels(final Map<String, Rule> rules, final FileScanner fileScanner,
 			final ProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules)
 			throws RuntimeException {
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		for (final String pathToModel : fileScanner.getProcessdefinitions()) {
+		for (final String pathToModel : fileScanner.getProcessDefinitions()) {
 			issues.addAll(checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules));
 		}
 		return issues;
@@ -597,9 +588,10 @@ public class Runner {
 		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
 		ModelDispatchResult dispatchResult;
 		if (variableScanner != null) {
-			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, new File(ConfigConstants.BASEPATH + processdef),
-					fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(), variableScanner,
-					dataFlowRules, fileScanner.getResourcesNewestVersions(), rules);
+			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner,
+					new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
+					fileScanner.getProcessIdToPathMap(), variableScanner, dataFlowRules,
+					fileScanner.getResourcesNewestVersions(), rules);
 		} else {
 			dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(
 					new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
@@ -649,9 +641,8 @@ public class Runner {
 		return ignoredIssuesMap;
 	}
 
-	
 	public Set<String> getModelPath() {
-		return getFileScanner().getProcessdefinitions();
+		return getFileScanner().getProcessDefinitions();
 	}
 
 	public Collection<CheckerIssue> getfilteredIssues() {

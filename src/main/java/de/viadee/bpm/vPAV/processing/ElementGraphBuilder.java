@@ -164,8 +164,8 @@ public class ElementGraphBuilder {
 
 					for (EntryPoint ep : scanner.getEntryPoints()) {
 						if (ep.getMessageName().equals(messageName)) {
-							variables.putAll(checkInitialVariableOperations(ep, context, scanner, node,
-									processDefinition));
+							variables.putAll(
+									checkInitialVariableOperations(ep, context, scanner, node, processDefinition));
 						}
 					}
 					graph.addStartNode(node);
@@ -182,8 +182,8 @@ public class ElementGraphBuilder {
 
 					for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {
 						if (ep.getMessageName().equals(messageName)) {
-							variables.putAll(checkInitialVariableOperations(ep, context, scanner, node,
-									processDefinition));
+							variables.putAll(
+									checkInitialVariableOperations(ep, context, scanner, node, processDefinition));
 						}
 					}
 				}
@@ -573,9 +573,8 @@ public class ElementGraphBuilder {
 		// transform process into data flow
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
 				messageIdToVariables, processIdToVariables, bpmnScanner);
-		final Collection<IGraph> subGraphs = graphBuilder.createProcessGraph(context, fileScanner, subModel,
-				callActivityPath, calledElementHierarchy, scanner);
-		return subGraphs;
+		return graphBuilder.createProcessGraph(context, fileScanner, subModel, callActivityPath, calledElementHierarchy,
+				scanner);
 	}
 
 	/**

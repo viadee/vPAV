@@ -108,7 +108,7 @@ public class ProcessVariablesModelCheckerTest {
      */
     @Test
     public void testProcessVariablesModelChecker() {
-        final Collection<CheckerIssue> issues = checker.check(modelInstance);
+        final Collection<CheckerIssue> issues = checker.check();
 
         if (issues.size() == 0) {
             Assert.fail("there should be generated an issue");

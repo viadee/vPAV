@@ -49,38 +49,37 @@ import java.util.regex.Pattern;
 
 public class ElementIdConventionChecker extends AbstractElementChecker {
 
-    public ElementIdConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
-    }
+	public ElementIdConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+		super(rule, bpmnScanner);
+	}
 
-    /**
-     * Check if an element follows a configurable pattern
-     *
-     * @return issues
-     */
-    @Override
-    public Collection<CheckerIssue> check(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement baseElement = element.getBaseElement();
+	/**
+	 * Check if an element follows a configurable pattern
+	 *
+	 * @return issues
+	 */
+	@Override
+	public Collection<CheckerIssue> check(final BpmnElement element) {
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final BaseElement baseElement = element.getBaseElement();
 
-        final Collection<ElementConvention> elementConventions = rule.getElementConventions();
+		final Collection<ElementConvention> elementConventions = rule.getElementConventions();
 
-        final String elementId = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID);
+		final String elementId = baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID);
 
-        if (elementConventions != null && !elementConventions.isEmpty() && elementId != null) {
-            for (final ElementConvention convention : elementConventions) {
-                final Pattern pattern = Pattern.compile(convention.getPattern().trim());
-                Matcher matcher = pattern.matcher(elementId);
-                String bpmnInstance = convention.getName();
-                if (!matcher.matches()
-                        && baseElement.getElementType().getInstanceType().getSimpleName().toLowerCase()
-                                .equals(bpmnInstance.toLowerCase())) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                            String.format(Messages.getString("ElementIdConventionChecker.0"), elementId), //$NON-NLS-1$
-                            convention.getDescription()));
-                }
-            }
-        }
-        return issues;
-    }
+		if (elementConventions != null && !elementConventions.isEmpty() && elementId != null) {
+			for (final ElementConvention convention : elementConventions) {
+				final Pattern pattern = Pattern.compile(convention.getPattern().trim());
+				Matcher matcher = pattern.matcher(elementId);
+				String bpmnInstance = convention.getName();
+				if (!matcher.matches() && baseElement.getElementType().getInstanceType().getSimpleName().toLowerCase()
+						.equals(bpmnInstance.toLowerCase())) {
+					issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+							String.format(Messages.getString("ElementIdConventionChecker.0"), elementId), //$NON-NLS-1$
+							convention.getDescription()));
+				}
+			}
+		}
+		return issues;
+	}
 }

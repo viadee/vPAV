@@ -49,50 +49,50 @@ import java.util.Map;
 
 public class OverlapChecker extends AbstractElementChecker {
 
-    public OverlapChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
-    }
-    
-    private Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
+	public OverlapChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+		super(rule, bpmnScanner);
+	}
 
-    /**
-     * Check for redundant edges between common elements (double or more flows instead of one)
-     *
-     * @return issues
-     */
+	private Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
 
-    @Override
-    public Collection<CheckerIssue> check(BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        final BaseElement bpmnElement = element.getBaseElement();
+	/**
+	 * Check for redundant edges between common elements (double or more flows
+	 * instead of one)
+	 *
+	 * @return issues
+	 */
 
-        if (bpmnElement instanceof SequenceFlow) {
+	@Override
+	public Collection<CheckerIssue> check(BpmnElement element) {
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final BaseElement bpmnElement = element.getBaseElement();
 
-            final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
+		if (bpmnElement instanceof SequenceFlow) {
 
-            if (getSequenceFlowList().isEmpty()) {
-                addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
-            }
+			final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
 
-            for (Map.Entry<String, ArrayList<String>> entry : getSequenceFlowList().entrySet()) {
-                // Check whether targetRef & sourceRef of current item exist in global list
-                if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                            String.format(
-                                    Messages.getString("OverlapChecker.0"), //$NON-NLS-1$
-                                    CheckName.checkName(bpmnElement))));
-                    return issues;
-                }
-            }
+			if (getSequenceFlowList().isEmpty()) {
+				addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+			}
 
-            if (!getSequenceFlowList().containsKey(bpmnElement.getId())) {
-                addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
-            }
+			for (Map.Entry<String, ArrayList<String>> entry : getSequenceFlowList().entrySet()) {
+				// Check whether targetRef & sourceRef of current item exist in global list
+				if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
+					issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+							String.format(Messages.getString("OverlapChecker.0"), //$NON-NLS-1$
+									CheckName.checkName(bpmnElement))));
+					return issues;
+				}
+			}
 
-        }
+			if (!getSequenceFlowList().containsKey(bpmnElement.getId())) {
+				addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+			}
 
-        return issues;
-    }
+		}
+
+		return issues;
+	}
 
 	public Map<String, ArrayList<String>> getSequenceFlowList() {
 		return sequenceFlowList;

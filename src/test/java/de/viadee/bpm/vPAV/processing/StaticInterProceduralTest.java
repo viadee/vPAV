@@ -39,11 +39,7 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
@@ -51,13 +47,13 @@ import static org.junit.Assert.assertEquals;
 public class StaticInterProceduralTest {
 
     @BeforeClass
-    public static void setup() throws MalformedURLException {
+    public static void setup() {
         RuntimeConfig.getInstance().setClassLoader(StaticInterProceduralTest.class.getClassLoader());
         RuntimeConfig.getInstance().setTest(true);
     }
 
     @Test
-    public void testInterProceduralAnalysis() throws ParserConfigurationException, SAXException, IOException {
+    public void testInterProceduralAnalysis() {
         // Given
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
 

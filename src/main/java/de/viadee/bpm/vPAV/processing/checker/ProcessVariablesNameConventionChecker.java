@@ -46,71 +46,70 @@ import java.util.regex.Pattern;
 
 public class ProcessVariablesNameConventionChecker extends AbstractElementChecker {
 
-    public ProcessVariablesNameConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
-    }
+	public ProcessVariablesNameConventionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+		super(rule, bpmnScanner);
+	}
 
+	/**
+	 * Checks process variables in an bpmn element, whether they comply naming
+	 * conventions
+	 *
+	 * @param element
+	 *            BpmnElement
+	 * @return issues collection of issues
+	 */
+	@Override
+	public Collection<CheckerIssue> check(final BpmnElement element) {
 
-    /**
-     * Checks process variables in an bpmn element, whether they comply naming conventions
-     *
-     * @param element
-     *            BpmnElement
-     * @return issues collection of issues
-     */
-    @Override
-    public Collection<CheckerIssue> check(final BpmnElement element) {
+		// analyse process variables are matching naming conventions
+		final Collection<CheckerIssue> issues = checkNamingConvention(element);
 
-        // analyse process variables are matching naming conventions
-        final Collection<CheckerIssue> issues = checkNamingConvention(element);
+		return issues;
+	}
 
-        return issues;
-    }
+	/**
+	 * Use regular expressions to check process variable conventions
+	 *
+	 * @param element
+	 * @return issues
+	 */
+	private Collection<CheckerIssue> checkNamingConvention(final BpmnElement element) {
 
-    /**
-     * Use regular expressions to check process variable conventions
-     *
-     * @param element
-     * @return issues
-     */
-    private Collection<CheckerIssue> checkNamingConvention(final BpmnElement element) {
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<ElementConvention> elementConventions = rule.getElementConventions();
+		if (elementConventions != null) {
+			for (final ElementConvention convention : elementConventions) {
+				final Pattern pattern = Pattern.compile(convention.getPattern());
+				final ElementFieldTypes fieldTypes = convention.getElementFieldTypes();
+				final Collection<String> fieldTypeItems = fieldTypes.getElementFieldTypes();
+				for (final ProcessVariableOperation variable : element.getProcessVariables().values()) {
+					if (variable.getOperation() == VariableOperation.WRITE) {
+						if (fieldTypeItems != null) {
+							boolean isInRange = false;
+							if (fieldTypes.isExcluded()) {
+								isInRange = !fieldTypeItems.contains(variable.getFieldType().name());
+							} else {
+								isInRange = fieldTypeItems.contains(variable.getFieldType().name());
+							}
+							if (isInRange) {
+								final Matcher patternMatcher = pattern.matcher(variable.getName());
+								if (!patternMatcher.matches()) {
+									issues.add(IssueWriter.createSingleIssue(rule, CriticalityEnum.WARNING, element,
+											variable.getResourceFilePath(), variable.getName(),
+											String.format(Messages.getString("ProcessVariablesNameConventionChecker.0"), //$NON-NLS-1$
+													variable.getName(), convention.getName(), variable.getChapter(),
+													variable.getFieldType().getDescription()),
+											convention));
 
-        final Collection<ElementConvention> elementConventions = rule.getElementConventions();
-        if (elementConventions != null) {
-            for (final ElementConvention convention : elementConventions) {
-                final Pattern pattern = Pattern.compile(convention.getPattern());
-                final ElementFieldTypes fieldTypes = convention.getElementFieldTypes();
-                final Collection<String> fieldTypeItems = fieldTypes.getElementFieldTypes();
-                for (final ProcessVariableOperation variable : element.getProcessVariables().values()) {
-                    if (variable.getOperation() == VariableOperation.WRITE) {
-                        if (fieldTypeItems != null) {
-                            boolean isInRange = false;
-                            if (fieldTypes.isExcluded()) {
-                                isInRange = !fieldTypeItems.contains(variable.getFieldType().name());
-                            } else {
-                                isInRange = fieldTypeItems.contains(variable.getFieldType().name());
-                            }
-                            if (isInRange) {
-                                final Matcher patternMatcher = pattern.matcher(variable.getName());
-                                if (!patternMatcher.matches()) {
-                                    issues.add(IssueWriter.createSingleIssue(rule, CriticalityEnum.WARNING, element,
-                                            variable.getResourceFilePath(), variable.getName(),
-                                            String.format(
-                                                    Messages.getString("ProcessVariablesNameConventionChecker.0"), //$NON-NLS-1$
-                                                    variable.getName(), convention.getName(), variable.getChapter(),
-                                                    variable.getFieldType().getDescription()),
-                                            convention));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return issues;
-    }
+		return issues;
+	}
 }
