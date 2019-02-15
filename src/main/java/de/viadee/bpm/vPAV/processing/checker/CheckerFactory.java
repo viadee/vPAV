@@ -83,12 +83,12 @@ public class CheckerFactory {
 			if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")
 					&& !rule.getKey().equals("DataFlowChecker")) { //$NON-NLS-1$
 				try {
-					if (!rule.getKey().equals("VersioningChecker") && !rule.getKey().equals("MessageChecker")) { //$NON-NLS-1$
+					if (!rule.getKey().equals("VersioningChecker") && !rule.getKey().equals("MessageCorrelationChecker")) { //$NON-NLS-1$
 						Class<?> clazz = Class.forName(fullyQualifiedName);
 						Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class);
 						checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner));
 					}
-					if (scanner != null && rule.getKey().equals("MessageChecker")) {
+					if (scanner != null && rule.getKey().equals("MessageCorrelationChecker")) {
 						Class<?> clazz = Class.forName(fullyQualifiedName);
 						Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class,
 								ProcessVariablesScanner.class);

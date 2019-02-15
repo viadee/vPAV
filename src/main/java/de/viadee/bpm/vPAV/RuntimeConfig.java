@@ -65,7 +65,7 @@ public class RuntimeConfig {
 			"DmnTaskChecker", "ProcessVariablesModelChecker", "ProcessVariablesNameConventionChecker",
 			"TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
 			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker", "CreateOutputHTML",
-			"DataFlowChecker", "MessageChecker" };
+			"DataFlowChecker", "MessageCorrelationChecker" };
 
 	private ArrayList<String> allActiveRules = new ArrayList<>();
 

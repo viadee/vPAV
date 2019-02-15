@@ -47,25 +47,21 @@ import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 /**
- * Class MessageChecker
+ * Class MessageCorrelationChecker
  *
  * Checks a bpmn model, if message references can be resolved for message
  * events/receive tasks.
  *
  */
-public class MessageChecker extends AbstractElementChecker {
+public class MessageCorrelationChecker extends AbstractElementChecker {
 
 	private ProcessVariablesScanner scanner;
 
-	public MessageChecker(final Rule rule, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
+	MessageCorrelationChecker(final Rule rule, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
 		super(rule, bpmnScanner);
 		this.scanner = scanner;
 	}
-
-
-	// TODO: Merge with other message checker
 
 	@Override
 	public Collection<CheckerIssue> check(final BpmnElement element) {
@@ -123,7 +119,7 @@ public class MessageChecker extends AbstractElementChecker {
 		for (EntryPoint ep : entryPoints) {
 			if (!ep.getMessageName().equals(messageName)) {
 				issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-						String.format(Messages.getString("MessageChecker.1"), //$NON-NLS-1$
+						String.format(Messages.getString("MessageCorrelationChecker.1"), //$NON-NLS-1$
 								messageName)));
 			}
 		}

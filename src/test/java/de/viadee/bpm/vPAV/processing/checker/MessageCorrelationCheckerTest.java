@@ -33,7 +33,6 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -45,6 +44,7 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -53,14 +53,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
-public class MessageCheckerTest {
+public class MessageCorrelationCheckerTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
 
-	private static MessageChecker checker;
+	private static MessageCorrelationChecker checker;
 
 	private static Rule rule;
 
@@ -81,30 +80,37 @@ public class MessageCheckerTest {
 	 * Case: Test a model with correct message inside model (start event) + source
 	 * code
 	 */
-	//@Test
+	@Test
 	public void testCorrectMessageStartEvent() throws IOException, SAXException, ParserConfigurationException {
 
-		final String PATH = BASE_PATH + "MessageChecker_correctMessageStartEvent.bpmn";
+		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessageStartEvent.bpmn";
 
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final Set<String> testSet = new HashSet<String>();
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate.java");
+		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
 				fileScanner.getJavaResourcesFileInputStream());
-		checker = new MessageChecker(rule, new BpmnScanner(PATH), scanner);
 
-		ProcessApplicationValidator.findModelErrors();
+		scanner.scanProcessVariables();
+
+		checker = new MessageCorrelationChecker(rule, new BpmnScanner(PATH), scanner);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+		for (BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement);
+			issues.addAll(checker.check(element));
+		}
 
 		if (issues.size() > 0) {
-			Assert.fail("Correct message was not identified for receive task");
+			Assert.fail("Correct message was not identified for start event");
 		}
 	}
 
@@ -112,24 +118,33 @@ public class MessageCheckerTest {
 	 * Case: Test a model with correct message inside model (receive task) + source
 	 * code
 	 */
-	//@Test
+	@Test
 	public void testCorrectMessageReceiveTask() throws IOException, SAXException, ParserConfigurationException {
-		final String PATH = BASE_PATH + "MessageChecker_correctMessageReceiveTask.bpmn";
+		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessageReceiveTask.bpmn";
 
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final Set<String> testSet = new HashSet<String>();
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate2.java");
+		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
 				fileScanner.getJavaResourcesFileInputStream());
-		checker = new MessageChecker(rule, new BpmnScanner(PATH), scanner);
+
+		scanner.scanProcessVariables();
+
+		checker = new MessageCorrelationChecker(rule, new BpmnScanner(PATH), scanner);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+		for (BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement);
+			issues.addAll(checker.check(element));
+		}
 
 		if (issues.size() > 0) {
 			Assert.fail("Correct message was not identified for receive task");
@@ -140,24 +155,33 @@ public class MessageCheckerTest {
 	 * Case: Test a model with correct messages inside model (start event + receive
 	 * task) + source code
 	 */
-	//@Test
+	@Test
 	public void testAllCorrectMessages() throws IOException, SAXException, ParserConfigurationException {
-		final String PATH = BASE_PATH + "MessageChecker_correctMessages.bpmn";
+		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessages.bpmn";
 
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final Set<String> testSet = new HashSet<String>();
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate3.java");
+		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
 				fileScanner.getJavaResourcesFileInputStream());
-		checker = new MessageChecker(rule, new BpmnScanner(PATH), scanner);
+
+		scanner.scanProcessVariables();
+
+		checker = new MessageCorrelationChecker(rule, new BpmnScanner(PATH), scanner);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+		for (BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement);
+			issues.addAll(checker.check(element));
+		}
 
 		if (issues.size() > 0) {
 			Assert.fail("Correct messages were not identified");
@@ -168,24 +192,33 @@ public class MessageCheckerTest {
 	 * Case: Test a model with incorrect message inside model (start event + receive
 	 * task)
 	 */
-	//@Test
+	@Test
 	public void testIncorrectMessages() throws IOException, SAXException, ParserConfigurationException {
-		final String PATH = BASE_PATH + "MessageChecker_incorrectMessage.bpmn";
+		final String PATH = BASE_PATH + "MessageCorrelationChecker_incorrectMessage.bpmn";
 
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final Set<String> testSet = new HashSet<String>();
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate4.java");
+		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
 				fileScanner.getJavaResourcesFileInputStream());
-		checker = new MessageChecker(rule, new BpmnScanner(PATH), scanner);
+
+		scanner.scanProcessVariables();
+
+		checker = new MessageCorrelationChecker(rule, new BpmnScanner(PATH), scanner);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+		for (BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement);
+			issues.addAll(checker.check(element));
+		}
 
 		if (issues.size() != 1) {
 			Assert.fail("Incorrect message was not identified");

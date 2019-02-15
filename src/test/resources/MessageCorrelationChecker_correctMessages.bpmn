@@ -15,8 +15,8 @@
       <bpmn:outgoing>SequenceFlow_1xn01fx</bpmn:outgoing>
     </bpmn:receiveTask>
   </bpmn:process>
-  <bpmn:message id="Message_15np4mh" name="TestMessage1" />
-  <bpmn:message id="Message_0fnllzh" name="TestMessage2" />
+  <bpmn:message id="Message_15np4mh" name="TestMessage2" />
+  <bpmn:message id="Message_0fnllzh" name="TestMessage3" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
       <bpmndi:BPMNShape id="EndEvent_0lip64m_di" bpmnElement="EndEvent_0lip64m">

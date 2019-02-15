@@ -76,28 +76,25 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 	public Collection<CheckerIssue> check(final BpmnElement element) {
 
 		final BaseElement baseElement = element.getBaseElement();
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		// Map with string (contains the timer definiton) and the element itself
 		// (contains name and id)
-		Map<Element, Element> list = new HashMap<>();
 
 		// check if the element is an event and retrieve id
 		if (baseElement.getId() != null && (baseElement instanceof IntermediateCatchEvent
 				|| baseElement instanceof StartEvent || baseElement instanceof BoundaryEvent)) {
 
-			list = bpmnScanner.getTimerImplementation(baseElement.getId());
-			String timerDefinition;
+			final Map<Element, Element> timerMap = new HashMap<>(bpmnScanner.getTimerImplementation(baseElement.getId()));
+			String timerDefinition = "";
 
-			for (Map.Entry<Element, Element> entry : list.entrySet()) {
+			for (Map.Entry<Element, Element> entry : timerMap.entrySet()) {
 
 				if (entry.getValue() != null) {
 					timerDefinition = entry.getValue().getParentNode().getTextContent().trim();
-				} else {
-					timerDefinition = ""; //$NON-NLS-1$
 				}
 
-				if (timerDefinition != null && !timerDefinition.trim().isEmpty()) {
+				if (!timerDefinition.trim().isEmpty()) {
 
 					// BpmnModelConstants.BPMN_ELEMENT_TIME_DATE
 					if (entry.getValue() != null && (entry.getValue().getNodeName() != null
@@ -192,7 +189,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 					issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
 							String.format(Messages.getString("TimerExpressionChecker.14"), //$NON-NLS-1$
 									CheckName.checkTimer(entry.getKey()))));
-				} else if (timerDefinition == null || timerDefinition.trim().isEmpty()) {
+				} else if (timerDefinition.trim().isEmpty()) {
 					issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
 							String.format(Messages.getString("TimerExpressionChecker.15"), //$NON-NLS-1$
 									CheckName.checkTimer(entry.getKey()))));

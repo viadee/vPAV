@@ -470,6 +470,10 @@ public class FileScanner {
 		return javaResourcesFileInputStream;
 	}
 
+	public void setJavaResourcesFileInputStream(Set<String> javaResources) {
+		javaResourcesFileInputStream = javaResources;
+	}
+
 	public static boolean getIsDirectory() {
 		return isDirectory;
 	}
