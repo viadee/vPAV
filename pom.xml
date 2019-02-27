@@ -184,13 +184,17 @@
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
 			<version>3.2.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ca.mcgill.sable</groupId>
+					<artifactId>polyglot</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.mcgill.sable</groupId>
+					<artifactId>jasmin</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>5.0.4.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 	<profiles>
@@ -376,6 +380,15 @@
      			</plugin>	
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>central</id>
+			<name>Maven Central</name>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
+	</repositories>
+
 
 	<reporting>
 		<excludeDefaults>true</excludeDefaults>
