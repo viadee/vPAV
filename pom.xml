@@ -383,12 +383,17 @@
 
 	<repositories>
 		<repository>
-			<id>central</id>
-			<name>Maven Central</name>
-			<url>http://repo1.maven.org/maven2</url>
+			<id>soot-release</id>
+			<name>Maven repository of the Software Engineering Group at University of Paderborn</name>
+			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
-
 
 	<reporting>
 		<excludeDefaults>true</excludeDefaults>
