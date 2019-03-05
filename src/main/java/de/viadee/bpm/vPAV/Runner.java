@@ -82,8 +82,6 @@ public class Runner {
 
 	private boolean checkProcessVariables = false;
 
-	private static boolean isStatic = false;
-
 	/**
 	 * Main method which represents lifecycle of the validation process. Calls main
 	 * functions
@@ -428,7 +426,7 @@ public class Runner {
 	 * @param issues
 	 *            all found issues
 	 * @return filtered issues
-	 * @throws IOException
+	 * @throws RuntimeException
 	 *             Ignored issues couldn't be read successfully
 	 */
 	private Collection<CheckerIssue> filterIssues(final Collection<CheckerIssue> issues) throws RuntimeException {
@@ -465,8 +463,7 @@ public class Runner {
 		// all issues to be ignored
 		final Collection<String> ignoredIssues = collectIgnoredIssues(ConfigConstants.IGNORE_FILE);
 
-		final HashMap<String, CheckerIssue> filteredIssues = new HashMap<>();
-		filteredIssues.putAll(issuesMap);
+		final HashMap<String, CheckerIssue> filteredIssues = new HashMap<>(issuesMap);
 
 		// remove issues that are listed in ignore file
 		for (Map.Entry<String, CheckerIssue> entry : issuesMap.entrySet()) {
@@ -498,7 +495,7 @@ public class Runner {
 	private Collection<String> collectIgnoredIssues(final String filePath) throws IOException {
 
 		final Map<String, String> ignoredIssuesMap = getIgnoredIssuesMap();
-		final Collection<String> ignoredIssues = new ArrayList<String>();
+		final Collection<String> ignoredIssues = new ArrayList<>();
 
 		FileReader fileReader = createFileReader(filePath);
 
@@ -574,27 +571,27 @@ public class Runner {
 	 *
 	 * @param rules
 	 *            all rules of ruleSet.xml
-	 * @param processdef
-	 *            processdefintion
+	 * @param processDefinition
+	 *            processDefinition
 	 * @param fileScanner
 	 *            fileScanner
 	 * @param variableScanner
 	 *            variableScanner
 	 * @return modelIssues
 	 */
-	private Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processdef,
+	private Collection<CheckerIssue> checkModel(final Map<String, Rule> rules, final String processDefinition,
 			final FileScanner fileScanner, final ProcessVariablesScanner variableScanner,
 			Collection<DataFlowRule> dataFlowRules) {
 		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
 		ModelDispatchResult dispatchResult;
 		if (variableScanner != null) {
 			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner,
-					new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
+					new File(ConfigConstants.BASEPATH + processDefinition), fileScanner.getDecisionRefToPathMap(),
 					fileScanner.getProcessIdToPathMap(), variableScanner, dataFlowRules,
 					fileScanner.getResourcesNewestVersions(), rules);
 		} else {
 			dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(
-					new File(ConfigConstants.BASEPATH + processdef), fileScanner.getDecisionRefToPathMap(),
+					new File(ConfigConstants.BASEPATH + processDefinition), fileScanner.getDecisionRefToPathMap(),
 					fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
 		}
 		elements.addAll(dispatchResult.getBpmnElements());
@@ -610,7 +607,7 @@ public class Runner {
 	 *
 	 * @param scanner
 	 *            OuterProcessVariablesScanner
-	 * @throws IOException
+	 * @throws RuntimeException
 	 *             Outer process variables couldn't be read
 	 */
 	private void readOuterProcessVariables(final ProcessVariablesScanner scanner) throws RuntimeException {
@@ -645,7 +642,7 @@ public class Runner {
 		return getFileScanner().getProcessDefinitions();
 	}
 
-	public Collection<CheckerIssue> getfilteredIssues() {
+	public Collection<CheckerIssue> getFilteredIssues() {
 		return filteredIssues;
 	}
 
@@ -685,7 +682,4 @@ public class Runner {
 		this.wrongCheckersMap = wrongCheckersMap;
 	}
 
-	public static boolean getIsStatic() {
-		return isStatic;
-	}
 }

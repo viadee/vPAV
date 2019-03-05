@@ -79,13 +79,13 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		final BaseElement baseElement = element.getBaseElement();
-		issues.addAll(checkScriptTask(element.getProcessdefinition(), element));
+		issues.addAll(checkScriptTask(element.getProcessDefinition(), element));
 
 		final ExtensionElements extensionElements = baseElement.getExtensionElements();
 		if (extensionElements != null) {
 			issues.addAll(
-					checkExecutionListener(element.getProcessdefinition(), element, baseElement, extensionElements));
-			issues.addAll(checkTaskListener(element.getProcessdefinition(), element, baseElement, extensionElements));
+					checkExecutionListener(element.getProcessDefinition(), element, baseElement, extensionElements));
+			issues.addAll(checkTaskListener(element.getProcessDefinition(), element, baseElement, extensionElements));
 		}
 
 		return issues;

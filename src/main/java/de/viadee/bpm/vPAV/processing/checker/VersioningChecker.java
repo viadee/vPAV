@@ -321,7 +321,7 @@ public class VersioningChecker extends AbstractElementChecker {
             }
         } catch (final ELException e) {
             throw new ProcessingException(
-                    "el expression " + expression + " in " + element.getProcessdefinition() + ", element ID: " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    "el expression " + expression + " in " + element.getProcessDefinition() + ", element ID: " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                             + element.getBaseElement().getId() + " couldn't be parsed", //$NON-NLS-1$
                     e);
         }

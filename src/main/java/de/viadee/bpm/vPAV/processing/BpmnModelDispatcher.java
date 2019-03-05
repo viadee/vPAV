@@ -67,7 +67,7 @@ public class BpmnModelDispatcher {
 	 * 
 	 * @param fileScanner
 	 *            - FileScanner
-	 * @param processdefinition
+	 * @param processDefinition
 	 *            - Holds the path to the BPMN model
 	 * @param decisionRefToPathMap
 	 *            - DecisionRefToPathMap
@@ -83,15 +83,15 @@ public class BpmnModelDispatcher {
 	 *            - ruleSet
 	 * @return issues
 	 */
-	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processdefinition,
+	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processDefinition,
 			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
 			final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
 			final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
 
-		final BpmnScanner bpmnScanner = createScanner(processdefinition);
+		final BpmnScanner bpmnScanner = createScanner(processDefinition);
 
 		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
@@ -110,12 +110,12 @@ public class BpmnModelDispatcher {
 
 		// create data flow graphs for bpmn model
 		final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-				processdefinition.getPath(), new ArrayList<>(), scanner);
+				processDefinition.getPath(), new ArrayList<>(), scanner);
 
 		// add data flow information to graph and calculate invalid paths
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-		final Collection<BpmnElement> bpmnElements = getBpmnElements(processdefinition, baseElements, graphBuilder);
+		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
 		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
@@ -138,7 +138,7 @@ public class BpmnModelDispatcher {
 		Collection<ElementChecker> checkerInstances = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner,
 				scanner);
 
-		executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
+		executeCheckers(processDefinition, baseElements, graphBuilder, issues, checkerInstances);
 
 		return new ModelDispatchResult(issues, bpmnElements, processVariables);
 	}
@@ -189,7 +189,7 @@ public class BpmnModelDispatcher {
 
 	/**
 	 * @param baseElements
-	 *            Collection of baseelements
+	 *            Collection of baseElements
 	 * @param graphBuilder
 	 *            graphBuilder
 	 * @param processDefinition

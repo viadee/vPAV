@@ -89,7 +89,7 @@ public enum CamundaProcessVariableFunctions {
      * @param type
      *            - VariableOperation
      */
-    private CamundaProcessVariableFunctions(final String name, final String service, int number, int loc,
+    CamundaProcessVariableFunctions(final String name, final String service, int number, int loc,
             VariableOperation type) {
         this.name = name;
         this.service = service;

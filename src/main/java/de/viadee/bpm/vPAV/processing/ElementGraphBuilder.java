@@ -144,9 +144,6 @@ public class ElementGraphBuilder {
 				}
 
 				// Ordered map to hold operations in correct order
-				// final ListMultimap<String, ProcessVariableOperation> variables = new
-				// LinkedHashMap<>();
-
 				final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
 				// initialize element

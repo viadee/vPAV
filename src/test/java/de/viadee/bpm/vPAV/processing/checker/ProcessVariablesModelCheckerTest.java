@@ -83,17 +83,17 @@ public class ProcessVariablesModelCheckerTest {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
-        final File processdefinition = new File(PATH);
+        final File processDefinition = new File(PATH);
         final JavaReaderContext jvc = new JavaReaderContext();
         jvc.setJavaReadingStrategy(new JavaReaderRegex());
         
         // parse bpmn model
-        modelInstance = Bpmn.readModelFromFile(processdefinition);
+        modelInstance = Bpmn.readModelFromFile(processDefinition);
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
         // create data flow graphs
         final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-                processdefinition.getPath(), new ArrayList<String>(), scanner);
+                processDefinition.getPath(), new ArrayList<String>(), scanner);
 
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder

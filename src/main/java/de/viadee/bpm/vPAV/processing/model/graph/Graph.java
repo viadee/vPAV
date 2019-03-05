@@ -31,12 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-/**
- * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- *
- * A class for a directed graph. Implemented by an adjacency list representation of a graph.
- */
-
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -45,6 +39,12 @@ import de.viadee.bpm.vPAV.processing.model.data.InOutState;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
 import java.util.*;
+
+/**
+ * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
+ * <p>
+ * A class for a directed graph. Implemented by an adjacency list representation of a graph.
+ */
 
 public class Graph implements IGraph {
 

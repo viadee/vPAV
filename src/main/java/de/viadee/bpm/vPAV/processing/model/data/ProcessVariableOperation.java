@@ -105,7 +105,7 @@ public class ProcessVariableOperation {
     }
 
     public String toString() {
-        return name + " [" + element.getProcessdefinition() + ", " + element.getBaseElement().getId()
+        return name + " [" + element.getProcessDefinition() + ", " + element.getBaseElement().getId()
                 + ", Scope: " + scopeId + ", " + chapter.name() + ", " + fieldType.getDescription() + ", "
                 + resourceFilePath + "]";
     }
