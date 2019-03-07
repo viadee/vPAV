@@ -37,8 +37,6 @@ package de.viadee.bpm.vPAV.constants;
 
 public final class ConfigConstants {
 	
-	  public static final String INITIAL_VARIABLES = "InitialProcessVariables";
-
     public static final String RULESET = "ruleSet.xml";
 
     public static final String RULESETDEFAULT = "ruleSetDefault.xml";
@@ -73,8 +71,6 @@ public final class ConfigConstants {
 
     public static final String VALIDATION_ISSUE_SEVERITY = "target/vPAV/js/issue_severity.js";
 
-    public static final String VALIDATION_JS_TMP = "target/vPAV/js/tmp.js";
-
     public static final String VALIDATION_JS_PROCESSVARIABLES = "target/vPAV/js/processVariables.js";
 
     public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";
@@ -100,8 +96,6 @@ public final class ConfigConstants {
     public static final String JS_BASEPATH = "src\\main\\resources\\";
 
     public static final String TARGET_CLASS_FOLDER = "target/classes";
-
-    public static final String LOCATION = "location";
 
     public static final String VERSIONINGSCHEMEPACKAGE = "versioningSchemePackage";
 

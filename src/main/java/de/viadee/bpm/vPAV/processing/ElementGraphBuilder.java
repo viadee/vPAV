@@ -35,6 +35,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -71,10 +72,23 @@ public class ElementGraphBuilder {
 
 	private BpmnScanner bpmnScanner;
 
+	private Rule rule;
+
 	public ElementGraphBuilder(BpmnScanner bpmnScanner) {
 		this.bpmnScanner = bpmnScanner;
 	}
 
+	public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
+			final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
+			final Map<String, Collection<String>> processIdToVariables, final Rule rule, BpmnScanner bpmnScanner) {
+		this.decisionRefToPathMap = decisionRefToPathMap;
+		this.processIdToPathMap = processIdToPathMap;
+		this.messageIdToVariables = messageIdToVariables;
+		this.processIdToVariables = processIdToVariables;
+		this.bpmnScanner = bpmnScanner;
+		this.rule = rule;
+	}
+	
 	public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
 			final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
 			final Map<String, Collection<String>> processIdToVariables, BpmnScanner bpmnScanner) {
@@ -186,7 +200,7 @@ public class ElementGraphBuilder {
 				}
 
 				// examine process variables and save it with access operation
-				final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, bpmnScanner);
+				final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner);
 				variables.putAll(reader.getVariablesFromElement(context, fileScanner, node));
 				// examine process variables for element and set it
 				node.setProcessVariables(variables);
@@ -373,7 +387,7 @@ public class ElementGraphBuilder {
 			final BpmnElement node = new BpmnElement(processdefinitionPath, subElement);
 			// determine process variables with operations
 			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(new ProcessVariableReader(decisionRefToPathMap, bpmnScanner)
+			variables.putAll(new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner)
 					.getVariablesFromElement(context, fileScanner, node));
 			// set process variables for the node
 			node.setProcessVariables(variables);
@@ -569,7 +583,7 @@ public class ElementGraphBuilder {
 
 		// transform process into data flow
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
-				messageIdToVariables, processIdToVariables, bpmnScanner);
+				messageIdToVariables, processIdToVariables, rule, bpmnScanner);
 		return graphBuilder.createProcessGraph(context, fileScanner, subModel, callActivityPath, calledElementHierarchy,
 				scanner);
 	}

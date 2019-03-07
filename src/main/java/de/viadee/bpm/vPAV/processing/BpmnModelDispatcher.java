@@ -96,8 +96,10 @@ public class BpmnModelDispatcher {
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
+		final Rule rule = conf.get("ProcessVariablesModelChecker");
+
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
-				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), bpmnScanner);
+				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), rule, bpmnScanner);
 
 		// Depending on Regex/Static analysis, find Process Variables from Java Delegate
 		JavaReaderContext jvc = new JavaReaderContext();

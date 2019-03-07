@@ -41,8 +41,7 @@ import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import java.util.*;
 
 /**
- * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- * <p>
+ *
  * A class for a directed graph. Implemented by an adjacency list representation of a graph.
  */
 
@@ -295,9 +294,7 @@ public class Graph implements IGraph {
      * source: http://codereview.stackexchange.com/questions/45678/find-all-paths-from-source-to-destination
      *
      * @param startNode
-     * @param varName
      * @param currentPath
-     * @param maxSize
      * @return paths
      */
     private List<Path> getAllInvalidPathsRecursive(final BpmnElement startNode,
@@ -490,8 +487,8 @@ public class Graph implements IGraph {
      *
      * 1) delete 2) read 3) define
      *
-     * @param element1
-     * @param element2
+     * @param state1
+     * @param state2
      * @return
      */
     private static InOutState getStatePrecedence(final InOutState state1, final InOutState state2) {

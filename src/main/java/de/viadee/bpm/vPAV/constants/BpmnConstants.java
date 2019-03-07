@@ -197,6 +197,8 @@ public class BpmnConstants {
 
 	public static final String CAMUNDA_SCRIPT = "camunda:script";
 
+	public static final String SCRIPT_FORMAT = "scriptFormat";
+
 	public static final String RESULT_VARIABLE = "resultVariable";
 
 	public static final String ATTACHED_TO_REF = "attachedToRef";

@@ -300,4 +300,42 @@ public class ProcessVariableMappingTest {
         Assert.assertEquals(2, processVariables.size());
     }
 
+    /**
+     * Case: Test a model with Input Mapping of type text
+     * code
+     */
+    @Test
+    public void testInputTypeScript() throws IOException, SAXException, ParserConfigurationException {
+
+        final String PATH = BASE_PATH + "ProcessVariablesMapping_InputScript.bpmn";
+        final File processDefinition = new File(PATH);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final Set<String> testSet = new HashSet<>();
+        testSet.add("de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
+        fileScanner.setJavaResourcesFileInputStream(testSet);
+
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+                fileScanner.getJavaResourcesFileInputStream());
+
+        scanner.scanProcessVariables();
+
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        // create data flow graphs
+        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
+                processDefinition.getPath(), new ArrayList<>(), scanner);
+
+        final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
+        final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+
+        Assert.assertEquals(1, processVariables.size());
+    }
+
 }

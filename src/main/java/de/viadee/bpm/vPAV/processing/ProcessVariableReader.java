@@ -35,10 +35,14 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.*;
+import org.apache.commons.collections4.map.LinkedMap;
 import org.camunda.bpm.engine.impl.juel.Builder;
 import org.camunda.bpm.engine.impl.juel.IdentifierNode;
 import org.camunda.bpm.engine.impl.juel.Tree;
@@ -75,10 +79,13 @@ public final class ProcessVariableReader {
 
 	private final BpmnScanner bpmnScanner;
 
+	private final Rule rule;
+
 	public static final Logger LOGGER = Logger.getLogger(ProcessVariableReader.class.getName());
 
-	public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, BpmnScanner scanner) {
+	public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, final Rule rule, BpmnScanner scanner) {
 		this.decisionRefToPathMap = decisionRefToPathMap;
+		this.rule = rule;
 		this.bpmnScanner = scanner;
 	}
 
@@ -227,66 +234,70 @@ public final class ProcessVariableReader {
 				.getOutputMapping(element.getBaseElement().getId());
 		final ArrayList<String> variablesExpressions = new ArrayList<>();
 
+		final LinkedMap<String, String> inputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(), BpmnConstants.CAMUNDA_INPAR);
+		final LinkedMap<String, String> outputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(), BpmnConstants.CAMUNDA_OUTPAR);
+
 		for (Map.Entry<String, Map<String, String>> entry : inputVariables.entrySet()) {
 			for (Map.Entry<String, String> innerEntry : entry.getValue().entrySet()) {
-				if (innerEntry.getValue().equals("null")) {
-					processVariables.put(entry.getKey(),
-							new ProcessVariableOperation(entry.getKey(), element, ElementChapter.InputOutput,
-									KnownElementFieldType.InputParameter, element.getProcessDefinition(),
-									VariableOperation.DELETE, scopeElementId));
+				if (innerEntry.getValue().isEmpty()) {
+					IssueWriter.createSingleIssue(this.rule, CriticalityEnum.WARNING, element, element.getProcessDefinition(),
+							Messages.getString("ProcessVariableReader.1")); //$NON-NLS-1$);
 				} else {
-					processVariables.put(entry.getKey(),
-							new ProcessVariableOperation(entry.getKey(), element, ElementChapter.InputOutput,
-									KnownElementFieldType.InputParameter, element.getProcessDefinition(),
-									VariableOperation.WRITE, scopeElementId));
+					if (!inputMappingType.firstKey().equals(BpmnConstants.CAMUNDA_SCRIPT)) {
+						final ArrayList<String> variables = new ArrayList<>(checkExpressionForReadVariable(innerEntry.getValue(), element));
+						if (variables.size() == 0) {
+							processVariables.put(entry.getKey(),
+									new ProcessVariableOperation(entry.getKey(), element, ElementChapter.InputOutput,
+											KnownElementFieldType.InputParameter, element.getProcessDefinition(),
+											VariableOperation.WRITE, scopeElementId));
+						} else {
+							variablesExpressions.addAll(variables);
+						}
+					}
 				}
-				variablesExpressions.addAll(checkExpressionForReadVariable(innerEntry.getValue(), element));
 			}
 		}
 
-		for (Map.Entry<String, Map<String, String>> entry : outputVariables.entrySet()) {
-			processVariables.put(entry.getKey(),
-					new ProcessVariableOperation(entry.getKey(), element, ElementChapter.InputOutput,
-							KnownElementFieldType.OutputParameter, element.getProcessDefinition(),
-							VariableOperation.WRITE, scopeElementId));
-		}
-
-		// ArrayList<String> outVar =
-		// bpmnScanner.getOutputVariables(element.getBaseElement().getId());
-		// ArrayList<String> inVar =
-		// bpmnScanner.getInputVariables(element.getBaseElement().getId());
-		// ArrayList<String> varValues =
-		// bpmnScanner.getInOutputVariablesValue(element.getBaseElement().getId());
-		//
-		// // save output variables
-		// for (String name : outVar) {
-		// processVariables.put(name,
-		// new ProcessVariableOperation(name, element, ElementChapter.InputOutput,
-		// KnownElementFieldType.OutputParameter, element.getProcessDefinition(),
-		// VariableOperation.WRITE, scopeElementId));
-		// }
-		//
-		// ArrayList<String> varValueClean = new ArrayList<>();
-		// for (String expression : varValues) {
-		// varValueClean.addAll(checkExpressionForReadVariable(expression, element));
-		// }
-		// varValueClean.removeAll(inVar);
-		//
-		// // add all processVariables to List
-		// for (String var : varValueClean) {
-		// processVariables.put(var,
-		// new ProcessVariableOperation(var, element, ElementChapter.InputOutput,
-		// KnownElementFieldType.OutputParameter, element.getProcessDefinition(),
-		// VariableOperation.READ, scopeElementId));
-		// }
-		//
-		// for (String name : outVar)
-		// processVariables.put(name,
-		// new ProcessVariableOperation(name, element, ElementChapter.InputOutput,
-		// KnownElementFieldType.OutputParameter, element.getProcessDefinition(),
-		// VariableOperation.READ, scopeElementId));
+//		 ArrayList<String> outVar =
+//		 bpmnScanner.getOutputVariables(element.getBaseElement().getId());
+//		 ArrayList<String> inVar =
+//		 bpmnScanner.getInputVariables(element.getBaseElement().getId());
+//		 ArrayList<String> varValues =
+//		 bpmnScanner.getInOutputVariablesValue(element.getBaseElement().getId());
+//
+//		 // save output variables
+//		 for (String name : outVar) {
+//		 processVariables.put(name,
+//		 new ProcessVariableOperation(name, element, ElementChapter.InputOutput,
+//		 KnownElementFieldType.OutputParameter, element.getProcessDefinition(),
+//		 VariableOperation.WRITE, scopeElementId));
+//		 }
+//
+//		 ArrayList<String> varValueClean = new ArrayList<>();
+//		 for (String expression : varValues) {
+//		 varValueClean.addAll(checkExpressionForReadVariable(expression, element));
+//		 }
+//		 varValueClean.removeAll(inVar);
+//
+//		 // add all processVariables to List
+//		 for (String var : varValueClean) {
+//		 processVariables.put(var,
+//		 new ProcessVariableOperation(var, element, ElementChapter.InputOutput,
+//		 KnownElementFieldType.OutputParameter, element.getProcessDefinition(),
+//		 VariableOperation.READ, scopeElementId));
+//		 }
+//
+//		 for (String name : outVar)
+//		 processVariables.put(name,
+//		 new ProcessVariableOperation(name, element, ElementChapter.InputOutput,
+//		 KnownElementFieldType.OutputParameter, element.getProcessDefinition(),
+//		 VariableOperation.READ, scopeElementId));
 
 		return processVariables;
+	}
+
+	public void checkExp(final String expression, final BpmnElement element) {
+
 	}
 
 	/**

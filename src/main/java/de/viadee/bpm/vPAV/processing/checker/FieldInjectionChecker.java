@@ -113,9 +113,8 @@ public class FieldInjectionChecker extends AbstractElementChecker {
         final String delegateExprAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                 BpmnConstants.ATTR_DEL);
 
-        if (implementationAttr != null && !fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null
-                && (bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
-                        || bpmnElement instanceof SendTask)) {
+        if (implementationAttr != null && !fieldInjectionVarNames.isEmpty() && (bpmnElement instanceof ServiceTask ||
+                bpmnElement instanceof BusinessRuleTask || bpmnElement instanceof SendTask)) {
             // check if class is correct
             if (implementationAttr.equals(BpmnConstants.CAMUNDA_CLASS)) {
                 if (classAttr == null || classAttr.trim().length() == 0) {

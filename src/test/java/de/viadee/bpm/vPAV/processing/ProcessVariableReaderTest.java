@@ -96,7 +96,7 @@ public class ProcessVariableReaderTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -118,7 +118,7 @@ public class ProcessVariableReaderTest {
         final Collection<CallActivity> allServiceTasks = modelInstance
                 .getModelElementsByType(CallActivity.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();

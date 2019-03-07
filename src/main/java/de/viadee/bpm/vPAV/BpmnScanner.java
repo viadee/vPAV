@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import org.apache.commons.collections4.map.LinkedMap;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -44,8 +45,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BpmnScanner {
-
-	private DocumentBuilderFactory factory;
 
 	private DocumentBuilder builder;
 
@@ -72,7 +71,7 @@ public class BpmnScanner {
 	 *             Encapsulate a general SAX error or warning.
 	 */
 	public BpmnScanner(String path) throws ParserConfigurationException, SAXException, IOException {
-		factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		builder = factory.newDocumentBuilder();
 		setModelVersion(path);
@@ -834,6 +833,43 @@ public class BpmnScanner {
 		}
 		return timerList;
 	}
+
+	/**
+	 * get mapping type for input/output parameters for given element by id
+	 * @param id id of current element
+	 * @param mapping input or output mapping
+	 * @return mapping type
+	 */
+	public LinkedMap<String, String> getMappingType(final String id, final String mapping) {
+		final LinkedMap<String, String> mappingTypes = new LinkedMap<>();
+		final NodeList nodeList = doc.getElementsByTagName(mapping);
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			final Node node = nodeList.item(i);
+			if (idMatch(node, id)) {
+				// if more than one child, check on list and value
+				if (node.hasChildNodes() && node.getChildNodes().getLength() > 1) {
+					final NodeList nodeChilds = node.getChildNodes();
+					for (int y = 0; y < nodeChilds.getLength(); y++) {
+						switch (nodeChilds.item(y).getNodeName()) {
+							case BpmnConstants.CAMUNDA_LIST: {
+								mappingTypes.put(nodeChilds.item(y).getNodeName(), null);
+							}
+							case BpmnConstants.CAMUNDA_MAP: {
+								mappingTypes.put(nodeChilds.item(y).getNodeName(), null);
+							}
+							case BpmnConstants.CAMUNDA_SCRIPT: {
+								mappingTypes.put(nodeChilds.item(y).getNodeName(), ((Element) nodeChilds.item(y)).getAttribute(BpmnConstants.SCRIPT_FORMAT));
+							}
+						}
+					}
+				} else {
+					mappingTypes.put(mapping, null);
+				}
+			}
+		}
+		return mappingTypes;
+	}
+
 
 	/**
 	 * get mapping of inputParameters
