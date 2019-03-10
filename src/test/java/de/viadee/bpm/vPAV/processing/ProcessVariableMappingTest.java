@@ -92,7 +92,7 @@ public class ProcessVariableMappingTest {
         scanner.scanProcessVariables();
 
         final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -130,7 +130,7 @@ public class ProcessVariableMappingTest {
         scanner.scanProcessVariables();
 
         final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -168,7 +168,7 @@ public class ProcessVariableMappingTest {
         scanner.scanProcessVariables();
 
         final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -206,7 +206,7 @@ public class ProcessVariableMappingTest {
         scanner.scanProcessVariables();
 
         final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -244,7 +244,7 @@ public class ProcessVariableMappingTest {
         scanner.scanProcessVariables();
 
         final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -282,7 +282,7 @@ public class ProcessVariableMappingTest {
         scanner.scanProcessVariables();
 
         final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);

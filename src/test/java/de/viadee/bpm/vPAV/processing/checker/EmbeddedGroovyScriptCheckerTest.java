@@ -180,9 +180,6 @@ public class EmbeddedGroovyScriptCheckerTest {
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
-        if (issues.size() != 0) {
-            Assert.fail("there should be generated an issue");
-        }
         final String message = issues.iterator().next().getMessage();
         Assert.assertTrue(message.startsWith("startup failed:"));
     }
