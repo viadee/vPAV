@@ -258,6 +258,28 @@ public final class ProcessVariableReader {
 			}
 		}
 
+
+		for (Map.Entry<String, Map<String, String>> entry : outputVariables.entrySet()) {
+			for (Map.Entry<String, String> innerEntry : entry.getValue().entrySet()) {
+				if (innerEntry.getValue().isEmpty()) {
+					IssueWriter.createSingleIssue(this.rule, CriticalityEnum.WARNING, element, element.getProcessDefinition(),
+							Messages.getString("ProcessVariableReader.1")); //$NON-NLS-1$);
+				} else {
+					if (!outputMappingType.firstKey().equals(BpmnConstants.CAMUNDA_SCRIPT)) {
+						final ArrayList<String> variables = new ArrayList<>(checkExpressionForReadVariable(innerEntry.getValue(), element));
+						if (variables.size() == 0) {
+							processVariables.put(entry.getKey(),
+									new ProcessVariableOperation(entry.getKey(), element, ElementChapter.InputOutput,
+											KnownElementFieldType.OutputParameter, element.getProcessDefinition(),
+											VariableOperation.WRITE, scopeElementId));
+						} else {
+							variablesExpressions.addAll(variables);
+						}
+					}
+				}
+			}
+		}
+
 //		 ArrayList<String> outVar =
 //		 bpmnScanner.getOutputVariables(element.getBaseElement().getId());
 //		 ArrayList<String> inVar =
