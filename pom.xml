@@ -183,7 +183,17 @@
 		<dependency>
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
-			<version>3.2.0</version>
+			<version>3.3.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ca.mcgill.sable</groupId>
+					<artifactId>polyglot</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.mcgill.sable</groupId>
+					<artifactId>jasmin</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -371,6 +381,20 @@
 		</plugins>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>soot-release</id>
+			<name>Maven repository of the Software Engineering Group at University of Paderborn</name>
+			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	
 	<reporting>
 		<excludeDefaults>true</excludeDefaults>
 		<outputDirectory>${project.build.directory}/site</outputDirectory>
