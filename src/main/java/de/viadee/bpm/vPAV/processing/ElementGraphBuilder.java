@@ -78,6 +78,11 @@ public class ElementGraphBuilder {
 		this.bpmnScanner = bpmnScanner;
 	}
 
+	public ElementGraphBuilder(BpmnScanner bpmnScanner, final Rule rule) {
+		this.bpmnScanner = bpmnScanner;
+		this.rule = rule;
+	}
+
 	public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
 			final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
 			final Map<String, Collection<String>> processIdToVariables, final Rule rule, BpmnScanner bpmnScanner) {
@@ -88,7 +93,7 @@ public class ElementGraphBuilder {
 		this.bpmnScanner = bpmnScanner;
 		this.rule = rule;
 	}
-	
+
 	public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
 			final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
 			final Map<String, Collection<String>> processIdToVariables, BpmnScanner bpmnScanner) {
@@ -188,7 +193,7 @@ public class ElementGraphBuilder {
 					if (messageRefs.size() == 1) {
 						messageName = bpmnScanner.getMessageName(messageRefs.get(0));
 					}
-					// add process variables for start event, which set by call
+					// add process variables for receive task, which set by call
 					// startProcessInstanceByKey
 
 					for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {

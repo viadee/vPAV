@@ -39,10 +39,6 @@ public class MappingDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        final Object result = execution.getVariable("inputTextVariable");
-    }
-
-    public void doThis(DelegateExecution execution) {
-
+        final Object result = execution.getVariable("inputVariable");
     }
 }

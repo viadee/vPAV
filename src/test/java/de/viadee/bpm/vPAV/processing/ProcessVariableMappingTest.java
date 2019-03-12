@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
@@ -148,7 +149,7 @@ public class ProcessVariableMappingTest {
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
         final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
-        Assert.assertEquals(2, processVariables.size());
+        Assert.assertEquals(3, processVariables.size());
     }
 
     /**
@@ -186,7 +187,7 @@ public class ProcessVariableMappingTest {
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
         final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
-        Assert.assertEquals(2, processVariables.size());
+        Assert.assertEquals(3, processVariables.size());
     }
 
     /**
@@ -262,7 +263,7 @@ public class ProcessVariableMappingTest {
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
         final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
-        Assert.assertEquals(2, processVariables.size());
+        Assert.assertEquals(3, processVariables.size());
     }
 
     /**
@@ -300,7 +301,7 @@ public class ProcessVariableMappingTest {
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
         final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
-        Assert.assertEquals(2, processVariables.size());
+        Assert.assertEquals(3, processVariables.size());
     }
 
     /**
@@ -323,14 +324,14 @@ public class ProcessVariableMappingTest {
         scanner.scanProcessVariables();
 
         final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
-
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
         // create data flow graphs
         graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
