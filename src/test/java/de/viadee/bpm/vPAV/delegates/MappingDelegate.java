@@ -41,4 +41,8 @@ public class MappingDelegate implements JavaDelegate {
     public void execute(DelegateExecution execution) throws Exception {
         final Object result = execution.getVariable("inputTextVariable");
     }
+
+    public void doThis(DelegateExecution execution) {
+
+    }
 }

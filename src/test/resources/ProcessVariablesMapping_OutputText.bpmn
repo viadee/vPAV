@@ -9,10 +9,10 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1tij1gh" sourceRef="StartEvent_1" targetRef="Task_0wh7kto" />
     <bpmn:sequenceFlow id="SequenceFlow_1qw9mzs" sourceRef="Task_0wh7kto" targetRef="EndEvent_010c1mv" />
-    <bpmn:serviceTask id="Task_0wh7kto" camunda:delegateExpression="${mappingDelegate}">
+    <bpmn:serviceTask id="Task_0wh7kto" camunda:delegateExpression="">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:outputParameter name="testOutputText">123</camunda:outputParameter>
+          <camunda:outputParameter name="testOutputText">${mappingDelegate}</camunda:outputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1tij1gh</bpmn:incoming>

@@ -70,6 +70,9 @@ public class ProcessVariableMappingTest {
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
         RuntimeConfig.getInstance().setTest(true);
+        final Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("mappingDelegate", "de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
     }
 
     /**

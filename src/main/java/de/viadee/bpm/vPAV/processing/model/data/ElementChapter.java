@@ -37,6 +37,6 @@ package de.viadee.bpm.vPAV.processing.model.data;
 public enum ElementChapter {
 
     Code, General, InputOutput, Details, ExecutionListener, TaskListener, MultiInstance, FormData, InputData, OutputData,
-    OutstandingVariable, FieldInjections, Signal
+    OutstandingVariable, FieldInjections, Signal, Message
 	
 }
