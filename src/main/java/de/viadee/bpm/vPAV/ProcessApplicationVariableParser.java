@@ -85,14 +85,10 @@ public class ProcessApplicationVariableParser {
 	 * @param fileScanner
 	 *            FileScanner
 	 */
-	private static ProcessVariablesScanner readOuterProcessVariables(final FileScanner fileScanner) throws RuntimeException {
-		try {
-            ProcessVariablesScanner variableScanner = new ProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
-			variableScanner.scanProcessVariables();
-			return variableScanner;
-		} catch (final IOException e) {
-			throw new RuntimeException("Outer process variables couldn't be read", e);
-		}
+	private static ProcessVariablesScanner readOuterProcessVariables(final FileScanner fileScanner) {
+        ProcessVariablesScanner variableScanner = new ProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
+        variableScanner.scanProcessVariables();
+        return variableScanner;
 	}
 
 	/**

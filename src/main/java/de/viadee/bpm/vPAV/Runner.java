@@ -607,15 +607,9 @@ public class Runner {
 	 *
 	 * @param scanner
 	 *            OuterProcessVariablesScanner
-	 * @throws RuntimeException
-	 *             Outer process variables couldn't be read
 	 */
-	private void readOuterProcessVariables(final ProcessVariablesScanner scanner) throws RuntimeException {
-		try {
-			scanner.scanProcessVariables();
-		} catch (final IOException e) {
-			throw new RuntimeException("Outer process variables couldn't be read: " + e.getMessage());
-		}
+	private void readOuterProcessVariables(final ProcessVariablesScanner scanner) {
+		scanner.scanProcessVariables();
 	}
 
 	/**

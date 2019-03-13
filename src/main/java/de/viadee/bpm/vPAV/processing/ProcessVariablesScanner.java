@@ -39,7 +39,6 @@ import soot.jimple.InvokeStmt;
 import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.options.Options;
 
-import java.io.IOException;
 import java.util.*;
 
 public class ProcessVariablesScanner {
@@ -69,15 +68,13 @@ public class ProcessVariablesScanner {
 	 * scan java resources for variables and retrieve important information such as
 	 * message ids and entrypoints
 	 *
-	 * @throws IOException
-	 *             possible exception if filepath can not be resolved
 	 */
-	public void scanProcessVariables() throws IOException {
+	public void scanProcessVariables() {
 		for (final String filePath : javaResources) {
 			if (!filePath.startsWith("javax")) {
 				// TODO: Use ids properly to resolve process variable manipulation
-				final Set<String> messageIds = new HashSet<String>();
-				final Set<String> processIds = new HashSet<String>();
+				final Set<String> messageIds = new HashSet<>();
+				final Set<String> processIds = new HashSet<>();
 				retrieveMethod(filePath, messageIds, processIds);
 			}
 		}
@@ -90,9 +87,11 @@ public class ProcessVariablesScanner {
 	 * @param filePath
 	 *            fully qualified path to the java class
 	 * @param messageIds
-	 * 			Set of messageIds (used to retrieve variable manipulation later on)
+	 *            Set of messageIds (used to retrieve variable manipulation later
+	 *            on)
 	 * @param processIds
-	 * Set of processIds (used to retrieve variable manipulation later on)
+	 *            Set of processIds (used to retrieve variable manipulation later
+	 *            on)
 	 */
 	private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
 		final String sootPath = FileScanner.getSootPath();
@@ -115,7 +114,8 @@ public class ProcessVariablesScanner {
 							if (unit instanceof AssignStmt) {
 								final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
 								if (rightBox.contains(entryPoint)) {
-									if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
+									if (((AssignStmt) unit).getRightOpBox()
+											.getValue() instanceof JInterfaceInvokeExpr) {
 										final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
 												.getRightOpBox().getValue();
 										checkExpression(filePath, messageIds, method, entryPoint, expr);
@@ -125,7 +125,8 @@ public class ProcessVariablesScanner {
 							if (unit instanceof InvokeStmt) {
 								final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue().toString();
 								if (rightBox.contains(entryPoint)) {
-									if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+									if (((InvokeStmt) unit).getInvokeExprBox()
+											.getValue() instanceof JInterfaceInvokeExpr) {
 										final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
 												.getInvokeExprBox().getValue();
 										checkExpression(filePath, messageIds, method, entryPoint, expr);
@@ -146,21 +147,23 @@ public class ProcessVariablesScanner {
 	 * Checks the current expression and creates a new entrypoint
 	 *
 	 * @param filePath
-	 * 	Current filePath of the model
+	 *            Current filePath of the model
 	 * @param messageIds
-	 * 	List of message ids
+	 *            List of message ids
 	 * @param method
-	 * 	Current method
+	 *            Current method
 	 * @param entryPoint
-	 * Current entryPoint
+	 *            Current entryPoint
 	 * @param expr
-	 * Current expression
+	 *            Current expression
 	 */
-	private void checkExpression(final String filePath, final Set<String> messageIds, final SootMethod method, final String entryPoint, final JInterfaceInvokeExpr expr) {
+	private void checkExpression(final String filePath, final Set<String> messageIds, final SootMethod method,
+			final String entryPoint, final JInterfaceInvokeExpr expr) {
 		if (expr != null) {
 			final String ex = expr.getArgBox(0).getValue().toString();
 			if (entryPoint.equals(CamundaMethodServices.CORRELATE_MESSAGE)) {
-				intermediateEntryPoints.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
+				intermediateEntryPoints
+						.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
 			} else {
 				messageIds.add(entryPoint);
 				entryPoints.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
@@ -203,16 +206,15 @@ public class ProcessVariablesScanner {
 		return className;
 	}
 
-
-    /**
-     * get list of intermediate entrypoints (process message, method) where process variables
-     * have been found
-     *
-     * @return returns list of locations
-     */
-    public List<EntryPoint> getIntermediateEntryPoints() {
-        return intermediateEntryPoints;
-    }
+	/**
+	 * get list of intermediate entrypoints (process message, method) where process
+	 * variables have been found
+	 *
+	 * @return returns list of locations
+	 */
+	public List<EntryPoint> getIntermediateEntryPoints() {
+		return intermediateEntryPoints;
+	}
 
 	/**
 	 * get list of entrypoints (process message, method) where process variables

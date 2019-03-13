@@ -60,7 +60,7 @@ public class SignalEventChecker extends AbstractElementChecker {
 
 	@Override
 	public Collection<CheckerIssue> check(BpmnElement element) {
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BaseElement baseElement = element.getBaseElement();
 
 		if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)
@@ -104,15 +104,15 @@ public class SignalEventChecker extends AbstractElementChecker {
 	/**
 	 * Check for multiple usage of the same signal name
 	 * 
-	 * @param element
-	 * @param baseElement
-	 * @param signal
-	 * @return
+	 * @param element Current BpmnElement
+	 * @param baseElement BaseElement of BpmnElement
+	 * @param signal Signal
+	 * @return Issues
 	 */
 	private Collection<CheckerIssue> checkDoubleUsage(final BpmnElement element, final BaseElement baseElement,
 			final Signal signal) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		if (!addSignal(baseElement, signal.getName())) {
 			issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,

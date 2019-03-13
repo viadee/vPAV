@@ -1321,8 +1321,8 @@ public class BpmnScanner {
 	}
 
 	private ArrayList<String> getRefs(String id, String tag, String eventDefinition, String attrRef) {
-		ArrayList<String> signalRefs = new ArrayList<String>();
-		NodeList nodeList = null;
+		ArrayList<String> signalRefs = new ArrayList<>();
+		NodeList nodeList;
 
 		nodeList = doc.getElementsByTagName(tag);
 

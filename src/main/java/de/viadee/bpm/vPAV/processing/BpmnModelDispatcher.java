@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -221,28 +223,30 @@ public class BpmnModelDispatcher {
 		// write variables containing elements
 		// first, we need to inverse mapping to process variable -> operations
 		// (including element)
-		final Map<String, ProcessVariable> processVariables = new HashMap<>();
+		final ListMultimap<String, ProcessVariable> variables = ArrayListMultimap.create();
 		for (final BpmnElement element : elements) {
 			for (final ProcessVariableOperation variableOperation : element.getProcessVariables().values()) {
 				final String variableName = variableOperation.getName();
-				if (!processVariables.containsKey(variableName)) {
-					processVariables.put(variableName, new ProcessVariable(variableName));
+				if (!variables.containsKey(variableName)) {
+					variables.put(variableName, new ProcessVariable(variableName));
 				}
-				final ProcessVariable processVariable = processVariables.get(variableName);
-				switch (variableOperation.getOperation()) {
-				case READ:
-					processVariable.addRead(variableOperation);
-					break;
-				case WRITE:
-					processVariable.addWrite(variableOperation);
-					break;
-				case DELETE:
-					processVariable.addDelete(variableOperation);
-					break;
+				final Collection<ProcessVariable> processVariables = variables.asMap().get(variableName);
+				for (ProcessVariable pv : processVariables) {
+					switch (variableOperation.getOperation()) {
+						case READ:
+							pv.addRead(variableOperation);
+							break;
+						case WRITE:
+							pv.addWrite(variableOperation);
+							break;
+						case DELETE:
+							pv.addDelete(variableOperation);
+							break;
+					}
 				}
 			}
 		}
-		return processVariables.values();
+		return variables.values();
 	}
 
 	/**
