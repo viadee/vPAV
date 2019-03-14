@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,12 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class JavaReaderContext {
 
@@ -48,12 +46,12 @@ public class JavaReaderContext {
         this.javaReaderStrategy = readingStrategy;
     }
 
-    public LinkedHashMap<String, ProcessVariableOperation> readJavaDelegate(final FileScanner fileScanner, final String classFile, final BpmnElement element,
+    public ListMultimap<String, ProcessVariableOperation> readJavaDelegate(final FileScanner fileScanner, final String classFile, final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
         return javaReaderStrategy.getVariablesFromJavaDelegate(fileScanner, classFile, element, chapter, fieldType, scopeId);
     }
     
-    public LinkedHashMap<String, ProcessVariableOperation> readClass(final String className, final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath, final Map.Entry<String, Map<String, String>> entry){
+    public ListMultimap<String, ProcessVariableOperation> readClass(final String className, final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath, final EntryPoint entry){
     	return javaReaderStrategy.getVariablesFromClass(className, scanner, element, resourceFilePath, entry);
     }
 

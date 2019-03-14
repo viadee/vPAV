@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,119 +43,120 @@ import java.util.Collection;
 
 public class ProcessApplicationValidator {
 
-    private static Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
+	private static Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
 
-    public static void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {
-        ProcessApplicationValidator.dataFlowRules = dataFlowRules;
-    }
+	public static void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {
+		ProcessApplicationValidator.dataFlowRules = dataFlowRules;
+	}
 
-    /**
-     * Find issues with given ApplicationContext (Spring)
-     *
-     * @param ctx
-     *           - Spring context
-     * @return all issues
-     */
-    public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
+	/**
+	 * Find issues with given ApplicationContext (Spring)
+	 *
+	 * @param ctx
+	 *            - Spring context
+	 * @return all issues
+	 */
+	public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
 
-        RuntimeConfig.getInstance().setApplicationContext(ctx);
-        RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
-        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner runner = createRunner();
-      
-        return runner.getfilteredIssues();
-    }
+		RuntimeConfig.getInstance().setApplicationContext(ctx);
+		RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
+		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+		Runner runner = createRunner();
 
-    /**
-     * Find issues with given ApplicationContext (Spring)
-     *
-     * @param ctx
-     *            - Spring context
-     * @return issues with status error
-     */
-    public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {
+		return runner.getFilteredIssues();
+	}
 
-        RuntimeConfig.getInstance().setApplicationContext(ctx);
-        RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
-        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner runner = createRunner();
+	/**
+	 * Find issues with given ApplicationContext (Spring)
+	 *
+	 * @param ctx
+	 *            - Spring context
+	 * @return issues with status error
+	 */
+	public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {
 
-        return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
-    }
+		RuntimeConfig.getInstance().setApplicationContext(ctx);
+		RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
+		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+		Runner runner = createRunner();
 
-    /**
-     * Find model errors without spring context
-     *
-     * @return all issues
-     */
-    public static Collection<CheckerIssue> findModelInconsistencies() {
+		return filterErrors(runner.getFilteredIssues(), CriticalityEnum.ERROR);
+	}
 
-        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner runner = createRunner();
+	/**
+	 * Find model errors without spring context
+	 *
+	 * @return all issues
+	 */
+	public static Collection<CheckerIssue> findModelInconsistencies() {
 
-        return runner.getfilteredIssues();
-    }
+		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+		Runner runner = createRunner();
 
-    /**
-     * Find model errors without spring context
-     *
-     * @return issues with status error
-     */
-    public static Collection<CheckerIssue> findModelErrors() {
+		return runner.getFilteredIssues();
+	}
 
-        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-        Runner runner = createRunner();
+	/**
+	 * Find model errors without spring context
+	 *
+	 * @return issues with status error
+	 */
+	public static Collection<CheckerIssue> findModelErrors() {
 
-        return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
-    }
+		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+		Runner runner = createRunner();
 
-    /**
-     * Find model errors without spring context. Alternative method for testing purposes, to allow using a classloader
-     * that includes example delegates in /src/test/java etc.
-     *
-     * @param classloader 
-     * - ClassLoader that holds delegates etc.
-     * @return issues with status error
-     */
-    public static Collection<CheckerIssue> findModelErrorsFromClassloader(ClassLoader classloader) {
+		return filterErrors(runner.getFilteredIssues(), CriticalityEnum.ERROR);
+	}
 
-        RuntimeConfig.getInstance().setClassLoader(classloader);
-        Runner runner = createRunner();
+	/**
+	 * Find model errors without spring context. Alternative method for testing
+	 * purposes, to allow using a classloader that includes example delegates in
+	 * /src/test/java etc.
+	 *
+	 * @param classloader
+	 *            - ClassLoader that holds delegates etc.
+	 * @return issues with status error
+	 */
+	public static Collection<CheckerIssue> findModelErrorsFromClassloader(ClassLoader classloader) {
 
-        return filterErrors(runner.getfilteredIssues(), CriticalityEnum.ERROR);
-    }
+		RuntimeConfig.getInstance().setClassLoader(classloader);
+		Runner runner = createRunner();
 
-    /**
-     * Filter an issue collection by status
-     *
-     * @param filteredIssues
-     * - Filtered issues
-     * @param status
-     * - Criticality to be sorted with
-     * @return issues with status
-     */
-    private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues,
-            CriticalityEnum status) {
-        Collection<CheckerIssue> filteredErrors = new ArrayList<CheckerIssue>();
+		return filterErrors(runner.getFilteredIssues(), CriticalityEnum.ERROR);
+	}
 
-        for (CheckerIssue issue : filteredIssues) {
-            if (issue.getClassification().equals(status)) {
-                filteredErrors.add(issue);
-            }
-        }
-        return filteredErrors;
-    }
+	/**
+	 * Filter an issue collection by status
+	 *
+	 * @param filteredIssues
+	 *            - Filtered issues
+	 * @param status
+	 *            - Criticality to be sorted with
+	 * @return issues with status
+	 */
+	private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues,
+			CriticalityEnum status) {
+		Collection<CheckerIssue> filteredErrors = new ArrayList<CheckerIssue>();
 
-    /**
-     * Creates a new runner and returns it
-     * 
-     * @return Runner
-     */
-    private static Runner createRunner() {
-        Runner runner = new Runner();
-        runner.setDataFlowRules(dataFlowRules);
-        dataFlowRules = new ArrayList<>();
-        runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
-        return runner;
-    }
+		for (CheckerIssue issue : filteredIssues) {
+			if (issue.getClassification().equals(status)) {
+				filteredErrors.add(issue);
+			}
+		}
+		return filteredErrors;
+	}
+
+	/**
+	 * Creates a new runner and returns it
+	 * 
+	 * @return Runner
+	 */
+	private static Runner createRunner() {
+		Runner runner = new Runner();
+		runner.setDataFlowRules(dataFlowRules);
+		dataFlowRules = new ArrayList<>();
+		runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
+		return runner;
+	}
 }

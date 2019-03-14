@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ public interface ElementBasedPredicateBuilder<T> {
      * - Class 
      * @return Step builder of next rule building stage
      */
-    T ofType(Class clazz);
+    T ofType(Class<?> clazz);
     /**
      * Returns predicate with operation location based on camunda:property.
      * @param propertyName

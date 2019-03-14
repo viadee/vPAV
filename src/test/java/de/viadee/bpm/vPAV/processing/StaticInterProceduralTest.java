@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,38 +31,36 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 public class StaticInterProceduralTest {
 
     @BeforeClass
-    public static void setup() throws MalformedURLException {
+    public static void setup() {
         RuntimeConfig.getInstance().setClassLoader(StaticInterProceduralTest.class.getClassLoader());
         RuntimeConfig.getInstance().setTest(true);
     }
 
     @Test
-    public void testInterProceduralAnalysis() throws ParserConfigurationException, SAXException, IOException {
+    public void testInterProceduralAnalysis() {
         // Given
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
 
         // When
-        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null);
+    	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null));
         // Then
         assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
                 variables.size());

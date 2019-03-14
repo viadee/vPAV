@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,25 +34,26 @@ package de.viadee.bpm.vPAV.processing.model.data;
 import java.util.Collection;
 
 public class ModelDispatchResult {
-    private Collection<CheckerIssue> issues;
-    private Collection<BpmnElement> bpmnElements;
-    private Collection<ProcessVariable> processVariables;
+	private Collection<CheckerIssue> issues;
+	private Collection<BpmnElement> bpmnElements;
+	private Collection<ProcessVariable> processVariables;
 
-    public ModelDispatchResult(Collection<CheckerIssue> issues, Collection<BpmnElement> bpmnElements, Collection<ProcessVariable> processVariables) {
-        this.issues = issues;
-        this.bpmnElements = bpmnElements;
-        this.processVariables = processVariables;
-    }
+	public ModelDispatchResult(final Collection<CheckerIssue> issues, final Collection<BpmnElement> bpmnElements,
+			final Collection<ProcessVariable> processVariables) {
+		this.issues = issues;
+		this.bpmnElements = bpmnElements;
+		this.processVariables = processVariables;
+	}
 
-    public Collection<CheckerIssue> getIssues() {
-        return issues;
-    }
+	public Collection<CheckerIssue> getIssues() {
+		return issues;
+	}
 
-    public Collection<BpmnElement> getBpmnElements() {
-        return bpmnElements;
-    }
+	public Collection<BpmnElement> getBpmnElements() {
+		return bpmnElements;
+	}
 
-    public Collection<ProcessVariable> getProcessVariables() {
-        return processVariables;
-    }
+	public Collection<? extends ProcessVariable> getProcessVariables() {
+		return processVariables;
+	}
 }

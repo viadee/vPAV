@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -67,7 +69,7 @@ public class BpmnModelDispatcher {
 	 * 
 	 * @param fileScanner
 	 *            - FileScanner
-	 * @param processdefinition
+	 * @param processDefinition
 	 *            - Holds the path to the BPMN model
 	 * @param decisionRefToPathMap
 	 *            - DecisionRefToPathMap
@@ -83,21 +85,23 @@ public class BpmnModelDispatcher {
 	 *            - ruleSet
 	 * @return issues
 	 */
-	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processdefinition,
+	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processDefinition,
 			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
 			final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
 			final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
 
-		final BpmnScanner bpmnScanner = createScanner(processdefinition);
+		final BpmnScanner bpmnScanner = createScanner(processDefinition);
 
 		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
+		final Rule rule = conf.get("ProcessVariablesModelChecker");
+
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
-				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), bpmnScanner);
+				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), rule, bpmnScanner);
 
 		// Depending on Regex/Static analysis, find Process Variables from Java Delegate
 		JavaReaderContext jvc = new JavaReaderContext();
@@ -110,12 +114,12 @@ public class BpmnModelDispatcher {
 
 		// create data flow graphs for bpmn model
 		final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-				processdefinition.getPath(), new ArrayList<>(), scanner);
+				processDefinition.getPath(), new ArrayList<>(), scanner);
 
 		// add data flow information to graph and calculate invalid paths
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-		final Collection<BpmnElement> bpmnElements = getBpmnElements(processdefinition, baseElements, graphBuilder);
+		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
 		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
@@ -126,19 +130,19 @@ public class BpmnModelDispatcher {
 		if (processVariablesModelRule != null && processVariablesModelRule.isActive()) {
 			final ModelChecker processVarChecker = new ProcessVariablesModelChecker(processVariablesModelRule,
 					invalidPathMap);
-			issues.addAll(processVarChecker.check(modelInstance));
+			issues.addAll(processVarChecker.check());
 		}
 		final Rule dataFlowRule = conf.get(getClassName(DataFlowChecker.class));
 		if (dataFlowRule != null && dataFlowRule.isActive() && !dataFlowRules.isEmpty()) {
 			final DataFlowChecker dataFlowChecker = new DataFlowChecker(dataFlowRule, dataFlowRules, processVariables);
-			issues.addAll(dataFlowChecker.check(modelInstance));
+			issues.addAll(dataFlowChecker.check());
 		}
 
 		// create checkerInstances
 		Collection<ElementChecker> checkerInstances = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner,
-				issues);
+				scanner);
 
-		executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
+		executeCheckers(processDefinition, baseElements, graphBuilder, issues, checkerInstances);
 
 		return new ModelDispatchResult(issues, bpmnElements, processVariables);
 	}
@@ -148,7 +152,7 @@ public class BpmnModelDispatcher {
 	 * elements. Iterates through collection and checks each element for validity
 	 * Additionally a graph is created to check for invalid paths.
 	 *
-	 * @param processdefinition
+	 * @param processDefinition
 	 *            Holds the path to the BPMN model
 	 * @param decisionRefToPathMap
 	 *            decisionRefToPathMap
@@ -160,14 +164,14 @@ public class BpmnModelDispatcher {
 	 *            ruleSet
 	 * @return issues
 	 */
-	public ModelDispatchResult dispatchWithoutVariables(final File processdefinition,
+	public ModelDispatchResult dispatchWithoutVariables(final File processDefinition,
 			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
 			final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
 
-		BpmnScanner bpmnScanner = createScanner(processdefinition);
+		BpmnScanner bpmnScanner = createScanner(processDefinition);
 
 		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
@@ -179,31 +183,31 @@ public class BpmnModelDispatcher {
 
 		// create checkerInstances as singletons
 		Collection<ElementChecker> checkerInstances = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner,
-				issues);
+				null);
 
-		executeCheckers(processdefinition, baseElements, graphBuilder, issues, checkerInstances);
+		executeCheckers(processDefinition, baseElements, graphBuilder, issues, checkerInstances);
 
-		return new ModelDispatchResult(issues, getBpmnElements(processdefinition, baseElements, graphBuilder),
+		return new ModelDispatchResult(issues, getBpmnElements(processDefinition, baseElements, graphBuilder),
 				Collections.emptyList());
 	}
 
 	/**
 	 * @param baseElements
-	 *            Collection of baseelements
+	 *            Collection of baseElements
 	 * @param graphBuilder
 	 *            graphBuilder
-	 * @param processdefinition
+	 * @param processDefinition
 	 *            bpmn file
 	 * @return Collection of BpmnElements
 	 */
-	public static Collection<BpmnElement> getBpmnElements(final File processdefinition,
+	public static Collection<BpmnElement> getBpmnElements(final File processDefinition,
 			final Collection<BaseElement> baseElements, final ElementGraphBuilder graphBuilder) {
 		final List<BpmnElement> elements = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
 			BpmnElement element = graphBuilder.getElement(baseElement.getId());
 			if (element == null) {
 				// if element is not in the data flow graph, create it.
-				element = new BpmnElement(processdefinition.getPath(), baseElement);
+				element = new BpmnElement(processDefinition.getPath(), baseElement);
 			}
 			elements.add(element);
 		}
@@ -215,37 +219,39 @@ public class BpmnModelDispatcher {
 	 *            Collection of BPMN elements
 	 * @return Collection of process variables
 	 */
-	public static Collection<ProcessVariable> getProcessVariables(Collection<BpmnElement> elements) {
+	public static Collection<ProcessVariable> getProcessVariables(final Collection<BpmnElement> elements) {
 		// write variables containing elements
 		// first, we need to inverse mapping to process variable -> operations
 		// (including element)
-		final Map<String, ProcessVariable> processVariables = new HashMap<>();
+		final ListMultimap<String, ProcessVariable> variables = ArrayListMultimap.create();
 		for (final BpmnElement element : elements) {
 			for (final ProcessVariableOperation variableOperation : element.getProcessVariables().values()) {
 				final String variableName = variableOperation.getName();
-				if (!processVariables.containsKey(variableName)) {
-					processVariables.put(variableName, new ProcessVariable(variableName));
+				if (!variables.containsKey(variableName)) {
+					variables.put(variableName, new ProcessVariable(variableName));
 				}
-				final ProcessVariable processVariable = processVariables.get(variableName);
-				switch (variableOperation.getOperation()) {
-				case READ:
-					processVariable.addRead(variableOperation);
-					break;
-				case WRITE:
-					processVariable.addWrite(variableOperation);
-					break;
-				case DELETE:
-					processVariable.addDelete(variableOperation);
-					break;
+				final Collection<ProcessVariable> processVariables = variables.asMap().get(variableName);
+				for (ProcessVariable pv : processVariables) {
+					switch (variableOperation.getOperation()) {
+						case READ:
+							pv.addRead(variableOperation);
+							break;
+						case WRITE:
+							pv.addWrite(variableOperation);
+							break;
+						case DELETE:
+							pv.addDelete(variableOperation);
+							break;
+					}
 				}
 			}
 		}
-		return processVariables.values();
+		return variables.values();
 	}
 
 	/**
 	 * 
-	 * @param processdefinition
+	 * @param processDefinition
 	 *            Holds the path to the BPMN model
 	 * @param baseElements
 	 *            List of baseElements
@@ -256,7 +262,7 @@ public class BpmnModelDispatcher {
 	 * @param checkerInstances
 	 *            ElementCheckers from ruleSet
 	 */
-	private void executeCheckers(final File processdefinition, final Collection<BaseElement> baseElements,
+	private void executeCheckers(final File processDefinition, final Collection<BaseElement> baseElements,
 			final ElementGraphBuilder graphBuilder, final Collection<CheckerIssue> issues,
 			Collection<ElementChecker> checkerInstances) {
 		// execute element checkers
@@ -264,7 +270,7 @@ public class BpmnModelDispatcher {
 			BpmnElement element = graphBuilder.getElement(baseElement.getId());
 			if (element == null) {
 				// if element is not in the data flow graph, create it.
-				element = new BpmnElement(processdefinition.getPath(), baseElement);
+				element = new BpmnElement(processDefinition.getPath(), baseElement);
 			}
 			for (final ElementChecker checker : checkerInstances) {
 				issues.addAll(checker.check(element));
@@ -274,15 +280,15 @@ public class BpmnModelDispatcher {
 
 	/**
 	 * 
-	 * @param processdefinition
+	 * @param processDefinition
 	 *            Holds the path to the BPMN model
 	 * @return BpmnScanner
 	 */
-	public BpmnScanner createScanner(final File processdefinition) {
+	public BpmnScanner createScanner(final File processDefinition) {
 		// create BPMNScanner
 		BpmnScanner bpmnScanner;
 		try {
-			bpmnScanner = new BpmnScanner(processdefinition.getPath());
+			bpmnScanner = new BpmnScanner(processDefinition.getPath());
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new RuntimeException("Model couldn't be parsed");
 		}
@@ -298,16 +304,16 @@ public class BpmnModelDispatcher {
 	 *            ruleSet
 	 * @param bpmnScanner
 	 *            BPMNScanner
-	 * @param issues
-	 *            List of issues
+	 * @param scanner
+	 *            ProcessVariablesScanner
 	 * @return CheckerCollection
 	 */
 	private Collection<ElementChecker> createCheckerInstances(final Collection<String> resourcesNewestVersions,
-			final Map<String, Rule> conf, BpmnScanner bpmnScanner, final Collection<CheckerIssue> issues) {
+			final Map<String, Rule> conf, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
 		CheckerFactory checkerFactory = new CheckerFactory();
 
 		final Collection<ElementChecker> checkerCollection = checkerFactory.createCheckerInstances(conf,
-				resourcesNewestVersions, bpmnScanner);
+				resourcesNewestVersions, bpmnScanner, scanner);
 
 		setIncorrectCheckers(checkerFactory.getIncorrectCheckers());
 

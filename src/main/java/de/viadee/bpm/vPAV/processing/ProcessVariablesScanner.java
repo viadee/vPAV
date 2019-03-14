@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,12 @@ package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
-import soot.Body;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
+import soot.*;
+import soot.jimple.AssignStmt;
+import soot.jimple.InvokeStmt;
+import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.options.Options;
 
-import java.io.IOException;
 import java.util.*;
 
 public class ProcessVariablesScanner {
@@ -50,9 +49,11 @@ public class ProcessVariablesScanner {
 
 	private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
 
-	private Map<String, Map<String, String>> entryPoints = new HashMap<String, Map<String, String>>();
-
 	private Set<String> camundaProcessEntryPoints = new HashSet<String>();
+
+	private List<EntryPoint> entryPoints = new ArrayList<>();
+
+	private List<EntryPoint> intermediateEntryPoints = new ArrayList<>();
 
 	public ProcessVariablesScanner(final Set<String> javaResources) {
 		this.javaResources = javaResources;
@@ -60,20 +61,20 @@ public class ProcessVariablesScanner {
 		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY);
 		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE);
 		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF);
+		camundaProcessEntryPoints.add(CamundaMethodServices.CORRELATE_MESSAGE);
 	}
 
 	/**
 	 * scan java resources for variables and retrieve important information such as
 	 * message ids and entrypoints
 	 *
-	 * @throws IOException
-	 *             possible exception if filepath can not be resolved
 	 */
-	public void scanProcessVariables() throws IOException {
+	public void scanProcessVariables() {
 		for (final String filePath : javaResources) {
 			if (!filePath.startsWith("javax")) {
-				final Set<String> messageIds = new HashSet<String>();
-				final Set<String> processIds = new HashSet<String>();
+				// TODO: Use ids properly to resolve process variable manipulation
+				final Set<String> messageIds = new HashSet<>();
+				final Set<String> processIds = new HashSet<>();
 				retrieveMethod(filePath, messageIds, processIds);
 			}
 		}
@@ -82,10 +83,15 @@ public class ProcessVariablesScanner {
 	/**
 	 * Retrieve the method name which contains the entrypoint (e.g.
 	 * "startProcessByXYZ")
-	 * 
+	 *
 	 * @param filePath
 	 *            fully qualified path to the java class
-	 * @return
+	 * @param messageIds
+	 *            Set of messageIds (used to retrieve variable manipulation later
+	 *            on)
+	 * @param processIds
+	 *            Set of processIds (used to retrieve variable manipulation later
+	 *            on)
 	 */
 	private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
 		final String sootPath = FileScanner.getSootPath();
@@ -100,20 +106,67 @@ public class ProcessVariablesScanner {
 			sootClass.setApplicationClass();
 			Scene.v().loadNecessaryClasses();
 			for (SootMethod method : sootClass.getMethods()) {
-//				if (method.hasActiveBody()) {
-					final Body body = method.retrieveActiveBody();
-					for (String entryPoint : camundaProcessEntryPoints) {
-						if (body.toString().contains(entryPoint)) {
-							final Map<String, String> innerMap = new HashMap<String, String>();
-							innerMap.put(method.getName(), filePath);
-							entryPoints.put(entryPoint, innerMap);
-							messageIds.add(entryPoint);
-						}
-						if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
-							processIds.add(entryPoint);
+				final Body body = method.retrieveActiveBody();
+				for (String entryPoint : camundaProcessEntryPoints) {
+					if (body.toString().contains(entryPoint)) {
+						final PatchingChain<Unit> pc = body.getUnits();
+						for (Unit unit : pc) {
+							if (unit instanceof AssignStmt) {
+								final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
+								if (rightBox.contains(entryPoint)) {
+									if (((AssignStmt) unit).getRightOpBox()
+											.getValue() instanceof JInterfaceInvokeExpr) {
+										final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
+												.getRightOpBox().getValue();
+										checkExpression(filePath, messageIds, method, entryPoint, expr);
+									}
+								}
+							}
+							if (unit instanceof InvokeStmt) {
+								final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue().toString();
+								if (rightBox.contains(entryPoint)) {
+									if (((InvokeStmt) unit).getInvokeExprBox()
+											.getValue() instanceof JInterfaceInvokeExpr) {
+										final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
+												.getInvokeExprBox().getValue();
+										checkExpression(filePath, messageIds, method, entryPoint, expr);
+									}
+								}
+							}
 						}
 					}
-//				}
+					if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
+						processIds.add(entryPoint);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Checks the current expression and creates a new entrypoint
+	 *
+	 * @param filePath
+	 *            Current filePath of the model
+	 * @param messageIds
+	 *            List of message ids
+	 * @param method
+	 *            Current method
+	 * @param entryPoint
+	 *            Current entryPoint
+	 * @param expr
+	 *            Current expression
+	 */
+	private void checkExpression(final String filePath, final Set<String> messageIds, final SootMethod method,
+			final String entryPoint, final JInterfaceInvokeExpr expr) {
+		if (expr != null) {
+			final String ex = expr.getArgBox(0).getValue().toString();
+			if (entryPoint.equals(CamundaMethodServices.CORRELATE_MESSAGE)) {
+				intermediateEntryPoints
+						.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
+			} else {
+				messageIds.add(entryPoint);
+				entryPoints.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
 			}
 		}
 	}
@@ -154,12 +207,22 @@ public class ProcessVariablesScanner {
 	}
 
 	/**
+	 * get list of intermediate entrypoints (process message, method) where process
+	 * variables have been found
+	 *
+	 * @return returns list of locations
+	 */
+	public List<EntryPoint> getIntermediateEntryPoints() {
+		return intermediateEntryPoints;
+	}
+
+	/**
 	 * get list of entrypoints (process message, method) where process variables
 	 * have been found
 	 * 
 	 * @return returns list of locations
 	 */
-	public Map<String, Map<String, String>> getEntryPoints() {
+	public List<EntryPoint> getEntryPoints() {
 		return entryPoints;
 	}
 

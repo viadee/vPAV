@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -64,8 +63,6 @@ public class SignalEventCheckerTest {
 
     private static SignalEventChecker checker;
 
-    private static ClassLoader cl;
-
     private final Rule rule = new Rule("SignalEventChecker", true, null, null, null, null);
 
     @BeforeClass
@@ -74,7 +71,7 @@ public class SignalEventCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -85,15 +82,14 @@ public class SignalEventCheckerTest {
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
-     * @throws XPathExpressionException
      */
     @Test
     public void testCorrectModel()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+            throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "SignalEventChecker_Correct.bpmn";
         checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -117,15 +113,14 @@ public class SignalEventCheckerTest {
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
-     * @throws XPathExpressionException
      */
     @Test
     public void testWrongModel()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+            throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "SignalEventChecker_Wrong.bpmn";
         checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

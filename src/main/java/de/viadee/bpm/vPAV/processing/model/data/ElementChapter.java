@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ package de.viadee.bpm.vPAV.processing.model.data;
  */
 public enum ElementChapter {
 
-    Code, General, InputOutput, Details, ExecutionListener, TaskListener, MultiInstance, FormData, InputData, OutputData, OutstandingVariable, FieldInjections;
+    Code, General, InputOutput, Details, ExecutionListener, TaskListener, MultiInstance, FormData, InputData, OutputData,
+    OutstandingVariable, FieldInjections, Signal, Message
 	
 }

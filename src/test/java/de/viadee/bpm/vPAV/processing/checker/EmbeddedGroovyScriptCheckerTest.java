@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
@@ -43,8 +44,11 @@ import org.camunda.bpm.model.bpmn.instance.Task;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -58,10 +62,10 @@ public class EmbeddedGroovyScriptCheckerTest {
 
     private static ClassLoader cl;
 
+    final Rule rule = new Rule("EmbeddedGroovyScriptChecker", true, null, null, null, null);
+
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        final Rule rule = new Rule("EmbeddedGroovyScriptChecker", true, null, null, null, null);
-        checker = new EmbeddedGroovyScriptChecker(rule, null);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
@@ -75,8 +79,12 @@ public class EmbeddedGroovyScriptCheckerTest {
      * Case: there is an empty script reference
      */
     @Test
-    public void testEmptyScriptReference() {
+    public void testEmptyScriptReference() throws IOException, SAXException, ParserConfigurationException {
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptReference.bpmn";
+
+        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+
+        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -99,8 +107,12 @@ public class EmbeddedGroovyScriptCheckerTest {
      * Case: there is no script format for given script
      */
     @Test
-    public void testEmptyScriptFormat() {
+    public void testEmptyScriptFormat() throws IOException, SAXException, ParserConfigurationException {
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptFormat.bpmn";
+
+        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+
+        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -123,8 +135,12 @@ public class EmbeddedGroovyScriptCheckerTest {
      * Case: there is no script content for given script format
      */
     @Test
-    public void testEmptyScript() {
+    public void testEmptyScript() throws IOException, SAXException, ParserConfigurationException {
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScript.bpmn";
+
+        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+
+        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -144,11 +160,41 @@ public class EmbeddedGroovyScriptCheckerTest {
     }
 
     /**
+     * Case: Script content in Input/Output mapping of a task
+     */
+    @Test
+    public void testScriptInInputOutputMapping() throws IOException, SAXException, ParserConfigurationException {
+        final String PATH = BASE_PATH + "ProcessVariablesMapping_InputScript.bpmn";
+
+        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+
+        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ServiceTask> baseElements = modelInstance
+                .getModelElementsByType(ServiceTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final Collection<CheckerIssue> issues = checker.check(element);
+
+        final String message = issues.iterator().next().getMessage();
+        Assert.assertTrue(message.startsWith("startup failed:"));
+    }
+
+
+    /**
      * Case: invalid script for groovy script format
      */
     @Test
-    public void testInvalidGroovyScript() {
+    public void testInvalidGroovyScript() throws IOException, SAXException, ParserConfigurationException {
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_InvalidGroovyScript.bpmn";
+
+        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+
+        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -171,9 +217,13 @@ public class EmbeddedGroovyScriptCheckerTest {
      * Case: there is no script content for given script format in TaskListener (userTask)
      */
     @Test
-    public void testTaskListener() {
+    public void testTaskListener() throws IOException, SAXException, ParserConfigurationException {
 
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptTaskListener.bpmn";
+
+        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+
+        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

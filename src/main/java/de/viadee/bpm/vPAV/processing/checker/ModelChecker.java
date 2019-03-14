@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
 import java.util.Collection;
 
@@ -42,5 +41,5 @@ import java.util.Collection;
  */
 public interface ModelChecker {
 
-    Collection<CheckerIssue> check(final BpmnModelInstance processdefinition);
+    Collection<CheckerIssue> check();
 }

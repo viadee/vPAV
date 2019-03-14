@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,11 +92,11 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         if (bpmnElement instanceof UserTask) {
             taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_DEL,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskClass = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_CLASS,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskExpression = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
         }
 
         if (bpmnElement.getElementType().getTypeName()
@@ -111,11 +111,11 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         }
 
         executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_DEL,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionClass = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_CLASS,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionExpression = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_EX,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
         final String classAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                 BpmnConstants.ATTR_CLASS);

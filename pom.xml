@@ -157,6 +157,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.8.1</version>
 		</dependency>
@@ -183,9 +188,19 @@
 		<dependency>
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
-			<version>3.2.0</version>
+			<version>3.3.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ca.mcgill.sable</groupId>
+					<artifactId>polyglot</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.mcgill.sable</groupId>
+					<artifactId>jasmin</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-	</dependencies>
+    </dependencies>
 
 	<profiles>
 		<profile>
@@ -280,7 +295,7 @@
 					<header>src/main/resources/BSD3-license.txt</header>
 					<properties>
 						<owner>viadee Unternehmensberatung AG</owner>
-						<inceptionYear>2018</inceptionYear>
+						<inceptionYear>2019</inceptionYear>
 						<email>Frank.Koehne@viadee.de</email>
 					</properties>
 					<excludes>
@@ -370,6 +385,20 @@
      			</plugin>	
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>soot-release</id>
+			<name>Maven repository of the Software Engineering Group at University of Paderborn</name>
+			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<reporting>
 		<excludeDefaults>true</excludeDefaults>

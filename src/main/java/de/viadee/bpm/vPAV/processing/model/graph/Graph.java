@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-/**
- * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- *
- * A class for a directed graph. Implemented by an adjacency list representation of a graph.
- */
-
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -45,6 +39,11 @@ import de.viadee.bpm.vPAV.processing.model.data.InOutState;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
 import java.util.*;
+
+/**
+ *
+ * A class for a directed graph. Implemented by an adjacency list representation of a graph.
+ */
 
 public class Graph implements IGraph {
 
@@ -203,7 +202,7 @@ public class Graph implements IGraph {
         final boolean isNodeParallelGateway = startNode.getBaseElement().getElementType().getTypeName()
                 .equals(BpmnModelConstants.BPMN_ELEMENT_PARALLEL_GATEWAY);
         final boolean isEndEvent = startNode.getBaseElement().getElementType().getTypeName()
-                .equals(BpmnConstants.ENDEVENT)
+                .equals(BpmnConstants.END_EVENT)
                 && startNode.getBaseElement().getParentElement().getElementType().getTypeName()
                         .equals(BpmnConstants.PROCESS);
 
@@ -295,9 +294,7 @@ public class Graph implements IGraph {
      * source: http://codereview.stackexchange.com/questions/45678/find-all-paths-from-source-to-destination
      *
      * @param startNode
-     * @param varName
      * @param currentPath
-     * @param maxSize
      * @return paths
      */
     private List<Path> getAllInvalidPathsRecursive(final BpmnElement startNode,
@@ -355,7 +352,7 @@ public class Graph implements IGraph {
         // go back to the node, where the variable was deleted
         // or go back to the start
         if (anomaly.getAnomaly() == Anomaly.UR && (variableDeleted(anomaly, in, out)
-                || ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)
+                || ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.START_EVENT)
                         && startNode.getBaseElement().getParentElement().getElementType().getTypeName()
                                 .equals(BpmnConstants.PROCESS))))) {
 
@@ -490,8 +487,8 @@ public class Graph implements IGraph {
      *
      * 1) delete 2) read 3) define
      *
-     * @param element1
-     * @param element2
+     * @param state1
+     * @param state2
      * @return
      */
     private static InOutState getStatePrecedence(final InOutState state1, final InOutState state2) {

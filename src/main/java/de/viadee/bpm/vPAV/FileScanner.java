@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@ import java.util.regex.Pattern;
  */
 public class FileScanner {
 
-	private final Set<String> processdefinitions;
+	private final Set<String> processDefinitions;
 
 	private static Set<String> javaResourcesFileInputStream = new HashSet<String>();
 
@@ -94,7 +94,7 @@ public class FileScanner {
 		// get file paths of process definitions
 		scanner.setIncludes(new String[] { ConfigConstants.BPMN_FILE_PATTERN });
 		scanner.scan();
-		processdefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+		processDefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
 		scanner.setBasedir(javaScanPath);
 		// get file paths of process definitions
@@ -109,7 +109,7 @@ public class FileScanner {
 		javaResourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
 		// get mapping from process id to file path
-		processIdToPathMap = createProcessIdToPathMap(processdefinitions);
+		processIdToPathMap = createProcessIdToPathMap(processDefinitions);
 
 		// determine version name schema for resources
 		String versioningScheme = null;
@@ -140,12 +140,6 @@ public class FileScanner {
 			String path = urlTargetClass.toString();
 			addStringToSootPath(path);
 		}
-//
-//		if (System.getProperty("os.name").startsWith("Windows")) {
-//			sootPath = new StringBuilder(sootPath.toString().replace("/;", ";").replace(";;", ";"));
-//		} else {
-//			sootPath = new StringBuilder(sootPath.toString().replace("/;", "").replace(";", ":"));
-//		}
 
 		for (URL url : urls) {
 			// retrieve all jars during runtime and pass them to get class files
@@ -167,7 +161,7 @@ public class FileScanner {
 				}
 			}
 		}
-		
+
 		// get mapping from decision reference to file path
 		scanner.setBasedir(ConfigConstants.BASEPATH);
 		scanner.setIncludes(new String[] { ConfigConstants.DMN_FILE_PATTERN });
@@ -263,10 +257,10 @@ public class FileScanner {
 	/**
 	 * get file paths for process definitions
 	 *
-	 * @return processdefinitions Process definitions
+	 * @return processDefinitions Process definitions
 	 */
-	public Set<String> getProcessdefinitions() {
-		return processdefinitions;
+	Set<String> getProcessDefinitions() {
+		return processDefinitions;
 	}
 
 	/**
@@ -308,7 +302,7 @@ public class FileScanner {
 
 		for (final String path : paths) {
 			// read bpmn file
-			BpmnModelInstance modelInstance = null;
+			BpmnModelInstance modelInstance;
 			try {
 				modelInstance = Bpmn.readModelFromFile(new File(ConfigConstants.BASEPATH + path));
 			} catch (final BpmnModelException ex) {
@@ -341,7 +335,7 @@ public class FileScanner {
 
 		for (final String path : paths) {
 			// read dmn file
-			DmnModelInstance modelInstance = null;
+			DmnModelInstance modelInstance;
 			try {
 				modelInstance = Dmn.readModelFromFile(new File(ConfigConstants.BASEPATH + path));
 			} catch (final DmnModelException ex) {
@@ -474,6 +468,10 @@ public class FileScanner {
 
 	public Set<String> getJavaResourcesFileInputStream() {
 		return javaResourcesFileInputStream;
+	}
+
+	public void setJavaResourcesFileInputStream(Set<String> javaResources) {
+		javaResourcesFileInputStream = javaResources;
 	}
 
 	public static boolean getIsDirectory() {

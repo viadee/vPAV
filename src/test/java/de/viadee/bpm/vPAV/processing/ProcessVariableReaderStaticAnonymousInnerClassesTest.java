@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -54,7 +56,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 	
@@ -93,14 +94,14 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
         
-        final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>(); 
-        variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, variables));
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element));
 
-        Assert.assertEquals(3, variables.size());
+        Assert.assertEquals(3, variables.asMap().size());
     }
 
 

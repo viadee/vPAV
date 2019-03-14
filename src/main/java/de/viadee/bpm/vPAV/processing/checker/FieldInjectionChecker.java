@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,19 +93,19 @@ public class FieldInjectionChecker extends AbstractElementChecker {
 
         if (bpmnElement instanceof UserTask) {
             taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_DEL,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskClass = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_CLASS,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskExpression = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
         }
 
-        executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.CAMUNDA_EXECUTIONLISTENER,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+        executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.CAMUNDA_EXECUTION_LISTENER,
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionClass = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_CLASS,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionExpression = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_EX,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
         final ArrayList<String> fieldInjectionVarNames = bpmnScanner.getFieldInjectionVarName(bpmnElement.getId());
         final String classAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
@@ -113,9 +113,8 @@ public class FieldInjectionChecker extends AbstractElementChecker {
         final String delegateExprAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                 BpmnConstants.ATTR_DEL);
 
-        if (implementationAttr != null && !fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null
-                && (bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
-                        || bpmnElement instanceof SendTask)) {
+        if (implementationAttr != null && !fieldInjectionVarNames.isEmpty() && (bpmnElement instanceof ServiceTask ||
+                bpmnElement instanceof BusinessRuleTask || bpmnElement instanceof SendTask)) {
             // check if class is correct
             if (implementationAttr.equals(BpmnConstants.CAMUNDA_CLASS)) {
                 if (classAttr == null || classAttr.trim().length() == 0) {

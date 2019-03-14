@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@ public class CamundaMethodServices {
     public static final String SCOPE = "org.camunda.bpm.engine.delegate.VariableScope";
     
     public static final String VARIABLE_MAP = "org.camunda.bpm.engine.variable.VariableMap";
+
+    public static final String MAP = "java.util.Map";
     
     public static final String START_PROCESS_INSTANCE_BY_MESSAGE = "startProcessInstanceByMessage";
     
