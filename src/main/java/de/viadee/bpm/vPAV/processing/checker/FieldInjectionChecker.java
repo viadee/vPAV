@@ -93,19 +93,19 @@ public class FieldInjectionChecker extends AbstractElementChecker {
 
         if (bpmnElement instanceof UserTask) {
             taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_DEL,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskClass = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_CLASS,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskExpression = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_TASKLISTENER);
+                    BpmnConstants.CAMUNDA_TASK_LISTENER);
         }
 
-        executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.CAMUNDA_EXECUTIONLISTENER,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+        executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.CAMUNDA_EXECUTION_LISTENER,
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionClass = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_CLASS,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionExpression = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_EX,
-                BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
         final ArrayList<String> fieldInjectionVarNames = bpmnScanner.getFieldInjectionVarName(bpmnElement.getId());
         final String classAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,

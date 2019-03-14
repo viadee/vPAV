@@ -240,7 +240,7 @@ public class JavaReaderStatic implements JavaReader {
 			final JInterfaceInvokeExpr expr, final BpmnElement element) {
 		if (expr.getMethodRef().getName().equals(entry.getEntryPoint())) {
 			if (!assignment.isEmpty()) {
-				if (element.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.RECEIVETASK)) {
+				if (element.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.RECEIVE_TASK)) {
 					String message = expr.getArgBox(0).getValue().toString().replaceAll("\"", "");
 					if (message.equals(entry.getMessageName())) {
 						return true;
@@ -870,7 +870,7 @@ public class JavaReaderStatic implements JavaReader {
 		if (!currentPath.isEmpty()) {
 			currentPath.removeLast();
 		}
-	
+
 		for (ProcessVariableOperation pv : variableBlock.getAllProcessVariables()) {
 			predecessorVariablesList.removeLastOccurrence(pv);
 		}

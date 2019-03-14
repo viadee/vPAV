@@ -185,8 +185,6 @@ public class ProcessVariableReaderTest {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 
-        // scanner.scanProcessVariables();
-
         final JavaReaderContext jvc = new JavaReaderContext();
         jvc.setJavaReadingStrategy(new JavaReaderStatic());
         // parse bpmn model
@@ -204,5 +202,32 @@ public class ProcessVariableReaderTest {
         final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
         Assert.assertEquals(1, processVariables.size());
+    }
+
+    @Test
+    public void testRecogniseLinks() throws IOException, ParserConfigurationException, SAXException {
+        final String PATH = BASE_PATH + "ProcessVariablesReader_LinkVariables.bpmn";
+        final File processDefinition = new File(PATH);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+                fileScanner.getJavaResourcesFileInputStream());
+
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
+        // create data flow graphs
+        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
+                processDefinition.getPath(), new ArrayList<>(), scanner);
+
+        final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
+        final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+
+        Assert.assertEquals(2, processVariables.size());
     }
 }

@@ -116,6 +116,8 @@ public final class ProcessVariableReader {
 		processVariables.putAll(getVariablesFromOutputMapping(element, fileScanner, context));
 		// 6) Search variables in Signals and Messages
 		processVariables.putAll(getVariablesFromSignalsAndMessage(element, fileScanner, context));
+		// 7) Search variables in Links
+		processVariables.putAll(getVariablesFromLinks(element, fileScanner, context));
 
 		return processVariables;
 	}
@@ -126,7 +128,11 @@ public final class ProcessVariableReader {
 	 * 
 	 * @param element
 	 *            BpmnElement
-	 * @return processVariables returns processVariables
+	 * @param fileScanner
+	 *            FileScanner
+	 * @param context
+	 *            JavaReaderContext
+	 * @return ProcessVariables retrieved from signals and messages
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromSignalsAndMessage(final BpmnElement element,
 			final FileScanner fileScanner, final JavaReaderContext context) {
@@ -149,7 +155,11 @@ public final class ProcessVariableReader {
 	 *            List of signal references
 	 * @param element
 	 *            BpmnElement
-	 * @return variables
+	 * @param fileScanner
+	 *            FileScanner
+	 * @param context
+	 *            JavaReaderContext
+	 * @return ProcessVariables retrieved from signals
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getSignalVariables(final ArrayList<String> signalRefs,
 			final BpmnElement element, final FileScanner fileScanner, final JavaReaderContext context) {
@@ -185,7 +195,11 @@ public final class ProcessVariableReader {
 	 *            List of message references
 	 * @param element
 	 *            BpmnElement
-	 * @return variables
+	 * @param fileScanner
+	 *            FileScanner
+	 * @param context
+	 *            JavaReaderContext
+	 * @return ProcessVariables retrieved from messages
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getMessageVariables(final ArrayList<String> messageRefs,
 			final BpmnElement element, final FileScanner fileScanner, final JavaReaderContext context) {
@@ -214,6 +228,58 @@ public final class ProcessVariableReader {
 	}
 
 	/**
+	 *
+	 * @param element
+	 *            Current BPMN Element
+	 * @param fileScanner
+	 *            FileScanner
+	 * @param context
+	 *            JavaReaderContext
+	 * @return ProcessVariables retrieved from events of type link
+	 */
+	private ListMultimap<String, ProcessVariableOperation> getVariablesFromLinks(final BpmnElement element,
+			final FileScanner fileScanner, final JavaReaderContext context) {
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
+
+		final ArrayList<String> links = bpmnScanner.getLinkRefs(element.getBaseElement().getId());
+
+		processVariables.putAll(getLinkVariables(links, element, fileScanner, context));
+
+		return processVariables;
+	}
+
+	/**
+	 *
+	 * @param links
+	 *            List of links for current element
+	 * @param element
+	 *            Current BPMN Element
+	 * @param fileScanner
+	 *            FileScanner
+	 * @param context
+	 *            JavaReaderContext
+	 * @return ProcessVariables retrieved from events of type link
+	 */
+	private ListMultimap<String, ProcessVariableOperation> getLinkVariables(final ArrayList<String> links,
+			final BpmnElement element, final FileScanner fileScanner, final JavaReaderContext context) {
+		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
+		final BaseElement baseElement = element.getBaseElement();
+		final BpmnModelElementInstance scopeElement = baseElement.getScope();
+
+		String scopeElementId = null;
+		if (scopeElement != null) {
+			scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+		}
+
+		for (String link : links) {
+			processVariables.putAll(checkMessageAndSignalForExpression(link, element, context, fileScanner,
+					ElementChapter.Signal, KnownElementFieldType.Signal, scopeElementId));
+		}
+
+		return processVariables;
+	}
+
+	/**
 	 * Analyze Input Parameters for variables
 	 *
 	 * @param element
@@ -234,7 +300,7 @@ public final class ProcessVariableReader {
 				.getInputMapping(element.getBaseElement().getId());
 
 		final LinkedMap<String, String> inputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(),
-				BpmnConstants.CAMUNDA_INPAR);
+				BpmnConstants.CAMUNDA_INPUT_PARAMETER);
 
 		for (Map.Entry<String, Map<String, String>> entry : inputVariables.entrySet()) {
 			for (Map.Entry<String, String> innerEntry : entry.getValue().entrySet()) {
@@ -282,7 +348,7 @@ public final class ProcessVariableReader {
 				.getOutputMapping(element.getBaseElement().getId());
 
 		final LinkedMap<String, String> outputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(),
-				BpmnConstants.CAMUNDA_OUTPAR);
+				BpmnConstants.CAMUNDA_OUTPUT_PARAMETER);
 
 		for (Map.Entry<String, Map<String, String>> entry : outputVariables.entrySet()) {
 			for (Map.Entry<String, String> innerEntry : entry.getValue().entrySet()) {
@@ -656,7 +722,7 @@ public final class ProcessVariableReader {
 
 			if (baseElement instanceof BusinessRuleTask) {
 				final String t_decisionRef = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-						BpmnConstants.DECISIONREF);
+						BpmnConstants.DECISION_REF);
 				if (t_decisionRef != null && t_decisionRef.trim().length() > 0 && decisionRefToPathMap != null) {
 					final String fileName = decisionRefToPathMap.get(t_decisionRef);
 					if (fileName != null) {
@@ -721,7 +787,7 @@ public final class ProcessVariableReader {
 						ElementChapter.Details, KnownElementFieldType.CalledElement, scopeId));
 			}
 			final String caseRef = callActivity.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-					BpmnConstants.CASEREF);
+					BpmnConstants.CASE_REF);
 			if (caseRef != null && caseRef.trim().length() > 0) {
 				processVariables.putAll(findVariablesInExpression(context, fileScanner, caseRef, element,
 						ElementChapter.Details, KnownElementFieldType.CaseRef, scopeId));

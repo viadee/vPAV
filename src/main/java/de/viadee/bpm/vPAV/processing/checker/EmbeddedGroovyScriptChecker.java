@@ -108,8 +108,8 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 		final Map<String, Map<String, String>> inputVariables = bpmnScanner.getInputMapping(baseElement.getId());
 		final Map<String, Map<String, String>> outputVariables = bpmnScanner.getOutputMapping(baseElement.getId());
 
-		final LinkedMap<String, String> inputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(), BpmnConstants.CAMUNDA_INPAR);
-		final LinkedMap<String, String> outputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(), BpmnConstants.CAMUNDA_OUTPAR);
+		final LinkedMap<String, String> inputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(), BpmnConstants.CAMUNDA_INPUT_PARAMETER);
+		final LinkedMap<String, String> outputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(), BpmnConstants.CAMUNDA_OUTPUT_PARAMETER);
 
 		checkMapping(bpmnFile, element, issues, inputVariables, inputMappingType);
 

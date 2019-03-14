@@ -202,7 +202,7 @@ public class Graph implements IGraph {
         final boolean isNodeParallelGateway = startNode.getBaseElement().getElementType().getTypeName()
                 .equals(BpmnModelConstants.BPMN_ELEMENT_PARALLEL_GATEWAY);
         final boolean isEndEvent = startNode.getBaseElement().getElementType().getTypeName()
-                .equals(BpmnConstants.ENDEVENT)
+                .equals(BpmnConstants.END_EVENT)
                 && startNode.getBaseElement().getParentElement().getElementType().getTypeName()
                         .equals(BpmnConstants.PROCESS);
 
@@ -352,7 +352,7 @@ public class Graph implements IGraph {
         // go back to the node, where the variable was deleted
         // or go back to the start
         if (anomaly.getAnomaly() == Anomaly.UR && (variableDeleted(anomaly, in, out)
-                || ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)
+                || ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.START_EVENT)
                         && startNode.getBaseElement().getParentElement().getElementType().getTypeName()
                                 .equals(BpmnConstants.PROCESS))))) {
 

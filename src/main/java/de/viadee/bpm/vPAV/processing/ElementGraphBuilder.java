@@ -169,7 +169,7 @@ public class ElementGraphBuilder {
 				final BpmnElement node = new BpmnElement(processDefinition, element);
 
 				// retrieve initial variable operation (should be WRITE)
-				if (element.getElementType().getTypeName().equals(BpmnConstants.STARTEVENT)) {
+				if (element.getElementType().getTypeName().equals(BpmnConstants.START_EVENT)) {
 					final ArrayList<String> messageRefs = bpmnScanner.getMessageRefs(element.getId());
 					String messageName = "";
 					if (messageRefs.size() == 1) {
@@ -187,7 +187,7 @@ public class ElementGraphBuilder {
 					graph.addStartNode(node);
 				}
 
-				if (element.getElementType().getTypeName().equals(BpmnConstants.RECEIVETASK)) {
+				if (element.getElementType().getTypeName().equals(BpmnConstants.RECEIVE_TASK)) {
 					final ArrayList<String> messageRefs = bpmnScanner.getMessageRefs(element.getId());
 					String messageName = "";
 					if (messageRefs.size() == 1) {
@@ -213,7 +213,7 @@ public class ElementGraphBuilder {
 				// mention element
 				elementMap.put(element.getId(), node);
 
-				if (element.getElementType().getTypeName().equals(BpmnConstants.ENDEVENT)) {
+				if (element.getElementType().getTypeName().equals(BpmnConstants.END_EVENT)) {
 					graph.addEndNode(node);
 				}
 				// save process elements as a node

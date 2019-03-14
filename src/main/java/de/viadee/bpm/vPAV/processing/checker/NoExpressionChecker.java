@@ -81,7 +81,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             // get the execution listener
             final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
             if (!listener.isEmpty() && listener.size() > 0
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -103,7 +103,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             // get the execution listener
             final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
             if (!listener.isEmpty() && listener.size() > 0
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -114,7 +114,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             // get the execution listener
             final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
@@ -123,7 +123,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
         } else if (baseElement instanceof ExclusiveGateway) {
             // get the execution listener
             final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
@@ -131,7 +131,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
         } else if (baseElement instanceof UserTask) {
             // get the execution listener
             final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
@@ -139,7 +139,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
             // get the task listener
             final ArrayList<String> taskListener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!taskListener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
@@ -148,7 +148,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
         } else if (baseElement instanceof ManualTask) {
             // get the execution listener
             final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_EXECUTIONLISTENER);
+                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
