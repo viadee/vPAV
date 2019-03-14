@@ -40,6 +40,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class ProcessApplicationValidator {
 
@@ -110,6 +111,34 @@ public class ProcessApplicationValidator {
 	}
 
 	/**
+	 * Find model errors without spring context but manual bean map
+	 *
+	 * @return all issues
+	 */
+	public static Collection<CheckerIssue> findModelInconsistencies(final HashMap<String, String> beanMap) {
+
+		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+		RuntimeConfig.getInstance().setBeanMapping(beanMap);
+		Runner runner = createRunner();
+
+		return runner.getFilteredIssues();
+	}
+
+	/**
+	 * Find model errors without spring context but manual bean map
+	 *
+	 * @return issues with status error
+	 */
+	public static Collection<CheckerIssue> findModelErrors(final HashMap<String, String> beanMap) {
+
+		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+		RuntimeConfig.getInstance().setBeanMapping(beanMap);
+		Runner runner = createRunner();
+
+		return filterErrors(runner.getFilteredIssues(), CriticalityEnum.ERROR);
+	}
+
+	/**
 	 * Find model errors without spring context. Alternative method for testing
 	 * purposes, to allow using a classloader that includes example delegates in
 	 * /src/test/java etc.
@@ -136,7 +165,7 @@ public class ProcessApplicationValidator {
 	 * @return issues with status
 	 */
 	private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues,
-			CriticalityEnum status) {
+														 CriticalityEnum status) {
 		Collection<CheckerIssue> filteredErrors = new ArrayList<CheckerIssue>();
 
 		for (CheckerIssue issue : filteredIssues) {
@@ -149,7 +178,7 @@ public class ProcessApplicationValidator {
 
 	/**
 	 * Creates a new runner and returns it
-	 * 
+	 *
 	 * @return Runner
 	 */
 	private static Runner createRunner() {
