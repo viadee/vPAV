@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +46,6 @@ import java.net.URLClassLoader;
  * assumption: examining process variables in source code is done before
  */
 public class OuterProcessVariablesTestOperation {
-
-    private static final String BASE_PATH = "src/test/resources/";
 
     private static ClassLoader cl;
 

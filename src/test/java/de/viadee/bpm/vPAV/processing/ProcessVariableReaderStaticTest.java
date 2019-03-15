@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,26 +31,28 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -72,11 +74,22 @@ public class ProcessVariableReaderStaticTest {
 
     @Test
     public void testSootReachingMethod() {
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final Map<String, ProcessVariableOperation> variables = new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", null, null, null, null);
+        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
 
-        assertEquals(3, variables.size());
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ServiceTask> tasks = modelInstance
+                .getModelElementsByType(ServiceTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+    	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+                "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null));
+
+        assertEquals(3, variables.asMap().size());
     }
     
     @Test
@@ -91,22 +104,16 @@ public class ProcessVariableReaderStaticTest {
 
         final BpmnElement element = new BpmnElement(PATH, startElement.iterator().next());
 
-        
-        final Map<String, Map<String, String>> outerMap = new HashMap<String, Map<String, String>>();
-        final Map<String, String> innerMap = new HashMap<String, String>();
-        innerMap.put("startProcess", "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java");
-        outerMap.put("startProcessInstanceByMessage", innerMap);
-        
-        final Map<String, ProcessVariableOperation> variables = new HashMap<>();
+        final EntryPoint entry = new EntryPoint("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java","startProcess", "schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage");
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         final Set<String> resources = new HashSet<String>();
         resources.add("");
         
         ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
-  
-        for (Map.Entry<String, Map<String, String>> entry : outerMap.entrySet()) {
-        	variables.putAll(new JavaReaderStatic().getVariablesFromClass(
+
+        variables.putAll(new JavaReaderStatic().getVariablesFromClass(
             		"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables", scanner, element, null, entry));
-        }
+
 
         assertEquals(3, variables.size());
 

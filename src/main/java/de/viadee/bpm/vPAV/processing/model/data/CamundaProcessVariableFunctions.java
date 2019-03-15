@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,7 @@ public enum CamundaProcessVariableFunctions {
     GetVariableLocalTyped("getVariableLocalTyped", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
     GetVariableLocalTyped2("getVariableLocalTyped", CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.READ),
     Put("put", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
+    Put2("put", CamundaMethodServices.MAP, 2, 1, VariableOperation.WRITE),
 	PutValue("putValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
 	PutValueTyped("putValueTyped", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
 	GetValue("getValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.READ),
@@ -88,7 +89,7 @@ public enum CamundaProcessVariableFunctions {
      * @param type
      *            - VariableOperation
      */
-    private CamundaProcessVariableFunctions(final String name, final String service, int number, int loc,
+    CamundaProcessVariableFunctions(final String name, final String service, int number, int loc,
             VariableOperation type) {
         this.name = name;
         this.service = service;

@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,13 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * Used to read the config file (ruleSet.xml) and extract the configured rules
- * Requirements: Exisiting ruleSet.xml in src/test/resources
+ * Requirements: Existing ruleSet.xml in src/test/resources
  */
 public final class XmlConfigReader implements ConfigReader {
 
 	/**
+	 * @param file
+	 *            Location of file relative to project
 	 * @throws ConfigReaderException
 	 *             If file can not be found in classpath
 	 */

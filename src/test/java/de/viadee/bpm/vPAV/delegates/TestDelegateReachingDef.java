@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ public class TestDelegateReachingDef implements org.camunda.bpm.engine.delegate.
 
         // TODO Auto-generated method stub
         /* execution.setVariable("dshfhdsfhfds", true); */
-        String bla = (String) execution.getVariable("ProcessVariable2");
+        execution.getVariable("ProcessVariable2");
 
         int a = 1;
         final String variableName2 = "ProcessVariable3";

@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,27 +85,23 @@ public class ProcessApplicationVariableParser {
 	 * @param fileScanner
 	 *            FileScanner
 	 */
-	private static ProcessVariablesScanner readOuterProcessVariables(final FileScanner fileScanner) throws RuntimeException {
-		try {
-            ProcessVariablesScanner variableScanner = new ProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
-			variableScanner.scanProcessVariables();
-			return variableScanner;
-		} catch (final IOException e) {
-			throw new RuntimeException("Outer process variables couldn't be read", e);
-		}
+	private static ProcessVariablesScanner readOuterProcessVariables(final FileScanner fileScanner) {
+        ProcessVariablesScanner variableScanner = new ProcessVariablesScanner(fileScanner.getJavaResourcesFileInputStream());
+        variableScanner.scanProcessVariables();
+        return variableScanner;
 	}
 
 	/**
      *
-     * @param processdefinition
+     * @param processDefinition
      *            Holds the path to the BPMN model
      * @return BpmnScanner
      */
-    private static BpmnScanner createScanner(final File processdefinition) {
+    private static BpmnScanner createScanner(final File processDefinition) {
         // create BPMNScanner
         BpmnScanner bpmnScanner;
         try {
-            bpmnScanner = new BpmnScanner(processdefinition.getPath());
+            bpmnScanner = new BpmnScanner(processDefinition.getPath());
         } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new RuntimeException("Model couldn't be parsed");
         }

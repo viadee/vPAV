@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,7 @@ public class JavaDelegateCheckerTest {
         final Map<String, String> beanMapping = new HashMap<String, String>();
         beanMapping.put("FalschesDelegate_bla", "de.test.Test");
         beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.delegates.TestDelegate");
+        beanMapping.put("transitiveDelegate", "de.viadee.bpm.vPAV.delegates.TransitiveDelegate");
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
         final File file = new File(".");
@@ -85,6 +86,33 @@ public class JavaDelegateCheckerTest {
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
+    }
+
+    /**
+     * Case: JavaDelegate has been correct set with transitive interface javaDelegate
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     */
+    @Test
+    public void testJavaDelegateTransitiveInterface()
+            throws ParserConfigurationException, SAXException, IOException {
+        final String PATH = BASE_PATH + "JavaDelegateCheckerTest_TransitiveInterface.bpmn";
+        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ServiceTask> baseElements = modelInstance
+                .getModelElementsByType(ServiceTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+
+        final Collection<CheckerIssue> issues = checker.check(element);
+
+        if (issues.size() > 0) {
+            Assert.fail("correct java delegate generates an issue");
+        }
     }
 
     /**

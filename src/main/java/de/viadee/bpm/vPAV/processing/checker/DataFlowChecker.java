@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@ import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,14 +46,14 @@ public class DataFlowChecker implements ModelChecker {
     private Collection<DataFlowRule> dataFlowRules;
     private Collection<ProcessVariable> processVariables;
 
-    public DataFlowChecker(Rule rule, Collection<DataFlowRule> dataFlowRules, Collection<ProcessVariable> processVariables) {
+    public DataFlowChecker(final Rule rule, final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables) {
         this.rule = rule;
         this.dataFlowRules = dataFlowRules;
         this.processVariables = processVariables;
     }
 
     @Override
-    public Collection<CheckerIssue> check(BpmnModelInstance processdefinition) {
+    public Collection<CheckerIssue> check() {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (DataFlowRule dataFlowRule : dataFlowRules) {
             dataFlowRule.evaluate(processVariables).stream()

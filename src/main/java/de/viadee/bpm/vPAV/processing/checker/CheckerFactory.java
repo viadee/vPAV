@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -50,7 +51,7 @@ import java.util.logging.Logger;
 public class CheckerFactory {
 
 	private static final Logger LOGGER = Logger.getLogger(CheckerFactory.class.getName());
-	
+
 	private Map<String, String> incorrectCheckers = new HashMap<>();
 
 	/**
@@ -62,10 +63,13 @@ public class CheckerFactory {
 	 *            resourcesNewestVersions in context
 	 * @param bpmnScanner
 	 *            bpmnScanner for model
+	 * @param scanner
+	 *            ProcessVariablesScanner for process variables, if active
 	 * @return checkers returns checkers
 	 */
 	public Collection<ElementChecker> createCheckerInstances(final Map<String, Rule> ruleConf,
-			final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner) {
+			final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
+			final ProcessVariablesScanner scanner) {
 
 		final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
 
@@ -78,15 +82,22 @@ public class CheckerFactory {
 
 			if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")
 					&& !rule.getKey().equals("DataFlowChecker")) { //$NON-NLS-1$
-				try {					
-					if (!rule.getKey().equals("VersioningChecker")) { //$NON-NLS-1$
-						Class clazz = Class.forName(fullyQualifiedName);
+				try {
+					if (!rule.getKey().equals("VersioningChecker") && !rule.getKey().equals("MessageCorrelationChecker")) { //$NON-NLS-1$
+						Class<?> clazz = Class.forName(fullyQualifiedName);
 						Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class);
 						checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner));
+					}
+					if (scanner != null && rule.getKey().equals("MessageCorrelationChecker")) {
+						Class<?> clazz = Class.forName(fullyQualifiedName);
+						Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class,
+								ProcessVariablesScanner.class);
+						checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner, scanner));
 					} else {
-						Class clazz = Class.forName(fullyQualifiedName);
+						Class<?> clazz = Class.forName(fullyQualifiedName);
 						Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class, Collection.class);
-						checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner, resourcesNewestVersions));
+						checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner,
+								resourcesNewestVersions));
 					}
 				} catch (NoSuchMethodException | SecurityException | ClassNotFoundException | IllegalAccessException
 						| IllegalArgumentException | InvocationTargetException | InstantiationException e) {
@@ -119,19 +130,19 @@ public class CheckerFactory {
 			LOGGER.warning("Checker '" + rule.getValue().getName() //$NON-NLS-1$
 					+ "' not found. Please add setting for external_location in ruleSet.xml."); //$NON-NLS-1$
 			rule.getValue().deactivate();
-			
+
 			setIncorrectCheckers(rule, String.format(Messages.getString("CheckerFactory.8"), //$NON-NLS-1$
 					rule.getValue().getName()));
 		}
 		return fullyQualifiedName;
 	}
-	
+
 	public void setIncorrectCheckers(final Map.Entry<String, Rule> rule, final String message) {
 		if (!getIncorrectCheckers().containsKey(rule.getValue().getName())) {
 			this.incorrectCheckers.put(rule.getValue().getName(), message);
 		}
 	}
-	
+
 	public Map<String, String> getIncorrectCheckers() {
 		return this.incorrectCheckers;
 	}

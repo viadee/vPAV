@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,6 @@ public class DescribedPredicateEvaluatorTest {
     public void testEvaluateAppliesPredicateCorrectly() {
         DescribedPredicateEvaluator<String> constraint = new DescribedPredicateEvaluator<>(s -> s.isEmpty() ?
                 EvaluationResult.forSuccess(s) : EvaluationResult.forViolation("error", s), "");
-        DescribedPredicateEvaluator<String> constraint2 = new DescribedPredicateEvaluator<>(s -> s.isEmpty() ?
-                EvaluationResult.forSuccess("success", s) : EvaluationResult.forViolation(s), "");
 
         assertThat(constraint.evaluate("").isFulfilled(), is(true));
         assertThat(constraint.evaluate("notEmpty").isFulfilled(), is(false));

@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,8 +126,6 @@ public class XmlConfigReaderTest {
 
     /**
      * Test loading an incorrect config file (no xml)
-     *
-     *
      */
     @Test(expected = ConfigReaderException.class)
     public void testLoadingIncorrectXMLConfigFile() throws ConfigReaderException {
@@ -155,7 +153,7 @@ public class XmlConfigReaderTest {
             Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
             if (setting != null) {
                 String value = setting.getValue();
-                if (setting.getValue().equals("true")) {
+                if (setting.getValue().equals(value)) {
                     isStatic = true;
                 }
             }

@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@ public class ProcessVariableOperation {
     }
 
     public String toString() {
-        return name + " [" + element.getProcessdefinition() + ", " + element.getBaseElement().getId()
+        return name + " [" + element.getProcessDefinition() + ", " + element.getBaseElement().getId()
                 + ", Scope: " + scopeId + ", " + chapter.name() + ", " + fieldType.getDescription() + ", "
                 + resourceFilePath + "]";
     }

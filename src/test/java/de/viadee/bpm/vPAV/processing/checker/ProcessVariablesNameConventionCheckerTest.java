@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -58,7 +60,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -120,10 +125,10 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+            ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
             
-            final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>(); 
-            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, variables));
+            final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element));
             
             element.setProcessVariables(variables);
 
@@ -157,10 +162,10 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            ProcessVariableReader variableReader = new ProcessVariableReader(null, new BpmnScanner(PATH));
+            ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
             
-            final LinkedHashMap<String, ProcessVariableOperation> variables = new LinkedHashMap<String, ProcessVariableOperation>(); 
-            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, variables));
+            final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element));
             
             element.setProcessVariables(variables);
 

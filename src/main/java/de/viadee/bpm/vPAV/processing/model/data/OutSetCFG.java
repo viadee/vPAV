@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import soot.toolkits.graph.Block;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 
@@ -69,9 +69,9 @@ public class OutSetCFG {
         this.variableBlocks.add(vb);
     }
 
-    public Map<String, ProcessVariableOperation> getAllProcessVariables() {
+    public ListMultimap<String, ProcessVariableOperation> getAllProcessVariables() {
 
-        Map<String, ProcessVariableOperation> variables = new HashMap<String, ProcessVariableOperation>();
+    	ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
         for (VariableBlock vb : variableBlocks) {
 

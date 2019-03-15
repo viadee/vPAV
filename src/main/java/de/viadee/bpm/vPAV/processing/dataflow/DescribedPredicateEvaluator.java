@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2018, viadee Unternehmensberatung AG
+ * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ public class DescribedPredicateEvaluator<T> {
      * @param other Other predicate
      * @return combined predicate
      */
-    public DescribedPredicateEvaluator<T> and(DescribedPredicateEvaluator other) {
+    public DescribedPredicateEvaluator<T> and(DescribedPredicateEvaluator<T> other) {
         Function<T, EvaluationResult<T>> andPredicateEvaluator = (T) ->
         {
             EvaluationResult<T> result1 = this.evaluate(T);
