@@ -91,10 +91,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * Creates list which contains elements with multiple issues and the marks it
 	 * with highest severity
 	 * 
-	 * @param issues
+	 * @param issues Collected issues
 	 */
 	private Map<String, CriticalityEnum> createIssueSeverity(final Collection<CheckerIssue> issues) {
-		Map<String, CriticalityEnum> issueSeverity = new HashMap<String, CriticalityEnum>();
+		Map<String, CriticalityEnum> issueSeverity = new HashMap<>();
 		for (CheckerIssue issue : issues) {
 			if (!issueSeverity.containsKey(issue.getElementId())) {
 				issueSeverity.put(issue.getElementId(), issue.getClassification());
@@ -112,11 +112,11 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Extract external rules from active ruleset
 	 * 
-	 * @param activeRules
-	 * @return
+	 * @param activeRules Active RuleSet
+	 * @return List of external configured checkers
 	 */
 	private ArrayList<String> extractExternalCheckers(final ArrayList<String> activeRules) {
-		final ArrayList<String> defaultRules = new ArrayList<String>();
+		final ArrayList<String> defaultRules = new ArrayList<>();
 		for (String entry : RuntimeConfig.getInstance().getViadeeRules()) {
 			if (activeRules.contains(entry)) {
 				defaultRules.add(entry);
@@ -126,11 +126,15 @@ public class JsOutputWriter implements IssueOutputWriter {
 	}
 
 	/**
-	 * 
-	 * @param json
-	 * @param json_noIssues
-	 * @param bpmn
-	 * @throws OutputWriterException
+	 *
+	 * @param json Elements to be marked (jsonified)
+	 * @param json_noIssues No issues (jsonified)
+	 * @param bpmn BPMN Model
+	 * @param wrongCheckers Wrong Checkers
+	 * @param defaultCheckers Default Checkers
+	 * @param issueSeverity Issue severity
+	 * @param ignoredIssues Ignored issues
+	 * @throws OutputWriterException If JavaScript could not be written
 	 */
 	private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
 			final String defaultCheckers, final String issueSeverity, final String ignoredIssues)
@@ -187,17 +191,14 @@ public class JsOutputWriter implements IssueOutputWriter {
 	}
 
 	/**
-	 * write javascript file with elements which have variables
+	 * Write javascript file with elements which have variables
 	 *
 	 * @param elements
 	 *            Collection of BPMN elements across all models
 	 * @param processVariables
 	 *            Collection of process variables
-	 * @throws OutputWriterException
-	 *             javascript couldnt be written
 	 */
-	public void writeVars(Collection<BpmnElement> elements, Collection<ProcessVariable> processVariables)
-			throws OutputWriterException {
+	public void writeVars(final Collection<BpmnElement> elements, final Collection<ProcessVariable> processVariables)  {
 		try {
 			FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, true);
 
@@ -221,7 +222,13 @@ public class JsOutputWriter implements IssueOutputWriter {
 		}
 	}
 
-	private static JsonObject transformElementToJsonIncludingProcessVariables(BpmnElement element) {
+	/**
+	 * Transforms a bpmn element to json object
+	 *
+	 * @param element BpmnElement
+	 * @return BpmnElement as JSON Object
+	 */
+	private static JsonObject transformElementToJsonIncludingProcessVariables(final BpmnElement element) {
 		final JsonObject obj = new JsonObject();
 		if (!element.getProcessVariables().isEmpty()) {
 			// elementID
@@ -259,8 +266,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Transforms a process variable to a json object
 	 *
-	 * @param processVariable
-	 * @return
+	 * @param processVariable ProcessVariable
+	 * @return ProcessVariable as JSON object
 	 */
 	private static JsonObject transformProcessVariablesToJson(final ProcessVariable processVariable) {
 		final JsonObject obj = new JsonObject();
@@ -294,11 +301,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return list with checkers without issues
 	 */
 	private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
-		Collection<CheckerIssue> newIssues = new ArrayList<CheckerIssue>();
+		Collection<CheckerIssue> newIssues = new ArrayList<>();
 
 		for (final String bpmnFilename : getModelPaths()) {
-			Collection<CheckerIssue> modelIssues = new ArrayList<CheckerIssue>();
-			modelIssues.addAll(issues);
+			Collection<CheckerIssue> modelIssues = new ArrayList<>(issues);
 
 			for (CheckerIssue issue : issues) {
 				String prettyBpmnFilename = replace(File.separator, "\\", issue.getBpmnFile());
@@ -307,8 +313,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			}
 
 			for (final String ruleName : RuntimeConfig.getInstance().getActiveRules()) {
-				Collection<CheckerIssue> ruleIssues = new ArrayList<CheckerIssue>();
-				ruleIssues.addAll(modelIssues);
+				Collection<CheckerIssue> ruleIssues = new ArrayList<>(modelIssues);
 				for (CheckerIssue issue : modelIssues) {
 					if (!issue.getRuleName().equals(ruleName))
 						ruleIssues.remove(issue);
@@ -327,17 +332,17 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * Transforms the path and filename to XML
 	 *
 	 * @return output
-	 * @throws OutputWriterException
+	 * @throws OutputWriterException If content can not bet transformed to XML format
 	 */
 	private String transformToXMLDatastructure() throws OutputWriterException {
-		String output = "var diagramXMLSource = [\n";
+		StringBuilder output = new StringBuilder("var diagramXMLSource = [\n");
 
 		try {
 			for (final String bpmnFilename : getModelPaths()) {
 				String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
-				output += "{\"name\":\"" + prettyBpmnFileName + "\",\n \"xml\": \"";
-				output += convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename);
-				output += "\"},\n";
+				output.append("{\"name\":\"").append(prettyBpmnFileName).append("\",\n \"xml\": \"");
+				output.append(convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename));
+				output.append("\"},\n");
 			}
 		} catch (IOException e) {
 			throw new OutputWriterException("bpmnFile not found");
@@ -346,11 +351,12 @@ public class JsOutputWriter implements IssueOutputWriter {
 	}
 
 	/**
+	 * Replaces FileSeparator with given char sequence
 	 *
-	 * @param search
-	 * @param replace
-	 * @param str
-	 * @return str
+	 * @param search FileSeparator
+	 * @param replace Chars to replace searched string
+	 * @param str String to be cleaned
+	 * @return str Cleaned String
 	 */
 	private static String replace(String search, String replace, String str) {
 		int start = str.indexOf(search);
@@ -365,9 +371,9 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Cleans bad unicode chars in a string
 	 *
-	 * @param path
-	 * @return s
-	 * @throws IOException
+	 * @param path Path to file
+	 * @return s Cleaned string
+	 * @throws IOException File not found
 	 */
 	private String convertBpmnFile(String path) throws IOException {
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
@@ -383,8 +389,9 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Transforms the collection of issues into JSON format
 	 *
-	 * @param issues
-	 * @return
+	 * @param issues Collection of found issues
+	 * @param varName Variable Name
+	 * @return Collection of issues in JSON format
 	 */
 	private String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
 		final JsonArray jsonIssues = new JsonArray();
@@ -432,8 +439,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Transforms the collection of wrong checkers into JSON format
 	 *
-	 * @param issues
-	 * @return
+	 * @param wrongCheckers Map of wrongly configured checkers
+	 * @return JavaScript variables containing the wrong checkers
 	 */
 	private String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
 		final String varName = "unlocatedCheckers";
@@ -452,8 +459,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Transforms the collection of issue severities into JSON format
 	 *
-	 * @param issues
-	 * @return
+	 * @param issues Map of collected issues
+	 * @return JavaScript variables containing the issues' id and severity
 	 */
 	private String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
 		final String varName = "issueSeverity";
@@ -462,7 +469,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			for (Map.Entry<String, CriticalityEnum> entry : issues.entrySet()) {
 				final JsonObject obj = new JsonObject();
 				obj.addProperty(BpmnConstants.ATTR_ID, entry.getKey());
-				obj.addProperty(ConfigConstants.CRITICALITY, entry.getValue().name().toString());
+				obj.addProperty(ConfigConstants.CRITICALITY, entry.getValue().name());
 				jsonIssues.add(obj);
 			}
 		}
@@ -472,10 +479,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Transforms the map of ignored issues into JSON format
 	 * 
-	 * @param ignoredIssues
-	 * @return
+	 * @param ignoredIssues Map of issues to be ignored
+	 * @return JavaScript variables containing the issues to be ignored
 	 */
-	private String transformIgnoredIssuesToJsDatastructure(Map<String, String> ignoredIssues) {
+	private String transformIgnoredIssuesToJsDatastructure(final Map<String, String> ignoredIssues) {
 		final String ignoredIssuesList = "ignoredIssues";
 		final JsonArray ignoredIssesJson = new JsonArray();
 
@@ -493,8 +500,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 	/**
 	 * 
-	 * @param wrongCheckers
-	 * @return
+	 * @param defaultCheckers ArrayList of default vPAV checkers
+	 * @return JavaScript variables containing the default checkers
 	 */
 	private String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
 		final String varName = "defaultCheckers";

@@ -59,11 +59,10 @@ public class JsonOutputWriter implements IssueOutputWriter {
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
         final String json = transformToJsonDatastructure(issues);
         if (json != null && !json.isEmpty()) {
-            try {
-                final OutputStreamWriter osWriter = new OutputStreamWriter(
-                        new FileOutputStream(ConfigConstants.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8);
+
+            try (OutputStreamWriter osWriter = new OutputStreamWriter(
+                    new FileOutputStream(ConfigConstants.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8)) {
                 osWriter.write(json);
-                osWriter.close();
             } catch (final IOException ex) {
                 throw new OutputWriterException("json output couldn't be written");
             }
@@ -73,8 +72,8 @@ public class JsonOutputWriter implements IssueOutputWriter {
     /**
      * Transforms the collected issues to a JSON-String
      *
-     * @param issues
-     * @return String
+     * @param issues Collection of found issues
+     * @return jsonified string
      */
     private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues) {
         final JsonArray jsonIssues = new JsonArray();
