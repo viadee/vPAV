@@ -150,52 +150,59 @@ public class JsOutputWriter implements IssueOutputWriter {
 			final String defaultCheckers, final String issueSeverity, final String ignoredIssues)
 			throws OutputWriterException {
 		if (json != null && !json.isEmpty()) {
-			try {
-				final FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT);
+			try (FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT)) {
 				file.write(bpmn);
-				file.close();
-
-				final OutputStreamWriter osWriter = new OutputStreamWriter(
-						new FileOutputStream(ConfigConstants.VALIDATION_JS_OUTPUT), StandardCharsets.UTF_8);
+			} catch (IOException e) {
+				throw new OutputWriterException("js output couldn't be written", e);
+			}
+			try (OutputStreamWriter osWriter = new OutputStreamWriter(
+					new FileOutputStream(ConfigConstants.VALIDATION_JS_OUTPUT), StandardCharsets.UTF_8)) {
 				osWriter.write(json);
-				osWriter.close();
-
-				final OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
-						new FileOutputStream(ConfigConstants.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8);
+			} catch (IOException e) {
+				throw new OutputWriterException("js output couldn't be written", e);
+			}
+			try (OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
+					new FileOutputStream(ConfigConstants.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8)) {
 				osWriterSuccess.write(json_noIssues);
-				osWriterSuccess.close();
+			} catch (IOException e) {
+				throw new OutputWriterException("js output couldn't be written", e);
+			}
 
-				if ((wrongCheckers != null && !wrongCheckers.isEmpty())
-						&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
-					final OutputStreamWriter wrongAndDefaultCheckers = new OutputStreamWriter(
-							new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8);
+			if ((wrongCheckers != null && !wrongCheckers.isEmpty())
+					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
+				try (OutputStreamWriter wrongAndDefaultCheckers = new OutputStreamWriter(
+						new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8)) {
 					wrongAndDefaultCheckers.write(wrongCheckers);
 					wrongAndDefaultCheckers.write(defaultCheckers);
-					wrongAndDefaultCheckers.close();
-				} else if ((wrongCheckers == null || wrongCheckers.isEmpty())
-						&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
-					final OutputStreamWriter defaultCheckerJS = new OutputStreamWriter(
-							new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8);
+				} catch (IOException e) {
+					throw new OutputWriterException("js output couldn't be written", e);
+				}
+			} else if ((wrongCheckers == null || wrongCheckers.isEmpty())
+					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
+				try (OutputStreamWriter defaultCheckerJS = new OutputStreamWriter(
+						new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8)) {
 					defaultCheckerJS.write(defaultCheckers);
-					defaultCheckerJS.close();
+				} catch (IOException e) {
+					throw new OutputWriterException("js output couldn't be written", e);
 				}
+			}
 
-				if (issueSeverity != null && !issueSeverity.isEmpty()) {
-					final OutputStreamWriter issueSeverityWriter = new OutputStreamWriter(
-							new FileOutputStream(ConfigConstants.VALIDATION_ISSUE_SEVERITY), StandardCharsets.UTF_8);
+			if (issueSeverity != null && !issueSeverity.isEmpty()) {
+				try (OutputStreamWriter issueSeverityWriter = new OutputStreamWriter(
+						new FileOutputStream(ConfigConstants.VALIDATION_ISSUE_SEVERITY), StandardCharsets.UTF_8)) {
 					issueSeverityWriter.write(issueSeverity);
-					issueSeverityWriter.close();
+				} catch (IOException e) {
+					throw new OutputWriterException("js output couldn't be written", e);
 				}
-				if (ignoredIssues != null && !ignoredIssues.isEmpty()) {
-					final OutputStreamWriter ignoredIssuesWriter = new OutputStreamWriter(
-							new FileOutputStream(ConfigConstants.VALIDATION_IGNORED_ISSUES_OUTPUT),
-							StandardCharsets.UTF_8);
+			}
+			if (ignoredIssues != null && !ignoredIssues.isEmpty()) {
+				try (OutputStreamWriter ignoredIssuesWriter = new OutputStreamWriter(
+						new FileOutputStream(ConfigConstants.VALIDATION_IGNORED_ISSUES_OUTPUT),
+						StandardCharsets.UTF_8)) {
 					ignoredIssuesWriter.write(ignoredIssues);
-					ignoredIssuesWriter.close();
+				} catch (IOException e) {
+					throw new OutputWriterException("js output couldn't be written", e);
 				}
-
-			} catch (final IOException ex) {
-				throw new OutputWriterException("js output couldn't be written", ex);
 			}
 		}
 	}
@@ -209,8 +216,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 *            Collection of process variables
 	 */
 	public void writeVars(final Collection<BpmnElement> elements, final Collection<ProcessVariable> processVariables) {
-		try {
-			FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, true);
+
+		try (FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, true)) {
 
 			// write elements containing operations
 			JsonArray jsonElements = elements.stream()
@@ -226,8 +233,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 					.append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonVariables)).append(";");
 
 			writer.write(jsFile.toString());
-			writer.close();
-		} catch (IOException e) {
+		} catch (IOException e1) {
 			logger.warning("Processvariables couldn't be written");
 		}
 	}

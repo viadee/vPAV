@@ -68,9 +68,12 @@ public class BpmnScanner {
 	 */
 	public BpmnScanner(String path) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
-		factory.setNamespaceAware(true);
 		try {
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+			factory.setFeature("http://xml.org/sax/features/external-general-entities",false);
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities",false);
+			factory.setNamespaceAware(true);
 			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
