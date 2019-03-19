@@ -49,73 +49,74 @@ import java.util.List;
 
 public class JsonOutputWriter implements IssueOutputWriter {
 
-    /**
-     * Writes all collected issues to the vPAV output
-     *
-     * @param issues
-     *            Collection of CheckerIssues
-     */
-    @Override
-    public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
-        final String json = transformToJsonDatastructure(issues);
-        if (json != null && !json.isEmpty()) {
+	/**
+	 * Writes all collected issues to the vPAV output
+	 *
+	 * @param issues
+	 *            Collection of CheckerIssues
+	 */
+	@Override
+	public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
+		final String json = transformToJsonDatastructure(issues);
+		if (json != null && !json.isEmpty()) {
 
-            try (OutputStreamWriter osWriter = new OutputStreamWriter(
-                    new FileOutputStream(ConfigConstants.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8)) {
-                osWriter.write(json);
-            } catch (final IOException ex) {
-                throw new OutputWriterException("json output couldn't be written");
-            }
-        }
-    }
+			try (OutputStreamWriter osWriter = new OutputStreamWriter(
+					new FileOutputStream(ConfigConstants.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8)) {
+				osWriter.write(json);
+			} catch (final IOException ex) {
+				throw new OutputWriterException("json output couldn't be written");
+			}
+		}
+	}
 
-    /**
-     * Transforms the collected issues to a JSON-String
-     *
-     * @param issues Collection of found issues
-     * @return jsonified string
-     */
-    private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues) {
-        final JsonArray jsonIssues = new JsonArray();
-        if (issues != null && issues.size() > 0) {
-            for (final CheckerIssue issue : issues) {
-                final JsonObject obj = new JsonObject();
-                obj.addProperty(BpmnConstants.VPAV_ID, issue.getId());
-                obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, issue.getBpmnFile());
-                obj.addProperty(BpmnConstants.VPAV_RULE_NAME, issue.getRuleName());
-                obj.addProperty(BpmnConstants.VPAV_RULE_DESCRIPTION, issue.getRuleDescription());
-                obj.addProperty(BpmnConstants.VPAV_ELEMENT_ID, issue.getElementId());
-                obj.addProperty(BpmnConstants.VPAV_ELEMENT_NAME, issue.getElementName());
-                obj.addProperty(BpmnConstants.VPAV_CLASSIFICATION, issue.getClassification().name());
-                obj.addProperty(BpmnConstants.VPAV_RESOURCE_FILE, issue.getResourceFile());
-                obj.addProperty(BpmnConstants.VPAV_VARIABLE, issue.getVariable());
-                obj.addProperty(BpmnConstants.VPAV_ANOMALY,
-                        issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription());
-                final JsonArray jsonPaths = new JsonArray();
-                final List<Path> paths = issue.getInvalidPaths();
-                if (paths != null && paths.size() > 0) {
-                    for (final Path path : paths) {
-                        final JsonArray jsonPath = new JsonArray();
-                        final List<BpmnElement> elements = path.getElements();
-                        for (BpmnElement element : elements) {
-                            final JsonObject jsonElement = new JsonObject();
-                            final String id = element.getBaseElement().getId();
-                            final String name = element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
-                            jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_ID, id);
-                            jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_NAME,
-                                    name == null ? null : name.replaceAll("\n", ""));
-                            jsonPath.add(jsonElement);
-                        }
-                        jsonPaths.add(jsonPath);
-                    }
-                }
-                obj.add(BpmnConstants.VPAV_PATHS, jsonPaths);
-                obj.addProperty(BpmnConstants.VPAV_MESSAGE, issue.getMessage());
-                obj.addProperty(BpmnConstants.VPAV_ELEMENT_DESCRIPTION, issue.getElementDescription());
-                jsonIssues.add(obj);
-            }
-        }
+	/**
+	 * Transforms the collected issues to a JSON-String
+	 *
+	 * @param issues
+	 *            Collection of found issues
+	 * @return jsonified string
+	 */
+	private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues) {
+		final JsonArray jsonIssues = new JsonArray();
+		if (issues != null && issues.size() > 0) {
+			for (final CheckerIssue issue : issues) {
+				final JsonObject obj = new JsonObject();
+				obj.addProperty(BpmnConstants.VPAV_ID, issue.getId());
+				obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, issue.getBpmnFile());
+				obj.addProperty(BpmnConstants.VPAV_RULE_NAME, issue.getRuleName());
+				obj.addProperty(BpmnConstants.VPAV_RULE_DESCRIPTION, issue.getRuleDescription());
+				obj.addProperty(BpmnConstants.VPAV_ELEMENT_ID, issue.getElementId());
+				obj.addProperty(BpmnConstants.VPAV_ELEMENT_NAME, issue.getElementName());
+				obj.addProperty(BpmnConstants.VPAV_CLASSIFICATION, issue.getClassification().name());
+				obj.addProperty(BpmnConstants.VPAV_RESOURCE_FILE, issue.getResourceFile());
+				obj.addProperty(BpmnConstants.VPAV_VARIABLE, issue.getVariable());
+				obj.addProperty(BpmnConstants.VPAV_ANOMALY,
+						issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription());
+				final JsonArray jsonPaths = new JsonArray();
+				final List<Path> paths = issue.getInvalidPaths();
+				if (paths != null && paths.size() > 0) {
+					for (final Path path : paths) {
+						final JsonArray jsonPath = new JsonArray();
+						final List<BpmnElement> elements = path.getElements();
+						for (BpmnElement element : elements) {
+							final JsonObject jsonElement = new JsonObject();
+							final String id = element.getBaseElement().getId();
+							final String name = element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
+							jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_ID, id);
+							jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_NAME,
+									name == null ? null : name.replaceAll("\n", ""));
+							jsonPath.add(jsonElement);
+						}
+						jsonPaths.add(jsonPath);
+					}
+				}
+				obj.add(BpmnConstants.VPAV_PATHS, jsonPaths);
+				obj.addProperty(BpmnConstants.VPAV_MESSAGE, issue.getMessage());
+				obj.addProperty(BpmnConstants.VPAV_ELEMENT_DESCRIPTION, issue.getElementDescription());
+				jsonIssues.add(obj);
+			}
+		}
 
-        return new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues);
-    }
+		return new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues);
+	}
 }

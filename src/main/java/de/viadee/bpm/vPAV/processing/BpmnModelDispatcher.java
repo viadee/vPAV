@@ -47,11 +47,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -233,15 +230,15 @@ public class BpmnModelDispatcher {
 				final Collection<ProcessVariable> processVariables = variables.asMap().get(variableName);
 				for (ProcessVariable pv : processVariables) {
 					switch (variableOperation.getOperation()) {
-						case READ:
-							pv.addRead(variableOperation);
-							break;
-						case WRITE:
-							pv.addWrite(variableOperation);
-							break;
-						case DELETE:
-							pv.addDelete(variableOperation);
-							break;
+					case READ:
+						pv.addRead(variableOperation);
+						break;
+					case WRITE:
+						pv.addWrite(variableOperation);
+						break;
+					case DELETE:
+						pv.addDelete(variableOperation);
+						break;
 					}
 				}
 			}
@@ -286,13 +283,7 @@ public class BpmnModelDispatcher {
 	 */
 	public BpmnScanner createScanner(final File processDefinition) {
 		// create BPMNScanner
-		BpmnScanner bpmnScanner;
-		try {
-			bpmnScanner = new BpmnScanner(processDefinition.getPath());
-		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new RuntimeException("Model couldn't be parsed");
-		}
-		return bpmnScanner;
+		return new BpmnScanner(processDefinition.getPath());
 	}
 
 	/**
