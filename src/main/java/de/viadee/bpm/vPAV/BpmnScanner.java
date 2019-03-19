@@ -37,10 +37,10 @@ import org.apache.commons.collections4.map.LinkedMap;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,8 +68,7 @@ public class BpmnScanner {
 	 */
 	public BpmnScanner(String path) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setAttribute(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-		factory.setAttribute(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+		factory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
 		factory.setNamespaceAware(true);
 		try {
 			builder = factory.newDocumentBuilder();
