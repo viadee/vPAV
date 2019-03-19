@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.processing.ProcessingException;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
@@ -39,11 +40,11 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class BpmnScanner {
 
@@ -52,8 +53,6 @@ public class BpmnScanner {
 	private Document doc;
 
 	private ModelVersionEnum modelVersion;
-
-	private static final Logger LOGGER = Logger.getLogger(BpmnScanner.class.getName());
 
 	private enum ModelVersionEnum {
 		V1, V2, V3
@@ -68,49 +67,19 @@ public class BpmnScanner {
 	 *            path to model
 	 */
 	public BpmnScanner(String path) {
-		String FEATURE = null;
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setAttribute(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+		factory.setAttribute(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+		factory.setNamespaceAware(true);
 		try {
-			// This is the PRIMARY defense. If DTDs (doctypes) are disallowed, almost all
-			// XML entity attacks are prevented
-			// Xerces 2 only - http://xerces.apache.org/xerces2-j/features.html#disallow-doctype-decl
-			FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
-			dbf.setFeature(FEATURE, true);
-
-			// If you can't completely disable DTDs, then at least do the following:
-			// Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-general-entities
-			// Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-general-entities
-			// JDK7+ - http://xml.org/sax/features/external-general-entities
-			FEATURE = "http://xml.org/sax/features/external-general-entities";
-			dbf.setFeature(FEATURE, false);
-
-			// Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-parameter-entities
-			// Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-parameter-entities
-			// JDK7+ - http://xml.org/sax/features/external-parameter-entities
-			FEATURE = "http://xml.org/sax/features/external-parameter-entities";
-			dbf.setFeature(FEATURE, false);
-
-			// Disable external DTDs as well
-			FEATURE = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
-			dbf.setFeature(FEATURE, false);
-
-			// and these as well, per Timothy Morgan's 2014 paper: "XML Schema, DTD, and Entity Attacks"
-			dbf.setXIncludeAware(false);
-			dbf.setExpandEntityReferences(false);
-
-			dbf.setNamespaceAware(true);
-			builder = dbf.newDocumentBuilder();
-			setModelVersion(path);
+			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			// This should catch a failed setFeature feature
-			LOGGER.info("ParserConfigurationException was thrown. The feature '" + FEATURE
-					+ "' is probably not supported by your XML processor.");
-		} catch (SAXException e) {
-			// On Apache, this should be thrown when disallowing DOCTYPE
-			LOGGER.warning("A DOCTYPE was passed into the XML document");
-		} catch (IOException e) {
-			// XXE that points to a file that doesn't exist
-			LOGGER.warning("IOException occurred, XXE may still possible: " + e.getMessage());
+			e.printStackTrace();
+		}
+		try {
+			setModelVersion(path);
+		} catch (SAXException | ParserConfigurationException | IOException e) {
+			throw new ProcessingException("Could not instantiate BpmnScanner. Run aborted");
 		}
 	}
 
@@ -890,12 +859,15 @@ public class BpmnScanner {
 						switch (nodeChilds.item(y).getNodeName()) {
 							case BpmnConstants.CAMUNDA_LIST: {
 								mappingTypes.put(nodeChilds.item(y).getNodeName(), null);
+								break;
 							}
 							case BpmnConstants.CAMUNDA_MAP: {
 								mappingTypes.put(nodeChilds.item(y).getNodeName(), null);
+								break;
 							}
 							case BpmnConstants.CAMUNDA_SCRIPT: {
 								mappingTypes.put(nodeChilds.item(y).getNodeName(), ((Element) nodeChilds.item(y)).getAttribute(BpmnConstants.SCRIPT_FORMAT));
+								break;
 							}
 						}
 					}
