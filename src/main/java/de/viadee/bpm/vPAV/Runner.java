@@ -85,7 +85,7 @@ public class Runner {
 	/**
 	 * Main method which represents lifecycle of the validation process. Calls main
 	 * functions
-	 * 
+	 *
 	 * @param javaScanPath
 	 *            Main entry path. Normally src/main/java
 	 */
@@ -324,7 +324,7 @@ public class Runner {
 	 */
 	private void copyFiles() throws RuntimeException {
 
-		ArrayList<Path> outputFiles = new ArrayList<Path>();
+		ArrayList<Path> outputFiles = new ArrayList<>();
 		for (String file : allOutputFilesArray)
 			outputFiles.add(Paths.get(fileMapping.get(file), file));
 
@@ -341,7 +341,7 @@ public class Runner {
 	 * @return ArrayList<String> allFiles
 	 */
 	private ArrayList<String> createAllOutputFilesArray() {
-		ArrayList<String> allFiles = new ArrayList<String>();
+		ArrayList<String> allFiles = new ArrayList<>();
 
 		allFiles.add("bootstrap.min.js");
 		allFiles.add("bpmn-navigated-viewer.js");
@@ -375,7 +375,7 @@ public class Runner {
 	 * @return Map<String, String> fMap
 	 */
 	private Map<String, String> createFileFolderMapping() {
-		Map<String, String> fMap = new HashMap<String, String>();
+		Map<String, String> fMap = new HashMap<>();
 		fMap.put("bootstrap.min.js", ConfigConstants.JS_FOLDER);
 		fMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
 		fMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
@@ -473,7 +473,7 @@ public class Runner {
 		}
 
 		// transform back into collection
-		final Collection<CheckerIssue> finalFilteredIssues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> finalFilteredIssues = new ArrayList<>();
 		for (Map.Entry<String, CheckerIssue> entry : filteredIssues.entrySet()) {
 			finalFilteredIssues.add(entry.getValue());
 		}
@@ -497,10 +497,35 @@ public class Runner {
 		final Map<String, String> ignoredIssuesMap = getIgnoredIssuesMap();
 		final Collection<String> ignoredIssues = new ArrayList<>();
 
-		FileReader fileReader = createFileReader(filePath);
+		try (FileReader fileReader = new FileReader(ConfigConstants.IGNORE_FILE_OLD)) {
+			readIssues(ignoredIssuesMap, ignoredIssues, fileReader);
+			logger.warning("Usage of .ignoreIssues is deprecated. Please use ignoreIssues.txt to whitelist issues.");
+		} catch (IOException ex) {
+			logger.info(ex.getMessage());
+		}
 
-		if (fileReader != null) {
-			final BufferedReader bufferedReader = new BufferedReader(fileReader);
+		try (FileReader fileReader = new FileReader(filePath)) {
+			readIssues(ignoredIssuesMap, ignoredIssues, fileReader);
+		} catch (IOException ex) {
+			logger.info(ex.getMessage());
+		}
+
+		return ignoredIssues;
+	}
+
+	/**
+	 * Reads the file and appends issues to the map of ignored issues
+	 *
+	 * @param ignoredIssuesMap
+	 *            Map of issues to be ignored
+	 * @param ignoredIssues
+	 *            Collection of ignored issues
+	 * @param fileReader
+	 *            FileReader
+	 */
+	private void readIssues(final Map<String, String> ignoredIssuesMap, final Collection<String> ignoredIssues,
+			final FileReader fileReader) {
+		try (final BufferedReader bufferedReader = new BufferedReader(fileReader)) {
 			String zeile = bufferedReader.readLine();
 			String prevLine = zeile;
 			while (zeile != null) {
@@ -508,38 +533,9 @@ public class Runner {
 				prevLine = zeile;
 				zeile = bufferedReader.readLine();
 			}
-			bufferedReader.close();
-			fileReader.close();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
 		}
-		return ignoredIssues;
-	}
-
-	/**
-	 * 
-	 * @param filePath
-	 *            Path to ignoreIssues file
-	 * @return FileReader ignoreIssue file
-	 */
-	private FileReader createFileReader(final String filePath) {
-
-		FileReader fileReader = null;
-		try {
-			fileReader = new FileReader(ConfigConstants.IGNORE_FILE_OLD);
-
-			if (fileReader != null) {
-				logger.warning(
-						"Usage of .ignoreIssues is deprecated. Please use ignoreIssues.txt to whitelist issues.");
-			}
-		} catch (final FileNotFoundException ex) {
-		}
-
-		try {
-			fileReader = new FileReader(filePath);
-		} catch (final FileNotFoundException ex) {
-			logger.info(ex.getMessage());
-		}
-
-		return fileReader;
 	}
 
 	/**
@@ -602,6 +598,28 @@ public class Runner {
 	}
 
 	/**
+	 *
+	 * @param ignoredIssuesMap
+	 *            Map of ignored issues
+	 * @param issues
+	 *            Collection of issues
+	 * @param row
+	 *            row of file
+	 * @param prevLine
+	 *            Previous line
+	 */
+	private void addIgnoredIssue(final Map<String, String> ignoredIssuesMap, final Collection<String> issues,
+			final String row, final String prevLine) {
+		if (row != null && !row.isEmpty()) {
+			if (!row.trim().startsWith("#")) {
+				ignoredIssuesMap.put(row, prevLine);
+				issues.add(row);
+			}
+
+		}
+	}
+
+	/**
 	 * Scan process variables in external classes, which are not referenced from
 	 * model
 	 *
@@ -610,26 +628,6 @@ public class Runner {
 	 */
 	private void readOuterProcessVariables(final ProcessVariablesScanner scanner) {
 		scanner.scanProcessVariables();
-	}
-
-	/**
-	 * Add ignored issue
-	 *
-	 * @param issues
-	 *            Collection of issues
-	 * @param row
-	 *            row of file
-	 */
-	private Map<String, String> addIgnoredIssue(final Map<String, String> ignoredIssuesMap,
-			final Collection<String> issues, final String row, final String prevLine) {
-		if (row != null && !row.isEmpty()) {
-			if (!row.trim().startsWith("#")) {
-				ignoredIssuesMap.put(row, prevLine);
-				issues.add(row);
-			}
-
-		}
-		return ignoredIssuesMap;
 	}
 
 	public Set<String> getModelPath() {

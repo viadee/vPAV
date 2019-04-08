@@ -112,7 +112,9 @@ public class ProcessApplicationValidator {
 
 	/**
 	 * Find model errors without spring context but manual bean map
-	 *
+	 * 
+	 * @param beanMap
+	 *            Map to resolve beans
 	 * @return all issues
 	 */
 	public static Collection<CheckerIssue> findModelInconsistencies(final HashMap<String, String> beanMap) {
@@ -127,6 +129,8 @@ public class ProcessApplicationValidator {
 	/**
 	 * Find model errors without spring context but manual bean map
 	 *
+	 * @param beanMap
+	 *            Map to resolve beans
 	 * @return issues with status error
 	 */
 	public static Collection<CheckerIssue> findModelErrors(final HashMap<String, String> beanMap) {
@@ -165,7 +169,7 @@ public class ProcessApplicationValidator {
 	 * @return issues with status
 	 */
 	private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues,
-														 CriticalityEnum status) {
+			CriticalityEnum status) {
 		Collection<CheckerIssue> filteredErrors = new ArrayList<CheckerIssue>();
 
 		for (CheckerIssue issue : filteredIssues) {

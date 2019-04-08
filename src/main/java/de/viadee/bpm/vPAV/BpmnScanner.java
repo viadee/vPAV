@@ -32,10 +32,12 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.processing.ProcessingException;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -57,31 +59,37 @@ public class BpmnScanner {
 	}
 
 	/**
-	 * The Camunda API's method "getimplementation" doesn't return the correct
+	 * The Camunda API's method "getImplementation" doesn't return the correct
 	 * Implementation, so the we have to scan the xml of the model for the
 	 * implementation
 	 *
 	 ** @param path
 	 *            path to model
-	 * @throws ParserConfigurationException
-	 *             exception if document cant be parsed
-	 * @throws IOException
-	 *             Signals that an I/O exception of some sort has occurred
-	 * @throws SAXException
-	 *             Encapsulate a general SAX error or warning.
 	 */
-	public BpmnScanner(String path) throws ParserConfigurationException, SAXException, IOException {
+	public BpmnScanner(String path) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(true);
-		builder = factory.newDocumentBuilder();
-		setModelVersion(path);
+		try {
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+			factory.setFeature("http://xml.org/sax/features/external-general-entities",false);
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities",false);
+			factory.setNamespaceAware(true);
+			builder = factory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+		try {
+			setModelVersion(path);
+		} catch (SAXException | ParserConfigurationException | IOException e) {
+			throw new ProcessingException("Could not instantiate BpmnScanner. Run aborted");
+		}
 	}
 
 	/**
 	 * Checks which camunda namespace is used in a given model and sets the version
 	 * correspondingly
 	 *
-	 * @param path
+	 * @param path Path to model
 	 * @throws SAXException
 	 * @throws IOException
 	 * @throws ParserConfigurationException
@@ -853,12 +861,15 @@ public class BpmnScanner {
 						switch (nodeChilds.item(y).getNodeName()) {
 							case BpmnConstants.CAMUNDA_LIST: {
 								mappingTypes.put(nodeChilds.item(y).getNodeName(), null);
+								break;
 							}
 							case BpmnConstants.CAMUNDA_MAP: {
 								mappingTypes.put(nodeChilds.item(y).getNodeName(), null);
+								break;
 							}
 							case BpmnConstants.CAMUNDA_SCRIPT: {
 								mappingTypes.put(nodeChilds.item(y).getNodeName(), ((Element) nodeChilds.item(y)).getAttribute(BpmnConstants.SCRIPT_FORMAT));
+								break;
 							}
 						}
 					}
