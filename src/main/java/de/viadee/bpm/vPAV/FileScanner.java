@@ -89,7 +89,7 @@ public class FileScanner {
 	public FileScanner(final Map<String, Rule> rules, final String javaScanPath) {
 
 		final DirectoryScanner scanner = new DirectoryScanner();
-		scanner.setBasedir(ConfigConstants.BASEPATH);
+		scanner.setBasedir(ConfigConstants.getInstance().getBasepath());
 
 		// get file paths of process definitions
 		scanner.setIncludes(new String[] { ConfigConstants.BPMN_FILE_PATTERN });
@@ -304,7 +304,7 @@ public class FileScanner {
 			// read bpmn file
 			BpmnModelInstance modelInstance;
 			try {
-				modelInstance = Bpmn.readModelFromFile(new File(ConfigConstants.BASEPATH + path));
+				modelInstance = Bpmn.readModelFromFile(new File(ConfigConstants.getInstance().getBasepath() + path));
 			} catch (final BpmnModelException ex) {
 				throw new RuntimeException("bpmn model couldn't be read", ex);
 			}
@@ -337,7 +337,7 @@ public class FileScanner {
 			// read dmn file
 			DmnModelInstance modelInstance;
 			try {
-				modelInstance = Dmn.readModelFromFile(new File(ConfigConstants.BASEPATH + path));
+				modelInstance = Dmn.readModelFromFile(new File(ConfigConstants.getInstance().getBasepath() + path));
 			} catch (final DmnModelException ex) {
 				throw new RuntimeException("dmn model couldn't be read", ex);
 			}

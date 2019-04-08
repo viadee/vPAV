@@ -360,7 +360,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			for (final String bpmnFilename : getModelPaths()) {
 				String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
 				output.append("{\"name\":\"").append(prettyBpmnFileName).append("\",\n \"xml\": \"");
-				output.append(convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename));
+				output.append(convertBpmnFile(ConfigConstants.getInstance().getBasepath() + bpmnFilename));
 				output.append("\"},\n");
 			}
 		} catch (IOException e) {

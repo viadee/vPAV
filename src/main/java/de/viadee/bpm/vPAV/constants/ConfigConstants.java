@@ -31,89 +31,108 @@
  */
 package de.viadee.bpm.vPAV.constants;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.Properties;
+import java.util.logging.Logger;
+
 /**
  * Class to hold global constants
  */
 
-public final class ConfigConstants {
+public class ConfigConstants {
 	
     public static final String RULESET = "ruleSet.xml";
-
     public static final String RULESETDEFAULT = "ruleSetDefault.xml";
-
     public static final String RULESETPARENT = "parentRuleSet.xml";
-
     public static final String HASPARENTRULESET = "HasParentRuleSet";
-
     public static final String IGNORE_FILE = "src/test/resources/ignoreIssues.txt";
-
     public static final String IGNORE_FILE_OLD = "src/test/resources/.ignoreIssues";
-
     public static final String BPMN_FILE_PATTERN = "**/*.bpmn";
-
     public static final String DMN_FILE_PATTERN = "**/*.dmn";
-
     public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
-
     public static final String JAVA_FILE_PATTERN = "**/*.java";
-
     public static final String EFFECTIVE_RULESET = "target/vPAV/effectiveRuleSet.xml";
-
     public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
-
     public static final String VALIDATION_JS_MODEL_OUTPUT = "target/vPAV/js/bpmn_model.js";
-
     public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
-
     public static final String VALIDATION_CHECKERS = "target/vPAV/js/checkers.js";
-
     public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
-
     public static final String VALIDATION_ISSUE_SEVERITY = "target/vPAV/js/issue_severity.js";
-
     public static final String VALIDATION_JS_PROCESSVARIABLES = "target/vPAV/js/processVariables.js";
-
     public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";
-
     public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = "target/vPAV/js/ignoredIssues.js";
-
     public static final String VALIDATION_FOLDER = "target/vPAV/";
-
     public static final String JS_FOLDER = "target/vPAV/js/";
-
     public static final String CSS_FOLDER = "target/vPAV/css/";
-
     public static final String IMG_FOLDER = "target/vPAV/img/";
-
-    public static final String BASEPATH = "src/main/resources/";
-
+    private static final String BASEPATH = "src/main/resources/";
     public static final String JAVAPATH = "src/main/java/";
-
     public static final String TEST_JAVAPATH = "src/test/java/";
-
     public static final String TEST_BASEPATH = "src/test/resources/";
-
     public static final String JS_BASEPATH = "src\\main\\resources\\";
-
     public static final String TARGET_CLASS_FOLDER = "target/classes";
-
     public static final String VERSIONINGSCHEMEPACKAGE = "versioningSchemePackage";
-
     public static final String VERSIONINGSCHEMECLASS = "versioningSchemeClass";
-
     public static final String GROOVY = "groovy";
-
     public static final String RULENAME = "rulename";
-
     public static final String MESSAGE = "message";
-
     public static final String CRITICALITY = "Criticality";
-    
     public static final String USE_STATIC_ANALYSIS_BOOLEAN = "UseStaticAnalysisBoolean";
-
     public static final String CREATE_OUTPUT_RULE = "CreateOutputHTML";
 
+    private static Logger logger = Logger.getLogger(ConfigConstants.class.getName());
+    private static ConfigConstants instance;
+    private Properties properties;
+
     private ConfigConstants() {
+        InputStream input = null;
+        properties = new Properties();
+
+        try {
+            // Todo make path customizable
+            input = new FileInputStream("vPav.properties");
+            properties.load(input);
+            joinProperties();
+
+        } catch (IOException e) {
+            logger.warning("Could not read vPav.properties file. Falling back to default values...");
+            e.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
     }
 
+    private void joinProperties() {
+        Field[] interfaceFields=ConfigConstants.class.getFields();
+        for(Field f:interfaceFields) {
+            if(!properties.containsKey(f.getName())) {
+                try {
+                    properties.setProperty(f.getName(), (String) f.get(f));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static ConfigConstants getInstance() {
+        if (ConfigConstants.instance == null) {
+            ConfigConstants.instance = new ConfigConstants();
+        }
+        return ConfigConstants.instance;
+    }
+
+    public String getBasepath() {
+        return properties.getProperty("basepath");
+    }
 }

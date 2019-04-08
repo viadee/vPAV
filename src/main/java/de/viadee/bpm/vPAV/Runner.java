@@ -582,12 +582,12 @@ public class Runner {
 		ModelDispatchResult dispatchResult;
 		if (variableScanner != null) {
 			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner,
-					new File(ConfigConstants.BASEPATH + processDefinition), fileScanner.getDecisionRefToPathMap(),
+					new File(ConfigConstants.getInstance().getBasepath() + processDefinition), fileScanner.getDecisionRefToPathMap(),
 					fileScanner.getProcessIdToPathMap(), variableScanner, dataFlowRules,
 					fileScanner.getResourcesNewestVersions(), rules);
 		} else {
 			dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(
-					new File(ConfigConstants.BASEPATH + processDefinition), fileScanner.getDecisionRefToPathMap(),
+					new File(ConfigConstants.getInstance().getBasepath() + processDefinition), fileScanner.getDecisionRefToPathMap(),
 					fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
 		}
 		elements.addAll(dispatchResult.getBpmnElements());
