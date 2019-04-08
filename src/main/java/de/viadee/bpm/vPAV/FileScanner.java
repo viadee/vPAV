@@ -163,7 +163,7 @@ public class FileScanner {
 		}
 
 		// get mapping from decision reference to file path
-		scanner.setBasedir(ConfigConstants.BASEPATH);
+		scanner.setBasedir(ConfigConstants.getInstance().getBasepath());
 		scanner.setIncludes(new String[] { ConfigConstants.DMN_FILE_PATTERN });
 		scanner.scan();
 		decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));

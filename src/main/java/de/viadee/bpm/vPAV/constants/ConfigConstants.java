@@ -93,32 +93,16 @@ public class ConfigConstants {
 
         try {
             // Todo make path customizable
-            input = new FileInputStream("vPav.properties");
+            input = this.getClass().getClassLoader().getResourceAsStream("vPav.properties");
             properties.load(input);
-            joinProperties();
 
         } catch (IOException e) {
             logger.warning("Could not read vPav.properties file. Falling back to default values...");
-            e.printStackTrace();
         } finally {
             if (input != null) {
                 try {
                     input.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
-    }
-
-    private void joinProperties() {
-        Field[] interfaceFields=ConfigConstants.class.getFields();
-        for(Field f:interfaceFields) {
-            if(!properties.containsKey(f.getName())) {
-                try {
-                    properties.setProperty(f.getName(), (String) f.get(f));
-                } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
             }
@@ -133,6 +117,6 @@ public class ConfigConstants {
     }
 
     public String getBasepath() {
-        return properties.getProperty("basepath");
+        return properties.getProperty("basepath", ConfigConstants.BASEPATH);
     }
 }
