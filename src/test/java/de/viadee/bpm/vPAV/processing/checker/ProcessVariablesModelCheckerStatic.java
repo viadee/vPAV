@@ -33,7 +33,6 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -48,13 +47,10 @@ import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -65,50 +61,16 @@ public class ProcessVariablesModelCheckerStatic {
 
     private static final String BASE_PATH = "src/test/resources/";
 
-    private static BpmnModelInstance modelInstance;
-
-    private static ModelChecker checker;
-
-    private static ClassLoader cl;
-
     @BeforeClass
-    public static void setup() throws ParserConfigurationException, SAXException, IOException {
-        RuntimeConfig.getInstance().setTest(true);
+    public static void setup() throws IOException {
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
-
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";
-        final File processDefinition = new File(PATH);
-        final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderStatic());
-
-        ProcessApplicationValidator.findModelErrors();
-
-        // parse bpmn model
-        modelInstance = Bpmn.readModelFromFile(processDefinition);
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-        // create data flow graphs
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-                processDefinition.getPath(), new ArrayList<String>(), scanner);
-
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
-                .createInvalidPaths(graphCollection);
-
-        final Map<String, Setting> staticSetting = new HashMap<String, Setting>();
-        staticSetting.put("UseStaticAnalysisBoolean",
-                new Setting("UseStaticAnalysisBoolean", "", null, null, false, "true"));
-
-        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, staticSetting, null, null);
-        checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+        RuntimeConfig.getInstance().setTest(true);
     }
 
     /**
@@ -116,6 +78,33 @@ public class ProcessVariablesModelCheckerStatic {
      */
     @Test
     public void testProcessVariablesModelChecker() {
+        final Set<String> resources = new HashSet<>();
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";
+        final File processDefinition = new File(PATH);
+        final JavaReaderContext jvc = new JavaReaderContext();
+        jvc.setJavaReadingStrategy(new JavaReaderStatic());
+
+        // parse bpmn model
+        BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        // create data flow graphs
+        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
+                processDefinition.getPath(), new ArrayList<>(), scanner);
+
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
+                .createInvalidPaths(graphCollection);
+
+        final Map<String, Setting> staticSetting = new HashMap<>();
+        staticSetting.put("UseStaticAnalysisBoolean",
+                new Setting("UseStaticAnalysisBoolean", "", null, null, false, "true"));
+
+        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, staticSetting, null, null);
+        ModelChecker checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+
         final Collection<CheckerIssue> issues = checker.check();
 
         if (issues.size() == 0) {
@@ -154,11 +143,6 @@ public class ProcessVariablesModelCheckerStatic {
         Assert.assertEquals("Task_0oj9gln", issue8.getElementId());
         Assert.assertEquals("ProcessVariable2", issue8.getVariable());
         Assert.assertEquals("UR", issue8.getAnomaly().toString());
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
     }
 
 }
