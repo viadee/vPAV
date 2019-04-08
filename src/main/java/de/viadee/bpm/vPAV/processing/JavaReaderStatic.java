@@ -774,7 +774,8 @@ public class JavaReaderStatic implements JavaReader {
 				final StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
 				final String name = variableName.value.replaceAll("\"", "");
 				initialOperations.put(name, new ProcessVariableOperation(name, element, ElementChapter.Code,
-						KnownElementFieldType.Initial, resourceFilePath, type, element.getBaseElement().getId()));
+						KnownElementFieldType.Initial, resourceFilePath, type,
+						element.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID)));
 			}
 		}
 		return initialOperations;
