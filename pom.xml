@@ -357,6 +357,7 @@
 						<suppressionFile>owasp-dependency-check-suppressions.xml</suppressionFile>
 					</suppressionFiles>
 					<failBuildOnCVSS>7</failBuildOnCVSS>
+					<failOnError>false</failOnError>
 				</configuration>
 				<executions>
 					<execution>
