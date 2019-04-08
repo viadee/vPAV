@@ -31,217 +31,223 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
-import soot.*;
+import soot.Body;
+import soot.PatchingChain;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.Unit;
 import soot.jimple.AssignStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.options.Options;
 
-import java.util.*;
-
 public class ProcessVariablesScanner {
 
-	private Set<String> javaResources;
+    private Set<String> javaResources;
 
-	private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<String, Collection<String>>();
+    private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<String, Collection<String>>();
 
-	private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
+    private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
 
-	private Set<String> camundaProcessEntryPoints = new HashSet<String>();
+    private Set<String> camundaProcessEntryPoints = new HashSet<String>();
 
-	private List<EntryPoint> entryPoints = new ArrayList<>();
+    private List<EntryPoint> entryPoints = new ArrayList<>();
 
-	private List<EntryPoint> intermediateEntryPoints = new ArrayList<>();
+    private List<EntryPoint> intermediateEntryPoints = new ArrayList<>();
 
-	public ProcessVariablesScanner(final Set<String> javaResources) {
-		this.javaResources = javaResources;
-		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID);
-		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY);
-		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE);
-		camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF);
-		camundaProcessEntryPoints.add(CamundaMethodServices.CORRELATE_MESSAGE);
-	}
+    public ProcessVariablesScanner(final Set<String> javaResources) {
+        this.javaResources = javaResources;
+        camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID);
+        camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY);
+        camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE);
+        camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF);
+        camundaProcessEntryPoints.add(CamundaMethodServices.CORRELATE_MESSAGE);
+    }
 
-	/**
-	 * scan java resources for variables and retrieve important information such as
-	 * message ids and entrypoints
-	 *
-	 */
-	public void scanProcessVariables() {
-		for (final String filePath : javaResources) {
-			if (!filePath.startsWith("javax")) {
-				// TODO: Use ids properly to resolve process variable manipulation
-				final Set<String> messageIds = new HashSet<>();
-				final Set<String> processIds = new HashSet<>();
-				retrieveMethod(filePath, messageIds, processIds);
-			}
-		}
-	}
+    /**
+     * scan java resources for variables and retrieve important information such as message ids and entrypoints
+     *
+     */
+    public void scanProcessVariables() {
+        for (final String filePath : javaResources) {
+            if (!filePath.startsWith("javax")) {
+                // TODO: Use ids properly to resolve process variable manipulation
+                final Set<String> messageIds = new HashSet<>();
+                final Set<String> processIds = new HashSet<>();
+                retrieveMethod(filePath, messageIds, processIds);
+            }
+        }
+    }
 
-	/**
-	 * Retrieve the method name which contains the entrypoint (e.g.
-	 * "startProcessByXYZ")
-	 *
-	 * @param filePath
-	 *            fully qualified path to the java class
-	 * @param messageIds
-	 *            Set of messageIds (used to retrieve variable manipulation later
-	 *            on)
-	 * @param processIds
-	 *            Set of processIds (used to retrieve variable manipulation later
-	 *            on)
-	 */
-	private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
-		final String sootPath = FileScanner.getSootPath();
-		System.setProperty("soot.class.path", sootPath);
+    /**
+     * Retrieve the method name which contains the entrypoint (e.g. "startProcessByXYZ")
+     *
+     * @param filePath
+     *            fully qualified path to the java class
+     * @param messageIds
+     *            Set of messageIds (used to retrieve variable manipulation later on)
+     * @param processIds
+     *            Set of processIds (used to retrieve variable manipulation later on)
+     */
+    private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
+        final String sootPath = FileScanner.getSootPath();
+        System.setProperty("soot.class.path", sootPath);
 
-		Options.v().set_whole_program(true);
-		Options.v().set_allow_phantom_refs(true);
+        Options.v().set_whole_program(true);
+        Options.v().set_allow_phantom_refs(true);
 
-		SootClass sootClass = Scene.v().forceResolve(cleanString(filePath, true), SootClass.SIGNATURES);
+        SootClass sootClass = Scene.v().forceResolve(cleanString(filePath, true), SootClass.SIGNATURES);
 
-		if (sootClass != null && !sootClass.isInterface()) {
-			sootClass.setApplicationClass();
-			Scene.v().loadNecessaryClasses();
-			for (SootMethod method : sootClass.getMethods()) {
-				final Body body = method.retrieveActiveBody();
-				for (String entryPoint : camundaProcessEntryPoints) {
-					if (body.toString().contains(entryPoint)) {
-						final PatchingChain<Unit> pc = body.getUnits();
-						for (Unit unit : pc) {
-							if (unit instanceof AssignStmt) {
-								final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
-								if (rightBox.contains(entryPoint)) {
-									if (((AssignStmt) unit).getRightOpBox()
-											.getValue() instanceof JInterfaceInvokeExpr) {
-										final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
-												.getRightOpBox().getValue();
-										checkExpression(filePath, messageIds, method, entryPoint, expr);
-									}
-								}
-							}
-							if (unit instanceof InvokeStmt) {
-								final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue().toString();
-								if (rightBox.contains(entryPoint)) {
-									if (((InvokeStmt) unit).getInvokeExprBox()
-											.getValue() instanceof JInterfaceInvokeExpr) {
-										final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
-												.getInvokeExprBox().getValue();
-										checkExpression(filePath, messageIds, method, entryPoint, expr);
-									}
-								}
-							}
-						}
-					}
-					if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
-						processIds.add(entryPoint);
-					}
-				}
-			}
-		}
-	}
+        if (sootClass != null && !sootClass.isInterface()) {
+            sootClass.setApplicationClass();
+            Scene.v().loadNecessaryClasses();
+            for (SootMethod method : sootClass.getMethods()) {
+                final Body body = method.retrieveActiveBody();
+                for (String entryPoint : camundaProcessEntryPoints) {
+                    if (body.toString().contains(entryPoint)) {
+                        final PatchingChain<Unit> pc = body.getUnits();
+                        for (Unit unit : pc) {
+                            if (unit instanceof AssignStmt) {
+                                final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
+                                if (rightBox.contains(entryPoint)) {
+                                    if (((AssignStmt) unit).getRightOpBox()
+                                            .getValue() instanceof JInterfaceInvokeExpr) {
+                                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
+                                                .getRightOpBox().getValue();
+                                        checkExpression(filePath, messageIds, method, entryPoint, expr);
+                                    }
+                                }
+                            }
+                            if (unit instanceof InvokeStmt) {
+                                final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue().toString();
+                                if (rightBox.contains(entryPoint)) {
+                                    if (((InvokeStmt) unit).getInvokeExprBox()
+                                            .getValue() instanceof JInterfaceInvokeExpr) {
+                                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
+                                                .getInvokeExprBox().getValue();
+                                        checkExpression(filePath, messageIds, method, entryPoint, expr);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
+                        processIds.add(entryPoint);
+                    }
+                }
+            }
+        }
+    }
 
-	/**
-	 * Checks the current expression and creates a new entrypoint
-	 *
-	 * @param filePath
-	 *            Current filePath of the model
-	 * @param messageIds
-	 *            List of message ids
-	 * @param method
-	 *            Current method
-	 * @param entryPoint
-	 *            Current entryPoint
-	 * @param expr
-	 *            Current expression
-	 */
-	private void checkExpression(final String filePath, final Set<String> messageIds, final SootMethod method,
-			final String entryPoint, final JInterfaceInvokeExpr expr) {
-		if (expr != null) {
-			final String ex = expr.getArgBox(0).getValue().toString();
-			if (entryPoint.equals(CamundaMethodServices.CORRELATE_MESSAGE)) {
-				intermediateEntryPoints
-						.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
-			} else {
-				messageIds.add(entryPoint);
-				entryPoints.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
-			}
-		}
-	}
+    /**
+     * Checks the current expression and creates a new entrypoint
+     *
+     * @param filePath
+     *            Current filePath of the model
+     * @param messageIds
+     *            List of message ids
+     * @param method
+     *            Current method
+     * @param entryPoint
+     *            Current entryPoint
+     * @param expr
+     *            Current expression
+     */
+    private void checkExpression(final String filePath, final Set<String> messageIds, final SootMethod method,
+            final String entryPoint, final JInterfaceInvokeExpr expr) {
+        if (expr != null) {
+            final String ex = expr.getArgBox(0).getValue().toString();
+            if (entryPoint.equals(CamundaMethodServices.CORRELATE_MESSAGE)) {
+                intermediateEntryPoints
+                        .add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
+            } else {
+                messageIds.add(entryPoint);
+                entryPoints.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
+            }
+        }
+    }
 
-	/**
-	 * Strips unnecessary characters and returns cleaned name
-	 * 
-	 * @param className
-	 *            Classname to be stripped of unused chars
-	 * @param dot
-	 *            Replace dots
-	 * @return cleaned String
-	 */
-	static String cleanString(String className, boolean dot) {
-		final String replaceDot = ".";
-		final String replaceEmpty = "";
-		final String replaceSingleBackSlash = "\\";
-		final String replaceSingleForwardSlash = "/";
-		final String replaceDotJava = ".java";
+    /**
+     * Strips unnecessary characters and returns cleaned name
+     * 
+     * @param className
+     *            Classname to be stripped of unused chars
+     * @param dot
+     *            Replace dots
+     * @return cleaned String
+     */
+    static String cleanString(String className, boolean dot) {
+        final String replaceDot = ".";
+        final String replaceEmpty = "";
+        final String replaceSingleBackSlash = "\\";
+        final String replaceSingleForwardSlash = "/";
+        final String replaceDotJava = ".java";
 
-		if (dot) {
-			if (System.getProperty("os.name").startsWith("Windows")) {
-				className = className.replace(replaceSingleBackSlash, replaceDot).replace(replaceDotJava, replaceEmpty);
-			} else {
-				className = className.replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotJava,
-						replaceEmpty);
-			}
-		} else {
-			if (System.getProperty("os.name").startsWith("Windows")) {
-				className = className.replace(replaceDot, replaceSingleBackSlash);
-				className = className.concat(replaceDotJava);
-			} else {
-				className = className.replace(replaceDot, replaceSingleForwardSlash);
-				className = className.concat(replaceDotJava);
-			}
-		}
-		return className;
-	}
+        if (dot) {
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                className = className.replace(replaceSingleBackSlash, replaceDot)
+                        .replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotJava, replaceEmpty);
+            } else {
+                className = className.replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotJava,
+                        replaceEmpty);
+            }
+        } else {
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                className = className.replace(replaceDot, replaceSingleBackSlash);
+                className = className.concat(replaceDotJava);
+            } else {
+                className = className.replace(replaceDot, replaceSingleForwardSlash);
+                className = className.concat(replaceDotJava);
+            }
+        }
+        return className;
+    }
 
-	/**
-	 * get list of intermediate entrypoints (process message, method) where process
-	 * variables have been found
-	 *
-	 * @return returns list of locations
-	 */
-	public List<EntryPoint> getIntermediateEntryPoints() {
-		return intermediateEntryPoints;
-	}
+    /**
+     * get list of intermediate entrypoints (process message, method) where process variables have been found
+     *
+     * @return returns list of locations
+     */
+    public List<EntryPoint> getIntermediateEntryPoints() {
+        return intermediateEntryPoints;
+    }
 
-	/**
-	 * get list of entrypoints (process message, method) where process variables
-	 * have been found
-	 * 
-	 * @return returns list of locations
-	 */
-	public List<EntryPoint> getEntryPoints() {
-		return entryPoints;
-	}
+    /**
+     * get list of entrypoints (process message, method) where process variables have been found
+     * 
+     * @return returns list of locations
+     */
+    public List<EntryPoint> getEntryPoints() {
+        return entryPoints;
+    }
 
-	/**
-	 * get mapping for message id
-	 *
-	 * @return messageIdToVariableMap returns messageIdToVariableMap
-	 */
-	public Map<String, Collection<String>> getMessageIdToVariableMap() {
-		return messageIdToVariableMap;
-	}
+    /**
+     * get mapping for message id
+     *
+     * @return messageIdToVariableMap returns messageIdToVariableMap
+     */
+    public Map<String, Collection<String>> getMessageIdToVariableMap() {
+        return messageIdToVariableMap;
+    }
 
-	/**
-	 * get mapping for process id
-	 *
-	 * @return processIdToVariableMap returns processIdToVariableMap
-	 */
-	public Map<String, Collection<String>> getProcessIdToVariableMap() {
-		return processIdToVariableMap;
-	}
+    /**
+     * get mapping for process id
+     *
+     * @return processIdToVariableMap returns processIdToVariableMap
+     */
+    public Map<String, Collection<String>> getProcessIdToVariableMap() {
+        return processIdToVariableMap;
+    }
 
 }
