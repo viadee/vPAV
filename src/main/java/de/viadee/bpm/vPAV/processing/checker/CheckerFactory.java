@@ -76,10 +76,6 @@ public class CheckerFactory {
 		for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
 			String fullyQualifiedName = getFullyQualifiedName(rule);
 
-			if (rule.getKey().equals(ConfigConstants.CREATE_OUTPUT_RULE)) {
-				continue;
-			}
-
 			if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")
 					&& !rule.getKey().equals("DataFlowChecker")) { //$NON-NLS-1$
 				try {

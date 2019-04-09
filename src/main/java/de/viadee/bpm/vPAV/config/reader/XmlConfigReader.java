@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -51,126 +51,121 @@ import java.util.regex.PatternSyntaxException;
  */
 public final class XmlConfigReader implements ConfigReader {
 
-	/**
-	 * @param file
-	 *            Location of file relative to project
-	 * @throws ConfigReaderException
-	 *             If file can not be found in classpath
-	 */
-	@Override
-	public Map<String, Rule> read(final String file) throws ConfigReaderException {
+    /**
+     * @param file
+     *            Location of file relative to project
+     * @throws ConfigReaderException
+     *             If file can not be found in classpath
+     */
+    @Override
+    public Map<String, Rule> read(final String file) throws ConfigReaderException {
 
-		try {
-			final JAXBContext jaxbContext = JAXBContext.newInstance(XmlRuleSet.class);
-			final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        try {
+            final JAXBContext jaxbContext = JAXBContext.newInstance(XmlRuleSet.class);
+            final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-			InputStream fRuleSet = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(file);
+            InputStream fRuleSet = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(file);
 
-			if (fRuleSet != null) {
-				final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(fRuleSet);
-				return transformFromXmlDatastructues(ruleSet);
-			} else {
-				throw new ConfigReaderException("ConfigFile could not be found");
-			}
-		} catch (JAXBException e) {
-			throw new ConfigReaderException(e);
-		}
-	}
+            if (fRuleSet != null) {
+                final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(fRuleSet);
+                return transformFromXmlDatastructues(ruleSet);
+            } else {
+                throw new ConfigReaderException("ConfigFile could not be found");
+            }
+        } catch (JAXBException e) {
+            throw new ConfigReaderException(e);
+        }
+    }
 
-	/**
-	 * Retrieves all rules, by default deactivated
-	 *
-	 * @return rules
-	 */
-	public Map<String, Rule> getDeactivatedRuleSet() {
-		final Map<String, Rule> rules = new HashMap<String, Rule>();
+    /**
+     * Retrieves all rules, by default deactivated
+     *
+     * @return rules
+     */
+    public Map<String, Rule> getDeactivatedRuleSet() {
+        final Map<String, Rule> rules = new HashMap<String, Rule>();
 
-		for (String name : RuntimeConfig.getInstance().getViadeeRules()) {
-			if (name.equals("CreateOutputHTML")) {
-				rules.put(name, new Rule(name, true, null, new HashMap<String, Setting>(),
-						new ArrayList<ElementConvention>(), new ArrayList<ModelConvention>()));
-			} else {
-				rules.put(name, new Rule(name, false, null, new HashMap<String, Setting>(),
-						new ArrayList<ElementConvention>(), new ArrayList<ModelConvention>()));
-			}
-		}
+        for (String name : RuntimeConfig.getInstance().getViadeeRules()) {
+            rules.put(name, new Rule(name, false, null, new HashMap<String, Setting>(),
+                    new ArrayList<ElementConvention>(), new ArrayList<ModelConvention>()));
+        }
 
-		return rules;
-	}
+        return rules;
+    }
 
-	/**
-	 * Transforms XmlRuleSet to rules
-	 *
-	 * @param ruleSet
-	 * @return rules
-	 * @throws ConfigReaderException
-	 *             If file could not be read properly
-	 */
-	private static Map<String, Rule> transformFromXmlDatastructues(final XmlRuleSet ruleSet)
-			throws ConfigReaderException {
-		final Map<String, Rule> rules = new HashMap<String, Rule>();
+    /**
+     * Transforms XmlRuleSet to rules
+     *
+     * @param ruleSet
+     * @return rules
+     * @throws ConfigReaderException
+     *             If file could not be read properly
+     */
+    private static Map<String, Rule> transformFromXmlDatastructues(final XmlRuleSet ruleSet)
+            throws ConfigReaderException {
+        final Map<String, Rule> rules = new HashMap<String, Rule>();
 
-		final Collection<XmlRule> xmlRules = ruleSet.getRules();
-		for (final XmlRule rule : xmlRules) {
-			final String name = rule.getName();
-			if (name == null)
-				throw new ConfigReaderException("rule name is not set");
-			final boolean state = rule.isState();
-			final String ruleDescription = rule.getDescription();
-			final Collection<XmlElementConvention> xmlElementConventions = rule.getElementConventions();
-			final ArrayList<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
-			if (xmlElementConventions != null) {
-				for (final XmlElementConvention xmlElementConvention : xmlElementConventions) {
-					final XmlElementFieldTypes xmlElementFieldTypes = xmlElementConvention.getElementFieldTypes();
-					ElementFieldTypes elementFieldTypes = null;
-					if (xmlElementFieldTypes != null) {
-						elementFieldTypes = new ElementFieldTypes(xmlElementFieldTypes.getElementFieldTypes(),
-								xmlElementFieldTypes.isExcluded());
-					}
-					if (!checkRegEx(xmlElementConvention.getPattern()))
-						throw new ConfigReaderException("RegEx (" + xmlElementConvention.getPattern() + ") of " + name
-								+ " (" + xmlElementConvention.getName() + ") is incorrect");
-					elementConventions.add(new ElementConvention(xmlElementConvention.getName(), elementFieldTypes,
-							xmlElementConvention.getDescription(), xmlElementConvention.getPattern()));
-				}
-			}
-			final Collection<XmlModelConvention> xmlModelConventions = rule.getModelConventions();
-			final ArrayList<ModelConvention> modelConventions = new ArrayList<ModelConvention>();
-			if (xmlModelConventions != null) {
-				for (final XmlModelConvention xmlModelConvention : xmlModelConventions) {
-					modelConventions.add(new ModelConvention(xmlModelConvention.getType()));
-				}
-			}
-			final Collection<XmlSetting> xmlSettings = rule.getSettings();
-			final Map<String, Setting> settings = new HashMap<String, Setting>();
-			if (xmlSettings != null) {
-				for (final XmlSetting xmlSetting : xmlSettings) {
-					if (!settings.containsKey(xmlSetting.getName())) {
-						settings.put(xmlSetting.getName(),
-								new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getType(),
-										xmlSetting.getId(), xmlSetting.getRequired(), xmlSetting.getValue()));
-					} else {
-						settings.get(xmlSetting.getName()).addScriptPlace(xmlSetting.getScript());
-					}
-				}
-			}
-			rules.put(name, new Rule(name, state, ruleDescription, settings, elementConventions, modelConventions));
-		}
+        final Collection<XmlRule> xmlRules = ruleSet.getRules();
+        for (final XmlRule rule : xmlRules) {
+            final String name = rule.getName();
+            if (name == null)
+                throw new ConfigReaderException("rule name is not set");
+            final boolean state = rule.isState();
+            final String ruleDescription = rule.getDescription();
+            final Collection<XmlElementConvention> xmlElementConventions = rule.getElementConventions();
+            final ArrayList<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+            if (xmlElementConventions != null) {
+                for (final XmlElementConvention xmlElementConvention : xmlElementConventions) {
+                    final XmlElementFieldTypes xmlElementFieldTypes = xmlElementConvention.getElementFieldTypes();
+                    ElementFieldTypes elementFieldTypes = null;
+                    if (xmlElementFieldTypes != null) {
+                        elementFieldTypes = new ElementFieldTypes(xmlElementFieldTypes.getElementFieldTypes(),
+                                xmlElementFieldTypes.isExcluded());
+                    }
+                    if (!checkRegEx(xmlElementConvention.getPattern()))
+                        throw new ConfigReaderException("RegEx (" + xmlElementConvention.getPattern() + ") of " + name
+                                + " (" + xmlElementConvention.getName() + ") is incorrect");
+                    elementConventions.add(new ElementConvention(xmlElementConvention.getName(), elementFieldTypes,
+                            xmlElementConvention.getDescription(), xmlElementConvention.getPattern()));
+                }
+            }
+            final Collection<XmlModelConvention> xmlModelConventions = rule.getModelConventions();
+            final ArrayList<ModelConvention> modelConventions = new ArrayList<ModelConvention>();
+            if (xmlModelConventions != null) {
+                for (final XmlModelConvention xmlModelConvention : xmlModelConventions) {
+                    modelConventions.add(new ModelConvention(xmlModelConvention.getType()));
+                }
+            }
+            final Collection<XmlSetting> xmlSettings = rule.getSettings();
+            final Map<String, Setting> settings = new HashMap<String, Setting>();
+            if (xmlSettings != null) {
+                for (final XmlSetting xmlSetting : xmlSettings) {
+                    if (!settings.containsKey(xmlSetting.getName())) {
+                        settings.put(xmlSetting.getName(),
+                                new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getType(),
+                                        xmlSetting.getId(), xmlSetting.getRequired(), xmlSetting.getValue()));
+                    } else {
+                        settings.get(xmlSetting.getName()).addScriptPlace(xmlSetting.getScript());
+                    }
+                }
+            }
+            rules.put(name, new Rule(name, state, ruleDescription, settings, elementConventions, modelConventions));
+        }
 
-		return rules;
-	}
+        return rules;
+    }
 
-	private static boolean checkRegEx(String regEx) {
-		boolean correct = false;
+    private static boolean checkRegEx(String regEx) {
+        boolean correct = false;
 
-		if (regEx.isEmpty())
-			return correct;
+        if (regEx.isEmpty())
+            return correct;
 
-		try {
-			Pattern.compile(regEx);
-			correct = true;
-		} catch (PatternSyntaxException e) {
-		}
-		return correct;
-	}
+        try {
+            Pattern.compile(regEx);
+            correct = true;
+        } catch (PatternSyntaxException e) {
+        }
+        return correct;
+    }
 }
