@@ -76,8 +76,9 @@ public class JsOutputWriter implements IssueOutputWriter {
 				extractExternalCheckers(RuntimeConfig.getInstance().getActiveRules()));
 		final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
 		final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
+		final String properties = transformPropertiesToJsonDatastructure();
 
-		writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues);
+		writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues, properties);
 	}
 
 	public void prepareMaps(final Map<String, String> wrongCheckers, final Map<String, String> ignoredIssues,
@@ -143,13 +144,15 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 *            Issue severity
 	 * @param ignoredIssues
 	 *            Ignored issues
+	 * @param properties
+	 * 	          vPav properties
 	 * @throws OutputWriterException
 	 *             If JavaScript could not be written
 	 */
 	private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
-			final String defaultCheckers, final String issueSeverity, final String ignoredIssues)
+			final String defaultCheckers, final String issueSeverity, final String ignoredIssues, final String properties)
 			throws OutputWriterException {
-		if (json != null && !json.isEmpty()) {
+		if (json != null && !json.isEmpty() && properties != null && !properties.isEmpty()) {
 			try (FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT)) {
 				file.write(bpmn);
 			} catch (IOException e) {
@@ -203,6 +206,12 @@ public class JsOutputWriter implements IssueOutputWriter {
 				} catch (IOException e) {
 					throw new OutputWriterException("js output couldn't be written", e);
 				}
+			}
+			try (OutputStreamWriter osWriter = new OutputStreamWriter(
+					new FileOutputStream(ConfigConstants.PROPERTIES_JS_OUTPUT), StandardCharsets.UTF_8)) {
+				osWriter.write(properties);
+			} catch (IOException e) {
+				throw new OutputWriterException("js output couldn't be written", e);
 			}
 		}
 	}
@@ -460,6 +469,29 @@ public class JsOutputWriter implements IssueOutputWriter {
 			}
 		}
 		return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+	}
+
+	/**
+	 * Transforms the collection of issues into JSON format
+	 *
+	 * @param issues
+	 *            Collection of found issues
+	 * @param varName
+	 *            Variable Name
+	 * @return Collection of issues in JSON format
+	 */
+	/**
+	 * Transforms the properties into JSON format
+	 * @return Properties in JSON format
+	 */
+	private String transformPropertiesToJsonDatastructure() {
+		final JsonObject obj = new JsonObject();
+		obj.addProperty("basepath", ConfigConstants.getInstance().getBasepath().replaceAll("/", "\\\\"));
+		// Create download basepath
+		String absolutepath = new File(ConfigConstants.getInstance().getBasepath()).getAbsolutePath() + "/";
+		obj.addProperty("downloadBasepath", "file:///" + absolutepath.replaceAll("\\\\", "/"));
+
+		return ("var vPavProperties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
 	}
 
 	/**

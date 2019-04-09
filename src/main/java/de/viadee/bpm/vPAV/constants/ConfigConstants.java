@@ -58,6 +58,7 @@ public class ConfigConstants {
     public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
     public static final String VALIDATION_JS_MODEL_OUTPUT = "target/vPAV/js/bpmn_model.js";
     public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
+    public static final String PROPERTIES_JS_OUTPUT = "target/vPAV/js/vpavproperties.js";
     public static final String VALIDATION_CHECKERS = "target/vPAV/js/checkers.js";
     public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
     public static final String VALIDATION_ISSUE_SEVERITY = "target/vPAV/js/issue_severity.js";
