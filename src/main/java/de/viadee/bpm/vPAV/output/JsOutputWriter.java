@@ -41,11 +41,14 @@ import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -409,7 +412,18 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 *             File not found
 	 */
 	private String convertBpmnFile(String path) throws IOException {
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		byte[] encoded = null;
+		if (path.startsWith("file:/")) {
+			try {
+				// Convert URI
+				encoded = Files.readAllBytes(Paths.get(new URI(path)));
+			} catch (URISyntaxException e) {
+				logger.log(Level.SEVERE, "URI of path seems to be malformed.", e);
+			}
+		} else {
+			encoded = Files.readAllBytes(Paths.get(path));
+		}
+
 		String s = new String(encoded);
 		s = s.replace("\"", "\\\""); // replace " with \"
 		s = s.replace('\n', ' '); // delete all \n
@@ -486,10 +500,25 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 */
 	private String transformPropertiesToJsonDatastructure() {
 		final JsonObject obj = new JsonObject();
-		obj.addProperty("basepath", ConfigConstants.getInstance().getBasepath().replaceAll("/", "\\\\"));
-		// Create download basepath
-		String absolutepath = new File(ConfigConstants.getInstance().getBasepath()).getAbsolutePath() + "/";
-		obj.addProperty("downloadBasepath", "file:///" + absolutepath.replaceAll("\\\\", "/"));
+		String basepath = ConfigConstants.getInstance().getBasepath();
+		String absolutepath = "";
+
+		if (basepath.startsWith("file:/")) {
+			try {
+				// Convert URI
+				absolutepath = basepath;
+				basepath = Paths.get(new URI(basepath)).toAbsolutePath().toString() + "/";
+			} catch (URISyntaxException e) {
+				logger.log(Level.SEVERE, "URI of path seems to be malformed.", e);
+			}
+		}
+		else {
+			// Create download basepath
+			absolutepath = "file:///" + new File(basepath).getAbsolutePath() + "/";
+		}
+		obj.addProperty("basepath", basepath.replaceAll("/", "\\\\"));
+
+		obj.addProperty("downloadBasepath", absolutepath);
 
 		return ("var vPavProperties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
 	}

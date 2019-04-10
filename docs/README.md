@@ -160,6 +160,12 @@ Add the dependency to your POM:
 </dependency>
 ```
 
+### Location of BPMN models
+By default, the BPMN models have to be stored in the folder ``src\main\resources`` of your Camunda project. 
+You can also load models from other locations of your local filesystem.
+To specify another location, you have to create a ``vPav.properties`` file and put it in your classpath. The property ``basepath`` is used to define the path.
+You can use relative paths (e.g. ```basepath=src/main/java```) or absolute paths using the ``file:///`` scheme.
+
 ### JUnit
 Configure a JUnit-4 Test to fire up your usual Spring context - esp. delegates referenced in the process, 
 if you use Spring in your application or a simple test case otherwise to call the consistency check.
