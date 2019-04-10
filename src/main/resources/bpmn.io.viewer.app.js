@@ -11,7 +11,7 @@ function markNodes(elements, canvas) {
 }
 
 function filterElementsByModel(elements, bpmnFile) {
-    return elements.filter(element =>(element.bpmnFile === (vPavProperties["basepath"] + bpmnFile)) && (element.elementId !== ""));
+    return elements.filter(element =>(element.bpmnFile === (properties["basepath"] + bpmnFile)) && (element.elementId !== ""));
 }
 
 //mark invalid path
@@ -57,7 +57,7 @@ function addCountOverlay(overlays, elements) {
 
 function getProcessVariableOverlay(bpmnFile) {
     let filteredVariables = proz_vars
-        .filter(p => p.bpmnFile === (vPavProperties["basepath"] + bpmnFile))
+        .filter(p => p.bpmnFile === (properties["basepath"] + bpmnFile))
         .filter(p => p.elementIid !== "");
 
     return filteredVariables.map(p => {
@@ -75,7 +75,7 @@ function getIssueOverlays(bpmnFile) {
     //getElemtIds
     var eId = [];
     for (id in elementsToMark) {
-        if (elementsToMark[id].bpmnFile == (vPavProperties["basepath"] + bpmnFile))
+        if (elementsToMark[id].bpmnFile == (properties["basepath"] + bpmnFile))
             if (elementsToMark[id].elementId != "")
                 eId[id] = elementsToMark[id].elementId;
     }
@@ -122,7 +122,7 @@ function getIssueOverlays(bpmnFile) {
     var issue = { i: "dummy", anz: 0 };
     var issues = [];
     for (id in elementsToMark) {
-        if (elementsToMark[id].bpmnFile == (vPavProperties["basepath"] + bpmnFile)) {
+        if (elementsToMark[id].bpmnFile == (properties["basepath"] + bpmnFile)) {
             var obj = elementsToMark[id];
             for (var i = 0; i < anzArray.length; i++) {
                 if (anzArray[i].eid == obj.elementId) {
@@ -370,7 +370,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
     
     //fill table with all issuesof current model
     for (let issue of tableContent) {
-        if (issue.bpmnFile == (vPavProperties["basepath"] + bpmnFile)) {
+        if (issue.bpmnFile == (properties["basepath"] + bpmnFile)) {
             myParent = document.getElementsByTagName("body").item(0);
             myTBody = document.createElement("tbody");
             myRow = document.createElement("tr");
@@ -522,7 +522,7 @@ function createVariableTable(bpmnFile, tableContent) {
 
     //fill table with all variables of current model
     for (let processVariable of tableContent) {
-        if (processVariable.bpmnFile !== (vPavProperties["basepath"] + bpmnFile))
+        if (processVariable.bpmnFile !== (properties["basepath"] + bpmnFile))
             continue;
 
         let myTBody = document.createElement("tbody");
@@ -619,7 +619,7 @@ function setUeberschrift(name) {
     subName = name.substr(0, name.length - 5);
     document.querySelector("#modell").innerHTML = subName;
     var mDownload = document.getElementById("model_download");
-    mDownload.setAttribute("href", vPavProperties["downloadBasepath"] + name);
+    mDownload.setAttribute("href", properties["downloadBasepath"] + name);
     setFocus(name);
 }
 
@@ -627,7 +627,7 @@ function setUeberschrift(name) {
 function countIssues(bpmnFile, tableContent) {
     let count = 0;
     for (let id in tableContent) {
-        if (tableContent[id].bpmnFile === (vPavProperties["basepath"] + bpmnFile)) {
+        if (tableContent[id].bpmnFile === (properties["basepath"] + bpmnFile)) {
             count++;
         }
     }

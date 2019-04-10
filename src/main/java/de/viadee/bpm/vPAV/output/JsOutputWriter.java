@@ -486,41 +486,32 @@ public class JsOutputWriter implements IssueOutputWriter {
 	}
 
 	/**
-	 * Transforms the collection of issues into JSON format
-	 *
-	 * @param issues
-	 *            Collection of found issues
-	 * @param varName
-	 *            Variable Name
-	 * @return Collection of issues in JSON format
-	 */
-	/**
 	 * Transforms the properties into JSON format
 	 * @return Properties in JSON format
 	 */
 	private String transformPropertiesToJsonDatastructure() {
 		final JsonObject obj = new JsonObject();
-		String basepath = ConfigConstants.getInstance().getBasepath();
-		String absolutepath = "";
+		String basePath = ConfigConstants.getInstance().getBasepath();
+		String absolutePath = "";
 
-		if (basepath.startsWith("file:/")) {
+		if (basePath.startsWith("file:/")) {
 			try {
 				// Convert URI
-				absolutepath = basepath;
-				basepath = Paths.get(new URI(basepath)).toAbsolutePath().toString() + "/";
+				absolutePath = basePath;
+				basePath = Paths.get(new URI(basePath)).toAbsolutePath().toString() + "/";
 			} catch (URISyntaxException e) {
 				logger.log(Level.SEVERE, "URI of path seems to be malformed.", e);
 			}
 		}
 		else {
 			// Create download basepath
-			absolutepath = "file:///" + new File(basepath).getAbsolutePath() + "/";
+			absolutePath = "file:///" + new File(basePath).getAbsolutePath() + "/";
 		}
-		obj.addProperty("basepath", basepath.replaceAll("/", "\\\\"));
+		obj.addProperty("basepath", basePath.replaceAll("/", "\\\\"));
 
-		obj.addProperty("downloadBasepath", absolutepath);
+		obj.addProperty("downloadBasepath", absolutePath);
 
-		return ("var vPavProperties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
+		return ("var properties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
 	}
 
 	/**
