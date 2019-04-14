@@ -70,6 +70,7 @@ public class ProcessVariableReaderStaticTest {
         final URL[] classUrls = { classUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().setTest(true);
     }
 
     @Test
@@ -117,6 +118,45 @@ public class ProcessVariableReaderStaticTest {
 
         assertEquals(3, variables.size());
 
+    }
+
+    @Test
+    public void followMethodInvocation() {
+        final String PATH = BASE_PATH + "ProcessVariablesReader_MethodInvocation.bpmn";
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ServiceTask> tasks = modelInstance
+                .getModelElementsByType(ServiceTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+                "de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, null, null, null));
+        assertEquals(2, variables.values().size());
+
+    }
+
+    @Test
+    public void followObjectInstantiation() {
+        final String PATH = BASE_PATH + "ProcessVariablesReader_ObjectInstantiation.bpmn";
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ServiceTask> tasks = modelInstance
+                .getModelElementsByType(ServiceTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+                "de.viadee.bpm.vPAV.delegates.ObjectInstantiationDelegate", element, null, null, null));
+        assertEquals(2, variables.values().size());
     }
 
 }

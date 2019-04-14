@@ -40,10 +40,7 @@ import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.engine.variable.VariableMap;
 import soot.*;
 import soot.jimple.*;
-import soot.jimple.internal.JIdentityStmt;
-import soot.jimple.internal.JInterfaceInvokeExpr;
-import soot.jimple.internal.JReturnStmt;
-import soot.jimple.internal.JVirtualInvokeExpr;
+import soot.jimple.internal.*;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
@@ -674,6 +671,11 @@ public class JavaReaderStatic implements JavaReader {
 					checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
 							variableBlock, unit, expr, assignmentStmt);
 				}
+				if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
+                    JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
+                    args = expr.getArgs();
+                    assignmentStmt = expr.getBaseBox().getValue().toString();
+                }
 			}
 			if (unit instanceof AssignStmt) {
 				if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JVirtualInvokeExpr) {
@@ -689,6 +691,9 @@ public class JavaReaderStatic implements JavaReader {
 						parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName);
 					}
 				}
+				if (unit instanceof JAssignStmt) {
+				    assignmentStmt = ((JAssignStmt) unit).leftBox.getValue().toString();
+                }
 			}
 		}
 
@@ -709,9 +714,9 @@ public class JavaReaderStatic implements JavaReader {
 	 * @param expr
 	 * @param assignmentStmt
 	 */
-	private void checkInterProceduralCall(Set<String> classPaths, CallGraph cg, OutSetCFG outSet, BpmnElement element,
-			ElementChapter chapter, KnownElementFieldType fieldType, String scopeId, VariableBlock variableBlock,
-			Unit unit, JVirtualInvokeExpr expr, String assignmentStmt) {
+	private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet, final BpmnElement element,
+                                          final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId, final VariableBlock variableBlock,
+                                          final Unit unit, final JVirtualInvokeExpr expr, final String assignmentStmt) {
 		if (expr != null) {
 			Iterator<Edge> sources = cg.edgesOutOf(unit);
 			Edge src;
@@ -748,9 +753,9 @@ public class JavaReaderStatic implements JavaReader {
 	 * @param scopeId
 	 *            Scope of BpmnElement
 	 */
-	private void parseExpression(JInterfaceInvokeExpr expr, VariableBlock variableBlock, BpmnElement element,
-			ElementChapter chapter, KnownElementFieldType fieldType, String filePath, String scopeId,
-			String paramName) {
+	private void parseExpression(final JInterfaceInvokeExpr expr, final VariableBlock variableBlock, final BpmnElement element,
+                                 final ElementChapter chapter, final KnownElementFieldType fieldType, final String filePath, final String scopeId,
+                                 final String paramName) {
 
 		String functionName = expr.getMethodRef().getName();
 		int numberOfArg = expr.getArgCount();
