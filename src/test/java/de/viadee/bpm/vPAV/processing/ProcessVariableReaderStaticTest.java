@@ -155,7 +155,7 @@ public class ProcessVariableReaderStaticTest {
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.ObjectInstantiationDelegate", element, null, null, null));
+                "de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null));
         assertEquals(2, variables.values().size());
     }
 

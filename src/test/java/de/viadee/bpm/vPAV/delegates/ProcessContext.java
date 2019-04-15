@@ -32,18 +32,16 @@
 package de.viadee.bpm.vPAV.delegates;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-public class MethodInvocationDelegate implements JavaDelegate {
+class ProcessContext {
 
-    @Override
-    public void execute(final DelegateExecution execution) throws Exception {
+    private TechnicalProcessContext technicalProcessContext;
 
-        MethodInvocation ac = new MethodInvocation();
-        String name = ac.manipulateVariables(execution, "var");
-
-        String var = (String) execution.getVariable(name);
-
+    ProcessContext(DelegateExecution execution, String name) {
+        this.technicalProcessContext = new TechnicalProcessContext(execution, name);
     }
 
+    TechnicalProcessContext getTechnicalProcessContext() {
+        return technicalProcessContext;
+    }
 }

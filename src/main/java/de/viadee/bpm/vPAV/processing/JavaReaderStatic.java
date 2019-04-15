@@ -59,6 +59,8 @@ public class JavaReaderStatic implements JavaReader {
 
 	private String returnStmt;
 
+	private List<Value> constructorArgs;
+
 	/**
 	 * Checks a java delegate for process variable references with static code
 	 * analysis (read/write/delete).
@@ -328,12 +330,16 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Callgraph information
 	 * @param originalBlock
 	 *            VariableBlock
+	 * @param assignmentStmt
+	 *            Assignment statement (left side)
+	 * @param args
+	 *            List of arguments
 	 * @return OutSetCFG which contains data flow information
 	 */
 	public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
-			final VariableBlock originalBlock, String assignmentStmt, final List<Value> args) {
+			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args) {
 
 		className = cleanString(className, true);
 
@@ -356,30 +362,30 @@ public class JavaReaderStatic implements JavaReader {
 
 			switch (methodName) {
 			case "execute":
-				parameterTypes.add((Type) delegateExecutionType);
+				parameterTypes.add(delegateExecutionType);
 				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args);
 				break;
 			case "notify":
 				for (SootClass clazz : sootClass.getInterfaces()) {
 					if (clazz.getName().equals("org.camunda.bpm.engine.delegate.TaskListener")) {
-						parameterTypes.add((Type) delegateTaskType);
+						parameterTypes.add(delegateTaskType);
 					} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.ExecutionListener")) {
-						parameterTypes.add((Type) delegateExecutionType);
+						parameterTypes.add(delegateExecutionType);
 					}
 				}
 				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args);
 				break;
 			case "mapInputVariables":
-				parameterTypes.add((Type) delegateExecutionType);
-				parameterTypes.add((Type) mapVariablesType);
+				parameterTypes.add(delegateExecutionType);
+				parameterTypes.add(mapVariablesType);
 				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args);
 				break;
 			case "mapOutputVariables":
-				parameterTypes.add((Type) delegateExecutionType);
-				parameterTypes.add((Type) mapVariablesType);
+				parameterTypes.add(delegateExecutionType);
+				parameterTypes.add(mapVariablesType);
 				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args);
 				break;
@@ -625,14 +631,16 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return VariableBlock
 	 */
 	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
-			OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
+			final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock variableBlock, String assignmentStmt, List<Value> args) {
+			VariableBlock variableBlock, String assignmentStmt, final List<Value> args) {
 		if (variableBlock == null) {
 			variableBlock = new VariableBlock(block, new ArrayList<>());
 		}
 
 		String paramName = "";
+		int argsCounter = 0;
+		int instanceFieldRef = Integer.MAX_VALUE;
 
 		final Iterator<Unit> unitIt = block.iterator();
 
@@ -640,6 +648,8 @@ public class JavaReaderStatic implements JavaReader {
 		while (unitIt.hasNext()) {
 			unit = unitIt.next();
 			if (unit instanceof IdentityStmt) {
+				// IdentityStatement, used to find index of method's arguments and name, if
+				// possible (has to be a String)
 				if (((IdentityStmt) unit).getRightOp() instanceof ParameterRef) {
 					if (((IdentityStmt) unit).getRightOp().getType().toString().equals("java.lang.String")) {
 						final Pattern pattern = Pattern.compile("(@parameter(.):)(.*)");
@@ -654,46 +664,71 @@ public class JavaReaderStatic implements JavaReader {
 				}
 			}
 			if (unit instanceof ReturnStmt) {
+				// Return statement
 				if (((JReturnStmt) unit).getOpBox().getValue().toString().equals(assignmentStmt)) {
 					this.setReturnStmt(paramName);
 				}
 			}
 			if (unit instanceof InvokeStmt) {
+				// Method call of implemented interface method without prior assignment
 				if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
 					JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox()
 							.getValue();
 					if (expr != null) {
-						parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName);
+						if (argsCounter > 0) {
+							parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
+									this.getConstructorArgs().get(argsCounter - 1).toString());
+						} else {
+							parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
+									paramName);
+						}
 					}
 				}
+				// Method call without prior assignment
 				if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JVirtualInvokeExpr) {
 					JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
 					checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-							variableBlock, unit, expr, assignmentStmt);
+							variableBlock, unit, assignmentStmt, expr.getArgs());
 				}
+				// Constructor call
 				if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
-                    JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
-                    args = expr.getArgs();
-                    assignmentStmt = expr.getBaseBox().getValue().toString();
-                }
+					JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
+					this.setConstructorArgs(expr.getArgs());
+					assignmentStmt = expr.getBaseBox().getValue().toString();
+				}
 			}
 			if (unit instanceof AssignStmt) {
+				// Method call with assignment to a variable
 				if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JVirtualInvokeExpr) {
 					assignmentStmt = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
 					JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 					checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-							variableBlock, unit, expr, assignmentStmt);
+							variableBlock, unit, assignmentStmt, expr.getArgs());
 					paramName = this.getReturnStmt();
 				}
+				// Method call of implemented interface method with assignment to a variable
 				if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
 					JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 					if (expr != null) {
 						parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName);
 					}
 				}
-				if (unit instanceof JAssignStmt) {
-				    assignmentStmt = ((JAssignStmt) unit).leftBox.getValue().toString();
-                }
+				// Instance fields
+				if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInstanceFieldRef) {
+					final Pattern pattern = Pattern.compile("(\\$r(\\d))");
+					String argument = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
+					Matcher matcher = pattern.matcher(argument);
+					if (matcher.matches()) {
+						if (instanceFieldRef > Integer.parseInt(matcher.group(2))) {
+							instanceFieldRef = Integer.parseInt(matcher.group(2));
+							assignmentStmt = argument;
+							argsCounter++;
+							paramName = this.getConstructorArgs().get(argsCounter - 1).toString();
+						} else {
+							assignmentStmt = argument;
+						}
+					}
+				}
 			}
 		}
 
@@ -701,37 +736,48 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	/**
-	 *
 	 * @param classPaths
+	 *            Set of classes that is included in inter-procedural analysis
 	 * @param cg
+	 *            Soot CallGraph
 	 * @param outSet
+	 *            OUT set of CFG
 	 * @param element
+	 *            BpmnElement
 	 * @param chapter
+	 *            ElementChapter
 	 * @param fieldType
+	 *            KnownElementFieldType
 	 * @param scopeId
+	 *            Scope of BpmnElement
 	 * @param variableBlock
+	 *            VariableBlock
 	 * @param unit
-	 * @param expr
+	 *            Current unit of code
 	 * @param assignmentStmt
+	 *            Left side of assignment statement
+	 * @param args
+	 *            List of arguments
 	 */
-	private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet, final BpmnElement element,
-                                          final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId, final VariableBlock variableBlock,
-                                          final Unit unit, final JVirtualInvokeExpr expr, final String assignmentStmt) {
-		if (expr != null) {
-			Iterator<Edge> sources = cg.edgesOutOf(unit);
-			Edge src;
-			while (sources.hasNext()) {
-				src = sources.next();
-				String methodName = src.tgt().getName();
-				String className = src.tgt().getDeclaringClass().getName();
-				className = cleanString(className, false);
-				if (classPaths.contains(className) || className.contains("$")) {
-					G.reset();
-					classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
-							scopeId, outSet, variableBlock, assignmentStmt, expr.getArgs());
-				}
+	private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
+			final List<Value> args) {
+
+		final Iterator<Edge> sources = cg.edgesOutOf(unit);
+		Edge src;
+		while (sources.hasNext()) {
+			src = sources.next();
+			String methodName = src.tgt().getName();
+			String className = src.tgt().getDeclaringClass().getName();
+			className = cleanString(className, false);
+			if (classPaths.contains(className) || className.contains("$")) {
+				G.reset();
+				classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
+						scopeId, outSet, variableBlock, assignmentStmt, args);
 			}
 		}
+
 	}
 
 	/**
@@ -753,9 +799,9 @@ public class JavaReaderStatic implements JavaReader {
 	 * @param scopeId
 	 *            Scope of BpmnElement
 	 */
-	private void parseExpression(final JInterfaceInvokeExpr expr, final VariableBlock variableBlock, final BpmnElement element,
-                                 final ElementChapter chapter, final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-                                 final String paramName) {
+	private void parseExpression(final JInterfaceInvokeExpr expr, final VariableBlock variableBlock,
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String filePath, final String scopeId, final String paramName) {
 
 		String functionName = expr.getMethodRef().getName();
 		int numberOfArg = expr.getArgCount();
@@ -777,8 +823,8 @@ public class JavaReaderStatic implements JavaReader {
 				variableBlock.addProcessVariable(
 						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
 			} else if (!paramName.isEmpty()) {
-				variableBlock.addProcessVariable(
-						new ProcessVariableOperation(paramName, element, chapter, fieldType, filePath, type, scopeId));
+				variableBlock.addProcessVariable(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
+						chapter, fieldType, filePath, type, scopeId));
 			}
 		}
 	}
@@ -835,8 +881,8 @@ public class JavaReaderStatic implements JavaReader {
 	private void addAnomaliesFoundInSourceCode(final BpmnElement element, final OutSetCFG outSet) {
 		for (VariableBlock vb : outSet.getAllVariableBlocks()) {
 			if (vb.getBlock().getIndexInMethod() == 0) {
-				addAnomaliesFoundInPathsRecursive(element, vb.getBlock(), new LinkedList<String>(), outSet,
-						new LinkedList<ProcessVariableOperation>(), "");
+				addAnomaliesFoundInPathsRecursive(element, vb.getBlock(), new LinkedList<>(), outSet,
+						new LinkedList<>(), "");
 			}
 		}
 	}
@@ -863,7 +909,7 @@ public class JavaReaderStatic implements JavaReader {
 			final LinkedList<ProcessVariableOperation> predecessorVariablesList, final String edge) {
 
 		// List<AnomalyContainer> foundAnomalies = new ArrayList<AnomalyContainer>();
-		if (edge != null && edge != "") {
+		if (edge != null && !edge.equals("")) {
 			currentPath.add(edge);
 		}
 
@@ -871,14 +917,14 @@ public class JavaReaderStatic implements JavaReader {
 		VariableBlock variableBlock = outSet.getVariableBlock(currentBlock);
 
 		// set IN + this Variables as OUT
-		LinkedList<ProcessVariableOperation> usedVariables = new LinkedList<ProcessVariableOperation>();
+		LinkedList<ProcessVariableOperation> usedVariables = new LinkedList<>();
 		usedVariables.addAll(variableBlock.getAllProcessVariables());
 
 		// prepare for statement by statement comparison
-		Set<ProcessVariableOperation> pvSet = new HashSet<ProcessVariableOperation>(usedVariables);
+		Set<ProcessVariableOperation> pvSet = new HashSet<>(usedVariables);
 		for (ProcessVariableOperation pV : pvSet) {
 			// create unique lists for operations on same variable
-			LinkedList<ProcessVariableOperation> innerList = new LinkedList<ProcessVariableOperation>();
+			LinkedList<ProcessVariableOperation> innerList = new LinkedList<>();
 			for (ProcessVariableOperation variable : usedVariables) {
 				if (pV.getName().equals(variable.getName())) {
 					innerList.add(variable);
@@ -1029,8 +1075,16 @@ public class JavaReaderStatic implements JavaReader {
 		return returnStmt;
 	}
 
-	private void setReturnStmt(String returnStmt) {
+	private void setReturnStmt(final String returnStmt) {
 		this.returnStmt = returnStmt;
+	}
+
+	private List<Value> getConstructorArgs() {
+		return constructorArgs;
+	}
+
+	private void setConstructorArgs(final List<Value> args) {
+		this.constructorArgs = args;
 	}
 
 }
