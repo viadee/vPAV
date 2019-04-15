@@ -105,8 +105,12 @@ public class FileScanner {
 		scanner.setBasedir("target/generated-sources/");
 		// get file paths of process definitions
 		scanner.setIncludes(new String[] { ConfigConstants.JAVA_FILE_PATTERN });
-		scanner.scan();
-		javaResourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
+		try {
+			scanner.scan();
+			javaResourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
+		} catch (IllegalStateException e) {
+			LOGGER.log(Level.WARNING, "Could not load base directory for generated sources.", e);
+		}	
 
 		// get mapping from process id to file path
 		processIdToPathMap = createProcessIdToPathMap(processDefinitions);
