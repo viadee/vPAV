@@ -29,34 +29,50 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.code.callgraph;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-import java.util.ArrayList;
+public class Node {
 
-public class CallGraph {
+    private InSet in;
+    private OutSet out;
+    private Node from;
+    private Node to;
 
-    private ArrayList<Node> nodes;
-    private ArrayList<Edge> edges;
-
-    public CallGraph() {
-        nodes = new ArrayList<>();
-        edges = new ArrayList<>();
+    public Node(final Node from, final Node to) {
+        this.from = from;
+        this.to = to;
     }
 
-    public ArrayList<Node> getNodes() {
-        return nodes;
+    public InSet getIn() {
+        return in;
     }
 
-    public void setNodes(ArrayList<Node> nodes) {
-        this.nodes = nodes;
+    public void setIn(InSet in) {
+        this.in = in;
     }
 
-    public ArrayList<Edge> getEdges() {
-        return edges;
+    public OutSet getOut() {
+        return out;
     }
 
-    public void setEdges(ArrayList<Edge> edges) {
-        this.edges = edges;
+    public void setOut(OutSet out) {
+        this.out = out;
+    }
+
+    public Node getFrom() {
+        return from;
+    }
+
+    public void setFrom(Node from) {
+        this.from = from;
+    }
+
+    public Node getTo() {
+        return to;
+    }
+
+    public void setTo(Node to) {
+        this.to = to;
     }
 
 }

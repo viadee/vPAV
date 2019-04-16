@@ -29,52 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.code.callgraph;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-public class Node {
-
-    private InSet in;
-    private OutSet out;
-    private Node from;
-    private Node to;
-
-    public Node(final InSet in, final OutSet out, final Node from, final Node to) {
-        this.in = in;
-        this.out = out;
-        this.from = from;
-        this.to = to;
-    }
-
-    public InSet getIn() {
-        return in;
-    }
-
-    public void setIn(InSet in) {
-        this.in = in;
-    }
-
-    public OutSet getOut() {
-        return out;
-    }
-
-    public void setOut(OutSet out) {
-        this.out = out;
-    }
-
-    public Node getFrom() {
-        return from;
-    }
-
-    public void setFrom(Node from) {
-        this.from = from;
-    }
-
-    public Node getTo() {
-        return to;
-    }
-
-    public void setTo(Node to) {
-        this.to = to;
-    }
-
+public class OutSet {
 }

@@ -33,7 +33,7 @@ package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.processing.code.callgraph.CallGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -68,8 +68,8 @@ public class JavaReaderRegex implements JavaReader {
 	 */
 	@Override
 	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
-																					   final String classFile, final BpmnElement element, final ElementChapter chapter,
-																					   final KnownElementFieldType fieldType, final String scopeId, CallGraph cg) {
+			final String classFile, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId, final FlowGraph flowGraph) {
 		// convert package format in a concrete path to the java class (.java)
 		String filePath = "";
 		if (classFile != null && classFile.trim().length() > 0) {

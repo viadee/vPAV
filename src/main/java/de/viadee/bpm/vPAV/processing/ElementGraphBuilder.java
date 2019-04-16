@@ -37,7 +37,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.code.callgraph.CallGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -145,7 +145,7 @@ public class ElementGraphBuilder {
 			final Collection<CallActivity> callActivities = new ArrayList<>();
 
 			for (final FlowElement element : elements) {
-				final CallGraph cg = new CallGraph();
+				final FlowGraph flowGraph = new FlowGraph();
 				if (element instanceof SequenceFlow) {
 					// mention sequence flows
 					final SequenceFlow flow = (SequenceFlow) element;
@@ -161,7 +161,7 @@ public class ElementGraphBuilder {
 				} else if (element instanceof SubProcess) {
 					final SubProcess subprocess = (SubProcess) element;
 					addElementsSubprocess(context, fileScanner, subProcesses, flows, boundaryEvents, graph, subprocess,
-							processDefinition, cg);
+							processDefinition, flowGraph);
 				}
 
 				// Ordered map to hold operations in correct order
@@ -208,7 +208,7 @@ public class ElementGraphBuilder {
 
 				// examine process variables and save it with access operation
 				final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner);
-				variables.putAll(reader.getVariablesFromElement(context, fileScanner, node, cg));
+				variables.putAll(reader.getVariablesFromElement(context, fileScanner, node, flowGraph));
 				// examine process variables for element and set it
 				node.setProcessVariables(variables);
 
@@ -375,7 +375,7 @@ public class ElementGraphBuilder {
 	private void addElementsSubprocess(final JavaReaderContext context, final FileScanner fileScanner,
 			final Collection<SubProcess> subProcesses, final Collection<SequenceFlow> flows,
 			final Collection<BoundaryEvent> events, final IGraph graph, final SubProcess process,
-			final String processDefinition, final CallGraph cg) {
+			final String processDefinition, final FlowGraph cg) {
 		subProcesses.add(process);
 		final Collection<FlowElement> subElements = process.getFlowElements();
 		for (final FlowElement subElement : subElements) {

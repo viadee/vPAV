@@ -29,30 +29,34 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.code.callgraph;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-public class Edge {
+import java.util.ArrayList;
 
-    private Node src, tgt;
+public class FlowGraph {
 
-    public Edge(final Node src, final Node tgt) {
-        this.src = src;
-        this.tgt = tgt;
+    private ArrayList<Node> nodes;
+    private ArrayList<Edge> edges;
+
+    public FlowGraph() {
+        nodes = new ArrayList<>();
+        edges = new ArrayList<>();
     }
 
-    public Node getSrc() {
-        return src;
+    public ArrayList<Node> getNodes() {
+        return nodes;
     }
 
-    public void setSrc(Node src) {
-        this.src = src;
+    public void setNodes(ArrayList<Node> nodes) {
+        this.nodes = nodes;
     }
 
-    public Node getTgt() {
-        return tgt;
+    public ArrayList<Edge> getEdges() {
+        return edges;
     }
 
-    public void setTgt(Node tgt) {
-        this.tgt = tgt;
+    public void setEdges(ArrayList<Edge> edges) {
+        this.edges = edges;
     }
+
 }

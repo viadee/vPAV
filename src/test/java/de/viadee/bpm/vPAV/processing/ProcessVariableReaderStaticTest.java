@@ -36,7 +36,7 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.callgraph.CallGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -85,7 +85,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final CallGraph cg = new CallGraph();
+        final FlowGraph cg = new FlowGraph();
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
@@ -132,7 +132,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final CallGraph cg = new CallGraph();
+        final FlowGraph cg = new FlowGraph();
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
@@ -152,7 +152,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final CallGraph cg = new CallGraph();
+        final FlowGraph cg = new FlowGraph();
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,

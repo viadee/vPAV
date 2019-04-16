@@ -29,7 +29,30 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.code.callgraph;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-public class OutSet {
+public class Edge {
+
+    private Node src, tgt;
+
+    public Edge(final Node src, final Node tgt) {
+        this.src = src;
+        this.tgt = tgt;
+    }
+
+    public Node getSrc() {
+        return src;
+    }
+
+    public void setSrc(Node src) {
+        this.src = src;
+    }
+
+    public Node getTgt() {
+        return tgt;
+    }
+
+    public void setTgt(Node tgt) {
+        this.tgt = tgt;
+    }
 }
