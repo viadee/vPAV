@@ -109,7 +109,7 @@ public class FileScanner {
 			scanner.scan();
 			javaResourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
 		} catch (IllegalStateException e) {
-			LOGGER.log(Level.WARNING, "Could not load base directory for generated sources.", e);
+			LOGGER.log(Level.WARNING, "Could not load base directory for generated sources.");
 		}	
 
 		// get mapping from process id to file path
@@ -128,8 +128,7 @@ public class FileScanner {
 
 		// get file paths of java files
 		URL[] urls;
-		LinkedList<File> files = new LinkedList<File>();
-		LinkedList<File> dirs = new LinkedList<File>();
+		LinkedList<File> files, dirs = new LinkedList<>();
 		URLClassLoader ucl;
 		if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
 			ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());

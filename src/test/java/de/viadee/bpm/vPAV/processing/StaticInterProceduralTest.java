@@ -36,6 +36,7 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.callgraph.CallGraph;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -59,8 +60,9 @@ public class StaticInterProceduralTest {
 
         // When
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        CallGraph cg = new CallGraph();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null));
+                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null, cg));
         // Then
         assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
                 variables.size());

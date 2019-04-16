@@ -29,23 +29,52 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.code.callgraph;
 
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.processing.code.callgraph.CallGraph;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+public class Node {
 
-public interface JavaReader {
+    private InSet in;
+    private OutSet out;
+    private Node from;
+    private Node to;
 
-	ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
-																				final String classFile, final BpmnElement element, final ElementChapter chapter,
-																				final KnownElementFieldType fieldType, final String scopeId, final CallGraph cg);
+    public Node(final InSet in, final OutSet out, final Node from, final Node to) {
+        this.in = in;
+        this.out = out;
+        this.from = from;
+        this.to = to;
+    }
 
-	ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
-			final EntryPoint entry);
+    public InSet getIn() {
+        return in;
+    }
+
+    public void setIn(InSet in) {
+        this.in = in;
+    }
+
+    public OutSet getOut() {
+        return out;
+    }
+
+    public void setOut(OutSet out) {
+        this.out = out;
+    }
+
+    public Node getFrom() {
+        return from;
+    }
+
+    public void setFrom(Node from) {
+        this.from = from;
+    }
+
+    public Node getTo() {
+        return to;
+    }
+
+    public void setTo(Node to) {
+        this.to = to;
+    }
+
 }

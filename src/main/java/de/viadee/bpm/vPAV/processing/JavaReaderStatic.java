@@ -84,8 +84,8 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return Map of process variables from the referenced delegate
 	 */
 	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
-			final String classFile, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String scopeId) {
+																					   final String classFile, final BpmnElement element, final ElementChapter chapter,
+																					   final KnownElementFieldType fieldType, final String scopeId, final de.viadee.bpm.vPAV.processing.code.callgraph.CallGraph cg) {
 
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 

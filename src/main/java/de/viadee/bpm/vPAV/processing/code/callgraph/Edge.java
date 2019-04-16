@@ -29,23 +29,30 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.code.callgraph;
 
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.processing.code.callgraph.CallGraph;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+public class Edge {
 
-public interface JavaReader {
+    private Node src, tgt;
 
-	ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
-																				final String classFile, final BpmnElement element, final ElementChapter chapter,
-																				final KnownElementFieldType fieldType, final String scopeId, final CallGraph cg);
+    public Edge(final Node src, final Node tgt) {
+        this.src = src;
+        this.tgt = tgt;
+    }
 
-	ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
-			final EntryPoint entry);
+    public Node getSrc() {
+        return src;
+    }
+
+    public void setSrc(Node src) {
+        this.src = src;
+    }
+
+    public Node getTgt() {
+        return tgt;
+    }
+
+    public void setTgt(Node tgt) {
+        this.tgt = tgt;
+    }
 }

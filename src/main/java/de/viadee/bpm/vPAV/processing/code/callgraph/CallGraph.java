@@ -29,23 +29,34 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.code.callgraph;
 
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.processing.code.callgraph.CallGraph;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import java.util.ArrayList;
 
-public interface JavaReader {
+public class CallGraph {
 
-	ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
-																				final String classFile, final BpmnElement element, final ElementChapter chapter,
-																				final KnownElementFieldType fieldType, final String scopeId, final CallGraph cg);
+    private ArrayList<Node> nodes;
+    private ArrayList<Edge> edges;
 
-	ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
-			final EntryPoint entry);
+    public CallGraph() {
+        nodes = new ArrayList<>();
+        edges = new ArrayList<>();
+    }
+
+    public ArrayList<Node> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(ArrayList<Node> nodes) {
+        this.nodes = nodes;
+    }
+
+    public ArrayList<Edge> getEdges() {
+        return edges;
+    }
+
+    public void setEdges(ArrayList<Edge> edges) {
+        this.edges = edges;
+    }
+
 }
