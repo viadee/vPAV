@@ -39,11 +39,19 @@ Consistency checks are performed by individual modules called checkers, which se
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
 ### Configuration
-The viadee Process Application Validator comes with a default ruleSet.xml which provides some basic rules. In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
+The viadee Process Application Validator uses a rule set to define which checks are executed.
+The plugin comes with a default ruleSet.xml which provides some basic rules.
+In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
 This allows you to use your own set of rules for naming conventions or to de-/activate certain checkers.
+To write your own rule set, you can follow the example of [ruleSetDefault.xml](https://github.com/viadee/vPAV/blob/master/src/main/resources/ruleSetDefault.xml).
 
 ### One set of rules to rule them all
-Furthermore you can use the plugin to manage multiple projects. Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar). In your child projects you have to add the dependency to the parent project and to vPAV.
+Furthermore you can use the plugin to manage multiple projects.
+A parent rule set can be shared among them so that you don't have to define the same checkers multiple times.
+The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit".
+Local sets of rules will override inherited rules in order to allow for customization.
+
+Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar).
 
 ```xml
 <dependency>
@@ -59,15 +67,18 @@ Furthermore you can use the plugin to manage multiple projects. Just create a bl
 </dependency>
 ```
 
-The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit". Local sets of rules will override inherited rules in order to allow for customization.
+In your child projects you have to add the dependency to the parent project and to vPAV.
+The inheritance is only working if you define an own rule set in your child project.
+You cannot use the default rule set because it does not include inheritance.
 
-Make sure that inheritance is activated in the ruleSet.xml of your project.
+Make sure that inheritance is activated in the ruleSet.xml of your child project.
 ```xml 
 <rule>
 	<name>HasParentRuleSet</name>
 	<state>true</state>
 </rule>
 ```
+
 ### Exclusion of false positives
 An ignore file can be created to exclude false positives. The file has to be named **"ignoreIssues.txt"** and stored in **"src/test/resources"**. 
 Here, you can list IDs of the issues which should be ignored in the next validation run. This must be done line by line. Line comments are initiated with "#".
