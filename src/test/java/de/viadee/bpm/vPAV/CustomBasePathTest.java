@@ -37,6 +37,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class CustomBasePathTest {
@@ -54,7 +55,8 @@ public class CustomBasePathTest {
         ArrayList<CheckerIssue> inconsistencies = (ArrayList<CheckerIssue>) ProcessApplicationValidator
                 .findModelInconsistencies();
         Assert.assertEquals("Wrong bpmn file was analyzed.",
-                "src\\test\\resources\\PropertiesTest\\PropertiesTest_Wrong.bpmn",
+                "src" + File.separator + "test" + File.separator + "resources" + File.separator + "PropertiesTest"
+                        + File.separator + "PropertiesTest_Wrong.bpmn",
                 inconsistencies.get(0).getBpmnFile());
         Assert.assertFalse("BasePath was changed but BPMN model was not found",
                 inconsistencies.isEmpty());
