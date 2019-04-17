@@ -145,7 +145,7 @@ public class ConfigConstants {
                 try {
                     input.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.warning("InputStream from vPav.properties could not be closed.");
                 }
             }
         }
