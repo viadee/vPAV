@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,12 +31,17 @@
  */
 package de.viadee.bpm.vPAV.constants;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.logging.Logger;
+
 /**
  * Class to hold global constants
  */
 
-public final class ConfigConstants {
-	
+public class ConfigConstants {
+
     public static final String RULESET = "ruleSet.xml";
 
     public static final String RULESETDEFAULT = "ruleSetDefault.xml";
@@ -65,6 +70,8 @@ public final class ConfigConstants {
 
     public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
 
+    public static final String PROPERTIES_JS_OUTPUT = "target/vPAV/js/properties.js";
+
     public static final String VALIDATION_CHECKERS = "target/vPAV/js/checkers.js";
 
     public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
@@ -85,7 +92,7 @@ public final class ConfigConstants {
 
     public static final String IMG_FOLDER = "target/vPAV/img/";
 
-    public static final String BASEPATH = "src/main/resources/";
+    private static final String BASEPATH = "src/main/resources/";
 
     public static final String JAVAPATH = "src/main/java/";
 
@@ -108,12 +115,59 @@ public final class ConfigConstants {
     public static final String MESSAGE = "message";
 
     public static final String CRITICALITY = "Criticality";
-    
+
     public static final String USE_STATIC_ANALYSIS_BOOLEAN = "UseStaticAnalysisBoolean";
 
     public static final String CREATE_OUTPUT_RULE = "CreateOutputHTML";
 
+    private static Logger logger = Logger.getLogger(ConfigConstants.class.getName());
+
+    private static ConfigConstants instance;
+
+    private Properties properties;
+
     private ConfigConstants() {
+        InputStream input = null;
+        properties = new Properties();
+
+        try {
+            input = this.getClass().getClassLoader().getResourceAsStream("vPav.properties");
+            if (input == null) {
+                logger.info("vPav.properties file could not be found. Falling back to default values...");
+            } else {
+                properties.load(input);
+            }
+
+        } catch (IOException e) {
+            logger.warning("Could not read vPav.properties file. Falling back to default values...");
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    logger.warning("InputStream from vPav.properties could not be closed.");
+                }
+            }
+        }
     }
 
+    public static ConfigConstants getInstance() {
+        if (ConfigConstants.instance == null) {
+            ConfigConstants.instance = new ConfigConstants();
+        }
+        return ConfigConstants.instance;
+    }
+
+    public String getBasepath() {
+        return properties.getProperty("basepath", ConfigConstants.BASEPATH);
+    }
+
+    /**
+     * Only used for tests in order to inject mocked class.
+     *
+     * @param instance mocked instance
+     */
+    protected static void setInstance(ConfigConstants instance) {
+        ConfigConstants.instance = instance;
+    }
 }

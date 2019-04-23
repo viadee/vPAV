@@ -45,11 +45,14 @@ import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Runner {
@@ -580,14 +583,26 @@ public class Runner {
 			Collection<DataFlowRule> dataFlowRules) {
 		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
 		ModelDispatchResult dispatchResult;
+		File bpmnfile = null;
+		String basepath = ConfigConstants.getInstance().getBasepath();
+
+		if (basepath.startsWith("file:/")) {
+			// Convert URI
+			try {
+				bpmnfile = new File(new URI(ConfigConstants.getInstance().getBasepath() + processDefinition));
+			} catch (URISyntaxException e) {
+				logger.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
+			}
+		} else {
+			bpmnfile = new File(basepath + processDefinition);
+		}
+
 		if (variableScanner != null) {
-			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner,
-					new File(ConfigConstants.BASEPATH + processDefinition), fileScanner.getDecisionRefToPathMap(),
+			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, bpmnfile, fileScanner.getDecisionRefToPathMap(),
 					fileScanner.getProcessIdToPathMap(), variableScanner, dataFlowRules,
 					fileScanner.getResourcesNewestVersions(), rules);
 		} else {
-			dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(
-					new File(ConfigConstants.BASEPATH + processDefinition), fileScanner.getDecisionRefToPathMap(),
+			dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(bpmnfile, fileScanner.getDecisionRefToPathMap(),
 					fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
 		}
 		elements.addAll(dispatchResult.getBpmnElements());
