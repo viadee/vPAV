@@ -298,8 +298,8 @@ public class BpmnModelDispatcher {
 	 *            ProcessVariablesScanner
 	 * @return CheckerCollection
 	 */
-	private Collection<ElementChecker> createCheckerInstances(final Collection<String> resourcesNewestVersions,
-															  final Map<String, Map<String, Rule>> conf, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
+	protected Collection<ElementChecker> createCheckerInstances(final Collection<String> resourcesNewestVersions,
+																final Map<String, Map<String, Rule>> conf, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
 		CheckerFactory checkerFactory = new CheckerFactory();
 
 		final Collection<ElementChecker> checkerCollection = checkerFactory.createCheckerInstances(conf,
