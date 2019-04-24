@@ -67,7 +67,7 @@ public class CheckerFactoryTest {
 
     private static Map<String, Setting> settings = new HashMap<String, Setting>();
 
-    private static Map<String, Rule> rules = new HashMap<String, Rule>();
+    private static Map<String, Map<String, Rule>> rules = new HashMap<>();
 
     private final String PATH = BASE_PATH + "CheckerFactoryTest.bpmn";
 
@@ -89,7 +89,9 @@ public class CheckerFactoryTest {
     public void testCorrectInternalChecker()
             throws ParserConfigurationException, SAXException, IOException {
         Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
-        rules.put("JavaDelegateChecker", rule);
+        HashMap<String, Rule> delegateRules = new HashMap<>();
+        delegateRules.put("JavaDelegateChecker", rule);
+        rules.put("JavaDelegateChecker", delegateRules);
         CheckerFactory checkerFactory = new CheckerFactory();
 
         Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
@@ -105,7 +107,9 @@ public class CheckerFactoryTest {
     public void testIncorrectInternalChecker()
             throws ParserConfigurationException, SAXException, IOException {
         Rule rule = new Rule("WrongChecker", true, null, null, null, null);
-        rules.put("WrongChecker", rule);
+        HashMap<String, Rule> wrongCheckerRules = new HashMap<>();
+        wrongCheckerRules.put("WrongChecker", rule);
+        rules.put("WrongChecker", wrongCheckerRules);
         CheckerFactory checkerFactory = new CheckerFactory();
         
         Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
@@ -123,7 +127,9 @@ public class CheckerFactoryTest {
             throws ParserConfigurationException, SAXException, IOException {
         settings.put("external_Location", setting);
         Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
-        rules.put("WrongChecker", rule);
+        HashMap<String, Rule> wrongCheckerRules = new HashMap<>();
+        wrongCheckerRules.put("WrongChecker", rule);
+        rules.put("WrongChecker", wrongCheckerRules);
         CheckerFactory checkerFactory = new CheckerFactory();
         
         Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,

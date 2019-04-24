@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -87,7 +87,7 @@ public class FileScanner {
 
     private static final Logger LOGGER = Logger.getLogger(FileScanner.class.getName());
 
-    public FileScanner(final Map<String, Rule> rules, final String javaScanPath) {
+    public FileScanner(final Map<String, Map<String, Rule>> rules, final String javaScanPath) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
         File basedir = null;
@@ -167,11 +167,15 @@ public class FileScanner {
             if (url.getFile().contains(ConfigConstants.TARGET_CLASS_FOLDER)) {
                 File f = new File(url.getFile());
                 if (!isDirectory && f.exists()) {
-                    files = (LinkedList<File>) FileUtils.listFiles(f, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+                    files =
+                            (LinkedList<File>)
+                                    FileUtils.listFiles(f, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
                     addResources(files);
                 } else {
-                    files = (LinkedList<File>) FileUtils.listFilesAndDirs(f, DirectoryFileFilter.INSTANCE,
-                            TrueFileFilter.INSTANCE);
+                    files =
+                            (LinkedList<File>)
+                                    FileUtils.listFilesAndDirs(
+                                            f, DirectoryFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
                     dirs.addAll(findLastDir(files));
                 }
             }
@@ -183,30 +187,37 @@ public class FileScanner {
         scanner.scan();
         decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
 
-        final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
-        if (rule != null && rule.isActive()) {
-            if (versioningScheme != null && !isDirectory) {
-                // also add groovy files to included files
-                scanner.setIncludes(new String[]{ConfigConstants.SCRIPT_FILE_PATTERN});
-                scanner.scan();
+        if (rules.get(VersioningChecker.class.getSimpleName()) != null) {
+            final Rule rule =
+                    rules
+                            .get(VersioningChecker.class.getSimpleName())
+                            .get(VersioningChecker.class.getSimpleName());
+            if (rule != null && rule.isActive()) {
+                if (versioningScheme != null && !isDirectory) {
+                    // also add groovy files to included files
+                    scanner.setIncludes(new String[]{ConfigConstants.SCRIPT_FILE_PATTERN});
+                    scanner.scan();
 
-                includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
+                    includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
-                // filter files by versioningSchema
-                resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
-            } else {
+                    // filter files by versioningSchema
+                    resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
+                } else {
 
-                for (File file : dirs) {
-                    includedFiles.add(file.getAbsolutePath());
+                    for (File file : dirs) {
+                        includedFiles.add(file.getAbsolutePath());
+                    }
+                    resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
                 }
-                resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
             }
         }
+
+
     }
 
     /**
-     * Take one jar`s path, modify it from ClassLoader format to Soot`s format and
-     * add it to the previous paths.
+     * Take one jar`s path, modify it from ClassLoader format to Soot`s format and add it to the
+     * previous paths.
      *
      * @param sootPathCurrent - one jar's local path
      */
@@ -323,12 +334,12 @@ public class FileScanner {
             if (basepath.startsWith("file:/")) {
                 // Convert URI
                 try {
-                    bpmnfile = new File(new URI(ConfigConstants.getInstance().getBasepath()+path));
+                    bpmnfile = new File(new URI(ConfigConstants.getInstance().getBasepath() + path));
                 } catch (URISyntaxException e) {
                     LOGGER.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
                 }
             } else {
-                bpmnfile = new File(basepath+path);
+                bpmnfile = new File(basepath + path);
             }
 
             try {
@@ -464,29 +475,39 @@ public class FileScanner {
      * @return schema (regex), if null the checker is inactive
      * @throws ConfigItemNotFoundException
      */
-    private static String loadVersioningScheme(final Map<String, Rule> rules) throws ConfigItemNotFoundException {
+    private static String loadVersioningScheme(final Map<String, Map<String, Rule>> rules)
+            throws ConfigItemNotFoundException {
 
-        final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
-        if (rule != null && rule.isActive()) {
-            Setting setting = null;
-            final Map<String, Setting> settings = rule.getSettings();
-            if (settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
-                    && !settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
-                setting = settings.get(ConfigConstants.VERSIONINGSCHEMECLASS);
-                isDirectory = false;
-            } else if (!settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
-                    && settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
-                setting = settings.get(ConfigConstants.VERSIONINGSCHEMEPACKAGE);
-                isDirectory = true;
-            }
-            if (setting == null) {
-                throw new ConfigItemNotFoundException("VersioningChecker: Versioning Scheme could not be read. "
-                        + "Possible options: " + ConfigConstants.VERSIONINGSCHEMECLASS + " or "
-                        + ConfigConstants.VERSIONINGSCHEMEPACKAGE);
-            } else {
-                scheme = setting.getValue().trim();
+        if (rules.get(VersioningChecker.class.getSimpleName()) != null) {
+            final Rule rule =
+                    rules
+                            .get(VersioningChecker.class.getSimpleName())
+                            .get(VersioningChecker.class.getSimpleName());
+            if (rule != null && rule.isActive()) {
+                Setting setting = null;
+                final Map<String, Setting> settings = rule.getSettings();
+                if (settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
+                        && !settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
+                    setting = settings.get(ConfigConstants.VERSIONINGSCHEMECLASS);
+                    isDirectory = false;
+                } else if (!settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
+                        && settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
+                    setting = settings.get(ConfigConstants.VERSIONINGSCHEMEPACKAGE);
+                    isDirectory = true;
+                }
+                if (setting == null) {
+                    throw new ConfigItemNotFoundException(
+                            "VersioningChecker: Versioning Scheme could not be read. "
+                                    + "Possible options: "
+                                    + ConfigConstants.VERSIONINGSCHEMECLASS
+                                    + " or "
+                                    + ConfigConstants.VERSIONINGSCHEMEPACKAGE);
+                } else {
+                    scheme = setting.getValue().trim();
+                }
             }
         }
+
         return scheme;
     }
 

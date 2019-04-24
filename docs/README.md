@@ -79,6 +79,38 @@ Make sure that inheritance is activated in the ruleSet.xml of your child project
 </rule>
 ```
 
+### Multiple checker configurations
+It might be useful to run a checker two times with different configurations. To prevent a rule from being overridden, you can define an ID.
+```xml 
+<rule id="xorChecker1">
+    <name>XorConventionChecker</name>
+	<state>true</state>
+	<settings>
+	    <setting name="requiredDefault">true</setting>
+	</settings>
+	<elementConventions>
+		<elementConvention>
+			<name>convention</name>
+			<description>gateway name has to end with an question mark</description>
+			<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
+		</elementConvention>
+	</elementConventions>
+</rule>
+```
+If two rule sets are merged (e. g. parent and child rule set), the following inheritance rules apply:
+- A parent rule will be overridden if a child rule has the same ID.
+- A parent rule will be loaded if no rule with the same ID exists in the child rule set.
+- If a rule does not have an ID, the name of the rule will be used and handled as ID.
+
+
+The following checkers/rules can only be defined once. It it not possible to have different configurations:
+- HasParentRuleSet
+- CreateOutputHTML
+- language
+- VersioningChecker
+- ProcessVariablesModelChecker
+- DataFlowChecker
+
 ### Exclusion of false positives
 An ignore file can be created to exclude false positives. The file has to be named **"ignoreIssues.txt"** and stored in **"src/test/resources"**. 
 Here, you can list IDs of the issues which should be ignored in the next validation run. This must be done line by line. Line comments are initiated with "#".

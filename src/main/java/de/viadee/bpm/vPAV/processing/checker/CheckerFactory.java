@@ -57,91 +57,89 @@ public class CheckerFactory {
     /**
      * create checkers
      *
-     * @param ruleConf
-     *            rules for checker
-     * @param resourcesNewestVersions
-     *            resourcesNewestVersions in context
-     * @param bpmnScanner
-     *            bpmnScanner for model
-     * @param scanner
-     *            ProcessVariablesScanner for process variables, if active
+     * @param ruleConf                rules for checker
+     * @param resourcesNewestVersions resourcesNewestVersions in context
+     * @param bpmnScanner             bpmnScanner for model
+     * @param scanner                 ProcessVariablesScanner for process variables, if active
      * @return checkers returns checkers
      */
-    public Collection<ElementChecker> createCheckerInstances(final Map<String, Rule> ruleConf,
-            final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
-            final ProcessVariablesScanner scanner) {
+    public Collection<ElementChecker> createCheckerInstances(final Map<String, Map<String, Rule>> ruleConf,
+                                                             final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
+                                                             final ProcessVariablesScanner scanner) {
 
         final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
 
-        for (Map.Entry<String, Rule> rule : ruleConf.entrySet()) {
-            String fullyQualifiedName = getFullyQualifiedName(rule);
+        for (Map<String, Rule> rules : ruleConf.values()) {
+            for (Rule rule : rules.values()) {
+                String fullyQualifiedName = getFullyQualifiedName(rule);
 
-            if (rule.getKey().equals(ConfigConstants.CREATE_OUTPUT_RULE)) {
-                continue;
-            }
+                if (rule.getName().equals(ConfigConstants.CREATE_OUTPUT_RULE)) {
+                    continue;
+                }
 
-            if (!fullyQualifiedName.isEmpty() && !rule.getKey().equals("ProcessVariablesModelChecker")
-                    && !rule.getKey().equals("DataFlowChecker")) { //$NON-NLS-1$
-                try {
-                    if (!rule.getKey().equals("VersioningChecker") && !rule.getKey()
-                            .equals("MessageCorrelationChecker")) { //$NON-NLS-1$
-                        Class<?> clazz = Class.forName(fullyQualifiedName);
-                        Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class);
-                        checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner));
-                    } else if (scanner != null && rule.getKey().equals("MessageCorrelationChecker")) {
-                        Class<?> clazz = Class.forName(fullyQualifiedName);
-                        Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class,
-                                ProcessVariablesScanner.class);
-                        checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner, scanner));
-                    } else {
-                        Class<?> clazz = Class.forName(fullyQualifiedName);
-                        Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class, Collection.class);
-                        checkers.add((AbstractElementChecker) c.newInstance(rule.getValue(), bpmnScanner,
-                                resourcesNewestVersions));
+                if (!fullyQualifiedName.isEmpty() && !rule.getName().equals("ProcessVariablesModelChecker")
+                        && !rule.getName().equals("DataFlowChecker")) { //$NON-NLS-1$
+                    try {
+                        if (!rule.getName().equals("VersioningChecker") && !rule.getName()
+                                .equals("MessageCorrelationChecker")) { //$NON-NLS-1$
+                            Class<?> clazz = Class.forName(fullyQualifiedName);
+                            Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class);
+                            checkers.add((AbstractElementChecker) c.newInstance(rule, bpmnScanner));
+                        } else if (scanner != null && rule.getName().equals("MessageCorrelationChecker")) {
+                            Class<?> clazz = Class.forName(fullyQualifiedName);
+                            Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class,
+                                    ProcessVariablesScanner.class);
+                            checkers.add((AbstractElementChecker) c.newInstance(rule, bpmnScanner, scanner));
+                        } else {
+                            Class<?> clazz = Class.forName(fullyQualifiedName);
+                            Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class, Collection.class);
+                            checkers.add((AbstractElementChecker) c.newInstance(rule, bpmnScanner,
+                                    resourcesNewestVersions));
+                        }
+                    } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | IllegalAccessException
+                            | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
+                        LOGGER.warning("Class " + fullyQualifiedName
+                                + " not found or couldn't be instantiated"); //$NON-NLS-1$ //$NON-NLS-2$
+                        rule.deactivate();
                     }
-                } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | IllegalAccessException
-                        | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
-                    LOGGER.warning("Class " + fullyQualifiedName
-                            + " not found or couldn't be instantiated"); //$NON-NLS-1$ //$NON-NLS-2$
-                    rule.getValue().deactivate();
                 }
             }
         }
+
         return checkers;
     }
 
     /**
      * get the fullyQualifiedName of the rule
      *
-     * @param rule
-     *            Rule in Map
+     * @param rule Rule in Map
      * @return fullyQualifiedName
      */
-    private String getFullyQualifiedName(Map.Entry<String, Rule> rule) {
+    private String getFullyQualifiedName(Rule rule) {
         String fullyQualifiedName = ""; //$NON-NLS-1$
-        if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getKey())
-                && rule.getValue().isActive()) {
-            fullyQualifiedName = BpmnConstants.INTERN_LOCATION + rule.getValue().getName().trim();
-        } else if (rule.getValue().isActive() && rule.getValue().getSettings() != null
-                && rule.getValue().getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
+        if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getName())
+                && rule.isActive()) {
+            fullyQualifiedName = BpmnConstants.INTERN_LOCATION + rule.getName().trim();
+        } else if (rule.isActive() && rule.getSettings() != null
+                && rule.getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
             fullyQualifiedName =
-                    rule.getValue().getSettings().get(BpmnConstants.EXTERN_LOCATION).getValue() + "." //$NON-NLS-1$
-                            + rule.getValue().getName().trim();
+                    rule.getSettings().get(BpmnConstants.EXTERN_LOCATION).getValue() + "." //$NON-NLS-1$
+                            + rule.getName().trim();
         }
-        if (fullyQualifiedName.isEmpty() && rule.getValue().isActive()) {
-            LOGGER.warning("Checker '" + rule.getValue().getName() //$NON-NLS-1$
+        if (fullyQualifiedName.isEmpty() && rule.isActive()) {
+            LOGGER.warning("Checker '" + rule.getName() //$NON-NLS-1$
                     + "' not found. Please add setting for external_location in ruleSet.xml."); //$NON-NLS-1$
-            rule.getValue().deactivate();
+            rule.deactivate();
 
             setIncorrectCheckers(rule, String.format(Messages.getString("CheckerFactory.8"), //$NON-NLS-1$
-                    rule.getValue().getName()));
+                    rule.getName()));
         }
         return fullyQualifiedName;
     }
 
-    public void setIncorrectCheckers(final Map.Entry<String, Rule> rule, final String message) {
-        if (!getIncorrectCheckers().containsKey(rule.getValue().getName())) {
-            this.incorrectCheckers.put(rule.getValue().getName(), message);
+    public void setIncorrectCheckers(final Rule rule, final String message) {
+        if (!getIncorrectCheckers().containsKey(rule.getName())) {
+            this.incorrectCheckers.put(rule.getName(), message);
         }
     }
 
