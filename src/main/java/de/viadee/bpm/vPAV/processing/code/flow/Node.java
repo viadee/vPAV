@@ -35,36 +35,36 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import soot.toolkits.graph.Block;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.BitSet;
 import java.util.List;
-import java.util.Set;
 
 public class Node {
 
-    private Set<ProcessVariableOperation> defined;
-    private Set<ProcessVariableOperation> used;
-    private Set<ProcessVariableOperation> killed;
-    private Set<ProcessVariableOperation> inUnused;
-    private Set<ProcessVariableOperation> inUsed;
-    private Set<ProcessVariableOperation> outUnused;
-    private Set<ProcessVariableOperation> outUsed;
+    private FlowGraph flowGraph;
     private List<ProcessVariableOperation> operations;
-    private Block block;
-    private int id;
 
-    public Node(final Block block) {
+    private Block block;
+    private List<Block> children;
+    private String id;
+
+    private BitSet def;
+    private BitSet use;
+    private BitSet kill;
+
+
+    public Node(final FlowGraph flowGraph, final Block block) {
+        this.flowGraph = flowGraph;
         this.block = block;
-        this.defined = new HashSet<>();
-        this.used = new HashSet<>();
-        this.killed = new HashSet<>();
-        this.inUnused = new HashSet<>();
-        this.inUsed = new HashSet<>();
-        this.outUnused = new HashSet<>();
-        this.outUsed = new HashSet<>();
+        this.children = new ArrayList<>();
+
         this.operations = new ArrayList<>();
+
+        this.def = new BitSet();
+        this.use = new BitSet();
+        this.kill = new BitSet();
     }
 
-    public void setId(final int id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -72,42 +72,38 @@ public class Node {
     // Based on operation type adds the operation to the set of corresponding operations
     public void addOperation(final ProcessVariableOperation processVariableOperation) {
         this.operations.add(processVariableOperation);
+        flowGraph.incrementDefCounter();
 
         switch (processVariableOperation.getOperation()) {
             case WRITE:
-                addDefined(processVariableOperation);
+                def.set(flowGraph.getDefCounter());
+                printBits(def);
                 break;
             case READ:
-                addUsed(processVariableOperation);
+                use.set(flowGraph.getDefCounter());
+                printBits(use);
                 break;
             case DELETE:
-                addKilled(processVariableOperation);
+                kill.set(flowGraph.getDefCounter());
+                printBits(kill);
                 break;
         }
     }
 
-    private void addDefined(final ProcessVariableOperation processVariableOperation) {
-        this.defined.add(processVariableOperation);
+
+    public static void printBits(BitSet b) {
+        for (int i = 0; i < b.size(); i++) {
+            System.out.print(b.get(i) ? "1" : "0");
+        }
+        System.out.println();
     }
 
-    private void addUsed(final ProcessVariableOperation processVariableOperation) {
-        this.used.add(processVariableOperation);
+    public String getId() {
+        return id;
     }
 
-    private void addKilled(final ProcessVariableOperation processVariableOperation) {
-        this.killed.add(processVariableOperation);
-    }
-
-    public Set<ProcessVariableOperation> getDefined() {
-        return defined;
-    }
-
-    public Set<ProcessVariableOperation> getUsed() {
-        return used;
-    }
-
-    public Set<ProcessVariableOperation> getKilled() {
-        return killed;
+    public Block getBlock() {
+        return block;
     }
 
 }

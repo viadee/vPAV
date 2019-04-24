@@ -87,8 +87,7 @@ public class JavaReaderStatic implements JavaReader {
 	 */
 	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String scopeId,
-			final FlowGraph flowGraph) {
+			final KnownElementFieldType fieldType, final String scopeId, final FlowGraph flowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -159,9 +158,9 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	/**
-	 * 
+	 *
 	 * Checks for WRITE operations on process variables
-	 * 
+	 *
 	 * @param body
 	 *            Soot representation of a method's body
 	 * @param element
@@ -290,7 +289,8 @@ public class JavaReaderStatic implements JavaReader {
 	 */
 	public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
 			final String className, final String methodName, final String classFile, final BpmnElement element,
-			final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId, final FlowGraph flowGraph) {
+			final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId,
+			final FlowGraph flowGraph) {
 
 		ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
@@ -312,7 +312,7 @@ public class JavaReaderStatic implements JavaReader {
 
 	/**
 	 * Recursively follow call hierarchy and obtain method bodies
-	 * 
+	 *
 	 * @param classPaths
 	 *            Set of classes that is included in inter-procedural analysis
 	 * @param className
@@ -342,7 +342,8 @@ public class JavaReaderStatic implements JavaReader {
 	public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
-			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args, final FlowGraph flowGraph) {
+			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
+			final FlowGraph flowGraph) {
 
 		className = cleanString(className, true);
 
@@ -407,10 +408,10 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	/**
-	 * 
+	 *
 	 * Retrieve given camunda methods to obtain a Soot representation of said method
 	 * to analyse its body
-	 * 
+	 *
 	 * @param classPaths
 	 *            Set of classes that is included in inter-procedural analysis
 	 * @param methodName
@@ -461,10 +462,10 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	/**
-	 * 
+	 *
 	 * Retrieve given custom methods to obtain a Soot representation of said method
 	 * to analyse its body
-	 * 
+	 *
 	 * @param classPaths
 	 *            Set of classes that is included in inter-procedural analysis
 	 * @param methodName
@@ -490,7 +491,8 @@ public class JavaReaderStatic implements JavaReader {
 	private OutSetCFG retrieveCustomMethod(final SootClass sootClass, final Set<String> classPaths,
 			final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
-			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args, final FlowGraph flowGraph) {
+			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
+			final FlowGraph flowGraph) {
 
 		for (SootMethod method : sootClass.getMethods()) {
 			if (method.getName().equals(methodName)) {
@@ -502,10 +504,10 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	/**
-	 * 
+	 *
 	 * Retrieve given custom methods to obtain a Soot representation of said method
 	 * to analyse its body
-	 * 
+	 *
 	 * @param classPaths
 	 *            Set of classes that is included in inter-procedural analysis
 	 * @param classFile
@@ -576,21 +578,19 @@ public class JavaReaderStatic implements JavaReader {
 	 *            Scope of BpmnElement
 	 * @param originalBlock
 	 *            VariableBlock
-	 * 
+	 *
 	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG graphIterator(final Set<String> classPaths, CallGraph cg, BlockGraph graph, OutSetCFG outSet,
-			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-			final String filePath, final String scopeId, VariableBlock originalBlock, final String assignmentStmt,
-			final List<Value> args, final FlowGraph flowGraph) {
+	private OutSetCFG graphIterator(final Set<String> classPaths, final CallGraph cg, final BlockGraph graph,
+			OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
+			VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
+			final FlowGraph flowGraph) {
 
-		final Iterator<Block> graphIterator = graph.iterator();
-
-		Block block;
-		while (graphIterator.hasNext()) {
-			block = graphIterator.next();
-			Node node = new Node(block);
+		for (Block block : graph.getBlocks()) {
+			Node node = new Node(flowGraph, block);
 			flowGraph.addNode(node);
+
 			// Collect the functions Unit by Unit via the blockIterator
 			final VariableBlock vb = blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
 					scopeId, originalBlock, assignmentStmt, args, flowGraph, node);
@@ -637,7 +637,8 @@ public class JavaReaderStatic implements JavaReader {
 	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
 			final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock variableBlock, String assignmentStmt, final List<Value> args, final FlowGraph flowGraph, final Node node) {
+			VariableBlock variableBlock, String assignmentStmt, final List<Value> args, final FlowGraph flowGraph,
+			final Node node) {
 		if (variableBlock == null) {
 			variableBlock = new VariableBlock(block, new ArrayList<>());
 		}
@@ -674,37 +675,8 @@ public class JavaReaderStatic implements JavaReader {
 				}
 			}
 			if (unit instanceof InvokeStmt) {
-				// Method call of implemented interface method without prior assignment
-				if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
-					JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox()
-							.getValue();
-					if (expr != null) {
-						if (argsCounter > 0) {
-							parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
-									this.getConstructorArgs().get(argsCounter - 1).toString(), node);
-						} else {
-							parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
-									paramName, node);
-						}
-					}
-				}
-				// Method call without prior assignment
-				if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JVirtualInvokeExpr) {
-					JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
-					checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-							variableBlock, unit, assignmentStmt, expr.getArgs(), flowGraph);
-				}
-				// Constructor call
-				if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
-					JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
-					if (((InvokeStmt) unit).getInvokeExprBox().getValue().toString().contains("void <init>")) {
-						this.setConstructorArgs(expr.getArgs());
-						assignmentStmt = expr.getBaseBox().getValue().toString();
-					} else {
-						checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-								variableBlock, unit, assignmentStmt, expr.getArgs(), flowGraph);
-					}
-				}
+				assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType, filePath,
+						scopeId, variableBlock, assignmentStmt, flowGraph, node, paramName, argsCounter, unit);
 			}
 			if (unit instanceof AssignStmt) {
 				// Method call with assignment to a variable
@@ -719,7 +691,8 @@ public class JavaReaderStatic implements JavaReader {
 				if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
 					JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 					if (expr != null) {
-						parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName, node);
+						parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName,
+								node);
 					}
 				}
 				// Instance fields
@@ -730,11 +703,11 @@ public class JavaReaderStatic implements JavaReader {
 					if (matcher.matches()) {
 						if (instanceFieldRef > Integer.parseInt(matcher.group(2))) {
 							instanceFieldRef = Integer.parseInt(matcher.group(2));
-							assignmentStmt = argument;							
+							assignmentStmt = argument;
 							if (this.getConstructorArgs() != null) {
 								argsCounter++;
 								paramName = this.getConstructorArgs().get(argsCounter - 1).toString();
-							} 							
+							}
 						} else {
 							assignmentStmt = argument;
 						}
@@ -744,6 +717,80 @@ public class JavaReaderStatic implements JavaReader {
 		}
 
 		return variableBlock;
+	}
+
+	/**
+	 * Iterator through the source code line by line, collecting the
+	 * ProcessVariables Camunda methods are interface invocations appearing either
+	 * in Assign statement or Invoke statement Constraint: Only String constants can
+	 * be precisely recognized.
+	 *
+	 * @param classPaths
+	 *            Set of classes that is included in inter-procedural analysis
+	 * @param cg
+	 *            Soot FlowGraph
+	 * @param outSet
+	 *            OUT set of CFG
+	 * @param element
+	 *            BpmnElement
+	 * @param chapter
+	 *            ElementChapter
+	 * @param fieldType
+	 *            KnownElementFieldType
+	 * @param filePath
+	 *            ResourceFilePath for ProcessVariableOperation
+	 * @param scopeId
+	 *            Scope of BpmnElement
+	 * @param variableBlock
+	 *            VariableBlock
+	 * @param flowGraph
+	 *            Control Flow Graph
+	 * @param node
+	 *            Current node of the CFG
+	 * @param paramName
+	 *            Name of the parameter
+	 * @param argsCounter
+	 *            Counts the arguments in case of a method or constructor call
+	 * @param unit
+	 *            Current unit
+	 * @return assignmentStmt
+	 */
+	private String processInvokeStmt(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String filePath, final String scopeId, final VariableBlock variableBlock, String assignmentStmt,
+			final FlowGraph flowGraph, final Node node, final String paramName, final int argsCounter,
+			final Unit unit) {
+		// Method call of implemented interface method without prior assignment
+		if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
+			JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
+			if (expr != null) {
+				if (argsCounter > 0) {
+					parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
+							this.getConstructorArgs().get(argsCounter - 1).toString(), node);
+				} else {
+					parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName,
+							node);
+				}
+			}
+		}
+		// Method call without prior assignment
+		if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JVirtualInvokeExpr) {
+			JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
+			checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock, unit,
+					assignmentStmt, expr.getArgs(), flowGraph);
+		}
+		// Constructor call
+		if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
+			JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
+			if (((InvokeStmt) unit).getInvokeExprBox().getValue().toString().contains("void <init>")) {
+				this.setConstructorArgs(expr.getArgs());
+				assignmentStmt = expr.getBaseBox().getValue().toString();
+			} else {
+				checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
+						unit, assignmentStmt, expr.getArgs(), flowGraph);
+			}
+		}
+		return assignmentStmt;
 	}
 
 	/**
@@ -783,9 +830,13 @@ public class JavaReaderStatic implements JavaReader {
 			String className = src.tgt().getDeclaringClass().getName();
 			className = cleanString(className, false);
 			if (classPaths.contains(className) || className.contains("$")) {
+				flowGraph.incrementRecursionCounter();
+				flowGraph.resetInternalNodeCounter();
+				flowGraph.setPriorLevel(flowGraph.getInternalNodeCounter());
 				G.reset();
 				classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
 						scopeId, outSet, variableBlock, assignmentStmt, args, flowGraph);
+				flowGraph.decrementRecursionCounter();
 			}
 		}
 
@@ -794,7 +845,7 @@ public class JavaReaderStatic implements JavaReader {
 	/**
 	 *
 	 * Special parsing of statements to find Process Variable operations.
-	 * 
+	 *
 	 * @param expr
 	 *            Expression Unit from Statement
 	 * @param variableBlock
@@ -827,13 +878,14 @@ public class JavaReaderStatic implements JavaReader {
 			if (expr.getArgBox(location).getValue() instanceof StringConstant) {
 				StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
 				String name = variableName.value.replaceAll("\"", "");
-				node.addOperation(new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
+				node.addOperation(
+						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
 				variableBlock.addProcessVariable(
 						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
 
 			} else if (!paramName.isEmpty()) {
-				node.addOperation(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
-						chapter, fieldType, filePath, type, scopeId));
+				node.addOperation(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element, chapter,
+						fieldType, filePath, type, scopeId));
 				variableBlock.addProcessVariable(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
 						chapter, fieldType, filePath, type, scopeId));
 			} else {
@@ -843,10 +895,10 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	/**
-	 * 
+	 *
 	 * Parsing of initially discovered statements to find Process Variable
 	 * operations.
-	 * 
+	 *
 	 * @param expr
 	 *            Expression Unit from Statement
 	 * @param element
@@ -883,9 +935,9 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	/**
-	 * 
+	 *
 	 * Find anomalies inside a Bpmn element as well.
-	 * 
+	 *
 	 * @param element
 	 *            BpmnElement
 	 * @param outSet
@@ -903,7 +955,7 @@ public class JavaReaderStatic implements JavaReader {
 	/**
 	 *
 	 * Build LinkedList of ProcessVariableOperations recursively based on CFG paths.
-	 * 
+	 *
 	 * @param element
 	 *            BpmnElement
 	 * @param currentBlock
@@ -981,7 +1033,7 @@ public class JavaReaderStatic implements JavaReader {
 
 	/**
 	 * Checks for anomalies occurring between elements
-	 * 
+	 *
 	 * @param element
 	 *            Current BpmnElement
 	 * @param innerList
@@ -1005,7 +1057,7 @@ public class JavaReaderStatic implements JavaReader {
 
 	/**
 	 * Check for dataflow anomaly between current and previous variable operation
-	 * 
+	 *
 	 * @param element
 	 *            Current BpmnElement
 	 * @param curr
@@ -1032,7 +1084,7 @@ public class JavaReaderStatic implements JavaReader {
 
 	/**
 	 * UR anomaly: second last operation of PV is DELETE, last operation is READ
-	 * 
+	 *
 	 * @param prev
 	 *            Previous ProcessVariable
 	 * @param curr
@@ -1046,7 +1098,7 @@ public class JavaReaderStatic implements JavaReader {
 
 	/**
 	 * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
-	 * 
+	 *
 	 * @param prev
 	 *            Previous ProcessVariable
 	 * @param curr
@@ -1060,7 +1112,7 @@ public class JavaReaderStatic implements JavaReader {
 
 	/**
 	 * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
-	 * 
+	 *
 	 * @param prev
 	 *            Previous ProcessVariable
 	 * @param curr
@@ -1074,7 +1126,7 @@ public class JavaReaderStatic implements JavaReader {
 
 	/**
 	 * Strips unnecessary characters and returns cleaned name
-	 * 
+	 *
 	 * @param className
 	 *            Classname to be stripped of unused chars
 	 * @return cleaned String
@@ -1093,8 +1145,8 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	private List<Value> getConstructorArgs() {
-		return constructorArgs;	
-		
+		return constructorArgs;
+
 	}
 
 	private void setConstructorArgs(final List<Value> args) {

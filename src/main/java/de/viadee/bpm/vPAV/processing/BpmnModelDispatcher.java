@@ -83,9 +83,9 @@ public class BpmnModelDispatcher {
 	 * @return issues
 	 */
 	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processDefinition,
-			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
-			final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
-			final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
+													 final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
+													 final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
+													 final Collection<String> resourcesNewestVersions, final Map<String, Map<String, Rule>> conf) {
 
 		final BpmnScanner bpmnScanner = createScanner(processDefinition);
 
@@ -95,7 +95,7 @@ public class BpmnModelDispatcher {
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Rule rule = conf.get("ProcessVariablesModelChecker");
+		final Rule rule = conf.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER).get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
 				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), rule, bpmnScanner);
@@ -103,7 +103,7 @@ public class BpmnModelDispatcher {
 		// Depending on Regex/Static analysis, find Process Variables from Java Delegate
 		JavaReaderContext jvc = new JavaReaderContext();
 
-		if (getIsStatic(conf)) {
+		if (getIsStatic(rule)) {
 			jvc.setJavaReadingStrategy(new JavaReaderStatic());
 		} else {
 			jvc.setJavaReadingStrategy(new JavaReaderRegex());
@@ -123,13 +123,12 @@ public class BpmnModelDispatcher {
 
 		// call model checkers
 		// TODO: move it to a factory class later
-		final Rule processVariablesModelRule = conf.get(getClassName(ProcessVariablesModelChecker.class));
-		if (processVariablesModelRule != null && processVariablesModelRule.isActive()) {
-			final ModelChecker processVarChecker = new ProcessVariablesModelChecker(processVariablesModelRule,
+		if (rule != null && rule.isActive()) {
+			final ModelChecker processVarChecker = new ProcessVariablesModelChecker(rule,
 					invalidPathMap);
 			issues.addAll(processVarChecker.check());
 		}
-		final Rule dataFlowRule = conf.get(getClassName(DataFlowChecker.class));
+		final Rule dataFlowRule = conf.get(getClassName(DataFlowChecker.class)).get(getClassName(DataFlowChecker.class));
 		if (dataFlowRule != null && dataFlowRule.isActive() && !dataFlowRules.isEmpty()) {
 			final DataFlowChecker dataFlowChecker = new DataFlowChecker(dataFlowRule, dataFlowRules, processVariables);
 			issues.addAll(dataFlowChecker.check());
@@ -162,8 +161,8 @@ public class BpmnModelDispatcher {
 	 * @return issues
 	 */
 	public ModelDispatchResult dispatchWithoutVariables(final File processDefinition,
-			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
-			final Collection<String> resourcesNewestVersions, final Map<String, Rule> conf) {
+														final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
+														final Collection<String> resourcesNewestVersions, final Map<String, Map<String, Rule>> conf) {
 
 		BpmnScanner bpmnScanner = createScanner(processDefinition);
 
@@ -299,8 +298,8 @@ public class BpmnModelDispatcher {
 	 *            ProcessVariablesScanner
 	 * @return CheckerCollection
 	 */
-	private Collection<ElementChecker> createCheckerInstances(final Collection<String> resourcesNewestVersions,
-			final Map<String, Rule> conf, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
+	protected Collection<ElementChecker> createCheckerInstances(final Collection<String> resourcesNewestVersions,
+																final Map<String, Map<String, Rule>> conf, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
 		CheckerFactory checkerFactory = new CheckerFactory();
 
 		final Collection<ElementChecker> checkerCollection = checkerFactory.createCheckerInstances(conf,
@@ -316,9 +315,8 @@ public class BpmnModelDispatcher {
 	 * Based on the boolean value the // * Process Variables are collected with
 	 * Regex or Static Analysis // * // * @param rules // * @return //
 	 */
-	private boolean getIsStatic(Map<String, Rule> rules) {
+	private boolean getIsStatic(Rule rule) {
 		boolean isStatic = false;
-		Rule rule = rules.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
 		if (rule != null) {
 			Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
 			if (setting != null && setting.getValue().equals("true"))

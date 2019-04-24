@@ -31,39 +31,156 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import soot.toolkits.graph.Block;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class FlowGraph {
 
-    private ArrayList<Node> nodes;
+	private ArrayList<Node> nodes;
 
-    private int counter;
+	private int internalNodeCounter;
 
-    public FlowGraph() {
-        nodes = new ArrayList<>();
-    }
+	private int recursionCounter;
 
-    public void addNode(final Node node) {
-        this.nodes.add(node);
-        node.setId(counter);
-        counter++;
-    }
+	private int nodeCounter;
 
-    public void computeInAndOutSets() {
-        // OUT[Entry] = {}
-        // For (each basic block B other than ENTRY) {
-        //      OUT[B] = {}
-        // }
-        // change = true;
-        // while (change) {
-        //      change = false;
-        //      for (each basic block B other than ENTRY) {
-        //          IN(unused)[B] = (intersection of pred) OUT(unused)[P]
-        //          IN(used)[B] = (intersection of pred) OUT(used)[P]
-        //          OUT(unused)[B] = defined U (IN(unused) - killed - used)
-        //          OUT(used)[B] = used U (in(used) - killed)
-        //       }
-        // }
-    }
+	private int defCounter;
 
+	private int priorLevel;
+
+	public FlowGraph() {
+		nodes = new ArrayList<>();
+		defCounter = 0;
+		nodeCounter = -1;
+		internalNodeCounter = 0;
+		recursionCounter = 0;
+		priorLevel = 0;
+	}
+
+    /**
+     *
+     * @param node Node to be added to the control flow graph
+     */
+	public void addNode(final Node node) {
+		StringBuilder key = createHierarchy();
+		node.setId(key.toString());
+		this.nodes.add(node);
+	}
+
+	/**
+	 *
+	 * Helper method to create ids based on hierarchy, e.g.
+	 *
+	 * 0 --> 1 --> 2 --> 3 --> 3.0 --> 3.0.0 --> 3.0.1 --> 3.0.2
+	 * 
+	 * @return Id of node
+	 */
+	private StringBuilder createHierarchy() {
+		StringBuilder key = new StringBuilder();
+		if (recursionCounter == 0) {
+			nodeCounter++;
+			key.append(nodeCounter);
+		} else {
+			key.append(nodeCounter);
+			for (int i = 1; i <= recursionCounter; i++) {
+				key.append(".");
+				if (i == recursionCounter) {
+					key.append(internalNodeCounter);
+				} else {
+					key.append(priorLevel);
+				}
+			}
+			internalNodeCounter++;
+		}
+		return key;
+	}
+
+
+	public void computeInAndOutSets() {
+		createCFG();
+		// for (final Node node : nodes) {
+		// node.initOutUnused();
+		// node.initOutUsed();
+		// }
+		// boolean change = true;
+		// while (change) {
+		// change = false;
+		// for (final Node node : nodes) {
+		// BitSet oldOutUnused = node.getOutUnused();
+		// BitSet oldOutUsed = node.getOutUsed();
+		// node.setInUnused();
+		// node.setInUsed();
+		// node.setOutUnused();
+		// node.setOutUsed();
+		// // IN(unused)[B] = (intersection of pred) OUT(unused)[P]
+		// // IN(used)[B] = (intersection of pred) OUT(used)[P]
+		// // OUT(unused)[B] = defined U (IN(unused) - killed - used)
+		// // OUT(used)[B] = used U (in(used) - killed)
+		// if (!oldOutUnused.equals(node.getOutUnused()) ||
+		// !oldOutUsed.equals(node.getOutUsed())) {
+		// change = true;
+		// }
+		// }
+		// }
+
+		// OUT[Entry] = {}
+		// For (each basic block B other than ENTRY) {
+		// OUT[B] = {}
+		// }
+		// change = true;
+		// while (change) {
+		// change = false;
+		// for (each basic block B other than ENTRY) {
+		// IN(unused)[B] = (intersection of pred) OUT(unused)[P]
+		// IN(used)[B] = (intersection of pred) OUT(used)[P]
+		// OUT(unused)[B] = defined U (IN(unused) - killed - used)
+		// OUT(used)[B] = used U (in(used) - killed)
+		// }
+		// }
+	}
+
+	private void createCFG() {
+		for (Node node : nodes) {
+			for (Block block : node.getBlock().getPreds()) {
+				List<Node> preds = new ArrayList<>();
+
+				// node.setPreds(ids);
+			}
+			for (Block block : node.getBlock().getSuccs()) {
+				// List<Integer> ids = new ArrayList<>();
+				// node.setSuccs(ids);
+			}
+
+		}
+	}
+
+	int getDefCounter() {
+		return defCounter;
+	}
+
+	void incrementDefCounter() {
+		this.defCounter++;
+	}
+
+	public void incrementRecursionCounter() {
+		this.recursionCounter++;
+	}
+
+	public void decrementRecursionCounter() {
+		this.recursionCounter--;
+	}
+
+	public void resetInternalNodeCounter() {
+		this.internalNodeCounter = 0;
+	}
+
+	public int getInternalNodeCounter() {
+		return internalNodeCounter;
+	}
+
+	public void setPriorLevel(int priorLevel) {
+		this.priorLevel = priorLevel;
+	}
 }
