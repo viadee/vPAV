@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.engine.variable.VariableMap;
 import soot.*;
@@ -585,14 +586,14 @@ public class JavaReaderStatic implements JavaReader {
 
 		final Iterator<Block> graphIterator = graph.iterator();
 
-
-		// TODO: Create node if pv operation has been found
 		Block block;
 		while (graphIterator.hasNext()) {
 			block = graphIterator.next();
+			Node node = new Node(block);
+			flowGraph.addNode(node);
 			// Collect the functions Unit by Unit via the blockIterator
 			final VariableBlock vb = blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-					scopeId, originalBlock, assignmentStmt, args, flowGraph);
+					scopeId, originalBlock, assignmentStmt, args, flowGraph, node);
 
 			// depending if outset already has that Block, only add variables,
 			// if not, then add the whole vb
@@ -636,7 +637,7 @@ public class JavaReaderStatic implements JavaReader {
 	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
 			final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock variableBlock, String assignmentStmt, final List<Value> args, final FlowGraph flowGraph) {
+			VariableBlock variableBlock, String assignmentStmt, final List<Value> args, final FlowGraph flowGraph, final Node node) {
 		if (variableBlock == null) {
 			variableBlock = new VariableBlock(block, new ArrayList<>());
 		}
@@ -680,10 +681,10 @@ public class JavaReaderStatic implements JavaReader {
 					if (expr != null) {
 						if (argsCounter > 0) {
 							parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
-									this.getConstructorArgs().get(argsCounter - 1).toString());
+									this.getConstructorArgs().get(argsCounter - 1).toString(), node);
 						} else {
 							parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
-									paramName);
+									paramName, node);
 						}
 					}
 				}
@@ -696,8 +697,13 @@ public class JavaReaderStatic implements JavaReader {
 				// Constructor call
 				if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
 					JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
-					this.setConstructorArgs(expr.getArgs());
-					assignmentStmt = expr.getBaseBox().getValue().toString();
+					if (((InvokeStmt) unit).getInvokeExprBox().getValue().toString().contains("void <init>")) {
+						this.setConstructorArgs(expr.getArgs());
+						assignmentStmt = expr.getBaseBox().getValue().toString();
+					} else {
+						checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
+								variableBlock, unit, assignmentStmt, expr.getArgs(), flowGraph);
+					}
 				}
 			}
 			if (unit instanceof AssignStmt) {
@@ -713,7 +719,7 @@ public class JavaReaderStatic implements JavaReader {
 				if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
 					JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 					if (expr != null) {
-						parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName);
+						parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName, node);
 					}
 				}
 				// Instance fields
@@ -724,9 +730,11 @@ public class JavaReaderStatic implements JavaReader {
 					if (matcher.matches()) {
 						if (instanceFieldRef > Integer.parseInt(matcher.group(2))) {
 							instanceFieldRef = Integer.parseInt(matcher.group(2));
-							assignmentStmt = argument;
-							argsCounter++;
-							paramName = this.getConstructorArgs().get(argsCounter - 1).toString();
+							assignmentStmt = argument;							
+							if (this.getConstructorArgs() != null) {
+								argsCounter++;
+								paramName = this.getConstructorArgs().get(argsCounter - 1).toString();
+							} 							
 						} else {
 							assignmentStmt = argument;
 						}
@@ -804,7 +812,7 @@ public class JavaReaderStatic implements JavaReader {
 	 */
 	private void parseExpression(final JInterfaceInvokeExpr expr, final VariableBlock variableBlock,
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-			final String filePath, final String scopeId, final String paramName) {
+			final String filePath, final String scopeId, final String paramName, final Node node) {
 
 		String functionName = expr.getMethodRef().getName();
 		int numberOfArg = expr.getArgCount();
@@ -814,20 +822,22 @@ public class JavaReaderStatic implements JavaReader {
 				.findByNameAndNumberOfBoxes(functionName, baseBox, numberOfArg);
 
 		if (foundMethod != null) {
-
 			int location = foundMethod.getLocation() - 1;
 			VariableOperation type = foundMethod.getOperationType();
-
 			if (expr.getArgBox(location).getValue() instanceof StringConstant) {
-
 				StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
 				String name = variableName.value.replaceAll("\"", "");
-
+				node.addOperation(new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
 				variableBlock.addProcessVariable(
 						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
+
 			} else if (!paramName.isEmpty()) {
+				node.addOperation(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
+						chapter, fieldType, filePath, type, scopeId));
 				variableBlock.addProcessVariable(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
 						chapter, fieldType, filePath, type, scopeId));
+			} else {
+				// TODO: Warnmeldung mit PV operation
 			}
 		}
 	}
@@ -1083,7 +1093,8 @@ public class JavaReaderStatic implements JavaReader {
 	}
 
 	private List<Value> getConstructorArgs() {
-		return constructorArgs;
+		return constructorArgs;	
+		
 	}
 
 	private void setConstructorArgs(final List<Value> args) {

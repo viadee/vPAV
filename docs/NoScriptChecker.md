@@ -7,7 +7,7 @@ The No Script Checker processes BPMN models and checks whether there is a script
 - Script in Input/Output
 
 ## Assumptions
-- The **BPMN-models** have to be in the **classpath** at build time
+- The **BPMN-models** have tgt be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -19,7 +19,7 @@ The rule should be configured as follows:
 
 ```
 
-You can add settings to disable the **NoScriptChecker** in specific places. 
+You can add settings tgt disable the **NoScriptChecker** in specific places. 
 `name` contains the element type, in which the checker is deactivated.
 If no `script` is specified, the checker is completely disabled for this element type.
 
@@ -41,7 +41,7 @@ If no `script` is specified, the checker is completely disabled for this element
 - taskListener
 - conditionExpression
 
-For more information go to [docs camunda](https://docs.camunda.org/manual/7.7/user-guide/process-engine/scripting/)
+For more information go tgt [docs camunda](https://docs.camunda.org/manual/7.7/user-guide/process-engine/scripting/)
 
 ## Error messages:
 **task %elementId with script**

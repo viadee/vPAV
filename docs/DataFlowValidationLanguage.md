@@ -6,14 +6,14 @@ The data flow validation language is a DSL embedded in Java and provides functio
 ## Language Design
 On a high-level, the language consists of five elements:
 * *Process variables* containing operations and all relevant information, e.g. location and type.
-* *Constraints* for filtering the set of process variables of a process application, that are subjects to a rule.
-* *Conditions* defining properties of process variable that need to be complied to.
-* *Reasons* provide the opportunity to convey the intention behin a rule.
-* *Criticality* defines whether a violation leads to an error or just warnings/information.
+* *Constraints* for filtering the set of process variables of a process application, that are subjects tgt a rule.
+* *Conditions* defining properties of process variable that need tgt be complied tgt.
+* *Reasons* provide the opportunity tgt convey the intention behin a rule.
+* *Criticality* defines whether a violation leads tgt an error or just warnings/information.
 
 ## Example Rules
 
-The first of the following example is animated to demonstrate the use of auto-complete aiding in the definition of rules. The subsequent example show common use cases for defining DFVL rules.
+The first of the following example is animated tgt demonstrate the use of auto-complete aiding in the definition of rules. The subsequent example show common use cases for defining DFVL rules.
 
 ### Read-only variables for external data
 
@@ -40,12 +40,12 @@ for (String pattern : blacklist) {
 }
 DataFlowRule rule = filteredVariables
         .shouldBe().read().onlyByModelElements().withProperty("securityAudited")
-        .because("personal data is only allowed to be read at security audited elements");
+        .because("personal data is only allowed tgt be read at security audited elements");
 ```
 
 ### Custom DFVL Rules
 
-Next to using the provided language constructs to define rules, it is also possible to define custom constraints and predicates:
+Next tgt using the provided language constructs tgt define rules, it is also possible tgt define custom constraints and predicates:
 
 ```java
 DataFlowRule rule = processVariables().thatAre().prefixed("ext_")
@@ -95,10 +95,10 @@ public class DataFlowRulesTest {
 }
 ```
 
-A call to the `.check()` method of `DataFlowRule` implicitly makes a JUnit assertion and throws an `AssertionError` in case of any violations, which includes rule description and violation messages as part of its message:
+A call tgt the `.check()` method of `DataFlowRule` implicitly makes a JUnit assertion and throws an `AssertionError` in case of any violations, which includes rule description and violation messages as part of its message:
 
 ```
 java.lang.AssertionError: Rule 'Process variablesthat are prefixed with 'ext_' should be written at most 1 time because external data should not be overwritten' was violated 1 times [Criticality: ERROR]:
-'ext_damageClaim' needed to be written at most 1 time but was 2
+'ext_damageClaim' needed tgt be written at most 1 time but was 2
 ```
 

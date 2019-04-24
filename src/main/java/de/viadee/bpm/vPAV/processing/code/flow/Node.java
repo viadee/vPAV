@@ -15,7 +15,7 @@
  *   and/or other materials provided with the distribution.
  *
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
+ *   contributors may be used tgt endorse or promote products derived src
  *   this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -31,48 +31,83 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import soot.toolkits.graph.Block;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class Node {
 
-    private InSet in;
-    private OutSet out;
-    private Node from;
-    private Node to;
+    private Set<ProcessVariableOperation> defined;
+    private Set<ProcessVariableOperation> used;
+    private Set<ProcessVariableOperation> killed;
+    private Set<ProcessVariableOperation> inUnused;
+    private Set<ProcessVariableOperation> inUsed;
+    private Set<ProcessVariableOperation> outUnused;
+    private Set<ProcessVariableOperation> outUsed;
+    private List<ProcessVariableOperation> operations;
+    private Block block;
+    private int id;
 
-    public Node(final Node from, final Node to) {
-        this.from = from;
-        this.to = to;
+    public Node(final Block block) {
+        this.block = block;
+        this.defined = new HashSet<>();
+        this.used = new HashSet<>();
+        this.killed = new HashSet<>();
+        this.inUnused = new HashSet<>();
+        this.inUsed = new HashSet<>();
+        this.outUnused = new HashSet<>();
+        this.outUsed = new HashSet<>();
+        this.operations = new ArrayList<>();
     }
 
-    public InSet getIn() {
-        return in;
+    public void setId(final int id) {
+        this.id = id;
     }
 
-    public void setIn(InSet in) {
-        this.in = in;
+    // Adds an operation to the list of operations (used for line by line checking)
+    // Based on operation type adds the operation to the set of corresponding operations
+    public void addOperation(final ProcessVariableOperation processVariableOperation) {
+        this.operations.add(processVariableOperation);
+
+        switch (processVariableOperation.getOperation()) {
+            case WRITE:
+                addDefined(processVariableOperation);
+                break;
+            case READ:
+                addUsed(processVariableOperation);
+                break;
+            case DELETE:
+                addKilled(processVariableOperation);
+                break;
+        }
     }
 
-    public OutSet getOut() {
-        return out;
+    private void addDefined(final ProcessVariableOperation processVariableOperation) {
+        this.defined.add(processVariableOperation);
     }
 
-    public void setOut(OutSet out) {
-        this.out = out;
+    private void addUsed(final ProcessVariableOperation processVariableOperation) {
+        this.used.add(processVariableOperation);
     }
 
-    public Node getFrom() {
-        return from;
+    private void addKilled(final ProcessVariableOperation processVariableOperation) {
+        this.killed.add(processVariableOperation);
     }
 
-    public void setFrom(Node from) {
-        this.from = from;
+    public Set<ProcessVariableOperation> getDefined() {
+        return defined;
     }
 
-    public Node getTo() {
-        return to;
+    public Set<ProcessVariableOperation> getUsed() {
+        return used;
     }
 
-    public void setTo(Node to) {
-        this.to = to;
+    public Set<ProcessVariableOperation> getKilled() {
+        return killed;
     }
 
 }

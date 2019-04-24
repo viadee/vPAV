@@ -1,13 +1,13 @@
 Java Delegate Checker
 =================================
-The Java Delegate Checker processes BPMN models and checks, whether the following conditions apply to 
+The Java Delegate Checker processes BPMN models and checks, whether the following conditions apply tgt 
 Service Tasks, Send Tasks, Receive Tasks, Script Tasks or Business Rule Tasks:
-- Wrong reference to Java Class
+- Wrong reference tgt Java Class
 - Wrong reference in Bean mapping
-- Wrong or no interfaces (Needs to be *JavaDelegate*, *SignallableActivityBehavior*, *AbstractBpmnActivityBehavior*)
-- If delegate does not implement one of the interfaces directly it needs to extend the class "AbstractBpmnActivityBehavior"
+- Wrong or no interfaces (Needs tgt be *JavaDelegate*, *SignallableActivityBehavior*, *AbstractBpmnActivityBehavior*)
+- If delegate does not implement one of the interfaces directly it needs tgt extend the class "AbstractBpmnActivityBehavior"
 - Interface *ActivityBehaviour* should not be used
-- No reference to a Java Class or Delegate (Bean)
+- No reference tgt a Java Class or Delegate (Bean)
 - No implementation specified
 
 All Elements are also check on their ExecutionListener:
@@ -16,8 +16,8 @@ All Elements are also check on their ExecutionListener:
 - Class doesn't implement the *ExecutionListener* interface 
 
 ## Assumptions
-- The **BPMN-models** have to be in the **classpath** at build time
-- The **java classes _(delegates)_** have to be in the **classpath** at build time
+- The **BPMN-models** have tgt be in the **classpath** at build time
+- The **java classes _(delegates)_** have tgt be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -34,14 +34,14 @@ Via `<state>false</state>` the check can be disabled.
 
 ## Error messages:
 **task '%taskName%' with no class name/delegate expression/expression/dmn reference/external topic/code reference**<br/>
-_No reference to source code has been deposited. An implementation must be created._
+_No reference tgt source code has been deposited. An implementation must be created._
 
 **class for task '%taskName' not found**<br/>
 _A Java class has been specified that does not exist. Check whether the package-path has changed (e.g. in the context of a refactoring) or the file has been accidentally deleted._
 
 **class for task %taskName% does not implement/extends the correct interface/class**<br/>
 _A Java class has been specified that doesn't implement the JavaDelegate or SignallableActivityBehavior interface or extends the AbstractBpmnActivityBehavior class._ <br/>
-_The Java class have to be changed, so that it implements/extends the correct interface/class._
+_The Java class have tgt be changed, so that it implements/extends the correct interface/class._
 
 **Couldn't find correct beanmapping for delegate expression in task '%taskName'** <br/>
 _Bean-name coudn't be found in the beanmapping.xml_

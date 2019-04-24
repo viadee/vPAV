@@ -37,6 +37,8 @@ package de.viadee.bpm.vPAV.processing.model.data;
  */
 public class ProcessVariableOperation {
 
+    private String id;
+
     private String name;
 
     private VariableOperation operation;
@@ -66,6 +68,13 @@ public class ProcessVariableOperation {
         this.fieldType = fieldType;
         this.operation = operation;
         this.scopeId = scopeId;
+        this.id = createId();
+    }
+
+    private String createId() {
+        return CheckerIssue.getMD5(
+                name + "_" + element.getBaseElement().getId() + "_" + chapter + "_" + fieldType + "_" +
+                        resourceFilePath + "_" + operation + "_" + scopeId + "_" + System.nanoTime());
     }
 
     public String getName() {
@@ -112,7 +121,7 @@ public class ProcessVariableOperation {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return id.hashCode();
     }
 
     @Override

@@ -7,7 +7,7 @@ The Timer Expression Checker processes BPMN models and checks if time events fol
 - Wrong TimeDefinition (against ISO8601 or CRON)
 
 ## Assumptions
-- The **BPMN-models** have to be in the **classpath** at build time
+- The **BPMN-models** have tgt be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -22,7 +22,7 @@ The rule should be configured as follows:
 ## Error messages:
 **time event '%timeEvent%' does not follow the ISO 8601 scheme for timeDates.**
 
-_Due to the camunda engine using the ISO 8601 scheme, it is required for users to follow this scheme._
+_Due tgt the camunda engine using the ISO 8601 scheme, it is required for users tgt follow this scheme._
 
 
 **time event '%timeEvent%' does not follow the scheme for CRON jobs.**

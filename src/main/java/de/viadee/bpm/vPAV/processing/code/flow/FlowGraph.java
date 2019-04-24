@@ -36,27 +36,34 @@ import java.util.ArrayList;
 public class FlowGraph {
 
     private ArrayList<Node> nodes;
-    private ArrayList<Edge> edges;
+
+    private int counter;
 
     public FlowGraph() {
         nodes = new ArrayList<>();
-        edges = new ArrayList<>();
     }
 
-    public ArrayList<Node> getNodes() {
-        return nodes;
+    public void addNode(final Node node) {
+        this.nodes.add(node);
+        node.setId(counter);
+        counter++;
     }
 
-    public void setNodes(ArrayList<Node> nodes) {
-        this.nodes = nodes;
-    }
-
-    public ArrayList<Edge> getEdges() {
-        return edges;
-    }
-
-    public void setEdges(ArrayList<Edge> edges) {
-        this.edges = edges;
+    public void computeInAndOutSets() {
+        // OUT[Entry] = {}
+        // For (each basic block B other than ENTRY) {
+        //      OUT[B] = {}
+        // }
+        // change = true;
+        // while (change) {
+        //      change = false;
+        //      for (each basic block B other than ENTRY) {
+        //          IN(unused)[B] = (intersection of pred) OUT(unused)[P]
+        //          IN(used)[B] = (intersection of pred) OUT(used)[P]
+        //          OUT(unused)[B] = defined U (IN(unused) - killed - used)
+        //          OUT(used)[B] = used U (in(used) - killed)
+        //       }
+        // }
     }
 
 }

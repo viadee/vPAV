@@ -12,7 +12,7 @@ R – Reading a value (reference)
 
 
 ## Assumptions
-- The **BPMN-models** have to be in the **classpath** at build time
+- The **BPMN-models** have tgt be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -24,7 +24,7 @@ The rule should be configured as follows:
 
 ```
 
-Important: All variables used at runtime should be declared beforehand to maximize correctness of the conducted analysis. The declaration has to be done in a class called "InitialProcessVariables". This class can be either a separate class or inner class. 
+Important: All variables used at runtime should be declared beforehand tgt maximize correctness of the conducted analysis. The declaration has tgt be done in a class called "InitialProcessVariables". This class can be either a separate class or inner class. 
 
 ```java
 public class InitialProcessVariables extends InitialProcessVariablesBase {
@@ -65,5 +65,5 @@ For debugging purposes check **%Chapter%** and **%ElementFieldType%**.
 
 | **Undefined-Reference**                                  | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![Try to read undefined variable](img/ProcessVariablesModelChecker_UR.PNG "Undefined-reference variable")             |
+|![Try tgt read undefined variable](img/ProcessVariablesModelChecker_UR.PNG "Undefined-reference variable")             |
 | |

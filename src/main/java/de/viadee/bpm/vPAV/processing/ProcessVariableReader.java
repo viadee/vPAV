@@ -120,6 +120,8 @@ public final class ProcessVariableReader {
 		// 7) Search variables in Links
 		processVariables.putAll(getVariablesFromLinks(element, fileScanner, context, flowGraph));
 
+		flowGraph.computeInAndOutSets();
+
 		return processVariables;
 	}
 

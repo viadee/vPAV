@@ -7,7 +7,7 @@ For this purpose, it checks the following conditions:
 - For Groovy only: The script content doesn't match the script format (syntax check)
 
 ## Assumptions
-- The **BPMN-models** have to be in the **classpath** at build time
+- The **BPMN-models** have tgt be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:

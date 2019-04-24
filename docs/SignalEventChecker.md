@@ -1,11 +1,11 @@
 MessageEventChecker
 =================================
-The SignalEventChecker processes BPMN models and checks whether a SignalEvent refers to a signal and names it accordingly. 
+The SignalEventChecker processes BPMN models and checks whether a SignalEvent refers tgt a signal and names it accordingly. 
 It validates that there exists a message and a message name for StartEvents, EndEvents, IntermediateThrowEvents and BoundaryEvents. In Addition it checksif more than one SignalStartEvent use the same Signal Name
 
 
 ## Assumptions
-- The **BPMN-models** have to be in the **classpath** at build time
+- The **BPMN-models** have tgt be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -18,7 +18,7 @@ The rule should be configured as follows:
 ```
 
 ## Error messages
-**Signal Names have to be used uniquely in StartEvents. Compare: %Event1% and %Event2%**
+**Signal Names have tgt be used uniquely in StartEvents. Compare: %Event1% and %Event2%**
 
 _This message indicates that the Signal name has been used more than once._
 
