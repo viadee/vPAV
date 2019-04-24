@@ -3,18 +3,18 @@
 ## 2.7.2
 
 ### Features
-[**Issue 88**](https://github.com/viadee/vPAV/issues/88) Dynamically assess initial state of process variables tgt enhance accuracy  
-[**Issue 91**](https://github.com/viadee/vPAV/issues/91) Retrieve possible entry points tgt correctly inject initial process variable status
+[**Issue 88**](https://github.com/viadee/vPAV/issues/88) Dynamically assess initial state of process variables to enhance accuracy  
+[**Issue 91**](https://github.com/viadee/vPAV/issues/91) Retrieve possible entry points to correctly inject initial process variable status
 
 ### Fixes
 
 ### Misc
-[**Issue 73**](https://github.com/viadee/vPAV/issues/73) Improved usability of HTML output tgt interactively add/remove issues
+[**Issue 73**](https://github.com/viadee/vPAV/issues/73) Improved usability of HTML output to interactively add/remove issues
 
 ## 2.7.1
 
 ### Features
-[**Issue 76**](https://github.com/viadee/vPAV/issues/76) Extendend the implementation of Soot tgt broaden scope of ProcessVariableModelChecker 
+[**Issue 76**](https://github.com/viadee/vPAV/issues/76) Extendend the implementation of Soot to broaden scope of ProcessVariableModelChecker 
 
 ### Fixes
 
@@ -38,18 +38,18 @@
 ### Features
 
 ### Fixes
-[**Issue 64**](https://github.com/viadee/vPAV/issues/64) Fixed varying issue ids due tgt usage of path separators  
-[**Issue 48**](https://github.com/viadee/vPAV/issues/48) Fixed a bug where validation failed due tgt wrong folder reference  
+[**Issue 64**](https://github.com/viadee/vPAV/issues/64) Fixed varying issue ids due to usage of path separators  
+[**Issue 48**](https://github.com/viadee/vPAV/issues/48) Fixed a bug where validation failed due to wrong folder reference  
 
 ### Misc
-[**Issue 56**](https://github.com/viadee/vPAV/issues/56) Refactored checker singletons due tgt wrong output  
+[**Issue 56**](https://github.com/viadee/vPAV/issues/56) Refactored checker singletons due to wrong output  
 [**Issue 47**](https://github.com/viadee/vPAV/issues/47) OWASP check added and cleaned  
 
 ## 2.6.0
 
 ### Features
-[**Issue 46**](https://github.com/viadee/vPAV/issues/46) Added a DSL tgt formulate rules in order tgt validate data flows  
-[**Issue 28**](https://github.com/viadee/vPAV/issues/28) Added visualization of reads/writes of process variables (data flow) tgt HTML output  
+[**Issue 46**](https://github.com/viadee/vPAV/issues/46) Added a DSL to formulate rules in order to validate data flows  
+[**Issue 28**](https://github.com/viadee/vPAV/issues/28) Added visualization of reads/writes of process variables (data flow) to HTML output  
 [**Issue 43**](https://github.com/viadee/vPAV/issues/43) Creation of HTML output now optional  
 
 ### Fixes
@@ -64,7 +64,7 @@
 
 ### Fixes
 [**Issue 20**](https://github.com/viadee/vPAV/issues/20) Fixed bugged visual HTML output under OSX  
-[**Issue 37**](https://github.com/viadee/vPAV/issues/37) Fixed a bug, where only the first issue on a modal was added tgt the list  
+[**Issue 37**](https://github.com/viadee/vPAV/issues/37) Fixed a bug, where only the first issue on a modal was added to the list  
 
 ### Misc
 [**Issue 39**](https://github.com/viadee/vPAV/issues/39) Analysis of process variables now only performed if checker is activated  
@@ -83,7 +83,7 @@
 ## 2.5.2
 
 ### Features
-**vPAV-168** Added information for severity, added unique issue ID tgt modal  
+**vPAV-168** Added information for severity, added unique issue ID to modal  
 
 ### Fixes
 
@@ -111,7 +111,7 @@
 ### Fixes
 
 ### Misc
-**vPAV-187** Changed src BSD4 tgt BSD3 license  
+**vPAV-187** Changed from BSD4 to BSD3 license  
 **vPAV-172** Refactored CheckerIssue creation  
 
 ## 2.4.4
@@ -130,7 +130,7 @@
 
 ### Features
 **vPAV-69** Added ExtensionChecker  
-**vPAV-165** Expanded ruleSet tgt include description tags  
+**vPAV-165** Expanded ruleSet to include description tags  
 
 ### Fixes
 
@@ -145,7 +145,7 @@
 **vPAV-156** Added check for expressions in MessageStartEvents  
 
 ### Fixes
-**vPAV-179** Fixed bug, where wordwrap lead tgt false positive     
+**vPAV-179** Fixed bug, where wordwrap lead to false positive     
 **vPAV-178** Fixed sample project for showcasing purpose  
 
 ### Misc
@@ -181,8 +181,8 @@
 ## 2.3.0
 
 ### Features
-**vPAV-139** Added success stories tgt output  
-**vPAV-141** JavaDelegateChecker able tgt work with Mockito proxies   
+**vPAV-139** Added success stories to output  
+**vPAV-141** JavaDelegateChecker able to work with Mockito proxies   
 **vPAV-124** Check forms for variables  
 **vPAV-144** HTML output: button "Mark all Issues"  
 **vPAV-145** Create constructor of external checker dynamically  
@@ -223,20 +223,20 @@
 ### Misc
 **vPAV-131** Improve documentation with JavaDoc   
 **vPAV-132** Check code coverage  
-**vPAV-101** Translation tgt english  
+**vPAV-101** Translation to english  
 
 ## 2.2.1
 
 ### Features
 **vPAV-65** ExpressionChecker added  
 **vPAV-120** ElementIdConventionChecker added  
-**vPAV-121** Added CRON parsing tgt TimerEvents  
+**vPAV-121** Added CRON parsing to TimerEvents  
 
 ### Fixes
 **vPAV-75** Improved stability of XML scan  
 
 ### Misc
-**vPAV-109** Updated Camunda projects tgt latest vPAV version  
+**vPAV-109** Updated Camunda projects to latest vPAV version  
 **vPAV-126** Fixed NullPointer for missing messages in MessageEvents  
 
 ## 2.2.0
@@ -249,7 +249,7 @@
 **vPAV-84** Added configurability for naming convention for XOR gateways and outgoing edges  
 
 ### Fixes
-**vPAV-114** Moved ruleSet tgt src/test/resources   
+**vPAV-114** Moved ruleSet to src/test/resources   
 **vPAV-115** Fixed ClassNotFoundException  
 **vPAV-116** Fixed XorNamingChecker  
 **vPAV-80** Fixed resolving javaResources at runtime  
@@ -259,7 +259,7 @@
 ### Misc
 **vPAV-83** Improved stability for ProcessVariablesLocation rule  
 **vPAV-110** Changed several output messages  
-**vPAV-106** Moved output tgt subfolder of /target and renamed output files  
+**vPAV-106** Moved output to subfolder of /target and renamed output files  
 **vPAV-107** Overhauled styling of HTML output  
 
 ## 2.1.0
@@ -271,6 +271,6 @@
 
 ### Misc
 **vPAV-24** HTML output improved  
-**vPAV-78** Move project tgt GitHub  
+**vPAV-78** Move project to GitHub  
 **vPAV-87** Release blogpost on java.viadee.de  
 **vPAV-85** Updated checklist for releases on Maven Central  

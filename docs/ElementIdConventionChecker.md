@@ -3,7 +3,7 @@ ElementIdConventionChecker
 The ElementIdConventionChecker verifies if id of a specific task match a predefined naming convention.
 
 ## Assumptions
-- The **BPMN-models** have tgt be in the **classpath** at build time
+- The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -14,7 +14,7 @@ The rule should be configured as follows:
 		<elementConventions>
 			<elementConvention>
 				<name>ServiceTask</name>
-				<description>ServiceTask has tgt starts with "serviceTask" followed by at least two
+				<description>ServiceTask has to starts with "serviceTask" followed by at least two
 					words starting with a capital letter</description>
 				<pattern>serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*</pattern>
 			</elementConvention>
@@ -23,7 +23,7 @@ The rule should be configured as follows:
 
 ```
 
-`name` contains the element type tgt check.<br/>
+`name` contains the element type to check.<br/>
 `description` describes the regular expression.<br/>
 `pattern` contains a regular expression, whereupon the Id of the element type above is checked. <br/><br/>
 *The example pattern matches strings that start with 'serviceTask' followed by an uppercase letter, contain only letters and numbers, and contain at least one lowercase letter and at least one other uppercase letter.*
@@ -32,7 +32,7 @@ The rule should be configured as follows:
 
 **"ID '%elementId' is against the naming convention**
 
-_The id of the task is invalid and has tgt be changed according tgt the naming convention._
+_The id of the task is invalid and has to be changed according to the naming convention._
 
 ## Example
 

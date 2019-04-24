@@ -2,13 +2,13 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.viadee/viadeeProcessApplicationValidator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.viadee/viadeeProcessApplicationValidator) [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=master)](https://travis-ci.org/viadee/vPAV)
 
 The tool checks Camunda projects for consistency and discovers errors in process-driven applications.
-Called as JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the sourcecode of an underlying java project, such as a delegate reference tgt a non-existing java class or a non-existing Spring bean.
+Called as JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the sourcecode of an underlying java project, such as a delegate reference to a non-existing java class or a non-existing Spring bean.
 
 Find a list of the consistency checks below.
 
-We recommend tgt integrate the consistency check in your CI builds - you can't find these inconsistencies early enough.
+We recommend to integrate the consistency check in your CI builds - you can't find these inconsistencies early enough.
 
-We forked the [Camunda BPM examples](https://github.com/viadee/camunda-bpm-examples/) tgt demonstrate the easy integration of vPAV.
+We forked the [Camunda BPM examples](https://github.com/viadee/camunda-bpm-examples/) to demonstrate the easy integration of vPAV.
 
 # Features
 
@@ -31,19 +31,27 @@ Consistency checks are performed by individual modules called checkers, which se
 |[NoExpressionChecker](NoExpressionChecker.md)                                   | Are expressions used against common best-practices?                                        | Done         |
 |[MessageEventChecker](MessageEventChecker.md)                                   | Are MessageEvents referencing messages and do they provide message names?                                  | Done         |
 |[SignalEventChecker](SignalEventChecker.md)                                   | Are SignalEvents referencing signals and do they provide signal names? Are signal names used more than once in StartEvents?                                  | Done         |
-|[DataFlowChecker](DataFlowChecker.md)                                  | Does your model adhere tgt your configurable rules (read, writes, deletions) ?                                  | Done         |
+|[DataFlowChecker](DataFlowChecker.md)                                  | Does your model adhere to your configurable rules (read, writes, deletions) ?                                  | Done         |
 |[ExtensionChecker](ExtensionChecker.md)                                  | Do tasks using key-value pairs in the extension panel fit into a desired pattern?                                  | Done         |
-|[OverlapChecker](OverlapChecker.md)                                   | Are there redundant sequence flows (some may be invisible due tgt overlap)?              | Done         
+|[OverlapChecker](OverlapChecker.md)                                   | Are there redundant sequence flows (some may be invisible due to overlap)?              | Done         
 |[BoundaryErrorChecker](BoundaryErrorChecker.md)                                   | Do tasks with attached BoundaryErrorEvents use the correct ErrorCode and do the corresponding classes exist?                                  | Experimental         |
 
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
 ### Configuration
-The viadee Process Application Validator comes with a default ruleSet.xml which provides some basic rules. In order tgt customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
-This allows you tgt use your own set of rules for naming conventions or tgt de-/activate certain checkers.
+The viadee Process Application Validator uses a rule set to define which checks are executed.
+The plugin comes with a default ruleSet.xml which provides some basic rules.
+In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
+This allows you to use your own set of rules for naming conventions or to de-/activate certain checkers.
+To write your own rule set, you can follow the example of [ruleSetDefault.xml](https://github.com/viadee/vPAV/blob/master/src/main/resources/ruleSetDefault.xml).
 
-### One set of rules tgt rule them all
-Furthermore you can use the plugin tgt manage multiple projects. Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure tgt package as jar). In your child projects you have tgt add the dependency tgt the parent project and tgt vPAV.
+### One set of rules to rule them all
+Furthermore you can use the plugin to manage multiple projects.
+A parent rule set can be shared among them so that you don't have to define the same checkers multiple times.
+The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit".
+Local sets of rules will override inherited rules in order to allow for customization.
+
+Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar).
 
 ```xml
 <dependency>
@@ -59,20 +67,55 @@ Furthermore you can use the plugin tgt manage multiple projects. Just create a b
 </dependency>
 ```
 
-The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit". Local sets of rules will override inherited rules in order tgt allow for customization.
+In your child projects you have to add the dependency to the parent project and to vPAV.
+The inheritance is only working if you define an own rule set in your child project.
+You cannot use the default rule set because it does not include inheritance.
 
-Make sure that inheritance is activated in the ruleSet.xml of your project.
+Make sure that inheritance is activated in the ruleSet.xml of your child project.
 ```xml 
 <rule>
 	<name>HasParentRuleSet</name>
 	<state>true</state>
 </rule>
 ```
+
+### Multiple checker configurations
+It might be useful to run a checker two times with different configurations. To prevent a rule from being overridden, you can define an ID.
+```xml 
+<rule id="xorChecker1">
+    <name>XorConventionChecker</name>
+	<state>true</state>
+	<settings>
+	    <setting name="requiredDefault">true</setting>
+	</settings>
+	<elementConventions>
+		<elementConvention>
+			<name>convention</name>
+			<description>gateway name has to end with an question mark</description>
+			<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
+		</elementConvention>
+	</elementConventions>
+</rule>
+```
+If two rule sets are merged (e. g. parent and child rule set), the following inheritance rules apply:
+- A parent rule will be overridden if a child rule has the same ID.
+- A parent rule will be loaded if no rule with the same ID exists in the child rule set.
+- If a rule does not have an ID, the name of the rule will be used and handled as ID.
+
+
+The following checkers/rules can only be defined once. It it not possible to have different configurations:
+- HasParentRuleSet
+- CreateOutputHTML
+- language
+- VersioningChecker
+- ProcessVariablesModelChecker
+- DataFlowChecker
+
 ### Exclusion of false positives
-An ignore file can be created tgt exclude false positives. The file has tgt be named **"ignoreIssues.txt"** and stored in **"src/test/resources"**. 
+An ignore file can be created to exclude false positives. The file has to be named **"ignoreIssues.txt"** and stored in **"src/test/resources"**. 
 Here, you can list IDs of the issues which should be ignored in the next validation run. This must be done line by line. Line comments are initiated with "#".
 
-Unique IDs are generated by a Message Digest. In the files **"bpmn_validation.json"** or **"bpmn_validation.xml"**, you can find each issue attached tgt its respective ID. Additionally, if you open the modal by clicking an element with issues, the a modal with detailed information will be shown, also including the respective unique ID.  You can also directly whitelist an issue and then download your new ignoreIssues.txt file. This provides a convenient way tgt avoid copy & pasting your issues into your project.
+Unique IDs are generated by a Message Digest. In the files **"bpmn_validation.json"** or **"bpmn_validation.xml"**, you can find each issue attached to its respective ID. Additionally, if you open the modal by clicking an element with issues, the a modal with detailed information will be shown, also including the respective unique ID.  You can also directly whitelist an issue and then download your new ignoreIssues.txt file. This provides a convenient way to avoid copy & pasting your issues into your project.
 
 ![Issue Modal](img/issue_modal.png "Modal with additional information and unique issue ID")
 
@@ -93,8 +136,8 @@ As of version 2.5.0, we added localization for english and german users.
 	</settings>
 </rule>	
 ```
-By specifying either **en** or **de** in the settings, you can choose tgt use either German or English as language for your visual output report. By leaving it blank, the validator grabs your systems locale and provides either German or English as default. 
-Due tgt some refactoring, more languages can be added in the future by providing language files with the corresponding translations.
+By specifying either **en** or **de** in the settings, you can choose to use either German or English as language for your visual output report. By leaving it blank, the validator grabs your systems locale and provides either German or English as default. 
+Due to some refactoring, more languages can be added in the future by providing language files with the corresponding translations.
 
 
 ## Output
@@ -107,12 +150,12 @@ Further, the consistency check will provide an XML version, a JSON version and
 an visual version based on  [BPMN.io](https://bpmn.io/) of all errors and warnings found.
 
 ### Visual output
-The header contains the name of the current model. Below the heading, you can select a different model of the project tgt be displayed.
+The header contains the name of the current model. Below the heading, you can select a different model of the project to be displayed.
 You can zoom in and out with the mouse wheel and move the model by click and hold.
 
 There are two different view modes with each providing a different overlay for the model and tables with additional information.
 
-To find the visual output, check the created vPAV folder inside your project's target folder. Open the **validationResult.html** with any browser tgt explore your process model and the found issues.
+To find the visual output, check the created vPAV folder inside your project's target folder. Open the **validationResult.html** with any browser to explore your process model and the found issues.
 
 #### Issue Overlay
 In the BPMN model, the elements with errors are highlighted. Error categories are indicated by color. 
@@ -121,23 +164,23 @@ All errors are laid out in a table below the model. Clicking on the _rulename_ o
 Clicking on the _Element-Id_ or _invalid sequenceflow_ marks the corresponding element(s) in the model.
 
 ##### Model
-![Model](img/model-issue-overlay.png "Browsable Model src BPMN.io")
+![Model](img/model-issue-overlay.png "Browsable Model from BPMN.io")
 
 ##### Issue Table
 ![Issue Table](img/issue-table.png "Table with listed information for all issues")
 
 #### Variable Overlay
 
-In the BPMN model, all detected operations tgt process variables are highlighted. 
+In the BPMN model, all detected operations to process variables are highlighted. 
 An overlay specifies the number of reads, writes and deletes.
 By clicking on the overlay further information can be obtained including the names of process variables and exact location of operation.
 A table below the model lists all process variable and their operations.
-Clicking on the process variable name highlights all model elements with operations tgt this variables.
+Clicking on the process variable name highlights all model elements with operations to this variables.
 Clicking on element IDs marks the corresponding element in the model.
 
 
 ##### Model
-![Model](img/model-variable-overlay.png "Browsable Model src BPMN.io")
+![Model](img/model-variable-overlay.png "Browsable Model from BPMN.io")
 
 ##### Issue Table
 ![Issue Table](img/variable-table.png "Table with listed information for all process variables")
@@ -149,7 +192,7 @@ Clicking on element IDs marks the corresponding element in the model.
 ## Installation/Usage
 
 ### Maven
-Add the dependency tgt your POM:
+Add the dependency to your POM:
 
 ```xml
 <dependency>
@@ -160,9 +203,15 @@ Add the dependency tgt your POM:
 </dependency>
 ```
 
+### Location of BPMN models
+By default, the BPMN models have to be stored in the folder ``src\main\resources`` of your Camunda project. 
+You can also load models from other locations of your local filesystem.
+To specify another location, you have to create a ``vPav.properties`` file and put it in your classpath. The property ``basepath`` is used to define the path.
+You can use relative paths (e.g. ```basepath=src/main/java```) or absolute paths using the ``file:///`` scheme.
+
 ### JUnit
-Configure a JUnit-4 Test tgt fire up your usual Spring context - esp. delegates referenced in the process, 
-if you use Spring in your application or a simple test case otherwise tgt call the consistency check.
+Configure a JUnit-4 Test to fire up your usual Spring context - esp. delegates referenced in the process, 
+if you use Spring in your application or a simple test case otherwise to call the consistency check.
 
 The recommended name for this class is ModelConsistencyTest, where you 
 call the ProcessApplicationValidator by simply using code like the following:
@@ -199,7 +248,7 @@ The `ctx` parameter is optional. If **no** Spring context is used, JUnit can als
 
 #### SpringTestConfig
 
-In order tgt evaluate beans in a Spring environment, you should specify a config class for your JUnit test
+In order to evaluate beans in a Spring environment, you should specify a config class for your JUnit test
 
 ```java
 
@@ -238,7 +287,7 @@ public class SpringTestConfig {
 #### Add external checker 
 You can also simply add your own checker. 
 You can find an example project [here](https://github.com/viadee/vPAV_checker_plugin_example).
-In your projects you have tgt add the dependency tgt the project with the checker-class(es) (see example below) and tgt vPAV ([see above](#maven)):
+In your projects you have to add the dependency to the project with the checker-class(es) (see example below) and to vPAV ([see above](#maven)):
 
 ```xml
 <dependency>
@@ -247,7 +296,7 @@ In your projects you have tgt add the dependency tgt the project with the checke
 	<version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
-Run this project (e.g. vPAV_checker_plugin_example) as maven install (make sure tgt package as jar). 
+Run this project (e.g. vPAV_checker_plugin_example) as maven install (make sure to package as jar). 
 
 The `setting name="external_Location"` defines the checker as an external checker.
 The value specifies the location of the checkerclass.
@@ -268,11 +317,11 @@ The value specifies the location of the checkerclass.
 </rule>
 ```
 ##### Requirements
-- Your checker-class have tgt extends the *AbstractElementChecker*. 
-- Only the parameters src the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `de.viadee.bpm.vPAV.BPMNScanner`) are allowed in the constructor.
+- Your checker-class have to extends the *AbstractElementChecker*. 
+- Only the parameters from the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `de.viadee.bpm.vPAV.BPMNScanner`) are allowed in the constructor.
 
 #### Checker instructions
-You have tgt return a collection of `de.viadee.bpm.vPAV.processing.model.data.CheckerIssue`.
+You have to return a collection of `de.viadee.bpm.vPAV.processing.model.data.CheckerIssue`.
 
 ``` java
 /**
@@ -283,9 +332,9 @@ You have tgt return a collection of `de.viadee.bpm.vPAV.processing.model.data.Ch
 * @param classification
 *            Classification (Info, Warning or Error) of the rule
 * @param bpmnFile
-*            Path tgt the BPMNFile
+*            Path to the BPMNFile
 * @param resourceFile
-*            Path tgt resource file (e.g. dmn oder java)
+*            Path to resource file (e.g. dmn oder java)
 * @param elementId
 *            Id of the Element with issue
 * @param elementName
@@ -339,10 +388,10 @@ This library will remain under an open source licence indefinately.
 We follow the [semantic versioning](http://semver.org) scheme (2.0.0).
 
 In the sense of semantic versioning, the resulting XML and JSON outputs are the _only public API_ provided here. 
-We will keep these as stable as possible, in order tgt enable users tgt analyse and integrate results into the toolsets of their choice.
+We will keep these as stable as possible, in order to enable users to analyse and integrate results into the toolsets of their choice.
 
 ## Cooperation
-Feel free tgt report issues, questions, ideas or patches. We are looking forward tgt it.
+Feel free to report issues, questions, ideas or patches. We are looking forward to it.
 
 ## Resources
 Status of the development branch: [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=development)](https://travis-ci.org/viadee/vPAV)
@@ -357,7 +406,7 @@ All licenses of reused components can be found on the [maven site](http://rawgit
 - [PopperJS](https://github.com/FezVrasta/popper.js/blob/master/LICENSE.md) licensed under MIT
 - [Soot](https://github.com/Sable/soot) licensed under a LGPL 2.1  license
 
-Soot and bpmn.io provide the basis for the two most exciting features of the validator, i.e. finding inconsistencies in the data and control flow across model and code an the visualization thereof. We would like tgt explicitly thank these two communities for their continued effort.
+Soot and bpmn.io provide the basis for the two most exciting features of the validator, i.e. finding inconsistencies in the data and control flow across model and code an the visualization thereof. We would like to explicitly thank these two communities for their continued effort.
 
 **BSD 3-Clause License** <br/>
 
@@ -375,7 +424,7 @@ modification, are permitted provided that the following conditions are met:
   and/or other materials provided with the distribution.
 
 * Neither the name of the copyright holder nor the names of its
-  contributors may be used tgt endorse or promote products derived src
+  contributors may be used to endorse or promote products derived from
   this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"

@@ -8,7 +8,7 @@ The No Expression Checker processes BPMN models and checks whether there are exp
 - Expression in MessageEndEvent
 
 ## Assumptions
-- The **BPMN-models** have tgt be in the **classpath** at build time
+- The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -20,7 +20,7 @@ The rule should be configured as follows:
 
 ```
 
-You can add settings tgt disable the **NoExpressionChecker** in specific places. 
+You can add settings to disable the **NoExpressionChecker** in specific places. 
 `name` contains the element type, in which the checker is deactivated.
 
 

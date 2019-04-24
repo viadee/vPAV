@@ -1,12 +1,12 @@
 Data Flow Checker
 =================================
 The Data Flow Checker evaluates DFVL rules and generates issues for rule violations.
-See the documentation of the [DataFlowValidationLanguage](DataFlowValidationLanguage.md) on how tgt define data flow rules rules.
+See the documentation of the [DataFlowValidationLanguage](DataFlowValidationLanguage.md) on how to define data flow rules rules.
 
 
 
 ## Assumptions
-- The **BPMN-models** have tgt be in the **classpath** at build time
+- The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -17,7 +17,7 @@ The rule should be configured as follows:
 </rule>
 ```
 
-Additionally, data flow rules need tgt be defined and set that are evaluated by the checker.
+Additionally, data flow rules need to be defined and set that are evaluated by the checker.
 ```java
 Collection<DataFlowRule> rules = Arrays.asList(...);
 ProcessApplicationValidator.setDataFlowRules(rules);

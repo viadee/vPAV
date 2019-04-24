@@ -1,12 +1,12 @@
 Process Variables Name Convention Checker
 =================================
-Elements in business processes are regularly subject tgt naming conventions. This checker validates the names of process variables with a configurable regular expression.
+Elements in business processes are regularly subject to naming conventions. This checker validates the names of process variables with a configurable regular expression.
 
 - Variable name against internal convention
 - Variable name against external convention
 
 ## Assumptions
-- The **BPMN-models** have tgt be in the **classpath**
+- The **BPMN-models** have to be in the **classpath**
 
 ## Configuration
 The rule should be configured as follows:
@@ -24,7 +24,7 @@ The rule should be configured as follows:
           <elementFieldType>DMN</elementFieldType>
           <elementFieldType>DelegateExpression</elementFieldType>
         </elementFieldTypes>
-        <description>Variable has tgt start with "int_"</description>
+        <description>Variable has to start with "int_"</description>
         <pattern>int_[a-zA-Z]+</pattern>
       </elementConvention>
       <elementConvention>
@@ -36,7 +36,7 @@ The rule should be configured as follows:
           <elementFieldType>DMN</elementFieldType>
           <elementFieldType>DelegateExpression</elementFieldType>
         </elementFieldTypes>
-        <description>Variable has tgt start with "ext_"</description>
+        <description>Variable has to start with "ext_"</description>
         <pattern>ext_[a-zA-Z]+</pattern>
       </elementConvention>
     </elementConventions>
@@ -48,9 +48,9 @@ Via `<state>true/false</state>` the check can be enabled or disabled
 For internal and external naming conventions, `elementConventions` must be defined.<br/>
 An element convention consists of:
 - a `name`
-- an `elementFieldType` tgt be analyzed
+- an `elementFieldType` to be analyzed
 - a regular expression for the naming convention (`pattern`)
-- a `description` tgt describe the convention (optional)
+- a `description` to describe the convention (optional)
 
 The attribute `excluded = "true"` means that all element field types, except those that are stored, should be checked.
 
@@ -67,7 +67,7 @@ _%ConventionName% contains the name of the convention that has been defined with
 _%Chapter% and %ElementFieldType% contain information on where the process variable can be found in the Camunda Modeler for the specific BPMN element._
 
 
-_**Solution:** the variable has tgt be adapted tgt the convention._
+_**Solution:** the variable has to be adapted to the convention._
 
 
 ## Examples

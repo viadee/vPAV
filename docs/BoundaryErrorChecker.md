@@ -3,7 +3,7 @@ BoundaryErrorChecker
 The BoundaryErrorChecker processes BPMN models and checks whether a BoundaryErrorEvent and its ErrorCode is referenced in the tasks corresponding class/bean.
 
 ## Assumptions
-- The **BPMN-models** have tgt be in the **classpath** at build time
+- The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:
@@ -29,9 +29,9 @@ _This message indicates that the ErrorCode of the underlying task and its refere
 
 
 
-| **BoundaryErrorEvent attached tgt task (has tgt have either correct class reference or bean mapping)**                                                                                    |
+| **BoundaryErrorEvent attached to task (has to have either correct class reference or bean mapping)**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![BoundaryErrorEvent attached tgt task](img/AttachedToTask.PNG "Implementation of task")         |
+|![BoundaryErrorEvent attached to task](img/AttachedToTask.PNG "Implementation of task")         |
 
 
 | **BoundaryErrorEvent with ErrorCode and other attributes**                                                                                    |

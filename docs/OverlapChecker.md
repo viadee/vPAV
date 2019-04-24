@@ -3,7 +3,7 @@ OverlapChecker
 The OverlapChecker processes BPMN models and checks whether there are redundant edges (same source and target) exist.
 
 ## Assumptions
-- The **BPMN-models** have tgt be in the **classpath** at build time
+- The **BPMN-models** have to be in the **classpath** at build time
 
 ## Configuration
 The rule should be configured as follows:

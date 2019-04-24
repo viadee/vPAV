@@ -1,18 +1,18 @@
 Versioning Checker
 =================================
 The Versioning Checker checks references in Service Tasks, Script Tasks, Business Rule Tasks, Send Tasks, Listenern and Message Events
-tgt the declaration of a versioned java implementation.
-When a versioned implementation is referenced, it is checked whether it is up-tgt-date.
+to the declaration of a versioned java implementation.
+When a versioned implementation is referenced, it is checked whether it is up-to-date.
 
 - No version
 - Outdated version
 
 ## Assumptions
-- The **BPMN-models** have tgt be in the **classpath** at build time
-- Classes or packages have tgt be versioned
+- The **BPMN-models** have to be in the **classpath** at build time
+- Classes or packages have to be versioned
 
 ## Configuration
-The rule should be configured as follows, if you want tgt use a versioning scheme on a file level:
+The rule should be configured as follows, if you want to use a versioning scheme on a file level:
 ```xml
 <rule>
   <name>VersioningChecker</name>
@@ -37,9 +37,9 @@ Alternatively, if you use a package-based versioning scheme, the rule should be 
  </rule>
 ```
 The setting "versioningSchemePackage" includes an exemplary regular expression that matches package-based versioning, e.g.
-de.viadee.package.v10_19.example. This versioning scheme would be identified and in comparison, de.viadee.package.v12_20.example would be tagged as the newer version. This scheme is configurable as you desire. Beware, that as of now, the number of digits have tgt match and you need tgt fill up numbers with preceeding zeros.
+de.viadee.package.v10_19.example. This versioning scheme would be identified and in comparison, de.viadee.package.v12_20.example would be tagged as the newer version. This scheme is configurable as you desire. Beware, that as of now, the number of digits have to match and you need to fill up numbers with preceeding zeros.
 
-If the versioning scheme is based on packages, it is **mandatory** tgt adhere tgt our assumptions, i.e. two packages with different versions still contain the same classes (see figure below), else the VersioningChecker will malfunction.
+If the versioning scheme is based on packages, it is **mandatory** to adhere to our assumptions, i.e. two packages with different versions still contain the same classes (see figure below), else the VersioningChecker will malfunction.
 
 ![Package based versioning](img/versioningSchemePackage.png "versioning with packages")
 
@@ -56,20 +56,20 @@ Via `<state>false</state>` the check can be disabled.
 **class reference is deprecated or file with version doesn't exist**
 
 _A referenced Java class is deprecated or isn't versioned._
-_If the referenced class is deprecated, change the reference tgt the current version._
-_Unless a versioned class is undeposited, it must be adapted tgt the version name convention._
+_If the referenced class is deprecated, change the reference to the current version._
+_Unless a versioned class is undeposited, it must be adapted to the version name convention._
 
 **script reference is deprecated or file with version doesn't exist**
 
 _A referenced script is deprecated or isn't versioned._
-_If the referenced script is deprecated, change the reference tgt the current version._
-_Unless a versioned script is undeposited, it must be adapted tgt the version name convention._
+_If the referenced script is deprecated, change the reference to the current version._
+_Unless a versioned script is undeposited, it must be adapted to the version name convention._
 
 **bean reference is deprecated or file with version doesn't exist**
 
 _A referenced spring-bean is deprecated or isn't versioned._
-_If the referenced spring-bean is deprecated, change the reference tgt the current version._
-_Unless a versioned spring-bean is undeposited, it must be adapted tgt the version name convention._
+_If the referenced spring-bean is deprecated, change the reference to the current version._
+_Unless a versioned spring-bean is undeposited, it must be adapted to the version name convention._
 
 
 
