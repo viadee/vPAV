@@ -73,10 +73,14 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When
-        Map<String, Rule> result = reader.read(ConfigConstants.RULESET);
+        Map<String, Map<String, Rule>> result = reader.read(ConfigConstants.RULESET);
 
         // Then
         assertFalse("No rules could be read", result.isEmpty());
+        for (Map.Entry<String, Map<String, Rule>> entry : result.entrySet()) {
+            assertFalse("Rules of type " + entry.getKey() + " could not be read.", entry.getValue().isEmpty());
+        }
+        assertTrue("ID of XorNamingConventionChecker was not loaded.", result.get("XorNamingConventionChecker").containsKey("XorCheckerId"));
     }
 
     /**
@@ -88,7 +92,7 @@ public class XmlConfigReaderTest {
     public void testLoadingNonExistingXMLConfigFile() throws ConfigReaderException {
         // Given
         XmlConfigReader reader = new XmlConfigReader();
-        Map<String, Rule> result = null;
+        Map<String, Map<String, Rule>> result = null;
 
         // When
         try {
@@ -99,13 +103,13 @@ public class XmlConfigReaderTest {
             result = reader.read("ruleSetDefault.xml");
 
             // Default rules correct
-            assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").isActive());
-            assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("VersioningChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").isActive());
+            assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").get("JavaDelegateChecker").isActive());
+            assertTrue("False Default ruleSet ", result.get("EmbeddedGroovyScriptChecker").get("EmbeddedGroovyScriptChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("VersioningChecker").get("VersioningChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").get("DmnTaskChecker").isActive());
 //            assertFalse("False Default ruleSet ", result.get("ProcessVariablesModelChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").isActive());
-            assertFalse("False Default ruleSet ", result.get("TaskNamingConventionChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker").get("ProcessVariablesNameConventionChecker").isActive());
+            assertFalse("False Default ruleSet ", result.get("TaskNamingConventionChecker").get("TaskNamingConventionChecker").isActive());
         }
     }
 
@@ -144,11 +148,11 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When
-        Map<String, Rule> result = reader.read(ConfigConstants.RULESETDEFAULT);
+        Map<String, Map<String, Rule>> result = reader.read(ConfigConstants.RULESETDEFAULT);
 
         // Then
         boolean isStatic = false;
-        Rule rule = result.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
+        Rule rule = result.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER).get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
         if (rule != null) {
             Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
             if (setting != null) {

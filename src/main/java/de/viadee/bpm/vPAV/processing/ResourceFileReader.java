@@ -83,7 +83,7 @@ public class ResourceFileReader {
 					if (fileName.endsWith(".java"))
 						directoryScanner.setBasedir(ConfigConstants.JAVAPATH);
 					else
-						directoryScanner.setBasedir(ConfigConstants.BASEPATH);
+						directoryScanner.setBasedir(ConfigConstants.getInstance().getBasepath());
 				}
 
 				Resource s = directoryScanner.getResource(fileName);

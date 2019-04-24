@@ -29,10 +29,15 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.processing;
 
+import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import org.junit.Assert;
+import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
+import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
+import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,11 +45,12 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
 
-public class FileScannerTest {
+import static org.junit.Assert.assertEquals;
 
+public class BpmnModelDispatcherTest {
     private static ClassLoader cl;
 
     @BeforeClass
@@ -58,17 +64,34 @@ public class FileScannerTest {
     }
 
     @Test
-    public void testSootPathLoading() {
-        new FileScanner(new HashMap<String, Map<String, Rule>>(), "src/test/java");
-        String testTarget = "target/test-classes";
-        String sootPath = FileScanner.getSootPath();
-        boolean contains = false;
+    public void testCreateCheckerInstances() throws ConfigReaderException {
+        // Load rule set.
+        XmlConfigReader reader = new XmlConfigReader();
+        Map<String, Map<String, Rule>> rules = reader.read("ruleSetChild.xml");
+        rules.remove("HasParentRuleSet");
 
-        if (sootPath.contains(testTarget)) {
-            contains = true;
+        BpmnScanner bpmnScanner = new BpmnScanner((new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());
+
+        FileScanner fileScanner = new FileScanner(rules, "src/test/java");
+        BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
+        Collection<ElementChecker> checkerInstances = dispatcher.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null);
+
+        // Check if all checkers were created.
+        assertEquals("Wrong number of loaded checkers.",4, checkerInstances.size());
+        int xor = 0, extension = 0, timer = 0;
+        for(ElementChecker c : checkerInstances) {
+            if(c.getClass().getSimpleName().equals("XorConventionChecker")) {
+                xor++;
+            }
+            else if(c.getClass().getSimpleName().equals("ExtensionChecker")) {
+                extension++;
+            }
+            else if(c.getClass().getSimpleName().equals("TimerExpressionChecker")) {
+                timer++;
+            }
         }
-
-        Assert.assertTrue("SootPath should contain 'target/test-classes'.", contains);
+        assertEquals("Wrong number of loaded XorConventionCheckers.",2, xor);
+        assertEquals("Exactly one ExtensionChecker should exist.", 1, extension);
+        assertEquals("Exactly one TimerExpressionChecker should exist.", 1, timer);
     }
-
 }
