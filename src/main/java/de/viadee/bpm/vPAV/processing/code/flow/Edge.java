@@ -29,43 +29,30 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.junit.BeforeClass;
-import org.junit.Test;
+public class Edge {
 
-import java.util.HashMap;
+    private Node src, tgt;
 
-import static org.junit.Assert.assertEquals;
-
-public class StaticInterProceduralTest {
-
-    @BeforeClass
-    public static void setup() {
-        RuntimeConfig.getInstance().setClassLoader(StaticInterProceduralTest.class.getClassLoader());
-        RuntimeConfig.getInstance().setTest(true);
+    public Edge(final Node src, final Node tgt) {
+        this.src = src;
+        this.tgt = tgt;
     }
 
-    @Test
-    public void testInterProceduralAnalysis() {
-        // Given
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-
-        // When
-    	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        FlowGraph cg = new FlowGraph();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null, cg));
-        // Then
-        assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
-                variables.size());
+    public Node getSrc() {
+        return src;
     }
 
+    public void setSrc(Node src) {
+        this.src = src;
+    }
+
+    public Node getTgt() {
+        return tgt;
+    }
+
+    public void setTgt(Node tgt) {
+        this.tgt = tgt;
+    }
 }

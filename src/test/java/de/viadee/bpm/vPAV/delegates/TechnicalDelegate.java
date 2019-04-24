@@ -29,43 +29,21 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.delegates;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
+public class TechnicalDelegate implements JavaDelegate {
 
-public class StaticInterProceduralTest {
+    @Override
+    public void execute(final DelegateExecution execution) throws Exception {
 
-    @BeforeClass
-    public static void setup() {
-        RuntimeConfig.getInstance().setClassLoader(StaticInterProceduralTest.class.getClassLoader());
-        RuntimeConfig.getInstance().setTest(true);
-    }
+        ProcessContext processContext = new ProcessContext(execution, "var");
+        String name = processContext.getTechnicalProcessContext().manipulateVariables();
+        String var = (String) execution.getVariable(name);
 
-    @Test
-    public void testInterProceduralAnalysis() {
-        // Given
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-
-        // When
-    	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        FlowGraph cg = new FlowGraph();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null, cg));
-        // Then
-        assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
-                variables.size());
     }
 
 }

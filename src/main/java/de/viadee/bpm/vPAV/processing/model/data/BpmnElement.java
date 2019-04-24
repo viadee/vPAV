@@ -66,8 +66,8 @@ public class BpmnElement {
 	// collecting anomalies found on Java code level
 	private List<AnomalyContainer> sourceCodeAnomalies = new ArrayList<AnomalyContainer>();
 
-	public BpmnElement(final String processdefinition, final BaseElement element) {
-		this.processDefinition = processdefinition;
+	public BpmnElement(final String processDefinition, final BaseElement element) {
+		this.processDefinition = processDefinition;
 		this.baseElement = element;
 		this.processVariables = ArrayListMultimap.create();
 	}

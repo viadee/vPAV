@@ -29,43 +29,41 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import java.util.ArrayList;
 
-import java.util.HashMap;
+public class FlowGraph {
 
-import static org.junit.Assert.assertEquals;
+    private ArrayList<Node> nodes;
 
-public class StaticInterProceduralTest {
+    private int counter;
 
-    @BeforeClass
-    public static void setup() {
-        RuntimeConfig.getInstance().setClassLoader(StaticInterProceduralTest.class.getClassLoader());
-        RuntimeConfig.getInstance().setTest(true);
+    public FlowGraph() {
+        nodes = new ArrayList<>();
     }
 
-    @Test
-    public void testInterProceduralAnalysis() {
-        // Given
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+    public void addNode(final Node node) {
+        this.nodes.add(node);
+        node.setId(counter);
+        counter++;
+    }
 
-        // When
-    	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        FlowGraph cg = new FlowGraph();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null, cg));
-        // Then
-        assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
-                variables.size());
+    public void computeInAndOutSets() {
+        // OUT[Entry] = {}
+        // For (each basic block B other than ENTRY) {
+        //      OUT[B] = {}
+        // }
+        // change = true;
+        // while (change) {
+        //      change = false;
+        //      for (each basic block B other than ENTRY) {
+        //          IN(unused)[B] = (intersection of pred) OUT(unused)[P]
+        //          IN(used)[B] = (intersection of pred) OUT(used)[P]
+        //          OUT(unused)[B] = defined U (IN(unused) - killed - used)
+        //          OUT(used)[B] = used U (in(used) - killed)
+        //       }
+        // }
     }
 
 }

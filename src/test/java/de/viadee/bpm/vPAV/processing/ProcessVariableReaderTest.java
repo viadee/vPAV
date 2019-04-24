@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -106,8 +107,9 @@ public class ProcessVariableReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
+        final FlowGraph cg = new FlowGraph();
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element));
+        variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, cg));
 
         Assert.assertEquals(2, variables.size());
     }
@@ -128,8 +130,9 @@ public class ProcessVariableReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
+        final FlowGraph cg = new FlowGraph();
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element));
+        variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, cg));
 
         final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables
                 .get("nameOfVariableInMainProcess");
