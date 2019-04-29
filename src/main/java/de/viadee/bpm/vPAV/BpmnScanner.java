@@ -45,6 +45,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BpmnScanner {
 
@@ -53,6 +55,8 @@ public class BpmnScanner {
 	private Document doc;
 
 	private ModelVersionEnum modelVersion;
+
+	private static final Logger LOGGER = Logger.getLogger(BpmnScanner.class.getName());
 
 	private enum ModelVersionEnum {
 		V1, V2, V3
@@ -76,7 +80,7 @@ public class BpmnScanner {
 			factory.setNamespaceAware(true);
 			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Could not instantiate BpmnScanner because of an configuration error.", e);
 		}
 		try {
 			setModelVersion(path);

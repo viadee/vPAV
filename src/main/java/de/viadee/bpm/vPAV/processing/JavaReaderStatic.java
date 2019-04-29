@@ -821,7 +821,7 @@ public class JavaReaderStatic implements JavaReader {
 			final LinkedList<ProcessVariableOperation> predecessorVariablesList, final String edge) {
 
 		// List<AnomalyContainer> foundAnomalies = new ArrayList<AnomalyContainer>();
-		if (edge != null && edge != "") {
+		if (edge != null && !edge.equals("")) {
 			currentPath.add(edge);
 		}
 

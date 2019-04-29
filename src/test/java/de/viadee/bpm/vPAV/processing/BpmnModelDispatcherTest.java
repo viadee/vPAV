@@ -38,6 +38,9 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
+import de.viadee.bpm.vPAV.processing.checker.ExtensionChecker;
+import de.viadee.bpm.vPAV.processing.checker.TimerExpressionChecker;
+import de.viadee.bpm.vPAV.processing.checker.XorConventionChecker;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -80,13 +83,11 @@ public class BpmnModelDispatcherTest {
         assertEquals("Wrong number of loaded checkers.",4, checkerInstances.size());
         int xor = 0, extension = 0, timer = 0;
         for(ElementChecker c : checkerInstances) {
-            if(c.getClass().getSimpleName().equals("XorConventionChecker")) {
+            if (c instanceof XorConventionChecker) {
                 xor++;
-            }
-            else if(c.getClass().getSimpleName().equals("ExtensionChecker")) {
+            } else if (c instanceof ExtensionChecker) {
                 extension++;
-            }
-            else if(c.getClass().getSimpleName().equals("TimerExpressionChecker")) {
+            } else if (c instanceof TimerExpressionChecker) {
                 timer++;
             }
         }

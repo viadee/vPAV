@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -65,7 +65,7 @@ public class VersioningChecker extends AbstractElementChecker {
     private Collection<String> resourcesNewestVersions;
 
     public VersioningChecker(final Rule rule, final BpmnScanner bpmnScanner,
-            final Collection<String> resourcesNewestVersions) {
+                             final Collection<String> resourcesNewestVersions) {
         super(rule, bpmnScanner);
         this.resourcesNewestVersions = resourcesNewestVersions;
     }
@@ -112,7 +112,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @return issues
      */
     private Collection<CheckerIssue> checkExecutionListener(final BpmnElement element,
-            final ExtensionElements extensionElements) {
+                                                            final ExtensionElements extensionElements) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         List<CamundaExecutionListener> execListenerList = extensionElements.getElementsQuery()
                 .filterByType(CamundaExecutionListener.class).list();
@@ -148,7 +148,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @return issues
      */
     private Collection<CheckerIssue> checkTaskListener(final BpmnElement element,
-            final ExtensionElements extensionElements) {
+                                                       final ExtensionElements extensionElements) {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         List<CamundaTaskListener> taskListenerList = extensionElements.getElementsQuery()
                 .filterByType(CamundaTaskListener.class).list();
@@ -299,7 +299,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @return file path
      */
     private String findBeanReferenceInExpression(final String expression, final BpmnElement element,
-            final Collection<CheckerIssue> issues) {
+                                                 final Collection<CheckerIssue> issues) {
 
         try {
             final String filteredExpression = expression.replaceAll("[\\w]+\\.", ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -336,7 +336,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @param issues
      */
     private void prepareScriptWarning(final String resourcePath, final BpmnElement element,
-            final Collection<CheckerIssue> issues) {
+                                      final Collection<CheckerIssue> issues) {
         if (resourcePath != null) {
             if (!resourcesNewestVersions.contains(resourcePath)) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, resourcePath, element,
@@ -353,7 +353,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @param issues
      */
     private void prepareBeanWarning(final String expression, final BpmnElement element,
-            final Collection<CheckerIssue> issues) {
+                                    final Collection<CheckerIssue> issues) {
         final String beanReference = findBeanReferenceInExpression(expression, element, issues);
         if (beanReference != null && !resourcesNewestVersions.contains(beanReference)) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
@@ -370,7 +370,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @param issues
      */
     private void prepareDirBasedBeanWarning(final String expression, final BpmnElement element,
-            final Collection<CheckerIssue> issues) {
+                                            final Collection<CheckerIssue> issues) {
         String beanReference = findBeanReferenceInExpression(expression, element, issues);
 
         if (beanReference != null) {
@@ -393,17 +393,15 @@ public class VersioningChecker extends AbstractElementChecker {
      * @param issues
      */
     private void prepareClassWarning(final String javaReference, final BpmnElement element,
-            final Collection<CheckerIssue> issues) {
-        if (javaReference != null) {
-            if (!resourcesNewestVersions.contains(javaReference)) {
-                if (element.getBaseElement().getId() == null) {
-                    issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
-                            String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
+                                     final Collection<CheckerIssue> issues) {
+        if (javaReference != null && !resourcesNewestVersions.contains(javaReference)) {
+            if (element.getBaseElement().getId() == null) {
+                issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
+                        String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
 
-                } else {
-                    issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
-                            String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
-                }
+            } else {
+                issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
+                        String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
             }
         }
     }
@@ -416,7 +414,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @param issues
      */
     private void prepareDirBasedClassWarning(String javaReference, final BpmnElement element,
-            final Collection<CheckerIssue> issues) {
+                                             final Collection<CheckerIssue> issues) {
         if (javaReference != null) {
             javaReference = javaReference.replace(".", "\\"); //$NON-NLS-1$ //$NON-NLS-2$
             javaReference = javaReference.substring(0, javaReference.lastIndexOf("\\")); //$NON-NLS-1$
