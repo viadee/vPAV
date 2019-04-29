@@ -36,6 +36,7 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -89,7 +90,7 @@ public class ProcessVariableReaderStrategyPatternTest {
 				.getModelElementsByType(ServiceTask.class);
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-
+		final FlowGraph cg = new FlowGraph();
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
 
 		final JavaReaderContext pvc = new JavaReaderContext();
@@ -98,7 +99,7 @@ public class ProcessVariableReaderStrategyPatternTest {
 
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(pvc.readJavaDelegate(fileScanner, "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element,
-				null, null, null));
+				null, null, null, cg));
 
 		assertEquals("Static reader should not find 4 variables since one of them is in a comment", 3,
 				variables.asMap().size());
@@ -116,7 +117,7 @@ public class ProcessVariableReaderStrategyPatternTest {
 		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-
+		final FlowGraph cg = new FlowGraph();
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
 
 		final JavaReaderContext pvc = new JavaReaderContext();
@@ -126,7 +127,7 @@ public class ProcessVariableReaderStrategyPatternTest {
 
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(pvc.readJavaDelegate(fileScanner, "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element,
-				null, null, null));
+				null, null, null, cg));
 
 		assertEquals("RegEx reader should find 4 variables including a false positive in a comment", 4,
 				variables.asMap().size());

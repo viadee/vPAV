@@ -329,7 +329,6 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 	}
 
 	public String getId() {
-		
 		return getMD5(
 				ruleName + "_" + cleanPath(bpmnFile) + "_" + cleanPath(resourceFile) + "_" + elementId + "_" + variable + "_" + message);
 	}

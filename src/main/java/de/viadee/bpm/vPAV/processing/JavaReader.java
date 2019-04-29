@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
@@ -42,7 +43,7 @@ public interface JavaReader {
 
 	ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String scopeId);
+			final KnownElementFieldType fieldType, final String scopeId, final FlowGraph flow);
 
 	ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
 			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
