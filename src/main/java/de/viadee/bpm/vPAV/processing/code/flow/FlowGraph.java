@@ -31,14 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import soot.toolkits.graph.Block;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 public class FlowGraph {
 
-	private ArrayList<Node> nodes;
+	public LinkedHashMap<String, Node> getNodes() {
+		return nodes;
+	}
+
+	private LinkedHashMap<String, Node> nodes;
 
 	private int internalNodeCounter;
 
@@ -51,7 +52,7 @@ public class FlowGraph {
 	private int priorLevel;
 
 	public FlowGraph() {
-		nodes = new ArrayList<>();
+		nodes = new LinkedHashMap<>();
 		defCounter = 0;
 		nodeCounter = -1;
 		internalNodeCounter = 0;
@@ -59,14 +60,15 @@ public class FlowGraph {
 		priorLevel = 0;
 	}
 
-    /**
-     *
-     * @param node Node to be added to the control flow graph
-     */
+	/**
+	 *
+	 * @param node
+	 *            Node to be added to the control flow graph
+	 */
 	public void addNode(final Node node) {
-		StringBuilder key = createHierarchy();
-		node.setId(key.toString());
-		this.nodes.add(node);
+		String key = createHierarchy();
+		node.setId(key);
+		this.nodes.put(key, node);
 	}
 
 	/**
@@ -77,7 +79,7 @@ public class FlowGraph {
 	 * 
 	 * @return Id of node
 	 */
-	private StringBuilder createHierarchy() {
+	private String createHierarchy() {
 		StringBuilder key = new StringBuilder();
 		if (recursionCounter == 0) {
 			nodeCounter++;
@@ -94,9 +96,8 @@ public class FlowGraph {
 			}
 			internalNodeCounter++;
 		}
-		return key;
+		return key.toString();
 	}
-
 
 	public void computeInAndOutSets() {
 		createCFG();
@@ -141,18 +142,14 @@ public class FlowGraph {
 		// }
 	}
 
+	/**
+	 * Constructs the links between nodes, which are needed to subsequently
+	 * calculate the sets
+	 */
 	private void createCFG() {
-		for (Node node : nodes) {
-			for (Block block : node.getBlock().getPreds()) {
-				List<Node> preds = new ArrayList<>();
-
-				// node.setPreds(ids);
-			}
-			for (Block block : node.getBlock().getSuccs()) {
-				// List<Integer> ids = new ArrayList<>();
-				// node.setSuccs(ids);
-			}
-
+		for (Node node : nodes.values()) {
+			node.setPreds();
+			node.setSuccs();
 		}
 	}
 
