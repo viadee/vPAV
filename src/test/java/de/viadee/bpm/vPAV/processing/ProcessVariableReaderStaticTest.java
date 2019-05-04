@@ -37,7 +37,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -92,7 +92,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final FlowGraph cg = new FlowGraph(element);
+        final ControlFlowGraph cg = new ControlFlowGraph(element);
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
@@ -139,7 +139,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final FlowGraph cg = new FlowGraph(element);
+        final ControlFlowGraph cg = new ControlFlowGraph(element);
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
@@ -159,7 +159,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final FlowGraph cg = new FlowGraph(element);
+        final ControlFlowGraph cg = new ControlFlowGraph(element);
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,

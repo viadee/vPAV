@@ -33,7 +33,6 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Triple;
 import soot.toolkits.graph.Block;
 
 import java.util.ArrayList;
@@ -45,8 +44,12 @@ import java.util.regex.Pattern;
 
 public class Node {
 
-	private FlowGraph flowGraph;
-	private LinkedHashMap<Integer, ImmutablePair<String, ProcessVariableOperation>> operations;
+	private ControlFlowGraph controlFlowGraph;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> operations;
+
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> def;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> use;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> kill;
 
 	private Block block;
 
@@ -64,12 +67,9 @@ public class Node {
 	private BitSet outUnused;
 	private BitSet outUsed;
 
-	private LinkedHashMap<Integer, Triple<BitSet, String, ProcessVariableOperation>> def;
-	private LinkedHashMap<Integer, Triple<BitSet, String, ProcessVariableOperation>> use;
-	private LinkedHashMap<Integer, Triple<BitSet, String, ProcessVariableOperation>> kill;
 
-	public Node(final FlowGraph flowGraph, final Block block) {
-		this.flowGraph = flowGraph;
+	public Node(final ControlFlowGraph controlFlowGraph, final Block block) {
+		this.controlFlowGraph = controlFlowGraph;
 		this.block = block;
 		this.preds = new ArrayList<>();
 		this.succs = new ArrayList<>();
@@ -95,23 +95,26 @@ public class Node {
 	// Based on operation type adds the operation to the set of corresponding
 	// operations
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
-		this.operations.put(flowGraph.getDefCounter(),
-				new ImmutablePair<>(processVariableOperation.getName(), processVariableOperation));
+		this.operations.put(controlFlowGraph.getDefCounter(),
+				new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
-			defined.set(flowGraph.getDefCounter());
+			defined.set(controlFlowGraph.getDefCounter());
+			def.put(controlFlowGraph.getDefCounter(), new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
 			printBits(defined);
 			break;
 		case READ:
-			used.set(flowGraph.getDefCounter());
+			used.set(controlFlowGraph.getDefCounter());
+			use.put(controlFlowGraph.getDefCounter(), new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
 			printBits(used);
 			break;
 		case DELETE:
-			killed.set(flowGraph.getDefCounter());
+			killed.set(controlFlowGraph.getDefCounter());
+			kill.put(controlFlowGraph.getDefCounter(), new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
 			printBits(killed);
 			break;
 		}
-		flowGraph.incrementDefCounter();
+		controlFlowGraph.incrementDefCounter();
 	}
 
 	void printBits(BitSet b) {
@@ -167,15 +170,15 @@ public class Node {
 				id = id.substring(0, id.length() - 1).concat(key);
 				if (id.length() > 1) {
 					if (pred) {
-						this.preds.add(flowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
+						this.preds.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
 					} else {
-						this.succs.add(flowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
+						this.succs.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
 					}
 				} else {
 					if (pred) {
-						this.preds.add(flowGraph.getNodes().get(id));
+						this.preds.add(controlFlowGraph.getNodes().get(id));
 					} else {
-						this.succs.add(flowGraph.getNodes().get(id));
+						this.succs.add(controlFlowGraph.getNodes().get(id));
 					}
 				}
 			}
@@ -246,8 +249,15 @@ public class Node {
 		this.outUsed = outUsed;
 	}
 
-	public LinkedHashMap<Integer, ImmutablePair<String, ProcessVariableOperation>> getOperations() {
+	public LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getOperations() {
 		return operations;
 	}
 
+	public void setKill(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> kill) {
+		this.kill.putAll(kill);
+	}
+
+	public LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getDef() {
+		return def;
+	}
 }

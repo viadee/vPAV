@@ -77,9 +77,9 @@ public class ProcessVariableOperation {
                         resourceFilePath + "_" + operation + "_" + scopeId + "_" + System.nanoTime());
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+
+    public String getId() { return id; }
 
     public String getResourceFilePath() {
         return resourceFilePath;

@@ -36,12 +36,17 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.BitSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
-public class FlowGraph {
+public class ControlFlowGraph {
 
 	private BpmnElement element;
 
 	private LinkedHashMap<String, Node> nodes;
+
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> operations;
 
 	private int internalNodeCounter;
 
@@ -53,9 +58,10 @@ public class FlowGraph {
 
 	private int priorLevel;
 
-	public FlowGraph(final BpmnElement element) {
+	public ControlFlowGraph(final BpmnElement element) {
 		this.element = element;
 		nodes = new LinkedHashMap<>();
+		this.operations = new LinkedHashMap<>();
 		defCounter = 0;
 		nodeCounter = -1;
 		internalNodeCounter = 0;
@@ -64,6 +70,7 @@ public class FlowGraph {
 	}
 
 	/**
+	 * Adds a node to the current CFG
 	 *
 	 * @param node
 	 *            Node to be added to the control flow graph
@@ -102,11 +109,35 @@ public class FlowGraph {
 		return key.toString();
 	}
 
+	/**
+	 * Method used to start the data flow analysis by checking the found process variable operations.
+	 * First checks for anomalies inside each block (i.e. unit by unit), subsequently calculates the reaching definitions
+	 */
 	public void analyze() {
-		computeLineByLine();
-		// computeInAndOutSets();
+		computeKillSet();
+		// computeLineByLine();
+		// computeReachingDefinitions();
 	}
 
+	private void computeKillSet() {
+		for (Node node : nodes.values()) {
+			this.operations.putAll(node.getOperations());
+		}
+
+		for (Node node : nodes.values()) {
+			for (Entry<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> entry : node.getDef().entrySet()) {
+				Map<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> result = operations.entrySet().stream()
+						.filter(map -> entry.getValue().getRight().getName().equals(map.getValue().getRight().getName())
+								&& !entry.getValue().getRight().getId().equals(map.getValue().getRight().getId()))
+						.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+				node.setKill(new LinkedHashMap<>(result));
+			}
+		}
+	}
+
+	/**
+	 * Finds anomalies inside blocks by checking statements unit by unit
+	 */
 	private void computeLineByLine() {
 		for (final Node node : getNodes().values()) {
 			if (node.getOperations().size() >= 2) {
@@ -123,7 +154,69 @@ public class FlowGraph {
 		}
 	}
 
-	private void checkAnomaly(final BpmnElement element, ProcessVariableOperation curr, ProcessVariableOperation prev) {
+	/**
+	 * Uses the approach from ALSU07 (Reaching Definitions) to compute data flow anomalies across the CFG
+	 */
+	private void computeReachingDefinitions() {
+        // Set predecessor/successor relations and initialize sets
+        for (Node node : nodes.values()) {
+            node.setPreds();
+            node.setSuccs();
+            node.setOutUnused(new BitSet());
+            node.setOutUsed(new BitSet());
+        }
+
+        boolean change = true;
+        while (change) {
+            change = false;
+            for (Node node : nodes.values()) {
+                // Calculate in-sets (intersection of predecessors)
+                BitSet inUnused = node.getInUnused();
+                BitSet inUsed = node.getInUsed();
+                for (Node pred : node.getPreds()) {
+                    inUnused.and(pred.getOutUnused());
+                    inUsed.and(pred.getOutUsed());
+                }
+                node.setInUnused(inUnused);
+                node.setInUsed(inUsed);
+
+                // Calculate out-sets for used definitions (transfer functions)
+                BitSet oldOutUsed = node.getOutUsed();
+                BitSet newOutUsed = node.getUsed();
+                BitSet inUsedTemp = node.getInUsed();
+                inUsedTemp.andNot(node.getKilled());
+                newOutUsed.or(inUsedTemp);
+
+                node.printBits(newOutUsed);
+
+                // Calculate out-sets for unused definitions (transfer functions)
+                BitSet oldOutUnused = node.getOutUnused();
+                BitSet newOutUnused = node.getDefined();
+                BitSet inUnusedTemp = node.getInUnused();
+                inUnusedTemp.andNot(node.getKilled());
+                inUnusedTemp.andNot(node.getUsed());
+                newOutUnused.or(inUnusedTemp);
+
+                node.printBits(newOutUnused);
+
+                if (!oldOutUnused.equals(newOutUnused) || !oldOutUsed.equals(newOutUsed)) {
+                    change = true;
+                }
+            }
+        }
+	}
+
+	/**
+	 * Check for data-flow anomaly between current and previous variable operation
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param curr
+	 *            current operation
+	 * @param prev
+	 *            previous operation
+	 */
+	private void checkAnomaly(final BpmnElement element, final ProcessVariableOperation curr, final ProcessVariableOperation prev) {
 		if (urSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
 					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
@@ -198,55 +291,6 @@ public class FlowGraph {
 	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
 		return curr.getOperation().equals(VariableOperation.DELETE)
 				&& prev.getOperation().equals(VariableOperation.WRITE);
-	}
-
-	public void computeInAndOutSets() {
-        // Set predecessor/successor relations and initialize sets
-        for (Node node : nodes.values()) {
-            node.setPreds();
-            node.setSuccs();
-            node.setOutUnused(new BitSet());
-            node.setOutUsed(new BitSet());
-        }
-
-        boolean change = true;
-        while (change) {
-            change = false;
-            for (Node node : nodes.values()) {
-                // Calculate in-sets (intersection of predecessors)
-                BitSet inUnused = node.getInUnused();
-                BitSet inUsed = node.getInUsed();
-                for (Node pred : node.getPreds()) {
-                    inUnused.and(pred.getOutUnused());
-                    inUsed.and(pred.getOutUsed());
-                }
-                node.setInUnused(inUnused);
-                node.setInUsed(inUsed);
-
-                // Calculate out-sets for used definitions (transfer functions)
-                BitSet oldOutUsed = node.getOutUsed();
-                BitSet newOutUsed = node.getUsed();
-                BitSet inUsedTemp = node.getInUsed();
-                inUsedTemp.andNot(node.getKilled());
-                newOutUsed.or(inUsedTemp);
-
-                node.printBits(newOutUsed);
-
-                // Calculate out-sets for unused definitions (transfer functions)
-                BitSet oldOutUnused = node.getOutUnused();
-                BitSet newOutUnused = node.getDefined();
-                BitSet inUnusedTemp = node.getInUnused();
-                inUnusedTemp.andNot(node.getKilled());
-                inUnusedTemp.andNot(node.getUsed());
-                newOutUnused.or(inUnusedTemp);
-
-                node.printBits(newOutUnused);
-
-                if (!oldOutUnused.equals(newOutUnused) || !oldOutUsed.equals(newOutUsed)) {
-                    change = true;
-                }
-            }
-        }
 	}
 
 	int getDefCounter() {
