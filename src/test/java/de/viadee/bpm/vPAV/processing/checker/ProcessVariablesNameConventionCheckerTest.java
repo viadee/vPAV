@@ -125,8 +125,8 @@ public class ProcessVariablesNameConventionCheckerTest {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
-            final FlowGraph cg = new FlowGraph();
             final BpmnElement element = new BpmnElement(PATH, baseElement);
+            final FlowGraph cg = new FlowGraph(element);
             ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
             
             final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -164,7 +164,7 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
-            final FlowGraph cg = new FlowGraph();
+            final FlowGraph cg = new FlowGraph(element);
             ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
             
             final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();

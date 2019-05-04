@@ -985,19 +985,6 @@ public class JavaReaderStatic implements JavaReader {
 		LinkedList<ProcessVariableOperation> usedVariables = new LinkedList<>();
 		usedVariables.addAll(variableBlock.getAllProcessVariables());
 
-		// prepare for statement by statement comparison
-		Set<ProcessVariableOperation> pvSet = new HashSet<>(usedVariables);
-		for (ProcessVariableOperation pV : pvSet) {
-			// create unique lists for operations on same variable
-			LinkedList<ProcessVariableOperation> innerList = new LinkedList<>();
-			for (ProcessVariableOperation variable : usedVariables) {
-				if (pV.getName().equals(variable.getName())) {
-					innerList.add(variable);
-				}
-			}
-			checkStatementByStatement(element, innerList);
-		}
-
 		// Based on last appearance of Variable decide on UR, DD, DU anomaly
 		for (ProcessVariableOperation variable : usedVariables) {
 			if (predecessorVariablesList.lastIndexOf(variable) >= 0) {
@@ -1027,30 +1014,6 @@ public class JavaReaderStatic implements JavaReader {
 
 		for (ProcessVariableOperation pv : variableBlock.getAllProcessVariables()) {
 			predecessorVariablesList.removeLastOccurrence(pv);
-		}
-
-	}
-
-	/**
-	 * Checks for anomalies occurring between elements
-	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param innerList
-	 *            List of all variable operations (same name)
-	 */
-	private void checkStatementByStatement(final BpmnElement element,
-			final LinkedList<ProcessVariableOperation> innerList) {
-
-		if (innerList.size() >= 2) {
-			ProcessVariableOperation prev = null;
-			for (ProcessVariableOperation curr : innerList) {
-				if (prev == null) {
-					prev = curr;
-					continue;
-				}
-				checkAnomaly(element, curr, prev);
-			}
 		}
 
 	}

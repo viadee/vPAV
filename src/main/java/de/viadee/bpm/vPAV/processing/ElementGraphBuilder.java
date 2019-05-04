@@ -145,7 +145,10 @@ public class ElementGraphBuilder {
 			final Collection<CallActivity> callActivities = new ArrayList<>();
 
 			for (final FlowElement element : elements) {
-				final FlowGraph flowGraph = new FlowGraph();
+				// initialize element
+				final BpmnElement node = new BpmnElement(processDefinition, element);
+				final FlowGraph flowGraph = new FlowGraph(node);
+
 				if (element instanceof SequenceFlow) {
 					// mention sequence flows
 					final SequenceFlow flow = (SequenceFlow) element;
@@ -166,9 +169,6 @@ public class ElementGraphBuilder {
 
 				// Ordered map to hold operations in correct order
 				final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-
-				// initialize element
-				final BpmnElement node = new BpmnElement(processDefinition, element);
 
 				// retrieve initial variable operation (should be WRITE)
 				if (element.getElementType().getTypeName().equals(BpmnConstants.START_EVENT)) {

@@ -31,13 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import de.viadee.bpm.vPAV.processing.model.data.*;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import java.util.BitSet;
 import java.util.LinkedHashMap;
 
 public class FlowGraph {
 
-	public LinkedHashMap<String, Node> getNodes() {
-		return nodes;
-	}
+	private BpmnElement element;
 
 	private LinkedHashMap<String, Node> nodes;
 
@@ -51,7 +53,8 @@ public class FlowGraph {
 
 	private int priorLevel;
 
-	public FlowGraph() {
+	public FlowGraph(final BpmnElement element) {
+		this.element = element;
 		nodes = new LinkedHashMap<>();
 		defCounter = 0;
 		nodeCounter = -1;
@@ -99,58 +102,151 @@ public class FlowGraph {
 		return key.toString();
 	}
 
-	public void computeInAndOutSets() {
-		createCFG();
-		// for (final Node node : nodes) {
-		// node.initOutUnused();
-		// node.initOutUsed();
-		// }
-		// boolean change = true;
-		// while (change) {
-		// change = false;
-		// for (final Node node : nodes) {
-		// BitSet oldOutUnused = node.getOutUnused();
-		// BitSet oldOutUsed = node.getOutUsed();
-		// node.setInUnused();
-		// node.setInUsed();
-		// node.setOutUnused();
-		// node.setOutUsed();
-		// // IN(unused)[B] = (intersection of pred) OUT(unused)[P]
-		// // IN(used)[B] = (intersection of pred) OUT(used)[P]
-		// // OUT(unused)[B] = defined U (IN(unused) - killed - used)
-		// // OUT(used)[B] = used U (in(used) - killed)
-		// if (!oldOutUnused.equals(node.getOutUnused()) ||
-		// !oldOutUsed.equals(node.getOutUsed())) {
-		// change = true;
-		// }
-		// }
-		// }
+	public void analyze() {
+		computeLineByLine();
+		// computeInAndOutSets();
+	}
 
-		// OUT[Entry] = {}
-		// For (each basic block B other than ENTRY) {
-		// OUT[B] = {}
-		// }
-		// change = true;
-		// while (change) {
-		// change = false;
-		// for (each basic block B other than ENTRY) {
-		// IN(unused)[B] = (intersection of pred) OUT(unused)[P]
-		// IN(used)[B] = (intersection of pred) OUT(used)[P]
-		// OUT(unused)[B] = defined U (IN(unused) - killed - used)
-		// OUT(used)[B] = used U (in(used) - killed)
-		// }
-		// }
+	private void computeLineByLine() {
+		for (final Node node : getNodes().values()) {
+			if (node.getOperations().size() >= 2) {
+				ProcessVariableOperation prev = null;
+				for (ImmutablePair operation : node.getOperations().values()) {
+					ProcessVariableOperation curr = (ProcessVariableOperation) operation.getRight();
+					if (prev == null) {
+						prev = curr;
+						continue;
+					}
+					checkAnomaly(element, curr, prev);
+				}
+			}
+		}
+	}
+
+	private void checkAnomaly(final BpmnElement element, ProcessVariableOperation curr, ProcessVariableOperation prev) {
+		if (urSourceCode(prev, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
+		}
+
+		if (ddSourceCode(prev, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(), curr));
+		}
+
+		if (duSourceCode(prev, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(), curr));
+		}
+		if (uuSourceCode(prev, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(), curr));
+		}
 	}
 
 	/**
-	 * Constructs the links between nodes, which are needed to subsequently
-	 * calculate the sets
+	 * UU anomaly: second last operation of PV is DELETE, last operation is DELETE
+	 *
+	 * @param prev
+	 *            Previous ProcessVariable
+	 * @param curr
+	 *            Current ProcessVariable
+	 * @return true/false
 	 */
-	private void createCFG() {
-		for (Node node : nodes.values()) {
-			node.setPreds();
-			node.setSuccs();
-		}
+	private boolean uuSourceCode(ProcessVariableOperation prev, ProcessVariableOperation curr) {
+		return curr.getOperation().equals(VariableOperation.DELETE)
+				&& prev.getOperation().equals(VariableOperation.DELETE);
+	}
+
+	/**
+	 * UR anomaly: second last operation of PV is DELETE, last operation is READ
+	 *
+	 * @param prev
+	 *            Previous ProcessVariable
+	 * @param curr
+	 *            Current ProcessVariable
+	 * @return true/false
+	 */
+	private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		return curr.getOperation().equals(VariableOperation.READ)
+				&& prev.getOperation().equals(VariableOperation.DELETE);
+	}
+
+	/**
+	 * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
+	 *
+	 * @param prev
+	 *            Previous ProcessVariable
+	 * @param curr
+	 *            Current ProcessVariable
+	 * @return true/false
+	 */
+	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		return curr.getOperation().equals(VariableOperation.WRITE)
+				&& prev.getOperation().equals(VariableOperation.WRITE);
+	}
+
+	/**
+	 * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
+	 *
+	 * @param prev
+	 *            Previous ProcessVariable
+	 * @param curr
+	 *            Current ProcessVariable
+	 * @return true/false
+	 */
+	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		return curr.getOperation().equals(VariableOperation.DELETE)
+				&& prev.getOperation().equals(VariableOperation.WRITE);
+	}
+
+	public void computeInAndOutSets() {
+        // Set predecessor/successor relations and initialize sets
+        for (Node node : nodes.values()) {
+            node.setPreds();
+            node.setSuccs();
+            node.setOutUnused(new BitSet());
+            node.setOutUsed(new BitSet());
+        }
+
+        boolean change = true;
+        while (change) {
+            change = false;
+            for (Node node : nodes.values()) {
+                // Calculate in-sets (intersection of predecessors)
+                BitSet inUnused = node.getInUnused();
+                BitSet inUsed = node.getInUsed();
+                for (Node pred : node.getPreds()) {
+                    inUnused.and(pred.getOutUnused());
+                    inUsed.and(pred.getOutUsed());
+                }
+                node.setInUnused(inUnused);
+                node.setInUsed(inUsed);
+
+                // Calculate out-sets for used definitions (transfer functions)
+                BitSet oldOutUsed = node.getOutUsed();
+                BitSet newOutUsed = node.getUsed();
+                BitSet inUsedTemp = node.getInUsed();
+                inUsedTemp.andNot(node.getKilled());
+                newOutUsed.or(inUsedTemp);
+
+                node.printBits(newOutUsed);
+
+                // Calculate out-sets for unused definitions (transfer functions)
+                BitSet oldOutUnused = node.getOutUnused();
+                BitSet newOutUnused = node.getDefined();
+                BitSet inUnusedTemp = node.getInUnused();
+                inUnusedTemp.andNot(node.getKilled());
+                inUnusedTemp.andNot(node.getUsed());
+                newOutUnused.or(inUnusedTemp);
+
+                node.printBits(newOutUnused);
+
+                if (!oldOutUnused.equals(newOutUnused) || !oldOutUsed.equals(newOutUsed)) {
+                    change = true;
+                }
+            }
+        }
 	}
 
 	int getDefCounter() {
@@ -179,5 +275,9 @@ public class FlowGraph {
 
 	public void setPriorLevel(int priorLevel) {
 		this.priorLevel = priorLevel;
+	}
+
+	public LinkedHashMap<String, Node> getNodes() {
+		return nodes;
 	}
 }

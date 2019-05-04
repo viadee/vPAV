@@ -82,7 +82,7 @@ public class ReachingDefinitionTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-		FlowGraph cg = new FlowGraph();
+		FlowGraph cg = new FlowGraph(element);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,

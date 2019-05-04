@@ -92,7 +92,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final FlowGraph cg = new FlowGraph();
+        final FlowGraph cg = new FlowGraph(element);
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
@@ -139,7 +139,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final FlowGraph cg = new FlowGraph();
+        final FlowGraph cg = new FlowGraph(element);
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
@@ -159,7 +159,7 @@ public class ProcessVariableReaderStaticTest {
                 .getModelElementsByType(ServiceTask.class);
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-        final FlowGraph cg = new FlowGraph();
+        final FlowGraph cg = new FlowGraph(element);
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,

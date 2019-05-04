@@ -32,10 +32,13 @@
 package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Triple;
 import soot.toolkits.graph.Block;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,16 +46,27 @@ import java.util.regex.Pattern;
 public class Node {
 
 	private FlowGraph flowGraph;
-	private List<ProcessVariableOperation> operations;
+	private LinkedHashMap<Integer, ImmutablePair<String, ProcessVariableOperation>> operations;
 
 	private Block block;
+
 	private List<Node> preds;
 	private List<Node> succs;
 	private String id;
 
-	private BitSet def;
-	private BitSet use;
-	private BitSet kill;
+	private BitSet defined;
+	private BitSet used;
+	private BitSet killed;
+
+	private BitSet inUnused;
+	private BitSet inUsed;
+
+	private BitSet outUnused;
+	private BitSet outUsed;
+
+	private LinkedHashMap<Integer, Triple<BitSet, String, ProcessVariableOperation>> def;
+	private LinkedHashMap<Integer, Triple<BitSet, String, ProcessVariableOperation>> use;
+	private LinkedHashMap<Integer, Triple<BitSet, String, ProcessVariableOperation>> kill;
 
 	public Node(final FlowGraph flowGraph, final Block block) {
 		this.flowGraph = flowGraph;
@@ -60,53 +74,51 @@ public class Node {
 		this.preds = new ArrayList<>();
 		this.succs = new ArrayList<>();
 
-		this.operations = new ArrayList<>();
+		this.operations = new LinkedHashMap<>();
 
-		this.def = new BitSet();
-		this.use = new BitSet();
-		this.kill = new BitSet();
+		this.defined = new BitSet();
+		this.used = new BitSet();
+		this.killed = new BitSet();
+
+		this.inUnused = new BitSet();
+		this.inUsed = new BitSet();
+
+		this.outUnused = new BitSet();
+		this.outUsed = new BitSet();
+
+		this.def = new LinkedHashMap<>();
+		this.use = new LinkedHashMap<>();
+		this.kill = new LinkedHashMap<>();
 	}
 
 	// Adds an operation to the list of operations (used for line by line checking)
 	// Based on operation type adds the operation to the set of corresponding
 	// operations
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
-		this.operations.add(processVariableOperation);
-		flowGraph.incrementDefCounter();
-
+		this.operations.put(flowGraph.getDefCounter(),
+				new ImmutablePair<>(processVariableOperation.getName(), processVariableOperation));
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
-			def.set(flowGraph.getDefCounter());
-			printBits(def);
+			defined.set(flowGraph.getDefCounter());
+			printBits(defined);
 			break;
 		case READ:
-			use.set(flowGraph.getDefCounter());
-			printBits(use);
+			used.set(flowGraph.getDefCounter());
+			printBits(used);
 			break;
 		case DELETE:
-			kill.set(flowGraph.getDefCounter());
-			printBits(kill);
+			killed.set(flowGraph.getDefCounter());
+			printBits(killed);
 			break;
 		}
+		flowGraph.incrementDefCounter();
 	}
 
-	public void setId(final String id) {
-		this.id = id;
-	}
-
-	private static void printBits(BitSet b) {
+	void printBits(BitSet b) {
 		for (int i = 0; i < b.size(); i++) {
 			System.out.print(b.get(i) ? "1" : "0");
 		}
 		System.out.println();
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public Block getBlock() {
-		return block;
 	}
 
 	/**
@@ -118,7 +130,7 @@ public class Node {
 
 		for (Block block : this.block.getPreds()) {
 			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
-			matchIds(idPattern, blockMatcher, true);
+			createIds(idPattern, blockMatcher, true);
 		}
 	}
 
@@ -131,7 +143,7 @@ public class Node {
 
 		for (Block block : this.block.getSuccs()) {
 			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
-			matchIds(idPattern, blockMatcher, false);
+			createIds(idPattern, blockMatcher, false);
 		}
 	}
 
@@ -146,7 +158,7 @@ public class Node {
 	 *            Boolean to indicate whether the current node is a predecessor or
 	 *            successor
 	 */
-	private void matchIds(final Pattern idPattern, final Matcher blockMatcher, final boolean pred) {
+	private void createIds(final Pattern idPattern, final Matcher blockMatcher, final boolean pred) {
 		if (blockMatcher.matches()) {
 			String key = blockMatcher.group(2);
 			Matcher idMatcher = idPattern.matcher(this.id);
@@ -169,4 +181,73 @@ public class Node {
 			}
 		}
 	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(final String id) {
+		this.id = id;
+	}
+
+	public Block getBlock() {
+		return block;
+	}
+
+	List<Node> getPreds() {
+		return preds;
+	}
+
+	List<Node> getSuccs() {
+		return succs;
+	}
+
+	BitSet getDefined() {
+		return defined;
+	}
+
+	public BitSet getUsed() {
+		return used;
+	}
+
+	BitSet getKilled() {
+		return killed;
+	}
+
+	BitSet getInUnused() {
+		return inUnused;
+	}
+
+	void setInUnused(BitSet inUnused) {
+		this.inUnused = inUnused;
+	}
+
+	BitSet getInUsed() {
+		return inUsed;
+	}
+
+	void setInUsed(BitSet inUsed) {
+		this.inUsed = inUsed;
+	}
+
+	BitSet getOutUnused() {
+		return outUnused;
+	}
+
+	void setOutUnused(BitSet outUnused) {
+		this.outUnused = outUnused;
+	}
+
+	BitSet getOutUsed() {
+		return outUsed;
+	}
+
+	void setOutUsed(BitSet outUsed) {
+		this.outUsed = outUsed;
+	}
+
+	public LinkedHashMap<Integer, ImmutablePair<String, ProcessVariableOperation>> getOperations() {
+		return operations;
+	}
+
 }
