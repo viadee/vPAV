@@ -73,13 +73,13 @@ public class ProcessVariableOperation {
 
     private String createId() {
         return CheckerIssue.getMD5(
-                name + "_" + "_" + chapter + "_" + fieldType + "_" +
+                name + "_" + chapter + "_" + fieldType + "_" +
                         resourceFilePath + "_" + operation + "_" + scopeId + "_" + System.nanoTime());
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+
+    public String getId() { return id; }
 
     public String getResourceFilePath() {
         return resourceFilePath;

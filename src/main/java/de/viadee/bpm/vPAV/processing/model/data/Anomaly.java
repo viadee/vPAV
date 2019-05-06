@@ -35,7 +35,7 @@ package de.viadee.bpm.vPAV.processing.model.data;
  * Represents anomalies like DD("defined-defined"), DU("defined-undefined"), UR("undefined-read");
  */
 public enum Anomaly {
-    DD("defined-defined"), DU("defined-undefined"), UR("undefined-read");
+    DD("defined-defined"), DU("defined-undefined"), UR("undefined-read"), UU("undefined-undefined");
 
     private final String description;
 
