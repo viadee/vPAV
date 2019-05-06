@@ -156,22 +156,24 @@ public class JsOutputWriter implements IssueOutputWriter {
 			final String defaultCheckers, final String issueSeverity, final String ignoredIssues, final String properties)
 			throws OutputWriterException {
 		if (json != null && !json.isEmpty() && properties != null && !properties.isEmpty()) {
+			String errorMsg = "js output couldn't be written";
+
 			try (FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT)) {
 				file.write(bpmn);
 			} catch (IOException e) {
-				throw new OutputWriterException("js output couldn't be written", e);
+				throw new OutputWriterException(errorMsg, e);
 			}
 			try (OutputStreamWriter osWriter = new OutputStreamWriter(
 					new FileOutputStream(ConfigConstants.VALIDATION_JS_OUTPUT), StandardCharsets.UTF_8)) {
 				osWriter.write(json);
 			} catch (IOException e) {
-				throw new OutputWriterException("js output couldn't be written", e);
+				throw new OutputWriterException(errorMsg, e);
 			}
 			try (OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
 					new FileOutputStream(ConfigConstants.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8)) {
 				osWriterSuccess.write(json_noIssues);
 			} catch (IOException e) {
-				throw new OutputWriterException("js output couldn't be written", e);
+				throw new OutputWriterException(errorMsg, e);
 			}
 
 			if ((wrongCheckers != null && !wrongCheckers.isEmpty())
@@ -181,7 +183,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 					wrongAndDefaultCheckers.write(wrongCheckers);
 					wrongAndDefaultCheckers.write(defaultCheckers);
 				} catch (IOException e) {
-					throw new OutputWriterException("js output couldn't be written", e);
+					throw new OutputWriterException(errorMsg, e);
 				}
 			} else if ((wrongCheckers == null || wrongCheckers.isEmpty())
 					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
@@ -189,7 +191,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 						new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8)) {
 					defaultCheckerJS.write(defaultCheckers);
 				} catch (IOException e) {
-					throw new OutputWriterException("js output couldn't be written", e);
+					throw new OutputWriterException(errorMsg, e);
 				}
 			}
 
@@ -198,7 +200,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 						new FileOutputStream(ConfigConstants.VALIDATION_ISSUE_SEVERITY), StandardCharsets.UTF_8)) {
 					issueSeverityWriter.write(issueSeverity);
 				} catch (IOException e) {
-					throw new OutputWriterException("js output couldn't be written", e);
+					throw new OutputWriterException(errorMsg, e);
 				}
 			}
 			if (ignoredIssues != null && !ignoredIssues.isEmpty()) {
@@ -207,14 +209,14 @@ public class JsOutputWriter implements IssueOutputWriter {
 						StandardCharsets.UTF_8)) {
 					ignoredIssuesWriter.write(ignoredIssues);
 				} catch (IOException e) {
-					throw new OutputWriterException("js output couldn't be written", e);
+					throw new OutputWriterException(errorMsg, e);
 				}
 			}
 			try (OutputStreamWriter osWriter = new OutputStreamWriter(
 					new FileOutputStream(ConfigConstants.PROPERTIES_JS_OUTPUT), StandardCharsets.UTF_8)) {
 				osWriter.write(properties);
 			} catch (IOException e) {
-				throw new OutputWriterException("js output couldn't be written", e);
+				throw new OutputWriterException(errorMsg, e);
 			}
 		}
 	}
