@@ -45,83 +45,64 @@ import java.util.regex.Pattern;
 public class Node {
 
 	private ControlFlowGraph controlFlowGraph;
-	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> operations;
 
-	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> def;
-	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> use;
-	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> kill;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> operations;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> defined;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> used;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> killed;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> inUsed;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> inUnused;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> outUsed;
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> outUnused;
 
 	private Block block;
 
-	private List<Node> preds;
-	private List<Node> succs;
+	private List<Node> predecessors;
+	private List<Node> successor;
 	private String id;
-
-	private BitSet defined;
-	private BitSet used;
-	private BitSet killed;
-
-	private BitSet inUnused;
-	private BitSet inUsed;
-
-	private BitSet outUnused;
-	private BitSet outUsed;
-
 
 	public Node(final ControlFlowGraph controlFlowGraph, final Block block) {
 		this.controlFlowGraph = controlFlowGraph;
 		this.block = block;
-		this.preds = new ArrayList<>();
-		this.succs = new ArrayList<>();
+		this.predecessors = new ArrayList<>();
+		this.successor = new ArrayList<>();
 
 		this.operations = new LinkedHashMap<>();
-
-		this.defined = new BitSet();
-		this.used = new BitSet();
-		this.killed = new BitSet();
-
-		this.inUnused = new BitSet();
-		this.inUsed = new BitSet();
-
-		this.outUnused = new BitSet();
-		this.outUsed = new BitSet();
-
-		this.def = new LinkedHashMap<>();
-		this.use = new LinkedHashMap<>();
-		this.kill = new LinkedHashMap<>();
+		this.defined = new LinkedHashMap<>();
+		this.used = new LinkedHashMap<>();
+		this.killed = new LinkedHashMap<>();
+		this.inUsed = new LinkedHashMap<>();
+		this.inUnused = new LinkedHashMap<>();
+		this.outUsed = new LinkedHashMap<>();
+		this.outUnused = new LinkedHashMap<>();
 	}
 
-	// Adds an operation to the list of operations (used for line by line checking)
-	// Based on operation type adds the operation to the set of corresponding
-	// operations
+	/**
+	 * Adds an operation to the list of operations (used for line by line checking)
+	 * Based on operation type adds the operation to the set of corresponding
+	 * operations
+	 *
+	 * @param processVariableOperation
+	 *            Current process variable operation
+	 */
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
 		this.operations.put(controlFlowGraph.getDefCounter(),
 				new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
-			defined.set(controlFlowGraph.getDefCounter());
-			def.put(controlFlowGraph.getDefCounter(), new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
-			printBits(defined);
+			defined.put(controlFlowGraph.getDefCounter(),
+					new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
 			break;
 		case READ:
-			used.set(controlFlowGraph.getDefCounter());
-			use.put(controlFlowGraph.getDefCounter(), new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
-			printBits(used);
+			used.put(controlFlowGraph.getDefCounter(),
+					new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
 			break;
 		case DELETE:
-			killed.set(controlFlowGraph.getDefCounter());
-			kill.put(controlFlowGraph.getDefCounter(), new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
-			printBits(killed);
+			killed.put(controlFlowGraph.getDefCounter(),
+					new ImmutablePair<>(new BitSet(controlFlowGraph.getDefCounter()), processVariableOperation));
 			break;
 		}
 		controlFlowGraph.incrementDefCounter();
-	}
-
-	void printBits(BitSet b) {
-		for (int i = 0; i < b.size(); i++) {
-			System.out.print(b.get(i) ? "1" : "0");
-		}
-		System.out.println();
 	}
 
 	/**
@@ -170,15 +151,17 @@ public class Node {
 				id = id.substring(0, id.length() - 1).concat(key);
 				if (id.length() > 1) {
 					if (pred) {
-						this.preds.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
+						this.predecessors
+								.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
 					} else {
-						this.succs.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
+						this.successor
+								.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
 					}
 				} else {
 					if (pred) {
-						this.preds.add(controlFlowGraph.getNodes().get(id));
+						this.predecessors.add(controlFlowGraph.getNodes().get(id));
 					} else {
-						this.succs.add(controlFlowGraph.getNodes().get(id));
+						this.successor.add(controlFlowGraph.getNodes().get(id));
 					}
 				}
 			}
@@ -197,67 +180,72 @@ public class Node {
 		return block;
 	}
 
-	List<Node> getPreds() {
-		return preds;
-	}
-
-	List<Node> getSuccs() {
-		return succs;
-	}
-
-	BitSet getDefined() {
-		return defined;
-	}
-
-	public BitSet getUsed() {
-		return used;
-	}
-
-	BitSet getKilled() {
-		return killed;
-	}
-
-	BitSet getInUnused() {
-		return inUnused;
-	}
-
-	void setInUnused(BitSet inUnused) {
-		this.inUnused = inUnused;
-	}
-
-	BitSet getInUsed() {
-		return inUsed;
-	}
-
-	void setInUsed(BitSet inUsed) {
-		this.inUsed = inUsed;
-	}
-
-	BitSet getOutUnused() {
-		return outUnused;
-	}
-
-	void setOutUnused(BitSet outUnused) {
-		this.outUnused = outUnused;
-	}
-
-	BitSet getOutUsed() {
-		return outUsed;
-	}
-
-	void setOutUsed(BitSet outUsed) {
-		this.outUsed = outUsed;
+	List<Node> getPredecessors() {
+		return predecessors;
 	}
 
 	public LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getOperations() {
 		return operations;
 	}
 
-	public void setKill(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> kill) {
-		this.kill.putAll(kill);
+	public void setOperations(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> operations) {
+		this.operations = operations;
 	}
 
-	public LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getDef() {
-		return def;
+	public LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getDefined() {
+		return defined;
 	}
+
+	public void setDefined(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> defined) {
+		this.defined = defined;
+	}
+
+	public LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getUsed() {
+		return used;
+	}
+
+	public void setUsed(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> used) {
+		this.used = used;
+	}
+
+	public LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getKilled() {
+		return killed;
+	}
+
+	public void setKilled(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> killed) {
+		this.killed = killed;
+	}
+
+	LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getInUsed() {
+		return inUsed;
+	}
+
+	void setInUsed(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> inUsed) {
+		this.inUsed = inUsed;
+	}
+
+	LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getInUnused() {
+		return inUnused;
+	}
+
+	void setInUnused(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> inUnused) {
+		this.inUnused = inUnused;
+	}
+
+	LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getOutUsed() {
+		return outUsed;
+	}
+
+	void setOutUsed(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> outUsed) {
+		this.outUsed = outUsed;
+	}
+
+	LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getOutUnused() {
+		return outUnused;
+	}
+
+	void setOutUnused(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> outUnused) {
+		this.outUnused = outUnused;
+	}
+
 }

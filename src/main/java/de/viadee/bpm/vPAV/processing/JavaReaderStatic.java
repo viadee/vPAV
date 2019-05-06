@@ -637,8 +637,8 @@ public class JavaReaderStatic implements JavaReader {
 	private VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
 			final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-			VariableBlock variableBlock, String assignmentStmt, final List<Value> args, final ControlFlowGraph controlFlowGraph,
-			final Node node) {
+			VariableBlock variableBlock, String assignmentStmt, final List<Value> args,
+			final ControlFlowGraph controlFlowGraph, final Node node) {
 		if (variableBlock == null) {
 			variableBlock = new VariableBlock(block, new ArrayList<>());
 		}
@@ -756,10 +756,10 @@ public class JavaReaderStatic implements JavaReader {
 	 * @return assignmentStmt
 	 */
 	private String processInvokeStmt(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
-									 final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-									 final String filePath, final String scopeId, final VariableBlock variableBlock, String assignmentStmt,
-									 final ControlFlowGraph controlFlowGraph, final Node node, final String paramName, final int argsCounter,
-									 final Unit unit) {
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String filePath, final String scopeId, final VariableBlock variableBlock, String assignmentStmt,
+			final ControlFlowGraph controlFlowGraph, final Node node, final String paramName, final int argsCounter,
+			final Unit unit) {
 		// Method call of implemented interface method without prior assignment
 		if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
 			JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();

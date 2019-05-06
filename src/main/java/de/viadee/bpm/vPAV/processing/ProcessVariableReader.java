@@ -120,7 +120,7 @@ public final class ProcessVariableReader {
 		// 7) Search variables in Links
 		processVariables.putAll(getVariablesFromLinks(element, fileScanner, context, controlFlowGraph));
 
-		controlFlowGraph.analyze();
+		controlFlowGraph.analyze(element);
 
 		return processVariables;
 	}
@@ -447,8 +447,9 @@ public final class ProcessVariableReader {
 			}
 			final String l_delegateExpression = listener.getCamundaDelegateExpression();
 			if (l_delegateExpression != null) {
-				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, l_delegateExpression,
-						element, ElementChapter.ExecutionListener, KnownElementFieldType.DelegateExpression, scopeId));
+				processVariables.putAll(
+						findVariablesInExpression(controlFlowGraph, context, fileScanner, l_delegateExpression, element,
+								ElementChapter.ExecutionListener, KnownElementFieldType.DelegateExpression, scopeId));
 			}
 			final String l_class = listener.getCamundaClass();
 			if (l_class != null) {
@@ -508,12 +509,13 @@ public final class ProcessVariableReader {
 			}
 			final String l_delegateExpression = listener.getCamundaDelegateExpression();
 			if (l_delegateExpression != null) {
-				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, l_delegateExpression,
-						element, ElementChapter.TaskListener, KnownElementFieldType.DelegateExpression, scopeId));
+				processVariables.putAll(
+						findVariablesInExpression(controlFlowGraph, context, fileScanner, l_delegateExpression, element,
+								ElementChapter.TaskListener, KnownElementFieldType.DelegateExpression, scopeId));
 			}
-			processVariables
-					.putAll(new JavaReaderRegex().getVariablesFromJavaDelegate(fileScanner, listener.getCamundaClass(),
-							element, ElementChapter.TaskListener, KnownElementFieldType.Class, scopeId, controlFlowGraph));
+			processVariables.putAll(
+					new JavaReaderRegex().getVariablesFromJavaDelegate(fileScanner, listener.getCamundaClass(), element,
+							ElementChapter.TaskListener, KnownElementFieldType.Class, scopeId, controlFlowGraph));
 
 			final CamundaScript script = listener.getCamundaScript();
 			if (script != null && script.getCamundaScriptFormat() != null
@@ -656,9 +658,9 @@ public final class ProcessVariableReader {
 					}
 				} else {
 					if (expression.getTextContent().trim().length() > 0) {
-						variables.putAll(
-								findVariablesInExpression(controlFlowGraph, context, fileScanner, expression.getTextContent(),
-										element, ElementChapter.Details, KnownElementFieldType.Expression, scopeId));
+						variables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner,
+								expression.getTextContent(), element, ElementChapter.Details,
+								KnownElementFieldType.Expression, scopeId));
 					}
 				}
 			}
@@ -702,8 +704,9 @@ public final class ProcessVariableReader {
 			final String t_delegateExpression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
 					BpmnConstants.ATTR_DEL);
 			if (t_delegateExpression != null) {
-				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, t_delegateExpression,
-						element, ElementChapter.Details, KnownElementFieldType.DelegateExpression, scopeId));
+				processVariables
+						.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, t_delegateExpression,
+								element, ElementChapter.Details, KnownElementFieldType.DelegateExpression, scopeId));
 			}
 
 			final ArrayList<String> t_fieldInjectionExpressions = bpmnScanner
@@ -745,20 +748,22 @@ public final class ProcessVariableReader {
 			final UserTask userTask = (UserTask) baseElement;
 			final String assignee = userTask.getCamundaAssignee();
 			if (assignee != null)
-				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, assignee, element,
-						ElementChapter.Details, KnownElementFieldType.Assignee, scopeId));
+				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, assignee,
+						element, ElementChapter.Details, KnownElementFieldType.Assignee, scopeId));
 			final String candidateUsers = userTask.getCamundaCandidateUsers();
 			if (candidateUsers != null)
-				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, candidateUsers,
-						element, ElementChapter.Details, KnownElementFieldType.CandidateUsers, scopeId));
+				processVariables
+						.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, candidateUsers,
+								element, ElementChapter.Details, KnownElementFieldType.CandidateUsers, scopeId));
 			final String candidateGroups = userTask.getCamundaCandidateGroups();
 			if (candidateGroups != null)
-				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, candidateGroups,
-						element, ElementChapter.Details, KnownElementFieldType.CandidateGroups, scopeId));
+				processVariables
+						.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, candidateGroups,
+								element, ElementChapter.Details, KnownElementFieldType.CandidateGroups, scopeId));
 			final String dueDate = userTask.getCamundaDueDate();
 			if (dueDate != null)
-				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, dueDate, element,
-						ElementChapter.Details, KnownElementFieldType.DueDate, scopeId));
+				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, dueDate,
+						element, ElementChapter.Details, KnownElementFieldType.DueDate, scopeId));
 			final String followUpDate = userTask.getCamundaFollowUpDate();
 			if (followUpDate != null)
 				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, followUpDate,
@@ -798,8 +803,8 @@ public final class ProcessVariableReader {
 			final String caseRef = callActivity.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
 					BpmnConstants.CASE_REF);
 			if (caseRef != null && caseRef.trim().length() > 0) {
-				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, caseRef, element,
-						ElementChapter.Details, KnownElementFieldType.CaseRef, scopeId));
+				processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, caseRef,
+						element, ElementChapter.Details, KnownElementFieldType.CaseRef, scopeId));
 			}
 		}
 
@@ -854,8 +859,9 @@ public final class ProcessVariableReader {
 			if (loopCardinality != null) {
 				final String cardinality = loopCardinality.getTextContent();
 				if (cardinality != null && cardinality.trim().length() > 0) {
-					processVariables.putAll(findVariablesInExpression(controlFlowGraph, context, fileScanner, cardinality,
-							element, ElementChapter.MultiInstance, KnownElementFieldType.LoopCardinality, scopeId));
+					processVariables.putAll(
+							findVariablesInExpression(controlFlowGraph, context, fileScanner, cardinality, element,
+									ElementChapter.MultiInstance, KnownElementFieldType.LoopCardinality, scopeId));
 				}
 			}
 			final ModelElementInstance completionCondition = loopCharacteristics
@@ -960,10 +966,10 @@ public final class ProcessVariableReader {
 	 *            ScopeId
 	 * @return variables
 	 */
-	private ListMultimap<String, ProcessVariableOperation> findVariablesInExpression(final ControlFlowGraph controlFlowGraph,
-			final JavaReaderContext context, final FileScanner fileScanner, final String expression,
-			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-			final String scopeId) {
+	private ListMultimap<String, ProcessVariableOperation> findVariablesInExpression(
+			final ControlFlowGraph controlFlowGraph, final JavaReaderContext context, final FileScanner fileScanner,
+			final String expression, final BpmnElement element, final ElementChapter chapter,
+			final KnownElementFieldType fieldType, final String scopeId) {
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
 		// HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
