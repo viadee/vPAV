@@ -147,8 +147,8 @@ public class ElementGraphBuilder {
 			for (final FlowElement element : elements) {
 				// initialize element
 				final BpmnElement node = new BpmnElement(processDefinition, element);
-				final ControlFlowGraph controlFlowGraph = new ControlFlowGraph(node);
-
+				final ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
+				
 				if (element instanceof SequenceFlow) {
 					// mention sequence flows
 					final SequenceFlow flow = (SequenceFlow) element;

@@ -226,37 +226,8 @@ public class BpmnElement {
 	}
 
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
-		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<BpmnElement, List<AnomalyContainer>>();
-		final Set<String> variableNames = new HashSet<String>();
-		variableNames.addAll(used().keySet());
-		for (final String variableName : in.keySet()) {
-			if (in.get(variableName) == InOutState.DEFINED) {
-				variableNames.add(variableName);
-			}
-		}
-		final List<AnomalyContainer> anomalies = new ArrayList<AnomalyContainer>();
-		for (final String variableName : variableNames) {
-			final List<ProcessVariableOperation> list = processVariables.get(variableName);
-			if (ur(variableName)) {
-				anomalies.add(new AnomalyContainer(variableName, Anomaly.UR, baseElement.getId(),
-						processVariables.get(variableName).get(list.size() - 1)));
-			}
-			if (du(variableName)) {
-				anomalies.add(new AnomalyContainer(variableName, Anomaly.DU, baseElement.getId(),
-						processVariables.get(variableName).get(list.size() - 1)));
-			}
-			if (dd(variableName)) {
-				anomalies.add(new AnomalyContainer(variableName, Anomaly.DD, baseElement.getId(),
-						processVariables.get(variableName).get(list.size() - 1)));
-			}
-		}
-		anomalyMap.put(this, anomalies);
-
-		if (sourceCodeAnomalies != null) {
-			// add anomalies found on Java code level
-			anomalies.addAll(sourceCodeAnomalies);
-		}
-
+		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<>();
+		anomalyMap.put(this, this.sourceCodeAnomalies);
 		return anomalyMap;
 	}
 

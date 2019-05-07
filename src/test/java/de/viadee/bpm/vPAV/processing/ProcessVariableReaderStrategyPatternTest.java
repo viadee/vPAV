@@ -90,7 +90,7 @@ public class ProcessVariableReaderStrategyPatternTest {
 				.getModelElementsByType(ServiceTask.class);
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-		final ControlFlowGraph cg = new ControlFlowGraph(element);
+		final ControlFlowGraph cg = new ControlFlowGraph();
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
 
 		final JavaReaderContext pvc = new JavaReaderContext();
@@ -117,7 +117,7 @@ public class ProcessVariableReaderStrategyPatternTest {
 		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
-		final ControlFlowGraph cg = new ControlFlowGraph(element);
+		final ControlFlowGraph cg = new ControlFlowGraph();
 		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
 
 		final JavaReaderContext pvc = new JavaReaderContext();

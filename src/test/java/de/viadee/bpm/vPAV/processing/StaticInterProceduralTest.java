@@ -60,7 +60,7 @@ public class StaticInterProceduralTest {
 
         // When
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        ControlFlowGraph cg = new ControlFlowGraph(null);
+        ControlFlowGraph cg = new ControlFlowGraph();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", null, null, null, null, cg));
         // Then

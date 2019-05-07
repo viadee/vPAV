@@ -31,7 +31,10 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.BitSet;
@@ -41,8 +44,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class ControlFlowGraph {
-
-	private BpmnElement element;
 
 	private LinkedHashMap<String, Node> nodes;
 
@@ -58,8 +59,7 @@ public class ControlFlowGraph {
 
 	private int priorLevel;
 
-	public ControlFlowGraph(final BpmnElement element) {
-		this.element = element;
+	public ControlFlowGraph() {
 		nodes = new LinkedHashMap<>();
 		this.operations = new LinkedHashMap<>();
 		defCounter = 0;
@@ -119,7 +119,6 @@ public class ControlFlowGraph {
 	 */
 	public void analyze(final BpmnElement element) {
 		computeKillSet();
-		computeLineByLine();
 		computeReachingDefinitions();
 		extractAnomalies(element);
 	}
@@ -137,25 +136,6 @@ public class ControlFlowGraph {
 								&& !entry.getValue().getRight().getId().equals(map.getValue().getRight().getId()))
 						.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 				node.setKilled(new LinkedHashMap<>(result));
-			}
-		}
-	}
-
-	/**
-	 * Finds anomalies inside blocks by checking statements unit by unit
-	 */
-	private void computeLineByLine() {
-		for (final Node node : getNodes().values()) {
-			if (node.getOperations().size() >= 2) {
-				ProcessVariableOperation prev = null;
-				for (ImmutablePair<BitSet, ProcessVariableOperation> operation : node.getOperations().values()) {
-					ProcessVariableOperation curr = operation.getRight();
-					if (prev == null) {
-						prev = curr;
-						continue;
-					}
-					checkAnomaly(element, curr, prev);
-				}
 			}
 		}
 	}
@@ -218,42 +198,154 @@ public class ControlFlowGraph {
 
 	/**
 	 * Based on the calculated sets, extract the anomalies found on source code
-	 * level dd (inUnused U defined) du (inUnused U killed) ur (used - inUnused -
-	 * inUsed) d- (inUnused U inUsed -(defined - killed - used)) uu ()
+	 * level
 	 * 
 	 * @param element
 	 *            Current BpmnElement
 	 */
 	private void extractAnomalies(final BpmnElement element) {
 		for (Node node : nodes.values()) {
-			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> ddAnomalies = new LinkedHashMap<>();
-			ddAnomalies.putAll(node.getInUnused());
-			ddAnomalies.putAll(node.getDefined());
+			// DD (inUnused U defined)
+			ddAnomalies(element, node);
 
-			if (!ddAnomalies.isEmpty()) {
-				ddAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(new AnomalyContainer(v.right.getName(),
-						Anomaly.DD, element.getBaseElement().getId(), v.right)));
+			// DU (inUnused U killed)
+			duAnomalies(element, node);
+
+			// UR (used - inUnused - inUsed - defined(only if define operation comes after
+			// use))
+			urAnomalies(element, node);
+
+			// D- (inUnused U inUsed - (defined - killed - used))
+			dNopAnomalies(element, node);
+
+			// TODO: UU
+			uuAnomalies(element, node);
+			// TODO: -R
+		}
+	}
+
+	/**
+	 * Extract UU anomalies
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param node
+	 *            Current node
+	 */
+	private void uuAnomalies(BpmnElement element, Node node) {
+
+	}
+
+	/**
+	 * Extract D- anomalies
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param node
+	 *            Current node
+	 */
+	private void dNopAnomalies(final BpmnElement element, final Node node) {
+		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> dNopAnomaliesTemp = new LinkedHashMap<>(
+				node.getInUnused());
+		dNopAnomaliesTemp.putAll(node.getInUsed());
+		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> dNopAnomalies = new LinkedHashMap<>(
+				dNopAnomaliesTemp);
+
+		dNopAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+			if (value.getRight().getName().equals(value2.getRight().getName())) {
+				dNopAnomalies.remove(key);
 			}
+		}));
 
-			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> duAnomalies = new LinkedHashMap<>();
-			duAnomalies.putAll(node.getInUnused());
-			duAnomalies.putAll(node.getKilled());
-
-			if (!duAnomalies.isEmpty()) {
-				duAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(new AnomalyContainer(v.right.getName(),
-						Anomaly.DU, element.getBaseElement().getId(), v.right)));
+		dNopAnomaliesTemp.forEach((key, value) -> node.getKilled().forEach((key2, value2) -> {
+			if (value.getRight().getName().equals(value2.getRight().getName())) {
+				dNopAnomalies.remove(key);
 			}
+		}));
 
-			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> urAnomalies = new LinkedHashMap<>();
-			urAnomalies.putAll(node.getUsed());
-			urAnomalies.putAll(getSetDifference(urAnomalies, node.getInUnused()));
-			urAnomalies.putAll(getSetDifference(urAnomalies, node.getUsed()));
-
-			if (!urAnomalies.isEmpty()) {
-				urAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(new AnomalyContainer(v.right.getName(),
-						Anomaly.UR, element.getBaseElement().getId(), v.right)));
+		dNopAnomaliesTemp.forEach((key, value) -> node.getUsed().forEach((key2, value2) -> {
+			if (value.getRight().getName().equals(value2.getRight().getName())) {
+				dNopAnomalies.remove(key);
 			}
+		}));
 
+		if (!dNopAnomalies.isEmpty()) {
+			dNopAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
+					new AnomalyContainer(v.right.getName(), Anomaly.D, element.getBaseElement().getId(), v.right)));
+		}
+	}
+
+	/**
+	 * Extract UR anomalies
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param node
+	 *            Current node
+	 */
+	private void urAnomalies(final BpmnElement element, final Node node) {
+		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> urAnomaliesTemp = new LinkedHashMap<>(
+				node.getUsed());
+		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> urAnomalies = new LinkedHashMap<>(
+				urAnomaliesTemp);
+
+		urAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
+			if (value.getRight().getName().equals(value2.getRight().getName())) {
+				urAnomalies.remove(key);
+			}
+		}));
+
+		urAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
+			if (value.getRight().getName().equals(value2.getRight().getName())) {
+				urAnomalies.remove(key);
+			}
+		}));
+
+		urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+			if (value.getRight().getName().equals(value2.getRight().getName())) {
+				if (key < key2) {
+					urAnomalies.remove(key);
+				}
+			}
+		}));
+
+		if (!urAnomalies.isEmpty()) {
+			urAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
+					new AnomalyContainer(v.right.getName(), Anomaly.UR, element.getBaseElement().getId(), v.right)));
+		}
+	}
+
+	/**
+	 * Extract DU anomalies
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param node
+	 *            Current node
+	 */
+	private void duAnomalies(final BpmnElement element, final Node node) {
+		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> duAnomalies = new LinkedHashMap<>(
+				getIntersection(node.getInUnused(), node.getKilled()));
+		if (!duAnomalies.isEmpty()) {
+			duAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
+					new AnomalyContainer(v.right.getName(), Anomaly.DU, element.getBaseElement().getId(), v.right)));
+		}
+	}
+
+	/**
+	 * Extract DD anomalies
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param node
+	 *            Current node
+	 */
+	private void ddAnomalies(final BpmnElement element, final Node node) {
+		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> ddAnomalies = new LinkedHashMap<>(
+				getIntersection(node.getInUnused(), node.getDefined()));
+		if (!ddAnomalies.isEmpty()) {
+			ddAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
+					new AnomalyContainer(v.right.getName(), Anomaly.DD, element.getBaseElement().getId(), v.right)));
 		}
 	}
 
@@ -280,91 +372,24 @@ public class ControlFlowGraph {
 	}
 
 	/**
-	 * Check for data-flow anomaly between current and previous variable operation
+	 * Helper method to create the intersection of two given maps
 	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param curr
-	 *            current operation
-	 * @param prev
-	 *            previous operation
+	 * @param mapOne
+	 *            First map
+	 * @param mapTwo
+	 *            Second map
+	 * @return Intersection of given maps
 	 */
-	private void checkAnomaly(final BpmnElement element, final ProcessVariableOperation curr,
-			final ProcessVariableOperation prev) {
-		if (urSourceCode(prev, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
+	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getIntersection(
+			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> mapOne,
+			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> mapTwo) {
+		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> intersection = new LinkedHashMap<>();
+		for (Integer key : mapOne.keySet()) {
+			if (mapTwo.containsKey(key)) {
+				intersection.put(key, mapOne.get(key));
+			}
 		}
-
-		if (ddSourceCode(prev, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(), curr));
-		}
-
-		if (duSourceCode(prev, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(), curr));
-		}
-		if (uuSourceCode(prev, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(), curr));
-		}
-	}
-
-	/**
-	 * UU anomaly: second last operation of PV is DELETE, last operation is DELETE
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean uuSourceCode(ProcessVariableOperation prev, ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.DELETE)
-				&& prev.getOperation().equals(VariableOperation.DELETE);
-	}
-
-	/**
-	 * UR anomaly: second last operation of PV is DELETE, last operation is READ
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.READ)
-				&& prev.getOperation().equals(VariableOperation.DELETE);
-	}
-
-	/**
-	 * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.WRITE)
-				&& prev.getOperation().equals(VariableOperation.WRITE);
-	}
-
-	/**
-	 * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.DELETE)
-				&& prev.getOperation().equals(VariableOperation.WRITE);
+		return intersection;
 	}
 
 	int getDefCounter() {

@@ -107,7 +107,7 @@ public class ProcessVariableReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final ControlFlowGraph cg = new ControlFlowGraph(element);
+        final ControlFlowGraph cg = new ControlFlowGraph();
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, cg));
 
@@ -130,7 +130,7 @@ public class ProcessVariableReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        final ControlFlowGraph cg = new ControlFlowGraph(element);
+        final ControlFlowGraph cg = new ControlFlowGraph();
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, cg));
 
