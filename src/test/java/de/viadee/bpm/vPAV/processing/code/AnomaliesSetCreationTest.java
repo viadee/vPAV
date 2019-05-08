@@ -61,7 +61,7 @@ public class AnomaliesSetCreationTest {
 
         Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
         assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
-        assertEquals("Expected a DD anomaly but found " + anomaly, anomaly, Anomaly.DD);
+        assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.DD, anomaly);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class AnomaliesSetCreationTest {
 
         Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
         assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
-        assertEquals("Expected a DU anomaly but found " + anomaly, anomaly, Anomaly.DU);
+        assertEquals("Expected a DU anomaly but found " + anomaly, Anomaly.DU, anomaly);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class AnomaliesSetCreationTest {
 
         Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
         assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
-        assertEquals("Expected a UU anomaly but found " + anomaly, anomaly, Anomaly.UU);
+        assertEquals("Expected a UU anomaly but found " + anomaly, Anomaly.UU, anomaly);
     }
 
     @Test
