@@ -375,13 +375,13 @@ public class ControlFlowGraph {
 			}
 		}));
 
-		urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-			if (value.getRight().getName().equals(value2.getRight().getName())) {
-				if (key < key2) {
-					urAnomalies.remove(key);
-				}
-			}
-		}));
+//		urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+//			if (value.getRight().getName().equals(value2.getRight().getName())) {
+//				if (key > key2) {
+//					urAnomalies.remove(key);
+//				}
+//			}
+//		}));
 
 		if (!urAnomalies.isEmpty()) {
 			urAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
@@ -398,26 +398,26 @@ public class ControlFlowGraph {
      *            Current node
      */
     private void uuAnomalies(BpmnElement element, Node node) {
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> urAnomaliesTemp = new LinkedHashMap<>(
+        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> uuAnomaliesTemp = new LinkedHashMap<>(
                 node.getKilled());
         final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> uuAnomalies = new LinkedHashMap<>(
-                urAnomaliesTemp);
+                uuAnomaliesTemp);
 
-        urAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
+        uuAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
             if (value.getRight().getName().equals(value2.getRight().getName())) {
                 uuAnomalies.remove(key);
             }
         }));
 
-        urAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
+        uuAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
             if (value.getRight().getName().equals(value2.getRight().getName())) {
                 uuAnomalies.remove(key);
             }
         }));
 
-        urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+        uuAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
             if (value.getRight().getName().equals(value2.getRight().getName())) {
-                if (key < key2) {
+                if (key > key2) {
                     uuAnomalies.remove(key);
                 }
             }
