@@ -107,13 +107,30 @@ public class AnomaliesSetCreationTest {
 
         Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
         assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
-        assertEquals("Expected a UR anomaly but found " + anomaly, anomaly, Anomaly.UR);
-
+        assertEquals("Expected a UR anomaly but found " + anomaly, Anomaly.UR, anomaly);
     }
 
     @Test
     public void findUU() {
+        final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUU.bpmn";
 
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<ServiceTask> tasks = modelInstance
+                .getModelElementsByType(ServiceTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+        final ControlFlowGraph cg = new ControlFlowGraph();
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+                "de.viadee.bpm.vPAV.delegates.DelegateAnomalyUU", element, null, null, null, cg));
+        cg.analyze(element);
+
+        Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
+        assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
+        assertEquals("Expected a UU anomaly but found " + anomaly, anomaly, Anomaly.UU);
     }
 
     @Test
@@ -127,6 +144,5 @@ public class AnomaliesSetCreationTest {
     public void findNOPR() {
 
     }
-
 
 }

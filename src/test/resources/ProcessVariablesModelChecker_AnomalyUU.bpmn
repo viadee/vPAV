@@ -7,9 +7,9 @@
     <bpmn:endEvent id="EndEvent_0vzc9ma">
       <bpmn:incoming>SequenceFlow_1j6llbe</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_1j6llbe" sourceRef="Task_1gwl" targetRef="EndEvent_0vzc9ma" />
-    <bpmn:sequenceFlow id="SequenceFlow_1tzx0zn" sourceRef="StartEvent_1" targetRef="Task_1gwl" />
-    <bpmn:serviceTask id="Task_1gwl" name="Test" camunda:class="de.viadee.bpm.vPAV.delegates.DelegateAnomalyUR">
+    <bpmn:sequenceFlow id="SequenceFlow_1j6llbe" sourceRef="Task_1gwlfgh" targetRef="EndEvent_0vzc9ma" />
+    <bpmn:sequenceFlow id="SequenceFlow_1tzx0zn" sourceRef="StartEvent_1" targetRef="Task_1gwlfgh" />
+    <bpmn:serviceTask id="Task_1gwlfgh" name="Test" camunda:class="de.viadee.bpm.vPAV.delegates.DelegateAnomalyUU">
       <bpmn:incoming>SequenceFlow_1tzx0zn</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1j6llbe</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -39,7 +39,7 @@
           <dc:Bounds x="228" y="98.5" width="0" height="13" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_0j3nf2f_di" bpmnElement="Task_1gwl">
+      <bpmndi:BPMNShape id="ServiceTask_0j3nf2f_di" bpmnElement="Task_1gwlfgh">
         <dc:Bounds x="247" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>

@@ -136,6 +136,7 @@ public class ControlFlowGraph {
 						continue;
 					}
 					checkAnomaly(element, curr, prev);
+					prev = curr;
 				}
 			}
 		}
@@ -305,7 +306,7 @@ public class ControlFlowGraph {
 			urAnomalies(element, node);
 
 			// UU ()
-//			uuAnomalies(element, node);
+			uuAnomalies(element, node);
 
 			// D- (inUnused U inUsed - (defined - killed - used))
 //			dNopAnomalies(element, node);
@@ -398,7 +399,20 @@ public class ControlFlowGraph {
      *            Current node
      */
     private void uuAnomalies(BpmnElement element, Node node) {
+        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> uuAnomalies = new LinkedHashMap<>(
+                node.getKilled());
+        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> pool = new LinkedHashMap<>();
+        pool.putAll(node.getInUsed());
+        pool.putAll(node.getInUnused());
+        pool.putAll(node.getUsed());
+        pool.putAll(node.getDefined());
 
+        if (pool.isEmpty()) {
+            if (!uuAnomalies.isEmpty()) {
+                uuAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
+                        new AnomalyContainer(v.right.getName(), Anomaly.UU, element.getBaseElement().getId(), v.right)));
+            }
+        }
     }
 
     /**
