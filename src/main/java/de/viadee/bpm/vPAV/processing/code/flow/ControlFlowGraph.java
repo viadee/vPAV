@@ -158,12 +158,10 @@ public class ControlFlowGraph {
 			element.addSourceCodeAnomaly(
 					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
 		}
-
 		if (ddSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
 					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(), curr));
 		}
-
 		if (duSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
 					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(), curr));
@@ -308,11 +306,12 @@ public class ControlFlowGraph {
 			// UU ()
 			uuAnomalies(element, node);
 
+            // -R ()
+			nopRAnomalies(element, node);
+
 			// D- (inUnused U inUsed - (defined - killed - used))
 //			dNopAnomalies(element, node);
 
-			// -R ()
-//			nopRAnomalies(element, node);
 		});
 	}
 
@@ -399,20 +398,49 @@ public class ControlFlowGraph {
      *            Current node
      */
     private void uuAnomalies(BpmnElement element, Node node) {
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> uuAnomalies = new LinkedHashMap<>(
+        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> urAnomaliesTemp = new LinkedHashMap<>(
                 node.getKilled());
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> pool = new LinkedHashMap<>();
-        pool.putAll(node.getInUsed());
-        pool.putAll(node.getInUnused());
-        pool.putAll(node.getUsed());
-        pool.putAll(node.getDefined());
+        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> uuAnomalies = new LinkedHashMap<>(
+                urAnomaliesTemp);
 
-        if (pool.isEmpty()) {
-            if (!uuAnomalies.isEmpty()) {
-                uuAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                        new AnomalyContainer(v.right.getName(), Anomaly.UU, element.getBaseElement().getId(), v.right)));
+        urAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
+            if (value.getRight().getName().equals(value2.getRight().getName())) {
+                uuAnomalies.remove(key);
             }
+        }));
+
+        urAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
+            if (value.getRight().getName().equals(value2.getRight().getName())) {
+                uuAnomalies.remove(key);
+            }
+        }));
+
+        urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+            if (value.getRight().getName().equals(value2.getRight().getName())) {
+                if (key < key2) {
+                    uuAnomalies.remove(key);
+                }
+            }
+        }));
+
+
+        if (!uuAnomalies.isEmpty()) {
+            uuAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
+                    new AnomalyContainer(v.right.getName(), Anomaly.UU, element.getBaseElement().getId(), v.right)));
         }
+
+    }
+
+    /**
+     * Extract -R anomalies
+     *
+     * @param element
+     *            Current BpmnElement
+     * @param node
+     *            Current node
+     */
+    private void nopRAnomalies(BpmnElement element, Node node) {
+
     }
 
     /**
@@ -453,18 +481,6 @@ public class ControlFlowGraph {
                     new AnomalyContainer(v.right.getName(), Anomaly.D, element.getBaseElement().getId(), v.right)));
         }
     }
-
-	/**
-	 * Extract -R anomalies
-	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param node
-	 *            Current node
-	 */
-	private void nopRAnomalies(BpmnElement element, Node node) {
-
-	}
 
 	/**
 	 * Helper method to create the set difference of two given maps (based on variable names)

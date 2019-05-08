@@ -134,15 +134,15 @@ public class AnomaliesSetCreationTest {
     }
 
     @Test
-    public void findDNOP() {
-
+    public void findNOPR() {
     }
-
-
 
     @Test
-    public void findNOPR() {
-
+    public void findDNOP() {
     }
+
+
+
+
 
 }

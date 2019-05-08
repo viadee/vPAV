@@ -5,7 +5,7 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 
 import java.util.Random;
 
-public class DelegateAnomalyUU implements JavaDelegate {
+public class DelegateAnomalyNopR implements JavaDelegate {
 
     private final static String first = "1";
 
@@ -16,10 +16,10 @@ public class DelegateAnomalyUU implements JavaDelegate {
 
     private void dd(DelegateExecution execution) {
         Random r = new Random();
-        execution.removeVariable(first);
         if (r.nextInt(5) > 2) {
             int i = 3;
         }
-        execution.removeVariable(first);
+
+        execution.getVariable(first);
     }
 }
