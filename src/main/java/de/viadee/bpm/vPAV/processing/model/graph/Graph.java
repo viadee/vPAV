@@ -269,7 +269,7 @@ public class Graph implements IGraph {
     @Override
     public Map<BpmnElement, List<AnomalyContainer>> getNodesWithAnomalies() {
 
-        final Map<BpmnElement, List<AnomalyContainer>> anomalies = new HashMap<BpmnElement, List<AnomalyContainer>>();
+        final Map<BpmnElement, List<AnomalyContainer>> anomalies = new HashMap<>();
         for (final BpmnElement node : adjacencyListSucessor.keySet()) {
             anomalies.putAll(node.getAnomalies());
         }

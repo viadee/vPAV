@@ -106,6 +106,14 @@ public class Node {
 	}
 
 	/**
+	 * Set the predecessor nodes of the current node for intraprocedural methods
+	 */
+	void setPredsIntraProcedural(final String key) {
+		this.predecessors.add(controlFlowGraph.getNodes().get(key));
+	}
+
+
+	/**
 	 * Set the predecessor nodes of the current node
 	 */
 	void setPreds() {
@@ -247,5 +255,6 @@ public class Node {
 	void setOutUnused(LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> outUnused) {
 		this.outUnused = outUnused;
 	}
+
 
 }

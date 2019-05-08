@@ -831,12 +831,13 @@ public class JavaReaderStatic implements JavaReader {
 			className = cleanString(className, false);
 			if (classPaths.contains(className) || className.contains("$")) {
 				controlFlowGraph.incrementRecursionCounter();
+				controlFlowGraph.setPriorLevel(controlFlowGraph.getInternalNodeCounter() - 1);
 				controlFlowGraph.resetInternalNodeCounter();
-				controlFlowGraph.setPriorLevel(controlFlowGraph.getInternalNodeCounter());
 				G.reset();
 				classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
 						scopeId, outSet, variableBlock, assignmentStmt, args, controlFlowGraph);
 				controlFlowGraph.decrementRecursionCounter();
+				controlFlowGraph.setInternalNodeCounter(controlFlowGraph.getPriorLevel() + 1);
 			}
 		}
 

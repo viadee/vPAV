@@ -31,10 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.BitSet;
@@ -76,7 +73,7 @@ public class ControlFlowGraph {
 	 *            Node to be added to the control flow graph
 	 */
 	public void addNode(final Node node) {
-		String key = createHierarchy();
+		String key = createHierarchy(node);
 		node.setId(key);
 		this.nodes.put(key, node);
 	}
@@ -89,7 +86,7 @@ public class ControlFlowGraph {
 	 * 
 	 * @return Id of node
 	 */
-	private String createHierarchy() {
+	private String createHierarchy(final Node node) {
 		StringBuilder key = new StringBuilder();
 		if (recursionCounter == 0) {
 			nodeCounter++;
@@ -100,6 +97,10 @@ public class ControlFlowGraph {
 				key.append(".");
 				if (i == recursionCounter) {
 					key.append(internalNodeCounter);
+					String predKey = key.toString();
+					if (internalNodeCounter == 0) {
+						node.setPredsIntraProcedural(predKey.substring(0, predKey.length() - 2));
+					}
 				} else {
 					key.append(priorLevel);
 				}
@@ -120,7 +121,114 @@ public class ControlFlowGraph {
 	public void analyze(final BpmnElement element) {
 		computeKillSet();
 		computeReachingDefinitions();
+		computeLineByLine(element);
 		extractAnomalies(element);
+	}
+	/**
+	 * Finds anomalies inside blocks by checking statements unit by unit
+	 */
+	private void computeLineByLine(final BpmnElement element) {
+		for (final Node node : getNodes().values()) {
+			if (node.getOperations().size() >= 2) {
+				ProcessVariableOperation prev = null;
+				for (ImmutablePair<BitSet, ProcessVariableOperation> operation : node.getOperations().values()) {
+					ProcessVariableOperation curr = operation.getRight();
+					if (prev == null) {
+						prev = curr;
+						continue;
+					}
+					checkAnomaly(element, curr, prev);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Check for data-flow anomaly between current and previous variable operation
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param curr
+	 *            current operation
+	 * @param prev
+	 *            previous operation
+	 */
+	private void checkAnomaly(final BpmnElement element, final ProcessVariableOperation curr,
+							  final ProcessVariableOperation prev) {
+		if (urSourceCode(prev, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
+		}
+
+		if (ddSourceCode(prev, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(), curr));
+		}
+
+		if (duSourceCode(prev, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(), curr));
+		}
+		if (uuSourceCode(prev, curr)) {
+			element.addSourceCodeAnomaly(
+					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(), curr));
+		}
+	}
+
+	/**
+	 * UU anomaly: second last operation of PV is DELETE, last operation is DELETE
+	 *
+	 * @param prev
+	 *            Previous ProcessVariable
+	 * @param curr
+	 *            Current ProcessVariable
+	 * @return true/false
+	 */
+	private boolean uuSourceCode(ProcessVariableOperation prev, ProcessVariableOperation curr) {
+		return curr.getOperation().equals(VariableOperation.DELETE)
+				&& prev.getOperation().equals(VariableOperation.DELETE);
+	}
+
+	/**
+	 * UR anomaly: second last operation of PV is DELETE, last operation is READ
+	 *
+	 * @param prev
+	 *            Previous ProcessVariable
+	 * @param curr
+	 *            Current ProcessVariable
+	 * @return true/false
+	 */
+	private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		return curr.getOperation().equals(VariableOperation.READ)
+				&& prev.getOperation().equals(VariableOperation.DELETE);
+	}
+
+	/**
+	 * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
+	 *
+	 * @param prev
+	 *            Previous ProcessVariable
+	 * @param curr
+	 *            Current ProcessVariable
+	 * @return true/false
+	 */
+	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		return curr.getOperation().equals(VariableOperation.WRITE)
+				&& prev.getOperation().equals(VariableOperation.WRITE);
+	}
+
+	/**
+	 * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
+	 *
+	 * @param prev
+	 *            Previous ProcessVariable
+	 * @param curr
+	 *            Current ProcessVariable
+	 * @return true/false
+	 */
+	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+		return curr.getOperation().equals(VariableOperation.DELETE)
+				&& prev.getOperation().equals(VariableOperation.WRITE);
 	}
 
 	/**
@@ -211,30 +319,20 @@ public class ControlFlowGraph {
 			// DU (inUnused U killed)
 			duAnomalies(element, node);
 
-			// UR (used - inUnused - inUsed - defined(only if define operation comes after
-			// use))
+			// UR (used - inUnused - inUsed - defined)
 			urAnomalies(element, node);
 
 			// D- (inUnused U inUsed - (defined - killed - used))
 			dNopAnomalies(element, node);
 
-			// TODO: UU
+			// UU ()
 			uuAnomalies(element, node);
-			// TODO: -R
+
+			// -R ()
+			nopRAnomalies(element, node);
 		}
 	}
 
-	/**
-	 * Extract UU anomalies
-	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param node
-	 *            Current node
-	 */
-	private void uuAnomalies(BpmnElement element, Node node) {
-
-	}
 
 	/**
 	 * Extract D- anomalies
@@ -349,6 +447,29 @@ public class ControlFlowGraph {
 		}
 	}
 
+
+	/**
+	 * Extract -R anomalies
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param node
+	 *            Current node
+	 */
+	private void nopRAnomalies(BpmnElement element, Node node) {
+	}
+
+	/**
+	 * Extract UU anomalies
+	 *
+	 * @param element
+	 *            Current BpmnElement
+	 * @param node
+	 *            Current node
+	 */
+	private void uuAnomalies(BpmnElement element, Node node) {
+
+	}
 	/**
 	 * Helper method to create the set difference of two given maps
 	 *
@@ -422,5 +543,13 @@ public class ControlFlowGraph {
 
 	public LinkedHashMap<String, Node> getNodes() {
 		return nodes;
+	}
+
+	public int getPriorLevel() {
+		return priorLevel;
+	}
+
+	public void setInternalNodeCounter(int internalNodeCounter) {
+		this.internalNodeCounter = internalNodeCounter;
 	}
 }
