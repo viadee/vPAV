@@ -307,7 +307,7 @@ public class ControlFlowGraph {
 			uuAnomalies(element, node);
 
             // -R ()
-			nopRAnomalies(element, node);
+//			nopRAnomalies(element, node);
 
 			// D- (inUnused U inUsed - (defined - killed - used))
 //			dNopAnomalies(element, node);
@@ -374,14 +374,6 @@ public class ControlFlowGraph {
 				urAnomalies.remove(key);
 			}
 		}));
-
-//		urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-//			if (value.getRight().getName().equals(value2.getRight().getName())) {
-//				if (key > key2) {
-//					urAnomalies.remove(key);
-//				}
-//			}
-//		}));
 
 		if (!urAnomalies.isEmpty()) {
 			urAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
