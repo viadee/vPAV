@@ -31,26 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
-import soot.Body;
-import soot.PatchingChain;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Unit;
+import soot.*;
 import soot.jimple.AssignStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.options.Options;
+
+import java.util.*;
 
 public class ProcessVariablesScanner {
 
@@ -106,6 +95,8 @@ public class ProcessVariablesScanner {
 
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
+        Scene.v().getBasicClasses();
+        Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
 
         SootClass sootClass = Scene.v().forceResolve(cleanString(filePath, true), SootClass.SIGNATURES);
 

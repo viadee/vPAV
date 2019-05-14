@@ -140,6 +140,7 @@ public class JavaReaderStatic implements JavaReader {
 
 			Options.v().set_whole_program(true);
 			Options.v().set_allow_phantom_refs(true);
+			Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
 
 			SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
@@ -349,6 +350,7 @@ public class JavaReaderStatic implements JavaReader {
 
 		Options.v().set_whole_program(true);
 		Options.v().set_allow_phantom_refs(true);
+		Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
 
 		SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
