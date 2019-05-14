@@ -31,15 +31,14 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.util.Collection;
 
 @XmlRootElement(name = "rule")
 @XmlType(propOrder = { "name", "state", "description", "settings", "elementConventions", "modelConventions" })
 public class XmlRule {
+
+    private String id;
 
     private String name;
 
@@ -56,16 +55,26 @@ public class XmlRule {
     public XmlRule() {
     }
 
-    public XmlRule(String name, boolean state, String description, final Collection<XmlSetting> settings,
+    public XmlRule(String id, String name, boolean state, String description, final Collection<XmlSetting> settings,
             final Collection<XmlElementConvention> elementConventions,
             final Collection<XmlModelConvention> modelConventions) {
         super();
+        this.id = id;
         this.name = name;
         this.state = state;
         this.description = description;
         this.settings = settings;
         this.elementConventions = elementConventions;
         this.modelConventions = modelConventions;
+    }
+
+    @XmlAttribute(name = "id", required = false)
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @XmlElement(name = "name", required = true)

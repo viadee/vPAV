@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -144,6 +145,10 @@ public class ElementGraphBuilder {
 			final Collection<CallActivity> callActivities = new ArrayList<>();
 
 			for (final FlowElement element : elements) {
+				// initialize element
+				final BpmnElement node = new BpmnElement(processDefinition, element);
+				final ControlFlowGraph controlFlowGraph = new ControlFlowGraph(node);
+
 				if (element instanceof SequenceFlow) {
 					// mention sequence flows
 					final SequenceFlow flow = (SequenceFlow) element;
@@ -159,14 +164,11 @@ public class ElementGraphBuilder {
 				} else if (element instanceof SubProcess) {
 					final SubProcess subprocess = (SubProcess) element;
 					addElementsSubprocess(context, fileScanner, subProcesses, flows, boundaryEvents, graph, subprocess,
-							processDefinition);
+							processDefinition, controlFlowGraph);
 				}
 
 				// Ordered map to hold operations in correct order
 				final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-
-				// initialize element
-				final BpmnElement node = new BpmnElement(processDefinition, element);
 
 				// retrieve initial variable operation (should be WRITE)
 				if (element.getElementType().getTypeName().equals(BpmnConstants.START_EVENT)) {
@@ -206,7 +208,7 @@ public class ElementGraphBuilder {
 
 				// examine process variables and save it with access operation
 				final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner);
-				variables.putAll(reader.getVariablesFromElement(context, fileScanner, node));
+				variables.putAll(reader.getVariablesFromElement(context, fileScanner, node, controlFlowGraph));
 				// examine process variables for element and set it
 				node.setProcessVariables(variables);
 
@@ -367,20 +369,20 @@ public class ElementGraphBuilder {
 	 *            Current Graph
 	 * @param process
 	 *            Current Process
-	 * @param processdefinitionPath
+	 * @param processDefinition
 	 *            Current Path to process
 	 */
 	private void addElementsSubprocess(final JavaReaderContext context, final FileScanner fileScanner,
 			final Collection<SubProcess> subProcesses, final Collection<SequenceFlow> flows,
 			final Collection<BoundaryEvent> events, final IGraph graph, final SubProcess process,
-			final String processdefinitionPath) {
+			final String processDefinition, final ControlFlowGraph cg) {
 		subProcesses.add(process);
 		final Collection<FlowElement> subElements = process.getFlowElements();
 		for (final FlowElement subElement : subElements) {
 			if (subElement instanceof SubProcess) {
 				final SubProcess subProcess = (SubProcess) subElement;
 				addElementsSubprocess(context, fileScanner, subProcesses, flows, events, graph, subProcess,
-						processdefinitionPath);
+						processDefinition, cg);
 			} else if (subElement instanceof SequenceFlow) {
 				final SequenceFlow flow = (SequenceFlow) subElement;
 				flows.add(flow);
@@ -389,11 +391,11 @@ public class ElementGraphBuilder {
 				events.add(boundaryEvent);
 			}
 			// add elements of the sub process as nodes
-			final BpmnElement node = new BpmnElement(processdefinitionPath, subElement);
+			final BpmnElement node = new BpmnElement(processDefinition, subElement);
 			// determine process variables with operations
 			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 			variables.putAll(new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner)
-					.getVariablesFromElement(context, fileScanner, node));
+					.getVariablesFromElement(context, fileScanner, node, cg));
 			// set process variables for the node
 			node.setProcessVariables(variables);
 			// mention the element

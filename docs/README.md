@@ -39,11 +39,19 @@ Consistency checks are performed by individual modules called checkers, which se
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
 ### Configuration
-The viadee Process Application Validator comes with a default ruleSet.xml which provides some basic rules. In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
+The viadee Process Application Validator uses a rule set to define which checks are executed.
+The plugin comes with a default ruleSet.xml which provides some basic rules.
+In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
 This allows you to use your own set of rules for naming conventions or to de-/activate certain checkers.
+To write your own rule set, you can follow the example of [ruleSetDefault.xml](https://github.com/viadee/vPAV/blob/master/src/main/resources/ruleSetDefault.xml).
 
 ### One set of rules to rule them all
-Furthermore you can use the plugin to manage multiple projects. Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar). In your child projects you have to add the dependency to the parent project and to vPAV.
+Furthermore you can use the plugin to manage multiple projects.
+A parent rule set can be shared among them so that you don't have to define the same checkers multiple times.
+The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit".
+Local sets of rules will override inherited rules in order to allow for customization.
+
+Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar).
 
 ```xml
 <dependency>
@@ -59,15 +67,50 @@ Furthermore you can use the plugin to manage multiple projects. Just create a bl
 </dependency>
 ```
 
-The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit". Local sets of rules will override inherited rules in order to allow for customization.
+In your child projects you have to add the dependency to the parent project and to vPAV.
+The inheritance is only working if you define an own rule set in your child project.
+You cannot use the default rule set because it does not include inheritance.
 
-Make sure that inheritance is activated in the ruleSet.xml of your project.
+Make sure that inheritance is activated in the ruleSet.xml of your child project.
 ```xml 
 <rule>
 	<name>HasParentRuleSet</name>
 	<state>true</state>
 </rule>
 ```
+
+### Multiple checker configurations
+It might be useful to run a checker two times with different configurations. To prevent a rule from being overridden, you can define an ID.
+```xml 
+<rule id="xorChecker1">
+    <name>XorConventionChecker</name>
+	<state>true</state>
+	<settings>
+	    <setting name="requiredDefault">true</setting>
+	</settings>
+	<elementConventions>
+		<elementConvention>
+			<name>convention</name>
+			<description>gateway name has to end with an question mark</description>
+			<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
+		</elementConvention>
+	</elementConventions>
+</rule>
+```
+If two rule sets are merged (e. g. parent and child rule set), the following inheritance rules apply:
+- A parent rule will be overridden if a child rule has the same ID.
+- A parent rule will be loaded if no rule with the same ID exists in the child rule set.
+- If a rule does not have an ID, the name of the rule will be used and handled as ID.
+
+
+The following checkers/rules can only be defined once. It it not possible to have different configurations:
+- HasParentRuleSet
+- CreateOutputHTML
+- language
+- VersioningChecker
+- ProcessVariablesModelChecker
+- DataFlowChecker
+
 ### Exclusion of false positives
 An ignore file can be created to exclude false positives. The file has to be named **"ignoreIssues.txt"** and stored in **"src/test/resources"**. 
 Here, you can list IDs of the issues which should be ignored in the next validation run. This must be done line by line. Line comments are initiated with "#".
@@ -159,6 +202,12 @@ Add the dependency to your POM:
   <scope>test</scope>
 </dependency>
 ```
+
+### Location of BPMN models
+By default, the BPMN models have to be stored in the folder ``src\main\resources`` of your Camunda project. 
+You can also load models from other locations of your local filesystem.
+To specify another location, you have to create a ``vPav.properties`` file and put it in your classpath. The property ``basepath`` is used to define the path.
+You can use relative paths (e.g. ```basepath=src/main/java```) or absolute paths using the ``file:///`` scheme.
 
 ### JUnit
 Configure a JUnit-4 Test to fire up your usual Spring context - esp. delegates referenced in the process, 

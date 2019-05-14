@@ -37,5 +37,5 @@ import java.util.Map;
 
 public interface ConfigReader {
 
-    Map<String, Rule> read(final String file) throws ConfigReaderException;
+  Map<String, Map<String, Rule>> read(final String file) throws ConfigReaderException;
 }

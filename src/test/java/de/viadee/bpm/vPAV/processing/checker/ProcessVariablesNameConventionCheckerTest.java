@@ -43,6 +43,7 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.JavaReaderContext;
 import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -125,10 +126,11 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
+            final ControlFlowGraph cg = new ControlFlowGraph(element);
             ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
             
             final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element));
+            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, cg));
             
             element.setProcessVariables(variables);
 
@@ -162,10 +164,11 @@ public class ProcessVariablesNameConventionCheckerTest {
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement);
+            final ControlFlowGraph cg = new ControlFlowGraph(element);
             ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
             
             final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element));
+            variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element, cg));
             
             element.setProcessVariables(variables);
 

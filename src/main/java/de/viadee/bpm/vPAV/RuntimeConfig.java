@@ -49,7 +49,7 @@ public class RuntimeConfig {
 
 	private Map<String, String> beanMap;
 
-	private Map<String, Rule> activeRuleSet = new HashMap<>();
+	private Map<String, Map<String, Rule>> activeRuleSet = new HashMap<>();
 
 	private ClassLoader classLoader;
 
@@ -118,16 +118,23 @@ public class RuntimeConfig {
 		return viadeeRules;
 	}
 
-	public void addActiveRules(Map<String, Rule> rules) {
-		for (Map.Entry<String, Rule> entry : rules.entrySet()) {
-			Rule rule = entry.getValue();
-			if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET))
-				activeRuleSet.put(entry.getKey(), entry.getValue());
-			allActiveRules.add(rule.getName());
+	public void addActiveRules(Map<String, Map<String, Rule>> rules) {
+		for (Map.Entry<String, Map<String, Rule>> entry : rules.entrySet()) {
+			for (Map.Entry<String, Rule> ruleEntry : entry.getValue().entrySet()) {
+				Rule rule = ruleEntry.getValue();
+				if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET)) {
+					if (!activeRuleSet.containsKey(entry.getKey())) {
+						activeRuleSet.put(entry.getKey(), new HashMap<>());
+					}
+					activeRuleSet.get(entry.getKey()).put(ruleEntry.getKey(), ruleEntry.getValue());
+				}
+
+				allActiveRules.add(entry.getKey());
+			}
 		}
 	}
 
-	public Map<String, Rule> getActiveRuleSet() {
+	public Map<String, Map<String, Rule>> getActiveRuleSet() {
 		return activeRuleSet;
 	}
 
@@ -146,9 +153,9 @@ public class RuntimeConfig {
 	 * @param rules
 	 *            RuleSet Rules from ruleset
 	 */
-	public void retrieveLocale(Map<String, Rule> rules) {
+	public void retrieveLocale(Map<String, Map<String, Rule>> rules) {
 		try {
-			final Rule rule = rules.get("language");
+			final Rule rule = rules.get("language").get("language");
 			final Map<String, Setting> settings = rule.getSettings();
 			if (settings.get("locale").getValue().equals("de")) {
 				getResource("de_DE");

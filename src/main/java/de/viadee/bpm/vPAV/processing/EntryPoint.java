@@ -33,50 +33,51 @@ package de.viadee.bpm.vPAV.processing;
 
 public class EntryPoint {
 
-    private String className;
+	private String className;
 
-    private String methodName;
+	private String methodName;
 
-    private String messageName;
+	private String messageName;
 
-    private String entryPoint;
+	private String entryPoint;
 
-    public EntryPoint(final String className, final String methodName, final String messageName, final String entryPoint) {
-        this.className = className;
-        this.methodName = methodName;
-        this.messageName = messageName;
-        this.entryPoint = entryPoint;
-    }
+	public EntryPoint(final String className, final String methodName, final String messageName,
+			final String entryPoint) {
+		this.className = className;
+		this.methodName = methodName;
+		this.messageName = messageName;
+		this.entryPoint = entryPoint;
+	}
 
-    public String getClassName() {
-        return className;
-    }
+	public String getClassName() {
+		return className;
+	}
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
-    public String getMethodName() {
-        return methodName;
-    }
+	public String getMethodName() {
+		return methodName;
+	}
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
 
-    public String getMessageName() {
-        return messageName;
-    }
+	public String getMessageName() {
+		return messageName;
+	}
 
-    public void setMessageName(String messageName) {
-        this.messageName = messageName;
-    }
+	public void setMessageName(String messageName) {
+		this.messageName = messageName;
+	}
 
-    public String getEntryPoint() {
-        return entryPoint;
-    }
+	public String getEntryPoint() {
+		return entryPoint;
+	}
 
-    public void setEntryPoint(String entryPoint) {
-        this.entryPoint = entryPoint;
-    }
+	public void setEntryPoint(String entryPoint) {
+		this.entryPoint = entryPoint;
+	}
 }

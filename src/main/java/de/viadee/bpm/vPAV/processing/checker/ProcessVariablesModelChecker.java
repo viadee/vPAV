@@ -89,6 +89,13 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 									var.getElement().getBaseElement()
 											.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
 									var.getChapter(), var.getFieldType().getDescription())));
+				} else if (anomaly.getAnomaly() == Anomaly.UU) {
+					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.3"), //$NON-NLS-1$
+									var.getName(),
+									var.getElement().getBaseElement()
+											.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+									var.getChapter(), var.getFieldType().getDescription())));
 				}
 			}
 		}
@@ -96,9 +103,14 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 		return issues;
 	}
 
+	/**
+	 *
+	 * @param anomaly
+	 *            Anomaly
+	 * @return Warning or error
+	 */
 	private CriticalityEnum determineCriticality(final Anomaly anomaly) {
-
-		if (anomaly == Anomaly.DD || anomaly == Anomaly.DU) {
+		if (anomaly == Anomaly.DD || anomaly == Anomaly.DU || anomaly == Anomaly.UU) {
 			return CriticalityEnum.WARNING;
 		} else {
 			return CriticalityEnum.ERROR;

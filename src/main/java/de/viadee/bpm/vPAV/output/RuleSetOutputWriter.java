@@ -59,7 +59,7 @@ public class RuleSetOutputWriter {
      * @throws OutputWriterException
      *             Occurs if output can not be written
      */
-    public void write(Map<String, Rule> rules) throws OutputWriterException {
+    public void write(Map<String, Map<String, Rule>> rules) throws OutputWriterException {
         Writer writer = null;
 
         Path path = Paths.get(ConfigConstants.EFFECTIVE_RULESET);
@@ -83,7 +83,8 @@ public class RuleSetOutputWriter {
             try {
                 writer.close();
             } catch (Exception ex) {
-                /* ignore */}
+                /* ignore */
+            }
         }
     }
 
@@ -93,65 +94,67 @@ public class RuleSetOutputWriter {
      * @param rules
      * @return xmlRuleSet
      */
-    private static XmlRuleSet transformToXmlDatastructure(final Map<String, Rule> rules) {
+    private static XmlRuleSet transformToXmlDatastructure(final Map<String, Map<String, Rule>> rules) {
         XmlRuleSet xmlRuleSet = new XmlRuleSet();
         Collection<XmlRule> xmlRules = new ArrayList<XmlRule>();
 
-        for (Map.Entry<String, Rule> entry : rules.entrySet()) {
-            Rule rule = entry.getValue();
+        for (Map.Entry<String, Map<String, Rule>> entry : rules.entrySet()) {
+            for (Map.Entry<String, Rule> ruleEntry : entry.getValue().entrySet()) {
+                Rule rule = ruleEntry.getValue();
 
-            // Get XmlModelConventions
-            Collection<XmlModelConvention> xModelConventions = new ArrayList<XmlModelConvention>();
-            for (ModelConvention modCon : rule.getModelConventions()) {
-                XmlModelConvention xmlMoCon = new XmlModelConvention(modCon.getType());
-                xModelConventions.add(xmlMoCon);
-            }
-
-            // Get XmlElementConvention
-            Collection<XmlElementConvention> xElementConventions = new ArrayList<XmlElementConvention>();
-            for (ElementConvention elCon : rule.getElementConventions()) {
-                ElementFieldTypes eFT = elCon.getElementFieldTypes();
-                if (eFT != null) {
-                    Collection<String> cElFieTy = eFT.getElementFieldTypes();
-                    XmlElementFieldTypes xmlElFieTy = new XmlElementFieldTypes(cElFieTy,
-                            elCon.getElementFieldTypes().isExcluded());
-                    XmlElementConvention xmlElCon = new XmlElementConvention(elCon.getName(), xmlElFieTy,
-                            elCon.getDescription(), elCon.getPattern());
-                    xElementConventions.add(xmlElCon);
-                } else {
-                    XmlElementConvention xmlElCon = new XmlElementConvention(elCon.getName(), null,
-                            elCon.getDescription(), elCon.getPattern());
-                    xElementConventions.add(xmlElCon);
+                // Get XmlModelConventions
+                Collection<XmlModelConvention> xModelConventions = new ArrayList<XmlModelConvention>();
+                for (ModelConvention modCon : rule.getModelConventions()) {
+                    XmlModelConvention xmlMoCon = new XmlModelConvention(modCon.getType());
+                    xModelConventions.add(xmlMoCon);
                 }
-            }
 
-            // Get XmlSettings
-            Collection<XmlSetting> xSettings = new ArrayList<XmlSetting>();
-            for (Map.Entry<String, Setting> sEntry : rule.getSettings().entrySet()) {
-                Setting s = sEntry.getValue();
+                // Get XmlElementConvention
+                Collection<XmlElementConvention> xElementConventions = new ArrayList<XmlElementConvention>();
+                for (ElementConvention elCon : rule.getElementConventions()) {
+                    ElementFieldTypes eFT = elCon.getElementFieldTypes();
+                    if (eFT != null) {
+                        Collection<String> cElFieTy = eFT.getElementFieldTypes();
+                        XmlElementFieldTypes xmlElFieTy = new XmlElementFieldTypes(cElFieTy,
+                                elCon.getElementFieldTypes().isExcluded());
+                        XmlElementConvention xmlElCon = new XmlElementConvention(elCon.getName(), xmlElFieTy,
+                                elCon.getDescription(), elCon.getPattern());
+                        xElementConventions.add(xmlElCon);
+                    } else {
+                        XmlElementConvention xmlElCon = new XmlElementConvention(elCon.getName(), null,
+                                elCon.getDescription(), elCon.getPattern());
+                        xElementConventions.add(xmlElCon);
+                    }
+                }
 
-                if (!sEntry.getValue().getScriptPlaces().isEmpty()) {
-                    for (String place : sEntry.getValue().getScriptPlaces()) {
-                        XmlSetting xmlSetting = new XmlSetting(s.getName(), place, s.getType(), s.getId(),
-                                s.getRequired(),
+                // Get XmlSettings
+                Collection<XmlSetting> xSettings = new ArrayList<XmlSetting>();
+                for (Map.Entry<String, Setting> sEntry : rule.getSettings().entrySet()) {
+                    Setting s = sEntry.getValue();
+
+                    if (!sEntry.getValue().getScriptPlaces().isEmpty()) {
+                        for (String place : sEntry.getValue().getScriptPlaces()) {
+                            XmlSetting xmlSetting = new XmlSetting(s.getName(), place, s.getType(), s.getId(),
+                                    s.getRequired(),
+                                    s.getValue());
+                            xSettings.add(xmlSetting);
+                        }
+                    } else {
+                        XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getId(), s.getRequired(),
                                 s.getValue());
                         xSettings.add(xmlSetting);
                     }
-                } else {
-                    XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getId(), s.getRequired(),
-                            s.getValue());
-                    xSettings.add(xmlSetting);
                 }
+
+                // create xmlRule
+                XmlRule xRule = new XmlRule(rule.getId(), rule.getName(), rule.isActive(), rule.getRuleDescription(),
+                        xSettings.isEmpty() ? null : xSettings,
+                        xElementConventions.isEmpty() ? null : xElementConventions,
+                        xModelConventions.isEmpty() ? null : xModelConventions);
+
+                // add xmlRule to Collection
+                xmlRules.add(xRule);
             }
-
-            // create xmlRule
-            XmlRule xRule = new XmlRule(rule.getName(), rule.isActive(), rule.getRuleDescription(),
-                    xSettings.isEmpty() ? null : xSettings,
-                    xElementConventions.isEmpty() ? null : xElementConventions,
-                    xModelConventions.isEmpty() ? null : xModelConventions);
-
-            // add xmlRule to Collection
-            xmlRules.add(xRule);
         }
         xmlRuleSet.setRules(xmlRules);
         return xmlRuleSet;

@@ -37,6 +37,8 @@ import java.util.Map;
 
 public class Rule {
 
+    private String id;
+
     private String name;
 
     private boolean isActive;
@@ -54,12 +56,31 @@ public class Rule {
             final Collection<ElementConvention> elementConventions,
             final ArrayList<ModelConvention> modelConventions) {
         super();
+        this.id = name;
         this.name = name;
         this.isActive = isActive;
         this.ruleDescription = ruleDescription;
         this.settings = settings;
         this.elementConventions = elementConventions;
         this.modelConventions = modelConventions;
+    }
+
+    public Rule(final String id, final String name, final boolean isActive, final String ruleDescription,
+            final Map<String, Setting> settings,
+            final Collection<ElementConvention> elementConventions,
+            final ArrayList<ModelConvention> modelConventions) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.isActive = isActive;
+        this.ruleDescription = ruleDescription;
+        this.settings = settings;
+        this.elementConventions = elementConventions;
+        this.modelConventions = modelConventions;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
