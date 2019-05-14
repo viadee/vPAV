@@ -31,8 +31,11 @@
  */
 package de.viadee.bpm.vPAV.constants;
 
+import de.viadee.bpm.vPAV.config.model.Rule;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -158,20 +161,42 @@ public class ConfigConstants {
         return ConfigConstants.instance;
     }
 
+    /**
+     * Only used for tests in order to inject mocked properties.
+     *
+     * @param newProperties mocked properties
+     */
+    public void setProperties(Properties newProperties) {
+        this.properties = newProperties;
+    }
+
     public String getBasepath() {
         return properties.getProperty("basepath", ConfigConstants.BASEPATH);
     }
 
+    /**
+     * Checks whether the output of the result should be in html
+     *
+     * @return true (default) or false if false is defined in the properties file
+     */
     public boolean isHtmlOutputEnabled() {
         return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
     }
 
     /**
-     * Only used for tests in order to inject mocked class.
+     * Method for backwards compatiblity. Should be deleted in the future and replaced by the method without parameters.
      *
-     * @param instance mocked instance
+     * @param createoutputrule
+     * @return
      */
-    protected static void setInstance(ConfigConstants instance) {
-        ConfigConstants.instance = instance;
+    public boolean isHtmlOutputEnabled(Map<String, Rule> createoutputrule) {
+        if (properties.containsKey("outputhtml")) {
+            return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
+        } else if (createoutputrule != null) {
+            // Backwards compatibility: allow create-output flag to be defined in ruleset
+            return createoutputrule.get(ConfigConstants.CREATE_OUTPUT_RULE).isActive();
+        } else {
+            return true;
+        }
     }
 }

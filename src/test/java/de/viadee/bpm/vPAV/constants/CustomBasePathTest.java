@@ -35,19 +35,19 @@ import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class CustomBasePathTest {
 
     @Test
     public void testCustomBasePathExists() {
         // Set custom basepath.
-        ConfigConstants instance = Mockito.mock(ConfigConstants.class);
-        ConfigConstants.setInstance(instance);
-        Mockito.when(instance.getBasepath()).thenReturn("src/test/resources/PropertiesTest/");
+        Properties myProperties = new Properties();
+        myProperties.put("basepath", "src/test/resources/PropertiesTest/");
+        ConfigConstants.getInstance().setProperties(myProperties);
         Assert.assertEquals("BasePath could not be successfully injected", "src/test/resources/PropertiesTest/",
                 ConfigConstants.getInstance().getBasepath());
 
@@ -60,5 +60,17 @@ public class CustomBasePathTest {
                 inconsistencies.get(0).getBpmnFile());
         Assert.assertFalse("BasePath was changed but BPMN model was not found",
                 inconsistencies.isEmpty());
+    }
+
+    public void testCreateOutputHtmlPropertyExists() {
+        Properties myProperties = new Properties();
+        myProperties.put("outputhtml", false);
+        ConfigConstants.getInstance().setProperties(myProperties);
+        Assert.assertTrue("Output Html property could not be successfully injected", ConfigConstants.getInstance().isHtmlOutputEnabled());
+
+    }
+
+    public void testCreateOutputHtmlPropertyNotExists() {
+        // TODO
     }
 }
