@@ -40,9 +40,11 @@ import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.checker.*;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.*;
-import de.viadee.bpm.vPAV.processing.model.graph.IGraph;
+import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -110,10 +112,14 @@ public class BpmnModelDispatcher {
 		}
 
 		// create data flow graphs for bpmn model
-		final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
 				processDefinition.getPath(), new ArrayList<>(), scanner);
 
-		// add data flow information to graph and calculate invalid paths
+		// analyze data flows
+		final FlowAnalysis flowAnalysis = new FlowAnalysis();
+		flowAnalysis.analyze(graphCollection);
+
+		// calculate invalid paths
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
 		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -203,7 +209,8 @@ public class BpmnModelDispatcher {
 			BpmnElement element = graphBuilder.getElement(baseElement.getId());
 			if (element == null) {
 				// if element is not in the data flow graph, create it.
-				element = new BpmnElement(processDefinition.getPath(), baseElement);
+                ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
+				element = new BpmnElement(processDefinition.getPath(), baseElement, controlFlowGraph);
 			}
 			elements.add(element);
 		}
@@ -266,7 +273,8 @@ public class BpmnModelDispatcher {
 			BpmnElement element = graphBuilder.getElement(baseElement.getId());
 			if (element == null) {
 				// if element is not in the data flow graph, create it.
-				element = new BpmnElement(processDefinition.getPath(), baseElement);
+                ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
+				element = new BpmnElement(processDefinition.getPath(), baseElement, controlFlowGraph);
 			}
 			for (final ElementChecker checker : checkerInstances) {
 				issues.addAll(checker.check(element));

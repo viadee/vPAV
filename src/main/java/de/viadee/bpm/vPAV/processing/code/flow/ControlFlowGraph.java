@@ -32,16 +32,14 @@
 package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.*;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.BitSet;
 import java.util.LinkedHashMap;
 
 public class ControlFlowGraph {
 
 	private LinkedHashMap<String, Node> nodes;
 
-	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> operations;
+	private LinkedHashMap<String, ProcessVariableOperation> operations;
 
 	private int internalNodeCounter;
 
@@ -126,20 +124,19 @@ public class ControlFlowGraph {
      *            Current BpmnElement
 	 */
 	private void computeLineByLine(final BpmnElement element) {
-		for (final Node node : getNodes().values()) {
+		getNodes().values().forEach(node -> {
 			if (node.getOperations().size() >= 2) {
 				ProcessVariableOperation prev = null;
-				for (ImmutablePair<BitSet, ProcessVariableOperation> operation : node.getOperations().values()) {
-					ProcessVariableOperation curr = operation.getRight();
+				for (ProcessVariableOperation operation : node.getOperations().values()) {
 					if (prev == null) {
-						prev = curr;
+						prev = operation;
 						continue;
 					}
-					checkAnomaly(element, curr, prev);
-					prev = curr;
+					checkAnomaly(element, operation, prev);
+					prev = operation;
 				}
 			}
-		}
+		});
 	}
 
 	/**
@@ -247,8 +244,8 @@ public class ControlFlowGraph {
 			change = false;
 			for (Node node : nodes.values()) {
 				// Calculate in-sets (intersection of predecessors)
-				final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> inUsed = node.getInUsed();
-				final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> inUnused = node
+				final LinkedHashMap<String, ProcessVariableOperation> inUsed = node.getInUsed();
+				final LinkedHashMap<String, ProcessVariableOperation> inUnused = node
 						.getInUnused();
 				for (Node pred : node.getPredecessors()) {
 					inUsed.putAll(pred.getOutUsed());
@@ -258,24 +255,24 @@ public class ControlFlowGraph {
 				node.setInUnused(inUnused);
 
 				// Calculate out-sets for used definitions (transfer functions)
-				final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> outUsed = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>();
 				outUsed.putAll(node.getUsed());
 				outUsed.putAll(getSetDifference(node.getInUsed(), node.getKilled()));
 				node.setOutUsed(outUsed);
 
 				// Calculate out-sets for unused definitions (transfer functions)
-				final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> outUnused = new LinkedHashMap<>(
+				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
 						node.getDefined());
-				final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> tempIntersection = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>();
 				tempIntersection.putAll(getSetDifference(node.getInUnused(), node.getKilled()));
 				tempIntersection.putAll(getSetDifference(tempIntersection, node.getUsed()));
 				outUnused.putAll(tempIntersection);
 				node.setOutUnused(outUnused);
 
 				// Compare old values with new values and check for changes
-				final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> oldOutUnused = node
+				final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = node
 						.getOutUnused();
-				final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> oldOutUsed = node
+				final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = node
 						.getOutUsed();
 
 				if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
@@ -324,11 +321,11 @@ public class ControlFlowGraph {
      *            Current node
      */
     private void ddAnomalies(final BpmnElement element, final Node node) {
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> ddAnomalies = new LinkedHashMap<>(
+        final LinkedHashMap<String, ProcessVariableOperation> ddAnomalies = new LinkedHashMap<>(
                 getIntersection(node.getInUnused(), node.getDefined()));
         if (!ddAnomalies.isEmpty()) {
             ddAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                    new AnomalyContainer(v.right.getName(), Anomaly.DD, element.getBaseElement().getId(), v.right)));
+                    new AnomalyContainer(v.getName(), Anomaly.DD, element.getBaseElement().getId(), v)));
         }
     }
 
@@ -341,11 +338,11 @@ public class ControlFlowGraph {
      *            Current node
      */
     private void duAnomalies(final BpmnElement element, final Node node) {
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> duAnomalies = new LinkedHashMap<>(
+        final LinkedHashMap<String, ProcessVariableOperation> duAnomalies = new LinkedHashMap<>(
                 getIntersection(node.getInUnused(), node.getKilled()));
         if (!duAnomalies.isEmpty()) {
             duAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                    new AnomalyContainer(v.right.getName(), Anomaly.DU, element.getBaseElement().getId(), v.right)));
+                    new AnomalyContainer(v.getName(), Anomaly.DU, element.getBaseElement().getId(), v)));
         }
     }
 
@@ -358,26 +355,26 @@ public class ControlFlowGraph {
 	 *            Current node
 	 */
 	private void urAnomalies(final BpmnElement element, final Node node) {
-		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> urAnomaliesTemp = new LinkedHashMap<>(
+		final LinkedHashMap<String, ProcessVariableOperation> urAnomaliesTemp = new LinkedHashMap<>(
 				node.getUsed());
-		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> urAnomalies = new LinkedHashMap<>(
+		final LinkedHashMap<String, ProcessVariableOperation> urAnomalies = new LinkedHashMap<>(
 				urAnomaliesTemp);
 
 		urAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
-			if (value.getRight().getName().equals(value2.getRight().getName())) {
+			if (value.getName().equals(value2.getName())) {
 				urAnomalies.remove(key);
 			}
 		}));
 
 		urAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
-			if (value.getRight().getName().equals(value2.getRight().getName())) {
+			if (value.getName().equals(value2.getName())) {
 				urAnomalies.remove(key);
 			}
 		}));
 
 		if (!urAnomalies.isEmpty()) {
 			urAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-					new AnomalyContainer(v.right.getName(), Anomaly.UR, element.getBaseElement().getId(), v.right)));
+					new AnomalyContainer(v.getName(), Anomaly.UR, element.getBaseElement().getId(), v)));
 		}
 	}
 
@@ -390,26 +387,26 @@ public class ControlFlowGraph {
      *            Current node
      */
     private void uuAnomalies(BpmnElement element, Node node) {
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> uuAnomaliesTemp = new LinkedHashMap<>(
+        final LinkedHashMap<String, ProcessVariableOperation> uuAnomaliesTemp = new LinkedHashMap<>(
                 node.getKilled());
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> uuAnomalies = new LinkedHashMap<>(
+        final LinkedHashMap<String, ProcessVariableOperation> uuAnomalies = new LinkedHashMap<>(
                 uuAnomaliesTemp);
 
         uuAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
-            if (value.getRight().getName().equals(value2.getRight().getName())) {
+            if (value.getName().equals(value2.getName())) {
                 uuAnomalies.remove(key);
             }
         }));
 
         uuAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
-            if (value.getRight().getName().equals(value2.getRight().getName())) {
+            if (value.getName().equals(value2.getName())) {
                 uuAnomalies.remove(key);
             }
         }));
 
         uuAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-            if (value.getRight().getName().equals(value2.getRight().getName())) {
-                if (key > key2) {
+            if (value.getName().equals(value2.getName())) {
+                if (Integer.parseInt(key) > Integer.parseInt(key2)) {
                     uuAnomalies.remove(key);
                 }
             }
@@ -418,7 +415,7 @@ public class ControlFlowGraph {
 
         if (!uuAnomalies.isEmpty()) {
             uuAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                    new AnomalyContainer(v.right.getName(), Anomaly.UU, element.getBaseElement().getId(), v.right)));
+                    new AnomalyContainer(v.getName(), Anomaly.UU, element.getBaseElement().getId(), v)));
         }
 
     }
@@ -444,33 +441,33 @@ public class ControlFlowGraph {
      *            Current node
      */
     private void dNopAnomalies(final BpmnElement element, final Node node) {
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> dNopAnomaliesTemp = new LinkedHashMap<>(
+        final LinkedHashMap<String, ProcessVariableOperation> dNopAnomaliesTemp = new LinkedHashMap<>(
                 node.getInUnused());
         dNopAnomaliesTemp.putAll(node.getInUsed());
-        final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> dNopAnomalies = new LinkedHashMap<>(
+        final LinkedHashMap<String, ProcessVariableOperation> dNopAnomalies = new LinkedHashMap<>(
                 dNopAnomaliesTemp);
 
         dNopAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-            if (value.getRight().getName().equals(value2.getRight().getName())) {
+            if (value.getName().equals(value2.getName())) {
                 dNopAnomalies.remove(key);
             }
         }));
 
         dNopAnomaliesTemp.forEach((key, value) -> node.getKilled().forEach((key2, value2) -> {
-            if (value.getRight().getName().equals(value2.getRight().getName())) {
+            if (value.getName().equals(value2.getName())) {
                 dNopAnomalies.remove(key);
             }
         }));
 
         dNopAnomaliesTemp.forEach((key, value) -> node.getUsed().forEach((key2, value2) -> {
-            if (value.getRight().getName().equals(value2.getRight().getName())) {
+            if (value.getName().equals(value2.getName())) {
                 dNopAnomalies.remove(key);
             }
         }));
 
         if (!dNopAnomalies.isEmpty()) {
             dNopAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                    new AnomalyContainer(v.right.getName(), Anomaly.D, element.getBaseElement().getId(), v.right)));
+                    new AnomalyContainer(v.getName(), Anomaly.D, element.getBaseElement().getId(), v)));
         }
     }
 
@@ -483,10 +480,10 @@ public class ControlFlowGraph {
 	 *            Second map
 	 * @return Set difference of given maps
 	 */
-	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getSetDifference(
-			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> mapOne,
-			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> mapTwo) {
-		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> setDifference = new LinkedHashMap<>(
+	private LinkedHashMap<String, ProcessVariableOperation> getSetDifference(
+			final LinkedHashMap<String, ProcessVariableOperation> mapOne,
+			final LinkedHashMap<String, ProcessVariableOperation> mapTwo) {
+		final LinkedHashMap<String, ProcessVariableOperation> setDifference = new LinkedHashMap<>(
 				mapOne);
 
 		mapOne.keySet().forEach(key -> {
@@ -506,18 +503,20 @@ public class ControlFlowGraph {
 	 *            Second map
 	 * @return Intersection of given maps
 	 */
-	private LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> getIntersection(
-			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> mapOne,
-			final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> mapTwo) {
-		final LinkedHashMap<Integer, ImmutablePair<BitSet, ProcessVariableOperation>> intersection = new LinkedHashMap<>();
+	private LinkedHashMap<String, ProcessVariableOperation> getIntersection(
+			final LinkedHashMap<String, ProcessVariableOperation> mapOne,
+			final LinkedHashMap<String, ProcessVariableOperation> mapTwo) {
+		final LinkedHashMap<String, ProcessVariableOperation> intersection = new LinkedHashMap<>();
 
         mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
-            if (value.getRight().getName().equals(value2.getRight().getName())) {
+            if (value.getName().equals(value2.getName())) {
                 intersection.put(key, value);
             }
         }));
 		return intersection;
 	}
+
+	boolean hasNodes () { return !nodes.isEmpty(); }
 
 	int getDefCounter() {
 		return defCounter;

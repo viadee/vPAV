@@ -120,8 +120,6 @@ public final class ProcessVariableReader {
 		// 7) Search variables in Links
 		processVariables.putAll(getVariablesFromLinks(element, fileScanner, context, controlFlowGraph));
 
-		controlFlowGraph.analyze(element);
-
 		return processVariables;
 	}
 
@@ -1000,14 +998,14 @@ public final class ProcessVariableReader {
 				} else {
 					// save variable
 					variables.put(node.getName(), new ProcessVariableOperation(node.getName(), element, chapter,
-							fieldType, null, VariableOperation.READ, scopeId));
+							fieldType, element.getProcessDefinition(), VariableOperation.READ, scopeId));
 				}
 			}
 			// extract written variables
-			variables.putAll(ResourceFileReader.searchWrittenProcessVariablesInCode(element, chapter, fieldType, null,
+			variables.putAll(ResourceFileReader.searchWrittenProcessVariablesInCode(element, chapter, fieldType, element.getProcessDefinition(),
 					scopeId, expression));
 			// extract deleted variables
-			variables.putAll(ResourceFileReader.searchRemovedProcessVariablesInCode(element, chapter, fieldType, null,
+			variables.putAll(ResourceFileReader.searchRemovedProcessVariablesInCode(element, chapter, fieldType, element.getProcessDefinition(),
 					scopeId, expression));
 		} catch (final ELException e) {
 			throw new ProcessingException("EL expression " + expression + " in " + element.getProcessDefinition()

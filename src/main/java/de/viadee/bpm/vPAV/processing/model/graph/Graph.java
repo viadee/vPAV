@@ -36,92 +36,109 @@ import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.InOutState;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
  * A class for a directed graph. Implemented by an adjacency list representation of a graph.
  */
 
-public class Graph implements IGraph {
+public class Graph {
 
     private String processId;
 
-    private Map<BpmnElement, List<Edge>> adjacencyListSucessor; // [vertices] -> [edge]
 
-    private Map<BpmnElement, List<Edge>> adjacencyListPredecessor; // [vertices] -> [edge]
 
-    private Map<BpmnElement, VertexInfo> vertexInfo; // [vertex] -> [info]
+    private LinkedHashMap<BpmnElement, List<Edge>> adjacencyListSuccessor; // [vertices] -> [edge]
 
-    private Collection<BpmnElement> startNodes = new ArrayList<BpmnElement>();
+    private LinkedHashMap<BpmnElement, List<Edge>> adjacencyListPredecessor; // [vertices] -> [edge]
 
-    private Collection<BpmnElement> endNodes = new ArrayList<BpmnElement>();
+    public LinkedHashMap<BpmnElement, VertexInfo> getVertexInfo() {
+        return vertexInfo;
+    }
+
+    private LinkedHashMap<BpmnElement, VertexInfo> vertexInfo; // [vertex] -> [info]
+
+    private Collection<BpmnElement> startNodes = new ArrayList<>();
+
+    private Collection<BpmnElement> endNodes = new ArrayList<>();
 
     public Graph(final String processId) {
         this.processId = processId;
-        this.adjacencyListSucessor = new HashMap<BpmnElement, List<Edge>>();
-        this.adjacencyListPredecessor = new HashMap<BpmnElement, List<Edge>>();
-        this.vertexInfo = new HashMap<BpmnElement, VertexInfo>();
+        this.adjacencyListSuccessor = new LinkedHashMap<>();
+        this.adjacencyListPredecessor = new LinkedHashMap<>();
+        this.vertexInfo = new LinkedHashMap<>();
     }
 
-    @Override
     public String getProcessId() {
         return processId;
     }
 
-    @Override
+
     public void addStartNode(final BpmnElement node) {
         startNodes.add(node);
     }
 
-    @Override
+
     public Collection<BpmnElement> getStartNodes() {
         return startNodes;
     }
 
-    @Override
+
     public void addEndNode(final BpmnElement node) {
         endNodes.add(node);
     }
 
-    @Override
+
     public Collection<BpmnElement> getEndNodes() {
         return endNodes;
     }
 
-    @Override
-    public void addVertex(BpmnElement v) {
+
+    public void addVertex(final BpmnElement v) {
         if (v == null) {
             throw new IllegalArgumentException("null");
         }
 
-        adjacencyListSucessor.put(v, new ArrayList<Edge>());
-        adjacencyListPredecessor.put(v, new ArrayList<Edge>());
+        adjacencyListSuccessor.put(v, new ArrayList<>());
+        adjacencyListPredecessor.put(v, new ArrayList<>());
         vertexInfo.put(v, new VertexInfo(v));
     }
 
-    @Override
+
     public Collection<BpmnElement> getVertices() {
         return vertexInfo.keySet();
     }
 
-    @Override
+
     public Collection<List<Edge>> getEdges() {
-        return adjacencyListSucessor.values();
+        return adjacencyListSuccessor.values();
     }
 
-    @Override
+    public LinkedHashMap<BpmnElement, List<Edge>> getAdjacencyListPredecessor() {
+        return adjacencyListPredecessor;
+    }
+
+    public List<BpmnElement> getAdjacencyListPredecessor(final BpmnElement element) {
+        return adjacencyListPredecessor.get(element).stream().map(Edge::getTo).collect(Collectors.toList());
+    }
+
+    public List<BpmnElement> getAdjacencyListSuccessor(final BpmnElement element) {
+        return adjacencyListSuccessor.get(element).stream().map(Edge::getTo).collect(Collectors.toList());
+    }
+
+
     public void addEdge(BpmnElement from, BpmnElement to, int weight) {
         // add successor
-        List<Edge> edgeSucessorList = adjacencyListSucessor.get(from);
-        if (edgeSucessorList == null) {
+        List<Edge> edgeSuccessorList = adjacencyListSuccessor.get(from);
+        if (edgeSuccessorList == null) {
             throw new IllegalArgumentException("source vertex not in graph");
         }
 
-        Edge newSucessorEdge = new Edge(from, to, weight);
-        edgeSucessorList.add(newSucessorEdge);
+        Edge newSuccessorEdge = new Edge(from, to, weight);
+        edgeSuccessorList.add(newSuccessorEdge);
 
         // add predecessor
         List<Edge> edgePredecessorList = adjacencyListPredecessor.get(to);
@@ -133,17 +150,17 @@ public class Graph implements IGraph {
         edgePredecessorList.add(newPredecessorEdge);
     }
 
-    @Override
+
     public void removeEdge(BpmnElement from, BpmnElement to) {
-        final List<Edge> edgeSucessorList = adjacencyListSucessor.get(from);
+        final List<Edge> edgeSuccessorList = adjacencyListSuccessor.get(from);
         Edge foundEdge = null;
-        for (final Edge e : edgeSucessorList) {
+        for (final Edge e : edgeSuccessorList) {
             if (e.getFrom().toString().equals(from.toString()) && e.getTo().toString().equals(to.toString())) {
                 // delete
                 foundEdge = e;
             }
         }
-        edgeSucessorList.remove(foundEdge);
+        edgeSuccessorList.remove(foundEdge);
 
         final List<Edge> edgePredecessorList = adjacencyListPredecessor.get(to);
         foundEdge = null;
@@ -156,14 +173,14 @@ public class Graph implements IGraph {
         edgePredecessorList.remove(foundEdge);
     }
 
-    @Override
+
     public boolean hasEdge(BpmnElement from, BpmnElement to) {
         return getEdge(from, to) != null;
     }
 
-    @Override
+
     public Edge getEdge(BpmnElement from, BpmnElement to) {
-        List<Edge> edgeList = adjacencyListSucessor.get(from);
+        List<Edge> edgeList = adjacencyListSuccessor.get(from);
         if (edgeList == null) {
             throw new IllegalArgumentException("source vertex not in graph");
         }
@@ -178,99 +195,12 @@ public class Graph implements IGraph {
     }
 
     /**
-     * set anomaly information on data flow graph
-     *
-     */
-    @Override
-    public void setAnomalyInformation(final BpmnElement source) {
-        setAnomalyInformationRecursive(source, new LinkedList<BpmnElement>());
-    }
-
-    /**
-     * set anomaly information recursive on data flow graph (forward)
-     *
-     * @param startNode
-     * @param currentPath
-     */
-    private void setAnomalyInformationRecursive(final BpmnElement startNode,
-            final LinkedList<BpmnElement> currentPath) {
-
-        currentPath.add(startNode);
-
-        final boolean isGateway = startNode.getBaseElement().getElementType().getBaseType()
-                .getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_GATEWAY);
-        final boolean isNodeParallelGateway = startNode.getBaseElement().getElementType().getTypeName()
-                .equals(BpmnModelConstants.BPMN_ELEMENT_PARALLEL_GATEWAY);
-        final boolean isEndEvent = startNode.getBaseElement().getElementType().getTypeName()
-                .equals(BpmnConstants.END_EVENT)
-                && startNode.getBaseElement().getParentElement().getElementType().getTypeName()
-                        .equals(BpmnConstants.PROCESS);
-
-        final List<Edge> predecessorEdges = this.adjacencyListPredecessor.get(startNode);
-        Map<String, InOutState> outSuccessors = new HashMap<String, InOutState>();
-        if (predecessorEdges != null) {
-            for (final Edge t : predecessorEdges) {
-                if (isGateway) {
-                    if (isNodeParallelGateway) {
-                        // If the node is a parallel gateway, take all predecessor variables.
-                        // If variables are identical, take the variable with the following precedence
-                        // 1) DELETED
-                        // 2) READ
-                        // 3) DEFINED
-                        if (outSuccessors.isEmpty()) {
-                            outSuccessors.putAll(t.getTo().getOut());
-                        } else {
-                            outSuccessors.putAll(unionWithStatePrecedence(outSuccessors, t.getTo().getOut()));
-                        }
-                    } else {
-                        // If the node is an other gateway, take the intersection of all predecessor variables.
-                        // Follow the precedence rule (look above)
-                        if (outSuccessors.isEmpty()) {
-                            outSuccessors.putAll(t.getTo().getOut());
-                        } else {
-                            outSuccessors.putAll(intersection(outSuccessors, t.getTo().getOut()));
-                        }
-                    }
-                } else {
-                    outSuccessors.putAll(t.getTo().getOut());
-                }
-            }
-        }
-
-        startNode.setIn(outSuccessors);
-        if (!isEndEvent) {
-            // end element has not an out set
-            startNode.setOut();
-        }
-
-        if (startNode.getBaseElement() != null) {
-            // save the path, if the the search has reached the begin of the process
-            if (isEndEvent) {
-                currentPath.remove(startNode);
-                return;
-            }
-        }
-
-        final List<Edge> edges = this.adjacencyListSucessor.get(startNode);
-
-        for (final Edge t : edges) {
-            int occurrences = Collections.frequency(currentPath, t.getTo());
-            if (occurrences < 2) { // case iterations n=1 and n=2 for loops
-                setAnomalyInformationRecursive(t.getTo(), currentPath);
-            }
-        }
-
-        currentPath.remove(startNode);
-    }
-
-    /**
      * get nodes with data flow anomalies
      */
-    @Override
     public Map<BpmnElement, List<AnomalyContainer>> getNodesWithAnomalies() {
 
         final Map<BpmnElement, List<AnomalyContainer>> anomalies = new HashMap<>();
-        for (final BpmnElement node : adjacencyListSucessor.keySet()) {
+        for (final BpmnElement node : adjacencyListSuccessor.keySet()) {
             anomalies.putAll(node.getAnomalies());
         }
         return anomalies;
@@ -281,11 +211,8 @@ public class Graph implements IGraph {
      *
      * source: http://codereview.stackexchange.com/questions/45678/find-all-paths-from-source-to-destination
      */
-    @Override
     public List<Path> getAllInvalidPaths(final BpmnElement source, final AnomalyContainer anomaly) {
-        final List<Path> paths = getAllInvalidPathsRecursive(source, anomaly,
-                new LinkedList<BpmnElement>());
-        return paths;
+        return getAllInvalidPathsRecursive(source, anomaly, new LinkedList<>());
     }
 
     /**
@@ -293,14 +220,11 @@ public class Graph implements IGraph {
      *
      * source: http://codereview.stackexchange.com/questions/45678/find-all-paths-from-source-to-destination
      *
-     * @param startNode
-     * @param currentPath
-     * @return paths
      */
     private List<Path> getAllInvalidPathsRecursive(final BpmnElement startNode,
             final AnomalyContainer anomaly, final LinkedList<BpmnElement> currentPath) {
 
-        final List<Path> invalidPaths = new ArrayList<Path>();
+        final List<Path> invalidPaths = new ArrayList<>();
 
         currentPath.add(startNode);
 
@@ -337,12 +261,6 @@ public class Graph implements IGraph {
     /**
      * exit condition for path finding (ur anomaly)
      *
-     * @param startNode
-     * @param anomaly
-     * @param currentPath
-     * @param invalidPaths
-     * @param in
-     * @param out
      */
     private List<Path> exitConditionUrAnomaly(final BpmnElement startNode,
             final AnomalyContainer anomaly, final LinkedList<BpmnElement> currentPath,
@@ -356,7 +274,7 @@ public class Graph implements IGraph {
                         && startNode.getBaseElement().getParentElement().getElementType().getTypeName()
                                 .equals(BpmnConstants.PROCESS))))) {
 
-            final List<BpmnElement> newPath = new ArrayList<BpmnElement>(currentPath);
+            final List<BpmnElement> newPath = new ArrayList<>(currentPath);
             invalidPaths.add(new Path(newPath));
 
             currentPath.remove(startNode);
@@ -368,10 +286,6 @@ public class Graph implements IGraph {
     /**
      * is variable deleted
      *
-     * @param anomaly
-     * @param in
-     * @param out
-     * @return
      */
     private boolean variableDeleted(final AnomalyContainer anomaly, final Map<String, InOutState> in,
             final Map<String, InOutState> out) {
@@ -383,10 +297,6 @@ public class Graph implements IGraph {
     /**
      * exit condition for path finding (du / dd anomaly)
      *
-     * @param startNode
-     * @param anomaly
-     * @param currentPath
-     * @param invalidPaths
      */
     private List<Path> exitConditionDdDuAnomaly(final BpmnElement startNode,
             final AnomalyContainer anomaly, final LinkedList<BpmnElement> currentPath,
@@ -397,7 +307,7 @@ public class Graph implements IGraph {
         if (startNode.defined().containsKey(anomaly.getName())
                 && (anomaly.getAnomaly() == Anomaly.DD || anomaly.getAnomaly() == Anomaly.DU)
                 && currentPath.size() > 1) {
-            final List<BpmnElement> newPath = new ArrayList<BpmnElement>(currentPath);
+            final List<BpmnElement> newPath = new ArrayList<>(currentPath);
             invalidPaths.add(new Path(newPath));
 
             currentPath.remove(startNode);
@@ -408,21 +318,21 @@ public class Graph implements IGraph {
 
     @Override
     public String toString() {
-        Set<BpmnElement> keys = adjacencyListSucessor.keySet();
-        String str = "digraph G {\n";
+        Set<BpmnElement> keys = adjacencyListSuccessor.keySet();
+        StringBuilder str = new StringBuilder("digraph G {\n");
 
         for (BpmnElement v : keys) {
-            str += " ";
+            str.append(" ");
 
-            List<Edge> edgeList = adjacencyListSucessor.get(v);
+            List<Edge> edgeList = adjacencyListSuccessor.get(v);
 
             for (Edge edge : edgeList) {
-                str += edge;
-                str += "\n";
+                str.append(edge);
+                str.append("\n");
             }
         }
-        str += "}";
-        return str;
+        str.append("}");
+        return str.toString();
     }
 
     protected final void clearVertexInfo() {
@@ -442,8 +352,8 @@ public class Graph implements IGraph {
      */
     public static Map<String, InOutState> intersection(final Map<String, InOutState> mapA,
             final Map<String, InOutState> mapB) {
-        final Map<String, InOutState> intersectionMap = new HashMap<String, InOutState>();
-        final Set<String> variables = new HashSet<String>();
+        final Map<String, InOutState> intersectionMap = new HashMap<>();
+        final Set<String> variables = new HashSet<>();
         variables.addAll(mapA.keySet());
         variables.addAll(mapB.keySet());
         for (final String varName : variables) {
@@ -473,7 +383,7 @@ public class Graph implements IGraph {
     public static Map<String, InOutState> unionWithStatePrecedence(final Map<String, InOutState> mapA,
             final Map<String, InOutState> mapB) {
 
-        final Map<String, InOutState> unionMap = new HashMap<String, InOutState>();
+        final Map<String, InOutState> unionMap = new HashMap<>();
         unionMap.putAll(mapA);
         unionMap.putAll(mapB);
         unionMap.putAll(intersection(mapA, mapB));
@@ -487,16 +397,11 @@ public class Graph implements IGraph {
      *
      * 1) delete 2) read 3) define
      *
-     * @param state1
-     * @param state2
-     * @return
      */
     private static InOutState getStatePrecedence(final InOutState state1, final InOutState state2) {
-        if (state1 == InOutState.DELETED || state2 == InOutState.DELETED
-                || (state1 == InOutState.DELETED && state2 == InOutState.DELETED)) {
+        if (state1 == InOutState.DELETED || state2 == InOutState.DELETED) {
             return InOutState.DELETED;
-        } else if (state1 == InOutState.READ || state2 == InOutState.READ
-                || (state1 == InOutState.READ && state2 == InOutState.READ)) {
+        } else if (state1 == InOutState.READ || state2 == InOutState.READ) {
             return InOutState.READ;
         }
         return InOutState.DEFINED;
