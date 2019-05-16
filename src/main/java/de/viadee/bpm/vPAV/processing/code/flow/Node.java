@@ -59,15 +59,9 @@ public class Node {
 	private List<Node> nodePredecessors;
 	private List<Node> nodeSuccessors;
 
-	public void addProcessPredecessors(final List<BpmnElement> processPredecessors) {
-		this.processPredecessors.addAll(processPredecessors);
-	}
-	public void addProcessSuccessors(final List<BpmnElement> processSuccessors) {
-		this.processSuccessors.addAll(processSuccessors);
-	}
-
 	private List<BpmnElement> processPredecessors;
 	private List<BpmnElement> processSuccessors;
+
 	private String id;
 
 	public Node(final ControlFlowGraph controlFlowGraph, final Block block) {
@@ -184,6 +178,7 @@ public class Node {
 		}
 	}
 
+
 	public String getId() {
 		return id;
 	}
@@ -262,6 +257,10 @@ public class Node {
 
 	void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
 		this.outUnused = outUnused;
+	}
+
+	void addProcessSuccessors(final List<BpmnElement> processSuccessors) {
+		this.processSuccessors.addAll(processSuccessors);
 	}
 
 

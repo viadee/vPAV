@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
@@ -48,10 +49,6 @@ public class BpmnElement {
 
 	private BaseElement baseElement;
 
-	public ControlFlowGraph getControlFlowGraph() {
-		return controlFlowGraph;
-	}
-
 	private ControlFlowGraph controlFlowGraph;
 
 	private LinkedHashMap<String, ProcessVariableOperation> operations;
@@ -60,15 +57,6 @@ public class BpmnElement {
 	private LinkedHashMap<String, ProcessVariableOperation> killed2;
 	private LinkedHashMap<String, ProcessVariableOperation> inUsed;
 	private LinkedHashMap<String, ProcessVariableOperation> inUnused;
-
-	public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
-		this.outUsed = outUsed;
-	}
-
-	public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
-		this.outUnused = outUnused;
-	}
-
 	private LinkedHashMap<String, ProcessVariableOperation> outUsed;
 	private LinkedHashMap<String, ProcessVariableOperation> outUnused;
 
@@ -89,6 +77,7 @@ public class BpmnElement {
 		this.nodeSuccessors = new ArrayList<>();
 
 		this.operations = new LinkedHashMap<>();
+		this.processVariables = ArrayListMultimap.create();
 		this.defined2 = new LinkedHashMap<>();
 		this.used2 = new LinkedHashMap<>();
 		this.killed2= new LinkedHashMap<>();
@@ -98,13 +87,17 @@ public class BpmnElement {
 		this.outUnused = new LinkedHashMap<>();
 	}
 
+	public ControlFlowGraph getControlFlowGraph() {
+		return controlFlowGraph;
+	}
+
 	/**
 	 *
 	 * @param variables
 	 */
 	public void setProcessVariables(final ListMultimap<String, ProcessVariableOperation> variables) {
 		variables.entries().forEach(e -> addOperation(e.getValue()));
-		this.processVariables = variables;
+		this.processVariables.putAll(variables);
 	}
 
 	/**
@@ -124,11 +117,6 @@ public class BpmnElement {
 				killed2.put(processVariableOperation.getId(), processVariableOperation);
 				break;
 		}
-	}
-
-
-	public void analyze() {
-		this.controlFlowGraph.analyze(this);
 	}
 
 
