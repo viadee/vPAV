@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import soot.toolkits.graph.Block;
 
@@ -55,15 +56,28 @@ public class Node {
 
 	private Block block;
 
-	private List<Node> predecessors;
-	private List<Node> successors;
+	private List<Node> nodePredecessors;
+	private List<Node> nodeSuccessors;
+
+	public void addProcessPredecessors(final List<BpmnElement> processPredecessors) {
+		this.processPredecessors.addAll(processPredecessors);
+	}
+	public void addProcessSuccessors(final List<BpmnElement> processSuccessors) {
+		this.processSuccessors.addAll(processSuccessors);
+	}
+
+	private List<BpmnElement> processPredecessors;
+	private List<BpmnElement> processSuccessors;
 	private String id;
 
 	public Node(final ControlFlowGraph controlFlowGraph, final Block block) {
 		this.controlFlowGraph = controlFlowGraph;
 		this.block = block;
-		this.predecessors = new ArrayList<>();
-		this.successors = new ArrayList<>();
+		this.nodePredecessors = new ArrayList<>();
+		this.nodeSuccessors = new ArrayList<>();
+
+		this.processPredecessors = new ArrayList<>();
+		this.processSuccessors = new ArrayList<>();
 
 		this.operations = new LinkedHashMap<>();
 		this.defined = new LinkedHashMap<>();
@@ -103,7 +117,7 @@ public class Node {
 	 * Set the predecessor nodes of the current node for intraprocedural methods
 	 */
 	void setPredsIntraProcedural(final String key) {
-		this.predecessors.add(controlFlowGraph.getNodes().get(key));
+		this.nodePredecessors.add(controlFlowGraph.getNodes().get(key));
 	}
 
 
@@ -134,7 +148,7 @@ public class Node {
 	}
 
 	/**
-	 * Matches the ids and creates the references to successors and predecessors
+	 * Matches the ids and creates the references to nodeSuccessors and nodePredecessors
 	 *
 	 * @param idPattern
 	 *            Pattern for resolving the id
@@ -153,17 +167,17 @@ public class Node {
 				id = id.substring(0, id.length() - 1).concat(key);
 				if (id.length() > 1) {
 					if (pred) {
-						this.predecessors
+						this.nodePredecessors
 								.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
 					} else {
-						this.successors
+						this.nodeSuccessors
 								.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
 					}
 				} else {
 					if (pred) {
-						this.predecessors.add(controlFlowGraph.getNodes().get(id));
+						this.nodePredecessors.add(controlFlowGraph.getNodes().get(id));
 					} else {
-						this.successors.add(controlFlowGraph.getNodes().get(id));
+						this.nodeSuccessors.add(controlFlowGraph.getNodes().get(id));
 					}
 				}
 			}
@@ -182,8 +196,8 @@ public class Node {
 		return block;
 	}
 
-	List<Node> getPredecessors() {
-		return predecessors;
+	List<Node> getNodePredecessors() {
+		return nodePredecessors;
 	}
 
 	public LinkedHashMap<String, ProcessVariableOperation> getOperations() {

@@ -20,11 +20,34 @@ public class FlowAnalysis {
 
     public void analyze(final Collection<Graph> graphCollection) {
         for (Graph graph : graphCollection) {
-            integrateGraph(graph);
+            embedControlFlowGraph(graph);
+            printGraph();
+            System.out.println();
         }
     }
 
-    private void integrateGraph(final Graph graph) {
+    private void printGraph() {
+        nodes.forEach((key, value) -> {
+            if (key.getControlFlowGraph().hasNodes()) {
+                key.getControlFlowGraph().computeReachingDefinitions();
+                key.getProcessPredecessors().forEach(pred -> {
+                    System.out.println("Curr: " + key.getControlFlowGraph().firstNode().getId() + " -> pred: " + pred.getBaseElement().getId());
+                    key.getControlFlowGraph().getNodes().values().forEach(node -> {
+                        node.getNodePredecessors().forEach(nodePred -> {
+                            System.out.println("Curr: " + node.getId() + " -> pred: " + nodePred.getId());
+                        });
+                    });
+                });
+                System.out.println("Curr: " + key + " -> pred: " + key.getControlFlowGraph().lastNode().getId());
+            } else {
+                key.getProcessPredecessors().forEach(pred -> {
+                    System.out.println("Curr: " + key.getBaseElement().getId() + " -> pred: " + pred.getBaseElement().getId());
+                });
+            }
+        });
+    }
+
+    private void embedControlFlowGraph(final Graph graph) {
         graph.getVertexInfo().keySet().forEach(element -> {
             element.setProcessPredecessors(graph.getAdjacencyListPredecessor(element));
             element.setProcessSuccessors(graph.getAdjacencyListSuccessor(element));
@@ -40,8 +63,10 @@ public class FlowAnalysis {
                 }
                 final Node finalBlock = block;
                 entry.getProcessSuccessors().forEach(successor -> {
-                    System.out.println(entry.getBaseElement().getId() + " : " + finalBlock.getId());
-                    successor.addNodePredecessor(finalBlock);
+                    if (finalBlock != null) {
+                        successor.addNodePredecessor(finalBlock);
+                        finalBlock.addProcessSuccessors(entry.getProcessSuccessors());
+                    }
                 });
             }
         }));

@@ -127,7 +127,6 @@ public class BpmnElement {
 	}
 
 
-
 	public void analyze() {
 		this.controlFlowGraph.analyze(this);
 	}

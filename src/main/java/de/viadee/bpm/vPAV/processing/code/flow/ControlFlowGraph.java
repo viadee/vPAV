@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.*;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 public class ControlFlowGraph {
@@ -229,7 +230,7 @@ public class ControlFlowGraph {
 	 * Uses the approach from ALSU07 (Reaching Definitions) to compute data flow
 	 * anomalies across the CFG
 	 */
-	private void computeReachingDefinitions() {
+	public void computeReachingDefinitions() {
 		// Set predecessor/successor relations and initialize sets
 		nodes.values().forEach(node -> {
 			this.operations.putAll(node.getOperations());
@@ -247,7 +248,7 @@ public class ControlFlowGraph {
 				final LinkedHashMap<String, ProcessVariableOperation> inUsed = node.getInUsed();
 				final LinkedHashMap<String, ProcessVariableOperation> inUnused = node
 						.getInUnused();
-				for (Node pred : node.getPredecessors()) {
+				for (Node pred : node.getNodePredecessors()) {
 					inUsed.putAll(pred.getOutUsed());
 					inUnused.putAll(pred.getOutUnused());
 				}
@@ -556,5 +557,19 @@ public class ControlFlowGraph {
 
 	public void setInternalNodeCounter(int internalNodeCounter) {
 		this.internalNodeCounter = internalNodeCounter;
+	}
+
+	Node firstNode() {
+		Iterator<Node> iterator = nodes.values().iterator();
+		return iterator.next();
+	}
+
+	Node lastNode() {
+		Iterator<Node> iterator = nodes.values().iterator();
+		Node node = null;
+		while (iterator.hasNext()) {
+			node = iterator.next();
+		}
+		return node;
 	}
 }
