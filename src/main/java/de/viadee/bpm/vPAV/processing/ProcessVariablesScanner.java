@@ -95,8 +95,15 @@ public class ProcessVariablesScanner {
 
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
-        Scene.v().getBasicClasses();
+        ArrayList<String> excludedClasses = new ArrayList<>();
+        excludedClasses.add("java.*");
+        excludedClasses.add("sun.*");
+        excludedClasses.add("jdk.*");
+        excludedClasses.add("javax.*");
+        Options.v().set_exclude(excludedClasses);
+        Options.v().set_no_bodies_for_excluded(true);
         Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
+
 
         SootClass sootClass = Scene.v().forceResolve(cleanString(filePath, true), SootClass.SIGNATURES);
 
@@ -156,7 +163,7 @@ public class ProcessVariablesScanner {
      *            Current expression
      */
     private void checkExpression(final String filePath, final Set<String> messageIds, final SootMethod method,
-            final String entryPoint, final JInterfaceInvokeExpr expr) {
+                                 final String entryPoint, final JInterfaceInvokeExpr expr) {
         if (expr != null) {
             final String ex = expr.getArgBox(0).getValue().toString();
             if (entryPoint.equals(CamundaMethodServices.CORRELATE_MESSAGE)) {
@@ -171,7 +178,7 @@ public class ProcessVariablesScanner {
 
     /**
      * Strips unnecessary characters and returns cleaned name
-     * 
+     *
      * @param className
      *            Classname to be stripped of unused chars
      * @param dot
@@ -216,7 +223,7 @@ public class ProcessVariablesScanner {
 
     /**
      * get list of entrypoints (process message, method) where process variables have been found
-     * 
+     *
      * @return returns list of locations
      */
     public List<EntryPoint> getEntryPoints() {
