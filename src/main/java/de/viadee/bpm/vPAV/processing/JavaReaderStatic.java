@@ -63,6 +63,10 @@ public class JavaReaderStatic implements JavaReader {
 
     private List<Value> constructorArgs;
 
+    public JavaReaderStatic() {
+        this.setupSoot();
+    }
+
     /**
      * Checks a java delegate for process variable references with static code
      * analysis (read/write/delete).
@@ -92,11 +96,6 @@ public class JavaReaderStatic implements JavaReader {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
         if (classFile != null && classFile.trim().length() > 0) {
-
-            final String sootPath = FileScanner.getSootPath();
-
-            System.setProperty("soot.class.path", sootPath);
-
             final Set<String> classPaths = fileScanner.getJavaResourcesFileInputStream();
             final ArrayList<String> delegateMethods = new ArrayList<>();
             delegateMethods.add("execute");
@@ -133,9 +132,6 @@ public class JavaReaderStatic implements JavaReader {
         final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
         if (className != null && className.trim().length() > 0) {
-            final String sootPath = FileScanner.getSootPath();
-            System.setProperty("soot.class.path", sootPath);
-            this.setupSoot();
             SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
             if (sootClass != null) {
@@ -341,7 +337,6 @@ public class JavaReaderStatic implements JavaReader {
                                            final ControlFlowGraph controlFlowGraph) {
 
         className = cleanString(className, true);
-        this.setupSoot();
         SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
         if (sootClass != null) {
@@ -826,6 +821,7 @@ public class JavaReaderStatic implements JavaReader {
                 controlFlowGraph.resetInternalNodeCounter();
                 controlFlowGraph.setPriorLevel(controlFlowGraph.getInternalNodeCounter());
                 G.reset();
+                this.setupSoot();
                 classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
                         scopeId, outSet, variableBlock, assignmentStmt, args, controlFlowGraph);
                 controlFlowGraph.decrementRecursionCounter();
@@ -1109,6 +1105,8 @@ public class JavaReaderStatic implements JavaReader {
     }
 
     private void setupSoot() {
+        final String sootPath = FileScanner.getSootPath();
+        System.setProperty("soot.class.path", sootPath);
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
         ArrayList<String> excludedClasses = new ArrayList<>();
