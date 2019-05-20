@@ -70,6 +70,10 @@ public class VersioningChecker extends AbstractElementChecker {
         this.resourcesNewestVersions = resourcesNewestVersions;
     }
 
+    public static boolean isSingletonChecker() {
+        return true;
+    }
+
     /**
      * Check versions of referenced beans and/or classes
      *

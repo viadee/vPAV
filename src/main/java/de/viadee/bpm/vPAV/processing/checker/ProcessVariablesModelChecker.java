@@ -96,6 +96,10 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 		return issues;
 	}
 
+	public boolean isSingletonChecker() {
+		return true;
+	}
+
 	private CriticalityEnum determineCriticality(final Anomaly anomaly) {
 
 		if (anomaly == Anomaly.DD || anomaly == Anomaly.DU) {

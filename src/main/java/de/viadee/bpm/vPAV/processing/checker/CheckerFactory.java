@@ -115,7 +115,7 @@ public class CheckerFactory {
      * @param rule Rule in Map
      * @return fullyQualifiedName
      */
-    private String getFullyQualifiedName(Rule rule) {
+    public String getFullyQualifiedName(Rule rule) {
         String fullyQualifiedName = ""; //$NON-NLS-1$
         if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getName())
                 && rule.isActive()) {

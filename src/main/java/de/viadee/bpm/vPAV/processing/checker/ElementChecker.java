@@ -42,4 +42,8 @@ import java.util.Collection;
 public interface ElementChecker {
 
     Collection<CheckerIssue> check(final BpmnElement element);
+
+    static boolean isSingletonChecker() {
+        return false;
+    }
 }
