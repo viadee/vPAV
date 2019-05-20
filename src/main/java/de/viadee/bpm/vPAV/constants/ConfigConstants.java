@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -197,6 +198,23 @@ public class ConfigConstants {
             return createoutputrule.get(ConfigConstants.CREATE_OUTPUT_RULE).isActive();
         } else {
             return true;
+        }
+    }
+
+    /**
+     * @return
+     */
+    public String getLanguage() {
+        if (properties.containsKey("language")) {
+            return properties.getProperty("language");
+        } else {
+            if (Locale.getDefault().toString().equals("de_DE")) {
+                logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: de_DE.");
+                return "de";
+            } else {
+                logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: en_US.");
+                return "en";
+            }
         }
     }
 }
