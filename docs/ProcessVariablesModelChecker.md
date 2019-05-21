@@ -20,29 +20,13 @@ The rule should be configured as follows:
 <rule>
   <name>ProcessVariablesModelChecker</name>
   <state>true</state>
+  <settings>
+    <setting name="UseStaticAnalysisBoolean">true</setting>
+  </settings>
 </rule>
 
 ```
 
-Important: All variables used at runtime should be declared beforehand to maximize correctness of the conducted analysis. The declaration has to be done in a class called "InitialProcessVariables". This class can be either a separate class or inner class. 
-
-```java
-public class InitialProcessVariables extends InitialProcessVariablesBase {
-
-    String filename;
-    
-}
-```
-
-```java
-public class Example {
-
-   class InitialProcessVariables extends InitialProcessVariablesBase {
-
-   	String filename;
-    }    
-}
-```
 
 ## Error messages
 **process variable creates an anomaly (compare %Chapter%,%ElementFieldType%)**
