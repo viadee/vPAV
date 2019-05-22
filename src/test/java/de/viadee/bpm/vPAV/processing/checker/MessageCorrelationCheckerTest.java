@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -105,7 +106,7 @@ public class MessageCorrelationCheckerTest {
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement);
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
 			issues.addAll(checker.check(element));
 		}
 
@@ -142,7 +143,7 @@ public class MessageCorrelationCheckerTest {
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement);
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
 			issues.addAll(checker.check(element));
 		}
 
@@ -179,7 +180,7 @@ public class MessageCorrelationCheckerTest {
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement);
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
 			issues.addAll(checker.check(element));
 		}
 
@@ -216,7 +217,7 @@ public class MessageCorrelationCheckerTest {
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement);
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
 			issues.addAll(checker.check(element));
 		}
 

@@ -56,6 +56,12 @@ public class Node {
 
 	private Block block;
 
+	public BpmnElement getParentElement() {
+		return parentElement;
+	}
+
+	private BpmnElement parentElement;
+
 	private List<Node> nodePredecessors;
 	private List<Node> nodeSuccessors;
 
@@ -64,8 +70,28 @@ public class Node {
 
 	private String id;
 
-	public Node(final ControlFlowGraph controlFlowGraph, final Block block) {
+	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement) {
 		this.controlFlowGraph = controlFlowGraph;
+		this.parentElement = parentElement;
+		this.nodePredecessors = new ArrayList<>();
+		this.nodeSuccessors = new ArrayList<>();
+
+		this.processPredecessors = new ArrayList<>();
+		this.processSuccessors = new ArrayList<>();
+
+		this.operations = new LinkedHashMap<>();
+		this.defined = new LinkedHashMap<>();
+		this.used = new LinkedHashMap<>();
+		this.killed = new LinkedHashMap<>();
+		this.inUsed = new LinkedHashMap<>();
+		this.inUnused = new LinkedHashMap<>();
+		this.outUsed = new LinkedHashMap<>();
+		this.outUnused = new LinkedHashMap<>();
+	}
+
+	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block) {
+		this.controlFlowGraph = controlFlowGraph;
+		this.parentElement = parentElement;
 		this.block = block;
 		this.nodePredecessors = new ArrayList<>();
 		this.nodeSuccessors = new ArrayList<>();

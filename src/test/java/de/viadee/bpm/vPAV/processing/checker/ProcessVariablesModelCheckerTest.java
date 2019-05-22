@@ -37,11 +37,10 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.JavaReaderContext;
-import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -60,80 +59,77 @@ import java.util.*;
 
 public class ProcessVariablesModelCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+	private static final String BASE_PATH = "src/test/resources/";
 
-    private static BpmnModelInstance modelInstance;
+	private static BpmnModelInstance modelInstance;
 
-    private static ModelChecker checker;
+	private static ModelChecker checker;
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws ParserConfigurationException, SAXException, IOException {
-        RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+	@BeforeClass
+	public static void setup() throws ParserConfigurationException, SAXException, IOException {
+		RuntimeConfig.getInstance().setTest(true);
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java");
+		final URL[] classUrls = { classUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().getResource("en_US");
 
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
-        final File processDefinition = new File(PATH);
-        final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
-        
-        // parse bpmn model
-        modelInstance = Bpmn.readModelFromFile(processDefinition);
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
+		final File processDefinition = new File(PATH);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-        // create data flow graphs
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
-                processDefinition.getPath(), new ArrayList<String>(), scanner);
+		// parse bpmn model
+		modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
-                .createInvalidPaths(graphCollection);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+		// create data flow graphs
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), new ArrayList<String>(), scanner);
 
-        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
-        checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
-    }
+		// calculate invalid paths based on data flow graphs
+		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-    /**
-     * Case: there is an empty script reference
-     */
-    @Test
-    public void testProcessVariablesModelChecker() {
-        final Collection<CheckerIssue> issues = checker.check();
+		final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
+		checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+	}
 
-        if (issues.size() == 0) {
-            Assert.fail("there should be generated an issue");
-        }
+	/**
+	 * Case: there is an empty script reference
+	 */
+	@Test
+	public void testProcessVariablesModelChecker() {
+		final Collection<CheckerIssue> issues = checker.check();
 
-        Iterator<CheckerIssue> iterator = issues.iterator();
-        final CheckerIssue issue1 = iterator.next();
-        Assert.assertEquals("SequenceFlow_0bi6kaa", issue1.getElementId());
-        Assert.assertEquals("geloeschteVariable", issue1.getVariable());
-        Assert.assertEquals("DU", issue1.getAnomaly().toString());
-        final CheckerIssue issue2 = iterator.next();
-        Assert.assertEquals("SequenceFlow_0btqo3y", issue2.getElementId());
-        Assert.assertEquals("jepppa", issue2.getVariable());
-        Assert.assertEquals("DD", issue2.getAnomaly().toString());
-        final CheckerIssue issue3 = iterator.next();
-        Assert.assertEquals("ServiceTask_05g4a96", issue3.getElementId());
-        Assert.assertEquals("intHallo", issue3.getVariable().toString());
-        Assert.assertEquals("UR", issue3.getAnomaly().toString());
-        final CheckerIssue issue4 = iterator.next();
-        Assert.assertEquals("BusinessRuleTask_119jb6t", issue4.getElementId());
-        Assert.assertEquals("hallo2", issue4.getVariable());
-        Assert.assertEquals("UR", issue4.getAnomaly().toString());
-    }
+		if (issues.size() == 0) {
+			Assert.fail("there should be generated an issue");
+		}
 
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
-    }
+		Iterator<CheckerIssue> iterator = issues.iterator();
+		final CheckerIssue issue1 = iterator.next();
+		Assert.assertEquals("SequenceFlow_0bi6kaa", issue1.getElementId());
+		Assert.assertEquals("geloeschteVariable", issue1.getVariable());
+		Assert.assertEquals("DU", issue1.getAnomaly().toString());
+		final CheckerIssue issue2 = iterator.next();
+		Assert.assertEquals("SequenceFlow_0btqo3y", issue2.getElementId());
+		Assert.assertEquals("jepppa", issue2.getVariable());
+		Assert.assertEquals("DD", issue2.getAnomaly().toString());
+		final CheckerIssue issue3 = iterator.next();
+		Assert.assertEquals("ServiceTask_05g4a96", issue3.getElementId());
+		Assert.assertEquals("intHallo", issue3.getVariable().toString());
+		Assert.assertEquals("UR", issue3.getAnomaly().toString());
+		final CheckerIssue issue4 = iterator.next();
+		Assert.assertEquals("BusinessRuleTask_119jb6t", issue4.getElementId());
+		Assert.assertEquals("hallo2", issue4.getVariable());
+		Assert.assertEquals("UR", issue4.getAnomaly().toString());
+	}
+
+	@AfterClass
+	public static void tearDown() {
+		RuntimeConfig.getInstance().setTest(false);
+	}
 }

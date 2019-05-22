@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -106,7 +107,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -135,7 +136,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -164,7 +165,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -193,7 +194,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -222,7 +223,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -254,7 +255,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -286,7 +287,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -318,7 +319,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -351,7 +352,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -383,7 +384,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -415,7 +416,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -447,7 +448,7 @@ public class JavaDelegateCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 

@@ -71,6 +71,11 @@ public class ControlFlowGraph {
 	public void addNode(final Node node) {
 		String key = createHierarchy(node);
 		node.setId(key);
+		this.nodes.forEach((key1, value) -> {
+			if (value.getParentElement().getBaseElement().getId().equals(node.getParentElement().getBaseElement().getId())) {
+				node.setPredsIntraProcedural(key1);
+			}
+		});
 		this.nodes.put(key, node);
 	}
 

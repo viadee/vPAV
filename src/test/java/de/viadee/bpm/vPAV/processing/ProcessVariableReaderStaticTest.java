@@ -61,9 +61,7 @@ import static de.viadee.bpm.vPAV.processing.BpmnModelDispatcher.getProcessVariab
 import static org.junit.Assert.assertEquals;
 
 public class ProcessVariableReaderStaticTest {
-
-    private static ClassLoader cl;
-    
+   
     private static final String BASE_PATH = "src/test/resources/";
 
     @BeforeClass
@@ -91,7 +89,7 @@ public class ProcessVariableReaderStaticTest {
         final Collection<ServiceTask> tasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -111,7 +109,7 @@ public class ProcessVariableReaderStaticTest {
         final Collection<StartEvent> startElement = modelInstance
                 .getModelElementsByType(StartEvent.class);
 
-        final BpmnElement element = new BpmnElement(PATH, startElement.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, startElement.iterator().next(), new ControlFlowGraph());
 
         final EntryPoint entry = new EntryPoint("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java","startProcess", "schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage");
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -138,7 +136,7 @@ public class ProcessVariableReaderStaticTest {
         final Collection<ServiceTask> tasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -158,7 +156,7 @@ public class ProcessVariableReaderStaticTest {
         final Collection<ServiceTask> tasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -181,9 +179,6 @@ public class ProcessVariableReaderStaticTest {
 
         scanner.scanProcessVariables();
 
-        final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderStatic());
-
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
@@ -191,7 +186,7 @@ public class ProcessVariableReaderStaticTest {
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
         // create data flow graphs
-        graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);

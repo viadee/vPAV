@@ -82,7 +82,7 @@ public class AnomaliesSetCreationTest {
         final Collection<ServiceTask> tasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -105,7 +105,7 @@ public class AnomaliesSetCreationTest {
         final Collection<ServiceTask> tasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -128,7 +128,7 @@ public class AnomaliesSetCreationTest {
         final Collection<ServiceTask> tasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -151,7 +151,7 @@ public class AnomaliesSetCreationTest {
         final Collection<ServiceTask> tasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();

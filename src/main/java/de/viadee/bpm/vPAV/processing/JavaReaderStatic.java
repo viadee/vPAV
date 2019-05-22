@@ -55,7 +55,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JavaReaderStatic implements JavaReader {
+public class JavaReaderStatic {
 
 	public static final Logger LOGGER = Logger.getLogger(JavaReaderStatic.class.getName());
 
@@ -303,7 +303,6 @@ public class JavaReaderStatic implements JavaReader {
 
 		if (outSet.getAllProcessVariables().size() > 0) {
 			processVariables.putAll(outSet.getAllProcessVariables());
-			addAnomaliesFoundInSourceCode(element, outSet);
 		}
 
 		return processVariables;
@@ -588,7 +587,7 @@ public class JavaReaderStatic implements JavaReader {
 			final ControlFlowGraph controlFlowGraph) {
 
 		for (Block block : graph.getBlocks()) {
-			Node node = new Node(controlFlowGraph, block);
+			Node node = new Node(controlFlowGraph, element, block);
 			controlFlowGraph.addNode(node);
 
 			// Collect the functions Unit by Unit via the blockIterator
@@ -933,159 +932,6 @@ public class JavaReaderStatic implements JavaReader {
 			}
 		}
 		return initialOperations;
-	}
-
-	/**
-	 *
-	 * Find anomalies inside a Bpmn element as well.
-	 *
-	 * @param element
-	 *            BpmnElement
-	 * @param outSet
-	 *            OUT set of CFG
-	 */
-	private void addAnomaliesFoundInSourceCode(final BpmnElement element, final OutSetCFG outSet) {
-		for (VariableBlock vb : outSet.getAllVariableBlocks()) {
-			if (vb.getBlock().getIndexInMethod() == 0) {
-				addAnomaliesFoundInPathsRecursive(element, vb.getBlock(), new LinkedList<>(), outSet,
-						new LinkedList<>(), "");
-			}
-		}
-	}
-
-	/**
-	 *
-	 * Build LinkedList of ProcessVariableOperations recursively based on CFG paths.
-	 *
-	 * @param element
-	 *            BpmnElement
-	 * @param currentBlock
-	 *            Block from CFG
-	 * @param currentPath
-	 *            List of so far visited Blocks
-	 * @param outSet
-	 *            OUT set of CFG
-	 * @param predecessorVariablesList
-	 *            Chain of Process Variables along the path
-	 * @param edge
-	 *            Current edge between two Blocks
-	 */
-	private void addAnomaliesFoundInPathsRecursive(final BpmnElement element, final Block currentBlock,
-			final LinkedList<String> currentPath, final OutSetCFG outSet,
-			final LinkedList<ProcessVariableOperation> predecessorVariablesList, final String edge) {
-
-		// List<AnomalyContainer> foundAnomalies = new ArrayList<AnomalyContainer>();
-		if (edge != null && !edge.equals("")) {
-			currentPath.add(edge);
-		}
-
-		// get the VariableBlock
-		VariableBlock variableBlock = outSet.getVariableBlock(currentBlock);
-
-		// set IN + this Variables as OUT
-		LinkedList<ProcessVariableOperation> usedVariables = new LinkedList<>();
-		usedVariables.addAll(variableBlock.getAllProcessVariables());
-
-		// Based on last appearance of Variable decide on UR, DD, DU anomaly
-		for (ProcessVariableOperation variable : usedVariables) {
-			if (predecessorVariablesList.lastIndexOf(variable) >= 0) {
-				ProcessVariableOperation lastAppearance = predecessorVariablesList
-						.get(predecessorVariablesList.lastIndexOf(variable));
-				checkAnomaly(element, variable, lastAppearance);
-			}
-		}
-
-		// Prepare new chain of Variables including this Block's variables for
-		// successors
-		predecessorVariablesList.addAll(usedVariables);
-
-		List<Block> successors = currentBlock.getSuccs();
-		for (Block successor : successors) {
-			String newEdge = currentBlock.toShortString() + successor.toShortString();
-			int occurrence = Collections.frequency(currentPath, newEdge);
-			if (occurrence < 2) {
-				addAnomaliesFoundInPathsRecursive(element, successor, currentPath, outSet, predecessorVariablesList,
-						newEdge);
-			}
-		}
-
-		if (!currentPath.isEmpty()) {
-			currentPath.removeLast();
-		}
-
-		for (ProcessVariableOperation pv : variableBlock.getAllProcessVariables()) {
-			predecessorVariablesList.removeLastOccurrence(pv);
-		}
-
-	}
-
-	/**
-	 * Check for data-flow anomaly between current and previous variable operation
-	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param curr
-	 *            current operation
-	 * @param last
-	 *            previous operation
-	 */
-	private void checkAnomaly(final BpmnElement element, ProcessVariableOperation curr, ProcessVariableOperation last) {
-		if (urSourceCode(last, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
-		}
-
-		if (ddSourceCode(last, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(), curr));
-		}
-
-		if (duSourceCode(last, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(), curr));
-		}
-	}
-
-	/**
-	 * UR anomaly: second last operation of PV is DELETE, last operation is READ
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.READ)
-				&& prev.getOperation().equals(VariableOperation.DELETE);
-	}
-
-	/**
-	 * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.WRITE)
-				&& prev.getOperation().equals(VariableOperation.WRITE);
-	}
-
-	/**
-	 * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.DELETE)
-				&& prev.getOperation().equals(VariableOperation.WRITE);
 	}
 
 	/**
