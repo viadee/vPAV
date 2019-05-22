@@ -71,11 +71,18 @@ public class ControlFlowGraph {
 	public void addNode(final Node node) {
 		String key = createHierarchy(node);
 		node.setId(key);
-		this.nodes.forEach((key1, value) -> {
-			if (value.getParentElement().getBaseElement().getId().equals(node.getParentElement().getBaseElement().getId())) {
-				node.setPredsIntraProcedural(key1);
-			}
-		});
+
+//		for (Map.Entry<String, Node> entry : nodes.entrySet()) {
+//            if (entry.getValue().getFilePath().equals(node.getFilePath())) {
+//                node.setPredsIntraProcedural(entry.getKey());
+//            }
+//        }
+//		this.nodes.forEach((key1, value) -> {
+//			if (value.getParentElement().getBaseElement().getId().equals(node.getParentElement().getBaseElement().getId())) {
+//				node.setPredsIntraProcedural(key1);
+////				node.incrementDelegateCount();
+//			}
+//		});
 		this.nodes.put(key, node);
 	}
 
@@ -120,11 +127,75 @@ public class ControlFlowGraph {
 	 *            Current BpmnElement
 	 */
 	public void analyze(final BpmnElement element) {
+        computePredecessorRelations();
 		computeReachingDefinitions();
 		computeLineByLine(element);
 		extractAnomalies(element);
 	}
-	/**
+
+    /**
+     * Set predecessor/successor relations for blocks and initialize sets
+     */
+    void computePredecessorRelations() {
+        nodes.values().forEach(node -> {
+            this.operations.putAll(node.getOperations());
+            node.setPreds();
+            node.setSuccs();
+            node.setOutUnused(new LinkedHashMap<>());
+            node.setOutUsed(new LinkedHashMap<>());
+        });
+    }
+
+    /**
+     * Uses the approach from ALSU07 (Reaching Definitions) to compute data flow
+     * anomalies across the CFG
+     */
+    private void computeReachingDefinitions() {
+        boolean change = true;
+        while (change) {
+            change = false;
+            for (Node node : nodes.values()) {
+                // Calculate in-sets (intersection of predecessors)
+                final LinkedHashMap<String, ProcessVariableOperation> inUsed = node.getInUsed();
+                final LinkedHashMap<String, ProcessVariableOperation> inUnused = node
+                        .getInUnused();
+                for (Node pred : node.getNodePredecessors()) {
+                    inUsed.putAll(pred.getOutUsed());
+                    inUnused.putAll(pred.getOutUnused());
+                }
+                node.setInUsed(inUsed);
+                node.setInUnused(inUnused);
+
+                // Calculate out-sets for used definitions (transfer functions)
+                final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>();
+                outUsed.putAll(node.getUsed());
+                outUsed.putAll(getSetDifference(node.getInUsed(), node.getKilled()));
+                node.setOutUsed(outUsed);
+
+                // Calculate out-sets for unused definitions (transfer functions)
+                final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
+                        node.getDefined());
+                final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>();
+                tempIntersection.putAll(getSetDifference(node.getInUnused(), node.getKilled()));
+                tempIntersection.putAll(getSetDifference(tempIntersection, node.getUsed()));
+                outUnused.putAll(tempIntersection);
+                node.setOutUnused(outUnused);
+
+                // Compare old values with new values and check for changes
+                final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = node
+                        .getOutUnused();
+                final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = node
+                        .getOutUsed();
+
+                if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
+                    change = true;
+                }
+            }
+        }
+    }
+
+
+    /**
 	 * Finds anomalies inside blocks by checking statements unit by unit
      * @param element
      *            Current BpmnElement
@@ -231,64 +302,7 @@ public class ControlFlowGraph {
 				&& prev.getOperation().equals(VariableOperation.WRITE);
 	}
 
-	/**
-	 * Uses the approach from ALSU07 (Reaching Definitions) to compute data flow
-	 * anomalies across the CFG
-	 */
-	public void computeReachingDefinitions() {
-		// Set predecessor/successor relations and initialize sets
-		nodes.values().forEach(node -> {
-			this.operations.putAll(node.getOperations());
-			node.setPreds();
-			node.setSuccs();
-			node.setOutUnused(new LinkedHashMap<>());
-			node.setOutUsed(new LinkedHashMap<>());
-		});
-
-		boolean change = true;
-		while (change) {
-			change = false;
-			for (Node node : nodes.values()) {
-				// Calculate in-sets (intersection of predecessors)
-				final LinkedHashMap<String, ProcessVariableOperation> inUsed = node.getInUsed();
-				final LinkedHashMap<String, ProcessVariableOperation> inUnused = node
-						.getInUnused();
-				for (Node pred : node.getNodePredecessors()) {
-					inUsed.putAll(pred.getOutUsed());
-					inUnused.putAll(pred.getOutUnused());
-				}
-				node.setInUsed(inUsed);
-				node.setInUnused(inUnused);
-
-				// Calculate out-sets for used definitions (transfer functions)
-				final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>();
-				outUsed.putAll(node.getUsed());
-				outUsed.putAll(getSetDifference(node.getInUsed(), node.getKilled()));
-				node.setOutUsed(outUsed);
-
-				// Calculate out-sets for unused definitions (transfer functions)
-				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
-						node.getDefined());
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>();
-				tempIntersection.putAll(getSetDifference(node.getInUnused(), node.getKilled()));
-				tempIntersection.putAll(getSetDifference(tempIntersection, node.getUsed()));
-				outUnused.putAll(tempIntersection);
-				node.setOutUnused(outUnused);
-
-				// Compare old values with new values and check for changes
-				final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = node
-						.getOutUnused();
-				final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = node
-						.getOutUsed();
-
-				if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
-					change = true;
-				}
-			}
-		}
-	}
-
-	/**
+    /**
 	 * Based on the calculated sets, extract the anomalies found on source code
 	 * level
 	 * 

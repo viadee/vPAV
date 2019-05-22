@@ -55,11 +55,6 @@ public class Node {
 	private LinkedHashMap<String, ProcessVariableOperation> outUnused;
 
 	private Block block;
-
-	public BpmnElement getParentElement() {
-		return parentElement;
-	}
-
 	private BpmnElement parentElement;
 
 	private List<Node> nodePredecessors;
@@ -69,6 +64,7 @@ public class Node {
 	private List<BpmnElement> processSuccessors;
 
 	private String id;
+	private String filePath;
 
 	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement) {
 		this.controlFlowGraph = controlFlowGraph;
@@ -89,10 +85,11 @@ public class Node {
 		this.outUnused = new LinkedHashMap<>();
 	}
 
-	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block) {
+	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block, final String filePath) {
 		this.controlFlowGraph = controlFlowGraph;
 		this.parentElement = parentElement;
 		this.block = block;
+		this.filePath = filePath;
 		this.nodePredecessors = new ArrayList<>();
 		this.nodeSuccessors = new ArrayList<>();
 
@@ -285,9 +282,9 @@ public class Node {
 		this.outUnused = outUnused;
 	}
 
-	void addProcessSuccessors(final List<BpmnElement> processSuccessors) {
-		this.processSuccessors.addAll(processSuccessors);
+	public BpmnElement getParentElement() {	return parentElement; }
+
+	public String getFilePath() {
+		return filePath;
 	}
-
-
 }

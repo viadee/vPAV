@@ -377,4 +377,8 @@ public class BpmnElement {
 	public void setProcessPredecessors(final List<BpmnElement> processPredecessors) {
 		this.processPredecessors = processPredecessors;
 	}
+
+	public void addNodeSuccessor(final Node node) {
+		this.nodeSuccessors.add(node);
+	}
 }
