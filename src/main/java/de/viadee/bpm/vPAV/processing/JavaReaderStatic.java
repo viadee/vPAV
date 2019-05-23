@@ -962,5 +962,19 @@ public class JavaReaderStatic {
 	private void setConstructorArgs(final List<Value> args) {
 		this.constructorArgs = args;
 	}
-
+  
+  private void setupSoot() {
+    final String sootPath = FileScanner.getSootPath();
+    System.setProperty("soot.class.path", sootPath);
+    Options.v().set_whole_program(true);
+    Options.v().set_allow_phantom_refs(true);
+    ArrayList<String> excludedClasses = new ArrayList<>();
+    excludedClasses.add("java.*");
+    excludedClasses.add("sun.*");
+    excludedClasses.add("jdk.*");
+    excludedClasses.add("javax.*");
+    Options.v().set_exclude(excludedClasses);
+    Options.v().set_no_bodies_for_excluded(true);
+    Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
+  }
 }

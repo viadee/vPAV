@@ -64,4 +64,8 @@ public class DataFlowChecker implements ModelChecker {
         }
         return issues;
     }
+
+    public static boolean isSingletonChecker() {
+        return true;
+    }
 }

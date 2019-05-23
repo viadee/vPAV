@@ -110,6 +110,10 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 		return issues;
 	}
 
+	public static boolean isSingletonChecker() {
+        return true;
+    }
+
 	/**
 	 *
 	 * @param anomaly

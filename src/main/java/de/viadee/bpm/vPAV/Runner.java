@@ -338,12 +338,11 @@ public class Runner {
         for (String file : allOutputFilesArray)
             outputFiles.add(Paths.get(fileMapping.get(file), file));
 
-        if (rules.get(ConfigConstants.CREATE_OUTPUT_RULE).get(ConfigConstants.CREATE_OUTPUT_RULE).isActive()) {
-            for (String file : allOutputFilesArray)
-                copyFileToVPAVFolder(file);
-        }
-
-    }
+        if (ConfigConstants.getInstance().isHtmlOutputEnabled(rules.get(ConfigConstants.CREATE_OUTPUT_RULE))) {
+			for (String file : allOutputFilesArray)
+				copyFileToVPAVFolder(file);
+		}
+	}
 
     /**
      * Creates ArrayList to hold output files

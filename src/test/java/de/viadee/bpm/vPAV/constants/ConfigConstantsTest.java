@@ -32,22 +32,28 @@
 package de.viadee.bpm.vPAV.constants;
 
 import de.viadee.bpm.vPAV.ProcessApplicationValidator;
+import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.*;
 
-public class CustomBasePathTest {
+public class ConfigConstantsTest {
+
+    @After
+    public void resetConfigConstants() {
+        ConfigConstants.getInstance().setProperties(new Properties());
+    }
 
     @Test
     public void testCustomBasePathExists() {
         // Set custom basepath.
-        ConfigConstants instance = Mockito.mock(ConfigConstants.class);
-        ConfigConstants.setInstance(instance);
-        Mockito.when(instance.getBasepath()).thenReturn("src/test/resources/PropertiesTest/");
+        Properties myProperties = new Properties();
+        myProperties.put("basepath", "src/test/resources/PropertiesTest/");
+        ConfigConstants.getInstance().setProperties(myProperties);
         Assert.assertEquals("BasePath could not be successfully injected", "src/test/resources/PropertiesTest/",
                 ConfigConstants.getInstance().getBasepath());
 
@@ -60,5 +66,46 @@ public class CustomBasePathTest {
                 inconsistencies.get(0).getBpmnFile());
         Assert.assertFalse("BasePath was changed but BPMN model was not found",
                 inconsistencies.isEmpty());
+    }
+
+    @Test
+    public void testCreateOutputHtmlPropertyExists() {
+        Properties myProperties = new Properties();
+        myProperties.put("outputhtml", false);
+        ConfigConstants.getInstance().setProperties(myProperties);
+        Assert.assertTrue("Output Html property should be false.", ConfigConstants.getInstance().isHtmlOutputEnabled());
+    }
+
+    @Test
+    public void testCreateOutputHtmlPropertyNotExists() {
+        Assert.assertTrue("Output Html property should be true because it is not set.", ConfigConstants.getInstance().isHtmlOutputEnabled());
+    }
+
+    @Test
+    public void testCreateOutputHtmlPropertyBackwardsCompatiblity() {
+        Map<String, Rule> htmlrulemap = new HashMap<>();
+        Rule htmlrule = new Rule("id", "name", false, null, null, null, null);
+        htmlrulemap.put(ConfigConstants.CREATE_OUTPUT_RULE, htmlrule);
+        Assert.assertFalse("Output Html property was not read from rule.", ConfigConstants.getInstance().isHtmlOutputEnabled(htmlrulemap));
+    }
+
+    @Test
+    public void testLanguagePropertyExists() {
+        Properties myProperties = new Properties();
+        myProperties.put("language", "en");
+        ConfigConstants.getInstance().setProperties(myProperties);
+        Assert.assertEquals("Language was not correctly loaded.", "en", ConfigConstants.getInstance().getLanguage());
+    }
+
+    @Test
+    public void testLanguagePropertyNotExists() {
+        String expected;
+        if (Locale.getDefault().toString().equals("de_DE")) {
+            expected = "de";
+        } else {
+            expected = "en";
+        }
+
+        Assert.assertEquals("Default language was not used.", expected, ConfigConstants.getInstance().getLanguage());
     }
 }

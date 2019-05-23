@@ -31,8 +31,12 @@
  */
 package de.viadee.bpm.vPAV.constants;
 
+import de.viadee.bpm.vPAV.config.model.Rule;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -158,16 +162,59 @@ public class ConfigConstants {
         return ConfigConstants.instance;
     }
 
+    /**
+     * Only used for tests in order to inject mocked properties.
+     *
+     * @param newProperties mocked properties
+     */
+    public void setProperties(Properties newProperties) {
+        this.properties = newProperties;
+    }
+
     public String getBasepath() {
         return properties.getProperty("basepath", ConfigConstants.BASEPATH);
     }
 
     /**
-     * Only used for tests in order to inject mocked class.
+     * Checks whether the output of the result should be in html
      *
-     * @param instance mocked instance
+     * @return true (default) or false if false is defined in the properties file
      */
-    protected static void setInstance(ConfigConstants instance) {
-        ConfigConstants.instance = instance;
+    public boolean isHtmlOutputEnabled() {
+        return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
+    }
+
+    /**
+     * Method for backwards compatiblity. Should be deleted in the future and replaced by the method without parameters.
+     *
+     * @param createoutputrule
+     * @return
+     */
+    public boolean isHtmlOutputEnabled(Map<String, Rule> createoutputrule) {
+        if (properties.containsKey("outputhtml")) {
+            return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
+        } else if (createoutputrule != null) {
+            // Backwards compatibility: allow create-output flag to be defined in ruleset
+            return createoutputrule.get(ConfigConstants.CREATE_OUTPUT_RULE).isActive();
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * @return
+     */
+    public String getLanguage() {
+        if (properties.containsKey("language")) {
+            return properties.getProperty("language");
+        } else {
+            if (Locale.getDefault().toString().equals("de_DE")) {
+                logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: de_DE.");
+                return "de";
+            } else {
+                logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: en_US.");
+                return "en";
+            }
+        }
     }
 }

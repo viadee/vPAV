@@ -64,8 +64,8 @@ public class RuntimeConfig {
 			"NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker", "VersioningChecker",
 			"DmnTaskChecker", "ProcessVariablesModelChecker", "ProcessVariablesNameConventionChecker",
 			"TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
-			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker", "CreateOutputHTML",
-			"DataFlowChecker", "MessageCorrelationChecker" };
+			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
+			"DataFlowChecker", "MessageCorrelationChecker", "CreateOutputHTML"};
 
 	private ArrayList<String> allActiveRules = new ArrayList<>();
 
@@ -155,6 +155,7 @@ public class RuntimeConfig {
 	 */
 	public void retrieveLocale(Map<String, Map<String, Rule>> rules) {
 		try {
+			// Todo don't allow definition of language in rule set in future versions
 			final Rule rule = rules.get("language").get("language");
 			final Map<String, Setting> settings = rule.getSettings();
 			if (settings.get("locale").getValue().equals("de")) {
@@ -163,7 +164,7 @@ public class RuntimeConfig {
 				getResource("en_US");
 			}
 		} catch (NullPointerException e) {
-			if (Locale.getDefault().toString().equals("de_DE")) {
+			if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
 				logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: de_DE.");
 				getResource("de_DE");
 			} else {

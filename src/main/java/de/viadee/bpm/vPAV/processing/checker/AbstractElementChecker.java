@@ -44,5 +44,4 @@ public abstract class AbstractElementChecker implements ElementChecker {
         this.rule = rule;
         this.bpmnScanner = bpmnScanner;
     }
-
 }

@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -136,6 +137,43 @@ public class CheckerFactoryTest {
                 new BpmnScanner(PATH), null);
 
         assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
+    }
+
+    /**
+     * Tests whether multiple definitions of a singleton checker are correctly handled.
+     */
+    @Test
+    public void testMultipleRulesOfSingletonChecker() {
+        // Given rule set
+        Rule ruleMessageEvent = new Rule("MessageEventChecker", true, null, null, null, null);
+        Rule ruleJavaDelegate = new Rule("JavaDelegateChecker", true, null, null, null, null);
+        Rule ruleJavaDelegate2 = new Rule("JavaDelegateChecker", true, null, null, null, null);
+        Rule ruleVersioningChecker = new Rule("VersioningChecker", true, null, null, null, null);
+        Rule ruleVersioningChecker2 = new Rule("VersioningChecker", true, null, null, null, null);
+
+        Map<String, Rule> ruleMapMessageEvent = new HashMap<>();
+        Map<String, Rule> ruleMapJavaDelegate = new HashMap<>();
+        Map<String, Rule> ruleMapVersioningChecker = new HashMap<>();
+
+        ruleMapMessageEvent.put("MessageEvent", ruleMessageEvent);
+        rules.put("MessageEventChecker", ruleMapMessageEvent);
+
+        ruleMapJavaDelegate.put("JavaDelegate", ruleJavaDelegate);
+        ruleMapJavaDelegate.put("JavaDelegate2", ruleJavaDelegate2);
+        rules.put("JavaDelegateChecker", ruleMapJavaDelegate);
+
+        ruleMapVersioningChecker.put("Versioning", ruleVersioningChecker);
+        ruleMapVersioningChecker.put("Versioning2", ruleVersioningChecker2);
+        rules.put("VersioningChecker", ruleMapVersioningChecker);
+
+        // When
+        CheckerFactory checkerFactory = new CheckerFactory();
+        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
+                new BpmnScanner(PATH), null);
+
+        // Then
+        Assert.assertEquals("Wrong number of checkers was created.", 4, cElChecker.size());
+        Assert.assertEquals("Duplicated versioning checker rule was not added to incorrect checker map.", 1, checkerFactory.getIncorrectCheckers().size());
     }
 
     @After
