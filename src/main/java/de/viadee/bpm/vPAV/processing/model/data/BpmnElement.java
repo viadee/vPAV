@@ -381,4 +381,48 @@ public class BpmnElement {
 	public void addNodeSuccessor(final Node node) {
 		this.nodeSuccessors.add(node);
 	}
+
+	public LinkedHashMap<String,ProcessVariableOperation> getInUsed() {
+		return inUsed;
+	}
+
+	public LinkedHashMap<String,ProcessVariableOperation> getInUnused() {
+		return inUnused;
+	}
+
+	public LinkedHashMap<String,ProcessVariableOperation> getOutUsed() {
+		return outUsed;
+	}
+
+	public LinkedHashMap<String,ProcessVariableOperation> getOutUnused() {
+		return outUnused;
+	}
+
+	public void setInUsed(LinkedHashMap<String,ProcessVariableOperation> inUsedB) {
+		this.inUsed = inUsedB;
+	}
+
+	public void setInUnused(LinkedHashMap<String,ProcessVariableOperation> inUnusedB) {
+		this.inUnused = inUnusedB;
+	}
+
+	public LinkedHashMap<String,ProcessVariableOperation> getUsed2() {
+		return used2;
+	}
+
+	public LinkedHashMap<String,ProcessVariableOperation> getKilled2() {
+		return killed2;
+	}
+
+	public LinkedHashMap<String,ProcessVariableOperation> getDefined2() {
+		return defined2;
+	}
+
+	public void setOutUsed(LinkedHashMap<String,ProcessVariableOperation> outUsed) {
+		this.outUsed = outUsed;
+	}
+
+	public void setOutUnused(LinkedHashMap<String,ProcessVariableOperation> outUnused) {
+		this.outUnused = outUnused;
+	}
 }

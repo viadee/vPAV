@@ -88,7 +88,7 @@ public class AnomaliesSetCreationTest {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.DelegateAnomalyDD", element, null, null, null, cg));
-        cg.analyze(element);
+//        cg.analyze(element);
 
         Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
         assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
@@ -111,7 +111,7 @@ public class AnomaliesSetCreationTest {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.DelegateAnomalyDU", element, null, null, null, cg));
-        cg.analyze(element);
+//        cg.analyze(element);
 
         Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
         assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
@@ -134,7 +134,7 @@ public class AnomaliesSetCreationTest {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.DelegateAnomalyUR", element, null, null, null, cg));
-        cg.analyze(element);
+//        cg.analyze(element);
 
         Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
         assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
@@ -157,7 +157,7 @@ public class AnomaliesSetCreationTest {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.DelegateAnomalyUU", element, null, null, null, cg));
-        cg.analyze(element);
+//        cg.analyze(element);
 
         Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
         assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
