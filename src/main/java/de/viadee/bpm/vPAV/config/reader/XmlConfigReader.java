@@ -205,9 +205,13 @@ public final class XmlConfigReader implements ConfigReader {
         checkSingletonRule(rules, ConfigConstants.CREATE_OUTPUT_RULE);
         checkSingletonRule(rules, "language");
 
-        // TODO use interface method for checking if MODEL checker is singleton
-        checkSingletonRule(rules, ProcessVariablesModelChecker.class.getSimpleName());
-        checkSingletonRule(rules, DataFlowChecker.class.getSimpleName());
+        if (ProcessVariablesModelChecker.isSingletonChecker()) {
+            checkSingletonRule(rules, ProcessVariablesModelChecker.class.getSimpleName());
+        }
+
+        if (DataFlowChecker.isSingletonChecker()) {
+            checkSingletonRule(rules, DataFlowChecker.class.getSimpleName());
+        }
 
         return rules;
     }

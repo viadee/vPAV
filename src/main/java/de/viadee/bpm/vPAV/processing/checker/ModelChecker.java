@@ -42,8 +42,4 @@ import java.util.Collection;
 public interface ModelChecker {
 
     Collection<CheckerIssue> check();
-
-    default boolean isSingletonChecker() {
-        return false;
-    }
 }
