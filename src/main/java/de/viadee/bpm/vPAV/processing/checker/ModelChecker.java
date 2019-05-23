@@ -43,7 +43,7 @@ public interface ModelChecker {
 
     Collection<CheckerIssue> check();
 
-    static boolean isSingletonChecker() {
+    default boolean isSingletonChecker() {
         return false;
     }
 }

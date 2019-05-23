@@ -43,7 +43,7 @@ public interface ElementChecker {
 
     Collection<CheckerIssue> check(final BpmnElement element);
 
-    static boolean isSingletonChecker() {
+    default boolean isSingletonChecker() {
         return false;
     }
 }

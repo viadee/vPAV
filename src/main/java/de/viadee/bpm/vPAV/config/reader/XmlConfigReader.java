@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,7 +34,6 @@ package de.viadee.bpm.vPAV.config.reader;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.*;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.checker.*;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -192,31 +191,15 @@ public final class XmlConfigReader implements ConfigReader {
                 }
             }
 
-            final Rule r = new Rule(id, name, state, ruleDescription, settings, elementConventions, modelConventions);
             if (!rules.containsKey(name)) {
                 rules.put(name, new HashMap<String, Rule>());
-            } else {
-                // Check if multiple rules of this type are allowed
-                try {
-                    CheckerFactory checkerFactory = new CheckerFactory();
-                    String fullRuleName = checkerFactory.getFullyQualifiedName(r);
-                    Class<?> clazz = Class.forName(fullRuleName);
-                    AbstractElementChecker elementChecker = (AbstractElementChecker) clazz;
-
-
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
             }
-            rules.get(name).put(id, r);
+            rules.get(name).put(id, new Rule(id, name, state, ruleDescription, settings, elementConventions, modelConventions));
         }
 
         // TODO as soon as we finally move the properties to an external file, we don't need this checks anymore
         // Some rules are only allowed once. Check this.
         checkSingletonRule(rules, ConfigConstants.HASPARENTRULESET);
-        checkSingletonRule(rules, VersioningChecker.class.getSimpleName());
-        checkSingletonRule(rules, ProcessVariablesModelChecker.class.getSimpleName());
-        checkSingletonRule(rules, DataFlowChecker.class.getSimpleName());
         checkSingletonRule(rules, ConfigConstants.CREATE_OUTPUT_RULE);
         checkSingletonRule(rules, "language");
 

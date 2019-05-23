@@ -70,7 +70,7 @@ public class VersioningChecker extends AbstractElementChecker {
         this.resourcesNewestVersions = resourcesNewestVersions;
     }
 
-    public static boolean isSingletonChecker() {
+    public boolean isSingletonChecker() {
         return true;
     }
 

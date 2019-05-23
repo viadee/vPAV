@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -46,7 +46,6 @@ import java.util.logging.Logger;
 
 /**
  * Factory decides which Checkers will be used in defined situations
- *
  */
 public class CheckerFactory {
 
@@ -67,7 +66,9 @@ public class CheckerFactory {
                                                              final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
                                                              final ProcessVariablesScanner scanner) {
 
+        final HashSet<String> instantiatedCheckerClasses = new HashSet<>();
         final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
+        AbstractElementChecker newChecker;
 
         for (Map<String, Rule> rules : ruleConf.values()) {
             for (Rule rule : rules.values()) {
@@ -84,17 +85,32 @@ public class CheckerFactory {
                                 .equals("MessageCorrelationChecker")) { //$NON-NLS-1$
                             Class<?> clazz = Class.forName(fullyQualifiedName);
                             Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class);
-                            checkers.add((AbstractElementChecker) c.newInstance(rule, bpmnScanner));
+                            newChecker = (AbstractElementChecker) c.newInstance(rule, bpmnScanner);
                         } else if (scanner != null && rule.getName().equals("MessageCorrelationChecker")) {
                             Class<?> clazz = Class.forName(fullyQualifiedName);
                             Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class,
                                     ProcessVariablesScanner.class);
-                            checkers.add((AbstractElementChecker) c.newInstance(rule, bpmnScanner, scanner));
+                            newChecker = (AbstractElementChecker) c.newInstance(rule, bpmnScanner, scanner);
                         } else {
                             Class<?> clazz = Class.forName(fullyQualifiedName);
                             Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class, Collection.class);
-                            checkers.add((AbstractElementChecker) c.newInstance(rule, bpmnScanner,
-                                    resourcesNewestVersions));
+                            newChecker = (AbstractElementChecker) c.newInstance(rule, bpmnScanner,
+                                    resourcesNewestVersions);
+                        }
+
+                        // Check if checker is singleton and if an instance already exists
+                        if (instantiatedCheckerClasses.contains(fullyQualifiedName)) {
+                            if (newChecker.isSingletonChecker()) {
+                                // Multiple instances of a singleton checker are considered incorrect
+                                this.setIncorrectCheckers(rule, String.format(Messages.getString("CheckerFactory.9"), //$NON-NLS-1$
+                                        rule.getName()));
+                                LOGGER.warning("Multiple rule definitions of checker '" + rule.getName() + "' found. Only the first rule will be applied.");
+                            } else {
+                                checkers.add(newChecker);
+                            }
+                        } else {
+                            instantiatedCheckerClasses.add(fullyQualifiedName);
+                            checkers.add(newChecker);
                         }
                     } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | IllegalAccessException
                             | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
@@ -115,7 +131,7 @@ public class CheckerFactory {
      * @param rule Rule in Map
      * @return fullyQualifiedName
      */
-    public String getFullyQualifiedName(Rule rule) {
+    private String getFullyQualifiedName(Rule rule) {
         String fullyQualifiedName = ""; //$NON-NLS-1$
         if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getName())
                 && rule.isActive()) {
