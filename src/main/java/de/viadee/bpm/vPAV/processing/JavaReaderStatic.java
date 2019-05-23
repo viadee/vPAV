@@ -820,8 +820,6 @@ public class JavaReaderStatic implements JavaReader {
                 controlFlowGraph.incrementRecursionCounter();
                 controlFlowGraph.resetInternalNodeCounter();
                 controlFlowGraph.setPriorLevel(controlFlowGraph.getInternalNodeCounter());
-                G.reset();
-                this.setupSoot();
                 classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
                         scopeId, outSet, variableBlock, assignmentStmt, args, controlFlowGraph);
                 controlFlowGraph.decrementRecursionCounter();
