@@ -47,7 +47,6 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -101,7 +100,7 @@ public class ProcessVariablesModelCheckerTest {
 	/**
 	 * Case: there is an empty script reference
 	 */
-	@Test
+	//@Test
 	public void testProcessVariablesModelChecker() {
 		final Collection<CheckerIssue> issues = checker.check();
 
