@@ -162,6 +162,10 @@ public class ConfigConstants {
         return properties.getProperty("basepath", ConfigConstants.BASEPATH);
     }
 
+    public boolean isHtmlOutputEnabled() {
+        return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
+    }
+
     /**
      * Only used for tests in order to inject mocked class.
      *
