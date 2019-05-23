@@ -59,7 +59,7 @@ You can use relative paths (e.g. ```basepath=src/main/java```) or absolute paths
 You can disable or enable the HTML output if you want. You can set the property ``outputhtml`` to ``true`` for HTML output or to ``false`` to disable the HTML output.
 By default, the HTML output is enabled.
 
-#### language
+#### Language
 As of version 2.5.0, we added localization for english and german users.
 By specifying either **en** or **de** as ``language`` property, you can choose to use either German or English as language for your visual output report. By leaving it blank, the validator grabs your systems locale and provides either German or English as default. 
 Due to some refactoring, more languages can be added in the future by providing language files with the corresponding translations.
@@ -408,7 +408,7 @@ Soot and bpmn.io provide the basis for the two most exciting features of the val
 
 **BSD 3-Clause License** <br/>
 
-Copyright (c) 2018, viadee IT-Unternehmensberatung AG
+Copyright (c) 2019, viadee IT-Unternehmensberatung AG
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
