@@ -132,6 +132,7 @@ public class JavaReaderStatic implements JavaReader {
         final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
         if (className != null && className.trim().length() > 0) {
+        	className = cleanString(className, true);
             SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
             if (sootClass != null) {
@@ -243,12 +244,11 @@ public class JavaReaderStatic implements JavaReader {
                         return true;
                     }
                 } else {
-                    if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
-                        return true;
-                    }
-                    if (expr.getArgBox(2).getValue().toString().equals(invoke)) {
-                        return true;
-                    }
+                    for (Value value : expr.getArgs()) {
+                    	if (value.toString().equals(invoke)) {
+                        	return true;
+                    	}
+                    }      
                 }
             }
         }
