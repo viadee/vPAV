@@ -39,7 +39,6 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.checker.*;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -106,8 +105,8 @@ public class BpmnModelDispatcher {
 				processDefinition.getPath(), new ArrayList<>(), scanner);
 
 		// analyze data flows
-		final FlowAnalysis flowAnalysis = new FlowAnalysis();
-		flowAnalysis.analyze(graphCollection);
+//		final FlowAnalysis flowAnalysis = new FlowAnalysis();
+//		flowAnalysis.analyze(graphCollection);
 
 		// calculate invalid paths
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);

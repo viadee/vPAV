@@ -50,8 +50,8 @@ public class FlowAnalysis {
     public void analyze(final Collection<Graph> graphCollection) {
         for (Graph graph : graphCollection) {
             embedControlFlowGraph(graph);
-            printGraph();
-            System.out.println();
+//            printGraph();
+//            System.out.println();
         }
     }
 

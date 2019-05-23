@@ -63,6 +63,10 @@ public class JavaReaderStatic {
 
 	private List<Value> constructorArgs;
 
+	public JavaReaderStatic() {
+		this.setupSoot();
+	}
+
 	/**
 	 * Checks a java delegate for process variable references with static code
 	 * analysis (read/write/delete).
@@ -133,14 +137,7 @@ public class JavaReaderStatic {
 		final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
 		if (className != null && className.trim().length() > 0) {
-			final String sootPath = FileScanner.getSootPath();
-			System.setProperty("soot.class.path", sootPath);
-
 			className = cleanString(className, true);
-
-			Options.v().set_whole_program(true);
-			Options.v().set_allow_phantom_refs(true);
-
 			SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
 			if (sootClass != null) {
@@ -248,15 +245,12 @@ public class JavaReaderStatic {
 			if (!assignment.isEmpty()) {
 				if (element.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.RECEIVE_TASK)) {
 					String message = expr.getArgBox(0).getValue().toString().replaceAll("\"", "");
-					if (message.equals(entry.getMessageName())) {
-						return true;
-					}
+					return message.equals(entry.getMessageName());
 				} else {
-					if (expr.getArgBox(1).getValue().toString().equals(invoke)) {
-						return true;
-					}
-					if (expr.getArgBox(2).getValue().toString().equals(invoke)) {
-						return true;
+					for (Value value : expr.getArgs()) {
+						if (value.toString().equals(invoke)) {
+							return true;
+						}
 					}
 				}
 			}
@@ -345,10 +339,6 @@ public class JavaReaderStatic {
 			final ControlFlowGraph controlFlowGraph) {
 
 		className = cleanString(className, true);
-
-		Options.v().set_whole_program(true);
-		Options.v().set_allow_phantom_refs(true);
-
 		SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
 		if (sootClass != null) {
@@ -596,7 +586,6 @@ public class JavaReaderStatic {
 
 			// depending if outset already has that Block, only add variables,
 			// if not, then add the whole vb
-
 			if (outSet.getVariableBlock(vb.getBlock()) == null) {
 				outSet.addVariableBlock(vb);
 			}
@@ -703,7 +692,7 @@ public class JavaReaderStatic {
 						if (instanceFieldRef > Integer.parseInt(matcher.group(2))) {
 							instanceFieldRef = Integer.parseInt(matcher.group(2));
 							assignmentStmt = argument;
-							if (this.getConstructorArgs() != null) {
+							if (this.getConstructorArgs() != null && !this.getConstructorArgs().isEmpty()) {
 								argsCounter++;
 								paramName = this.getConstructorArgs().get(argsCounter - 1).toString();
 							}
@@ -832,7 +821,6 @@ public class JavaReaderStatic {
 				controlFlowGraph.incrementRecursionCounter();
 				controlFlowGraph.setPriorLevel(controlFlowGraph.getInternalNodeCounter() - 1);
 				controlFlowGraph.resetInternalNodeCounter();
-				G.reset();
 				classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
 						scopeId, outSet, variableBlock, assignmentStmt, args, controlFlowGraph);
 				controlFlowGraph.decrementRecursionCounter();
@@ -963,18 +951,18 @@ public class JavaReaderStatic {
 		this.constructorArgs = args;
 	}
   
-  private void setupSoot() {
-    final String sootPath = FileScanner.getSootPath();
-    System.setProperty("soot.class.path", sootPath);
-    Options.v().set_whole_program(true);
-    Options.v().set_allow_phantom_refs(true);
-    ArrayList<String> excludedClasses = new ArrayList<>();
-    excludedClasses.add("java.*");
-    excludedClasses.add("sun.*");
-    excludedClasses.add("jdk.*");
-    excludedClasses.add("javax.*");
-    Options.v().set_exclude(excludedClasses);
-    Options.v().set_no_bodies_for_excluded(true);
-    Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
-  }
+	private void setupSoot() {
+		final String sootPath = FileScanner.getSootPath();
+		System.setProperty("soot.class.path", sootPath);
+		Options.v().set_whole_program(true);
+		Options.v().set_allow_phantom_refs(true);
+		ArrayList<String> excludedClasses = new ArrayList<>();
+		excludedClasses.add("java.*");
+		excludedClasses.add("sun.*");
+		excludedClasses.add("jdk.*");
+		excludedClasses.add("javax.*");
+		Options.v().set_exclude(excludedClasses);
+		Options.v().set_no_bodies_for_excluded(true);
+		Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
+	}
 }
