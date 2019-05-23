@@ -29,23 +29,31 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.delegates;
 
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-public interface JavaReader {
+import java.util.Random;
 
-	ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
-			final String classFile, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String scopeId, final ControlFlowGraph flow);
+public class DelegateAnomalyUR implements JavaDelegate {
 
-	ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(final String className,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
-			final EntryPoint entry);
+    private final static String first = "1";
+
+    @Override
+    public void execute(DelegateExecution execution) {
+        dd(execution);
+    }
+
+    private void dd(DelegateExecution execution) {
+        Random r = new Random();
+        execution.setVariable(first, true);
+        execution.getVariable(first);
+        execution.removeVariable(first);
+        if (r.nextInt(5) > 2) {
+            int i = 3;
+
+        }
+        execution.getVariable(first);
+    }
 }

@@ -261,7 +261,7 @@ public class BpmnConstants {
 
 	public static final String TASK_LISTENER = "taskListener";
 
-	public static final String EXECUTION_LISTENER = "taskListener";
+	public static final String EXECUTION_LISTENER = "executionListener";
 
 	public static final String INTERFACE_DEL = "JavaDelegate";
 

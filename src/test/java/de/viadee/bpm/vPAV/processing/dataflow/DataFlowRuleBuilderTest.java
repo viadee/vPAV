@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ExclusiveGateway;
@@ -290,12 +291,12 @@ public class DataFlowRuleBuilderTest {
 
     private class ProcessVariableBuilder {
         private String name = "variable";
-        private BpmnElement element = new BpmnElement("process1", mock(BaseElement.class));
+        private BpmnElement element = new BpmnElement("process1", mock(BaseElement.class), new ControlFlowGraph());
         private VariableOperation operation = VariableOperation.WRITE;
 
 
         ProcessVariableBuilder withElement(Class<? extends BaseElement> clazz) {
-            element = new BpmnElement("process1", mock(clazz));
+            element = new BpmnElement("process1", mock(clazz), new ControlFlowGraph());
             return this;
         }
 
