@@ -66,6 +66,12 @@
 			<organization>viadee Unternehmensberatung AG</organization>
 			<organizationUrl>http://www.viadee.de</organizationUrl>
 		</developer>
+		<developer>
+			<name>Tamara Gunkel</name>
+			<email>Tamara.Gunkel@viadee.de</email>
+			<organization>viadee Unternehmensberatung AG</organization>
+			<organizationUrl>http://www.viadee.de</organizationUrl>
+		</developer>
 	</developers>
 
 	<scm>
@@ -188,7 +194,7 @@
 		<dependency>
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
-			<version>3.2.0</version>
+			<version>3.3.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>ca.mcgill.sable</groupId>
@@ -386,20 +392,6 @@
      			</plugin>	
 		</plugins>
 	</build>
-
-	<repositories>
-		<repository>
-			<id>soot-release</id>
-			<name>Maven repository of the Software Engineering Group at University of Paderborn</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 	<reporting>
 		<excludeDefaults>true</excludeDefaults>
