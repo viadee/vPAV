@@ -691,7 +691,7 @@ public class JavaReaderStatic implements JavaReader {
                         if (instanceFieldRef > Integer.parseInt(matcher.group(2))) {
                             instanceFieldRef = Integer.parseInt(matcher.group(2));
                             assignmentStmt = argument;
-                            if (this.getConstructorArgs() != null) {
+                            if (this.getConstructorArgs() != null && !this.getConstructorArgs().isEmpty()) {
                                 argsCounter++;
                                 paramName = this.getConstructorArgs().get(argsCounter - 1).toString();
                             }
