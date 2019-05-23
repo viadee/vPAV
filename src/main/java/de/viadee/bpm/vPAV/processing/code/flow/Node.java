@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import soot.toolkits.graph.Block;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -64,7 +65,6 @@ public class Node {
 	private List<BpmnElement> processSuccessors;
 
 	private String id;
-	private String filePath;
 
 	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement) {
 		this.controlFlowGraph = controlFlowGraph;
@@ -85,11 +85,10 @@ public class Node {
 		this.outUnused = new LinkedHashMap<>();
 	}
 
-	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block, final String filePath) {
+	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block) {
 		this.controlFlowGraph = controlFlowGraph;
 		this.parentElement = parentElement;
 		this.block = block;
-		this.filePath = filePath;
 		this.nodePredecessors = new ArrayList<>();
 		this.nodeSuccessors = new ArrayList<>();
 
@@ -206,6 +205,23 @@ public class Node {
 		return id;
 	}
 
+	ProcessVariableOperation lastOperation() {
+		Iterator<ProcessVariableOperation> iterator = operations.values().iterator();
+		if (iterator.hasNext()) {
+			return iterator.next();
+		}
+		return null;
+	}
+
+	ProcessVariableOperation firstOperation() {
+		Iterator<ProcessVariableOperation> iterator = operations.values().iterator();
+		ProcessVariableOperation processVariableOperation = null;
+		while (iterator.hasNext()) {
+			processVariableOperation = iterator.next();
+		}
+		return processVariableOperation;
+	}
+
 	public void setId(final String id) {
 		this.id = id;
 	}
@@ -284,7 +300,4 @@ public class Node {
 
 	public BpmnElement getParentElement() {	return parentElement; }
 
-	public String getFilePath() {
-		return filePath;
-	}
 }

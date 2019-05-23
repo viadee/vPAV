@@ -34,10 +34,8 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 
 public class FlowAnalysis {
 
@@ -50,8 +48,8 @@ public class FlowAnalysis {
     public void analyze(final Collection<Graph> graphCollection) {
         for (Graph graph : graphCollection) {
             embedControlFlowGraph(graph);
-//            printGraph();
-//            System.out.println();
+            printGraph();
+            System.out.println();
         }
     }
 
@@ -62,16 +60,32 @@ public class FlowAnalysis {
                 for (BpmnElement element : entry.getKey().getProcessPredecessors()) {
                     System.out.println("Curr: " + entry.getKey().getControlFlowGraph().firstNode().getId() + " -> pred: " + element.getBaseElement().getId());
                 }
-                for (Node node : entry.getKey().getControlFlowGraph().getNodes().values()) {
+
+                Iterator<Node> iterator = entry.getKey().getControlFlowGraph().getNodes().values().iterator();
+                Node predDelegate = null;
+                while (iterator.hasNext()) {
+                    Node node = iterator.next();
+                    if (predDelegate == null) {
+                        predDelegate = node;
+                    } else {
+                        if (node.firstOperation() != null && predDelegate.lastOperation() != null &&
+                                !node.firstOperation().getChapter().equals(predDelegate.lastOperation().getChapter())) {
+                            node.setPredsIntraProcedural(predDelegate.getId());
+                            predDelegate = node;
+                        }
+                    }
                     for (Node pred : node.getNodePredecessors()) {
                         System.out.println("Curr: " + node.getId() + " -> pred: " + pred.getId());
                     }
                 }
-
             } else {
                 if (entry.getKey().getNodePredecessors().size() > 0) {
                     for (Node pred : entry.getKey().getNodePredecessors()) {
                         System.out.println("Curr: " + entry.getKey().getBaseElement().getId() + " -> pred: " + pred.getId());
+                    }
+                } else if (entry.getKey().getNodeSuccessors().size() > 0) {
+                    for (BpmnElement element : entry.getKey().getProcessPredecessors()) {
+                        System.out.println("Curr: " + entry.getKey().getBaseElement().getId() + " -> pred: " + element.getBaseElement().getId());
                     }
                 } else {
                     for (BpmnElement element : entry.getValue()) {

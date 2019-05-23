@@ -180,7 +180,7 @@ public class ElementGraphBuilder {
 
 					for (EntryPoint ep : scanner.getEntryPoints()) {
 						if (ep.getMessageName().equals(messageName)) {
-							variables.putAll(checkInitialVariableOperations(ep, scanner, node, processDefinition));
+							variables.putAll(checkInitialVariableOperations(ep, node, processDefinition));
 						}
 					}
 					graph.addStartNode(node);
@@ -197,7 +197,7 @@ public class ElementGraphBuilder {
 
 					for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {
 						if (ep.getMessageName().equals(messageName)) {
-							variables.putAll(checkInitialVariableOperations(ep, scanner, node, processDefinition));
+							variables.putAll(checkInitialVariableOperations(ep, node, processDefinition));
 						}
 					}
 				}
@@ -239,8 +239,6 @@ public class ElementGraphBuilder {
 	 *
 	 * @param entryPoint
 	 *            Current entryPoint (most likely rest controller classes)
-	 * @param scanner
-	 *            OuterProcessVariableScanner
 	 * @param element
 	 *            Current BPMN element
 	 * @param resourceFilePath
@@ -248,8 +246,8 @@ public class ElementGraphBuilder {
 	 * @return initial operations
 	 */
 	private ListMultimap<String, ProcessVariableOperation> checkInitialVariableOperations(final EntryPoint entryPoint,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
-		return new JavaReaderStatic().getVariablesFromClass(entryPoint.getClassName(), scanner, element,
+																						  final BpmnElement element, final String resourceFilePath) {
+		return new JavaReaderStatic().getVariablesFromClass(entryPoint.getClassName(), element,
 				resourceFilePath, entryPoint);
 	}
 

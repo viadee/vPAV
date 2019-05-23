@@ -837,7 +837,7 @@ public final class ProcessVariableReader {
 			if (t_expression != null) {
 
 				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
-						t_expression, element, ElementChapter.Details, KnownElementFieldType.Expression, scopeId));
+						t_expression, element, ElementChapter.RegularDelegate, KnownElementFieldType.Expression, scopeId));
 			}
 
 			final String t_delegateExpression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
@@ -845,7 +845,7 @@ public final class ProcessVariableReader {
 			if (t_delegateExpression != null) {
 				processVariables.putAll(
 						findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner, t_delegateExpression,
-								element, ElementChapter.Details, KnownElementFieldType.DelegateExpression, scopeId));
+								element, ElementChapter.RegularDelegate, KnownElementFieldType.DelegateExpression, scopeId));
 			}
 
 			final ArrayList<String> t_fieldInjectionExpressions = bpmnScanner
@@ -868,7 +868,7 @@ public final class ProcessVariableReader {
 			if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS) != null) {
 				processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
 						baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS),
-						element, ElementChapter.Details, KnownElementFieldType.Class, scopeId, controlFlowGraph));
+						element, ElementChapter.RegularDelegate, KnownElementFieldType.Class, scopeId, controlFlowGraph));
 			}
 
 			if (baseElement instanceof BusinessRuleTask) {

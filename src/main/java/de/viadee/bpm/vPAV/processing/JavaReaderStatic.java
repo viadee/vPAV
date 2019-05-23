@@ -122,16 +122,13 @@ public class JavaReaderStatic {
 	 *
 	 * @param className
 	 *            Name of the class that potentially declares process variables
-	 * @param scanner
-	 *            OuterProcessVariablesScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param resourceFilePath
 	 *            Path of the BPMN model
 	 * @return Map of process variable operations
 	 */
-	public ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
+	public ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className, final BpmnElement element, final String resourceFilePath,
 			final EntryPoint entryPoint) {
 
 		final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
@@ -577,7 +574,7 @@ public class JavaReaderStatic {
 			final ControlFlowGraph controlFlowGraph) {
 
 		for (Block block : graph.getBlocks()) {
-			Node node = new Node(controlFlowGraph, element, block, filePath);
+			Node node = new Node(controlFlowGraph, element, block);
 			controlFlowGraph.addNode(node);
 
 			// Collect the functions Unit by Unit via the blockIterator
