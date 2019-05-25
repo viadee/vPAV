@@ -31,7 +31,10 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 
 import java.util.*;
@@ -39,7 +42,7 @@ import java.util.*;
 
 public class FlowAnalysis {
 
-    private LinkedHashMap<BpmnElement, List<BpmnElement>> nodes;
+    private LinkedHashMap<String, AnalysisElement> nodes;
 
     public FlowAnalysis() {
         this.nodes = new LinkedHashMap<>();
@@ -48,9 +51,73 @@ public class FlowAnalysis {
     public void analyze(final Collection<Graph> graphCollection) {
         for (Graph graph : graphCollection) {
             embedControlFlowGraph(graph);
-            computeReachingDefinitions();
             printGraph();
+            computeReachingDefinitions();
+            extractAnomalies();
         }
+    }
+
+
+    private void printGraph() {
+        for (Map.Entry<String, AnalysisElement> entry : nodes.entrySet()) {
+            entry.getValue().getPredecessors().forEach(element -> System.out.println("Current: " + entry.getValue().getId() + " -> Pred: " + element.getId()));
+        }
+    }
+
+    private void embedControlFlowGraph(final Graph graph) {
+        // Add all elements on bpmn level
+        graph.getVertexInfo().keySet().forEach(element -> {
+            AnalysisElement analysisElement = new BpmnElementDecorator(element);
+            analysisElement.clearPredecessors();
+            graph.getAdjacencyListPredecessor(element).forEach(value -> analysisElement.addPredecessor(new BpmnElementDecorator(value)));
+            graph.getAdjacencyListSuccessor(element).forEach(value -> analysisElement.addSuccessor(new BpmnElementDecorator(value)));
+            this.nodes.put(analysisElement.getId(), analysisElement);
+        });
+
+        graph.getVertexInfo().keySet().forEach(element -> {
+            AnalysisElement analysisElement = new BpmnElementDecorator(element);
+            this.nodes.put(analysisElement.getId(), analysisElement);
+        });
+
+
+        // Add all nodes on source code level and correct the pointers
+        final LinkedHashMap<String, AnalysisElement> temp = new LinkedHashMap<>(nodes);
+        final LinkedHashMap<String, AnalysisElement> cfgNodes = new LinkedHashMap<>();
+        final ArrayList<String> ids = new ArrayList<>();
+        temp.values().forEach(analysisElement -> {
+            if (analysisElement.getControlFlowGraph().hasNodes()) {
+                analysisElement.getControlFlowGraph().computePredecessorRelations();
+
+                final Node firstNode = analysisElement.getControlFlowGraph().firstNode();
+                final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
+                analysisElement.getPredecessors().forEach(pred -> pred.addSuccessor(new NodeDecorator(pred)));
+                analysisElement.getSuccessors().forEach(succ -> {
+                    succ.removePredecessor(analysisElement.getId());
+                    succ.addPredecessor(new NodeDecorator(lastNode));
+                });
+
+                Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
+                Node predDelegate = null;
+                while (iterator.hasNext()) {
+                    Node currNode = iterator.next();
+                    if (predDelegate == null) {
+                        predDelegate = currNode;
+                    } else {
+                        if (currNode.firstOperation() != null && predDelegate.lastOperation() != null &&
+                                !currNode.firstOperation().getChapter().equals(predDelegate.lastOperation().getChapter())) {
+                            currNode.setPredsIntraProcedural(predDelegate.getId());
+                            predDelegate = currNode;
+                        }
+                    }
+                }
+
+                analysisElement.getControlFlowGraph().getNodes().values().forEach(node -> cfgNodes.put(node.getId(), node));
+                ids.add(firstNode.getParentElement().getBaseElement().getId());
+            }
+        });
+        temp.putAll(cfgNodes);
+        nodes.putAll(temp);
+        ids.forEach(id -> nodes.remove(id));
     }
 
     /**
@@ -61,82 +128,45 @@ public class FlowAnalysis {
         boolean change = true;
         while (change) {
             change = false;
-            for (BpmnElement element : nodes.keySet()) {
-                element.getControlFlowGraph().computePredecessorRelations();
+            for (AnalysisElement analysisElement : nodes.values()) {
                 // Calculate in-sets (intersection of predecessors)
-                final LinkedHashMap<String, ProcessVariableOperation> inUsedB = element.getInUsed();
-                final LinkedHashMap<String, ProcessVariableOperation> inUnusedB = element.getInUnused();
-                if (element.getControlFlowGraph().hasNodes()) {
-                    for (Node pred : element.getNodePredecessors()) {
-                        inUsedB.putAll(pred.getOutUsed());
-                        inUnusedB.putAll(pred.getOutUnused());
-                    }
-                } else {
-                    for (BpmnElement pred : element.getProcessPredecessors()) {
-                        inUsedB.putAll(pred.getOutUsed());
-                        inUnusedB.putAll(pred.getOutUnused());
-                    }
+                final LinkedHashMap<String, ProcessVariableOperation> inUsed = analysisElement.getInUsed();
+                final LinkedHashMap<String, ProcessVariableOperation> inUnused = analysisElement.getInUnused();
+                for (AnalysisElement pred : analysisElement.getPredecessors()) {
+                    inUsed.putAll(pred.getOutUsed());
+                    inUnused.putAll(pred.getOutUnused());
                 }
-                element.setInUsed(inUsedB);
-                element.setInUnused(inUnusedB);
+                analysisElement.setInUsed(inUsed);
+                analysisElement.setInUnused(inUnused);
 
                 // Calculate out-sets for used definitions (transfer functions)
-                final LinkedHashMap<String, ProcessVariableOperation> outUsedB = new LinkedHashMap<>();
-                outUsedB.putAll(element.getUsed2());
-                outUsedB.putAll(getSetDifference(element.getInUsed(), element.getKilled2()));
-                element.setOutUsed(outUsedB);
+                final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>();
+                outUsed.putAll(analysisElement.getUsed());
+                outUsed.putAll(getSetDifference(analysisElement.getInUsed(), analysisElement.getKilled()));
+                analysisElement.setOutUsed(outUsed);
 
                 // Calculate out-sets for unused definitions (transfer functions)
-                final LinkedHashMap<String, ProcessVariableOperation> outUnusedB = new LinkedHashMap<>(
-                        element.getDefined2());
-                final LinkedHashMap<String, ProcessVariableOperation> tempIntersectionB = new LinkedHashMap<>();
-                tempIntersectionB.putAll(getSetDifference(element.getInUnused(), element.getKilled2()));
-                tempIntersectionB.putAll(getSetDifference(tempIntersectionB, element.getUsed2()));
-                outUnusedB.putAll(tempIntersectionB);
-                element.setOutUnused(outUnusedB);
+                final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
+                        analysisElement.getDefined());
+                final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>();
+                tempIntersection.putAll(getSetDifference(analysisElement.getInUnused(), analysisElement.getKilled()));
+                tempIntersection.putAll(getSetDifference(tempIntersection, analysisElement.getUsed()));
+                outUnused.putAll(tempIntersection);
+                analysisElement.setOutUnused(outUnused);
 
+                // Compare old values with new values and check for changes
+                final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = analysisElement
+                        .getOutUnused();
+                final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = analysisElement
+                        .getOutUsed();
 
-                for (Node node : element.getControlFlowGraph().getNodes().values()) {
-                    // Calculate in-sets (intersection of predecessors)
-                    final LinkedHashMap<String, ProcessVariableOperation> inUsed = node.getInUsed();
-                    final LinkedHashMap<String, ProcessVariableOperation> inUnused = node.getInUnused();
-                    for (Node pred : node.getNodePredecessors()) {
-                        inUsed.putAll(pred.getOutUsed());
-                        inUnused.putAll(pred.getOutUnused());
-                    }
-                    node.setInUsed(inUsed);
-                    node.setInUnused(inUnused);
-
-                    // Calculate out-sets for used definitions (transfer functions)
-                    final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>();
-                    outUsed.putAll(node.getUsed());
-                    outUsed.putAll(getSetDifference(node.getInUsed(), node.getKilled()));
-                    node.setOutUsed(outUsed);
-
-                    // Calculate out-sets for unused definitions (transfer functions)
-                    final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
-                            node.getDefined());
-                    final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>();
-                    tempIntersection.putAll(getSetDifference(node.getInUnused(), node.getKilled()));
-                    tempIntersection.putAll(getSetDifference(tempIntersection, node.getUsed()));
-                    outUnused.putAll(tempIntersection);
-                    node.setOutUnused(outUnused);
-
-                    // Compare old values with new values and check for changes
-                    final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = node
-                            .getOutUnused();
-                    final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = node
-                            .getOutUsed();
-
-                    if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
-                        change = true;
-                    }
+                if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
+                    change = true;
                 }
-                computeLineByLine(element);
-                extractAnomalies(element);
             }
         }
     }
+
     /**
      * Finds anomalies inside blocks by checking statements unit by unit
      * @param element
@@ -162,22 +192,20 @@ public class FlowAnalysis {
      * Based on the calculated sets, extract the anomalies found on source code
      * level
      *
-     * @param element
-     *            Current BpmnElement
      */
-    private void extractAnomalies(final BpmnElement element) {
-        element.getControlFlowGraph().getNodes().values().forEach(node -> {
+    private void extractAnomalies() {
+        nodes.values().forEach(node -> {
             // DD (inUnused U defined)
-            ddAnomalies(element, node);
+            ddAnomalies(node);
 
             // DU (inUnused U killed)
-            duAnomalies(element, node);
+            duAnomalies(node);
 
             // UR (used - inUnused - inUsed - defined)
-            urAnomalies(element, node);
+            urAnomalies(node);
 
             // UU ()
-            uuAnomalies(element, node);
+            uuAnomalies(node);
 
             // -R ()
 //			nopRAnomalies(element, node);
@@ -191,46 +219,40 @@ public class FlowAnalysis {
     /**
      * Extract DD anomalies
      *
-     * @param element
-     *            Current BpmnElement
      * @param node
      *            Current node
      */
-    private void ddAnomalies(final BpmnElement element, final Node node) {
+    private void ddAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> ddAnomalies = new LinkedHashMap<>(
                 getIntersection(node.getInUnused(), node.getDefined()));
         if (!ddAnomalies.isEmpty()) {
-            ddAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                    new AnomalyContainer(v.getName(), Anomaly.DD, element.getBaseElement().getId(), v)));
+            ddAnomalies.forEach((k, v) -> node.addSourceCodeAnomaly(
+                    new AnomalyContainer(v.getName(), Anomaly.DD, node.getId(), v)));
         }
     }
 
     /**
      * Extract DU anomalies
      *
-     * @param element
-     *            Current BpmnElement
      * @param node
      *            Current node
      */
-    private void duAnomalies(final BpmnElement element, final Node node) {
+    private void duAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> duAnomalies = new LinkedHashMap<>(
                 getIntersection(node.getInUnused(), node.getKilled()));
         if (!duAnomalies.isEmpty()) {
-            duAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                    new AnomalyContainer(v.getName(), Anomaly.DU, element.getBaseElement().getId(), v)));
+            duAnomalies.forEach((k, v) -> node.addSourceCodeAnomaly(
+                    new AnomalyContainer(v.getName(), Anomaly.DU, node.getId(), v)));
         }
     }
 
     /**
      * Extract UR anomalies
      *
-     * @param element
-     *            Current BpmnElement
      * @param node
      *            Current node
      */
-    private void urAnomalies(final BpmnElement element, final Node node) {
+    private void urAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> urAnomaliesTemp = new LinkedHashMap<>(
                 node.getUsed());
         final LinkedHashMap<String, ProcessVariableOperation> urAnomalies = new LinkedHashMap<>(
@@ -249,20 +271,18 @@ public class FlowAnalysis {
         }));
 
         if (!urAnomalies.isEmpty()) {
-            urAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                    new AnomalyContainer(v.getName(), Anomaly.UR, element.getBaseElement().getId(), v)));
+            urAnomalies.forEach((k, v) -> node.addSourceCodeAnomaly(
+                    new AnomalyContainer(v.getName(), Anomaly.UR, node.getId(), v)));
         }
     }
 
     /**
      * Extract UU anomalies
      *
-     * @param element
-     *            Current BpmnElement
      * @param node
      *            Current node
      */
-    private void uuAnomalies(BpmnElement element, Node node) {
+    private void uuAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> uuAnomaliesTemp = new LinkedHashMap<>(
                 node.getKilled());
         final LinkedHashMap<String, ProcessVariableOperation> uuAnomalies = new LinkedHashMap<>(
@@ -280,18 +300,12 @@ public class FlowAnalysis {
             }
         }));
 
-        uuAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-            if (value.getName().equals(value2.getName())) {
-                if (Integer.parseInt(key) > Integer.parseInt(key2)) {
-                    uuAnomalies.remove(key);
-                }
-            }
-        }));
+       // TODO: Check definition of UU
 
 
         if (!uuAnomalies.isEmpty()) {
-            uuAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-                    new AnomalyContainer(v.getName(), Anomaly.UU, element.getBaseElement().getId(), v)));
+            uuAnomalies.forEach((k, v) -> node.addSourceCodeAnomaly(
+                    new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(), v)));
         }
 
     }
@@ -431,65 +445,6 @@ public class FlowAnalysis {
     private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
         return curr.getOperation().equals(VariableOperation.DELETE)
                 && prev.getOperation().equals(VariableOperation.WRITE);
-    }
-
-    private void printGraph() {
-        for (Map.Entry<BpmnElement, List<BpmnElement>> entry : nodes.entrySet()) {
-            if (entry.getKey().getControlFlowGraph().hasNodes()) {
-                for (BpmnElement element : entry.getKey().getProcessPredecessors()) {
-                    System.out.println("Curr: " + entry.getKey().getControlFlowGraph().firstNode().getId() + " -> pred: " + element.getBaseElement().getId());
-                }
-
-                Iterator<Node> iterator = entry.getKey().getControlFlowGraph().getNodes().values().iterator();
-                Node predDelegate = null;
-                while (iterator.hasNext()) {
-                    Node node = iterator.next();
-                    if (predDelegate == null) {
-                        predDelegate = node;
-                    } else {
-                        if (node.firstOperation() != null && predDelegate.lastOperation() != null &&
-                                !node.firstOperation().getChapter().equals(predDelegate.lastOperation().getChapter())) {
-                            node.setPredsIntraProcedural(predDelegate.getId());
-                            predDelegate = node;
-                        }
-                    }
-                    for (Node pred : node.getNodePredecessors()) {
-                        System.out.println("Curr: " + node.getId() + " -> pred: " + pred.getId());
-                    }
-                }
-            } else {
-                if (entry.getKey().getNodePredecessors().size() > 0) {
-                    for (Node pred : entry.getKey().getNodePredecessors()) {
-                        System.out.println("Curr: " + entry.getKey().getBaseElement().getId() + " -> pred: " + pred.getId());
-                    }
-                } else if (entry.getKey().getNodeSuccessors().size() > 0) {
-                    for (BpmnElement element : entry.getKey().getProcessPredecessors()) {
-                        System.out.println("Curr: " + entry.getKey().getBaseElement().getId() + " -> pred: " + element.getBaseElement().getId());
-                    }
-                } else {
-                    for (BpmnElement element : entry.getValue()) {
-                        System.out.println("Curr: " + entry.getKey().getBaseElement().getId() + " -> pred: " + element.getBaseElement().getId());
-                    }
-                }
-            }
-        }
-    }
-
-    private void embedControlFlowGraph(final Graph graph) {
-        graph.getVertexInfo().keySet().forEach(element -> {
-            element.setProcessPredecessors(graph.getAdjacencyListPredecessor(element));
-            element.setProcessSuccessors(graph.getAdjacencyListSuccessor(element));
-            nodes.put(element, graph.getAdjacencyListPredecessor(element));
-        });
-
-        nodes.forEach((key, value) -> {
-            if (key.getControlFlowGraph().hasNodes()) {
-                final Node firstNode = key.getControlFlowGraph().firstNode();
-                final Node lastNode = key.getControlFlowGraph().lastNode();
-                key.getProcessPredecessors().forEach(element -> element.addNodeSuccessor(firstNode));
-                key.getProcessSuccessors().forEach(element -> element.addNodePredecessor(lastNode));
-            }
-        });
     }
 
     /**

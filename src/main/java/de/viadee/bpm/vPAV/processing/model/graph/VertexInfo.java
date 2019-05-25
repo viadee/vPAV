@@ -31,7 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.output;
 
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
@@ -59,7 +60,7 @@ public class IssueWriter {
 	 * @return Issues
 	 */
 	public static Collection<CheckerIssue> createIssue(final Rule rule, final CriticalityEnum classification,
-			final BpmnElement element, final String message) {
+                                                       final BpmnElement element, final String message) {
 
 		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 

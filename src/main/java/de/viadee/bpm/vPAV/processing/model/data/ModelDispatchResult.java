@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+
 import java.util.Collection;
 
 public class ModelDispatchResult {

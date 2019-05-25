@@ -29,21 +29,21 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.code.flow.Node;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents an BPMN element
  *
  */
-public class BpmnElement {
+public class BpmnElement implements AnalysisElement {
 
 	private String processDefinition;
 
@@ -60,21 +60,17 @@ public class BpmnElement {
 	private LinkedHashMap<String, ProcessVariableOperation> outUsed;
 	private LinkedHashMap<String, ProcessVariableOperation> outUnused;
 
-	private List<BpmnElement> processPredecessors;
-	private List<BpmnElement> processSuccessors;
-	private List<Node> nodePredecessors;
-	private List<Node> nodeSuccessors;
-
+	private LinkedHashMap<String, AnalysisElement> predecessors;
+	private LinkedHashMap<String, AnalysisElement> successors;
 
 	public BpmnElement(final String processDefinition, final BaseElement element, final ControlFlowGraph controlFlowGraph) {
 		this.processDefinition = processDefinition;
 		this.baseElement = element;
 		this.controlFlowGraph = controlFlowGraph;
 		this.operations = new LinkedHashMap<>();
-		this.processPredecessors = new ArrayList<>();
-		this.processSuccessors = new ArrayList<>();
-		this.nodePredecessors = new ArrayList<>();
-		this.nodeSuccessors = new ArrayList<>();
+
+		this.predecessors = new LinkedHashMap<>();
+		this.successors = new LinkedHashMap<>();
 
 		this.operations = new LinkedHashMap<>();
 		this.processVariables = ArrayListMultimap.create();
@@ -158,6 +154,16 @@ public class BpmnElement {
 
 	public void addSourceCodeAnomaly(AnomalyContainer anomaly) {
 		sourceCodeAnomalies.add(anomaly);
+	}
+
+	@Override
+	public void clearPredecessors() {
+		this.predecessors.clear();
+	}
+
+	@Override
+	public void removePredecessor(String predecessor) {
+		this.predecessors.remove(predecessor);
 	}
 
 	@Override
@@ -275,30 +281,23 @@ public class BpmnElement {
 	}
 
 	public boolean du(final String varName) {
-		if (in.containsKey(varName) && in.get(varName) == InOutState.DEFINED && out.containsKey(varName)
-				&& out.get(varName) == InOutState.DELETED) {
-			return true;
-		}
-		return false;
+		return in.containsKey(varName) && in.get(varName) == InOutState.DEFINED && out.containsKey(varName)
+				&& out.get(varName) == InOutState.DELETED;
 	}
 
 	public boolean dd(final String varName) {
-		if (in.containsKey(varName) && in.get(varName) == InOutState.DEFINED && defined().containsKey(varName)) {
-			return true;
-		}
-		return false;
+		return in.containsKey(varName) && in.get(varName) == InOutState.DEFINED && defined().containsKey(varName);
 	}
 
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
-		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<BpmnElement, List<AnomalyContainer>>();
-		final Set<String> variableNames = new HashSet<String>();
-		variableNames.addAll(used().keySet());
+		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<>();
+		final Set<String> variableNames = new HashSet<>(used().keySet());
 		for (final String variableName : in.keySet()) {
 			if (in.get(variableName) == InOutState.DEFINED) {
 				variableNames.add(variableName);
 			}
 		}
-		final List<AnomalyContainer> anomalies = new ArrayList<AnomalyContainer>();
+		final List<AnomalyContainer> anomalies = new ArrayList<>();
 		for (final String variableName : variableNames) {
 			final List<ProcessVariableOperation> list = processVariables.get(variableName);
 			if (ur(variableName)) {
@@ -334,53 +333,6 @@ public class BpmnElement {
 		}
 	}
 
-	public List<BpmnElement> getProcessPredecessors() {
-		return processPredecessors;
-	}
-
-	public void addProcessPredecessor(final BpmnElement element) {
-		this.processPredecessors.add(element);
-	}
-
-	public List<BpmnElement> getProcessSuccessors() {
-		return processSuccessors;
-	}
-
-	public void addProcessSuccessor(final BpmnElement element) {
-		this.processSuccessors.add(element);
-	}
-
-	public void setProcessSuccessors(final List<BpmnElement> processSuccessors) {
-		this.processSuccessors = processSuccessors;
-	}
-
-	public List<Node> getNodePredecessors() {
-		return nodePredecessors;
-	}
-
-	public void setNodePredecessors(Node predecessor) {
-		this.nodePredecessors.add(predecessor);
-	}
-
-	public List<Node> getNodeSuccessors() {
-		return nodeSuccessors;
-	}
-
-	public void setNodeSuccessors(final List<Node> nodeSuccessors) {
-		this.nodeSuccessors = nodeSuccessors;
-	}
-
-	public void addNodePredecessor(final Node node) {
-		this.nodePredecessors.add(node);
-	}
-
-	public void setProcessPredecessors(final List<BpmnElement> processPredecessors) {
-		this.processPredecessors = processPredecessors;
-	}
-
-	public void addNodeSuccessor(final Node node) {
-		this.nodeSuccessors.add(node);
-	}
 
 	public LinkedHashMap<String,ProcessVariableOperation> getInUsed() {
 		return inUsed;
@@ -406,23 +358,52 @@ public class BpmnElement {
 		this.inUnused = inUnusedB;
 	}
 
-	public LinkedHashMap<String,ProcessVariableOperation> getUsed2() {
-		return used2;
-	}
-
-	public LinkedHashMap<String,ProcessVariableOperation> getKilled2() {
-		return killed2;
-	}
-
-	public LinkedHashMap<String,ProcessVariableOperation> getDefined2() {
-		return defined2;
-	}
-
 	public void setOutUsed(LinkedHashMap<String,ProcessVariableOperation> outUsed) {
 		this.outUsed = outUsed;
 	}
 
 	public void setOutUnused(LinkedHashMap<String,ProcessVariableOperation> outUnused) {
 		this.outUnused = outUnused;
+	}
+
+	public LinkedHashMap<String, ProcessVariableOperation> getUsed() { return used2; }
+
+	public LinkedHashMap<String, ProcessVariableOperation> getKilled() { return killed2; }
+
+	public LinkedHashMap<String, ProcessVariableOperation> getDefined() { return defined2; }
+
+	@Override
+	public String getId() {
+		return this.getBaseElement().getId();
+	}
+
+	@Override
+	public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
+		this.predecessors = predecessors;
+	}
+
+	@Override
+	public void addPredecessor(AnalysisElement predecessor) {
+		this.predecessors.put(predecessor.getId(), predecessor);
+	}
+
+	@Override
+	public List<AnalysisElement> getPredecessors() {
+		return this.predecessors.values().stream().map(BpmnElementDecorator::new).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<AnalysisElement> getSuccessors() {
+		return this.successors.values().stream().map(BpmnElementDecorator::new).collect(Collectors.toList());
+	}
+
+	@Override
+	public void setSuccessors(LinkedHashMap<String, AnalysisElement> successors) {
+		this.successors = successors;
+	}
+
+	@Override
+	public void addSuccessor(AnalysisElement successor) {
+		this.successors.put(successor.getId(), successor);
 	}
 }

@@ -31,18 +31,18 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import soot.toolkits.graph.Block;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-public class Node {
+public class Node implements AnalysisElement {
 
 	private ControlFlowGraph controlFlowGraph;
 
@@ -58,42 +58,18 @@ public class Node {
 	private Block block;
 	private BpmnElement parentElement;
 
-	private List<Node> nodePredecessors;
-	private List<Node> nodeSuccessors;
-
-	private List<BpmnElement> processPredecessors;
-	private List<BpmnElement> processSuccessors;
+	private LinkedHashMap<String, AnalysisElement> predecessors;
+	private LinkedHashMap<String, AnalysisElement> successors;
 
 	private String id;
-
-	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement) {
-		this.controlFlowGraph = controlFlowGraph;
-		this.parentElement = parentElement;
-		this.nodePredecessors = new ArrayList<>();
-		this.nodeSuccessors = new ArrayList<>();
-
-		this.processPredecessors = new ArrayList<>();
-		this.processSuccessors = new ArrayList<>();
-
-		this.operations = new LinkedHashMap<>();
-		this.defined = new LinkedHashMap<>();
-		this.used = new LinkedHashMap<>();
-		this.killed = new LinkedHashMap<>();
-		this.inUsed = new LinkedHashMap<>();
-		this.inUnused = new LinkedHashMap<>();
-		this.outUsed = new LinkedHashMap<>();
-		this.outUnused = new LinkedHashMap<>();
-	}
 
 	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block) {
 		this.controlFlowGraph = controlFlowGraph;
 		this.parentElement = parentElement;
 		this.block = block;
-		this.nodePredecessors = new ArrayList<>();
-		this.nodeSuccessors = new ArrayList<>();
 
-		this.processPredecessors = new ArrayList<>();
-		this.processSuccessors = new ArrayList<>();
+		this.predecessors = new LinkedHashMap<>();
+		this.successors = new LinkedHashMap<>();
 
 		this.operations = new LinkedHashMap<>();
 		this.defined = new LinkedHashMap<>();
@@ -133,7 +109,8 @@ public class Node {
 	 * Set the predecessor nodes of the current node for intraprocedural methods
 	 */
 	void setPredsIntraProcedural(final String key) {
-		this.nodePredecessors.add(controlFlowGraph.getNodes().get(key));
+		AnalysisElement ae = controlFlowGraph.getNodes().get(key);
+		this.predecessors.put(ae.getId(), ae);
 	}
 
 
@@ -181,28 +158,23 @@ public class Node {
 			if (idMatcher.matches()) {
 				String id = idMatcher.group();
 				id = id.substring(0, id.length() - 1).concat(key);
+				AnalysisElement ae = controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key));
 				if (id.length() > 1) {
 					if (pred) {
-						this.nodePredecessors
-								.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
+						this.predecessors.put(ae.getId(), ae);
 					} else {
-						this.nodeSuccessors
-								.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
+						this.successors.put(ae.getId(), ae);
 					}
 				} else {
+					AnalysisElement ae1 = controlFlowGraph.getNodes().get(id);
 					if (pred) {
-						this.nodePredecessors.add(controlFlowGraph.getNodes().get(id));
+						this.predecessors.put(ae1.getId(), ae);
 					} else {
-						this.nodeSuccessors.add(controlFlowGraph.getNodes().get(id));
+						this.successors.put(ae1.getId(), ae);
 					}
 				}
 			}
 		}
-	}
-
-
-	public String getId() {
-		return id;
 	}
 
 	ProcessVariableOperation lastOperation() {
@@ -222,16 +194,21 @@ public class Node {
 		return processVariableOperation;
 	}
 
+	@Override
+	public ControlFlowGraph getControlFlowGraph() {
+		return null;
+	}
+
 	public void setId(final String id) {
 		this.id = id;
 	}
 
-	public Block getBlock() {
-		return block;
+	public String getId() {
+		return id;
 	}
 
-	List<Node> getNodePredecessors() {
-		return nodePredecessors;
+	public Block getBlock() {
+		return block;
 	}
 
 	public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
@@ -244,6 +221,21 @@ public class Node {
 
 	public LinkedHashMap<String, ProcessVariableOperation> getDefined() {
 		return defined;
+	}
+
+	@Override
+	public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
+		this.parentElement.addSourceCodeAnomaly(anomalyContainer);
+	}
+
+	@Override
+	public void clearPredecessors() {
+		this.predecessors.clear();
+	}
+
+	@Override
+	public void removePredecessor(String predecessor) {
+		this.predecessors.remove(predecessor);
 	}
 
 	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
@@ -266,38 +258,69 @@ public class Node {
 		this.killed = killed;
 	}
 
-	LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
+	public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
 		return inUsed;
 	}
 
-	void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
+	public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
 		this.inUsed = inUsed;
 	}
 
-	LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
+	public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
 		return inUnused;
 	}
 
-	void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
+	public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
 		this.inUnused = inUnused;
 	}
 
-	LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
+	public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
 		return outUsed;
 	}
 
-	void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
+	public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
 		this.outUsed = outUsed;
 	}
 
-	LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
+	public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
 		return outUnused;
 	}
 
-	void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
+	@Override
+	public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
 		this.outUnused = outUnused;
 	}
 
 	public BpmnElement getParentElement() {	return parentElement; }
+
+	@Override
+	public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
+		this.predecessors = predecessors;
+	}
+
+	@Override
+	public void addPredecessor(AnalysisElement predecessor) {
+		this.predecessors.put(predecessor.getId(), predecessor);
+	}
+
+	@Override
+	public List<AnalysisElement> getPredecessors() {
+		return this.predecessors.values().stream().map(NodeDecorator::new).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<AnalysisElement> getSuccessors() {
+		return this.successors.values().stream().map(NodeDecorator::new).collect(Collectors.toList());
+	}
+
+	@Override
+	public void setSuccessors(LinkedHashMap<String, AnalysisElement> successors) {
+		this.successors = successors;
+	}
+
+	@Override
+	public void addSuccessor(AnalysisElement successor) {
+		this.successors.put(successor.getId(), successor);
+	}
 
 }

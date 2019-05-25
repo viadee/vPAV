@@ -37,9 +37,9 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -304,8 +304,8 @@ public class ElementGraphBuilder {
 			final BpmnElement srcElement = elementMap.get(flow.getSource().getId());
 			final BpmnElement destElement = elementMap.get(flow.getTarget().getId());
 
-			flowElement.addProcessPredecessor(srcElement);
-			flowElement.addProcessSuccessor(destElement);
+			flowElement.addPredecessor(srcElement);
+			flowElement.addSuccessor(destElement);
 
 			graph.addEdge(srcElement, flowElement, 100);
 			graph.addEdge(flowElement, destElement, 100);
