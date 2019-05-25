@@ -33,7 +33,10 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.InOutState;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import java.util.*;
@@ -87,6 +90,8 @@ public class BpmnElement implements AnalysisElement {
 		return controlFlowGraph;
 	}
 
+
+
 	/**
 	 *
 	 * @param variables
@@ -133,8 +138,12 @@ public class BpmnElement implements AnalysisElement {
 
 	private ListMultimap<String, ProcessVariableOperation> processVariables;
 
+	public List<AnomalyContainer> getSourceCodeAnomalies() {
+		return sourceCodeAnomalies;
+	}
+
 	// collecting anomalies found on Java code level
-	private List<AnomalyContainer> sourceCodeAnomalies = new ArrayList<AnomalyContainer>();
+	private List<AnomalyContainer> sourceCodeAnomalies = new ArrayList<>();
 
 	public String getProcessDefinition() {
 		return processDefinition;
@@ -291,35 +300,7 @@ public class BpmnElement implements AnalysisElement {
 
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<>();
-		final Set<String> variableNames = new HashSet<>(used().keySet());
-		for (final String variableName : in.keySet()) {
-			if (in.get(variableName) == InOutState.DEFINED) {
-				variableNames.add(variableName);
-			}
-		}
-		final List<AnomalyContainer> anomalies = new ArrayList<>();
-		for (final String variableName : variableNames) {
-			final List<ProcessVariableOperation> list = processVariables.get(variableName);
-			if (ur(variableName)) {
-				anomalies.add(new AnomalyContainer(variableName, Anomaly.UR, baseElement.getId(),
-						processVariables.get(variableName).get(list.size() - 1)));
-			}
-			if (du(variableName)) {
-				anomalies.add(new AnomalyContainer(variableName, Anomaly.DU, baseElement.getId(),
-						processVariables.get(variableName).get(list.size() - 1)));
-			}
-			if (dd(variableName)) {
-				anomalies.add(new AnomalyContainer(variableName, Anomaly.DD, baseElement.getId(),
-						processVariables.get(variableName).get(list.size() - 1)));
-			}
-		}
-		anomalyMap.put(this, anomalies);
-
-		if (sourceCodeAnomalies != null) {
-			// add anomalies found on Java code level
-			anomalies.addAll(sourceCodeAnomalies);
-		}
-
+		anomalyMap.put(this, getSourceCodeAnomalies());
 		return anomalyMap;
 	}
 
