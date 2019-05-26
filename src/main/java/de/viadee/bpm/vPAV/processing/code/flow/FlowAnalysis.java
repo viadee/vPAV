@@ -31,10 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 
 import java.util.*;
@@ -90,6 +87,20 @@ public class FlowAnalysis {
 
                 final Node firstNode = analysisElement.getControlFlowGraph().firstNode();
                 final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
+
+                LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
+                LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
+                analysisElement.getOperations().values().forEach(operation -> {
+                    if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
+                        inputVariables.put(operation.getId(), operation);
+                    }
+                    if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
+                        outputVariables.put(operation.getId(), operation);
+                    }
+                });
+                firstNode.setInUnused(inputVariables);
+                lastNode.setOutUnused(outputVariables);
+
                 analysisElement.getPredecessors().forEach(pred -> pred.addSuccessor(new NodeDecorator(pred)));
                 analysisElement.getSuccessors().forEach(succ -> {
                     succ.removePredecessor(analysisElement.getId());

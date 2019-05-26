@@ -25,6 +25,11 @@ public class BpmnElementDecorator implements AnalysisElement {
     }
 
     @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
+        return decoratedBpmnElement.getOperations();
+    }
+
+    @Override
     public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
     	decoratedBpmnElement.setPredecessors(predecessors);
     }

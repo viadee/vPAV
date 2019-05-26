@@ -12,6 +12,8 @@ public interface AnalysisElement {
 
     String getId();
 
+    LinkedHashMap<String, ProcessVariableOperation> getOperations();
+
     void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors);
 
     void addPredecessor(AnalysisElement predecessor);

@@ -358,7 +358,12 @@ public class BpmnElement implements AnalysisElement {
 		return this.getBaseElement().getId();
 	}
 
-	@Override
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
+        return operations;
+    }
+
+    @Override
 	public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
 		this.predecessors = predecessors;
 	}
