@@ -5,6 +5,7 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BpmnElementDecorator implements AnalysisElement {
 
@@ -127,5 +128,10 @@ public class BpmnElementDecorator implements AnalysisElement {
     @Override
     public void removePredecessor(String predecessor) {
         this.decoratedBpmnElement.removePredecessor(predecessor);
+    }
+
+    @Override
+    public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
+        return decoratedBpmnElement.getAnomalies();
     }
 }

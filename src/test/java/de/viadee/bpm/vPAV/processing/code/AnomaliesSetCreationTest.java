@@ -31,19 +31,18 @@
  */
 package de.viadee.bpm.vPAV.processing.code;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
-import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -51,8 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -74,94 +72,119 @@ public class AnomaliesSetCreationTest {
 
     @Test
     public void findDD() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDD.bpmn";
+        final File processDefinition = new File(PATH);
 
         // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final Collection<ServiceTask> tasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null,
+                new BpmnScanner(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
-        final ControlFlowGraph cg = new ControlFlowGraph();
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.DelegateAnomalyDD", element, null, null, null, cg));
-//        cg.analyze(element);
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<String>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner);
 
-        Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
-        assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        flowAnalysis.analyze(graphCollection);
+
+        Set<AnomalyContainer> anomalies = new HashSet<>();
+        flowAnalysis.getNodes().values().forEach(analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
+
+        Anomaly anomaly = anomalies.iterator().next().getAnomaly();
+        assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
         assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.DD, anomaly);
+
     }
 
     @Test
     public void findDU() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDU.bpmn";
+        final File processDefinition = new File(PATH);
 
         // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final Collection<ServiceTask> tasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null,
+                new BpmnScanner(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
-        final ControlFlowGraph cg = new ControlFlowGraph();
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.DelegateAnomalyDU", element, null, null, null, cg));
-//        cg.analyze(element);
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<String>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner);
 
-        Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
-        assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
-        assertEquals("Expected a DU anomaly but found " + anomaly, Anomaly.DU, anomaly);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        flowAnalysis.analyze(graphCollection);
+
+        Set<AnomalyContainer> anomalies = new HashSet<>();
+        flowAnalysis.getNodes().values().forEach(analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
+
+        Anomaly anomaly = anomalies.iterator().next().getAnomaly();
+        assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
+        assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.DU, anomaly);
     }
 
     @Test
     public void findUR() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUR.bpmn";
+        final File processDefinition = new File(PATH);
 
         // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final Collection<ServiceTask> tasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null,
+                new BpmnScanner(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
-        final ControlFlowGraph cg = new ControlFlowGraph();
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.DelegateAnomalyUR", element, null, null, null, cg));
-//        cg.analyze(element);
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<String>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner);
 
-        Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
-        assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
-        assertEquals("Expected a UR anomaly but found " + anomaly, Anomaly.UR, anomaly);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        flowAnalysis.analyze(graphCollection);
+
+        Set<AnomalyContainer> anomalies = new HashSet<>();
+        flowAnalysis.getNodes().values().forEach(analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
+
+        Anomaly anomaly = anomalies.iterator().next().getAnomaly();
+        assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
+        assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.UR, anomaly);
     }
 
     @Test
     public void findUU() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUU.bpmn";
+        final File processDefinition = new File(PATH);
 
         // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final Collection<ServiceTask> tasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null,
+                new BpmnScanner(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
-        final ControlFlowGraph cg = new ControlFlowGraph();
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.DelegateAnomalyUU", element, null, null, null, cg));
-//        cg.analyze(element);
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<String>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner);
 
-        Anomaly anomaly = element.getAnomalies().entrySet().iterator().next().getValue().iterator().next().getAnomaly();
-        assertEquals("Expected 1 anomalie but found " + element.getAnomalies().size(), 1, element.getAnomalies().size());
-        assertEquals("Expected a UU anomaly but found " + anomaly, Anomaly.UU, anomaly);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        flowAnalysis.analyze(graphCollection);
+
+        Set<AnomalyContainer> anomalies = new HashSet<>();
+        flowAnalysis.getNodes().values().forEach(analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
+
+        Anomaly anomaly = anomalies.iterator().next().getAnomaly();
+        assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
+        assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.UU, anomaly);
     }
 
     @Test

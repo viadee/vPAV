@@ -5,6 +5,7 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface AnalysisElement {
 
@@ -53,4 +54,6 @@ public interface AnalysisElement {
     void clearPredecessors();
 
     void removePredecessor(String predecessor);
+
+    Map<BpmnElement, List<AnomalyContainer>> getAnomalies();
 }

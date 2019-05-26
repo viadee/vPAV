@@ -45,11 +45,21 @@ public class FlowAnalysis {
         this.nodes = new LinkedHashMap<>();
     }
 
+    /**
+     * Given a collection of graphs, this method is the sole entrance to the analysis of the graphs
+     * First process model and control flow graph of delegates are embedded to create a single graph.
+     * Then the graph is analyzed conservatively by following the Reaching Definition algorithm.
+     * For discovering data flow anomalies inside a single block, a sequential check on unit basis is performed.
+     * Lastly, anomalies are extracted and appended to the parent element (for visualization=
+     *
+     * @param graphCollection Collection of graphs
+     */
     public void analyze(final Collection<Graph> graphCollection) {
         for (Graph graph : graphCollection) {
             embedControlFlowGraph(graph);
-            printGraph();
+            // printGraph();
             computeReachingDefinitions();
+            computeLineByLine();
             extractAnomalies();
         }
     }
@@ -61,6 +71,11 @@ public class FlowAnalysis {
         }
     }
 
+    /**
+     * Embeds the control flow graphs of bpmn elements into the process model
+     *
+     * @param graph Given Graph
+     */
     private void embedControlFlowGraph(final Graph graph) {
         // Add all elements on bpmn level
         graph.getVertexInfo().keySet().forEach(element -> {
@@ -133,7 +148,7 @@ public class FlowAnalysis {
 
     /**
      * Uses the approach from ALSU07 (Reaching Definitions) to compute data flow
-     * anomalies across the CFG
+     * anomalies across the embedded CFG
      */
     private void computeReachingDefinitions() {
         boolean change = true;
@@ -180,19 +195,17 @@ public class FlowAnalysis {
 
     /**
      * Finds anomalies inside blocks by checking statements unit by unit
-     * @param element
-     *            Current BpmnElement
      */
-    private void computeLineByLine(final BpmnElement element) {
-        element.getControlFlowGraph().getNodes().values().forEach(node -> {
-            if (node.getOperations().size() >= 2) {
+    private void computeLineByLine() {
+        nodes.values().forEach(analysisElement -> {
+            if (analysisElement.getOperations().size() >= 2) {
                 ProcessVariableOperation prev = null;
-                for (ProcessVariableOperation operation : node.getOperations().values()) {
+                for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
                     if (prev == null) {
                         prev = operation;
                         continue;
                     }
-                    checkAnomaly(element, operation, prev);
+                    checkAnomaly(operation.getElement(), operation, prev);
                     prev = operation;
                 }
             }
@@ -200,8 +213,7 @@ public class FlowAnalysis {
     }
 
     /**
-     * Based on the calculated sets, extract the anomalies found on source code
-     * level
+     * Based on the calculated sets, extract the anomalies found on source code leve
      *
      */
     private void extractAnomalies() {
@@ -502,4 +514,9 @@ public class FlowAnalysis {
         }));
         return intersection;
     }
+
+    public LinkedHashMap<String, AnalysisElement> getNodes() {
+        return nodes;
+    }
+
 }

@@ -38,6 +38,7 @@ import soot.toolkits.graph.Block;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -236,6 +237,11 @@ public class Node implements AnalysisElement {
 	@Override
 	public void removePredecessor(String predecessor) {
 		this.predecessors.remove(predecessor);
+	}
+
+	@Override
+	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
+		return getParentElement().getAnomalies();
 	}
 
 	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
