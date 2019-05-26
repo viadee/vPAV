@@ -106,20 +106,22 @@ public class ControlFlowGraph {
 		return key.toString();
 	}
 
-    /**
-     * Set predecessor/successor relations for blocks and initialize sets
-     */
-    void computePredecessorRelations() {
-        nodes.values().forEach(node -> {
-            this.operations.putAll(node.getOperations());
-            node.setPreds();
-            node.setSuccs();
-            node.setOutUnused(new LinkedHashMap<>());
-            node.setOutUsed(new LinkedHashMap<>());
-        });
-    }
+	/**
+	 * Set predecessor/successor relations for blocks and initialize sets
+	 */
+	void computePredecessorRelations() {
+		nodes.values().forEach(node -> {
+			this.operations.putAll(node.getOperations());
+			node.setPreds();
+			node.setSuccs();
+			node.setOutUnused(new LinkedHashMap<>());
+			node.setOutUsed(new LinkedHashMap<>());
+		});
+	}
 
-	boolean hasNodes () { return !nodes.isEmpty(); }
+	boolean hasNodes() {
+		return !nodes.isEmpty();
+	}
 
 	int getDefCounter() {
 		return defCounter;

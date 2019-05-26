@@ -55,9 +55,9 @@ public class BpmnElement implements AnalysisElement {
 	private ControlFlowGraph controlFlowGraph;
 
 	private LinkedHashMap<String, ProcessVariableOperation> operations;
-	private LinkedHashMap<String, ProcessVariableOperation> defined2;
-	private LinkedHashMap<String, ProcessVariableOperation> used2;
-	private LinkedHashMap<String, ProcessVariableOperation> killed2;
+	private LinkedHashMap<String, ProcessVariableOperation> defined;
+	private LinkedHashMap<String, ProcessVariableOperation> used;
+	private LinkedHashMap<String, ProcessVariableOperation> killed;
 	private LinkedHashMap<String, ProcessVariableOperation> inUsed;
 	private LinkedHashMap<String, ProcessVariableOperation> inUnused;
 	private LinkedHashMap<String, ProcessVariableOperation> outUsed;
@@ -66,7 +66,8 @@ public class BpmnElement implements AnalysisElement {
 	private LinkedHashMap<String, AnalysisElement> predecessors;
 	private LinkedHashMap<String, AnalysisElement> successors;
 
-	public BpmnElement(final String processDefinition, final BaseElement element, final ControlFlowGraph controlFlowGraph) {
+	public BpmnElement(final String processDefinition, final BaseElement element,
+			final ControlFlowGraph controlFlowGraph) {
 		this.processDefinition = processDefinition;
 		this.baseElement = element;
 		this.controlFlowGraph = controlFlowGraph;
@@ -77,9 +78,9 @@ public class BpmnElement implements AnalysisElement {
 
 		this.operations = new LinkedHashMap<>();
 		this.processVariables = ArrayListMultimap.create();
-		this.defined2 = new LinkedHashMap<>();
-		this.used2 = new LinkedHashMap<>();
-		this.killed2= new LinkedHashMap<>();
+		this.defined = new LinkedHashMap<>();
+		this.used = new LinkedHashMap<>();
+		this.killed = new LinkedHashMap<>();
 		this.inUsed = new LinkedHashMap<>();
 		this.inUnused = new LinkedHashMap<>();
 		this.outUsed = new LinkedHashMap<>();
@@ -89,8 +90,6 @@ public class BpmnElement implements AnalysisElement {
 	public ControlFlowGraph getControlFlowGraph() {
 		return controlFlowGraph;
 	}
-
-
 
 	/**
 	 *
@@ -108,23 +107,21 @@ public class BpmnElement implements AnalysisElement {
 	private void addOperation(final ProcessVariableOperation processVariableOperation) {
 		this.operations.put(processVariableOperation.getId(), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
-			case WRITE:
-				defined2.put(processVariableOperation.getId(), processVariableOperation);
-				break;
-			case READ:
-				used2.put(processVariableOperation.getId(), processVariableOperation);
-				break;
-			case DELETE:
-				killed2.put(processVariableOperation.getId(), processVariableOperation);
-				break;
+		case WRITE:
+			defined.put(processVariableOperation.getId(), processVariableOperation);
+			break;
+		case READ:
+			used.put(processVariableOperation.getId(), processVariableOperation);
+			break;
+		case DELETE:
+			killed.put(processVariableOperation.getId(), processVariableOperation);
+			break;
 		}
 	}
 
+	private Map<String, InOutState> used_old = new HashMap<String, InOutState>();
 
-
-	private Map<String, InOutState> used = new HashMap<String, InOutState>();
-
-	private Map<String, InOutState> defined = new HashMap<String, InOutState>();
+	private Map<String, InOutState> defined_old = new HashMap<String, InOutState>();
 
 	private Map<String, InOutState> in = new HashMap<String, InOutState>();
 
@@ -241,25 +238,25 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	private Map<String, InOutState> used() {
-		if (this.used.isEmpty()) {
+		if (this.used_old.isEmpty()) {
 			for (final ProcessVariableOperation var : processVariables.values()) {
 				if (var.getOperation() == VariableOperation.READ) {
-					used.put(var.getName(), InOutState.READ);
+					used_old.put(var.getName(), InOutState.READ);
 				}
 			}
 		}
-		return used;
+		return used_old;
 	}
 
 	public Map<String, InOutState> defined() {
-		if (this.defined.isEmpty()) {
+		if (this.defined_old.isEmpty()) {
 			for (final ProcessVariableOperation var : processVariables.values()) {
 				if (var.getOperation() == VariableOperation.WRITE) {
-					defined.put(var.getName(), InOutState.DEFINED);
+					defined_old.put(var.getName(), InOutState.DEFINED);
 				}
 			}
 		}
-		return defined;
+		return defined_old;
 	}
 
 	private Map<String, InOutState> killed() {
@@ -314,56 +311,61 @@ public class BpmnElement implements AnalysisElement {
 		}
 	}
 
-
-	public LinkedHashMap<String,ProcessVariableOperation> getInUsed() {
+	public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
 		return inUsed;
 	}
 
-	public LinkedHashMap<String,ProcessVariableOperation> getInUnused() {
+	public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
 		return inUnused;
 	}
 
-	public LinkedHashMap<String,ProcessVariableOperation> getOutUsed() {
+	public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
 		return outUsed;
 	}
 
-	public LinkedHashMap<String,ProcessVariableOperation> getOutUnused() {
+	public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
 		return outUnused;
 	}
 
-	public void setInUsed(LinkedHashMap<String,ProcessVariableOperation> inUsedB) {
+	public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsedB) {
 		this.inUsed = inUsedB;
 	}
 
-	public void setInUnused(LinkedHashMap<String,ProcessVariableOperation> inUnusedB) {
+	public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnusedB) {
 		this.inUnused = inUnusedB;
 	}
 
-	public void setOutUsed(LinkedHashMap<String,ProcessVariableOperation> outUsed) {
+	public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
 		this.outUsed = outUsed;
 	}
 
-	public void setOutUnused(LinkedHashMap<String,ProcessVariableOperation> outUnused) {
+	public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
 		this.outUnused = outUnused;
 	}
 
-	public LinkedHashMap<String, ProcessVariableOperation> getUsed() { return used2; }
+	public LinkedHashMap<String, ProcessVariableOperation> getUsed() {
+		return used;
+	}
 
-	public LinkedHashMap<String, ProcessVariableOperation> getKilled() { return killed2; }
+	public LinkedHashMap<String, ProcessVariableOperation> getKilled() {
+		return killed;
+	}
 
-	public LinkedHashMap<String, ProcessVariableOperation> getDefined() { return defined2; }
+	public LinkedHashMap<String, ProcessVariableOperation> getDefined() {
+		return defined;
+	}
 
 	@Override
 	public String getId() {
 		return this.getBaseElement().getId();
 	}
 
-    @Override
-    public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
-        return operations;
-    }
+	@Override
+	public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
+		return operations;
+	}
 
-    @Override
+	@Override
 	public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
 		this.predecessors = predecessors;
 	}

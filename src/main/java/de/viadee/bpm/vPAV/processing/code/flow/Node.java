@@ -114,7 +114,6 @@ public class Node implements AnalysisElement {
 		this.predecessors.put(ae.getId(), ae);
 	}
 
-
 	/**
 	 * Set the predecessor nodes of the current node
 	 */
@@ -142,7 +141,8 @@ public class Node implements AnalysisElement {
 	}
 
 	/**
-	 * Matches the ids and creates the references to nodeSuccessors and nodePredecessors
+	 * Matches the ids and creates the references to nodeSuccessors and
+	 * nodePredecessors
 	 *
 	 * @param idPattern
 	 *            Pattern for resolving the id
@@ -297,7 +297,9 @@ public class Node implements AnalysisElement {
 		this.outUnused = outUnused;
 	}
 
-	public BpmnElement getParentElement() {	return parentElement; }
+	public BpmnElement getParentElement() {
+		return parentElement;
+	}
 
 	@Override
 	public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
