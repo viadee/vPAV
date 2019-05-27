@@ -183,7 +183,9 @@ public class Graph {
 	}
 
 	/**
-	 * get nodes with data flow anomalies
+	 * Get nodes with data flow anomalies
+	 *
+	 * @return Map of elements with anomalies
 	 */
 	public Map<BpmnElement, List<AnomalyContainer>> getNodesWithAnomalies() {
 
@@ -195,10 +197,17 @@ public class Graph {
 	}
 
 	/**
-	 * search all paths with variables, which has not been set
+	 * Search all paths with variables, which has not been set
 	 *
 	 * source:
 	 * http://codereview.stackexchange.com/questions/45678/find-all-paths-from-source-to-destination
+	 *
+	 * @param source
+	 *            BpmnElement
+	 * @param anomaly
+	 *            AnomalyContainer
+	 *
+	 * @return List of invalid paths
 	 */
 	public List<Path> getAllInvalidPaths(final BpmnElement source, final AnomalyContainer anomaly) {
 		return getAllInvalidPathsRecursive(source, anomaly, new LinkedList<>());

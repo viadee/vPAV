@@ -92,8 +92,10 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	/**
+	 * Sets the process variables of this element
 	 *
 	 * @param variables
+	 *            Collection of variables
 	 */
 	public void setProcessVariables(final ListMultimap<String, ProcessVariableOperation> variables) {
 		variables.entries().forEach(e -> addOperation(e.getValue()));
@@ -101,8 +103,10 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	/**
+	 * Puts process variable operations into correct sets
 	 *
 	 * @param processVariableOperation
+	 *            Current operation
 	 */
 	private void addOperation(final ProcessVariableOperation processVariableOperation) {
 		this.operations.put(processVariableOperation.getId(), processVariableOperation);

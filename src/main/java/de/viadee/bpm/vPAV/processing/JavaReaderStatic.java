@@ -88,6 +88,8 @@ public class JavaReaderStatic {
 	 *            KnownElementFieldType
 	 * @param scopeId
 	 *            Scope of the element
+	 * @param controlFlowGraph
+	 *            Control flow graph
 	 * @return Map of process variables from the referenced delegate
 	 */
 	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
@@ -127,10 +129,12 @@ public class JavaReaderStatic {
 	 *            BpmnElement
 	 * @param resourceFilePath
 	 *            Path of the BPMN model
+	 * @param entryPoint
+	 *            Current entry point
 	 * @return Map of process variable operations
 	 */
-	public ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className, final BpmnElement element, final String resourceFilePath,
-			final EntryPoint entryPoint) {
+	public ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className,
+			final BpmnElement element, final String resourceFilePath, final EntryPoint entryPoint) {
 
 		final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
@@ -277,6 +281,8 @@ public class JavaReaderStatic {
 	 *            KnownElementFieldType
 	 * @param scopeId
 	 *            Scope of the element
+	 * @param controlFlowGraph
+	 *            Control flow graph
 	 * @return Map of process variables for a given class
 	 */
 	public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
@@ -328,6 +334,8 @@ public class JavaReaderStatic {
 	 *            Assignment statement (left side)
 	 * @param args
 	 *            List of arguments
+	 * @param controlFlowGraph
+	 *            Control flow graph
 	 * @return OutSetCFG which contains data flow information
 	 */
 	public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
@@ -804,9 +812,9 @@ public class JavaReaderStatic {
 	 *            List of arguments
 	 */
 	private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
-										  final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-										  final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
-										  final List<Value> args, final ControlFlowGraph controlFlowGraph) {
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
+			final List<Value> args, final ControlFlowGraph controlFlowGraph) {
 
 		final Iterator<Edge> sources = cg.edgesOutOf(unit);
 		Edge src;
@@ -948,7 +956,7 @@ public class JavaReaderStatic {
 	private void setConstructorArgs(final List<Value> args) {
 		this.constructorArgs = args;
 	}
-  
+
 	private void setupSoot() {
 		final String sootPath = FileScanner.getSootPath();
 		System.setProperty("soot.class.path", sootPath);

@@ -70,12 +70,13 @@ public class FlowAnalysis {
 	}
 
 	private void printGraph() {
-		for (AnalysisElement analysisElement: nodes.values()) {
+		for (AnalysisElement analysisElement : nodes.values()) {
 			for (AnalysisElement pred : analysisElement.getPredecessors()) {
 				System.out.println("Curr: " + analysisElement.getId() + " -> Pred: " + pred.getId());
 			}
 		}
 	}
+
 	/**
 	 * Embeds the control flow graphs of bpmn elements into the process model
 	 *
@@ -126,6 +127,10 @@ public class FlowAnalysis {
 				firstNode.setInUsed(inputVariables);
 				lastNode.setOutUnused(outputVariables);
 
+				// If we have initial operations, we cant have input mapping (restriction of
+				// start event)
+				// Set initial operations as input for the first block and later remove bpmn
+				// element
 				if (!initialOperations.isEmpty()) {
 					firstNode.setInUsed(initialOperations);
 				}
@@ -154,6 +159,16 @@ public class FlowAnalysis {
 						.forEach(node -> cfgNodes.put(node.getId(), node));
 				ids.add(firstNode.getParentElement().getBaseElement().getId());
 			}
+
+			// In case we have start event that maps a message to a method
+			LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
+			analysisElement.getOperations().values().forEach(operation -> {
+				if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
+					initialOperations.put(operation.getId(), operation);
+				}
+			});
+			analysisElement.setInUsed(initialOperations);
+
 		});
 		temp.putAll(cfgNodes);
 		nodes.putAll(temp);
