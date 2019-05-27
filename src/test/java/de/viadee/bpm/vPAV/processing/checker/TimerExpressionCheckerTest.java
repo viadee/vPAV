@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -104,7 +105,7 @@ public class TimerExpressionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 
@@ -136,7 +137,7 @@ public class TimerExpressionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 
@@ -168,7 +169,7 @@ public class TimerExpressionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 

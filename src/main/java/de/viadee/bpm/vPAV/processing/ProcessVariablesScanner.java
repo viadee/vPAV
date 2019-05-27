@@ -111,37 +111,39 @@ public class ProcessVariablesScanner {
             sootClass.setApplicationClass();
             Scene.v().loadNecessaryClasses();
             for (SootMethod method : sootClass.getMethods()) {
-                final Body body = method.retrieveActiveBody();
-                for (String entryPoint : camundaProcessEntryPoints) {
-                    if (body.toString().contains(entryPoint)) {
-                        final PatchingChain<Unit> pc = body.getUnits();
-                        for (Unit unit : pc) {
-                            if (unit instanceof AssignStmt) {
-                                final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
-                                if (rightBox.contains(entryPoint)) {
-                                    if (((AssignStmt) unit).getRightOpBox()
-                                            .getValue() instanceof JInterfaceInvokeExpr) {
-                                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
-                                                .getRightOpBox().getValue();
-                                        checkExpression(filePath, messageIds, method, entryPoint, expr);
+                if (!method.isPhantom()) {
+                    final Body body = method.retrieveActiveBody();
+                    for (String entryPoint : camundaProcessEntryPoints) {
+                        if (body.toString().contains(entryPoint)) {
+                            final PatchingChain<Unit> pc = body.getUnits();
+                            for (Unit unit : pc) {
+                                if (unit instanceof AssignStmt) {
+                                    final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
+                                    if (rightBox.contains(entryPoint)) {
+                                        if (((AssignStmt) unit).getRightOpBox()
+                                                .getValue() instanceof JInterfaceInvokeExpr) {
+                                            final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
+                                                    .getRightOpBox().getValue();
+                                            checkExpression(filePath, messageIds, method, entryPoint, expr);
+                                        }
                                     }
                                 }
-                            }
-                            if (unit instanceof InvokeStmt) {
-                                final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue().toString();
-                                if (rightBox.contains(entryPoint)) {
-                                    if (((InvokeStmt) unit).getInvokeExprBox()
-                                            .getValue() instanceof JInterfaceInvokeExpr) {
-                                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
-                                                .getInvokeExprBox().getValue();
-                                        checkExpression(filePath, messageIds, method, entryPoint, expr);
+                                if (unit instanceof InvokeStmt) {
+                                    final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue().toString();
+                                    if (rightBox.contains(entryPoint)) {
+                                        if (((InvokeStmt) unit).getInvokeExprBox()
+                                                .getValue() instanceof JInterfaceInvokeExpr) {
+                                            final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
+                                                    .getInvokeExprBox().getValue();
+                                            checkExpression(filePath, messageIds, method, entryPoint, expr);
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
-                        processIds.add(entryPoint);
+                        if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
+                            processIds.add(entryPoint);
+                        }
                     }
                 }
             }

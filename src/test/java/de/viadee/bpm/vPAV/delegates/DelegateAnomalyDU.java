@@ -29,30 +29,28 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.code.flow;
+package de.viadee.bpm.vPAV.delegates;
 
-public class Edge {
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-    private Node src, tgt;
+import java.util.Random;
 
-    public Edge(final Node src, final Node tgt) {
-        this.src = src;
-        this.tgt = tgt;
+public class DelegateAnomalyDU implements JavaDelegate {
+
+    private final static String first = "1";
+
+    @Override
+    public void execute(DelegateExecution execution) {
+        dd(execution);
     }
 
-    public Node getSrc() {
-        return src;
-    }
-
-    public void setSrc(Node src) {
-        this.src = src;
-    }
-
-    public Node getTgt() {
-        return tgt;
-    }
-
-    public void setTgt(Node tgt) {
-        this.tgt = tgt;
+    private void dd(DelegateExecution execution) {
+        Random r = new Random();
+        execution.setVariable(first, true);
+        if (r.nextInt(5) > 2) {
+            int i = 3;
+        }
+        execution.removeVariable(first);
     }
 }

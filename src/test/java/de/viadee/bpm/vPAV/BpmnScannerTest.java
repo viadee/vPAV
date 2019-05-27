@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -71,7 +72,7 @@ public class BpmnScannerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         BpmnScanner scanner = new BpmnScanner(PATH);
         String imp = scanner.getImplementation(element.getBaseElement().getId());
@@ -98,7 +99,7 @@ public class BpmnScannerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         BpmnScanner scanner = new BpmnScanner(PATH);
         String imp = scanner.getImplementation(element.getBaseElement().getId());
@@ -125,7 +126,7 @@ public class BpmnScannerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(),  new ControlFlowGraph());
 
         BpmnScanner scanner = new BpmnScanner(PATH);
         String imp = scanner.getImplementation(element.getBaseElement().getId());
@@ -152,7 +153,7 @@ public class BpmnScannerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         BpmnScanner scanner = new BpmnScanner(PATH);
         ArrayList<String> scripts = scanner.getScriptTypes(element.getBaseElement().getId());
@@ -179,7 +180,7 @@ public class BpmnScannerTest {
         final Collection<Gateway> baseElements = modelInstance
                 .getModelElementsByType(Gateway.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         BpmnScanner scanner = new BpmnScanner(PATH);
         String gwId = scanner.getXorGateWays(element.getBaseElement().getId());
@@ -206,7 +207,7 @@ public class BpmnScannerTest {
         final Collection<Gateway> baseElements = modelInstance
                 .getModelElementsByType(Gateway.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         BpmnScanner scanner = new BpmnScanner(PATH);
         int out = scanner.getOutgoing(element.getBaseElement().getId());

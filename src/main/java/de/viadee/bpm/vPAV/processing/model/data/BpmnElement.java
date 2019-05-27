@@ -33,6 +33,8 @@ package de.viadee.bpm.vPAV.processing.model.data;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import java.util.*;
@@ -46,6 +48,78 @@ public class BpmnElement {
 	private String processDefinition;
 
 	private BaseElement baseElement;
+
+	private ControlFlowGraph controlFlowGraph;
+
+	private LinkedHashMap<String, ProcessVariableOperation> operations;
+	private LinkedHashMap<String, ProcessVariableOperation> defined2;
+	private LinkedHashMap<String, ProcessVariableOperation> used2;
+	private LinkedHashMap<String, ProcessVariableOperation> killed2;
+	private LinkedHashMap<String, ProcessVariableOperation> inUsed;
+	private LinkedHashMap<String, ProcessVariableOperation> inUnused;
+	private LinkedHashMap<String, ProcessVariableOperation> outUsed;
+	private LinkedHashMap<String, ProcessVariableOperation> outUnused;
+
+	private List<BpmnElement> processPredecessors;
+	private List<BpmnElement> processSuccessors;
+	private List<Node> nodePredecessors;
+	private List<Node> nodeSuccessors;
+
+
+	public BpmnElement(final String processDefinition, final BaseElement element, final ControlFlowGraph controlFlowGraph) {
+		this.processDefinition = processDefinition;
+		this.baseElement = element;
+		this.controlFlowGraph = controlFlowGraph;
+		this.operations = new LinkedHashMap<>();
+		this.processPredecessors = new ArrayList<>();
+		this.processSuccessors = new ArrayList<>();
+		this.nodePredecessors = new ArrayList<>();
+		this.nodeSuccessors = new ArrayList<>();
+
+		this.operations = new LinkedHashMap<>();
+		this.processVariables = ArrayListMultimap.create();
+		this.defined2 = new LinkedHashMap<>();
+		this.used2 = new LinkedHashMap<>();
+		this.killed2= new LinkedHashMap<>();
+		this.inUsed = new LinkedHashMap<>();
+		this.inUnused = new LinkedHashMap<>();
+		this.outUsed = new LinkedHashMap<>();
+		this.outUnused = new LinkedHashMap<>();
+	}
+
+	public ControlFlowGraph getControlFlowGraph() {
+		return controlFlowGraph;
+	}
+
+	/**
+	 *
+	 * @param variables
+	 */
+	public void setProcessVariables(final ListMultimap<String, ProcessVariableOperation> variables) {
+		variables.entries().forEach(e -> addOperation(e.getValue()));
+		this.processVariables.putAll(variables);
+	}
+
+	/**
+	 *
+	 * @param processVariableOperation
+	 */
+	private void addOperation(final ProcessVariableOperation processVariableOperation) {
+		this.operations.put(processVariableOperation.getId(), processVariableOperation);
+		switch (processVariableOperation.getOperation()) {
+			case WRITE:
+				defined2.put(processVariableOperation.getId(), processVariableOperation);
+				break;
+			case READ:
+				used2.put(processVariableOperation.getId(), processVariableOperation);
+				break;
+			case DELETE:
+				killed2.put(processVariableOperation.getId(), processVariableOperation);
+				break;
+		}
+	}
+
+
 
 	private Map<String, InOutState> used = new HashMap<String, InOutState>();
 
@@ -66,12 +140,6 @@ public class BpmnElement {
 	// collecting anomalies found on Java code level
 	private List<AnomalyContainer> sourceCodeAnomalies = new ArrayList<AnomalyContainer>();
 
-	public BpmnElement(final String processDefinition, final BaseElement element) {
-		this.processDefinition = processDefinition;
-		this.baseElement = element;
-		this.processVariables = ArrayListMultimap.create();
-	}
-
 	public String getProcessDefinition() {
 		return processDefinition;
 	}
@@ -82,10 +150,6 @@ public class BpmnElement {
 
 	public ListMultimap<String, ProcessVariableOperation> getProcessVariables() {
 		return processVariables;
-	}
-
-	public void setProcessVariables(final ListMultimap<String, ProcessVariableOperation> variables) {
-		this.processVariables = variables;
 	}
 
 	public void setProcessVariable(final String variableName, final ProcessVariableOperation variableObject) {
@@ -268,5 +332,53 @@ public class BpmnElement {
 				out.put(varName, inVariables.get(varName));
 			}
 		}
+	}
+
+	public List<BpmnElement> getProcessPredecessors() {
+		return processPredecessors;
+	}
+
+	public void addProcessPredecessor(final BpmnElement element) {
+		this.processPredecessors.add(element);
+	}
+
+	public List<BpmnElement> getProcessSuccessors() {
+		return processSuccessors;
+	}
+
+	public void addProcessSuccessor(final BpmnElement element) {
+		this.processSuccessors.add(element);
+	}
+
+	public void setProcessSuccessors(final List<BpmnElement> processSuccessors) {
+		this.processSuccessors = processSuccessors;
+	}
+
+	public List<Node> getNodePredecessors() {
+		return nodePredecessors;
+	}
+
+	public void setNodePredecessors(Node predecessor) {
+		this.nodePredecessors.add(predecessor);
+	}
+
+	public List<Node> getNodeSuccessors() {
+		return nodeSuccessors;
+	}
+
+	public void setNodeSuccessors(final List<Node> nodeSuccessors) {
+		this.nodeSuccessors = nodeSuccessors;
+	}
+
+	public void addNodePredecessor(final Node node) {
+		this.nodePredecessors.add(node);
+	}
+
+	public void setProcessPredecessors(final List<BpmnElement> processPredecessors) {
+		this.processPredecessors = processPredecessors;
+	}
+
+	public void addNodeSuccessor(final Node node) {
+		this.nodeSuccessors.add(node);
 	}
 }

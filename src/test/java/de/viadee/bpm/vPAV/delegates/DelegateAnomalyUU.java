@@ -29,51 +29,28 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.graph;
+package de.viadee.bpm.vPAV.delegates;
 
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.Random;
 
-/*
- * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- * A basic graph interface.
- */
+public class DelegateAnomalyUU implements JavaDelegate {
 
-public interface IGraph {
+    private final static String first = "1";
 
-  public String getProcessId();
+    @Override
+    public void execute(DelegateExecution execution) {
+        dd(execution);
+    }
 
-  public void addVertex(BpmnElement v);
-
-  public Collection<BpmnElement> getVertices();
-
-  public void addEdge(BpmnElement v1, BpmnElement v2, int weight);
-
-  public Collection<List<Edge>> getEdges();
-
-  public void removeEdge(BpmnElement v1, BpmnElement v2);
-
-  public boolean hasEdge(BpmnElement v1, BpmnElement v2);
-
-  public Edge getEdge(BpmnElement v1, BpmnElement v2);
-
-  public List<Path> getAllInvalidPaths(BpmnElement v, AnomalyContainer anomaly);
-
-  public void setAnomalyInformation(BpmnElement v);
-
-  public Map<BpmnElement, List<AnomalyContainer>> getNodesWithAnomalies();
-
-  public void addStartNode(final BpmnElement node);
-
-  public Collection<BpmnElement> getStartNodes();
-
-  public void addEndNode(final BpmnElement node);
-
-  public Collection<BpmnElement> getEndNodes();
-
-  public String toString();
+    private void dd(DelegateExecution execution) {
+        Random r = new Random();
+        execution.removeVariable(first);
+        if (r.nextInt(5) > 2) {
+            int i = 3;
+        }
+        execution.removeVariable(first);
+    }
 }

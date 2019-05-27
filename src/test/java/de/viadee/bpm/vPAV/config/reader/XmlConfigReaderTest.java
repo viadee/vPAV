@@ -33,8 +33,6 @@ package de.viadee.bpm.vPAV.config.reader;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.model.Setting;
-import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -138,31 +136,6 @@ public class XmlConfigReaderTest {
 
         // When Then
         reader.read("ruleSetIncorrect.xml");
-
-    }
-
-    @Test()
-    public void testBooleanForTypeOfProcessVariableModelReader() throws ConfigReaderException {
-
-        // Given
-        XmlConfigReader reader = new XmlConfigReader();
-
-        // When
-        Map<String, Map<String, Rule>> result = reader.read(ConfigConstants.RULESETDEFAULT);
-
-        // Then
-        boolean isStatic = false;
-        Rule rule = result.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER).get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
-        if (rule != null) {
-            Setting setting = rule.getSettings().get(ConfigConstants.USE_STATIC_ANALYSIS_BOOLEAN);
-            if (setting != null) {
-                String value = setting.getValue();
-                if (setting.getValue().equals(value)) {
-                    isStatic = true;
-                }
-            }
-        }
-        assertTrue(isStatic);
 
     }
 

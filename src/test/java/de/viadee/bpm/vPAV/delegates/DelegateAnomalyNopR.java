@@ -29,7 +29,28 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.code.flow;
+package de.viadee.bpm.vPAV.delegates;
 
-public class InSet {
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
+
+import java.util.Random;
+
+public class DelegateAnomalyNopR implements JavaDelegate {
+
+    private final static String first = "1";
+
+    @Override
+    public void execute(DelegateExecution execution) {
+        dd(execution);
+    }
+
+    private void dd(DelegateExecution execution) {
+        Random r = new Random();
+        if (r.nextInt(5) > 2) {
+            int i = 3;
+        }
+
+        execution.getVariable(first);
+    }
 }
