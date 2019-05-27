@@ -209,10 +209,10 @@ public class ConfigConstants {
             return properties.getProperty("language");
         } else {
             if (Locale.getDefault().toString().equals("de_DE")) {
-                logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: de_DE.");
+                logger.warning("Could not retrieve localization from vpav.properties. Default localization: de_DE.");
                 return "de";
             } else {
-                logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: en_US.");
+                logger.warning("Could not retrieve localization from vpav.properties. Default localization: en_US.");
                 return "en";
             }
         }

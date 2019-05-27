@@ -163,12 +163,11 @@ public class RuntimeConfig {
 			} else if (settings.get("locale").getValue().equals("en")) {
 				getResource("en_US");
 			}
+			logger.warning("Usage of 'language' rule is deprecated. Please use vpav.properties instead.");
 		} catch (NullPointerException e) {
 			if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
-				logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: de_DE.");
 				getResource("de_DE");
 			} else {
-				logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: en_US.");
 				getResource("en_US");
 			}
 		}

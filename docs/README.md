@@ -61,7 +61,7 @@ By default, the HTML output is enabled.
 
 #### Language
 As of version 2.5.0, we added localization for english and german users.
-By specifying either **en** or **de** as ``language`` property, you can choose to use either German or English as language for your visual output report. By leaving it blank, the validator grabs your systems locale and provides either German or English as default. 
+By specifying either **en_US** or **de_DE** as ``language`` property, you can choose to use either German or English as language for your visual output report. By leaving it blank, the validator grabs your systems locale and provides either German or English as default. 
 Due to some refactoring, more languages can be added in the future by providing language files with the corresponding translations.
 
 ### One set of rules to rule them all
