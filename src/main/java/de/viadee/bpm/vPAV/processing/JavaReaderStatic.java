@@ -36,6 +36,7 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.*;
@@ -87,6 +88,8 @@ public class JavaReaderStatic {
 	 *            KnownElementFieldType
 	 * @param scopeId
 	 *            Scope of the element
+	 * @param controlFlowGraph
+	 *            Control flow graph
 	 * @return Map of process variables from the referenced delegate
 	 */
 	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
@@ -122,17 +125,16 @@ public class JavaReaderStatic {
 	 *
 	 * @param className
 	 *            Name of the class that potentially declares process variables
-	 * @param scanner
-	 *            OuterProcessVariablesScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param resourceFilePath
 	 *            Path of the BPMN model
+	 * @param entryPoint
+	 *            Current entry point
 	 * @return Map of process variable operations
 	 */
 	public ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath,
-			final EntryPoint entryPoint) {
+			final BpmnElement element, final String resourceFilePath, final EntryPoint entryPoint) {
 
 		final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
@@ -279,6 +281,8 @@ public class JavaReaderStatic {
 	 *            KnownElementFieldType
 	 * @param scopeId
 	 *            Scope of the element
+	 * @param controlFlowGraph
+	 *            Control flow graph
 	 * @return Map of process variables for a given class
 	 */
 	public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
@@ -330,6 +334,8 @@ public class JavaReaderStatic {
 	 *            Assignment statement (left side)
 	 * @param args
 	 *            List of arguments
+	 * @param controlFlowGraph
+	 *            Control flow graph
 	 * @return OutSetCFG which contains data flow information
 	 */
 	public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
@@ -577,7 +583,7 @@ public class JavaReaderStatic {
 			final ControlFlowGraph controlFlowGraph) {
 
 		for (Block block : graph.getBlocks()) {
-			Node node = new Node(controlFlowGraph, element, block, filePath);
+			Node node = new Node(controlFlowGraph, element, block);
 			controlFlowGraph.addNode(node);
 
 			// Collect the functions Unit by Unit via the blockIterator
@@ -950,7 +956,7 @@ public class JavaReaderStatic {
 	private void setConstructorArgs(final List<Value> args) {
 		this.constructorArgs = args;
 	}
-  
+
 	private void setupSoot() {
 		final String sootPath = FileScanner.getSootPath();
 		System.setProperty("soot.class.path", sootPath);

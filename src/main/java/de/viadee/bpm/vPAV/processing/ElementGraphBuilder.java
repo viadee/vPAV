@@ -37,9 +37,9 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -180,7 +180,7 @@ public class ElementGraphBuilder {
 
 					for (EntryPoint ep : scanner.getEntryPoints()) {
 						if (ep.getMessageName().equals(messageName)) {
-							variables.putAll(checkInitialVariableOperations(ep, scanner, node, processDefinition));
+							variables.putAll(checkInitialVariableOperations(ep, node, processDefinition));
 						}
 					}
 					graph.addStartNode(node);
@@ -197,7 +197,7 @@ public class ElementGraphBuilder {
 
 					for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {
 						if (ep.getMessageName().equals(messageName)) {
-							variables.putAll(checkInitialVariableOperations(ep, scanner, node, processDefinition));
+							variables.putAll(checkInitialVariableOperations(ep, node, processDefinition));
 						}
 					}
 				}
@@ -239,8 +239,6 @@ public class ElementGraphBuilder {
 	 *
 	 * @param entryPoint
 	 *            Current entryPoint (most likely rest controller classes)
-	 * @param scanner
-	 *            OuterProcessVariableScanner
 	 * @param element
 	 *            Current BPMN element
 	 * @param resourceFilePath
@@ -248,8 +246,8 @@ public class ElementGraphBuilder {
 	 * @return initial operations
 	 */
 	private ListMultimap<String, ProcessVariableOperation> checkInitialVariableOperations(final EntryPoint entryPoint,
-			final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath) {
-		return new JavaReaderStatic().getVariablesFromClass(entryPoint.getClassName(), scanner, element,
+																						  final BpmnElement element, final String resourceFilePath) {
+		return new JavaReaderStatic().getVariablesFromClass(entryPoint.getClassName(), element,
 				resourceFilePath, entryPoint);
 	}
 
@@ -306,8 +304,8 @@ public class ElementGraphBuilder {
 			final BpmnElement srcElement = elementMap.get(flow.getSource().getId());
 			final BpmnElement destElement = elementMap.get(flow.getTarget().getId());
 
-			flowElement.addProcessPredecessor(srcElement);
-			flowElement.addProcessSuccessor(destElement);
+			flowElement.addPredecessor(srcElement);
+			flowElement.addSuccessor(destElement);
 
 			graph.addEdge(srcElement, flowElement, 100);
 			graph.addEdge(flowElement, destElement, 100);

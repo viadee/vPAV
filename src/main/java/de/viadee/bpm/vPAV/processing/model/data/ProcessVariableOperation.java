@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+
 /**
  * Represents a process variable operation with some meaningful information.
  *

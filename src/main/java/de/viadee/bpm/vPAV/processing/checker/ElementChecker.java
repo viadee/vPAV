@@ -31,7 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
 import java.util.Collection;
