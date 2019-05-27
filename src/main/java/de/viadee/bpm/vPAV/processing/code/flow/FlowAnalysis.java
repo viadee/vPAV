@@ -65,9 +65,17 @@ public class FlowAnalysis {
 			computeReachingDefinitions();
 			computeLineByLine();
 			extractAnomalies();
+			printGraph();
 		}
 	}
 
+	private void printGraph() {
+		for (AnalysisElement analysisElement: nodes.values()) {
+			for (AnalysisElement pred : analysisElement.getPredecessors()) {
+				System.out.println("Curr: " + analysisElement.getId() + " -> Pred: " + pred.getId());
+			}
+		}
+	}
 	/**
 	 * Embeds the control flow graphs of bpmn elements into the process model
 	 *
@@ -104,17 +112,23 @@ public class FlowAnalysis {
 
 				LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
 				LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
+				LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 				analysisElement.getOperations().values().forEach(operation -> {
 					if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
 						inputVariables.put(operation.getId(), operation);
-					}
-					if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
+					} else if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
 						outputVariables.put(operation.getId(), operation);
+					} else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
+						initialOperations.put(operation.getId(), operation);
 					}
 				});
 
 				firstNode.setInUsed(inputVariables);
 				lastNode.setOutUnused(outputVariables);
+
+				if (!initialOperations.isEmpty()) {
+					firstNode.setInUsed(initialOperations);
+				}
 
 				analysisElement.getPredecessors().forEach(pred -> pred.addSuccessor(new NodeDecorator(pred)));
 				analysisElement.getSuccessors().forEach(succ -> {
@@ -136,7 +150,6 @@ public class FlowAnalysis {
 						}
 					}
 				}
-
 				analysisElement.getControlFlowGraph().getNodes().values()
 						.forEach(node -> cfgNodes.put(node.getId(), node));
 				ids.add(firstNode.getParentElement().getBaseElement().getId());

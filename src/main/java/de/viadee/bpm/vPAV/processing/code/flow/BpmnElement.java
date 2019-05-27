@@ -356,6 +356,11 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	@Override
+	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+		this.defined = defined;
+	}
+
+	@Override
 	public String getId() {
 		return this.getBaseElement().getId();
 	}

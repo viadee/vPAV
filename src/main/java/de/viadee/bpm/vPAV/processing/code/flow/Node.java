@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import soot.toolkits.graph.Block;
 
 import java.util.Iterator;
@@ -242,6 +243,11 @@ public class Node implements AnalysisElement {
 	@Override
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		return getParentElement().getAnomalies();
+	}
+
+	@Override
+	public BaseElement getBaseElement() {
+		return this.parentElement.getBaseElement();
 	}
 
 	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {

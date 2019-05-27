@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -147,6 +148,11 @@ public class BpmnElementDecorator implements AnalysisElement {
 	}
 
 	@Override
+	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+		this.decoratedBpmnElement.setDefined(defined);
+	}
+
+	@Override
 	public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
 		this.decoratedBpmnElement.addSourceCodeAnomaly(anomalyContainer);
 	}
@@ -164,5 +170,10 @@ public class BpmnElementDecorator implements AnalysisElement {
 	@Override
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		return decoratedBpmnElement.getAnomalies();
+	}
+
+	@Override
+	public BaseElement getBaseElement() {
+		return decoratedBpmnElement.getBaseElement();
 	}
 }
