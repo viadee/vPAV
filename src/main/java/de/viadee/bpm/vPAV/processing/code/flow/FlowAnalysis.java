@@ -161,7 +161,7 @@ public class FlowAnalysis {
 			}
 
 			// In case we have start event that maps a message to a method
-			LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
+			final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 			analysisElement.getOperations().values().forEach(operation -> {
 				if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
 					initialOperations.put(operation.getId(), operation);

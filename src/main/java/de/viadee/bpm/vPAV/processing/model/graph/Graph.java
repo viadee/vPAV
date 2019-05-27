@@ -35,7 +35,7 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.InOutState;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -107,10 +107,6 @@ public class Graph {
 
 	public Collection<List<Edge>> getEdges() {
 		return adjacencyListSuccessor.values();
-	}
-
-	public LinkedHashMap<BpmnElement, List<Edge>> getAdjacencyListPredecessor() {
-		return adjacencyListPredecessor;
 	}
 
 	public List<BpmnElement> getAdjacencyListPredecessor(final BpmnElement element) {
@@ -229,18 +225,11 @@ public class Graph {
 
 		final List<Edge> edges = this.adjacencyListPredecessor.get(startNode);
 
-		final Map<String, InOutState> in = startNode.getIn();
-		final Map<String, InOutState> out = startNode.getOut();
-
-		final List<Path> returnPathsUrAnomaly = exitConditionUrAnomaly(startNode, anomaly, currentPath, invalidPaths,
-				in, out);
+		final List<Path> returnPathsUrAnomaly = exitConditionUrAnomaly(startNode, anomaly, currentPath, invalidPaths);
 		final List<Path> returnPathsDdDuAnomaly = exitConditionDdDuAnomaly(startNode, anomaly, currentPath,
-				invalidPaths, in);
+				invalidPaths);
 
-		if (anomaly.getAnomaly() == Anomaly.UR && !in.containsKey(anomaly.getName())
-				&& out.containsKey(anomaly.getName())) {
-			return invalidPaths;
-		} else if (returnPathsUrAnomaly != null) {
+		if (returnPathsUrAnomaly != null) {
 			return returnPathsUrAnomaly;
 		} else if (returnPathsDdDuAnomaly != null) {
 			return returnPathsDdDuAnomaly;
@@ -258,19 +247,17 @@ public class Graph {
 	}
 
 	/**
-	 * exit condition for path finding (ur anomaly)
+	 * Exit condition for path finding (ur anomaly)
 	 *
 	 */
 	private List<Path> exitConditionUrAnomaly(final BpmnElement startNode, final AnomalyContainer anomaly,
-			final LinkedList<BpmnElement> currentPath, final List<Path> invalidPaths, final Map<String, InOutState> in,
-			final Map<String, InOutState> out) {
+			final LinkedList<BpmnElement> currentPath, final List<Path> invalidPaths) {
 
 		// go back to the node, where the variable was deleted
 		// or go back to the start
-		if (anomaly.getAnomaly() == Anomaly.UR && (variableDeleted(anomaly, in, out)
-				|| ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.START_EVENT)
+		if (anomaly.getAnomaly() == Anomaly.UR || ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.START_EVENT)
 						&& startNode.getBaseElement().getParentElement().getElementType().getTypeName()
-								.equals(BpmnConstants.PROCESS))))) {
+								.equals(BpmnConstants.PROCESS)))) {
 
 			final List<BpmnElement> newPath = new ArrayList<>(currentPath);
 			invalidPaths.add(new Path(newPath));
@@ -281,29 +268,18 @@ public class Graph {
 		return null;
 	}
 
-	/**
-	 * is variable deleted
-	 *
-	 */
-	private boolean variableDeleted(final AnomalyContainer anomaly, final Map<String, InOutState> in,
-			final Map<String, InOutState> out) {
-
-		return ((in.containsKey(anomaly.getName()) && in.get(anomaly.getName()) != InOutState.DELETED))
-				&& (out.containsKey(anomaly.getName()) && out.get(anomaly.getName()) == InOutState.DELETED);
-	}
 
 	/**
-	 * exit condition for path finding (du / dd anomaly)
+	 * Exit condition for path finding (du / dd anomaly)
 	 *
 	 */
 	private List<Path> exitConditionDdDuAnomaly(final BpmnElement startNode, final AnomalyContainer anomaly,
-			final LinkedList<BpmnElement> currentPath, final List<Path> invalidPaths, Map<String, InOutState> in) {
+			final LinkedList<BpmnElement> currentPath, final List<Path> invalidPaths) {
 
 		// go back to the node where the element is defined
 		// skip the startpoint
-		if (startNode.defined().containsKey(anomaly.getName())
-				&& (anomaly.getAnomaly() == Anomaly.DD || anomaly.getAnomaly() == Anomaly.DU)
-				&& currentPath.size() > 1) {
+		if ((anomaly.getAnomaly() == Anomaly.DD || anomaly.getAnomaly() == Anomaly.DU) && currentPath.size() > 1 &&
+				containsAnomaly(startNode, anomaly)) {
 			final List<BpmnElement> newPath = new ArrayList<>(currentPath);
 			invalidPaths.add(new Path(newPath));
 
@@ -311,6 +287,24 @@ public class Graph {
 			return invalidPaths;
 		}
 		return null;
+	}
+
+	/**
+	 *
+	 * Checks whether current element contains certain anomaly
+	 *
+	 * @param bpmnElement Current element
+	 * @param anomaly Container of anomaly
+	 * @return true/false
+	 */
+	private boolean containsAnomaly(final BpmnElement bpmnElement, final AnomalyContainer anomaly) {
+		boolean containsAnomaly = false;
+		for (ProcessVariableOperation processVariableOperation : bpmnElement.getDefined().values()) {
+			if (processVariableOperation.getName().equals(anomaly.getName())) {
+				containsAnomaly = true;
+			}
+		}
+		return containsAnomaly;
 	}
 
 	@Override
@@ -330,78 +324,5 @@ public class Graph {
 		}
 		str.append("}");
 		return str.toString();
-	}
-
-	protected final void clearVertexInfo() {
-		for (VertexInfo info : this.vertexInfo.values()) {
-			info.clear();
-		}
-	}
-
-	/**
-	 * generate intersection for variable maps and remind precedence rule for
-	 * variable states
-	 *
-	 * @param mapA
-	 *            mapA
-	 * @param mapB
-	 *            mapB
-	 * @return intersection
-	 */
-	public static Map<String, InOutState> intersection(final Map<String, InOutState> mapA,
-			final Map<String, InOutState> mapB) {
-		final Map<String, InOutState> intersectionMap = new HashMap<>();
-		final Set<String> variables = new HashSet<>();
-		variables.addAll(mapA.keySet());
-		variables.addAll(mapB.keySet());
-		for (final String varName : variables) {
-			if (mapA.containsKey(varName) && mapB.containsKey(varName)) {
-				final InOutState state1 = mapA.get(varName);
-				final InOutState state2 = mapB.get(varName);
-
-				final InOutState intersectionElement = getStatePrecedence(state1, state2);
-				intersectionMap.put(varName, intersectionElement);
-			} else {
-				mapA.remove(varName);
-				mapB.remove(varName);
-			}
-		}
-		return intersectionMap;
-	}
-
-	/**
-	 * get union and remind precedence rule for variable states
-	 *
-	 * @param mapA
-	 *            mapA
-	 * @param mapB
-	 *            mapB
-	 * @return union
-	 */
-	public static Map<String, InOutState> unionWithStatePrecedence(final Map<String, InOutState> mapA,
-			final Map<String, InOutState> mapB) {
-
-		final Map<String, InOutState> unionMap = new HashMap<>();
-		unionMap.putAll(mapA);
-		unionMap.putAll(mapB);
-		unionMap.putAll(intersection(mapA, mapB));
-
-		return unionMap;
-
-	}
-
-	/**
-	 * precedence rule for variable states
-	 *
-	 * 1) delete 2) read 3) define
-	 *
-	 */
-	private static InOutState getStatePrecedence(final InOutState state1, final InOutState state2) {
-		if (state1 == InOutState.DELETED || state2 == InOutState.DELETED) {
-			return InOutState.DELETED;
-		} else if (state1 == InOutState.READ || state2 == InOutState.READ) {
-			return InOutState.READ;
-		}
-		return InOutState.DEFINED;
 	}
 }

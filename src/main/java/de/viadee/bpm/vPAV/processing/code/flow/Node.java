@@ -92,7 +92,7 @@ public class Node implements AnalysisElement {
 	 *            Current process variable operation
 	 */
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
-		final String id = parentElement.getId() + "::" + String.valueOf(controlFlowGraph.getDefCounter());
+		final String id = String.valueOf(controlFlowGraph.getDefCounter());
 		this.operations.put(String.valueOf(id), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
