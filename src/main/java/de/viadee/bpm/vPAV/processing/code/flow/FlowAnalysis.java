@@ -65,15 +65,6 @@ public class FlowAnalysis {
 			computeReachingDefinitions();
 			computeLineByLine();
 			extractAnomalies();
-			printGraph();
-		}
-	}
-
-	private void printGraph() {
-		for (AnalysisElement analysisElement : nodes.values()) {
-			for (AnalysisElement pred : analysisElement.getPredecessors()) {
-				System.out.println("Curr: " + analysisElement.getId() + " -> Pred: " + pred.getId());
-			}
 		}
 	}
 
@@ -95,11 +86,6 @@ public class FlowAnalysis {
 			this.nodes.put(analysisElement.getId(), analysisElement);
 		});
 
-		graph.getVertexInfo().keySet().forEach(element -> {
-			AnalysisElement analysisElement = new BpmnElementDecorator(element);
-			this.nodes.put(analysisElement.getId(), analysisElement);
-		});
-
 		// Add all nodes on source code level and correct the pointers
 		final LinkedHashMap<String, AnalysisElement> temp = new LinkedHashMap<>(nodes);
 		final LinkedHashMap<String, AnalysisElement> cfgNodes = new LinkedHashMap<>();
@@ -111,31 +97,36 @@ public class FlowAnalysis {
 				final Node firstNode = analysisElement.getControlFlowGraph().firstNode();
 				final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
 
-				LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
-				LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
-				LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
 				analysisElement.getOperations().values().forEach(operation -> {
 					if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
 						inputVariables.put(operation.getId(), operation);
 					} else if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
 						outputVariables.put(operation.getId(), operation);
 					} else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
-						initialOperations.put(operation.getId(), operation);
+						initialVariables.put(operation.getId(), operation);
 					}
 				});
 
-				firstNode.setInUsed(inputVariables);
+				firstNode.setInUnused(inputVariables);
 				lastNode.setOutUnused(outputVariables);
 
 				// If we have initial operations, we cant have input mapping (restriction of
 				// start event)
 				// Set initial operations as input for the first block and later remove bpmn
 				// element
-				if (!initialOperations.isEmpty()) {
-					firstNode.setInUsed(initialOperations);
+				if (!initialVariables.isEmpty()) {
+					firstNode.setInUnused(initialVariables);
 				}
 
-				analysisElement.getPredecessors().forEach(pred -> pred.addSuccessor(new NodeDecorator(pred)));
+				analysisElement.getPredecessors().forEach(pred -> {
+					pred.removePredecessor(analysisElement.getId());
+					pred.addSuccessor(new NodeDecorator(firstNode));
+					firstNode.addPredecessor(pred);
+				});
+
 				analysisElement.getSuccessors().forEach(succ -> {
 					succ.removePredecessor(analysisElement.getId());
 					succ.addPredecessor(new NodeDecorator(lastNode));
@@ -170,6 +161,7 @@ public class FlowAnalysis {
 			analysisElement.setInUsed(initialOperations);
 
 		});
+
 		temp.putAll(cfgNodes);
 		nodes.putAll(temp);
 		ids.forEach(id -> nodes.remove(id));
@@ -194,6 +186,10 @@ public class FlowAnalysis {
 				analysisElement.setInUsed(inUsed);
 				analysisElement.setInUnused(inUnused);
 
+				// Get old values before calculating new values and later check for changes
+				final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = analysisElement.getOutUnused();
+				final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = analysisElement.getOutUsed();
+
 				// Calculate out-sets for used definitions (transfer functions)
 				final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>();
 				outUsed.putAll(analysisElement.getUsed());
@@ -208,10 +204,6 @@ public class FlowAnalysis {
 				tempIntersection.putAll(getSetDifference(tempIntersection, analysisElement.getUsed()));
 				outUnused.putAll(tempIntersection);
 				analysisElement.setOutUnused(outUnused);
-
-				// Compare old values with new values and check for changes
-				final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = analysisElement.getOutUnused();
-				final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = analysisElement.getOutUsed();
 
 				if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
 					change = true;

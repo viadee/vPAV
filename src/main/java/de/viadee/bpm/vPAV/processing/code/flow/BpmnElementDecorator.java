@@ -153,6 +153,11 @@ public class BpmnElementDecorator implements AnalysisElement {
 	}
 
 	@Override
+	public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+		this.decoratedBpmnElement.addDefined(defined);
+	}
+
+	@Override
 	public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
 		this.decoratedBpmnElement.addSourceCodeAnomaly(anomalyContainer);
 	}

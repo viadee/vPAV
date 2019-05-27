@@ -83,6 +83,8 @@ public interface AnalysisElement {
 
 	void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
 
+	void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
+
 	void addSourceCodeAnomaly(AnomalyContainer anomalyContainer);
 
 	void clearPredecessors();

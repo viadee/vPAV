@@ -121,7 +121,8 @@ public class Node implements AnalysisElement {
 	 */
 	void setPreds() {
 		final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
-		final Pattern idPattern = Pattern.compile("(\\d\\.)*(\\d)");
+		final Pattern idPattern = Pattern
+				.compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
 
 		for (Block block : this.block.getPreds()) {
 			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
@@ -134,7 +135,8 @@ public class Node implements AnalysisElement {
 	 */
 	void setSuccs() {
 		final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
-		final Pattern idPattern = Pattern.compile("(\\d\\.)*(\\d)");
+		final Pattern idPattern = Pattern
+				.compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
 
 		for (Block block : this.block.getSuccs()) {
 			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
@@ -161,20 +163,11 @@ public class Node implements AnalysisElement {
 			if (idMatcher.matches()) {
 				String id = idMatcher.group();
 				id = id.substring(0, id.length() - 1).concat(key);
-				AnalysisElement ae = controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key));
-				if (id.length() > 1) {
-					if (pred) {
-						this.predecessors.put(ae.getId(), ae);
-					} else {
-						this.successors.put(ae.getId(), ae);
-					}
+				AnalysisElement ae = controlFlowGraph.getNodes().get(id);
+				if (pred) {
+					this.addPredecessor(ae);
 				} else {
-					AnalysisElement ae1 = controlFlowGraph.getNodes().get(id);
-					if (pred) {
-						this.predecessors.put(ae1.getId(), ae);
-					} else {
-						this.successors.put(ae1.getId(), ae);
-					}
+					this.addSuccessor(ae);
 				}
 			}
 		}
@@ -253,6 +246,11 @@ public class Node implements AnalysisElement {
 
 	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
 		this.defined = defined;
+	}
+
+	@Override
+	public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+		this.defined.putAll(defined);
 	}
 
 	public LinkedHashMap<String, ProcessVariableOperation> getUsed() {

@@ -84,6 +84,7 @@ public class ControlFlowGraph {
 	 */
 	private String createHierarchy(final Node node) {
 		StringBuilder key = new StringBuilder();
+		key.append(node.getParentElement().getBaseElement().getId()).append("__");
 		if (recursionCounter == 0) {
 			nodeCounter++;
 			key.append(nodeCounter);

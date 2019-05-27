@@ -153,6 +153,11 @@ public class NodeDecorator implements AnalysisElement {
 	}
 
 	@Override
+	public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+		this.decoratedNode.addDefined(defined);
+	}
+
+	@Override
 	public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
 		this.decoratedNode.addSourceCodeAnomaly(anomalyContainer);
 	}

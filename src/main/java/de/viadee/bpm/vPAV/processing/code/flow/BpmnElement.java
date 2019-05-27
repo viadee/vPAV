@@ -90,7 +90,6 @@ public class BpmnElement implements AnalysisElement {
 		this.sourceCodeAnomalies = new ArrayList<>();
 	}
 
-
 	/**
 	 * Sets the process variables of this element
 	 *
@@ -123,7 +122,6 @@ public class BpmnElement implements AnalysisElement {
 		}
 	}
 
-
 	private Map<String, InOutState> in = new HashMap<String, InOutState>();
 
 	private Map<String, InOutState> out = new HashMap<String, InOutState>();
@@ -152,7 +150,6 @@ public class BpmnElement implements AnalysisElement {
 		processVariables.put(variableName, variableObject);
 	}
 
-
 	public Map<String, InOutState> getIn() {
 		return in;
 	}
@@ -160,7 +157,6 @@ public class BpmnElement implements AnalysisElement {
 	public Map<String, InOutState> getOut() {
 		return out;
 	}
-
 
 	public void setInCa(final Collection<String> in) {
 		this.inCa = in;
@@ -170,19 +166,23 @@ public class BpmnElement implements AnalysisElement {
 		this.outCa = out;
 	}
 
-
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<>();
 		anomalyMap.put(this, getSourceCodeAnomalies());
 		return anomalyMap;
 	}
-	public BaseElement getBaseElement() { return baseElement; }
+
+	public BaseElement getBaseElement() {
+		return baseElement;
+	}
 
 	public void addSourceCodeAnomaly(AnomalyContainer anomaly) {
 		sourceCodeAnomalies.add(anomaly);
 	}
 
-	public ControlFlowGraph getControlFlowGraph() { return controlFlowGraph; }
+	public ControlFlowGraph getControlFlowGraph() {
+		return controlFlowGraph;
+	}
 
 	public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
 		return inUsed;
@@ -234,6 +234,11 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	@Override
+	public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+		this.defined.putAll(defined);
+	}
+
+	@Override
 	public String getId() {
 		return this.getBaseElement().getId();
 	}
@@ -272,7 +277,6 @@ public class BpmnElement implements AnalysisElement {
 	public void addSuccessor(AnalysisElement successor) {
 		this.successors.put(successor.getId(), successor);
 	}
-
 
 	@Override
 	public void clearPredecessors() {
