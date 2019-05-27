@@ -92,16 +92,17 @@ public class Node implements AnalysisElement {
 	 *            Current process variable operation
 	 */
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
-		this.operations.put(String.valueOf(controlFlowGraph.getDefCounter()), processVariableOperation);
+		final String id = parentElement.getId() + "::" + String.valueOf(controlFlowGraph.getDefCounter());
+		this.operations.put(String.valueOf(id), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
-			defined.put(String.valueOf(controlFlowGraph.getDefCounter()), processVariableOperation);
+			defined.put(id, processVariableOperation);
 			break;
 		case READ:
-			used.put(String.valueOf(controlFlowGraph.getDefCounter()), processVariableOperation);
+			used.put(id, processVariableOperation);
 			break;
 		case DELETE:
-			killed.put(String.valueOf(controlFlowGraph.getDefCounter()), processVariableOperation);
+			killed.put(id, processVariableOperation);
 			break;
 		}
 		controlFlowGraph.incrementDefCounter();
