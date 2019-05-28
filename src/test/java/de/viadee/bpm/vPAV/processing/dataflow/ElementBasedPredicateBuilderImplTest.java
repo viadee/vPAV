@@ -50,7 +50,7 @@ import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,9 +62,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withPrefix("ext_");
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("ext_name"));
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("ext_name"));
     }
 
     @Test
@@ -73,9 +72,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withPrefix("ext_");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("int_name"));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("int_name"));
     }
 
         @Test
@@ -84,9 +82,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withPostfix("_post");
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("name_post"));
+            assertTrue(result.isFulfilled());
+            assertThat(result.getMessage().orElse(null), containsString("name_post"));
     }
 
     @Test
@@ -95,9 +92,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withPostfix("_post");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("name_nopost"));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("name_nopost"));
     }
 
     @Test
@@ -106,9 +102,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).ofType(UserTask.class);
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString(UserTask.class.getSimpleName()));
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString(UserTask.class.getSimpleName()));
     }
 
     @Test
@@ -117,9 +112,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).ofType(UserTask.class);
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString(ServiceTask.class.getSimpleName()));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString(ServiceTask.class.getSimpleName()));
     }
 
     @Test
@@ -128,9 +122,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("present at 'element'"));
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("present at 'element'"));
     }
 
     @Test
@@ -139,9 +132,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("not present at 'element'"));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("not present at 'element'"));
     }
 
     @Test
@@ -150,9 +142,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withProperty("correctProperty");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("not present at 'element'"));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("not present at 'element'"));
     }
 
     @Test
@@ -161,9 +152,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withNameMatching(".*MATCH[0-9][A-Y]?");
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("hasAMATCH9"));
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("hasAMATCH9"));
     }
 
     @Test
@@ -172,9 +162,8 @@ public class ElementBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(bpmnElements).withNameMatching(".*MATCH[0-9][A-Y]?");
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("hasNoMATC9"));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("hasNoMATC9"));
     }
 
     @Test
@@ -186,9 +175,8 @@ public class ElementBasedPredicateBuilderImplTest {
         );
         Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
             EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
-            assertThat(result.isFulfilled(), is(true));
-            assertThat(result.getMessage().isPresent(), is(true));
-            assertThat(result.getMessage().get(), is("e1, e2, e3"));
+            assertTrue(result.isFulfilled());
+            assertThat(result.getMessage().orElse(null), is("e1, e2, e3"));
             return new Object();
         };
         Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
@@ -209,9 +197,8 @@ public class ElementBasedPredicateBuilderImplTest {
         );
         Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
             EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
-            assertThat(result.isFulfilled(), is(false));
-            assertThat(result.getMessage().isPresent(), is(true));
-            assertThat(result.getMessage().get(), is("e2"));
+            assertFalse(result.isFulfilled());
+            assertThat(result.getMessage().orElse(null), is("e2"));
             return new Object();
         };
         Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
@@ -250,9 +237,8 @@ public class ElementBasedPredicateBuilderImplTest {
         Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
             EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
             assertThat(predicate.getDescription(), is("all elements fulfilling this"));
-            assertThat(result.isFulfilled(), is(true));
-            assertThat(result.getMessage().isPresent(), is(true));
-            assertThat(result.getMessage().get(), is("e1, e3"));
+            assertTrue(result.isFulfilled());
+            assertThat(result.getMessage().orElse(null), is("e1, e3"));
             return new Object();
         };
         Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
@@ -274,9 +260,8 @@ public class ElementBasedPredicateBuilderImplTest {
         );
         Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
             EvaluationResult<ProcessVariable> result = predicate.evaluate(new ProcessVariable(""));
-            assertThat(result.isFulfilled(), is(false));
-            assertThat(result.getMessage().isPresent(), is(true));
-            assertThat(result.getMessage().get(), is("e1, e2, e3"));
+            assertFalse(result.isFulfilled());
+            assertThat(result.getMessage().orElse(null), is("e1, e2, e3"));
             return new Object();
         };
         Function<ProcessVariable, List<BpmnElement>> elementProvider = p -> bpmnElements;
