@@ -67,13 +67,13 @@ public class FileScanner {
 
     private final Set<String> processDefinitions;
 
-    private static Set<String> javaResourcesFileInputStream = new HashSet<String>();
+    private static Set<String> javaResourcesFileInputStream = new HashSet<>();
 
-    private Set<String> includedFiles = new HashSet<String>();
+    private Set<String> includedFiles = new HashSet<>();
 
     private Map<String, String> decisionRefToPathMap;
 
-    private Collection<String> resourcesNewestVersions = new ArrayList<String>();
+    private Collection<String> resourcesNewestVersions = new ArrayList<>();
 
     private Map<String, String> processIdToPathMap;
 
@@ -81,7 +81,7 @@ public class FileScanner {
 
     private static StringBuilder sootPath = new StringBuilder();
 
-    private static Collection<String> sootPaths = new ArrayList<String>();
+    private static Collection<String> sootPaths = new ArrayList<>();
 
     private static boolean isDirectory = false;
 
@@ -115,7 +115,7 @@ public class FileScanner {
         // get file paths of process definitions
         scanner.setIncludes(new String[]{ConfigConstants.JAVA_FILE_PATTERN});
         scanner.scan();
-        javaResourcesFileInputStream = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+        javaResourcesFileInputStream = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
 
         scanner.setBasedir("target/generated-sources/");
         // get file paths of process definitions
@@ -139,8 +139,8 @@ public class FileScanner {
 
         // get file paths of java files
         URL[] urls;
-        LinkedList<File> files = new LinkedList<File>();
-        LinkedList<File> dirs = new LinkedList<File>();
+        LinkedList<File> files;
+        LinkedList<File> dirs = new LinkedList<>();
         URLClassLoader ucl;
         if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
             ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
@@ -250,8 +250,7 @@ public class FileScanner {
      */
     private LinkedList<File> findLastDir(LinkedList<File> list) {
 
-        LinkedList<File> returnList = new LinkedList<File>();
-        returnList.addAll(list);
+        LinkedList<File> returnList = new LinkedList<>(list);
 
         for (File f : list) {
             if (f.isFile())
@@ -323,7 +322,7 @@ public class FileScanner {
      */
     private static Map<String, String> createProcessIdToPathMap(final Set<String> paths) {
 
-        final Map<String, String> keyToPathMap = new HashMap<String, String>();
+        final Map<String, String> keyToPathMap = new HashMap<>();
 
         for (final String path : paths) {
             // read bpmn file
@@ -370,7 +369,7 @@ public class FileScanner {
      */
     private static Map<String, String> createDmnKeyToPathMap(final Set<String> paths) {
 
-        final Map<String, String> keyToPathMap = new HashMap<String, String>();
+        final Map<String, String> keyToPathMap = new HashMap<>();
 
         for (final String path : paths) {
             // read dmn file
@@ -403,8 +402,8 @@ public class FileScanner {
      */
     private static Collection<String> createDirectoriesToNewestVersions(final Set<String> versionedFiles,
                                                                         final String versioningSchema) {
-        final Map<String, String> newestVersionsPathMap = new HashMap<String, String>();
-        final Map<String, String> newestVersionsMap = new HashMap<String, String>();
+        final Map<String, String> newestVersionsPathMap = new HashMap<>();
+        final Map<String, String> newestVersionsMap = new HashMap<>();
 
         if (versionedFiles != null && versioningSchema != null) {
             for (final String versionedFile : versionedFiles) {
@@ -445,7 +444,7 @@ public class FileScanner {
      */
     private static Collection<String> createResourcesToNewestVersions(final Set<String> versionedFiles,
                                                                       final String versioningSchema) {
-        final Map<String, String> newestVersionsMap = new HashMap<String, String>();
+        final Map<String, String> newestVersionsMap = new HashMap<>();
 
         if (versionedFiles != null) {
             for (final String versionedFile : versionedFiles) {
