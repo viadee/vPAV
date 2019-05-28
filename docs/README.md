@@ -48,6 +48,7 @@ To write your own rule set, you can follow the example of [ruleSetDefault.xml](h
 
 ### Properties
 There are some configurations that have nothing to do with checkers. To define these properties, you have to create a ``vPav.properties`` file and put it in your classpath.
+An example of a properties file can be found in the project [Serialized Objects in Embedded Forms](https://github.com/viadee/camunda-bpm-examples/tree/syncfork/usertask/task-form-embedded-serialized-java-object) of our forked camunda-bpm-examples repository.
 
 #### Location of BPMN models
 By default, the BPMN models have to be stored in the folder ``src\main\resources`` of your Camunda project. 
