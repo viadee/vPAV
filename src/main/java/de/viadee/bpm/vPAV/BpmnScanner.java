@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -334,7 +334,7 @@ public class BpmnScanner {
     public ArrayList<String> getListener(String id, String listType, String extType) {
 
         // list to hold return values
-        ArrayList<String> returnAttrList = new ArrayList<String>();
+        ArrayList<String> returnAttrList = new ArrayList<>();
 
         // List for all Task elements
         NodeList nodeListExtensionElements;
@@ -395,7 +395,7 @@ public class BpmnScanner {
      */
     public ArrayList<String> getScriptTypes(String id) {
         // bool to hold return values
-        ArrayList<String> returnScriptType = new ArrayList<String>();
+        ArrayList<String> returnScriptType = new ArrayList<>();
 
         // List for all Task elements
         NodeList nodeList;
@@ -440,10 +440,12 @@ public class BpmnScanner {
                 nodeList = null;
         }
 
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element startEvent = (Element) nodeList.item(i);
-            if (id.equals(startEvent.getAttribute(BpmnConstants.ATTR_ID))) {
-                return isSubprocess(startEvent);
+        if (nodeList != null) {
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element startEvent = (Element) nodeList.item(i);
+                if (id.equals(startEvent.getAttribute(BpmnConstants.ATTR_ID))) {
+                    return isSubprocess(startEvent);
+                }
             }
         }
 
@@ -520,10 +522,12 @@ public class BpmnScanner {
                 break;
         }
 
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element sequenceElement = (Element) nodeList.item(i);
-            if (sequenceElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
-                return hasCondExp(sequenceElement);
+        if (nodeList != null) {
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element sequenceElement = (Element) nodeList.item(i);
+                if (sequenceElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
+                    return hasCondExp(sequenceElement);
+                }
             }
         }
 
@@ -648,16 +652,19 @@ public class BpmnScanner {
 
         NodeList nodeList = getNodeListByVersion();
 
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element taskElement = (Element) nodeList.item(i);
+        if (nodeList != null) {
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element taskElement = (Element) nodeList.item(i);
 
-            // check if the ids are corresponding and retrieve the attributes for target and
-            // source reference
-            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                references.add(taskElement.getAttribute(BpmnConstants.SOURCE_REF));
-                references.add(taskElement.getAttribute(BpmnConstants.TARGET_REF));
+                // check if the ids are corresponding and retrieve the attributes for target and
+                // source reference
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                    references.add(taskElement.getAttribute(BpmnConstants.SOURCE_REF));
+                    references.add(taskElement.getAttribute(BpmnConstants.TARGET_REF));
+                }
             }
         }
+
         return references;
     }
 
@@ -689,20 +696,23 @@ public class BpmnScanner {
                 break;
         }
 
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element taskElement = (Element) nodeList.item(i);
+        if (nodeList != null) {
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element taskElement = (Element) nodeList.item(i);
 
-            // check if the ids are corresponding and retrieve the outgoing edges of the xor
-            // gateway
-            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                NodeList children = taskElement.getChildNodes();
-                for (int j = 0; j < children.getLength(); j++) {
-                    if (children.item(j).getNodeName().equals(out)) {
-                        outgoingEdges.add(checkNamingOfEdges(children.item(j).getTextContent()));
+                // check if the ids are corresponding and retrieve the outgoing edges of the xor
+                // gateway
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                    NodeList children = taskElement.getChildNodes();
+                    for (int j = 0; j < children.getLength(); j++) {
+                        if (children.item(j).getNodeName().equals(out)) {
+                            outgoingEdges.add(checkNamingOfEdges(children.item(j).getTextContent()));
+                        }
                     }
                 }
             }
         }
+
         return outgoingEdges;
     }
 
@@ -717,12 +727,15 @@ public class BpmnScanner {
         Node edge = null;
         NodeList nodeList = getNodeListByVersion();
 
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element taskElement = (Element) nodeList.item(i);
-            if (taskElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
-                edge = taskElement;
+        if (nodeList != null) {
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element taskElement = (Element) nodeList.item(i);
+                if (taskElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
+                    edge = taskElement;
+                }
             }
         }
+
         return edge;
     }
 
@@ -1084,18 +1097,21 @@ public class BpmnScanner {
                 break;
         }
 
-        final Map<String, String> errorDef = new HashMap<String, String>();
+        final Map<String, String> errorDef = new HashMap<>();
 
-        // iterate over list and check each item
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element taskElement = (Element) nodeList.item(i);
+        if (nodeList != null) {
+            // iterate over list and check each item
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element taskElement = (Element) nodeList.item(i);
 
-            // check if the ids are corresponding
-            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                errorDef.put(taskElement.getAttribute(BpmnConstants.ATTR_NAME),
-                        taskElement.getAttribute(BpmnConstants.ATTR_ERROR_CODE));
+                // check if the ids are corresponding
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                    errorDef.put(taskElement.getAttribute(BpmnConstants.ATTR_NAME),
+                            taskElement.getAttribute(BpmnConstants.ATTR_ERROR_CODE));
+                }
             }
         }
+
         return errorDef;
     }
 
@@ -1173,13 +1189,15 @@ public class BpmnScanner {
                 break;
         }
 
-        // iterate over list and check each item
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element taskElement = (Element) nodeList.item(i);
+        if (nodeList != null) {
+            // iterate over list and check each item
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element taskElement = (Element) nodeList.item(i);
 
-            // check if the ids are corresponding
-            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                attachedToTask = taskElement.getAttribute(BpmnConstants.ATTACHED_TO_REF);
+                // check if the ids are corresponding
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                    attachedToTask = taskElement.getAttribute(BpmnConstants.ATTACHED_TO_REF);
+                }
             }
         }
 
@@ -1227,7 +1245,7 @@ public class BpmnScanner {
     }
 
     private ArrayList<String> getMessageRefFromReceiveTask(String id) {
-        ArrayList<String> messageRefs = new ArrayList<String>();
+        ArrayList<String> messageRefs = new ArrayList<>();
         NodeList nodeList = null;
 
         switch (modelVersion) {
@@ -1244,12 +1262,15 @@ public class BpmnScanner {
                 break;
         }
 
-        // iterate over list and check each item
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element taskElement = (Element) nodeList.item(i);
-            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID)))
-                messageRefs.add(taskElement.getAttribute(BpmnConstants.ATTR_MESSAGE_REF));
+        if (nodeList != null) {
+            // iterate over list and check each item
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element taskElement = (Element) nodeList.item(i);
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID)))
+                    messageRefs.add(taskElement.getAttribute(BpmnConstants.ATTR_MESSAGE_REF));
+            }
         }
+
         return messageRefs;
     }
 
@@ -1367,15 +1388,18 @@ public class BpmnScanner {
     private String getName(NodeList nodeList, String id) {
         String name = "";
 
-        // iterate over list and check each item
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element taskElement = (Element) nodeList.item(i);
+        if (nodeList != null) {
+            // iterate over list and check each item
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element taskElement = (Element) nodeList.item(i);
 
-            // check if the ids are corresponding
-            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                name = taskElement.getAttribute(BpmnConstants.ATTR_NAME);
+                // check if the ids are corresponding
+                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
+                    name = taskElement.getAttribute(BpmnConstants.ATTR_NAME);
+                }
             }
         }
+
         return name;
     }
 }
