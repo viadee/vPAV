@@ -1,5 +1,17 @@
 # Release notes
 
+## 3.0.0
+
+### Features
+[**Issue 80**](https://github.com/viadee/vPAV/issues/80) Location of BPMN files is not static anymore and can be configured  
+[**Issue 199**](https://github.com/viadee/vPAV/issues/199) Properties are excluded from rule set and can now be defined in a properties file  
+[**Issue 121**](https://github.com/viadee/vPAV/issues/121) Element checkers can define whether only one instance/rule or multiple instances/rules are allowed
+
+### Fixes
+[**Issue 120**](https://github.com/viadee/vPAV/issues/120) Checker factory does not fail on instantiating some checkers twice
+
+### Misc
+
 ## 2.7.2
 
 ### Features
