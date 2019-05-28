@@ -36,7 +36,6 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,23 +70,29 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 				if (anomaly.getAnomaly() == Anomaly.DD) {
 					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
 							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.0"), //$NON-NLS-1$
-									var.getName(),
-									var.getElement().getBaseElement()
-											.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+									var.getName(),var.getElement().getBaseElement().getId(),
 									var.getChapter(), var.getFieldType().getDescription())));
 				} else if (anomaly.getAnomaly() == Anomaly.DU) {
 					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
 							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.1"), //$NON-NLS-1$
-									var.getName(),
-									var.getElement().getBaseElement()
-											.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+									var.getName(),var.getElement().getBaseElement().getId(),
 									var.getChapter(), var.getFieldType().getDescription())));
 				} else if (anomaly.getAnomaly() == Anomaly.UR) {
 					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
 							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.2"), //$NON-NLS-1$
+									var.getName(), var.getElement().getBaseElement().getId(),
+									var.getChapter(), var.getFieldType().getDescription())));
+				} else if (anomaly.getAnomaly() == Anomaly.UU) {
+					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.3"), //$NON-NLS-1$
 									var.getName(),
-									var.getElement().getBaseElement()
-											.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
+									var.getElement().getBaseElement().getId(),
+									var.getChapter(), var.getFieldType().getDescription())));
+				} else if (anomaly.getAnomaly() == Anomaly.D) {
+					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.4"), //$NON-NLS-1$
+									var.getName(),
+									var.getElement().getBaseElement().getId(),
 									var.getChapter(), var.getFieldType().getDescription())));
 				}
 			}
@@ -96,9 +101,18 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 		return issues;
 	}
 
-	private CriticalityEnum determineCriticality(final Anomaly anomaly) {
+	public static boolean isSingletonChecker() {
+        return true;
+    }
 
-		if (anomaly == Anomaly.DD || anomaly == Anomaly.DU) {
+	/**
+	 *
+	 * @param anomaly
+	 *            Anomaly
+	 * @return Warning or error
+	 */
+	private CriticalityEnum determineCriticality(final Anomaly anomaly) {
+		if (anomaly == Anomaly.DD || anomaly == Anomaly.DU || anomaly == Anomaly.UU || anomaly == Anomaly.D) {
 			return CriticalityEnum.WARNING;
 		} else {
 			return CriticalityEnum.ERROR;

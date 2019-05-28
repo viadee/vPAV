@@ -29,51 +29,51 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.graph;
+package de.viadee.bpm.vPAV.delegates;
 
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+public class TestDelegateFlowGraph implements JavaDelegate {
 
-/*
- * University of Washington, Computer Science & Engineering, Course 373, Winter 2011, Jessica Miller
- * A basic graph interface.
- */
+    @Override
+    public void execute(final DelegateExecution execution) throws Exception {
 
-public interface IGraph {
+        int max = 3;
+        int count = 0;
+        boolean flag = false;
 
-  public String getProcessId();
 
-  public void addVertex(BpmnElement v);
+        // turns out to be:
+        // execution.setVariable("0", 0);
+        // execution.setVariable("1", 1);
+        // execution.setVariable("2", 2);
+        while (count < max) {
+            execution.setVariable(Integer.toString(count), count);
+            count++;
+            flag = true;
+        }
 
-  public Collection<BpmnElement> getVertices();
+        // execution.getVariable("1");
+        final int count_var = (Integer) execution.getVariable("test");
 
-  public void addEdge(BpmnElement v1, BpmnElement v2, int weight);
+        if (flag) {
+            // execution.removeVariable("1");
+            doThis(execution, count_var);
+            System.out.println("Here");
+        }
 
-  public Collection<List<Edge>> getEdges();
+        execution.getVariable("3");
+        doThat(execution);
 
-  public void removeEdge(BpmnElement v1, BpmnElement v2);
+    }
 
-  public boolean hasEdge(BpmnElement v1, BpmnElement v2);
+    private void doThis(final DelegateExecution execution, final int count) {
+        execution.removeVariable(Integer.toString(count));
+    }
 
-  public Edge getEdge(BpmnElement v1, BpmnElement v2);
-
-  public List<Path> getAllInvalidPaths(BpmnElement v, AnomalyContainer anomaly);
-
-  public void setAnomalyInformation(BpmnElement v);
-
-  public Map<BpmnElement, List<AnomalyContainer>> getNodesWithAnomalies();
-
-  public void addStartNode(final BpmnElement node);
-
-  public Collection<BpmnElement> getStartNodes();
-
-  public void addEndNode(final BpmnElement node);
-
-  public Collection<BpmnElement> getEndNodes();
-
-  public String toString();
+    private int doThat(final DelegateExecution execution) {
+        return (Integer) execution.getVariable("3");
+    }
 }
+

@@ -31,11 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+
 /**
  * Represents a process variable operation with some meaningful information.
  *
  */
 public class ProcessVariableOperation {
+
+    private String id;
 
     private String name;
 
@@ -66,11 +70,18 @@ public class ProcessVariableOperation {
         this.fieldType = fieldType;
         this.operation = operation;
         this.scopeId = scopeId;
+        this.id = createId();
     }
 
-    public String getName() {
-        return name;
+    private String createId() {
+        return CheckerIssue.getMD5(
+                name + "_" + chapter + "_" + fieldType + "_" +
+                        resourceFilePath + "_" + operation + "_" + scopeId + "_" + System.nanoTime());
     }
+
+    public String getName() { return name; }
+
+    public String getId() { return id; }
 
     public String getResourceFilePath() {
         return resourceFilePath;
@@ -112,7 +123,7 @@ public class ProcessVariableOperation {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return id.hashCode();
     }
 
     @Override

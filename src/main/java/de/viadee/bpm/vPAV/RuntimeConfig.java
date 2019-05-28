@@ -49,7 +49,7 @@ public class RuntimeConfig {
 
 	private Map<String, String> beanMap;
 
-	private Map<String, Rule> activeRuleSet = new HashMap<>();
+	private Map<String, Map<String, Rule>> activeRuleSet = new HashMap<>();
 
 	private ClassLoader classLoader;
 
@@ -64,8 +64,8 @@ public class RuntimeConfig {
 			"NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker", "VersioningChecker",
 			"DmnTaskChecker", "ProcessVariablesModelChecker", "ProcessVariablesNameConventionChecker",
 			"TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
-			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker", "CreateOutputHTML",
-			"DataFlowChecker", "MessageCorrelationChecker" };
+			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
+			"DataFlowChecker", "MessageCorrelationChecker", "CreateOutputHTML"};
 
 	private ArrayList<String> allActiveRules = new ArrayList<>();
 
@@ -118,16 +118,23 @@ public class RuntimeConfig {
 		return viadeeRules;
 	}
 
-	public void addActiveRules(Map<String, Rule> rules) {
-		for (Map.Entry<String, Rule> entry : rules.entrySet()) {
-			Rule rule = entry.getValue();
-			if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET))
-				activeRuleSet.put(entry.getKey(), entry.getValue());
-			allActiveRules.add(rule.getName());
+	public void addActiveRules(Map<String, Map<String, Rule>> rules) {
+		for (Map.Entry<String, Map<String, Rule>> entry : rules.entrySet()) {
+			for (Map.Entry<String, Rule> ruleEntry : entry.getValue().entrySet()) {
+				Rule rule = ruleEntry.getValue();
+				if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET)) {
+					if (!activeRuleSet.containsKey(entry.getKey())) {
+						activeRuleSet.put(entry.getKey(), new HashMap<>());
+					}
+					activeRuleSet.get(entry.getKey()).put(ruleEntry.getKey(), ruleEntry.getValue());
+				}
+
+				allActiveRules.add(entry.getKey());
+			}
 		}
 	}
 
-	public Map<String, Rule> getActiveRuleSet() {
+	public Map<String, Map<String, Rule>> getActiveRuleSet() {
 		return activeRuleSet;
 	}
 
@@ -146,21 +153,21 @@ public class RuntimeConfig {
 	 * @param rules
 	 *            RuleSet Rules from ruleset
 	 */
-	public void retrieveLocale(Map<String, Rule> rules) {
+	public void retrieveLocale(Map<String, Map<String, Rule>> rules) {
 		try {
-			final Rule rule = rules.get("language");
+			// Todo don't allow definition of language in rule set in future versions
+			final Rule rule = rules.get("language").get("language");
 			final Map<String, Setting> settings = rule.getSettings();
 			if (settings.get("locale").getValue().equals("de")) {
 				getResource("de_DE");
 			} else if (settings.get("locale").getValue().equals("en")) {
 				getResource("en_US");
 			}
+			logger.warning("Usage of 'language' rule is deprecated. Please use vpav.properties instead.");
 		} catch (NullPointerException e) {
-			if (Locale.getDefault().toString().equals("de_DE")) {
-				logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: de_DE.");
+			if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
 				getResource("de_DE");
 			} else {
-				logger.warning("Could not retrieve localization from ruleSet.xml. Default localization: en_US.");
 				getResource("en_US");
 			}
 		}

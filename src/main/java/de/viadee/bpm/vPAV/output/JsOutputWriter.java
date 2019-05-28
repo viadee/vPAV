@@ -37,15 +37,19 @@ import com.google.gson.JsonObject;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -76,8 +80,9 @@ public class JsOutputWriter implements IssueOutputWriter {
 				extractExternalCheckers(RuntimeConfig.getInstance().getActiveRules()));
 		final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
 		final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
+		final String properties = transformPropertiesToJsonDatastructure();
 
-		writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues);
+		writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues, properties);
 	}
 
 	public void prepareMaps(final Map<String, String> wrongCheckers, final Map<String, String> ignoredIssues,
@@ -143,29 +148,33 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 *            Issue severity
 	 * @param ignoredIssues
 	 *            Ignored issues
+	 * @param properties
+	 * 	          vPav properties
 	 * @throws OutputWriterException
 	 *             If JavaScript could not be written
 	 */
 	private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
-			final String defaultCheckers, final String issueSeverity, final String ignoredIssues)
+			final String defaultCheckers, final String issueSeverity, final String ignoredIssues, final String properties)
 			throws OutputWriterException {
-		if (json != null && !json.isEmpty()) {
+		if (json != null && !json.isEmpty() && properties != null && !properties.isEmpty()) {
+			String errorMsg = "js output couldn't be written";
+
 			try (FileWriter file = new FileWriter(ConfigConstants.VALIDATION_JS_MODEL_OUTPUT)) {
 				file.write(bpmn);
 			} catch (IOException e) {
-				throw new OutputWriterException("js output couldn't be written", e);
+				throw new OutputWriterException(errorMsg, e);
 			}
 			try (OutputStreamWriter osWriter = new OutputStreamWriter(
 					new FileOutputStream(ConfigConstants.VALIDATION_JS_OUTPUT), StandardCharsets.UTF_8)) {
 				osWriter.write(json);
 			} catch (IOException e) {
-				throw new OutputWriterException("js output couldn't be written", e);
+				throw new OutputWriterException(errorMsg, e);
 			}
 			try (OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
 					new FileOutputStream(ConfigConstants.VALIDATION_JS_SUCCESS_OUTPUT), StandardCharsets.UTF_8)) {
 				osWriterSuccess.write(json_noIssues);
 			} catch (IOException e) {
-				throw new OutputWriterException("js output couldn't be written", e);
+				throw new OutputWriterException(errorMsg, e);
 			}
 
 			if ((wrongCheckers != null && !wrongCheckers.isEmpty())
@@ -175,7 +184,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 					wrongAndDefaultCheckers.write(wrongCheckers);
 					wrongAndDefaultCheckers.write(defaultCheckers);
 				} catch (IOException e) {
-					throw new OutputWriterException("js output couldn't be written", e);
+					throw new OutputWriterException(errorMsg, e);
 				}
 			} else if ((wrongCheckers == null || wrongCheckers.isEmpty())
 					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
@@ -183,7 +192,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 						new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8)) {
 					defaultCheckerJS.write(defaultCheckers);
 				} catch (IOException e) {
-					throw new OutputWriterException("js output couldn't be written", e);
+					throw new OutputWriterException(errorMsg, e);
 				}
 			}
 
@@ -192,7 +201,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 						new FileOutputStream(ConfigConstants.VALIDATION_ISSUE_SEVERITY), StandardCharsets.UTF_8)) {
 					issueSeverityWriter.write(issueSeverity);
 				} catch (IOException e) {
-					throw new OutputWriterException("js output couldn't be written", e);
+					throw new OutputWriterException(errorMsg, e);
 				}
 			}
 			if (ignoredIssues != null && !ignoredIssues.isEmpty()) {
@@ -201,8 +210,14 @@ public class JsOutputWriter implements IssueOutputWriter {
 						StandardCharsets.UTF_8)) {
 					ignoredIssuesWriter.write(ignoredIssues);
 				} catch (IOException e) {
-					throw new OutputWriterException("js output couldn't be written", e);
+					throw new OutputWriterException(errorMsg, e);
 				}
+			}
+			try (OutputStreamWriter osWriter = new OutputStreamWriter(
+					new FileOutputStream(ConfigConstants.PROPERTIES_JS_OUTPUT), StandardCharsets.UTF_8)) {
+				osWriter.write(properties);
+			} catch (IOException e) {
+				throw new OutputWriterException(errorMsg, e);
 			}
 		}
 	}
@@ -360,7 +375,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			for (final String bpmnFilename : getModelPaths()) {
 				String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
 				output.append("{\"name\":\"").append(prettyBpmnFileName).append("\",\n \"xml\": \"");
-				output.append(convertBpmnFile(ConfigConstants.BASEPATH + bpmnFilename));
+				output.append(convertBpmnFile(ConfigConstants.getInstance().getBasepath() + bpmnFilename));
 				output.append("\"},\n");
 			}
 		} catch (IOException e) {
@@ -400,7 +415,18 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 *             File not found
 	 */
 	private String convertBpmnFile(String path) throws IOException {
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		byte[] encoded = null;
+		if (path.startsWith("file:/")) {
+			try {
+				// Convert URI
+				encoded = Files.readAllBytes(Paths.get(new URI(path)));
+			} catch (URISyntaxException e) {
+				logger.log(Level.SEVERE, "URI of path seems to be malformed.", e);
+			}
+		} else {
+			encoded = Files.readAllBytes(Paths.get(path));
+		}
+
 		String s = new String(encoded);
 		s = s.replace("\"", "\\\""); // replace " with \"
 		s = s.replace('\n', ' '); // delete all \n
@@ -460,6 +486,35 @@ public class JsOutputWriter implements IssueOutputWriter {
 			}
 		}
 		return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+	}
+
+	/**
+	 * Transforms the properties into JSON format
+	 * @return Properties in JSON format
+	 */
+	private String transformPropertiesToJsonDatastructure() {
+		final JsonObject obj = new JsonObject();
+		String basePath = ConfigConstants.getInstance().getBasepath();
+		String absolutePath = "";
+
+		if (basePath.startsWith("file:/")) {
+			try {
+				// Convert URI
+				absolutePath = basePath;
+				basePath = Paths.get(new URI(basePath)).toAbsolutePath().toString() + "/";
+			} catch (URISyntaxException e) {
+				logger.log(Level.SEVERE, "URI of path seems to be malformed.", e);
+			}
+		}
+		else {
+			// Create download basepath
+			absolutePath = "file:///" + new File(basePath).getAbsolutePath() + "/";
+		}
+		obj.addProperty("basepath", basePath.replaceAll("/", "\\\\"));
+
+		obj.addProperty("downloadBasepath", absolutePath);
+
+		return ("var properties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
 	}
 
 	/**

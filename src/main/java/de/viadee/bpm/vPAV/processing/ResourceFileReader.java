@@ -35,7 +35,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
@@ -83,7 +87,7 @@ public class ResourceFileReader {
 					if (fileName.endsWith(".java"))
 						directoryScanner.setBasedir(ConfigConstants.JAVAPATH);
 					else
-						directoryScanner.setBasedir(ConfigConstants.BASEPATH);
+						directoryScanner.setBasedir(ConfigConstants.getInstance().getBasepath());
 				}
 
 				Resource s = directoryScanner.getResource(fileName);
@@ -154,8 +158,8 @@ public class ResourceFileReader {
 	 * @return found Process Variables
 	 */
 	public static ListMultimap<String, ProcessVariableOperation> searchReadProcessVariablesInCode(
-			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-			final String fileName, final String scopeId, final String code) {
+            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+            final String fileName, final String scopeId, final String code) {
 
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 

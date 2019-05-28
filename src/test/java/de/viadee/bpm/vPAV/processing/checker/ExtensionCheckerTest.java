@@ -36,7 +36,8 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ModelConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -106,7 +107,7 @@ public class ExtensionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 
@@ -139,7 +140,7 @@ public class ExtensionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 
@@ -172,7 +173,7 @@ public class ExtensionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 
@@ -205,7 +206,7 @@ public class ExtensionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 
@@ -238,7 +239,7 @@ public class ExtensionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 
@@ -271,7 +272,7 @@ public class ExtensionCheckerTest {
                 .getModelElementsByType(BaseElement.class);
 
         for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event);
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 

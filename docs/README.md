@@ -20,7 +20,7 @@ Consistency checks are performed by individual modules called checkers, which se
 |[JavaDelegateChecker](JavaDelegateChecker.md)                                         | Is the implementation (or Spring bean reference) available and usable?   | Done         |
 |[DmnTaskChecker](DmnTaskChecker.md)                                                   | Is the implementation available?                                         | Done         |
 |[EmbeddedGroovyScriptChecker](EmbeddedGroovyScriptChecker.md)                         | Is the implementation available and does it look like a script?          | Done         |
-|[ProcessVariablesModelChecker](ProcessVariablesModelChecker.md)                       | Are process variables in the model provided in the code for all paths?   | Done |
+|[ProcessVariablesModelChecker](ProcessVariablesModelChecker.md)                       | Are process variables in the model provided in the code for all paths?   | WIP |
 |[ProcessVariablesNameConventionChecker](ProcessVariablesNameConventionChecker.md)     | Do process variables in the model fit into a desired regex pattern?      | Done         |
 |[TaskNamingConventionChecker](TaskNamingConventionChecker.md)                         | Do task names in the model fit into a desired regex pattern?             | Done         |
 |[VersioningChecker](VersioningChecker.md)                                             | Do java classes implementing tasks fit  a version scheme?             | Done         |
@@ -38,12 +38,40 @@ Consistency checks are performed by individual modules called checkers, which se
 
 
 All of these can be switched on or off as required. Implementing further checkers is rather simple.
+
 ### Configuration
-The viadee Process Application Validator comes with a default ruleSet.xml which provides some basic rules. In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
+The viadee Process Application Validator uses a rule set to define which checks are executed.
+The plugin comes with a default ruleSet.xml which provides some basic rules.
+In order to customize the plugin, we recommend creating your own ruleSet.xml and store it in **"src/test/resources"**. 
 This allows you to use your own set of rules for naming conventions or to de-/activate certain checkers.
+To write your own rule set, you can follow the example of [ruleSetDefault.xml](https://github.com/viadee/vPAV/blob/master/src/main/resources/ruleSetDefault.xml).
+
+### Properties
+There are some configurations that have nothing to do with checkers. To define these properties, you have to create a ``vPav.properties`` file and put it in your classpath.
+An example of a properties file can be found in the project [Serialized Objects in Embedded Forms](https://github.com/viadee/camunda-bpm-examples/tree/syncfork/usertask/task-form-embedded-serialized-java-object) of our forked camunda-bpm-examples repository.
+
+#### Location of BPMN models
+By default, the BPMN models have to be stored in the folder ``src\main\resources`` of your Camunda project. 
+You can also load models from other locations of your local filesystem.
+In the properties file, use the property ``basepath`` to define the path.
+You can use relative paths (e.g. ```basepath=src/main/java```) or absolute paths using the ``file:///`` scheme.
+
+#### Html output
+You can disable or enable the HTML output if you want. You can set the property ``outputhtml`` to ``true`` for HTML output or to ``false`` to disable the HTML output.
+By default, the HTML output is enabled.
+
+#### Language
+As of version 2.5.0, we added localization for english and german users.
+By specifying either **en_US** or **de_DE** as ``language`` property, you can choose to use either German or English as language for your visual output report. By leaving it blank, the validator grabs your systems locale and provides either German or English as default. 
+Due to some refactoring, more languages can be added in the future by providing language files with the corresponding translations.
 
 ### One set of rules to rule them all
-Furthermore you can use the plugin to manage multiple projects. Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar). In your child projects you have to add the dependency to the parent project and to vPAV.
+Furthermore you can use the plugin to manage multiple projects.
+A parent rule set can be shared among them so that you don't have to define the same checkers multiple times.
+The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit".
+Local sets of rules will override inherited rules in order to allow for customization.
+
+Just create a blank maven project with only the parentRuleSet.xml stored in **"src/main/resources"** and run this project as maven install (make sure to package as jar).
 
 ```xml
 <dependency>
@@ -59,15 +87,50 @@ Furthermore you can use the plugin to manage multiple projects. Just create a bl
 </dependency>
 ```
 
-The parentRuleSet.xml will provide a basic set of rules for all projects that "inherit". Local sets of rules will override inherited rules in order to allow for customization.
+In your child projects you have to add the dependency to the parent project and to vPAV.
+The inheritance is only working if you define an own rule set in your child project.
+You cannot use the default rule set because it does not include inheritance.
 
-Make sure that inheritance is activated in the ruleSet.xml of your project.
+Make sure that inheritance is activated in the ruleSet.xml of your child project.
 ```xml 
 <rule>
 	<name>HasParentRuleSet</name>
 	<state>true</state>
 </rule>
 ```
+
+### Multiple checker configurations
+It might be useful to run a checker two times with different configurations. To prevent a rule from being overridden, you can define an ID.
+```xml 
+<rule id="xorChecker1">
+    <name>XorConventionChecker</name>
+	<state>true</state>
+	<settings>
+	    <setting name="requiredDefault">true</setting>
+	</settings>
+	<elementConventions>
+		<elementConvention>
+			<name>convention</name>
+			<description>gateway name has to end with an question mark</description>
+			<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
+		</elementConvention>
+	</elementConventions>
+</rule>
+```
+If two rule sets are merged (e. g. parent and child rule set), the following inheritance rules apply:
+- A parent rule will be overridden if a child rule has the same ID.
+- A parent rule will be loaded if no rule with the same ID exists in the child rule set.
+- If a rule does not have an ID, the name of the rule will be used and handled as ID.
+
+
+The following checkers/rules can only be defined once. It it not possible to have different configurations:
+- HasParentRuleSet
+- CreateOutputHTML
+- language
+- VersioningChecker
+- ProcessVariablesModelChecker
+- DataFlowChecker
+
 ### Exclusion of false positives
 An ignore file can be created to exclude false positives. The file has to be named **"ignoreIssues.txt"** and stored in **"src/test/resources"**. 
 Here, you can list IDs of the issues which should be ignored in the next validation run. This must be done line by line. Line comments are initiated with "#".
@@ -81,21 +144,6 @@ Unique IDs are generated by a Message Digest. In the files **"bpmn_validation.js
 # Comment 
 8d04f2e77a7d282c521098ab947ac060
 ```
-
-### Multi-Language Support ###
-As of version 2.5.0, we added localization for english and german users.
-
-```xml
-<rule>
-	<name>language</name>		
-	<settings>
-		<setting name="locale">en</setting>
-	</settings>
-</rule>	
-```
-By specifying either **en** or **de** in the settings, you can choose to use either German or English as language for your visual output report. By leaving it blank, the validator grabs your systems locale and provides either German or English as default. 
-Due to some refactoring, more languages can be added in the future by providing language files with the corresponding translations.
-
 
 ## Output
 
@@ -361,7 +409,7 @@ Soot and bpmn.io provide the basis for the two most exciting features of the val
 
 **BSD 3-Clause License** <br/>
 
-Copyright (c) 2018, viadee IT-Unternehmensberatung AG
+Copyright (c) 2019, viadee IT-Unternehmensberatung AG
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

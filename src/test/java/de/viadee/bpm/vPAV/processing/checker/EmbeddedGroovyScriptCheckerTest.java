@@ -34,7 +34,8 @@ package de.viadee.bpm.vPAV.processing.checker;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -92,7 +93,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         final Collection<ScriptTask> baseElements = modelInstance
                 .getModelElementsByType(ScriptTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -120,7 +121,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -148,7 +149,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -176,7 +177,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -202,7 +203,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         final Collection<ServiceTask> baseElements = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -231,7 +232,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         final Collection<Task> baseElements = modelInstance
                 .getModelElementsByType(Task.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 

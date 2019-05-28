@@ -37,7 +37,8 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -85,8 +86,6 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
     public void testRecogniseVariablesInInnerAnonymousClass() throws ParserConfigurationException, SAXException, IOException {
     	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
-        final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderStatic());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -96,10 +95,10 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next());
-        
+        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph());
+        final ControlFlowGraph cg = new ControlFlowGraph();
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(jvc, fileScanner, element));
+        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
 
         Assert.assertEquals(3, variables.asMap().size());
     }

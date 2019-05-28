@@ -35,7 +35,8 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.CheckName;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -102,7 +103,7 @@ public class DmnTaskCheckerTest {
         final Collection<BusinessRuleTask> baseElements = modelInstance
                 .getModelElementsByType(BusinessRuleTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 
@@ -133,7 +134,7 @@ public class DmnTaskCheckerTest {
         final Collection<BusinessRuleTask> baseElements = modelInstance
                 .getModelElementsByType(BusinessRuleTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
         final BaseElement baseElement = element.getBaseElement();
 
         final Collection<CheckerIssue> issues = checker.check(element);
@@ -168,7 +169,7 @@ public class DmnTaskCheckerTest {
         final Collection<BusinessRuleTask> baseElements = modelInstance
                 .getModelElementsByType(BusinessRuleTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
         final BaseElement baseElement = element.getBaseElement();
 
         final Collection<CheckerIssue> issues = checker.check(element);
@@ -203,7 +204,7 @@ public class DmnTaskCheckerTest {
         final Collection<BusinessRuleTask> baseElements = modelInstance
                 .getModelElementsByType(BusinessRuleTask.class);
 
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph());
 
         final Collection<CheckerIssue> issues = checker.check(element);
 

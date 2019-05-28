@@ -34,7 +34,8 @@ package de.viadee.bpm.vPAV.processing.checker;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -88,7 +89,7 @@ public class TaskNamingConventionCheckerTest {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 
@@ -113,7 +114,7 @@ public class TaskNamingConventionCheckerTest {
 
         final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
         for (final BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement);
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
             issues.addAll(checker.check(element));
         }
 

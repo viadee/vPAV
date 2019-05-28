@@ -29,31 +29,28 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.delegates;
 
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-public class JavaReaderContext {
+import java.util.Random;
 
-    private JavaReader javaReaderStrategy;
+public class DelegateAnomalyDU implements JavaDelegate {
 
-    public void setJavaReadingStrategy(JavaReader readingStrategy) {
-        this.javaReaderStrategy = readingStrategy;
+    private final static String first = "1";
+
+    @Override
+    public void execute(DelegateExecution execution) {
+        dd(execution);
     }
 
-    public ListMultimap<String, ProcessVariableOperation> readJavaDelegate(final FileScanner fileScanner, final String classFile, final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
-        return javaReaderStrategy.getVariablesFromJavaDelegate(fileScanner, classFile, element, chapter, fieldType, scopeId);
+    private void dd(DelegateExecution execution) {
+        Random r = new Random();
+        execution.setVariable(first, true);
+        if (r.nextInt(5) > 2) {
+            int i = 3;
+        }
+        execution.removeVariable(first);
     }
-    
-    public ListMultimap<String, ProcessVariableOperation> readClass(final String className, final ProcessVariablesScanner scanner, final BpmnElement element, final String resourceFilePath, final EntryPoint entry){
-    	return javaReaderStrategy.getVariablesFromClass(className, scanner, element, resourceFilePath, entry);
-    }
-
-    
 }

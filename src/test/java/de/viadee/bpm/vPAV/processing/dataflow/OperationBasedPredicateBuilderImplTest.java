@@ -31,7 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
@@ -192,7 +193,7 @@ public class OperationBasedPredicateBuilderImplTest {
         private VariableOperation operationType = VariableOperation.WRITE;
 
         ProcessVariableOperation build() {
-            return new ProcessVariableOperation("name", new BpmnElement("", null), null,
+            return new ProcessVariableOperation("name", new BpmnElement("", null, new ControlFlowGraph()), null,
                     null, "", operationType, "");
         }
     }

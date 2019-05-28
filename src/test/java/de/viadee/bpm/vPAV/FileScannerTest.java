@@ -41,6 +41,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
+import java.util.Map;
 
 public class FileScannerTest {
 
@@ -58,9 +59,7 @@ public class FileScannerTest {
 
     @Test
     public void testSootPathLoading() {
-
-
-        new FileScanner(new HashMap<String, Rule>(), "src/test/java");
+        new FileScanner(new HashMap<String, Map<String, Rule>>(), "src/test/java");
         String testTarget = "target/test-classes";
         String sootPath = FileScanner.getSootPath();
         boolean contains = false;

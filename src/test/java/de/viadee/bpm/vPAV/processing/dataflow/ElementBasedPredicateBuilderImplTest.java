@@ -31,7 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
@@ -336,7 +337,7 @@ public class ElementBasedPredicateBuilderImplTest {
                 when(elements.getElementsQuery()).thenReturn(query);
                 when(baseElement.getExtensionElements()).thenReturn(elements);
             }
-            return new BpmnElement("processDefinition", baseElement);
+            return new BpmnElement("processDefinition", baseElement, new ControlFlowGraph());
         }
     }
 }

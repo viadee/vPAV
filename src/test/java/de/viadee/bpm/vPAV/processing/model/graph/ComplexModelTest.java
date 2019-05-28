@@ -36,8 +36,6 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.JavaReaderContext;
-import de.viadee.bpm.vPAV.processing.JavaReaderRegex;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -91,8 +89,6 @@ public class ComplexModelTest {
         final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
         final File processdefinition = new File(PATH);
-        final JavaReaderContext jvc = new JavaReaderContext();
-        jvc.setJavaReadingStrategy(new JavaReaderRegex());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
@@ -113,7 +109,7 @@ public class ComplexModelTest {
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, null, null, null,
                 new BpmnScanner(PATH));
         // create data flow graphs
-        final Collection<IGraph> graphCollection = graphBuilder.createProcessGraph(jvc, fileScanner, modelInstance,
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 processdefinition.getPath(), new ArrayList<String>(), scanner);
 
         long estimatedTime = System.currentTimeMillis() - startTime;

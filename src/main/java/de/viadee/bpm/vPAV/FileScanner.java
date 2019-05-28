@@ -50,6 +50,8 @@ import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.camunda.bpm.model.dmn.instance.Decision;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -60,442 +62,487 @@ import java.util.regex.Pattern;
 
 /**
  * scans maven project for files, which are necessary for the later analysis
- *
  */
 public class FileScanner {
 
-	private final Set<String> processDefinitions;
+    private final Set<String> processDefinitions;
 
-	private static Set<String> javaResourcesFileInputStream = new HashSet<String>();
+    private static Set<String> javaResourcesFileInputStream = new HashSet<>();
 
-	private Set<String> includedFiles = new HashSet<String>();
+    private Set<String> includedFiles = new HashSet<>();
 
-	private Map<String, String> decisionRefToPathMap;
+    private Map<String, String> decisionRefToPathMap;
 
-	private Collection<String> resourcesNewestVersions = new ArrayList<String>();
+    private Collection<String> resourcesNewestVersions = new ArrayList<>();
 
-	private Map<String, String> processIdToPathMap;
+    private Map<String, String> processIdToPathMap;
 
-	private static String scheme = null;
+    private static String scheme = null;
 
-	private static StringBuilder sootPath = new StringBuilder();
+    private static StringBuilder sootPath = new StringBuilder();
 
-	private static Collection<String> sootPaths = new ArrayList<String>();
+    private static Collection<String> sootPaths = new ArrayList<>();
 
-	private static boolean isDirectory = false;
+    private static boolean isDirectory = false;
 
-	private static final Logger LOGGER = Logger.getLogger(FileScanner.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FileScanner.class.getName());
 
-	public FileScanner(final Map<String, Rule> rules, final String javaScanPath) {
+    public FileScanner(final Map<String, Map<String, Rule>> rules, final String javaScanPath) {
 
-		final DirectoryScanner scanner = new DirectoryScanner();
-		scanner.setBasedir(ConfigConstants.BASEPATH);
+        final DirectoryScanner scanner = new DirectoryScanner();
+        File basedir = null;
+        String basepath = ConfigConstants.getInstance().getBasepath();
 
-		// get file paths of process definitions
-		scanner.setIncludes(new String[] { ConfigConstants.BPMN_FILE_PATTERN });
-		scanner.scan();
-		processDefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+        if (basepath.startsWith("file:/")) {
+            // Convert URI
+            try {
+                basedir = new File(new URI(ConfigConstants.getInstance().getBasepath()));
+            } catch (URISyntaxException e) {
+                LOGGER.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
+            }
+        } else {
+            basedir = new File(basepath);
+        }
 
-		scanner.setBasedir(javaScanPath);
-		// get file paths of process definitions
-		scanner.setIncludes(new String[] { ConfigConstants.JAVA_FILE_PATTERN });
-		scanner.scan();
-		javaResourcesFileInputStream = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+        scanner.setBasedir(basedir);
 
-		scanner.setBasedir("target/generated-sources/");
-		// get file paths of process definitions
-		scanner.setIncludes(new String[] { ConfigConstants.JAVA_FILE_PATTERN });
-		scanner.scan();
-		javaResourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
+        // get file paths of process definitions
+        scanner.setIncludes(new String[]{ConfigConstants.BPMN_FILE_PATTERN});
+        scanner.scan();
+        processDefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
-		// get mapping from process id to file path
-		processIdToPathMap = createProcessIdToPathMap(processDefinitions);
+        scanner.setBasedir(javaScanPath);
+        // get file paths of process definitions
+        scanner.setIncludes(new String[]{ConfigConstants.JAVA_FILE_PATTERN});
+        scanner.scan();
+        javaResourcesFileInputStream = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
 
-		// determine version name schema for resources
-		String versioningScheme = null;
+        scanner.setBasedir("target/generated-sources/");
+        // get file paths of process definitions
+        scanner.setIncludes(new String[]{ConfigConstants.JAVA_FILE_PATTERN});
+        scanner.scan();
+        javaResourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
-		try {
-			versioningScheme = loadVersioningScheme(rules);
-		} catch (ConfigItemNotFoundException e) {
-			LOGGER.log(Level.WARNING, "Versioning Scheme could not be loaded.", e);
-		} catch (NullPointerException e) {
-			LOGGER.log(Level.SEVERE, "RuleSet appears to be null", e);
-		}
+        // get mapping from process id to file path
+        processIdToPathMap = createProcessIdToPathMap(processDefinitions);
 
-		// get file paths of java files
-		URL[] urls;
-		LinkedList<File> files = new LinkedList<File>();
-		LinkedList<File> dirs = new LinkedList<File>();
-		URLClassLoader ucl;
-		if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
-			ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
-		} else {
-			ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
-		}
+        // determine version name schema for resources
+        String versioningScheme = null;
 
-		urls = ucl.getURLs();
+        try {
+            versioningScheme = loadVersioningScheme(rules);
+        } catch (ConfigItemNotFoundException e) {
+            LOGGER.log(Level.WARNING, "Versioning Scheme could not be loaded.", e);
+        } catch (NullPointerException e) {
+            LOGGER.log(Level.SEVERE, "RuleSet appears to be null", e);
+        }
 
-		URL urlTargetClass = this.getClass().getResource("/");
-		if (urlTargetClass != null) {
-			String path = urlTargetClass.toString();
-			addStringToSootPath(path);
-		}
+        // get file paths of java files
+        URL[] urls;
+        LinkedList<File> files;
+        LinkedList<File> dirs = new LinkedList<>();
+        URLClassLoader ucl;
+        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
+        } else {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
+        }
 
-		for (URL url : urls) {
-			// retrieve all jars during runtime and pass them to get class files
-			if (Pattern.compile(".*target/classes.*").matcher(url.toString()).find()
-					|| Pattern.compile(".*target/test-classes.*").matcher(url.toString()).find()) {
-				String sootPathCurrent = url.toString();
-				addStringToSootPath(sootPathCurrent);
-			}
+        urls = ucl.getURLs();
 
-			if (url.getFile().contains(ConfigConstants.TARGET_CLASS_FOLDER)) {
-				File f = new File(url.getFile());
-				if (!isDirectory && f.exists()) {
-					files = (LinkedList<File>) FileUtils.listFiles(f, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
-					addResources(files);
-				} else {
-					files = (LinkedList<File>) FileUtils.listFilesAndDirs(f, DirectoryFileFilter.INSTANCE,
-							TrueFileFilter.INSTANCE);
-					dirs.addAll(findLastDir(files));
-				}
-			}
-		}
+        URL urlTargetClass = this.getClass().getResource("/");
+        if (urlTargetClass != null) {
+            String path = urlTargetClass.toString();
+            addStringToSootPath(path);
+        }
 
-		// get mapping from decision reference to file path
-		scanner.setBasedir(ConfigConstants.BASEPATH);
-		scanner.setIncludes(new String[] { ConfigConstants.DMN_FILE_PATTERN });
-		scanner.scan();
-		decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
+        for (URL url : urls) {
+            // retrieve all jars during runtime and pass them to get class files
+            if (Pattern.compile(".*target/classes.*").matcher(url.toString()).find()
+                    || Pattern.compile(".*target/test-classes.*").matcher(url.toString()).find()) {
+                String sootPathCurrent = url.toString();
+                addStringToSootPath(sootPathCurrent);
+            }
 
-		final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
-		if (rule != null && rule.isActive()) {
-			if (versioningScheme != null && !isDirectory) {
-				// also add groovy files to included files
-				scanner.setIncludes(new String[] { ConfigConstants.SCRIPT_FILE_PATTERN });
-				scanner.scan();
+            if (url.getFile().contains(ConfigConstants.TARGET_CLASS_FOLDER)) {
+                File f = new File(url.getFile());
+                if (!isDirectory && f.exists()) {
+                    files =
+                            (LinkedList<File>)
+                                    FileUtils.listFiles(f, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+                    addResources(files);
+                } else {
+                    files =
+                            (LinkedList<File>)
+                                    FileUtils.listFilesAndDirs(
+                                            f, DirectoryFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+                    dirs.addAll(findLastDir(files));
+                }
+            }
+        }
 
-				includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
+        // get mapping from decision reference to file path
+        scanner.setBasedir(basedir);
+        scanner.setIncludes(new String[]{ConfigConstants.DMN_FILE_PATTERN});
+        scanner.scan();
+        decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
 
-				// filter files by versioningSchema
-				resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
-			} else {
+        if (rules.get(VersioningChecker.class.getSimpleName()) != null) {
+            final Rule rule =
+                    rules
+                            .get(VersioningChecker.class.getSimpleName())
+                            .get(VersioningChecker.class.getSimpleName());
+            if (rule != null && rule.isActive()) {
+                if (versioningScheme != null && !isDirectory) {
+                    // also add groovy files to included files
+                    scanner.setIncludes(new String[]{ConfigConstants.SCRIPT_FILE_PATTERN});
+                    scanner.scan();
 
-				for (File file : dirs) {
-					includedFiles.add(file.getAbsolutePath());
-				}
-				resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
-			}
-		}
-	}
+                    includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
-	/**
-	 * Take one jar`s path, modify it from ClassLoader format to Soot`s format and
-	 * add it to the previous paths.
-	 *
-	 * @param sootPathCurrent
-	 *            - one jar's local path
-	 */
-	private void addStringToSootPath(String sootPathCurrent) {
+                    // filter files by versioningSchema
+                    resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
+                } else {
 
-		// Create a long String with every file and jar path for Soot.
-		if (sootPathCurrent != null) {
-			if (System.getProperty("os.name").startsWith("Windows")) {
-				sootPathCurrent = sootPathCurrent.replace("file:/", "");
-				sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
-				if (!sootPaths.contains(sootPathCurrent)) {
-					sootPaths.add(sootPathCurrent);
-				}
-			} else {
-				sootPathCurrent = sootPathCurrent.replace("file:", "");
-				sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
-				if (!sootPaths.contains(sootPathCurrent)) {
-					sootPaths.add(sootPathCurrent);
-				}
-			}
-		}
-	}
+                    for (File file : dirs) {
+                        includedFiles.add(file.getAbsolutePath());
+                    }
+                    resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
+                }
+            }
+        }
 
-	/**
-	 * Find the bottom folder of a given list of starting folders to check a package
-	 * versioning scheme
-	 *
-	 * @param list
-	 * @return
-	 */
-	private LinkedList<File> findLastDir(LinkedList<File> list) {
 
-		LinkedList<File> returnList = new LinkedList<File>();
-		returnList.addAll(list);
+    }
 
-		for (File f : list) {
-			if (f.isFile())
-				returnList.remove(f);
-			File[] fileArr = f.listFiles();
-			for (File uF : fileArr) {
-				if (uF.isDirectory())
-					returnList.remove(f);
-			}
-		}
+    /**
+     * Take one jar`s path, modify it from ClassLoader format to Soot`s format and add it to the
+     * previous paths.
+     *
+     * @param sootPathCurrent - one jar's local path
+     */
+    private void addStringToSootPath(String sootPathCurrent) {
 
-		return returnList;
-	}
+        // Create a long String with every file and jar path for Soot.
+        if (sootPathCurrent != null) {
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                sootPathCurrent = sootPathCurrent.replace("file:/", "");
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
+                if (!sootPaths.contains(sootPathCurrent)) {
+                    sootPaths.add(sootPathCurrent);
+                }
+            } else {
+                sootPathCurrent = sootPathCurrent.replace("file:", "");
+                sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
+                if (!sootPaths.contains(sootPathCurrent)) {
+                    sootPaths.add(sootPathCurrent);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Process classes and add compiled classes to javaResources Also adss all
-	 * filenames to includedFiles
-	 *
-	 * @param classes
-	 */
-	private void addResources(LinkedList<File> classes) {
+    /**
+     * Find the bottom folder of a given list of starting folders to check a package
+     * versioning scheme
+     *
+     * @param list
+     * @return
+     */
+    private LinkedList<File> findLastDir(LinkedList<File> list) {
 
-		for (File file : classes) {
-			includedFiles.add(file.getName());
-		}
-	}
+        LinkedList<File> returnList = new LinkedList<>(list);
 
-	/**
-	 * get file paths for process definitions
-	 *
-	 * @return processDefinitions Process definitions
-	 */
-	Set<String> getProcessDefinitions() {
-		return processDefinitions;
-	}
+        for (File f : list) {
+            if (f.isFile())
+                returnList.remove(f);
+            File[] fileArr = f.listFiles();
+            for (File uF : fileArr) {
+                if (uF.isDirectory())
+                    returnList.remove(f);
+            }
+        }
 
-	/**
-	 * get mapping from process id to file path of bpmn models
-	 *
-	 * @return processIdToPathMap returns processIdToPathMap
-	 */
-	public Map<String, String> getProcessIdToPathMap() {
-		return processIdToPathMap;
-	}
+        return returnList;
+    }
 
-	/**
-	 * get mapping from decisionRef to file path of dmn models
-	 *
-	 * @return decisionRefToPathMap returns decisionRefToPathMap
-	 */
-	public Map<String, String> getDecisionRefToPathMap() {
-		return decisionRefToPathMap;
-	}
+    /**
+     * Process classes and add compiled classes to javaResources Also adss all
+     * filenames to includedFiles
+     *
+     * @param classes
+     */
+    private void addResources(LinkedList<File> classes) {
 
-	/**
-	 * get a list of versioned resources (only with current versions)
-	 *
-	 * @return resourcesNewestVersions returns resourcesNewestVersions
-	 */
-	public Collection<String> getResourcesNewestVersions() {
-		return resourcesNewestVersions;
-	}
+        for (File file : classes) {
+            includedFiles.add(file.getName());
+        }
+    }
 
-	/**
-	 * Map for getting bpmn reference by process id
-	 *
-	 * @param paths
-	 * @return
-	 */
-	private static Map<String, String> createProcessIdToPathMap(final Set<String> paths) {
+    /**
+     * get file paths for process definitions
+     *
+     * @return processDefinitions Process definitions
+     */
+    Set<String> getProcessDefinitions() {
+        return processDefinitions;
+    }
 
-		final Map<String, String> keyToPathMap = new HashMap<String, String>();
+    /**
+     * get mapping from process id to file path of bpmn models
+     *
+     * @return processIdToPathMap returns processIdToPathMap
+     */
+    public Map<String, String> getProcessIdToPathMap() {
+        return processIdToPathMap;
+    }
 
-		for (final String path : paths) {
-			// read bpmn file
-			BpmnModelInstance modelInstance;
-			try {
-				modelInstance = Bpmn.readModelFromFile(new File(ConfigConstants.BASEPATH + path));
-			} catch (final BpmnModelException ex) {
-				throw new RuntimeException("bpmn model couldn't be read", ex);
-			}
-			// if bpmn file could read
-			if (modelInstance != null) {
-				// find process
-				final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
-				if (processes != null) {
-					for (final Process process : processes) {
-						// save path for each process
-						keyToPathMap.put(process.getId(), path);
-					}
-				}
-			}
-		}
-		return keyToPathMap;
-	}
+    /**
+     * get mapping from decisionRef to file path of dmn models
+     *
+     * @return decisionRefToPathMap returns decisionRefToPathMap
+     */
+    public Map<String, String> getDecisionRefToPathMap() {
+        return decisionRefToPathMap;
+    }
 
-	/**
-	 * Map for getting dmn reference by key
-	 *
-	 * @param paths
-	 * @return
-	 */
-	private static Map<String, String> createDmnKeyToPathMap(final Set<String> paths) {
+    /**
+     * get a list of versioned resources (only with current versions)
+     *
+     * @return resourcesNewestVersions returns resourcesNewestVersions
+     */
+    public Collection<String> getResourcesNewestVersions() {
+        return resourcesNewestVersions;
+    }
 
-		final Map<String, String> keyToPathMap = new HashMap<String, String>();
+    /**
+     * Map for getting bpmn reference by process id
+     *
+     * @param paths
+     * @return
+     */
+    private static Map<String, String> createProcessIdToPathMap(final Set<String> paths) {
 
-		for (final String path : paths) {
-			// read dmn file
-			DmnModelInstance modelInstance;
-			try {
-				modelInstance = Dmn.readModelFromFile(new File(ConfigConstants.BASEPATH + path));
-			} catch (final DmnModelException ex) {
-				throw new RuntimeException("dmn model couldn't be read", ex);
-			}
-			// if dmn could read
-			if (modelInstance != null) {
-				// find decisions
-				final Collection<Decision> decisions = modelInstance.getModelElementsByType(Decision.class);
-				if (decisions != null) {
-					for (final Decision decision : decisions) {
-						// save path for each decision
-						keyToPathMap.put(decision.getId(), path);
-					}
-				}
-			}
-		}
+        final Map<String, String> keyToPathMap = new HashMap<>();
 
-		return keyToPathMap;
-	}
+        for (final String path : paths) {
+            // read bpmn file
+            BpmnModelInstance modelInstance;
+            File bpmnfile = null;
+            String basepath = ConfigConstants.getInstance().getBasepath();
 
-	/**
-	 * reads versioned directories and generates a map with newest versions
-	 *
-	 * @return Map
-	 */
-	private static Collection<String> createDirectoriesToNewestVersions(final Set<String> versionedFiles,
-			final String versioningSchema) {
-		final Map<String, String> newestVersionsPathMap = new HashMap<String, String>();
-		final Map<String, String> newestVersionsMap = new HashMap<String, String>();
+            if (basepath.startsWith("file:/")) {
+                // Convert URI
+                try {
+                    bpmnfile = new File(new URI(ConfigConstants.getInstance().getBasepath() + path));
+                } catch (URISyntaxException e) {
+                    LOGGER.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
+                }
+            } else {
+                bpmnfile = new File(basepath + path);
+            }
 
-		if (versionedFiles != null && versioningSchema != null) {
-			for (final String versionedFile : versionedFiles) {
-				final Pattern pattern = Pattern.compile(versioningSchema);
-				final Matcher matcher = pattern.matcher(versionedFile);
-				while (matcher.find()) {
-					String temp;
-					if (matcher.group(0).contains(File.separator)) {
-						temp = versionedFile
-								.replace(matcher.group(0).substring(matcher.group(0).lastIndexOf(File.separator)), "");
-					} else {
-						temp = versionedFile.replace(matcher.group(0), "");
-					}
-					final String value = versionedFile.substring(versionedFile.lastIndexOf("classes") + 8);
+            try {
+                modelInstance = Bpmn.readModelFromFile(bpmnfile);
+            } catch (final BpmnModelException ex) {
+                throw new RuntimeException("bpmn model couldn't be read", ex);
+            }
+            // if bpmn file could read
+            if (modelInstance != null) {
+                // find process
+                final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
+                if (processes != null) {
+                    for (final Process process : processes) {
+                        // save path for each process
+                        keyToPathMap.put(process.getId(), path);
+                    }
+                }
+            }
+        }
+        return keyToPathMap;
+    }
 
-					final String resource = temp.substring(temp.lastIndexOf("classes") + 8);
-					final String oldVersion = newestVersionsMap.get(resource);
+    /**
+     * Map for getting dmn reference by key
+     *
+     * @param paths
+     * @return
+     */
+    private static Map<String, String> createDmnKeyToPathMap(final Set<String> paths) {
 
-					if (oldVersion != null) {
-						if (oldVersion.compareTo(matcher.group(0)) < 0) {
-							newestVersionsMap.put(resource, matcher.group(0));
-							newestVersionsPathMap.put(resource, value);
-						}
-					} else {
-						newestVersionsMap.put(resource, matcher.group(0));
-						newestVersionsPathMap.put(resource, value);
-					}
-				}
-			}
-		}
-		return newestVersionsPathMap.values();
-	}
+        final Map<String, String> keyToPathMap = new HashMap<>();
 
-	/**
-	 * reads versioned classes and scripts and generates a map with newest versions
-	 *
-	 * @return Map
-	 */
-	private static Collection<String> createResourcesToNewestVersions(final Set<String> versionedFiles,
-			final String versioningSchema) {
-		final Map<String, String> newestVersionsMap = new HashMap<String, String>();
+        for (final String path : paths) {
+            // read dmn file
+            DmnModelInstance modelInstance;
+            try {
+                modelInstance = Dmn.readModelFromFile(new File(ConfigConstants.getInstance().getBasepath() + path));
+            } catch (final DmnModelException ex) {
+                throw new RuntimeException("dmn model couldn't be read", ex);
+            }
+            // if dmn could read
+            if (modelInstance != null) {
+                // find decisions
+                final Collection<Decision> decisions = modelInstance.getModelElementsByType(Decision.class);
+                if (decisions != null) {
+                    for (final Decision decision : decisions) {
+                        // save path for each decision
+                        keyToPathMap.put(decision.getId(), path);
+                    }
+                }
+            }
+        }
 
-		if (versionedFiles != null) {
-			for (final String versionedFile : versionedFiles) {
-				final Pattern pattern = Pattern.compile(versioningSchema);
-				final Matcher matcher = pattern.matcher(versionedFile);
-				while (matcher.find()) {
-					final String resource = matcher.group(1);
-					final String oldVersion = newestVersionsMap.get(resource);
-					if (oldVersion != null) {
-						// If smaller than 0 this version is newer
-						if (oldVersion.compareTo(versionedFile) < 0) {
-							newestVersionsMap.put(resource, versionedFile);
-						}
-					} else {
-						newestVersionsMap.put(resource, versionedFile);
-					}
-				}
-			}
-		}
-		return newestVersionsMap.values();
-	}
+        return keyToPathMap;
+    }
 
-	/**
-	 * determine versioning schema for an active versioning checker
-	 *
-	 * @param rules
-	 * @return schema (regex), if null the checker is inactive
-	 * @throws ConfigItemNotFoundException
-	 */
-	private static String loadVersioningScheme(final Map<String, Rule> rules) throws ConfigItemNotFoundException {
+    /**
+     * reads versioned directories and generates a map with newest versions
+     *
+     * @return Map
+     */
+    private static Collection<String> createDirectoriesToNewestVersions(final Set<String> versionedFiles,
+                                                                        final String versioningSchema) {
+        final Map<String, String> newestVersionsPathMap = new HashMap<>();
+        final Map<String, String> newestVersionsMap = new HashMap<>();
 
-		final Rule rule = rules.get(VersioningChecker.class.getSimpleName());
-		if (rule != null && rule.isActive()) {
-			Setting setting = null;
-			final Map<String, Setting> settings = rule.getSettings();
-			if (settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
-					&& !settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
-				setting = settings.get(ConfigConstants.VERSIONINGSCHEMECLASS);
-				isDirectory = false;
-			} else if (!settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
-					&& settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
-				setting = settings.get(ConfigConstants.VERSIONINGSCHEMEPACKAGE);
-				isDirectory = true;
-			}
-			if (setting == null) {
-				throw new ConfigItemNotFoundException("VersioningChecker: Versioning Scheme could not be read. "
-						+ "Possible options: " + ConfigConstants.VERSIONINGSCHEMECLASS + " or "
-						+ ConfigConstants.VERSIONINGSCHEMEPACKAGE);
-			} else {
-				scheme = setting.getValue().trim();
-			}
-		}
-		return scheme;
-	}
+        if (versionedFiles != null && versioningSchema != null) {
+            for (final String versionedFile : versionedFiles) {
+                final Pattern pattern = Pattern.compile(versioningSchema);
+                final Matcher matcher = pattern.matcher(versionedFile);
+                while (matcher.find()) {
+                    String temp;
+                    if (matcher.group(0).contains(File.separator)) {
+                        temp = versionedFile
+                                .replace(matcher.group(0).substring(matcher.group(0).lastIndexOf(File.separator)), "");
+                    } else {
+                        temp = versionedFile.replace(matcher.group(0), "");
+                    }
+                    final String value = versionedFile.substring(versionedFile.lastIndexOf("classes") + 8);
 
-	public static String getVersioningScheme() {
-		return scheme;
-	}
+                    final String resource = temp.substring(temp.lastIndexOf("classes") + 8);
+                    final String oldVersion = newestVersionsMap.get(resource);
 
-	public Set<String> getJavaResourcesFileInputStream() {
-		return javaResourcesFileInputStream;
-	}
+                    if (oldVersion != null) {
+                        if (oldVersion.compareTo(matcher.group(0)) < 0) {
+                            newestVersionsMap.put(resource, matcher.group(0));
+                            newestVersionsPathMap.put(resource, value);
+                        }
+                    } else {
+                        newestVersionsMap.put(resource, matcher.group(0));
+                        newestVersionsPathMap.put(resource, value);
+                    }
+                }
+            }
+        }
+        return newestVersionsPathMap.values();
+    }
 
-	public void setJavaResourcesFileInputStream(Set<String> javaResources) {
-		javaResourcesFileInputStream = javaResources;
-	}
+    /**
+     * reads versioned classes and scripts and generates a map with newest versions
+     *
+     * @return Map
+     */
+    private static Collection<String> createResourcesToNewestVersions(final Set<String> versionedFiles,
+                                                                      final String versioningSchema) {
+        final Map<String, String> newestVersionsMap = new HashMap<>();
 
-	public static boolean getIsDirectory() {
-		return isDirectory;
-	}
+        if (versionedFiles != null) {
+            for (final String versionedFile : versionedFiles) {
+                final Pattern pattern = Pattern.compile(versioningSchema);
+                final Matcher matcher = pattern.matcher(versionedFile);
+                while (matcher.find()) {
+                    final String resource = matcher.group(1);
+                    final String oldVersion = newestVersionsMap.get(resource);
+                    if (oldVersion != null) {
+                        // If smaller than 0 this version is newer
+                        if (oldVersion.compareTo(versionedFile) < 0) {
+                            newestVersionsMap.put(resource, versionedFile);
+                        }
+                    } else {
+                        newestVersionsMap.put(resource, versionedFile);
+                    }
+                }
+            }
+        }
+        return newestVersionsMap.values();
+    }
 
-	public static void setIsDirectory(boolean isDirectory) {
-		FileScanner.isDirectory = isDirectory;
-	}
+    /**
+     * determine versioning schema for an active versioning checker
+     *
+     * @param rules
+     * @return schema (regex), if null the checker is inactive
+     * @throws ConfigItemNotFoundException
+     */
+    private static String loadVersioningScheme(final Map<String, Map<String, Rule>> rules)
+            throws ConfigItemNotFoundException {
 
-	/**
-	 *
-	 * @return - Concatenated String of jars' local paths
-	 */
-	public static String getSootPath() {
-		for (String entry : sootPaths) {
-			if (System.getProperty("os.name").startsWith("Windows")) {
-				sootPath.append(entry);
-				sootPath.append(";");
-			} else {
-				sootPath.append(entry);
-				sootPath.append(":");
-			}
-		}
-		return sootPath.toString().substring(0, sootPath.toString().length() - 1);
-	}
+        if (rules.get(VersioningChecker.class.getSimpleName()) != null) {
+            final Rule rule =
+                    rules
+                            .get(VersioningChecker.class.getSimpleName())
+                            .get(VersioningChecker.class.getSimpleName());
+            if (rule != null && rule.isActive()) {
+                Setting setting = null;
+                final Map<String, Setting> settings = rule.getSettings();
+                if (settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
+                        && !settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
+                    setting = settings.get(ConfigConstants.VERSIONINGSCHEMECLASS);
+                    isDirectory = false;
+                } else if (!settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
+                        && settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
+                    setting = settings.get(ConfigConstants.VERSIONINGSCHEMEPACKAGE);
+                    isDirectory = true;
+                }
+                if (setting == null) {
+                    throw new ConfigItemNotFoundException(
+                            "VersioningChecker: Versioning Scheme could not be read. "
+                                    + "Possible options: "
+                                    + ConfigConstants.VERSIONINGSCHEMECLASS
+                                    + " or "
+                                    + ConfigConstants.VERSIONINGSCHEMEPACKAGE);
+                } else {
+                    scheme = setting.getValue().trim();
+                }
+            }
+        }
+
+        return scheme;
+    }
+
+    public static String getVersioningScheme() {
+        return scheme;
+    }
+
+    public Set<String> getJavaResourcesFileInputStream() {
+        return javaResourcesFileInputStream;
+    }
+
+    public void setJavaResourcesFileInputStream(Set<String> javaResources) {
+        javaResourcesFileInputStream = javaResources;
+    }
+
+    public static boolean getIsDirectory() {
+        return isDirectory;
+    }
+
+    public static void setIsDirectory(boolean isDirectory) {
+        FileScanner.isDirectory = isDirectory;
+    }
+
+    /**
+     * @return - Concatenated String of jars' local paths
+     */
+    public static String getSootPath() {
+        for (String entry : sootPaths) {
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                sootPath.append(entry);
+                sootPath.append(";");
+            } else {
+                sootPath.append(entry);
+                sootPath.append(":");
+            }
+        }
+        return sootPath.toString().substring(0, sootPath.toString().length() - 1);
+    }
 }

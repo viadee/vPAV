@@ -31,7 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 
 /**
  * Third and last step builder for building predicates to define constraints and condition.
