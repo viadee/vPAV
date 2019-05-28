@@ -3,6 +3,7 @@
 ## 3.0.0
 
 ### Features
+[**Issue 103**](https://github.com/viadee/vPAV/issues/103) & [**Issue 109**](https://github.com/viadee/vPAV/issues/109)  Reworked ProcessVariableModelChecker with drastic gains in accuracy  
 [**Issue 80**](https://github.com/viadee/vPAV/issues/80) Location of BPMN files is not static anymore and can be configured  
 [**Issue 199**](https://github.com/viadee/vPAV/issues/199) Properties are excluded from rule set and can now be defined in a properties file  
 [**Issue 121**](https://github.com/viadee/vPAV/issues/121) Element checkers can define whether only one instance/rule or multiple instances/rules are allowed
