@@ -41,6 +41,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -837,7 +838,7 @@ public final class ProcessVariableReader {
 			if (t_expression != null) {
 
 				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
-						t_expression, element, ElementChapter.Details, KnownElementFieldType.Expression, scopeId));
+						t_expression, element, ElementChapter.Implementation, KnownElementFieldType.Expression, scopeId));
 			}
 
 			final String t_delegateExpression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
@@ -845,7 +846,7 @@ public final class ProcessVariableReader {
 			if (t_delegateExpression != null) {
 				processVariables.putAll(
 						findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner, t_delegateExpression,
-								element, ElementChapter.Details, KnownElementFieldType.DelegateExpression, scopeId));
+								element, ElementChapter.Implementation, KnownElementFieldType.DelegateExpression, scopeId));
 			}
 
 			final ArrayList<String> t_fieldInjectionExpressions = bpmnScanner
@@ -868,7 +869,7 @@ public final class ProcessVariableReader {
 			if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS) != null) {
 				processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
 						baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS),
-						element, ElementChapter.Details, KnownElementFieldType.Class, scopeId, controlFlowGraph));
+						element, ElementChapter.Implementation, KnownElementFieldType.Class, scopeId, controlFlowGraph));
 			}
 
 			if (baseElement instanceof BusinessRuleTask) {

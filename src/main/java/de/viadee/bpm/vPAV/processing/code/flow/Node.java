@@ -31,17 +31,20 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import soot.toolkits.graph.Block;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-public class Node {
+public class Node implements AnalysisElement {
 
 	private ControlFlowGraph controlFlowGraph;
 
@@ -57,44 +60,18 @@ public class Node {
 	private Block block;
 	private BpmnElement parentElement;
 
-	private List<Node> nodePredecessors;
-	private List<Node> nodeSuccessors;
-
-	private List<BpmnElement> processPredecessors;
-	private List<BpmnElement> processSuccessors;
+	private LinkedHashMap<String, AnalysisElement> predecessors;
+	private LinkedHashMap<String, AnalysisElement> successors;
 
 	private String id;
-	private String filePath;
 
-	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement) {
-		this.controlFlowGraph = controlFlowGraph;
-		this.parentElement = parentElement;
-		this.nodePredecessors = new ArrayList<>();
-		this.nodeSuccessors = new ArrayList<>();
-
-		this.processPredecessors = new ArrayList<>();
-		this.processSuccessors = new ArrayList<>();
-
-		this.operations = new LinkedHashMap<>();
-		this.defined = new LinkedHashMap<>();
-		this.used = new LinkedHashMap<>();
-		this.killed = new LinkedHashMap<>();
-		this.inUsed = new LinkedHashMap<>();
-		this.inUnused = new LinkedHashMap<>();
-		this.outUsed = new LinkedHashMap<>();
-		this.outUnused = new LinkedHashMap<>();
-	}
-
-	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block, final String filePath) {
+	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block) {
 		this.controlFlowGraph = controlFlowGraph;
 		this.parentElement = parentElement;
 		this.block = block;
-		this.filePath = filePath;
-		this.nodePredecessors = new ArrayList<>();
-		this.nodeSuccessors = new ArrayList<>();
 
-		this.processPredecessors = new ArrayList<>();
-		this.processSuccessors = new ArrayList<>();
+		this.predecessors = new LinkedHashMap<>();
+		this.successors = new LinkedHashMap<>();
 
 		this.operations = new LinkedHashMap<>();
 		this.defined = new LinkedHashMap<>();
@@ -115,16 +92,17 @@ public class Node {
 	 *            Current process variable operation
 	 */
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
-		this.operations.put(String.valueOf(controlFlowGraph.getDefCounter()), processVariableOperation);
+		final String id = String.valueOf(controlFlowGraph.getDefCounter());
+		this.operations.put(String.valueOf(id), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
-			defined.put(String.valueOf(controlFlowGraph.getDefCounter()), processVariableOperation);
+			defined.put(id, processVariableOperation);
 			break;
 		case READ:
-			used.put(String.valueOf(controlFlowGraph.getDefCounter()), processVariableOperation);
+			used.put(id, processVariableOperation);
 			break;
 		case DELETE:
-			killed.put(String.valueOf(controlFlowGraph.getDefCounter()), processVariableOperation);
+			killed.put(id, processVariableOperation);
 			break;
 		}
 		controlFlowGraph.incrementDefCounter();
@@ -134,16 +112,17 @@ public class Node {
 	 * Set the predecessor nodes of the current node for intraprocedural methods
 	 */
 	void setPredsIntraProcedural(final String key) {
-		this.nodePredecessors.add(controlFlowGraph.getNodes().get(key));
+		AnalysisElement ae = controlFlowGraph.getNodes().get(key);
+		this.predecessors.put(ae.getId(), ae);
 	}
-
 
 	/**
 	 * Set the predecessor nodes of the current node
 	 */
 	void setPreds() {
 		final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
-		final Pattern idPattern = Pattern.compile("(\\d\\.)*(\\d)");
+		final Pattern idPattern = Pattern
+				.compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
 
 		for (Block block : this.block.getPreds()) {
 			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
@@ -156,7 +135,8 @@ public class Node {
 	 */
 	void setSuccs() {
 		final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
-		final Pattern idPattern = Pattern.compile("(\\d\\.)*(\\d)");
+		final Pattern idPattern = Pattern
+				.compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
 
 		for (Block block : this.block.getSuccs()) {
 			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
@@ -165,7 +145,8 @@ public class Node {
 	}
 
 	/**
-	 * Matches the ids and creates the references to nodeSuccessors and nodePredecessors
+	 * Matches the ids and creates the references to nodeSuccessors and
+	 * nodePredecessors
 	 *
 	 * @param idPattern
 	 *            Pattern for resolving the id
@@ -182,40 +163,48 @@ public class Node {
 			if (idMatcher.matches()) {
 				String id = idMatcher.group();
 				id = id.substring(0, id.length() - 1).concat(key);
-				if (id.length() > 1) {
-					if (pred) {
-						this.nodePredecessors
-								.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
-					} else {
-						this.nodeSuccessors
-								.add(controlFlowGraph.getNodes().get(id.substring(0, id.length() - 1).concat(key)));
-					}
+				AnalysisElement ae = controlFlowGraph.getNodes().get(id);
+				if (pred) {
+					this.addPredecessor(ae);
 				} else {
-					if (pred) {
-						this.nodePredecessors.add(controlFlowGraph.getNodes().get(id));
-					} else {
-						this.nodeSuccessors.add(controlFlowGraph.getNodes().get(id));
-					}
+					this.addSuccessor(ae);
 				}
 			}
 		}
 	}
 
+	ProcessVariableOperation lastOperation() {
+		Iterator<ProcessVariableOperation> iterator = operations.values().iterator();
+		if (iterator.hasNext()) {
+			return iterator.next();
+		}
+		return null;
+	}
 
-	public String getId() {
-		return id;
+	ProcessVariableOperation firstOperation() {
+		Iterator<ProcessVariableOperation> iterator = operations.values().iterator();
+		ProcessVariableOperation processVariableOperation = null;
+		while (iterator.hasNext()) {
+			processVariableOperation = iterator.next();
+		}
+		return processVariableOperation;
+	}
+
+	@Override
+	public ControlFlowGraph getControlFlowGraph() {
+		return null;
 	}
 
 	public void setId(final String id) {
 		this.id = id;
 	}
 
-	public Block getBlock() {
-		return block;
+	public String getId() {
+		return id;
 	}
 
-	List<Node> getNodePredecessors() {
-		return nodePredecessors;
+	public Block getBlock() {
+		return block;
 	}
 
 	public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
@@ -230,8 +219,38 @@ public class Node {
 		return defined;
 	}
 
+	@Override
+	public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
+		this.parentElement.addSourceCodeAnomaly(anomalyContainer);
+	}
+
+	@Override
+	public void clearPredecessors() {
+		this.predecessors.clear();
+	}
+
+	@Override
+	public void removePredecessor(String predecessor) {
+		this.predecessors.remove(predecessor);
+	}
+
+	@Override
+	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
+		return getParentElement().getAnomalies();
+	}
+
+	@Override
+	public BaseElement getBaseElement() {
+		return this.parentElement.getBaseElement();
+	}
+
 	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
 		this.defined = defined;
+	}
+
+	@Override
+	public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+		this.defined.putAll(defined);
 	}
 
 	public LinkedHashMap<String, ProcessVariableOperation> getUsed() {
@@ -250,41 +269,71 @@ public class Node {
 		this.killed = killed;
 	}
 
-	LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
+	public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
 		return inUsed;
 	}
 
-	void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
+	public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
 		this.inUsed = inUsed;
 	}
 
-	LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
+	public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
 		return inUnused;
 	}
 
-	void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
+	public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
 		this.inUnused = inUnused;
 	}
 
-	LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
+	public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
 		return outUsed;
 	}
 
-	void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
+	public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
 		this.outUsed = outUsed;
 	}
 
-	LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
+	public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
 		return outUnused;
 	}
 
-	void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
+	@Override
+	public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
 		this.outUnused = outUnused;
 	}
 
-	public BpmnElement getParentElement() {	return parentElement; }
-
-	public String getFilePath() {
-		return filePath;
+	public BpmnElement getParentElement() {
+		return parentElement;
 	}
+
+	@Override
+	public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
+		this.predecessors = predecessors;
+	}
+
+	@Override
+	public void addPredecessor(AnalysisElement predecessor) {
+		this.predecessors.put(predecessor.getId(), predecessor);
+	}
+
+	@Override
+	public List<AnalysisElement> getPredecessors() {
+		return this.predecessors.values().stream().map(NodeDecorator::new).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<AnalysisElement> getSuccessors() {
+		return this.successors.values().stream().map(NodeDecorator::new).collect(Collectors.toList());
+	}
+
+	@Override
+	public void setSuccessors(LinkedHashMap<String, AnalysisElement> successors) {
+		this.successors = successors;
+	}
+
+	@Override
+	public void addSuccessor(AnalysisElement successor) {
+		this.successors.put(successor.getId(), successor);
+	}
+
 }
