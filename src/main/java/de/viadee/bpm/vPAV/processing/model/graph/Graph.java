@@ -186,9 +186,11 @@ public class Graph {
 	public Map<BpmnElement, List<AnomalyContainer>> getNodesWithAnomalies() {
 
 		final Map<BpmnElement, List<AnomalyContainer>> anomalies = new HashMap<>();
-		for (final BpmnElement node : adjacencyListSuccessor.keySet()) {
-			anomalies.putAll(node.getAnomalies());
-		}
+		adjacencyListPredecessor.keySet().forEach(bpmnElement -> {
+			if (!bpmnElement.getAnomalies().isEmpty()) {
+				anomalies.putAll(bpmnElement.getAnomalies());
+			}
+		});
 		return anomalies;
 	}
 

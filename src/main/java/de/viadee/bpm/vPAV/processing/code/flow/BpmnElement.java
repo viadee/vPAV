@@ -168,7 +168,9 @@ public class BpmnElement implements AnalysisElement {
 
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<>();
-		anomalyMap.put(this, getSourceCodeAnomalies());
+		if (!getSourceCodeAnomalies().isEmpty()) {
+			anomalyMap.put(this, getSourceCodeAnomalies());
+		}
 		return anomalyMap;
 	}
 
