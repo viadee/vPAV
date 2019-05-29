@@ -48,6 +48,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -72,8 +73,12 @@ public class StaticInterProceduralTest {
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
 		final ControlFlowGraph cg = new ControlFlowGraph();
+
+		// Set custom basepath.
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, cg));
