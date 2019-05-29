@@ -86,7 +86,8 @@ public class MessageCorrelationCheckerTest {
 
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessageStartEvent.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final Set<String> testSet = new HashSet<String>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -123,7 +124,8 @@ public class MessageCorrelationCheckerTest {
 	public void testCorrectMessageReceiveTask() throws IOException, SAXException, ParserConfigurationException {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessageReceiveTask.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final Set<String> testSet = new HashSet<String>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate2.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -160,7 +162,8 @@ public class MessageCorrelationCheckerTest {
 	public void testAllCorrectMessages() throws IOException, SAXException, ParserConfigurationException {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessages.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final Set<String> testSet = new HashSet<String>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate3.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -197,7 +200,8 @@ public class MessageCorrelationCheckerTest {
 	public void testIncorrectMessages() throws IOException, SAXException, ParserConfigurationException {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_incorrectMessage.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final Set<String> testSet = new HashSet<String>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate4.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);

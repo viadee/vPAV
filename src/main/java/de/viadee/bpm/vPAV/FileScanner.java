@@ -67,7 +67,7 @@ public class FileScanner {
 
     private final Set<String> processDefinitions;
 
-    private static Set<String> javaResourcesFileInputStream = new HashSet<>();
+    private static Set<String> resourcesFileInputStream = new HashSet<>();
 
     private Set<String> includedFiles = new HashSet<>();
 
@@ -76,6 +76,10 @@ public class FileScanner {
     private Collection<String> resourcesNewestVersions = new ArrayList<>();
 
     private Map<String, String> processIdToPathMap;
+
+    private String scanPath = null;
+
+    private String filePattern = null;
 
     private static String scheme = null;
 
@@ -87,7 +91,7 @@ public class FileScanner {
 
     private static final Logger LOGGER = Logger.getLogger(FileScanner.class.getName());
 
-    public FileScanner(final Map<String, Map<String, Rule>> rules, final String javaScanPath) {
+    public FileScanner(final Map<String, Map<String, Rule>> rules) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
         File basedir = null;
@@ -111,17 +115,23 @@ public class FileScanner {
         scanner.scan();
         processDefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
-        scanner.setBasedir(javaScanPath);
+        scanPath = ConfigConstants.getInstance().getScanPath();
+        filePattern = ConfigConstants.getInstance().getFilePattern();
+
+        scanner.setBasedir(scanPath);
         // get file paths of process definitions
-        scanner.setIncludes(new String[]{ConfigConstants.JAVA_FILE_PATTERN});
+        scanner.setIncludes(new String[]{filePattern});
         scanner.scan();
-        javaResourcesFileInputStream = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
+        resourcesFileInputStream = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
 
         scanner.setBasedir("target/generated-sources/");
         // get file paths of process definitions
-        scanner.setIncludes(new String[]{ConfigConstants.JAVA_FILE_PATTERN});
-        scanner.scan();
-        javaResourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
+        scanner.setIncludes(new String[]{filePattern});
+        if (scanner.getBasedir().exists()) {
+            scanner.scan();
+            resourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
+        }
+
 
         // get mapping from process id to file path
         processIdToPathMap = createProcessIdToPathMap(processDefinitions);
@@ -515,11 +525,11 @@ public class FileScanner {
     }
 
     public Set<String> getJavaResourcesFileInputStream() {
-        return javaResourcesFileInputStream;
+        return resourcesFileInputStream;
     }
 
     public void setJavaResourcesFileInputStream(Set<String> javaResources) {
-        javaResourcesFileInputStream = javaResources;
+        resourcesFileInputStream = javaResources;
     }
 
     public static boolean getIsDirectory() {
@@ -544,5 +554,21 @@ public class FileScanner {
             }
         }
         return sootPath.toString().substring(0, sootPath.toString().length() - 1);
+    }
+
+    public String getScanPath() {
+        return scanPath;
+    }
+
+    public void setScanPath(String scanPath) {
+        this.scanPath = scanPath;
+    }
+
+    public String getFilePattern() {
+        return filePattern;
+    }
+
+    public void setFilePattern(String filePattern) {
+        this.filePattern = filePattern;
     }
 }

@@ -86,7 +86,8 @@ public class ComplexModelTest {
     @Test
     public void testGraphOnComplexModel() throws ParserConfigurationException, SAXException, IOException {
     	final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
         final File processdefinition = new File(PATH);
 

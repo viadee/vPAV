@@ -76,7 +76,8 @@ public class CallActivityTest {
 	//@Test
 	public void testEmbedding() throws ParserConfigurationException, SAXException, IOException {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
 		final File processdefinition = new File(PATH);
 

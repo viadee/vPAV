@@ -89,15 +89,14 @@ public class Runner {
      * Main method which represents lifecycle of the validation process. Calls main
      * functions
      *
-     * @param javaScanPath Main entry path. Normally src/main/java
      */
-    public void viadeeProcessApplicationValidator(final String javaScanPath) {
+    public void viadeeProcessApplicationValidator() {
 
         // 1
         rules = readConfig();
 
         // 2
-        setFileScanner(new FileScanner(rules, javaScanPath));
+        setFileScanner(new FileScanner(rules));
 
         // 3
         getProcessVariables(rules);

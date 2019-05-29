@@ -32,7 +32,6 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -189,7 +188,7 @@ public class ProcessApplicationValidator {
 		Runner runner = new Runner();
 		runner.setDataFlowRules(dataFlowRules);
 		dataFlowRules = new ArrayList<>();
-		runner.viadeeProcessApplicationValidator(ConfigConstants.JAVAPATH);
+		runner.viadeeProcessApplicationValidator();
 		return runner;
 	}
 }

@@ -83,7 +83,8 @@ public class ReachingDefinitionTest {
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
 		ControlFlowGraph cg = new ControlFlowGraph();
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, cg));

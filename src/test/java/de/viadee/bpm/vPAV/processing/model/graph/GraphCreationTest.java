@@ -90,7 +90,8 @@ public class GraphCreationTest {
     //@Test
     public void testGraph() throws ParserConfigurationException, SAXException, IOException {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
         final File processdefinition = new File(PATH);
         
