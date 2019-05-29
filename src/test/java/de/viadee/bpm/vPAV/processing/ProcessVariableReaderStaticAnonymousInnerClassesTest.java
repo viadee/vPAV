@@ -84,7 +84,8 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
     @Test
     public void testRecogniseVariablesInInnerAnonymousClass() throws ParserConfigurationException, SAXException, IOException {
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
 
         // parse bpmn model

@@ -91,7 +91,8 @@ public class ProcessVariableReaderStaticTest {
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>());
+    	fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, cg));
@@ -138,7 +139,8 @@ public class ProcessVariableReaderStaticTest {
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, null, null, null, cg));
@@ -158,7 +160,8 @@ public class ProcessVariableReaderStaticTest {
 
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, cg));
@@ -169,7 +172,8 @@ public class ProcessVariableReaderStaticTest {
     public void retrieveVariableOperations() {
         final String PATH = BASE_PATH + "ProcessVariableReader_RetrieveOperations.bpmn";
         final File processDefinition = new File(PATH);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);

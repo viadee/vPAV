@@ -110,7 +110,8 @@ public class ProcessVariablesNameConventionCheckerTest {
      */
     @Test
     public void testCorrectProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH
                 + "ProcessVariablesNameConventionCheckerTest_CorrectProcessVariablesNamingConvention.bpmn";
 
@@ -146,7 +147,8 @@ public class ProcessVariablesNameConventionCheckerTest {
      */
     @Test
     public void testWrongProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+    	final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH
                 + "ProcessVariablesNameConventionCheckerTest_WrongProcessVariablesNamingConvention.bpmn";
         

@@ -73,7 +73,8 @@ public class AnomaliesSetCreationTest {
 	@Test
 	public void findDD() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDD.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -103,7 +104,8 @@ public class AnomaliesSetCreationTest {
 	@Test
 	public void findDU() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDU.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -132,7 +134,8 @@ public class AnomaliesSetCreationTest {
 	@Test
 	public void findUR() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUR.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -161,7 +164,8 @@ public class AnomaliesSetCreationTest {
 	// @Test
 	public void findUU() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUU.bpmn";
 		final File processDefinition = new File(PATH);
 

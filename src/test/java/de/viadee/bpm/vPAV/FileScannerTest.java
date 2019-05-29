@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -59,7 +60,8 @@ public class FileScannerTest {
 
     @Test
     public void testSootPathLoading() {
-        new FileScanner(new HashMap<String, Map<String, Rule>>(), "src/test/java");
+        FileScanner fileScanner = new FileScanner(new HashMap<String, Map<String, Rule>>());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         String testTarget = "target/test-classes";
         String sootPath = FileScanner.getSootPath();
         boolean contains = false;

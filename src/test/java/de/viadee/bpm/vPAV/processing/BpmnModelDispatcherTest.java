@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
 import de.viadee.bpm.vPAV.processing.checker.ExtensionChecker;
 import de.viadee.bpm.vPAV.processing.checker.TimerExpressionChecker;
@@ -75,7 +76,8 @@ public class BpmnModelDispatcherTest {
 
         BpmnScanner bpmnScanner = new BpmnScanner((new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());
 
-        FileScanner fileScanner = new FileScanner(rules, "src/test/java");
+        FileScanner fileScanner = new FileScanner(rules);
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
         Collection<ElementChecker> checkerInstances = dispatcher.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null);
 

@@ -174,6 +174,9 @@ public class ConfigConstants {
 		return properties.getProperty("basepath", ConfigConstants.BASEPATH);
 	}
 
+	public String getScanPath() { return properties.getProperty("scanpath", ConfigConstants.JAVAPATH);	}
+
+	public String getFilePattern() { return properties.getProperty("filepattern", ConfigConstants.JAVA_FILE_PATTERN);	}
 	/**
 	 * Checks whether the output of the result should be in html
 	 *

@@ -32,7 +32,6 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -54,7 +53,7 @@ public class ProcessApplicationVariableParser {
 		RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
 		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
 
-		FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.JAVAPATH);
+		FileScanner fileScanner = new FileScanner(new HashMap<>());
 		ProcessVariablesScanner variableScanner = readOuterProcessVariables(fileScanner);
 
 		BpmnScanner bpmnScanner = createScanner(modelFile);
