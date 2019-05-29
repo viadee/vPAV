@@ -67,7 +67,7 @@ public class BpmnScanner {
      * Implementation, so the we have to scan the xml of the model for the
      * implementation
      * <p>
-     * * @param path
+     * @param path
      * path to model
      */
     public BpmnScanner(String path) {
