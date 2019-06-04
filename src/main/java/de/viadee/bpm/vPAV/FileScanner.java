@@ -199,7 +199,7 @@ public class FileScanner {
         scanner.setBasedir(basedir);
         scanner.setIncludes(new String[]{ConfigConstants.DMN_FILE_PATTERN});
         scanner.scan();
-        decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<String>(Arrays.asList(scanner.getIncludedFiles())));
+        decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<>(Arrays.asList(scanner.getIncludedFiles())));
 
         if (rules.get(VersioningChecker.class.getSimpleName()) != null) {
             final Rule rule =
