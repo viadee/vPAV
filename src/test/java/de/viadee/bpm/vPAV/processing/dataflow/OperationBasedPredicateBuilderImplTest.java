@@ -44,7 +44,7 @@ import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class OperationBasedPredicateBuilderImplTest {
     @Test
@@ -55,9 +55,8 @@ public class OperationBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).exactly(2);
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("2"));
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("2"));
     }
 
     @Test
@@ -68,9 +67,8 @@ public class OperationBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).exactly(3);
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("2"));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("2"));
     }
 
     @Test
@@ -100,9 +98,8 @@ public class OperationBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atLeast(2);
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("3"));
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("3"));
     }
 
     @Test
@@ -113,9 +110,8 @@ public class OperationBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atLeast(3);
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("2"));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("2"));
     }
 
     @Test
@@ -142,9 +138,8 @@ public class OperationBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atMost(4);
 
-        assertThat(result.isFulfilled(), is(true));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("2"));
+       assertTrue(result.isFulfilled());
+       assertThat(result.getMessage().orElse(null), containsString("2"));
     }
 
     @Test
@@ -157,9 +152,8 @@ public class OperationBasedPredicateBuilderImplTest {
 
         EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atMost(1);
 
-        assertThat(result.isFulfilled(), is(false));
-        assertThat(result.getMessage().isPresent(), is(true));
-        assertThat(result.getMessage().get(), containsString("4"));
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("4"));
     }
 
     @Test

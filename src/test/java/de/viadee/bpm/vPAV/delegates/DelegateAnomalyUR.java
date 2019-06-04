@@ -39,6 +39,7 @@ import java.util.Random;
 public class DelegateAnomalyUR implements JavaDelegate {
 
     private final static String first = "1";
+    private Random r = new Random();
 
     @Override
     public void execute(DelegateExecution execution) {
@@ -46,7 +47,6 @@ public class DelegateAnomalyUR implements JavaDelegate {
     }
 
     private void dd(DelegateExecution execution) {
-        Random r = new Random();
         execution.setVariable(first, true);
         execution.getVariable(first);
         execution.removeVariable(first);
