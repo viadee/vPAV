@@ -113,7 +113,7 @@ public class FileScanner {
         // get file paths of process definitions
         scanner.setIncludes(new String[]{ConfigConstants.BPMN_FILE_PATTERN});
         scanner.scan();
-        processDefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
+        processDefinitions = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
 
         if (processDefinitions.size() < 1) {
             LOGGER.log(Level.SEVERE, "No model present in given location (" + basepath + ")");

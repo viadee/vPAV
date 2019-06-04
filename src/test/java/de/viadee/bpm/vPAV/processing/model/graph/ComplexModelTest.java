@@ -40,8 +40,8 @@ import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -72,6 +72,7 @@ public class ComplexModelTest {
         final URL[] classUrls = { classUrl, resourcesUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     /**
@@ -87,7 +88,6 @@ public class ComplexModelTest {
     public void testGraphOnComplexModel() throws ParserConfigurationException, SAXException, IOException {
     	final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
         final File processdefinition = new File(PATH);
 

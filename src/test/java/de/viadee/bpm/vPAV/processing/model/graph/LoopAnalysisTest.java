@@ -67,6 +67,7 @@ public class LoopAnalysisTest {
 		final URL[] classUrls = { classUrl };
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
+		ConfigConstants.getInstance().setIsTest(true);
 	}
 
 	/**
@@ -82,7 +83,6 @@ public class LoopAnalysisTest {
 	public void testLoop() throws ParserConfigurationException, SAXException, IOException {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "LoopAnalysisTest_TestLoop.bpmn";
 		final File processdefinition = new File(PATH);
 

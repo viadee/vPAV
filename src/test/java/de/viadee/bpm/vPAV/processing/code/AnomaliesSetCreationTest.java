@@ -68,6 +68,7 @@ public class AnomaliesSetCreationTest {
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 		RuntimeConfig.getInstance().setTest(true);
+		ConfigConstants.getInstance().setIsTest(true);
 	}
 
 	@Test
@@ -77,7 +78,6 @@ public class AnomaliesSetCreationTest {
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDD.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -111,7 +111,6 @@ public class AnomaliesSetCreationTest {
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDU.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -144,7 +143,6 @@ public class AnomaliesSetCreationTest {
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUR.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -177,7 +175,6 @@ public class AnomaliesSetCreationTest {
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUU.bpmn";
 		final File processDefinition = new File(PATH);
 

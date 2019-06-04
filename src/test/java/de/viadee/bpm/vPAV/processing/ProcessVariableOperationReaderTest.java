@@ -76,7 +76,8 @@ public class ProcessVariableOperationReaderTest {
         final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
         final URL[] classUrls = { classUrl, resourcesUrl };
         cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);        
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     @AfterClass
@@ -87,7 +88,6 @@ public class ProcessVariableOperationReaderTest {
     @Test
     public void testRecogniseVariablesInClass() throws ParserConfigurationException, SAXException, IOException {
     	final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
 
         // parse bpmn model
@@ -109,7 +109,6 @@ public class ProcessVariableOperationReaderTest {
     @Test
     public void testRecogniseInputOutputAssociations() throws ParserConfigurationException, SAXException, IOException {
     	final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
         
         // parse bpmn model

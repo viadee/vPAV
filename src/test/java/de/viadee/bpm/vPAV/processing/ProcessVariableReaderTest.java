@@ -84,6 +84,7 @@ public class ProcessVariableReaderTest {
         final URL[] classUrls = { classUrl, resourcesUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     @AfterClass
@@ -95,7 +96,6 @@ public class ProcessVariableReaderTest {
     public void testRecogniseVariablesInClass() throws ParserConfigurationException, SAXException, IOException {
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -116,7 +116,6 @@ public class ProcessVariableReaderTest {
     @Test
     public void testRecogniseInputOutputAssociations() throws ParserConfigurationException, SAXException, IOException {
     	final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
         
         // parse bpmn model
@@ -156,7 +155,6 @@ public class ProcessVariableReaderTest {
         final String PATH = BASE_PATH + "ProcessVariablesReader_SignalVariables.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 
@@ -182,7 +180,6 @@ public class ProcessVariableReaderTest {
         final String PATH = BASE_PATH + "ProcessVariablesReader_MessageVariables.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 
@@ -208,7 +205,6 @@ public class ProcessVariableReaderTest {
         final String PATH = BASE_PATH + "ProcessVariablesReader_LinkVariables.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 

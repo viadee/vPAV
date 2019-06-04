@@ -74,6 +74,7 @@ public class ProcessVariableMappingTest {
         final Map<String, String> beanMapping = new HashMap<>();
         beanMapping.put("mappingDelegate", "de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     /**
@@ -86,7 +87,6 @@ public class ProcessVariableMappingTest {
         final String PATH = BASE_PATH + "ProcessVariablesMapping_InputText.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -122,7 +122,6 @@ public class ProcessVariableMappingTest {
         final String PATH = BASE_PATH + "ProcessVariablesMapping_InputList.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -158,7 +157,6 @@ public class ProcessVariableMappingTest {
         final String PATH = BASE_PATH + "ProcessVariablesMapping_InputMap.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -194,7 +192,6 @@ public class ProcessVariableMappingTest {
         final String PATH = BASE_PATH + "ProcessVariablesMapping_OutputText.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -230,7 +227,6 @@ public class ProcessVariableMappingTest {
         final String PATH = BASE_PATH + "ProcessVariablesMapping_OutputList.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -265,7 +261,6 @@ public class ProcessVariableMappingTest {
         final String PATH = BASE_PATH + "ProcessVariablesMapping_OutputMap.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -301,7 +296,6 @@ public class ProcessVariableMappingTest {
         final String PATH = BASE_PATH + "ProcessVariablesMapping_InputScript.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/MappingDelegate.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);

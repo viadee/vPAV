@@ -71,13 +71,13 @@ public class CallActivityTest {
 		final URL[] classUrls = { classUrl };
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
+		ConfigConstants.getInstance().setIsTest(true);
 	}
 
 	//@Test
 	public void testEmbedding() throws ParserConfigurationException, SAXException, IOException {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
 		final File processdefinition = new File(PATH);
 

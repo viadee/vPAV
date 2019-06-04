@@ -36,7 +36,6 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -85,7 +84,6 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
     @Test
     public void testRecogniseVariablesInInnerAnonymousClass() throws ParserConfigurationException, SAXException, IOException {
     	final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
 
         // parse bpmn model

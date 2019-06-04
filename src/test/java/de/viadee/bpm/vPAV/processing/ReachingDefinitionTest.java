@@ -69,6 +69,7 @@ public class ReachingDefinitionTest {
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
+		ConfigConstants.getInstance().setIsTest(true);
 	}
 
 	@Test
@@ -84,7 +85,6 @@ public class ReachingDefinitionTest {
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
 		ControlFlowGraph cg = new ControlFlowGraph();
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, cg));

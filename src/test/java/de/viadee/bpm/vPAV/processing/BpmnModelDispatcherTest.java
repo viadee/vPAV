@@ -65,6 +65,7 @@ public class BpmnModelDispatcherTest {
         final URL[] classUrls = { classUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     @Test
@@ -77,7 +78,6 @@ public class BpmnModelDispatcherTest {
         BpmnScanner bpmnScanner = new BpmnScanner((new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());
 
         FileScanner fileScanner = new FileScanner(rules);
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
         Collection<ElementChecker> checkerInstances = dispatcher.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null);
 

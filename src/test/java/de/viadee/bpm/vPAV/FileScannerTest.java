@@ -56,12 +56,12 @@ public class FileScannerTest {
         final URL[] classUrls = { classUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     @Test
     public void testSootPathLoading() {
         FileScanner fileScanner = new FileScanner(new HashMap<String, Map<String, Rule>>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         String testTarget = "target/test-classes";
         String sootPath = FileScanner.getSootPath();
         boolean contains = false;

@@ -77,6 +77,7 @@ public class ProcessVariableReaderStaticTest {
         final Map<String, String> beanMapping = new HashMap<>();
         beanMapping.put("testDelegate", "de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     @Test
@@ -92,7 +93,6 @@ public class ProcessVariableReaderStaticTest {
         final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
     	final FileScanner fileScanner = new FileScanner(new HashMap<>());
-    	fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, cg));
@@ -177,7 +177,6 @@ public class ProcessVariableReaderStaticTest {
         final String PATH = BASE_PATH + "ProcessVariableReader_RetrieveOperations.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);

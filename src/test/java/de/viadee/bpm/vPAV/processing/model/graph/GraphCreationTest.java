@@ -73,6 +73,7 @@ public class GraphCreationTest {
         final URL[] classUrls = { classUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     @AfterClass
@@ -91,7 +92,6 @@ public class GraphCreationTest {
     public void testGraph() throws ParserConfigurationException, SAXException, IOException {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
         final File processdefinition = new File(PATH);
         
