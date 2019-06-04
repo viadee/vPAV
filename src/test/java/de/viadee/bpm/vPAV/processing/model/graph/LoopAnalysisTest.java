@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -89,9 +90,11 @@ public class LoopAnalysisTest {
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+		BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+		ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
 		// create data flow graphs
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
 				processdefinition.getPath(), new ArrayList<String>(), scanner);
 
 		graphBuilder.createInvalidPaths(graphCollection);

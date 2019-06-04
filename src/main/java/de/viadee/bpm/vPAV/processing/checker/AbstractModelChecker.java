@@ -32,40 +32,19 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-public class DataFlowChecker implements ModelChecker {
+public abstract class AbstractModelChecker implements ModelChecker {
+    final protected Rule rule;
+    final protected Collection<ProcessVariable> processVariables;
+    final protected ElementGraphBuilder graphBuilder;
 
-    private Rule rule;
-    private Collection<DataFlowRule> dataFlowRules;
-    private Collection<ProcessVariable> processVariables;
-
-    public DataFlowChecker(final Rule rule, final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables) {
+    public AbstractModelChecker(final Rule rule,  final Collection<ProcessVariable> processVariables, final ElementGraphBuilder graphBuilder) {
         this.rule = rule;
-        this.dataFlowRules = dataFlowRules;
         this.processVariables = processVariables;
-    }
-
-    @Override
-    public Collection<CheckerIssue> check() {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        for (DataFlowRule dataFlowRule : dataFlowRules) {
-            dataFlowRule.evaluate(processVariables).stream()
-                    .filter(r-> !r.isFulfilled())
-                    .map(r -> IssueWriter.createIssue(rule, dataFlowRule.getRuleDescription(), dataFlowRule.getCriticality(),
-                            r.getEvaluatedVariable(), dataFlowRule.getViolationMessageFor(r)))
-                    .forEach(issues::addAll);
-        }
-        return issues;
-    }
-
-    public boolean isSingletonChecker() {
-        return true;
+        this.graphBuilder = graphBuilder;
     }
 }

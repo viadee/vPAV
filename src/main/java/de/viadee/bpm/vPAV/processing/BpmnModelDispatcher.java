@@ -88,6 +88,7 @@ public class BpmnModelDispatcher {
 			final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
 			final Collection<String> resourcesNewestVersions, final Map<String, Map<String, Rule>> conf) {
 
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BpmnScanner bpmnScanner = createScanner(processDefinition);
 
 		// parse bpmn model
@@ -96,14 +97,16 @@ public class BpmnModelDispatcher {
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
+
+		// ProcessVariables model checker
 		final Rule rule = conf.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER)
 				.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
-
+		ProcessVariableReader variableReader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner, fileScanner);
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
-				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), rule, bpmnScanner);
+				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), bpmnScanner, variableReader, fileScanner);
 
 		// create data flow graphs for bpmn model
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
 				processDefinition.getPath(), new ArrayList<>(), scanner);
 
 		// analyze data flows
@@ -113,17 +116,20 @@ public class BpmnModelDispatcher {
 		// calculate invalid paths
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
-		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
-
-		final Collection<CheckerIssue> issues = new ArrayList<>();
-
 		// call model checkers
 		// TODO: move it to a factory class later
 		if (rule != null && rule.isActive()) {
-			final ModelChecker processVarChecker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+			final ModelChecker processVarChecker = new ProcessVariablesModelChecker(rule, null, graphBuilder);
+			((ProcessVariablesModelChecker) processVarChecker).setInvalidPathsMap(invalidPathMap);
 			issues.addAll(processVarChecker.check());
 		}
+
+
+		// Data flow checker
+		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
+		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+
+
 		final Rule dataFlowRule = conf.get(getClassName(DataFlowChecker.class))
 				.get(getClassName(DataFlowChecker.class));
 		if (dataFlowRule != null && dataFlowRule.isActive() && !dataFlowRules.isEmpty()) {
@@ -131,6 +137,7 @@ public class BpmnModelDispatcher {
 			issues.addAll(dataFlowChecker.check());
 		}
 
+		// Element checkers
 		// create checkerInstances
 		Collection<ElementChecker> checkerInstances = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner,
 				scanner);

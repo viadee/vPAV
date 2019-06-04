@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -57,88 +58,91 @@ import java.util.*;
 
 public class ProcessVariablesModelCheckerStatic {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/";
 
-	@BeforeClass
-	public static void setup() throws IOException {
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		ClassLoader cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
-		RuntimeConfig.getInstance().setTest(true);
-	}
+    @BeforeClass
+    public static void setup() throws IOException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = {classUrl};
+        ClassLoader cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setTest(true);
+    }
 
-	/**
-	 * Case: there is an empty script reference
-	 */
-	@Test
-	public void testProcessVariablesModelChecker() {
-		final Set<String> resources = new HashSet<>();
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
-		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
-		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";
-		final File processDefinition = new File(PATH);
+    /**
+     * Case: there is an empty script reference
+     */
+    @Test
+    public void testProcessVariablesModelChecker() {
+        final Set<String> resources = new HashSet<>();
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
+        Properties myProperties = new Properties();
+        myProperties.put("scanpath", "src/test/java");
+        ConfigConstants.getInstance().setProperties(myProperties);
+        final FileScanner fileScanner = new FileScanner(new HashMap<>());
+        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";
+        final File processDefinition = new File(PATH);
 
-		// parse bpmn model
-		BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // parse bpmn model
+        BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-		// create data flow graphs
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), new ArrayList<>(), scanner);
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
+        // create data flow graphs
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
+                processDefinition.getPath(), new ArrayList<>(), scanner);
 
-		FlowAnalysis flowAnalysis = new FlowAnalysis();
-		flowAnalysis.analyze(graphCollection);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        flowAnalysis.analyze(graphCollection);
 
-		// calculate invalid paths based on data flow graphs
-		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-		final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
-		ModelChecker checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
+        ModelChecker checker = new ProcessVariablesModelChecker(rule, null, graphBuilder);
+        ((ProcessVariablesModelChecker) checker).setInvalidPathsMap(invalidPathMap);
 
-		final Collection<CheckerIssue> issues = checker.check();
+        final Collection<CheckerIssue> issues = checker.check();
 
-		if (issues.size() == 0) {
-			Assert.fail("there should be generated an issue");
-		}
+        if (issues.size() == 0) {
+            Assert.fail("there should be generated an issue");
+        }
 
-		Iterator<CheckerIssue> iterator = issues.iterator();
-		final CheckerIssue issue1 = iterator.next();
-		Assert.assertEquals("Task_0546a8y", issue1.getElementId());
-		Assert.assertEquals("UR", issue1.getAnomaly().toString());
-		final CheckerIssue issue2 = iterator.next();
-		Assert.assertEquals("SequenceFlow_1aapyv6", issue2.getElementId());
-		Assert.assertEquals("DD", issue2.getAnomaly().toString());
-		final CheckerIssue issue3 = iterator.next();
-		Assert.assertEquals("Task_0oj9gln", issue3.getElementId());
-		Assert.assertEquals("ProcessVariable3", issue3.getVariable());
-		Assert.assertEquals("DU", issue3.getAnomaly().toString());
-		final CheckerIssue issue4 = iterator.next();
-		Assert.assertEquals("SequenceFlow_09j6ilt", issue4.getElementId());
-		Assert.assertEquals("geloeschteVariable", issue4.getVariable());
-		Assert.assertEquals("DU", issue4.getAnomaly().toString());
-		final CheckerIssue issue5 = iterator.next();
-		Assert.assertEquals("Task_0oj9gln", issue5.getElementId());
-		Assert.assertEquals("ProcessVariable2", issue5.getVariable().toString());
-		Assert.assertEquals("UR", issue5.getAnomaly().toString());
-		final CheckerIssue issue6 = iterator.next();
-		Assert.assertEquals("ServiceTask_05g4a96", issue6.getElementId());
-		Assert.assertEquals("intHallo", issue6.getVariable());
-		Assert.assertEquals("UR", issue6.getAnomaly().toString());
-		final CheckerIssue issue7 = iterator.next();
-		Assert.assertEquals("BusinessRuleTask_119jb6t", issue7.getElementId());
-		Assert.assertEquals("hallo2", issue7.getVariable());
-		Assert.assertEquals("UR", issue7.getAnomaly().toString());
-		final CheckerIssue issue8 = iterator.next();
-		Assert.assertEquals("Task_0546a8y", issue8.getElementId());
-		Assert.assertEquals("ProcessVariable3", issue8.getVariable());
-		Assert.assertEquals("DU", issue8.getAnomaly().toString());
-	}
+        Iterator<CheckerIssue> iterator = issues.iterator();
+        final CheckerIssue issue1 = iterator.next();
+        Assert.assertEquals("Task_0546a8y", issue1.getElementId());
+        Assert.assertEquals("UR", issue1.getAnomaly().toString());
+        final CheckerIssue issue2 = iterator.next();
+        Assert.assertEquals("SequenceFlow_1aapyv6", issue2.getElementId());
+        Assert.assertEquals("DD", issue2.getAnomaly().toString());
+        final CheckerIssue issue3 = iterator.next();
+        Assert.assertEquals("Task_0oj9gln", issue3.getElementId());
+        Assert.assertEquals("ProcessVariable3", issue3.getVariable());
+        Assert.assertEquals("DU", issue3.getAnomaly().toString());
+        final CheckerIssue issue4 = iterator.next();
+        Assert.assertEquals("SequenceFlow_09j6ilt", issue4.getElementId());
+        Assert.assertEquals("geloeschteVariable", issue4.getVariable());
+        Assert.assertEquals("DU", issue4.getAnomaly().toString());
+        final CheckerIssue issue5 = iterator.next();
+        Assert.assertEquals("Task_0oj9gln", issue5.getElementId());
+        Assert.assertEquals("ProcessVariable2", issue5.getVariable().toString());
+        Assert.assertEquals("UR", issue5.getAnomaly().toString());
+        final CheckerIssue issue6 = iterator.next();
+        Assert.assertEquals("ServiceTask_05g4a96", issue6.getElementId());
+        Assert.assertEquals("intHallo", issue6.getVariable());
+        Assert.assertEquals("UR", issue6.getAnomaly().toString());
+        final CheckerIssue issue7 = iterator.next();
+        Assert.assertEquals("BusinessRuleTask_119jb6t", issue7.getElementId());
+        Assert.assertEquals("hallo2", issue7.getVariable());
+        Assert.assertEquals("UR", issue7.getAnomaly().toString());
+        final CheckerIssue issue8 = iterator.next();
+        Assert.assertEquals("Task_0546a8y", issue8.getElementId());
+        Assert.assertEquals("ProcessVariable3", issue8.getVariable());
+        Assert.assertEquals("DU", issue8.getAnomaly().toString());
+    }
 
 }

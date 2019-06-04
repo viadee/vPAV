@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
+import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
@@ -42,16 +43,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class ProcessVariablesModelChecker implements ModelChecker {
+public class ProcessVariablesModelChecker extends AbstractModelChecker {
 
-	private final Rule rule;
+	private Map<AnomalyContainer, List<Path>> invalidPathsMap;
 
-	private final Map<AnomalyContainer, List<Path>> invalidPathsMap;
+	public ProcessVariablesModelChecker(Rule rule, Collection<ProcessVariable> processVariables, ElementGraphBuilder graphBuilder) {
+		super(rule, processVariables, graphBuilder);
+	}
 
-	public ProcessVariablesModelChecker(final Rule rule, final Map<AnomalyContainer, List<Path>> invalidPathsMap) {
-		this.rule = rule;
+	public void setInvalidPathsMap(Map<AnomalyContainer, List<Path>> invalidPathsMap) {
 		this.invalidPathsMap = invalidPathsMap;
 	}
+
+/*	public ProcessVariablesModelChecker(final Rule rule, final Map<AnomalyContainer, List<Path>> invalidPathsMap) {
+		this.rule = rule;
+		this.invalidPathsMap = invalidPathsMap;
+	} */
 
 	/**
 	 * Checks variables of a given process and identifies read/write/delete
@@ -101,7 +108,7 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 		return issues;
 	}
 
-	public static boolean isSingletonChecker() {
+	public boolean isSingletonChecker() {
         return true;
     }
 

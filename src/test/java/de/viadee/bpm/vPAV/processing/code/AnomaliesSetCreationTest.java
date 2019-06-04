@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
@@ -84,11 +85,13 @@ public class AnomaliesSetCreationTest {
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+		BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+		ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, bpmnScanner, reader, fileScanner);
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner);
 
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
@@ -117,11 +120,13 @@ public class AnomaliesSetCreationTest {
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+		BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+		ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, bpmnScanner, reader, fileScanner);
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner);
 
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
@@ -149,11 +154,13 @@ public class AnomaliesSetCreationTest {
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+		BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+		ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, bpmnScanner, reader, fileScanner);
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner);
 
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
@@ -181,11 +188,13 @@ public class AnomaliesSetCreationTest {
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+		BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+		ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, bpmnScanner, reader, fileScanner);
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner);
 
 		FlowAnalysis flowAnalysis = new FlowAnalysis();

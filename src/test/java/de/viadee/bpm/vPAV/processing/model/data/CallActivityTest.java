@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -89,12 +90,14 @@ public class CallActivityTest {
 		processIdToPathMap.put("calledProcess", BASE_PATH + "CallActivityTest_calledProcess.bpmn");
 		processIdToPathMap.put("calledcalledProcess", BASE_PATH + "CallActivityTest_calledcalledProcess.bpmn");
 
+		BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+		ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-				new BpmnScanner(PATH));
+				bpmnScanner, reader, fileScanner);
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
 				processdefinition.getPath(), calledElementHierarchy, scanner);
 
 		// calculate invalid paths based on data flow graphs

@@ -64,7 +64,10 @@ public class JavaReaderStatic {
 
 	private List<Value> constructorArgs;
 
-	public JavaReaderStatic() {
+	private final FileScanner fileScanner;
+
+	public JavaReaderStatic(final FileScanner fileScanner) {
+		this.fileScanner = fileScanner;
 		this.setupSoot();
 	}
 
@@ -76,8 +79,6 @@ public class JavaReaderStatic {
 	 * analyzed. e.g. execution.setVariable(execution.getActivityId() + "-" +
 	 * execution.getEventName(), true)
 	 *
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param classFile
 	 *            Name of the class
 	 * @param element
@@ -92,7 +93,7 @@ public class JavaReaderStatic {
 	 *            Control flow graph
 	 * @return Map of process variables from the referenced delegate
 	 */
-	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
+	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, final ControlFlowGraph controlFlowGraph) {
 

@@ -83,28 +83,30 @@ public final class ProcessVariableReader {
 
 	private final Rule rule;
 
+	private final FileScanner fileScanner;
+
 	public static final Logger LOGGER = Logger.getLogger(ProcessVariableReader.class.getName());
 
-	public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, final Rule rule, BpmnScanner scanner) {
+	public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, final Rule rule, BpmnScanner scanner,
+								 final FileScanner fileScanner) {
 		this.decisionRefToPathMap = decisionRefToPathMap;
 		this.rule = rule;
 		this.bpmnScanner = scanner;
+		this.fileScanner = fileScanner;
 	}
 
 	/**
 	 * Examining an bpmn element for variables
 	 *
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param controlFlowGraph
 	 *            CFG
 	 * @return returns processVariables
 	 */
-	public ListMultimap<String, ProcessVariableOperation> getVariablesFromElement(final FileScanner fileScanner,
-			final BpmnElement element, final ControlFlowGraph controlFlowGraph) {
-		final JavaReaderStatic javaReaderStatic = new JavaReaderStatic();
+	public ListMultimap<String, ProcessVariableOperation> getVariablesFromElement(final BpmnElement element,
+																				  final ControlFlowGraph controlFlowGraph) {
+		final JavaReaderStatic javaReaderStatic = new JavaReaderStatic(fileScanner);
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
 		final BpmnModelElementInstance scopeElement = baseElement.getScope();
@@ -115,40 +117,40 @@ public final class ProcessVariableReader {
 		final ExtensionElements extensionElements = baseElement.getExtensionElements();
 
 		// 1) Search variables in Input Parameters
-		processVariables.putAll(getVariablesFromInputMapping(javaReaderStatic, element, fileScanner, controlFlowGraph));
+		processVariables.putAll(getVariablesFromInputMapping(javaReaderStatic, element, controlFlowGraph));
 
 		// 2) Search variables execution listener (start)
 		if (extensionElements != null) {
-			processVariables.putAll(getVariablesFromExecutionListenerStart(javaReaderStatic, fileScanner, element,
+			processVariables.putAll(getVariablesFromExecutionListenerStart(javaReaderStatic, element,
 					extensionElements, scopeElementId, controlFlowGraph));
 		}
 
 		// 3) Search variables in task
-		processVariables.putAll(getVariablesFromTask(javaReaderStatic, fileScanner, element, controlFlowGraph));
+		processVariables.putAll(getVariablesFromTask(javaReaderStatic, element, controlFlowGraph));
 
 		// 4) Search variables in sequence flow
 		processVariables
-				.putAll(searchVariablesFromSequenceFlow(javaReaderStatic, fileScanner, element, controlFlowGraph));
+				.putAll(searchVariablesFromSequenceFlow(javaReaderStatic, element, controlFlowGraph));
 
 		// 5) Search variables in ExtensionElements
-		processVariables.putAll(searchExtensionsElements(javaReaderStatic, fileScanner, element, controlFlowGraph));
+		processVariables.putAll(searchExtensionsElements(javaReaderStatic, element, controlFlowGraph));
 
 		// 6) Search variables in Signals and Messages
 		processVariables
-				.putAll(getVariablesFromSignalsAndMessage(javaReaderStatic, element, fileScanner, controlFlowGraph));
+				.putAll(getVariablesFromSignalsAndMessage(javaReaderStatic, element, controlFlowGraph));
 
 		// 7) Search variables in Links
-		processVariables.putAll(getVariablesFromLinks(javaReaderStatic, element, fileScanner, controlFlowGraph));
+		processVariables.putAll(getVariablesFromLinks(javaReaderStatic, element, controlFlowGraph));
 
 		// 8) Search variables execution listener (end)
 		if (extensionElements != null) {
-			processVariables.putAll(getVariablesFromExecutionListenerEnd(javaReaderStatic, fileScanner, element,
+			processVariables.putAll(getVariablesFromExecutionListenerEnd(javaReaderStatic, element,
 					extensionElements, scopeElementId, controlFlowGraph));
 		}
 
 		// 9) Search variables in Output Parameters
 		processVariables
-				.putAll(getVariablesFromOutputMapping(javaReaderStatic, element, fileScanner, controlFlowGraph));
+				.putAll(getVariablesFromOutputMapping(javaReaderStatic, element, controlFlowGraph));
 
 		return processVariables;
 	}
@@ -161,14 +163,12 @@ public final class ProcessVariableReader {
 	 *            Static java reader
 	 * @param element
 	 *            BpmnElement
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param controlFlowGraph
 	 *            CFG
 	 * @return ProcessVariables retrieved from signals and messages
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromSignalsAndMessage(
-			final JavaReaderStatic javaReaderStatic, final BpmnElement element, final FileScanner fileScanner,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ControlFlowGraph controlFlowGraph) {
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
@@ -176,9 +176,9 @@ public final class ProcessVariableReader {
 		final ArrayList<String> messagesRefs = bpmnScanner.getMessageRefs(element.getBaseElement().getId());
 
 		processVariables
-				.putAll(getSignalVariables(javaReaderStatic, signalRefs, element, fileScanner, controlFlowGraph));
+				.putAll(getSignalVariables(javaReaderStatic, signalRefs, element, controlFlowGraph));
 		processVariables
-				.putAll(getMessageVariables(javaReaderStatic, messagesRefs, element, fileScanner, controlFlowGraph));
+				.putAll(getMessageVariables(javaReaderStatic, messagesRefs, element, controlFlowGraph));
 
 		return processVariables;
 	}
@@ -193,15 +193,13 @@ public final class ProcessVariableReader {
 	 *            List of signal references
 	 * @param element
 	 *            BpmnElement
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param controlFlowGraph
 	 *            CFG
 	 * @return ProcessVariables retrieved from signals
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getSignalVariables(final JavaReaderStatic javaReaderStatic,
-			final ArrayList<String> signalRefs, final BpmnElement element, final FileScanner fileScanner,
-			final ControlFlowGraph controlFlowGraph) {
+																			  final ArrayList<String> signalRefs, final BpmnElement element,
+																			  final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
@@ -220,7 +218,7 @@ public final class ProcessVariableReader {
 
 		for (String signalName : names) {
 			processVariables
-					.putAll(checkMessageAndSignalForExpression(javaReaderStatic, signalName, element, fileScanner,
+					.putAll(checkMessageAndSignalForExpression(javaReaderStatic, signalName, element,
 							ElementChapter.Signal, KnownElementFieldType.Signal, scopeElementId, controlFlowGraph));
 		}
 
@@ -237,15 +235,13 @@ public final class ProcessVariableReader {
 	 *            List of message references
 	 * @param element
 	 *            BpmnElement
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param controlFlowGraph
 	 *            CFG
 	 * @return ProcessVariables retrieved from messages
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getMessageVariables(final JavaReaderStatic javaReaderStatic,
-			final ArrayList<String> messageRefs, final BpmnElement element, final FileScanner fileScanner,
-			final ControlFlowGraph controlFlowGraph) {
+																			   final ArrayList<String> messageRefs, final BpmnElement element,
+																			   final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
@@ -264,7 +260,7 @@ public final class ProcessVariableReader {
 
 		for (String messageName : names) {
 			processVariables
-					.putAll(checkMessageAndSignalForExpression(javaReaderStatic, messageName, element, fileScanner,
+					.putAll(checkMessageAndSignalForExpression(javaReaderStatic, messageName, element,
 							ElementChapter.Message, KnownElementFieldType.Message, scopeElementId, controlFlowGraph));
 		}
 
@@ -277,20 +273,18 @@ public final class ProcessVariableReader {
 	 *            Static java reader
 	 * @param element
 	 *            Current BPMN Element
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param controlFlowGraph
 	 *            CFG
 	 * @return ProcessVariables retrieved from events of type link
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromLinks(
-			final JavaReaderStatic javaReaderStatic, final BpmnElement element, final FileScanner fileScanner,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ControlFlowGraph controlFlowGraph) {
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
 		final ArrayList<String> links = bpmnScanner.getLinkRefs(element.getBaseElement().getId());
 
-		processVariables.putAll(getLinkVariables(javaReaderStatic, links, element, fileScanner, controlFlowGraph));
+		processVariables.putAll(getLinkVariables(javaReaderStatic, links, element, controlFlowGraph));
 
 		return processVariables;
 	}
@@ -303,15 +297,13 @@ public final class ProcessVariableReader {
 	 *            List of links for current element
 	 * @param element
 	 *            Current BPMN Element
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param controlFlowGraph
 	 *            CFG
 	 * @return ProcessVariables retrieved from events of type link
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getLinkVariables(final JavaReaderStatic javaReaderStatic,
-			final ArrayList<String> links, final BpmnElement element, final FileScanner fileScanner,
-			final ControlFlowGraph controlFlowGraph) {
+																			final ArrayList<String> links, final BpmnElement element,
+																			final ControlFlowGraph controlFlowGraph) {
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
 		final BpmnModelElementInstance scopeElement = baseElement.getScope();
@@ -322,7 +314,7 @@ public final class ProcessVariableReader {
 		}
 
 		for (String link : links) {
-			processVariables.putAll(checkMessageAndSignalForExpression(javaReaderStatic, link, element, fileScanner,
+			processVariables.putAll(checkMessageAndSignalForExpression(javaReaderStatic, link, element,
 					ElementChapter.Signal, KnownElementFieldType.Signal, scopeElementId, controlFlowGraph));
 		}
 
@@ -336,15 +328,13 @@ public final class ProcessVariableReader {
 	 *            Static java reader
 	 * @param element
 	 *            Current BPMN Element
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param controlFlowGraph
 	 *            CFG
 	 * @return Map of ProcessVariable
 	 *
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromInputMapping(
-			final JavaReaderStatic javaReaderStatic, final BpmnElement element, final FileScanner fileScanner,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ControlFlowGraph controlFlowGraph) {
 		final ListMultimap<String, ProcessVariableOperation> inputMappingProcessVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
@@ -364,7 +354,7 @@ public final class ProcessVariableReader {
 					if (!inputMappingType.firstKey().equals(BpmnConstants.CAMUNDA_SCRIPT)) {
 						inputMappingProcessVariables
 								.putAll(checkExpressionForReadVariable(javaReaderStatic, innerEntry.getValue(),
-										innerEntry.getKey(), element, fileScanner, ElementChapter.InputOutput,
+										innerEntry.getKey(), element, ElementChapter.InputOutput,
 										KnownElementFieldType.InputParameter, baseElement.getId(), controlFlowGraph));
 					} else {
 						IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
@@ -383,14 +373,12 @@ public final class ProcessVariableReader {
 	 *            Static java reader
 	 * @param element
 	 *            Current BPMN Element
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param controlFlowGraph
 	 *            CFG
 	 * @return Map of ProcessVariable
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromOutputMapping(
-			final JavaReaderStatic javaReaderStatic, final BpmnElement element, final FileScanner fileScanner,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ControlFlowGraph controlFlowGraph) {
 		final ListMultimap<String, ProcessVariableOperation> outputMappingProcessVariables = ArrayListMultimap.create();
 		final BaseElement baseElement = element.getBaseElement();
@@ -416,7 +404,7 @@ public final class ProcessVariableReader {
 					if (!outputMappingType.firstKey().equals(BpmnConstants.CAMUNDA_SCRIPT)) {
 						outputMappingProcessVariables
 								.putAll(checkExpressionForReadVariable(javaReaderStatic, innerEntry.getValue(),
-										innerEntry.getKey(), element, fileScanner, ElementChapter.InputOutput,
+										innerEntry.getKey(), element, ElementChapter.InputOutput,
 										KnownElementFieldType.OutputParameter, scopeElementId, controlFlowGraph));
 					} else {
 						IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
@@ -433,8 +421,6 @@ public final class ProcessVariableReader {
 	 *
 	 * @param javaReaderStatic
 	 *            Static java reader
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param controlFlowGraph
@@ -442,7 +428,7 @@ public final class ProcessVariableReader {
 	 * @return variables
 	 */
 	private ListMultimap<String, ProcessVariableOperation> searchExtensionsElements(
-			final JavaReaderStatic javaReaderStatic, final FileScanner fileScanner, final BpmnElement element,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
@@ -455,7 +441,7 @@ public final class ProcessVariableReader {
 		final ExtensionElements extensionElements = baseElement.getExtensionElements();
 		if (extensionElements != null) {
 			// 1) Search in Task Listeners
-			processVariables.putAll(getVariablesFromTaskListener(javaReaderStatic, fileScanner, element,
+			processVariables.putAll(getVariablesFromTaskListener(javaReaderStatic, element,
 					extensionElements, scopeElementId, controlFlowGraph));
 
 			// 2) Search in Form Data
@@ -473,8 +459,6 @@ public final class ProcessVariableReader {
 	 *
 	 * @param javaReaderStatic
 	 *            Static java reader
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param element
 	 *            Current BPMN Element
 	 * @param extensionElements
@@ -486,7 +470,7 @@ public final class ProcessVariableReader {
 	 * @return variables
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromExecutionListenerStart(
-			final JavaReaderStatic javaReaderStatic, final FileScanner fileScanner, final BpmnElement element,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ExtensionElements extensionElements, final String scopeId, final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
@@ -496,13 +480,13 @@ public final class ProcessVariableReader {
 			if (listener.getCamundaEvent().equals("start")) {
 				final String l_expression = listener.getCamundaExpression();
 				if (l_expression != null) {
-					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 							l_expression, element, ElementChapter.ExecutionListenerStart,
 							KnownElementFieldType.Expression, scopeId));
 				}
 				final String l_delegateExpression = listener.getCamundaDelegateExpression();
 				if (l_delegateExpression != null) {
-					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 							l_delegateExpression, element, ElementChapter.ExecutionListenerStart,
 							KnownElementFieldType.DelegateExpression, scopeId));
 				}
@@ -512,7 +496,7 @@ public final class ProcessVariableReader {
 							"Entered getVariablesFromJavaDelegate from getVariablesFromExecutionListenerStart for "
 									+ element.getBaseElement().getAttributeValue("name"));
 
-					processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
+					processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(
 							listener.getCamundaClass(), element, ElementChapter.ExecutionListenerStart,
 							KnownElementFieldType.Class, scopeId, controlFlowGraph));
 				}
@@ -544,8 +528,6 @@ public final class ProcessVariableReader {
 	 *
 	 * @param javaReaderStatic
 	 *            Static java reader
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param element
 	 *            Current BPMN Element
 	 * @param extensionElements
@@ -557,7 +539,7 @@ public final class ProcessVariableReader {
 	 * @return variables
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromExecutionListenerEnd(
-			final JavaReaderStatic javaReaderStatic, final FileScanner fileScanner, final BpmnElement element,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ExtensionElements extensionElements, final String scopeId, final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
@@ -567,13 +549,13 @@ public final class ProcessVariableReader {
 			if (listener.getCamundaEvent().equals("end")) {
 				final String l_expression = listener.getCamundaExpression();
 				if (l_expression != null) {
-					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 							l_expression, element, ElementChapter.ExecutionListenerEnd,
 							KnownElementFieldType.Expression, scopeId));
 				}
 				final String l_delegateExpression = listener.getCamundaDelegateExpression();
 				if (l_delegateExpression != null) {
-					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 							l_delegateExpression, element, ElementChapter.ExecutionListenerEnd,
 							KnownElementFieldType.DelegateExpression, scopeId));
 				}
@@ -581,7 +563,7 @@ public final class ProcessVariableReader {
 				if (l_class != null) {
 					LOGGER.warning("Entered getVariablesFromJavaDelegate from getVariablesFromExecutionListenerEnd for "
 							+ element.getBaseElement().getAttributeValue("name"));
-					processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
+					processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(
 							listener.getCamundaClass(), element, ElementChapter.ExecutionListenerEnd,
 							KnownElementFieldType.Class, scopeId, controlFlowGraph));
 				}
@@ -613,8 +595,6 @@ public final class ProcessVariableReader {
 	 *
 	 * @param javaReaderStatic
 	 *            Static java reader
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param extensionElements
@@ -626,7 +606,7 @@ public final class ProcessVariableReader {
 	 * @return variables
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromTaskListener(
-			final JavaReaderStatic javaReaderStatic, final FileScanner fileScanner, final BpmnElement element,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ExtensionElements extensionElements, final String scopeId, final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
@@ -635,12 +615,12 @@ public final class ProcessVariableReader {
 		for (final CamundaTaskListener listener : listenerList) {
 			final String l_expression = listener.getCamundaExpression();
 			if (l_expression != null) {
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 						l_expression, element, ElementChapter.TaskListener, KnownElementFieldType.Expression, scopeId));
 			}
 			final String l_delegateExpression = listener.getCamundaDelegateExpression();
 			if (l_delegateExpression != null) {
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 						l_delegateExpression, element, ElementChapter.TaskListener,
 						KnownElementFieldType.DelegateExpression, scopeId));
 			}
@@ -757,8 +737,6 @@ public final class ProcessVariableReader {
 	 *
 	 * @param javaReaderStatic
 	 *            Static java reader
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param controlFlowGraph
@@ -766,7 +744,7 @@ public final class ProcessVariableReader {
 	 * @return variables
 	 */
 	private ListMultimap<String, ProcessVariableOperation> searchVariablesFromSequenceFlow(
-			final JavaReaderStatic javaReaderStatic, final FileScanner fileScanner, final BpmnElement element,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -796,7 +774,7 @@ public final class ProcessVariableReader {
 					}
 				} else {
 					if (expression.getTextContent().trim().length() > 0) {
-						variables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+						variables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 								expression.getTextContent(), element, ElementChapter.Details,
 								KnownElementFieldType.Expression, scopeId));
 					}
@@ -811,8 +789,6 @@ public final class ProcessVariableReader {
 	 *
 	 * @param javaReaderStatic
 	 *            Static java reader
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param controlFlowGraph
@@ -820,7 +796,7 @@ public final class ProcessVariableReader {
 	 * @return variables
 	 */
 	private ListMultimap<String, ProcessVariableOperation> getVariablesFromTask(final JavaReaderStatic javaReaderStatic,
-			final FileScanner fileScanner, final BpmnElement element, final ControlFlowGraph controlFlowGraph) {
+																				final BpmnElement element, final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
@@ -837,7 +813,7 @@ public final class ProcessVariableReader {
 					BpmnConstants.ATTR_EX);
 			if (t_expression != null) {
 
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 						t_expression, element, ElementChapter.Implementation, KnownElementFieldType.Expression, scopeId));
 			}
 
@@ -845,7 +821,7 @@ public final class ProcessVariableReader {
 					BpmnConstants.ATTR_DEL);
 			if (t_delegateExpression != null) {
 				processVariables.putAll(
-						findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner, t_delegateExpression,
+						findVariablesInExpression(javaReaderStatic, controlFlowGraph, t_delegateExpression,
 								element, ElementChapter.Implementation, KnownElementFieldType.DelegateExpression, scopeId));
 			}
 
@@ -853,7 +829,7 @@ public final class ProcessVariableReader {
 					.getFieldInjectionExpression(baseElement.getId());
 			if (t_fieldInjectionExpressions != null && !t_fieldInjectionExpressions.isEmpty()) {
 				for (String t_fieldInjectionExpression : t_fieldInjectionExpressions)
-					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 							t_fieldInjectionExpression, element, ElementChapter.FieldInjections,
 							KnownElementFieldType.Expression, scopeId));
 			}
@@ -867,7 +843,7 @@ public final class ProcessVariableReader {
 			}
 
 			if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS) != null) {
-				processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
+				processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(
 						baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS),
 						element, ElementChapter.Implementation, KnownElementFieldType.Class, scopeId, controlFlowGraph));
 			}
@@ -888,25 +864,25 @@ public final class ProcessVariableReader {
 			final UserTask userTask = (UserTask) baseElement;
 			final String assignee = userTask.getCamundaAssignee();
 			if (assignee != null)
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 						assignee, element, ElementChapter.Details, KnownElementFieldType.Assignee, scopeId));
 			final String candidateUsers = userTask.getCamundaCandidateUsers();
 			if (candidateUsers != null)
 				processVariables.putAll(
-						findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner, candidateUsers,
+						findVariablesInExpression(javaReaderStatic, controlFlowGraph, candidateUsers,
 								element, ElementChapter.Details, KnownElementFieldType.CandidateUsers, scopeId));
 			final String candidateGroups = userTask.getCamundaCandidateGroups();
 			if (candidateGroups != null)
 				processVariables.putAll(
-						findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner, candidateGroups,
+						findVariablesInExpression(javaReaderStatic, controlFlowGraph, candidateGroups,
 								element, ElementChapter.Details, KnownElementFieldType.CandidateGroups, scopeId));
 			final String dueDate = userTask.getCamundaDueDate();
 			if (dueDate != null)
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 						dueDate, element, ElementChapter.Details, KnownElementFieldType.DueDate, scopeId));
 			final String followUpDate = userTask.getCamundaFollowUpDate();
 			if (followUpDate != null)
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 						followUpDate, element, ElementChapter.Details, KnownElementFieldType.FollowUpDate, scopeId));
 
 		} else if (baseElement instanceof ScriptTask) {
@@ -937,20 +913,20 @@ public final class ProcessVariableReader {
 			final CallActivity callActivity = (CallActivity) baseElement;
 			final String calledElement = callActivity.getCalledElement();
 			if (calledElement != null && calledElement.trim().length() > 0) {
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 						calledElement, element, ElementChapter.Details, KnownElementFieldType.CalledElement, scopeId));
 			}
 			final String caseRef = callActivity.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
 					BpmnConstants.CASE_REF);
 			if (caseRef != null && caseRef.trim().length() > 0) {
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 						caseRef, element, ElementChapter.Details, KnownElementFieldType.CaseRef, scopeId));
 			}
 		}
 
 		// Check multi instance attributes
 		processVariables
-				.putAll(searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, controlFlowGraph));
+				.putAll(searchVariablesInMultiInstanceTask(javaReaderStatic, element, controlFlowGraph));
 
 		return processVariables;
 	}
@@ -960,8 +936,6 @@ public final class ProcessVariableReader {
 	 *
 	 * @param javaReaderStatic
 	 *            Static java reader
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param element
 	 *            BpmnElement
 	 * @param controlFlowGraph
@@ -969,7 +943,7 @@ public final class ProcessVariableReader {
 	 * @return variables
 	 */
 	private ListMultimap<String, ProcessVariableOperation> searchVariablesInMultiInstanceTask(
-			final JavaReaderStatic javaReaderStatic, final FileScanner fileScanner, final BpmnElement element,
+			final JavaReaderStatic javaReaderStatic, final BpmnElement element,
 			final ControlFlowGraph controlFlowGraph) {
 
 		final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
@@ -1002,7 +976,7 @@ public final class ProcessVariableReader {
 			if (loopCardinality != null) {
 				final String cardinality = loopCardinality.getTextContent();
 				if (cardinality != null && cardinality.trim().length() > 0) {
-					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 							cardinality, element, ElementChapter.MultiInstance, KnownElementFieldType.LoopCardinality,
 							scopeId));
 				}
@@ -1012,7 +986,7 @@ public final class ProcessVariableReader {
 			if (completionCondition != null) {
 				final String completionConditionExpression = completionCondition.getTextContent();
 				if (completionConditionExpression != null && completionConditionExpression.trim().length() > 0) {
-					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+					processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph,
 							completionConditionExpression, element, ElementChapter.MultiInstance,
 							KnownElementFieldType.CompletionCondition, scopeId));
 				}
@@ -1097,8 +1071,6 @@ public final class ProcessVariableReader {
 	 *            Static java reader
 	 * @param controlFlowGraph
 	 *            CFG
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param expression
 	 *            Expression
 	 * @param element
@@ -1113,7 +1085,7 @@ public final class ProcessVariableReader {
 	 */
 	private ListMultimap<String, ProcessVariableOperation> findVariablesInExpression(
 			final JavaReaderStatic javaReaderStatic, final ControlFlowGraph controlFlowGraph,
-			final FileScanner fileScanner, final String expression, final BpmnElement element,
+			final String expression, final BpmnElement element,
 			final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -1140,7 +1112,7 @@ public final class ProcessVariableReader {
 				final String className = isBean(node.getName());
 				if (className != null) {
 					// read variables in class file (bean)
-					variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner, className, element,
+					variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(className, element,
 							chapter, fieldType, scopeId, controlFlowGraph));
 				} else {
 					// save variable
@@ -1171,8 +1143,6 @@ public final class ProcessVariableReader {
 	 *            Expression
 	 * @param element
 	 *            BpmnElement
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param chapter
 	 *            ElementChapter
 	 * @param fieldType
@@ -1185,7 +1155,7 @@ public final class ProcessVariableReader {
 	 */
 	private ListMultimap<String, ProcessVariableOperation> checkMessageAndSignalForExpression(
 			final JavaReaderStatic javaReaderStatic, final String expression, final BpmnElement element,
-			final FileScanner fileScanner, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String scopeId, final ControlFlowGraph controlFlowGraph) {
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		try {
@@ -1197,7 +1167,7 @@ public final class ProcessVariableReader {
 			// subsequent process variables
 			if (matcher.matches()) {
 				if (isBean(matcher.group(1)) != null) {
-					variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
+					variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(
 							isBean(matcher.group(1)), element, chapter, fieldType, scopeId, controlFlowGraph));
 				} else {
 					variables.put(expression, new ProcessVariableOperation(expression, element, chapter, fieldType,
@@ -1224,8 +1194,6 @@ public final class ProcessVariableReader {
 	 *            Variable name
 	 * @param element
 	 *            BpmnElement
-	 * @param fileScanner
-	 *            FileScanner
 	 * @param chapter
 	 *            ElementChapter
 	 * @param fieldType
@@ -1238,7 +1206,7 @@ public final class ProcessVariableReader {
 	 */
 	private ListMultimap<String, ProcessVariableOperation> checkExpressionForReadVariable(
 			final JavaReaderStatic javaReaderStatic, final String expression, final String name,
-			final BpmnElement element, final FileScanner fileScanner, final ElementChapter chapter,
+			final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, final ControlFlowGraph controlFlowGraph) {
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		try {
@@ -1252,7 +1220,7 @@ public final class ProcessVariableReader {
 			// create READ operation
 			if (matcher.matches()) {
 				if (isBean(matcher.group(1)) != null) {
-					variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
+					variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(
 							isBean(matcher.group(1)), element, chapter, fieldType, scopeId, controlFlowGraph));
 				} else {
 					variables.put(name, new ProcessVariableOperation(name, element, chapter, fieldType,

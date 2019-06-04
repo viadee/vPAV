@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -46,9 +47,7 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -66,7 +65,7 @@ public class ProcessVariablesModelCheckerTest {
 	private static ClassLoader cl;
 
 	@BeforeClass
-	public static void setup() throws ParserConfigurationException, SAXException, IOException {
+	public static void setup() throws IOException {
 		RuntimeConfig.getInstance().setTest(true);
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
@@ -84,16 +83,21 @@ public class ProcessVariablesModelCheckerTest {
 		// parse bpmn model
 		modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+
+		BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+		ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
+
 		// create data flow graphs
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
 				processDefinition.getPath(), new ArrayList<String>(), scanner);
 
 		// calculate invalid paths based on data flow graphs
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
 		final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
-		checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+		checker = new ProcessVariablesModelChecker(rule, null, graphBuilder);
+		((ProcessVariablesModelChecker) checker).setInvalidPathsMap(invalidPathMap);
 	}
 
 	/**

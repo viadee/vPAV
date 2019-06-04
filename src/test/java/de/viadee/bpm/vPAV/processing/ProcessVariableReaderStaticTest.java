@@ -94,7 +94,7 @@ public class ProcessVariableReaderStaticTest {
         final ControlFlowGraph cg = new ControlFlowGraph();
     	final FileScanner fileScanner = new FileScanner(new HashMap<>());
     	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+        variables.putAll(new JavaReaderStatic(fileScanner).getVariablesFromJavaDelegate(
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, cg));
 
         assertEquals(3, variables.asMap().size());
@@ -144,7 +144,7 @@ public class ProcessVariableReaderStaticTest {
         ConfigConstants.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+        variables.putAll(new JavaReaderStatic(fileScanner).getVariablesFromJavaDelegate(
                 "de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, null, null, null, cg));
         assertEquals(2, variables.values().size());
 
@@ -167,7 +167,7 @@ public class ProcessVariableReaderStaticTest {
         ConfigConstants.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+        variables.putAll(new JavaReaderStatic(fileScanner).getVariablesFromJavaDelegate(
                 "de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, cg));
         assertEquals(2, variables.values().size());
     }
@@ -191,9 +191,12 @@ public class ProcessVariableReaderStaticTest {
 
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
+
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);

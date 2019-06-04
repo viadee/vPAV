@@ -92,12 +92,12 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH), fileScanner);
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+        variables.putAll(variableReader.getVariablesFromElement(element, cg));
 
         Assert.assertEquals(3, variables.asMap().size());
     }

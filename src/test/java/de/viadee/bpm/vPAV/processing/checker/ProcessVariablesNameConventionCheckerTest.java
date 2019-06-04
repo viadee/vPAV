@@ -125,10 +125,10 @@ public class ProcessVariablesNameConventionCheckerTest {
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
             final ControlFlowGraph cg = new ControlFlowGraph();
-            ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
+            ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH), fileScanner);
             
             final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-            variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+            variables.putAll(variableReader.getVariablesFromElement(element, cg));
             
             element.setProcessVariables(variables);
 
@@ -161,10 +161,11 @@ public class ProcessVariablesNameConventionCheckerTest {
         for (final BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
             final ControlFlowGraph cg = new ControlFlowGraph();
-            ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
+            ProcessVariableReader variableReader = new ProcessVariableReader(null, new Rule("ProcessVariableReader", true, null,
+                    null, null, null), new BpmnScanner(PATH), fileScanner);
             
             final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-            variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+            variables.putAll(variableReader.getVariablesFromElement(element, cg));
             
             element.setProcessVariables(variables);
 

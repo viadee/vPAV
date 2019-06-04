@@ -80,7 +80,7 @@ public class StaticInterProceduralTest {
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+		variables.putAll(new JavaReaderStatic(fileScanner).getVariablesFromJavaDelegate(
 				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, cg));
 
 		// Then

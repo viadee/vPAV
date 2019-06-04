@@ -103,12 +103,12 @@ public class ProcessVariableReaderTest {
         final Collection<ServiceTask> allServiceTasks = modelInstance
                 .getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH), fileScanner);
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+        variables.putAll(variableReader.getVariablesFromElement(element, cg));
 
         Assert.assertEquals(2, variables.size());
     }
@@ -124,12 +124,12 @@ public class ProcessVariableReaderTest {
         final Collection<CallActivity> allServiceTasks = modelInstance
                 .getModelElementsByType(CallActivity.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH), fileScanner);
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph());
         final ControlFlowGraph cg = new ControlFlowGraph();
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+        variables.putAll(variableReader.getVariablesFromElement(element, cg));
 
         final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables
                 .get("nameOfVariableInMainProcess");
@@ -164,9 +164,11 @@ public class ProcessVariableReaderTest {
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
         final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, rule, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -189,9 +191,11 @@ public class ProcessVariableReaderTest {
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
         final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, rule, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -201,7 +205,7 @@ public class ProcessVariableReaderTest {
     }
 
     @Test
-    public void testRecogniseLinks() throws IOException, ParserConfigurationException, SAXException {
+    public void testRecogniseLinks() {
         final String PATH = BASE_PATH + "ProcessVariablesReader_LinkVariables.bpmn";
         final File processDefinition = new File(PATH);
         final FileScanner fileScanner = new FileScanner(new HashMap<>());
@@ -214,9 +218,11 @@ public class ProcessVariableReaderTest {
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
         final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, rule, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);

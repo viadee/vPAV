@@ -101,9 +101,11 @@ public class ProcessVariableMappingTest {
 
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -136,9 +138,12 @@ public class ProcessVariableMappingTest {
 
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
+
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -171,9 +176,12 @@ public class ProcessVariableMappingTest {
 
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -206,9 +214,11 @@ public class ProcessVariableMappingTest {
 
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -240,9 +250,12 @@ public class ProcessVariableMappingTest {
 
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
+
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -275,9 +288,12 @@ public class ProcessVariableMappingTest {
 
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
+
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
@@ -311,9 +327,11 @@ public class ProcessVariableMappingTest {
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
         final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
+        BpmnScanner bpmnScanner = new BpmnScanner(PATH);
+        ProcessVariableReader reader = new ProcessVariableReader(null, rule, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(bpmnScanner, reader);
         // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        graphBuilder.createProcessGraph(modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner);
 
         final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);

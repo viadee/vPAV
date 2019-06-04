@@ -125,6 +125,11 @@ public class CheckerFactory {
         return checkers;
     }
 
+    public Collection<ModelChecker> createModelCheckerInstances() {
+        final Collection<ModelChecker> checkers = new ArrayList<>();
+        return checkers;
+    }
+
     /**
      * get the fullyQualifiedName of the rule
      *

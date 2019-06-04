@@ -34,8 +34,6 @@ package de.viadee.bpm.vPAV.config.reader;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.*;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.checker.DataFlowChecker;
-import de.viadee.bpm.vPAV.processing.checker.ProcessVariablesModelChecker;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -205,13 +203,14 @@ public final class XmlConfigReader implements ConfigReader {
         checkSingletonRule(rules, ConfigConstants.CREATE_OUTPUT_RULE);
         checkSingletonRule(rules, "language");
 
-        if (ProcessVariablesModelChecker.isSingletonChecker()) {
+        // TODO enable this check again later
+       /* if (ProcessVariablesModelChecker.isSingletonChecker()) {
             checkSingletonRule(rules, ProcessVariablesModelChecker.class.getSimpleName());
         }
 
         if (DataFlowChecker.isSingletonChecker()) {
             checkSingletonRule(rules, DataFlowChecker.class.getSimpleName());
-        }
+        } */
 
         return rules;
     }
