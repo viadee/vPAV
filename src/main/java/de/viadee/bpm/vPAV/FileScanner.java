@@ -115,6 +115,11 @@ public class FileScanner {
         scanner.scan();
         processDefinitions = new HashSet<String>(Arrays.asList(scanner.getIncludedFiles()));
 
+        if (processDefinitions.size() < 1) {
+            LOGGER.log(Level.SEVERE, "No model present in given location (" + basepath + ")");
+            System.exit(0);
+        }
+
         scanPath = ConfigConstants.getInstance().getScanPath();
         filePattern = ConfigConstants.getInstance().getFilePattern();
 
@@ -131,7 +136,6 @@ public class FileScanner {
             scanner.scan();
             resourcesFileInputStream.addAll(Arrays.asList(scanner.getIncludedFiles()));
         }
-
 
         // get mapping from process id to file path
         processIdToPathMap = createProcessIdToPathMap(processDefinitions);
@@ -221,8 +225,6 @@ public class FileScanner {
                 }
             }
         }
-
-
     }
 
     /**
