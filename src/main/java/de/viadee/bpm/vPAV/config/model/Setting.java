@@ -39,7 +39,7 @@ public class Setting {
 
     private String value;
 
-    private ArrayList<String> scriptPlaces = new ArrayList<String>();
+    private ArrayList<String> scriptPlaces = new ArrayList<>();
 
     private String type;
 

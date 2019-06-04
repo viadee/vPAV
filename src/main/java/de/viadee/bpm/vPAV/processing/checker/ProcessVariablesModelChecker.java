@@ -31,13 +31,22 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -47,18 +56,28 @@ public class ProcessVariablesModelChecker extends AbstractModelChecker {
 
 	private Map<AnomalyContainer, List<Path>> invalidPathsMap;
 
-	public ProcessVariablesModelChecker(Rule rule, Collection<ProcessVariable> processVariables, ElementGraphBuilder graphBuilder) {
-		super(rule, processVariables, graphBuilder);
+	public ProcessVariablesModelChecker(Rule rule, BpmnScanner bpmnScanner, File processDefinition, FileScanner fileScanner,
+										ProcessVariablesScanner variablesScanner) {
+		super(rule, bpmnScanner, processDefinition, fileScanner, variablesScanner);
+		this.setupChecker();
 	}
 
-	public void setInvalidPathsMap(Map<AnomalyContainer, List<Path>> invalidPathsMap) {
-		this.invalidPathsMap = invalidPathsMap;
-	}
+	private void setupChecker() {
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+		ProcessVariableReader variableReader = new ProcessVariableReader(rule, bpmnScanner, fileScanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(
+				variablesScanner.getMessageIdToVariableMap(), variablesScanner.getProcessIdToVariableMap(), bpmnScanner, variableReader, fileScanner);
+		// create data flow graphs for bpmn model
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(modelInstance,
+				processDefinition.getPath(), new ArrayList<>(), variablesScanner);
 
-/*	public ProcessVariablesModelChecker(final Rule rule, final Map<AnomalyContainer, List<Path>> invalidPathsMap) {
-		this.rule = rule;
-		this.invalidPathsMap = invalidPathsMap;
-	} */
+		// analyze data flows
+		final FlowAnalysis flowAnalysis = new FlowAnalysis();
+		flowAnalysis.analyze(graphCollection);
+
+		// calculate invalid paths
+		invalidPathsMap = graphBuilder.createInvalidPaths(graphCollection);
+	}
 
 	/**
 	 * Checks variables of a given process and identifies read/write/delete

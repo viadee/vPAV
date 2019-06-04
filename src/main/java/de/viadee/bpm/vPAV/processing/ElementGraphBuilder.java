@@ -84,12 +84,11 @@ public class ElementGraphBuilder {
         this.reader = reader;
     }
 
-    public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
-                               final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
+    public ElementGraphBuilder(final Map<String, Collection<String>> messageIdToVariables,
                                final Map<String, Collection<String>> processIdToVariables, BpmnScanner bpmnScanner,
                                final ProcessVariableReader reader, final FileScanner fileScanner) {
-        this.decisionRefToPathMap = decisionRefToPathMap;
-        this.processIdToPathMap = processIdToPathMap;
+        this.decisionRefToPathMap = fileScanner.getDecisionRefToPathMap();
+        this.processIdToPathMap = fileScanner.getProcessIdToPathMap();
         this.messageIdToVariables = messageIdToVariables;
         this.processIdToVariables = processIdToVariables;
         this.bpmnScanner = bpmnScanner;

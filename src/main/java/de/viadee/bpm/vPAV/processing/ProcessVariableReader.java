@@ -87,9 +87,9 @@ public final class ProcessVariableReader {
 
 	public static final Logger LOGGER = Logger.getLogger(ProcessVariableReader.class.getName());
 
-	public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, final Rule rule, BpmnScanner scanner,
+	public ProcessVariableReader(final Rule rule, BpmnScanner scanner,
 								 final FileScanner fileScanner) {
-		this.decisionRefToPathMap = decisionRefToPathMap;
+		this.decisionRefToPathMap = fileScanner.getDecisionRefToPathMap();
 		this.rule = rule;
 		this.bpmnScanner = scanner;
 		this.fileScanner = fileScanner;

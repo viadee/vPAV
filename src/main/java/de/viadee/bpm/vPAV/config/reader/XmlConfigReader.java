@@ -59,7 +59,7 @@ public final class XmlConfigReader implements ConfigReader {
      * @throws ConfigReaderException If file can not be found in classpath
      */
     @Override
-    public Map<String, Map<String, Rule>> read(final String file) throws ConfigReaderException {
+    public RuleSet read(final String file) throws ConfigReaderException {
 
         try {
             final JAXBContext jaxbContext = JAXBContext.newInstance(XmlRuleSet.class);
@@ -83,8 +83,10 @@ public final class XmlConfigReader implements ConfigReader {
      *
      * @return rules
      */
-    public Map<String, Map<String, Rule>> getDeactivatedRuleSet() {
-        final Map<String, Map<String, Rule>> rules = new HashMap<>();
+    public RuleSet getDeactivatedRuleSet() {
+        final Map<String, Map<String, Rule>> elementRules = new HashMap<>();
+        // TODO split element and model rules
+        final Map<String, Map<String, Rule>> modelRules = new HashMap<>();
         Map<String, Rule> newrule;
 
         for (String name : RuntimeConfig.getInstance().getViadeeRules()) {
@@ -97,9 +99,9 @@ public final class XmlConfigReader implements ConfigReader {
                                 name,
                                 true,
                                 null,
-                                new HashMap<String, Setting>(),
-                                new ArrayList<ElementConvention>(),
-                                new ArrayList<ModelConvention>()));
+                                new HashMap<>(),
+                                new ArrayList<>(),
+                                new ArrayList<>()));
             } else {
                 newrule.put(
                         name,
@@ -107,14 +109,14 @@ public final class XmlConfigReader implements ConfigReader {
                                 name,
                                 false,
                                 null,
-                                new HashMap<String, Setting>(),
-                                new ArrayList<ElementConvention>(),
-                                new ArrayList<ModelConvention>()));
+                                new HashMap<>(),
+                                new ArrayList<>(),
+                                new ArrayList<>()));
             }
-            rules.put(name, newrule);
+            elementRules.put(name, newrule);
         }
 
-        return rules;
+        return new RuleSet(elementRules, modelRules);
     }
 
     /**
@@ -124,9 +126,10 @@ public final class XmlConfigReader implements ConfigReader {
      * @return rules
      * @throws ConfigReaderException If file could not be read properly
      */
-    private static Map<String, Map<String, Rule>> transformFromXmlDatastructues(
+    private static RuleSet transformFromXmlDatastructues(
             final XmlRuleSet ruleSet) throws ConfigReaderException {
-        final Map<String, Map<String, Rule>> rules = new HashMap<>();
+        final Map<String, Map<String, Rule>> elementRules = new HashMap<>();
+        final Map<String, Map<String, Rule>> modelRules = new HashMap<>();
 
         final Collection<XmlRule> xmlRules = ruleSet.getRules();
         for (final XmlRule rule : xmlRules) {

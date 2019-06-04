@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.config.reader;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
 
@@ -50,6 +51,18 @@ public class XmlRuleSet {
 
   @XmlElement(name = "rule", type = XmlRule.class)
   public Collection<XmlRule> getRules() {
+    return rules;
+  }
+
+  @XmlElementWrapper(name = "elementRules")
+  @XmlElement(name = "rule", type = XmlRule.class)
+  public Collection<XmlRule> getElementRules() {
+    return rules;
+  }
+
+  @XmlElementWrapper(name = "modelRules")
+  @XmlElement(name = "rule", type = XmlRule.class)
+  public Collection<XmlRule> getModelRules() {
     return rules;
   }
 

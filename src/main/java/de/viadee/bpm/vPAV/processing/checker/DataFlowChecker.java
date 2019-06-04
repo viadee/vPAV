@@ -31,25 +31,49 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
+import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
+import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class DataFlowChecker implements ModelChecker {
+public class DataFlowChecker extends AbstractModelChecker {
 
     private Rule rule;
     private Collection<DataFlowRule> dataFlowRules;
     private Collection<ProcessVariable> processVariables;
 
-    public DataFlowChecker(final Rule rule, final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables) {
-        this.rule = rule;
-        this.dataFlowRules = dataFlowRules;
-        this.processVariables = processVariables;
+    public DataFlowChecker(Rule rule, BpmnScanner bpmnScanner, File processDefinition, FileScanner fileScanner,
+                           ProcessVariablesScanner variablesScanner) {
+        super(rule, bpmnScanner, processDefinition, fileScanner, variablesScanner);
+        this.setupChecker();
+    }
+
+    private void setupChecker() {
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // hold bpmn elements
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        ProcessVariableReader variableReader = new ProcessVariableReader(rule, bpmnScanner, fileScanner);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(
+                variablesScanner.getMessageIdToVariableMap(), variablesScanner.getProcessIdToVariableMap(), bpmnScanner, variableReader, fileScanner);
+        // Data flow checker
+        final Collection<BpmnElement> bpmnElements = BpmnModelDispatcher.getBpmnElements(processDefinition, baseElements, graphBuilder);
+        processVariables = BpmnModelDispatcher.getProcessVariables(bpmnElements);
     }
 
     @Override

@@ -31,20 +31,28 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 
-import java.util.Collection;
+import java.io.File;
 
 public abstract class AbstractModelChecker implements ModelChecker {
     final protected Rule rule;
-    final protected Collection<ProcessVariable> processVariables;
-    final protected ElementGraphBuilder graphBuilder;
+    final protected BpmnScanner bpmnScanner;
+    final protected File processDefinition;
+    final protected FileScanner fileScanner;
+    final protected ProcessVariablesScanner variablesScanner;
 
-    public AbstractModelChecker(final Rule rule,  final Collection<ProcessVariable> processVariables, final ElementGraphBuilder graphBuilder) {
+    // Bpmn Scanner
+    public AbstractModelChecker(final Rule rule, final BpmnScanner bpmnScanner, final File processDefinition,
+                                final FileScanner fileScanner, final ProcessVariablesScanner variablesScanner) {
         this.rule = rule;
-        this.processVariables = processVariables;
-        this.graphBuilder = graphBuilder;
+        this.bpmnScanner = bpmnScanner;
+        this.processDefinition = processDefinition;
+        this.fileScanner = fileScanner;
+        this.variablesScanner = variablesScanner;
+
     }
 }
