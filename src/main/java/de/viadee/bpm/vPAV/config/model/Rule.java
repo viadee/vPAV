@@ -51,6 +51,10 @@ public class Rule {
 
     private ArrayList<ModelConvention> modelConventions;
 
+    private boolean isInternalRule = true;
+
+    private boolean isElementRule = true;
+
     public Rule(final String name, final boolean isActive, final String ruleDescription,
             final Map<String, Setting> settings,
             final Collection<ElementConvention> elementConventions,
@@ -119,5 +123,15 @@ public class Rule {
 
     public void deactivate() {
         isActive = false;
+    }
+
+    public boolean isInternalRule() {
+        // TODO
+        return isInternalRule;
+    }
+
+    public boolean isElementRule() {
+        // TODO
+        return isElementRule;
     }
 }

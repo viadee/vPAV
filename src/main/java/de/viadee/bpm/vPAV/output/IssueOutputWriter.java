@@ -31,12 +31,13 @@
  */
 package de.viadee.bpm.vPAV.output;
 
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
 import java.util.Collection;
 
 public interface IssueOutputWriter {
 
-    void write(final Collection<CheckerIssue> issues) throws OutputWriterException;
+    void write(final Collection<CheckerIssue> issues, final RuleSet ruleSet) throws OutputWriterException;
 
 }

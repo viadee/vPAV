@@ -34,21 +34,35 @@ package de.viadee.bpm.vPAV.config.reader;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @XmlRootElement(name = "ruleSet")
 public class XmlRuleSet {
 
   private Collection<XmlRule> rules;
+  private Collection<XmlRule> elementRules;
+  private Collection<XmlRule> modelRules;
 
   public XmlRuleSet() {
   }
 
+  // Todo delete this in future - will break backwards compatibility
   public XmlRuleSet(Collection<XmlRule> rules) {
     super();
     this.rules = rules;
+    this.elementRules = new ArrayList<>();
+    this.modelRules = new ArrayList<>();
   }
 
+  public XmlRuleSet(Collection<XmlRule> elementRules, Collection<XmlRule> modelRules) {
+    super();
+    this.rules = new ArrayList<>();
+    this.elementRules = elementRules;
+    this.modelRules = modelRules;
+  }
+
+  // Todo delete this in future - will break backwards compatibility
   @XmlElement(name = "rule", type = XmlRule.class)
   public Collection<XmlRule> getRules() {
     return rules;
@@ -57,16 +71,19 @@ public class XmlRuleSet {
   @XmlElementWrapper(name = "elementRules")
   @XmlElement(name = "rule", type = XmlRule.class)
   public Collection<XmlRule> getElementRules() {
-    return rules;
+    return elementRules;
   }
 
   @XmlElementWrapper(name = "modelRules")
   @XmlElement(name = "rule", type = XmlRule.class)
   public Collection<XmlRule> getModelRules() {
-    return rules;
+    return modelRules;
   }
 
-  public void setRules(Collection<XmlRule> rules) {
-    this.rules = rules;
+  public void setElementRules(Collection<XmlRule> rules) {
+    this.elementRules = rules;
+  }
+  public void setModelRules(Collection<XmlRule> rules) {
+    this.modelRules = rules;
   }
 }

@@ -35,6 +35,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -51,6 +53,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Create the JavaScript file for HTML-output; Needs: issues and bpmnFile names
@@ -69,15 +72,15 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * Writes the output as JavaScript to the vPAV output folder
 	 */
 	@Override
-	public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
+	public void write(final Collection<CheckerIssue> issues, final RuleSet ruleSet) throws OutputWriterException {
 
 		final String json = transformToJsonDatastructure(issues, BpmnConstants.VPAV_ELEMENTS_TO_MARK);
-		final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
+		final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues, ruleSet),
 				BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
 		final String bpmn = transformToXMLDatastructure();
 		final String wrongCheckers = transformToJsDatastructure(getWrongCheckersMap());
 		final String defaultCheckers = transformDefaultRulesToJsDatastructure(
-				extractExternalCheckers(RuntimeConfig.getInstance().getActiveRules()));
+				extractExternalCheckers(ruleSet.getAllActiveRules()));
 		final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
 		final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
 		final String properties = transformPropertiesToJsonDatastructure();
@@ -122,14 +125,11 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 *            Active RuleSet
 	 * @return List of external configured checkers
 	 */
-	private ArrayList<String> extractExternalCheckers(final ArrayList<String> activeRules) {
-		final ArrayList<String> defaultRules = new ArrayList<>();
-		for (String entry : RuntimeConfig.getInstance().getViadeeRules()) {
-			if (activeRules.contains(entry)) {
-				defaultRules.add(entry);
-			}
-		}
-		return defaultRules;
+	private Map<String, Map<String, Rule>> extractExternalCheckers(final Map<String, Map<String, Rule>> activeRules) {
+		return activeRules.entrySet().stream().filter(
+				e -> e.getValue().entrySet().stream().noneMatch(
+						r -> r.getValue().isInternalRule()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	/**
@@ -333,7 +333,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 *            list of all issues
 	 * @return list with checkers without issues
 	 */
-	private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues) {
+	private Collection<CheckerIssue> getNoIssues(final Collection<CheckerIssue> issues, RuleSet ruleSet) {
 		Collection<CheckerIssue> newIssues = new ArrayList<>();
 
 		for (final String bpmnFilename : getModelPaths()) {
@@ -345,7 +345,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 					modelIssues.remove(issue);
 			}
 
-			for (final String ruleName : RuntimeConfig.getInstance().getActiveRules()) {
+			// TODO different checker instantiations are not handled, all issues are mapped to the general checker
+			for (final String ruleName : ruleSet.getAllActiveRules().keySet()) {
 				Collection<CheckerIssue> ruleIssues = new ArrayList<>(modelIssues);
 				for (CheckerIssue issue : modelIssues) {
 					if (!issue.getRuleName().equals(ruleName))
@@ -589,6 +590,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the default checkers
 	 */
 	private String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
+		// TODO handle multiple instantiations ?!
 		final String varName = "defaultCheckers";
 		final JsonArray jsonIssues = new JsonArray();
 		if (defaultCheckers != null && defaultCheckers.size() > 0) {

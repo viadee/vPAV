@@ -59,7 +59,7 @@ public class RuleSetOutputWriter {
      * @throws OutputWriterException
      *             Occurs if output can not be written
      */
-    public void write(Map<String, Map<String, Rule>> rules) throws OutputWriterException {
+    public void write(RuleSet rules) throws OutputWriterException {
         Writer writer = null;
 
         Path path = Paths.get(ConfigConstants.EFFECTIVE_RULESET);
@@ -94,11 +94,19 @@ public class RuleSetOutputWriter {
      * @param rules
      * @return xmlRuleSet
      */
-    private static XmlRuleSet transformToXmlDatastructure(final Map<String, Map<String, Rule>> rules) {
+    private static XmlRuleSet transformToXmlDatastructure(final RuleSet rules) {
         XmlRuleSet xmlRuleSet = new XmlRuleSet();
-        Collection<XmlRule> xmlRules = new ArrayList<XmlRule>();
+        Collection<XmlRule> elementRules = transformRuleMapToXml(rules.getElementRules());
+        Collection<XmlRule> modelRules = transformRuleMapToXml(rules.getModelRules());
 
-        for (Map.Entry<String, Map<String, Rule>> entry : rules.entrySet()) {
+        xmlRuleSet.setElementRules(elementRules);
+        xmlRuleSet.setModelRules(modelRules);
+        return xmlRuleSet;
+    }
+
+    private static Collection<XmlRule> transformRuleMapToXml(Map<String, Map<String, Rule>> ruleMap) {
+        Collection<XmlRule> xmlRuleCollection = new ArrayList<>();
+        for (Map.Entry<String, Map<String, Rule>> entry : ruleMap.entrySet()) {
             for (Map.Entry<String, Rule> ruleEntry : entry.getValue().entrySet()) {
                 Rule rule = ruleEntry.getValue();
 
@@ -128,7 +136,7 @@ public class RuleSetOutputWriter {
                 }
 
                 // Get XmlSettings
-                Collection<XmlSetting> xSettings = new ArrayList<XmlSetting>();
+                Collection<XmlSetting> xSettings = new ArrayList<>();
                 for (Map.Entry<String, Setting> sEntry : rule.getSettings().entrySet()) {
                     Setting s = sEntry.getValue();
 
@@ -153,10 +161,9 @@ public class RuleSetOutputWriter {
                         xModelConventions.isEmpty() ? null : xModelConventions);
 
                 // add xmlRule to Collection
-                xmlRules.add(xRule);
+                xmlRuleCollection.add(xRule);
             }
         }
-        xmlRuleSet.setRules(xmlRules);
-        return xmlRuleSet;
+        return xmlRuleCollection;
     }
 }

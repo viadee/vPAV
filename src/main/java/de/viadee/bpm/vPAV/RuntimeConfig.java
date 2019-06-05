@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.springframework.context.ApplicationContext;
@@ -43,177 +44,153 @@ import java.util.logging.Logger;
 
 public class RuntimeConfig {
 
-	private static RuntimeConfig instance;
+    private static RuntimeConfig instance;
 
-	private ApplicationContext ctx;
+    private ApplicationContext ctx;
 
-	private Map<String, String> beanMap;
+    private Map<String, String> beanMap;
 
-	private Map<String, Map<String, Rule>> activeRuleSet = new HashMap<>();
+    private ClassLoader classLoader;
 
-	private ClassLoader classLoader;
+    private ResourceBundle resourceBundle;
 
-	private ResourceBundle resourceBundle;
+    private boolean test = false; // TODO: Replace with parameterized method calls, to improve separation of test
+    // and production code
 
-	private boolean test = false; // TODO: Replace with parameterized method calls, to improve separation of test
-									// and production code
+    private static Logger logger = Logger.getLogger(RuntimeConfig.class.getName());
 
-	private static Logger logger = Logger.getLogger(RuntimeConfig.class.getName());
+    private final String[] viadeeElementRules = {"XorConventionChecker", "TimerExpressionChecker", "JavaDelegateChecker",
+            "NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker", "VersioningChecker",
+            "DmnTaskChecker", "ProcessVariablesNameConventionChecker",
+            "TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
+            "BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker", "MessageCorrelationChecker",};
+    private final String[] viadeeModelRules = {
+            "ProcessVariablesModelChecker", "DataFlowChecker"
+    };
+    private final String[] viadeePropertiesRules = {
+            "CreateOutputHTML"
+    };
 
-	private final String[] viadeeRules = { "XorConventionChecker", "TimerExpressionChecker", "JavaDelegateChecker",
-			"NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker", "VersioningChecker",
-			"DmnTaskChecker", "ProcessVariablesModelChecker", "ProcessVariablesNameConventionChecker",
-			"TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
-			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
-			"DataFlowChecker", "MessageCorrelationChecker", "CreateOutputHTML"};
+    private RuntimeConfig() {
+    }
 
-	private ArrayList<String> allActiveRules = new ArrayList<>();
+    public static RuntimeConfig getInstance() {
+        if (RuntimeConfig.instance == null) {
+            RuntimeConfig.instance = new RuntimeConfig();
+        }
+        return RuntimeConfig.instance;
+    }
 
-	private RuntimeConfig() {
-	}
+    public String findBeanByName(String string) {
+        if (string != null && !string.isEmpty() && beanMap != null && !beanMap.isEmpty()) {
+            return beanMap.get(string);
+        } else
+            return null;
+    }
 
-	public static RuntimeConfig getInstance() {
-		if (RuntimeConfig.instance == null) {
-			RuntimeConfig.instance = new RuntimeConfig();
-		}
-		return RuntimeConfig.instance;
-	}
+    public void setBeanMapping(Map<String, String> beanMap) {
+        this.beanMap = beanMap;
+    }
 
-	public String findBeanByName(String string) {
-		if (string != null && !string.isEmpty() && beanMap != null && !beanMap.isEmpty()) {
-			return beanMap.get(string);
-		} else
-			return null;
-	}
+    public Map<String, String> getBeanMapping() {
+        return beanMap;
+    }
 
-	public void setBeanMapping(Map<String, String> beanMap) {
-		this.beanMap = beanMap;
-	}
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
 
-	public Map<String, String> getBeanMapping() {
-		return beanMap;
-	}
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
 
-	public void setClassLoader(ClassLoader classLoader) {
-		this.classLoader = classLoader;
-	}
+    public boolean isTest() {
+        return test;
+    }
 
-	public ClassLoader getClassLoader() {
-		return classLoader;
-	}
+    public void setTest(boolean test) {
+        this.test = test;
+    }
 
-	public boolean isTest() {
-		return test;
-	}
+    public String[] getViadeeElementRules() {
+        return viadeeElementRules;
+    }
 
-	public void setTest(boolean test) {
-		this.test = test;
-	}
+    public String[] getViadeeModelRules() {
+        return viadeeModelRules;
+    }
 
-	public ArrayList<String> getActiveRules() {
-		return allActiveRules;
-	}
+    public void setApplicationContext(ApplicationContext ctx) {
+        this.ctx = ctx;
+    }
 
-	public String[] getViadeeRules() {
-		return viadeeRules;
-	}
+    public ApplicationContext getApplicationContext() {
+        return ctx;
+    }
 
-	public void addActiveRules(Map<String, Map<String, Rule>> rules) {
-		for (Map.Entry<String, Map<String, Rule>> entry : rules.entrySet()) {
-			for (Map.Entry<String, Rule> ruleEntry : entry.getValue().entrySet()) {
-				Rule rule = ruleEntry.getValue();
-				if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET)) {
-					if (!activeRuleSet.containsKey(entry.getKey())) {
-						activeRuleSet.put(entry.getKey(), new HashMap<>());
-					}
-					activeRuleSet.get(entry.getKey()).put(ruleEntry.getKey(), ruleEntry.getValue());
-				}
+    /**
+     * Retrieve locale from ruleSet. If locale can not be retrieved, use system
+     * locale
+     *
+     * @param rules RuleSet Rules from ruleset
+     */
+    public void retrieveLocale(RuleSet rules) {
+        // Todo don't allow definition of language in rule set in future versions
+        if (rules.getLanguage() != null) {
+            if (rules.getLanguage().equals("de")) {
+                getResource("de_DE");
+            } else {
+                getResource("en_US");
+            }
+            logger.warning("Usage of 'language' rule is deprecated. Please use vpav.properties instead.");
+        } else {
+            if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
+                getResource("de_DE");
+            } else {
+                getResource("en_US");
+            }
+        }
+    }
 
-				allActiveRules.add(entry.getKey());
-			}
-		}
-	}
+    /**
+     * Set base directory and set ResourceBundle
+     *
+     * @param locale Locale extracted from ruleSet or either default system locale
+     *               Localization
+     */
+    public void getResource(final String locale) {
+        setResourceBundle(fromClassLoader("messages_" + locale));
+    }
 
-	public Map<String, Map<String, Rule>> getActiveRuleSet() {
-		return activeRuleSet;
-	}
+    /**
+     * Retrieves ResourceBundle from base directy and returns it to RuntimeConfig
+     *
+     * @param bundleName Bundle name for localization
+     * @return ResourceBundle
+     */
+    private static ResourceBundle fromClassLoader(final String bundleName) {
 
-	public void setApplicationContext(ApplicationContext ctx) {
-		this.ctx = ctx;
-	}
+        URL[] urls;
+        URLClassLoader ucl;
+        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
+        } else {
+            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
+        }
 
-	public ApplicationContext getApplicationContext() {
-		return ctx;
-	}
+        urls = ucl.getURLs();
 
-	/**
-	 * Retrieve locale from ruleSet. If locale can not be retrieved, use system
-	 * locale
-	 * 
-	 * @param rules
-	 *            RuleSet Rules from ruleset
-	 */
-	public void retrieveLocale(Map<String, Map<String, Rule>> rules) {
-		try {
-			// Todo don't allow definition of language in rule set in future versions
-			final Rule rule = rules.get("language").get("language");
-			final Map<String, Setting> settings = rule.getSettings();
-			if (settings.get("locale").getValue().equals("de")) {
-				getResource("de_DE");
-			} else if (settings.get("locale").getValue().equals("en")) {
-				getResource("en_US");
-			}
-			logger.warning("Usage of 'language' rule is deprecated. Please use vpav.properties instead.");
-		} catch (NullPointerException e) {
-			if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
-				getResource("de_DE");
-			} else {
-				getResource("en_US");
-			}
-		}
-	}
+        ClassLoader loader = new URLClassLoader(urls);
 
-	/**
-	 * Set base directory and set ResourceBundle
-	 * 
-	 * @param locale
-	 *            Locale extracted from ruleSet or either default system locale
-	 *            Localization
-	 */
-	public void getResource(final String locale) {
-		setResourceBundle(fromClassLoader("messages_" + locale));
-	}
+        return ResourceBundle.getBundle(bundleName, Locale.getDefault(), loader);
+    }
 
-	/**
-	 * Retrieves ResourceBundle from base directy and returns it to RuntimeConfig
-	 *
-	 * @param bundleName
-	 *            Bundle name for localization
-	 * @return ResourceBundle
-	 */
-	private static ResourceBundle fromClassLoader(final String bundleName) {
+    public ResourceBundle getResourceBundle() {
+        return resourceBundle;
+    }
 
-		URL[] urls;
-		URLClassLoader ucl;
-		if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
-			ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
-		} else {
-			ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
-		}
-
-		urls = ucl.getURLs();
-
-		ClassLoader loader = new URLClassLoader(urls);
-
-		return ResourceBundle.getBundle(bundleName, Locale.getDefault(), loader);
-	}
-
-	public ResourceBundle getResourceBundle() {
-		return resourceBundle;
-	}
-
-	public void setResourceBundle(ResourceBundle resourceBundle) {
-		this.resourceBundle = resourceBundle;
-	}
+    public void setResourceBundle(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
+    }
 
 }

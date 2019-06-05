@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
@@ -91,7 +92,7 @@ public class FileScanner {
 
     private static final Logger LOGGER = Logger.getLogger(FileScanner.class.getName());
 
-    public FileScanner(final Map<String, Map<String, Rule>> rules) {
+    public FileScanner(final RuleSet rules) {
 
         final DirectoryScanner scanner = new DirectoryScanner();
         File basedir = null;
@@ -144,7 +145,7 @@ public class FileScanner {
         String versioningScheme = null;
 
         try {
-            versioningScheme = loadVersioningScheme(rules);
+            versioningScheme = loadVersioningScheme(rules.getElementRules());
         } catch (ConfigItemNotFoundException e) {
             LOGGER.log(Level.WARNING, "Versioning Scheme could not be loaded.", e);
         } catch (NullPointerException e) {
@@ -201,9 +202,9 @@ public class FileScanner {
         scanner.scan();
         decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<>(Arrays.asList(scanner.getIncludedFiles())));
 
-        if (rules.get(VersioningChecker.class.getSimpleName()) != null) {
+        if (rules.getElementRules().get(VersioningChecker.class.getSimpleName()) != null) {
             final Rule rule =
-                    rules
+                    rules.getElementRules()
                             .get(VersioningChecker.class.getSimpleName())
                             .get(VersioningChecker.class.getSimpleName());
             if (rule != null && rule.isActive()) {

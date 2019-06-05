@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -62,12 +63,12 @@ public class CheckerFactory {
      * @param scanner                 ProcessVariablesScanner for process variables, if active
      * @return checkers returns checkers
      */
-    public Collection<ElementChecker> createCheckerInstances(final Map<String, Map<String, Rule>> ruleConf,
+    public Collection<ElementChecker> createElementCheckerInstances(final Map<String, Map<String, Rule>> ruleConf,
                                                              final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
                                                              final ProcessVariablesScanner scanner) {
 
         final HashSet<String> instantiatedCheckerClasses = new HashSet<>();
-        final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
+        final Collection<ElementChecker> checkers = new ArrayList<>();
         AbstractElementChecker newChecker;
 
         for (Map<String, Rule> rules : ruleConf.values()) {
@@ -125,7 +126,9 @@ public class CheckerFactory {
         return checkers;
     }
 
-    public Collection<ModelChecker> createModelCheckerInstances() {
+    public Collection<ModelChecker> createModelCheckerInstances(final RuleSet ruleConf,
+                                                                final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
+                                                                final ProcessVariablesScanner scanner) {
         final Collection<ModelChecker> checkers = new ArrayList<>();
         return checkers;
     }
@@ -138,16 +141,17 @@ public class CheckerFactory {
      */
     private String getFullyQualifiedName(Rule rule) {
         String fullyQualifiedName = ""; //$NON-NLS-1$
-        if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getName())
-                && rule.isActive()) {
+
+        if (rule.isInternalRule()) {
             fullyQualifiedName = BpmnConstants.INTERN_LOCATION + rule.getName().trim();
-        } else if (rule.isActive() && rule.getSettings() != null
+        } else if (rule.getSettings() != null
                 && rule.getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
             fullyQualifiedName =
                     rule.getSettings().get(BpmnConstants.EXTERN_LOCATION).getValue() + "." //$NON-NLS-1$
                             + rule.getName().trim();
         }
-        if (fullyQualifiedName.isEmpty() && rule.isActive()) {
+
+        if (fullyQualifiedName.isEmpty()) {
             LOGGER.warning("Checker '" + rule.getName() //$NON-NLS-1$
                     + "' not found. Please add setting for external_location in ruleSet.xml."); //$NON-NLS-1$
             rule.deactivate();
