@@ -181,4 +181,9 @@ public class BpmnElementDecorator implements AnalysisElement {
 	public BaseElement getBaseElement() {
 		return decoratedBpmnElement.getBaseElement();
 	}
+
+	@Override
+	public BpmnElement getParentElement() {
+		return decoratedBpmnElement.getParentElement();
+	}
 }

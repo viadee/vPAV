@@ -31,20 +31,28 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.stream.Stream;
+
+import static de.viadee.bpm.vPAV.processing.model.data.VariableOperation.*;
 
 public class FlowAnalysis {
 
 	private LinkedHashMap<String, AnalysisElement> nodes;
+	private LinkedHashMap<String, ProcessVariableOperation> scopedOperations;
 
 	public FlowAnalysis() {
 		this.nodes = new LinkedHashMap<>();
+		this.scopedOperations = new LinkedHashMap<>();
 	}
 
 	/**
@@ -194,7 +202,6 @@ public class FlowAnalysis {
 				final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>();
 				outUsed.putAll(analysisElement.getUsed());
 				outUsed.putAll(getSetDifference(analysisElement.getInUsed(), analysisElement.getKilled()));
-				analysisElement.setOutUsed(outUsed);
 
 				// Calculate out-sets for unused definitions (transfer functions)
 				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
@@ -203,6 +210,36 @@ public class FlowAnalysis {
 				tempIntersection.putAll(getSetDifference(analysisElement.getInUnused(), analysisElement.getKilled()));
 				tempIntersection.putAll(getSetDifference(tempIntersection, analysisElement.getUsed()));
 				outUnused.putAll(tempIntersection);
+
+				// If the current element contains input mapping operations, remove from
+				// outgoing sets due to scope (only locally accessible)
+				final LinkedHashMap<String, ProcessVariableOperation> tempOutUnused = new LinkedHashMap<>(outUnused);
+				final LinkedHashMap<String, ProcessVariableOperation> tempOutUsed = new LinkedHashMap<>(outUsed);
+				analysisElement.getParentElement().getOperations().forEach((key, value) -> {
+					if (value.getScopeId().equals(analysisElement.getParentElement().getId())) {
+						tempOutUnused.forEach((key1, value1) -> {
+							if (value1.getName().equals(value.getName())) {
+								outUnused.remove(key1);
+							}
+						});
+						tempOutUsed.forEach((key1, value1) -> {
+							if (value1.getName().equals(value.getName())) {
+								outUsed.remove(key1);
+							}
+						});
+						scopedOperations.put(value.getName(), value);
+					}
+				});
+
+				Stream<ProcessVariableOperation> operations = analysisElement.getOperations().values().stream()
+						.filter(value -> scopedOperations.containsKey(value.getName()))
+						.filter(operation -> operation.getOperation().equals(WRITE));
+				operations.forEach(operation -> {
+					scopedOperations.remove(operation.getName());
+					outUnused.put(operation.getId(), operation);
+				});
+
+				analysisElement.setOutUsed(outUsed);
 				analysisElement.setOutUnused(outUnused);
 
 				if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
@@ -307,6 +344,14 @@ public class FlowAnalysis {
 		urAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
 			if (value.getName().equals(value2.getName())) {
 				urAnomalies.remove(key);
+			}
+		}));
+
+		urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+			if (value.getName().equals(value2.getName())) {
+				if (Integer.parseInt(value.getId()) > Integer.parseInt(value2.getId())) {
+					urAnomalies.remove(key);
+				}
 			}
 		}));
 
@@ -436,8 +481,7 @@ public class FlowAnalysis {
 	 * @return true/false
 	 */
 	private boolean uuSourceCode(ProcessVariableOperation prev, ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.DELETE)
-				&& prev.getOperation().equals(VariableOperation.DELETE);
+		return curr.getOperation().equals(DELETE) && prev.getOperation().equals(DELETE);
 	}
 
 	/**
@@ -450,8 +494,7 @@ public class FlowAnalysis {
 	 * @return true/false
 	 */
 	private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.READ)
-				&& prev.getOperation().equals(VariableOperation.DELETE);
+		return curr.getOperation().equals(READ) && prev.getOperation().equals(DELETE);
 	}
 
 	/**
@@ -464,8 +507,7 @@ public class FlowAnalysis {
 	 * @return true/false
 	 */
 	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.WRITE)
-				&& prev.getOperation().equals(VariableOperation.WRITE);
+		return curr.getOperation().equals(WRITE) && prev.getOperation().equals(WRITE);
 	}
 
 	/**
@@ -478,8 +520,7 @@ public class FlowAnalysis {
 	 * @return true/false
 	 */
 	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(VariableOperation.DELETE)
-				&& prev.getOperation().equals(VariableOperation.WRITE);
+		return curr.getOperation().equals(DELETE) && prev.getOperation().equals(WRITE);
 	}
 
 	/**

@@ -182,4 +182,9 @@ public class NodeDecorator implements AnalysisElement {
 		return decoratedNode.getBaseElement();
 	}
 
+	@Override
+	public BpmnElement getParentElement() {
+		return decoratedNode.getParentElement();
+	}
+
 }

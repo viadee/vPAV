@@ -178,6 +178,11 @@ public class BpmnElement implements AnalysisElement {
 		return baseElement;
 	}
 
+	@Override
+	public BpmnElement getParentElement() {
+		return this;
+	}
+
 	public void addSourceCodeAnomaly(AnomalyContainer anomaly) {
 		sourceCodeAnomalies.add(anomaly);
 	}
