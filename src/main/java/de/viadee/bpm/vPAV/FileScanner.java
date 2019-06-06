@@ -77,9 +77,7 @@ public class FileScanner {
 
     private Map<String, String> processIdToPathMap;
 
-    private String scanPath = null;
-
-    private String filePattern = null;
+    private String scanPath;
 
     private static String scheme = null;
 
@@ -117,11 +115,11 @@ public class FileScanner {
 
         if (processDefinitions.size() < 1) {
             LOGGER.log(Level.SEVERE, "No model present in given location (" + basepath + ")");
-            System.exit(0);
+            // System.exit(0);
         }
 
         scanPath = ConfigConstants.getInstance().getScanPath();
-        filePattern = ConfigConstants.getInstance().getFilePattern();
+        String filePattern = ConfigConstants.getInstance().getFilePattern();
 
         scanner.setBasedir(scanPath);
         // get file paths of process definitions
@@ -281,7 +279,7 @@ public class FileScanner {
      * Process classes and add compiled classes to javaResources Also adss all
      * filenames to includedFiles
      *
-     * @param classes
+     * @param classes Classes
      */
     private void addResources(LinkedList<File> classes) {
 
@@ -558,19 +556,9 @@ public class FileScanner {
         return sootPath.toString().substring(0, sootPath.toString().length() - 1);
     }
 
-    public String getScanPath() {
-        return scanPath;
-    }
 
     public void setScanPath(String scanPath) {
         this.scanPath = scanPath;
     }
 
-    public String getFilePattern() {
-        return filePattern;
-    }
-
-    public void setFilePattern(String filePattern) {
-        this.filePattern = filePattern;
-    }
 }
