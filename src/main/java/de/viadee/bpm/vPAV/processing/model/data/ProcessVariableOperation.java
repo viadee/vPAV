@@ -56,12 +56,13 @@ public class ProcessVariableOperation {
 
 	private KnownElementFieldType fieldType;
 
+	private int index;
 	// Guaranteed that the operation takes place or not
 	private boolean operationType;
 
 	public ProcessVariableOperation(final String name, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String resourceFilePath, final VariableOperation operation,
-			final String scopeId) {
+			final String scopeId, final int index) {
 		super();
 		this.name = name;
 		this.element = element;
@@ -70,11 +71,14 @@ public class ProcessVariableOperation {
 		this.fieldType = fieldType;
 		this.operation = operation;
 		this.scopeId = scopeId;
+		this.index = index;
 		this.id = createId();
+		element.getFlowAnalysis().incrementOperationCounter();
 	}
 
 	private String createId() {
-		return String.valueOf(System.nanoTime()).substring(10);
+		return CheckerIssue.getMD5(name + "_" + chapter + "_" + fieldType + "_" + resourceFilePath + "_" + operation
+				+ "_" + scopeId + "_" + System.nanoTime());
 	}
 
 	public String getName() {
@@ -115,6 +119,10 @@ public class ProcessVariableOperation {
 
 	public boolean getOperationType() {
 		return operationType;
+	}
+
+	public int getIndex() {
+		return index;
 	}
 
 	public String toString() {

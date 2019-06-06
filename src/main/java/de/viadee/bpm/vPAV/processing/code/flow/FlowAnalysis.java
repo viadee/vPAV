@@ -351,7 +351,7 @@ public class FlowAnalysis {
 
 		urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
 			if (value.getName().equals(value2.getName())) {
-				if (Integer.parseInt(value.getId()) > Integer.parseInt(value2.getId())) {
+				if (value.getIndex() < value2.getIndex()) {
 					urAnomalies.remove(key);
 				}
 			}

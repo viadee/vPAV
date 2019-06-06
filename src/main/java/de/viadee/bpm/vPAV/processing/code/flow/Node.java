@@ -105,7 +105,6 @@ public class Node implements AnalysisElement {
 			killed.put(id, processVariableOperation);
 			break;
 		}
-		parentElement.getFlowAnalysis().incrementOperationCounter();
 	}
 
 	/**

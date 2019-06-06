@@ -182,7 +182,7 @@ public class OperationBasedPredicateBuilderImplTest {
 		ProcessVariableOperation build() {
 			return new ProcessVariableOperation("name",
 					new BpmnElement("", null, new ControlFlowGraph(), new FlowAnalysis()), null, null, "",
-					operationType, "");
+					operationType, "", new FlowAnalysis().getOperationCounter());
 		}
 	}
 }

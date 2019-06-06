@@ -124,7 +124,6 @@ public class BpmnElement implements AnalysisElement {
 			killed.put(processVariableOperation.getId(), processVariableOperation);
 			break;
 		}
-		flowAnalysis.incrementOperationCounter();
 	}
 
 	private Map<String, InOutState> in = new HashMap<String, InOutState>();
@@ -179,7 +178,7 @@ public class BpmnElement implements AnalysisElement {
 		return anomalyMap;
 	}
 
-	FlowAnalysis getFlowAnalysis() {
+	public FlowAnalysis getFlowAnalysis() {
 		return flowAnalysis;
 	}
 

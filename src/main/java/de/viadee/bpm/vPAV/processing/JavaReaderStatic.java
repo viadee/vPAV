@@ -872,16 +872,16 @@ public class JavaReaderStatic {
 			if (expr.getArgBox(location).getValue() instanceof StringConstant) {
 				StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
 				String name = variableName.value.replaceAll("\"", "");
-				node.addOperation(
-						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
-				variableBlock.addProcessVariable(
-						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
+				node.addOperation(new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type,
+						scopeId, element.getFlowAnalysis().getOperationCounter()));
+				variableBlock.addProcessVariable(new ProcessVariableOperation(name, element, chapter, fieldType,
+						filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
 
 			} else if (!paramName.isEmpty()) {
 				node.addOperation(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element, chapter,
-						fieldType, filePath, type, scopeId));
+						fieldType, filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
 				variableBlock.addProcessVariable(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
-						chapter, fieldType, filePath, type, scopeId));
+						chapter, fieldType, filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
 			} else {
 				// TODO: Warnmeldung mit PV operation
 			}
@@ -922,7 +922,8 @@ public class JavaReaderStatic {
 				initialOperations.put(name,
 						new ProcessVariableOperation(name, element, ElementChapter.Code, KnownElementFieldType.Initial,
 								resourceFilePath, type,
-								element.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID)));
+								element.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID),
+								element.getFlowAnalysis().getOperationCounter()));
 			}
 		}
 		return initialOperations;

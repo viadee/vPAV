@@ -297,7 +297,7 @@ public class DataFlowRuleBuilderTest {
 
 		ProcessVariableOperation build() {
 			return new ProcessVariableOperation(name, element, ElementChapter.Details, KnownElementFieldType.Class, "",
-					operation, "");
+					operation, "", element.getFlowAnalysis().getOperationCounter());
 		}
 	}
 }
