@@ -170,7 +170,7 @@ public class AnomaliesSetCreationTest {
 		assertEquals("Expected a UR anomaly but found " + anomaly, Anomaly.UR, anomaly);
 	}
 
-	// @Test
+	@Test
 	public void findUU() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
@@ -198,9 +198,11 @@ public class AnomaliesSetCreationTest {
 		flowAnalysis.getNodes().values().forEach(
 				analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
 
-		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
-		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
-		assertEquals("Expected a UU anomaly but found " + anomaly, Anomaly.UU, anomaly);
+		Anomaly anomaly1 = anomalies.iterator().next().getAnomaly();
+		Anomaly anomaly2 = anomalies.iterator().next().getAnomaly();
+		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 2, anomalies.size());
+		assertEquals("Expected a UU anomaly but found " + anomaly1, Anomaly.UU, anomaly1);
+		assertEquals("Expected a UU anomaly but found " + anomaly2, Anomaly.UU, anomaly2);
 	}
 
 	@Test

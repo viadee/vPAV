@@ -298,7 +298,7 @@ public class FlowAnalysis {
 			urAnomalies(node);
 
 			// UU ()
-			// uuAnomalies(node);
+			uuAnomalies(node);
 
 			// -R ()
 			// nopRAnomalies(element, node);
@@ -382,7 +382,6 @@ public class FlowAnalysis {
 	 *            Current node
 	 */
 	private void uuAnomalies(final AnalysisElement node) {
-		// TODO: Rework definition of UU (does not work properly now)
 		final LinkedHashMap<String, ProcessVariableOperation> uuAnomaliesTemp = new LinkedHashMap<>(node.getKilled());
 		final LinkedHashMap<String, ProcessVariableOperation> uuAnomalies = new LinkedHashMap<>(uuAnomaliesTemp);
 
@@ -395,6 +394,14 @@ public class FlowAnalysis {
 		uuAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
 			if (value.getName().equals(value2.getName())) {
 				uuAnomalies.remove(key);
+			}
+		}));
+
+		uuAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+			if (value.getName().equals(value2.getName())) {
+				if (value.getIndex() > value2.getIndex()) {
+					uuAnomalies.remove(key);
+				}
 			}
 		}));
 
