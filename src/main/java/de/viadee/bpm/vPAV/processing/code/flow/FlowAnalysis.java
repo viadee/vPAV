@@ -50,6 +50,8 @@ public class FlowAnalysis {
 	private LinkedHashMap<String, AnalysisElement> nodes;
 	private LinkedHashMap<String, ProcessVariableOperation> scopedOperations;
 
+	private int operationCounter = 0;
+
 	public FlowAnalysis() {
 		this.nodes = new LinkedHashMap<>();
 		this.scopedOperations = new LinkedHashMap<>();
@@ -62,7 +64,7 @@ public class FlowAnalysis {
 	 * conservatively by following the Reaching Definition algorithm. For
 	 * discovering data flow anomalies inside a single block, a sequential check on
 	 * unit basis is performed. Lastly, anomalies are extracted and appended to the
-	 * parent element (for visualization=
+	 * parent element (for visualization)
 	 *
 	 * @param graphCollection
 	 *            Collection of graphs
@@ -149,7 +151,7 @@ public class FlowAnalysis {
 					} else {
 						if (currNode.firstOperation() != null && predDelegate.lastOperation() != null && !currNode
 								.firstOperation().getChapter().equals(predDelegate.lastOperation().getChapter())) {
-							currNode.setPredsIntraProcedural(predDelegate.getId());
+							currNode.setPredsInterProcedural(predDelegate.getId());
 							predDelegate = currNode;
 						}
 					}
@@ -570,6 +572,14 @@ public class FlowAnalysis {
 
 	public LinkedHashMap<String, AnalysisElement> getNodes() {
 		return nodes;
+	}
+
+	public int getOperationCounter() {
+		return operationCounter;
+	}
+
+	public void incrementOperationCounter() {
+		this.operationCounter++;
 	}
 
 }

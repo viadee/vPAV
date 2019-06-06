@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -57,7 +58,7 @@ import static org.junit.Assert.assertEquals;
 public class ReachingDefinitionTest {
 
 	private static ClassLoader cl;
-	
+
 	private static final String BASE_PATH = "src/test/resources/";
 
 	@BeforeClass
@@ -74,15 +75,13 @@ public class ReachingDefinitionTest {
 	@Test
 	public void testSootReachingMethod() {
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
-		
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> tasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
-		ControlFlowGraph cg = new ControlFlowGraph();
+		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
+		final ControlFlowGraph cg = new ControlFlowGraph();
+		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), cg, new FlowAnalysis());
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();

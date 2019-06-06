@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.dataflow;
 
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ExclusiveGateway;
@@ -53,262 +54,250 @@ import static org.mockito.Mockito.*;
 
 public class DataFlowRuleBuilderTest {
 
+	@Test()
+	public void testRuleWithoutVariablesSucceeds() {
+		DataFlowRule rule = processVariables().thatAre(constraintFrom(v -> false)).shouldBe(constraintFrom(v -> false));
 
-    @Test()
-    public void testRuleWithoutVariablesSucceeds() {
-        DataFlowRule rule = processVariables()
-                .thatAre(constraintFrom(v -> false))
-                .shouldBe(constraintFrom(v -> false));
+		rule.check(new ArrayList<>());
+	}
 
-        rule.check(new ArrayList<>());
-    }
+	@Test(expected = AssertionError.class)
+	public void testRulesWithBrokenConditionFails() {
+		List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
-    @Test(expected = AssertionError.class)
-    public void testRulesWithBrokenConditionFails() {
-        List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
+		DataFlowRule rule = processVariables().thatAre(constraintFrom(v -> true)).shouldBe(constraintFrom(v -> false));
 
-        DataFlowRule rule = processVariables()
-                .thatAre(constraintFrom(v -> true))
-                .shouldBe(constraintFrom(v -> false));
+		rule.check(processVariables);
+	}
 
-        rule.check(processVariables);
-    }
+	@Test()
+	public void testRulesWithNonFulfillableConstraintSucceeds() {
+		List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
-    @Test()
-    public void testRulesWithNonFulfillableConstraintSucceeds() {
-        List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
+		DataFlowRule rule = processVariables().thatAre(constraintFrom(v -> false)).shouldBe(constraintFrom(v -> false));
 
-        DataFlowRule rule = processVariables()
-                .thatAre(constraintFrom(v -> false))
-                .shouldBe(constraintFrom(v -> false));
+		rule.check(processVariables);
+	}
 
-        rule.check(processVariables);
-    }
+	@Test()
+	public void testRulesWithFullfilledConstrainedAndConditionSucceeds() {
+		List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
 
-    @Test()
-    public void testRulesWithFullfilledConstrainedAndConditionSucceeds() {
-        List<ProcessVariable> processVariables = Collections.singletonList(new ProcessVariable("variable1"));
+		DataFlowRule rule = processVariables().thatAre(constraintFrom(v -> true)).shouldBe(constraintFrom(v -> true));
 
-        DataFlowRule rule = processVariables()
-                .thatAre(constraintFrom(v -> true))
-                .shouldBe(constraintFrom(v -> true));
+		rule.check(processVariables);
+	}
 
-        rule.check(processVariables);
-    }
+	@Test
+	public void testConstraintAreDefinedByServiceTasksFiltersCorrectProcessVariables() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("variable1");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(UserTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("variable2");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		processVariable.addRead(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ExclusiveGateway.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
 
-    @Test
-    public void testConstraintAreDefinedByServiceTasksFiltersCorrectProcessVariables() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("variable1");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("variable2");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        processVariable.addRead(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ExclusiveGateway.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
+		List<ProcessVariable> filteredVariables = filterProcessVariables(variables,
+				processVariables().thatAre().written().byModelElements().ofType(ServiceTask.class));
 
-        List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .thatAre().written().byModelElements().ofType(ServiceTask.class));
+		assertThat(filteredVariables.size(), is(1));
+	}
 
-        assertThat(filteredVariables.size(), is(1));
-    }
+	@Test
+	public void testConstraintHavePrefixFiltersCorrectProcessVariables() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("variable1");
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("ext_variable2");
+		variables.add(processVariable);
 
-    @Test
-    public void testConstraintHavePrefixFiltersCorrectProcessVariables() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("variable1");
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("ext_variable2");
-        variables.add(processVariable);
+		List<ProcessVariable> filteredVariables = filterProcessVariables(variables,
+				processVariables().thatAre().prefixed("ext_"));
 
-        List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .thatAre().prefixed("ext_"));
+		assertThat(filteredVariables.size(), is(1));
+	}
 
-        assertThat(filteredVariables.size(), is(1));
-    }
+	@Test()
+	public void testAndConstraintConjunctionIsAppliedCorrectly() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("ext_variable1");
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("variable1");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("ext_variable3");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
 
-    @Test()
-    public void testAndConstraintConjunctionIsAppliedCorrectly() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("ext_variable1");
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("variable1");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("ext_variable3");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
+		List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables().thatAre()
+				.written().byModelElements().ofType(ServiceTask.class).andThatAre().prefixed("ext_"));
 
-        List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .thatAre().written().byModelElements().ofType(ServiceTask.class)
-                .andThatAre().prefixed("ext_"));
+		assertThat(filteredVariables.size(), is(1));
+	}
 
-        assertThat(filteredVariables.size(), is(1));
-    }
+	@Test()
+	public void testOrConstraintConjunctionIsAppliedCorrectly() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("ext_variable1");
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("variable1");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("ext_variable3");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("variable3");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(UserTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
 
-    @Test()
-    public void testOrConstraintConjunctionIsAppliedCorrectly() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("ext_variable1");
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("variable1");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("ext_variable3");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("variable3");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
+		List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables().thatAre()
+				.written().byModelElements().ofType(ServiceTask.class).orThatAre().prefixed("ext_"));
 
-        List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .thatAre().written().byModelElements().ofType(ServiceTask.class)
-                .orThatAre().prefixed("ext_"));
+		assertThat(filteredVariables.size(), is(3));
+	}
 
-        assertThat(filteredVariables.size(), is(3));
-    }
+	@Test
+	public void testWrittenConditionIsAppliedCorrectly() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("ext_variable1");
+		variables.add(processVariable);
 
-    @Test
-    public void testWrittenConditionIsAppliedCorrectly() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("ext_variable1");
-        variables.add(processVariable);
+		DataFlowRule rule = processVariables().shouldBe().written().exactly(0);
 
-        DataFlowRule rule = processVariables()
-                .shouldBe().written().exactly(0);
+		rule.check(variables);
 
-        rule.check(variables);
+		processVariable.addWrite(new ProcessVariableBuilder().build());
 
-        processVariable.addWrite(new ProcessVariableBuilder().build());
+		rule = processVariables().shouldBe().written().exactly(1);
 
-        rule = processVariables()
-                .shouldBe().written().exactly(1);
+		rule.check(variables);
+	}
 
-        rule.check(variables);
-    }
+	@Test
+	public void testModelBasedConstraintIsAppliedCorrectly() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("variable2");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		processVariable = new ProcessVariable("variable3");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(UserTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("variable1");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
 
-    @Test
-    public void testModelBasedConstraintIsAppliedCorrectly() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("variable2");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        processVariable = new ProcessVariable("variable3");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("variable1");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
+		List<ProcessVariable> filteredVariables = filterProcessVariables(variables,
+				processVariables().thatAre().written().byModelElements().ofType(ServiceTask.class));
 
-        List<ProcessVariable> filteredVariables = filterProcessVariables(variables, processVariables()
-                .thatAre().written().byModelElements().ofType(ServiceTask.class));
+		assertThat(filteredVariables.size(), is(1));
+	}
 
-        assertThat(filteredVariables.size(), is(1));
-    }
+	@Test(expected = AssertionError.class)
+	public void testNotConditionAreAppliedCorrectly() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("ext_variable1");
+		variables.add(processVariable);
 
-    @Test(expected = AssertionError.class)
-    public void testNotConditionAreAppliedCorrectly() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("ext_variable1");
-        variables.add(processVariable);
+		DataFlowRule rule = processVariables().shouldBe().not().written().exactly(1);
 
-        DataFlowRule rule = processVariables()
-                .shouldBe().not().written().exactly(1);
+		rule.check(variables);
 
-        rule.check(variables);
+		rule = processVariables().shouldBe().not().not().written().exactly(1);
 
-        rule = processVariables()
-                .shouldBe().not().not().written().exactly(1);
+		rule.check(variables);
+	}
 
-        rule.check(variables);
-    }
+	@Test
+	public void testModelBasedConditionIsAppliedCorrectlyInCaseOfSuccess() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("variable2");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(UserTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
 
-    @Test
-    public void testModelBasedConditionIsAppliedCorrectlyInCaseOfSuccess() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("variable2");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
+		processVariables().shouldBe().written().byModelElements().ofType(ServiceTask.class).check(variables);
+	}
 
-        processVariables().shouldBe().written().byModelElements().ofType(ServiceTask.class).check(variables);
-    }
+	@Test(expected = AssertionError.class)
+	public void testModelBasedConditionIsAppliedCorrectlyInCaseOfViolation() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("variable2");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
+		processVariable = new ProcessVariable("variable3");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(UserTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
 
-    @Test(expected = AssertionError.class)
-    public void testModelBasedConditionIsAppliedCorrectlyInCaseOfViolation() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("variable2");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
-        processVariable = new ProcessVariable("variable3");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
+		processVariables().shouldBe().written().byModelElements().ofType(ServiceTask.class).check(variables);
+	}
 
-        processVariables().shouldBe().written().byModelElements().ofType(ServiceTask.class).check(variables);
-    }
+	@Test(expected = AssertionError.class)
+	public void testOnlyModelBasedConditionIsAppliedCorrectly() {
+		List<ProcessVariable> variables = new ArrayList<>();
+		ProcessVariable processVariable = new ProcessVariable("variable2");
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(ServiceTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		processVariable.addWrite(new ProcessVariableBuilder().withElement(UserTask.class)
+				.withOperation(VariableOperation.WRITE).build());
+		variables.add(processVariable);
 
-    @Test(expected = AssertionError.class)
-    public void testOnlyModelBasedConditionIsAppliedCorrectly() {
-        List<ProcessVariable> variables = new ArrayList<>();
-        ProcessVariable processVariable = new ProcessVariable("variable2");
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(ServiceTask.class).withOperation(VariableOperation.WRITE).build());
-        processVariable.addWrite(new ProcessVariableBuilder()
-                .withElement(UserTask.class).withOperation(VariableOperation.WRITE).build());
-        variables.add(processVariable);
+		processVariables().shouldBe().written().onlyByModelElements().ofType(ServiceTask.class).check(variables);
+	}
 
-        processVariables().shouldBe().written().onlyByModelElements().ofType(ServiceTask.class).check(variables);
-    }
+	private static <T> DescribedPredicateEvaluator<T> constraintFrom(Predicate<T> predicate) {
+		return new DescribedPredicateEvaluator<>(
+				v -> predicate.test(v) ? EvaluationResult.forSuccess(v) : EvaluationResult.forViolation("", v), "");
+	}
 
-    private static <T> DescribedPredicateEvaluator<T> constraintFrom(Predicate<T> predicate) {
-        return new DescribedPredicateEvaluator<>(v -> predicate.test(v) ? EvaluationResult.forSuccess(v) : EvaluationResult.forViolation("", v), "");
-    }
+	private static List<ProcessVariable> filterProcessVariables(List<ProcessVariable> variables,
+			ConstrainedProcessVariableSet constrainedSet) {
+		DescribedPredicateEvaluator<ProcessVariable> condition = spy(
+				new DescribedPredicateEvaluator<>(EvaluationResult::forSuccess, ""));
+		constrainedSet.shouldBe(condition).check(variables);
 
-    private static List<ProcessVariable> filterProcessVariables(List<ProcessVariable> variables, ConstrainedProcessVariableSet constrainedSet) {
-        DescribedPredicateEvaluator<ProcessVariable> condition = spy(new DescribedPredicateEvaluator<>(EvaluationResult::forSuccess, ""));
-        constrainedSet.shouldBe(condition).check(variables);
+		ArgumentCaptor<ProcessVariable> classesCaptor = ArgumentCaptor.forClass(ProcessVariable.class);
+		verify(condition, atLeast(0)).evaluate(classesCaptor.capture());
 
-        ArgumentCaptor<ProcessVariable> classesCaptor = ArgumentCaptor.forClass(ProcessVariable.class);
-        verify(condition, atLeast(0)).evaluate(classesCaptor.capture());
+		return classesCaptor.getAllValues();
+	}
 
-        return classesCaptor.getAllValues();
-    }
+	private class ProcessVariableBuilder {
+		private String name = "variable";
+		private BpmnElement element = new BpmnElement("process1", mock(BaseElement.class), new ControlFlowGraph(),
+				new FlowAnalysis());
+		private VariableOperation operation = VariableOperation.WRITE;
 
-    private class ProcessVariableBuilder {
-        private String name = "variable";
-        private BpmnElement element = new BpmnElement("process1", mock(BaseElement.class), new ControlFlowGraph());
-        private VariableOperation operation = VariableOperation.WRITE;
+		ProcessVariableBuilder withElement(Class<? extends BaseElement> clazz) {
+			element = new BpmnElement("process1", mock(clazz), new ControlFlowGraph(), new FlowAnalysis());
+			return this;
+		}
 
+		ProcessVariableBuilder withOperation(VariableOperation operation) {
+			this.operation = operation;
+			return this;
+		}
 
-        ProcessVariableBuilder withElement(Class<? extends BaseElement> clazz) {
-            element = new BpmnElement("process1", mock(clazz), new ControlFlowGraph());
-            return this;
-        }
-
-        ProcessVariableBuilder withOperation(VariableOperation operation) {
-            this.operation = operation;
-            return this;
-        }
-
-        ProcessVariableOperation build() {
-            return new ProcessVariableOperation(name, element, ElementChapter.Details,
-                    KnownElementFieldType.Class, "", operation, "");
-        }
-    }
+		ProcessVariableOperation build() {
+			return new ProcessVariableOperation(name, element, ElementChapter.Details, KnownElementFieldType.Class, "",
+					operation, "");
+		}
+	}
 }

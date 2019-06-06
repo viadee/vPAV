@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -55,87 +56,83 @@ import static org.junit.Assert.fail;
 
 public class TaskNamingConventionCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+	private static final String BASE_PATH = "src/test/resources/";
 
-    private static ElementChecker checker;
+	private static ElementChecker checker;
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        checker = new TaskNamingConventionChecker(createRule(), null);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
-    }
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		checker = new TaskNamingConventionChecker(createRule(), null);
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java/");
+		final URL[] classUrls = { classUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().getResource("en_US");
+	}
 
-    /**
-     * Case 1: Recognise a task name that fits the naming convention
-     */
-    @Test
-    public void testCorrectTaskNamingConvention() {
-        final String PATH = BASE_PATH
-                + "TaskNamingConventionCheckerTest_CorrectTaskNamingConvention.bpmn";
+	/**
+	 * Case 1: Recognise a task name that fits the naming convention
+	 */
+	@Test
+	public void testCorrectTaskNamingConvention() {
+		final String PATH = BASE_PATH + "TaskNamingConventionCheckerTest_CorrectTaskNamingConvention.bpmn";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        for (final BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		for (final BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        if (issues.size() > 0) {
-            fail("There are issues, altough the convention is correct.");
-        }
-    }
+		if (issues.size() > 0) {
+			fail("There are issues, altough the convention is correct.");
+		}
+	}
 
-    /**
-     * Case 2: Recognise a violation against the naming convention
-     */
-    @Test
-    public void testWrongTaskNamingConvention() {
-        final String PATH = BASE_PATH
-                + "TaskNamingConventionCheckerTest_WrongTaskNamingConvention.bpmn";
+	/**
+	 * Case 2: Recognise a violation against the naming convention
+	 */
+	@Test
+	public void testWrongTaskNamingConvention() {
+		final String PATH = BASE_PATH + "TaskNamingConventionCheckerTest_WrongTaskNamingConvention.bpmn";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
-        for (final BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		for (final BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        assertEquals("The issue wasn't recognised", 1, issues.size());
-    }
+		assertEquals("The issue wasn't recognised", 1, issues.size());
+	}
 
-    /**
-     * Creates rule configuration
-     * 
-     * @return rule
-     */
-    private static Rule createRule() {
+	/**
+	 * Creates rule configuration
+	 * 
+	 * @return rule
+	 */
+	private static Rule createRule() {
 
-        final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+		final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
 
-        final ElementConvention elementConvention = new ElementConvention("convention", null, null,
-                "[A-ZÄÖÜ][a-zäöü\\-\\s]+");
-        elementConventions.add(elementConvention);
+		final ElementConvention elementConvention = new ElementConvention("convention", null, null,
+				"[A-ZÄÖÜ][a-zäöü\\-\\s]+");
+		elementConventions.add(elementConvention);
 
-        final Rule rule = new Rule("TaskNamingConventionChecker", true, null, null, elementConventions, null);
+		final Rule rule = new Rule("TaskNamingConventionChecker", true, null, null, elementConventions, null);
 
-        return rule;
-    }
+		return rule;
+	}
 }

@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -67,7 +68,7 @@ public class ProcessApplicationVariableParser {
 				variableScanner.getProcessIdToVariableMap(), bpmnScanner);
 
 		final Collection<BpmnElement> bpmnElements = BpmnModelDispatcher.getBpmnElements(modelFile, baseElements,
-				graphBuilder);
+				graphBuilder, new FlowAnalysis());
 
 		return BpmnModelDispatcher.getProcessVariables(bpmnElements);
 	}

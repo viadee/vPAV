@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -59,50 +60,48 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
-	
-	
+
 	private static final String BASE_PATH = "src/test/resources/";
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-        final URL[] classUrls = { classUrl, resourcesUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);        
-    }
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		RuntimeConfig.getInstance().setTest(true);
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java/");
+		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+		final URL[] classUrls = { classUrl, resourcesUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+	}
 
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
-    }
+	@AfterClass
+	public static void tearDown() {
+		RuntimeConfig.getInstance().setTest(false);
+	}
 
-    @Test
-    public void testRecogniseVariablesInInnerAnonymousClass() throws ParserConfigurationException, SAXException, IOException {
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-        final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
+	@Test
+	public void testRecogniseVariablesInInnerAnonymousClass()
+			throws ParserConfigurationException, SAXException, IOException {
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+		final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<ServiceTask> allServiceTasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+		final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph());
-        final ControlFlowGraph cg = new ControlFlowGraph();
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+		final ControlFlowGraph cg = new ControlFlowGraph();
+		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), cg, new FlowAnalysis());
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
 
-        Assert.assertEquals(3, variables.asMap().size());
-    }
-
+		Assert.assertEquals(3, variables.asMap().size());
+	}
 
 }

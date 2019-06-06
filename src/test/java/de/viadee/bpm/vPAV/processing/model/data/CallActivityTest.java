@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -73,7 +74,7 @@ public class CallActivityTest {
 		RuntimeConfig.getInstance().setClassLoader(cl);
 	}
 
-	//@Test
+	// @Test
 	public void testEmbedding() throws ParserConfigurationException, SAXException, IOException {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
@@ -95,7 +96,7 @@ public class CallActivityTest {
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processdefinition.getPath(), calledElementHierarchy, scanner);
+				processdefinition.getPath(), calledElementHierarchy, scanner, new FlowAnalysis());
 
 		// calculate invalid paths based on data flow graphs
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);

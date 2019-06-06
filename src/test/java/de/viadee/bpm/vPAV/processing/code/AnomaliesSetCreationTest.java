@@ -88,10 +88,10 @@ public class AnomaliesSetCreationTest {
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -122,10 +122,10 @@ public class AnomaliesSetCreationTest {
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -155,10 +155,10 @@ public class AnomaliesSetCreationTest {
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -188,10 +188,10 @@ public class AnomaliesSetCreationTest {
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();

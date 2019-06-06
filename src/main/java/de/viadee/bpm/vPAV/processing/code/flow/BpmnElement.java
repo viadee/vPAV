@@ -53,6 +53,8 @@ public class BpmnElement implements AnalysisElement {
 
 	private ControlFlowGraph controlFlowGraph;
 
+	private FlowAnalysis flowAnalysis;
+
 	private LinkedHashMap<String, ProcessVariableOperation> operations;
 	private LinkedHashMap<String, ProcessVariableOperation> defined;
 	private LinkedHashMap<String, ProcessVariableOperation> used;
@@ -68,10 +70,11 @@ public class BpmnElement implements AnalysisElement {
 	private List<AnomalyContainer> sourceCodeAnomalies;
 
 	public BpmnElement(final String processDefinition, final BaseElement element,
-			final ControlFlowGraph controlFlowGraph) {
+			final ControlFlowGraph controlFlowGraph, final FlowAnalysis flowAnalysis) {
 		this.processDefinition = processDefinition;
 		this.baseElement = element;
 		this.controlFlowGraph = controlFlowGraph;
+		this.flowAnalysis = flowAnalysis;
 		this.operations = new LinkedHashMap<>();
 
 		this.predecessors = new LinkedHashMap<>();
@@ -108,7 +111,8 @@ public class BpmnElement implements AnalysisElement {
 	 *            Current operation
 	 */
 	private void addOperation(final ProcessVariableOperation processVariableOperation) {
-		this.operations.put(processVariableOperation.getId(), processVariableOperation);
+		final String id = String.valueOf(flowAnalysis.getOperationCounter());
+		this.operations.put(String.valueOf(id), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
 			defined.put(processVariableOperation.getId(), processVariableOperation);
@@ -120,6 +124,7 @@ public class BpmnElement implements AnalysisElement {
 			killed.put(processVariableOperation.getId(), processVariableOperation);
 			break;
 		}
+		flowAnalysis.incrementOperationCounter();
 	}
 
 	private Map<String, InOutState> in = new HashMap<String, InOutState>();
@@ -172,6 +177,10 @@ public class BpmnElement implements AnalysisElement {
 			anomalyMap.put(this, getSourceCodeAnomalies());
 		}
 		return anomalyMap;
+	}
+
+	FlowAnalysis getFlowAnalysis() {
+		return flowAnalysis;
 	}
 
 	public BaseElement getBaseElement() {

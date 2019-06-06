@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.output.*;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
@@ -559,6 +560,7 @@ public class Runner {
         ModelDispatchResult dispatchResult;
         File bpmnfile = null;
         String basepath = ConfigConstants.getInstance().getBasepath();
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
 
         if (basepath.startsWith("file:/")) {
             // Convert URI
@@ -574,10 +576,10 @@ public class Runner {
         if (variableScanner != null) {
             dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, bpmnfile, fileScanner.getDecisionRefToPathMap(),
                     fileScanner.getProcessIdToPathMap(), variableScanner, dataFlowRules,
-                    fileScanner.getResourcesNewestVersions(), rules);
+                    fileScanner.getResourcesNewestVersions(), rules, flowAnalysis);
         } else {
             dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(bpmnfile, fileScanner.getDecisionRefToPathMap(),
-                    fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
+                    fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules, flowAnalysis);
         }
         elements.addAll(dispatchResult.getBpmnElements());
         processVariables.addAll(dispatchResult.getProcessVariables());

@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -61,146 +62,152 @@ import static de.viadee.bpm.vPAV.processing.BpmnModelDispatcher.getProcessVariab
 import static org.junit.Assert.assertEquals;
 
 public class ProcessVariableReaderStaticTest {
-   
-    private static final String BASE_PATH = "src/test/resources/";
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = {classUrl};
-        ClassLoader cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
-        RuntimeConfig.getInstance().setTest(true);
-        final Map<String, String> beanMapping = new HashMap<>();
-        beanMapping.put("testDelegate", "de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
-        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
-    }
+	private static final String BASE_PATH = "src/test/resources/";
 
-    @Test
-    public void testSootReachingMethod() {
-        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java");
+		final URL[] classUrls = { classUrl };
+		ClassLoader cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().getResource("en_US");
+		RuntimeConfig.getInstance().setTest(true);
+		final Map<String, String> beanMapping = new HashMap<>();
+		beanMapping.put("testDelegate", "de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
+		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+	}
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+	@Test
+	public void testSootReachingMethod() {
+		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
 
-        final Collection<ServiceTask> tasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
-        final ControlFlowGraph cg = new ControlFlowGraph();
-    	final FileScanner fileScanner = new FileScanner(new HashMap<>());
-    	fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-    	final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, cg));
+		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-        assertEquals(3, variables.asMap().size());
-    }
-    
-    @Test
-    public void findInitialProcessVariables() {
-        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
+		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
+				new FlowAnalysis());
+		final ControlFlowGraph cg = new ControlFlowGraph();
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, cg));
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		assertEquals(3, variables.asMap().size());
+	}
 
-        final Collection<StartEvent> startElement = modelInstance
-                .getModelElementsByType(StartEvent.class);
+	@Test
+	public void findInitialProcessVariables() {
+		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
 
-        final BpmnElement element = new BpmnElement(PATH, startElement.iterator().next(), new ControlFlowGraph());
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final EntryPoint entry = new EntryPoint("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java","startProcess", "schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage");
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        final Set<String> resources = new HashSet<String>();
-        resources.add("");
-        
-        ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
+		final Collection<StartEvent> startElement = modelInstance.getModelElementsByType(StartEvent.class);
 
-      /*  variables.putAll(new JavaReaderStatic().getVariablesFromClass(
-            		"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables", scanner, element, null, entry));
+		final BpmnElement element = new BpmnElement(PATH, startElement.iterator().next(), new ControlFlowGraph(),
+				new FlowAnalysis());
 
+		final EntryPoint entry = new EntryPoint(
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java", "startProcess",
+				"schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage");
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+		final Set<String> resources = new HashSet<String>();
+		resources.add("");
 
-        assertEquals(3, variables.size()); */
+		ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
 
-    }
+		/*
+		 * variables.putAll(new JavaReaderStatic().getVariablesFromClass(
+		 * "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables",
+		 * scanner, element, null, entry));
+		 * 
+		 * 
+		 * assertEquals(3, variables.size());
+		 */
 
-    @Test
-    public void followMethodInvocation() {
-        final String PATH = BASE_PATH + "ProcessVariablesReader_MethodInvocation.bpmn";
+	}
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+	@Test
+	public void followMethodInvocation() {
+		final String PATH = BASE_PATH + "ProcessVariablesReader_MethodInvocation.bpmn";
 
-        final Collection<ServiceTask> tasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
-        final ControlFlowGraph cg = new ControlFlowGraph();
-        Properties myProperties = new Properties();
-        myProperties.put("scanpath", "src/test/java");
-        ConfigConstants.getInstance().setProperties(myProperties);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, null, null, null, cg));
-        assertEquals(2, variables.values().size());
+		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-    }
+		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
+				new FlowAnalysis());
+		final ControlFlowGraph cg = new ControlFlowGraph();
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+				"de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, null, null, null, cg));
+		assertEquals(2, variables.values().size());
 
-    @Test
-    public void followObjectInstantiation() {
-        final String PATH = BASE_PATH + "ProcessVariablesReader_ObjectInstantiation.bpmn";
+	}
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+	@Test
+	public void followObjectInstantiation() {
+		final String PATH = BASE_PATH + "ProcessVariablesReader_ObjectInstantiation.bpmn";
 
-        final Collection<ServiceTask> tasks = modelInstance
-                .getModelElementsByType(ServiceTask.class);
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
-        final ControlFlowGraph cg = new ControlFlowGraph();
-        Properties myProperties = new Properties();
-        myProperties.put("scanpath", "src/test/java");
-        ConfigConstants.getInstance().setProperties(myProperties);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, cg));
-        assertEquals(2, variables.values().size());
-    }
+		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-    @Test
-    public void retrieveVariableOperations() {
-        final String PATH = BASE_PATH + "ProcessVariableReader_RetrieveOperations.bpmn";
-        final File processDefinition = new File(PATH);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-        final Set<String> testSet = new HashSet<>();
-        testSet.add("de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
-        fileScanner.setJavaResourcesFileInputStream(testSet);
+		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
+				new FlowAnalysis());
+		final ControlFlowGraph cg = new ControlFlowGraph();
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, cg));
+		assertEquals(2, variables.values().size());
+	}
 
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
-                fileScanner.getJavaResourcesFileInputStream());
+	@Test
+	public void retrieveVariableOperations() {
+		final String PATH = BASE_PATH + "ProcessVariableReader_RetrieveOperations.bpmn";
+		final File processDefinition = new File(PATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+		final Set<String> testSet = new HashSet<>();
+		testSet.add("de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
+		fileScanner.setJavaResourcesFileInputStream(testSet);
 
-        scanner.scanProcessVariables();
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+				fileScanner.getJavaResourcesFileInputStream());
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+		scanner.scanProcessVariables();
 
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-        // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), new ArrayList<>(), scanner);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder);
-        final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+		// create data flow graphs
+		graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
+				scanner, new FlowAnalysis());
 
-        Assert.assertEquals(2, processVariables.size());
-    }
+		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
+				new FlowAnalysis());
+		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+
+		Assert.assertEquals(2, processVariables.size());
+	}
 
 }
