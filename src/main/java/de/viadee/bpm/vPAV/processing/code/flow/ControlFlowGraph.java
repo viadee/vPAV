@@ -48,14 +48,11 @@ public class ControlFlowGraph {
 
 	private int nodeCounter;
 
-	private int defCounter;
-
 	private int priorLevel;
 
 	public ControlFlowGraph() {
 		nodes = new LinkedHashMap<>();
 		this.operations = new LinkedHashMap<>();
-		defCounter = 0;
 		nodeCounter = -1;
 		internalNodeCounter = 0;
 		recursionCounter = 0;
@@ -80,6 +77,8 @@ public class ControlFlowGraph {
 	 *
 	 * 0 --> 1 --> 2 --> 3 --> 3.0 --> 3.0.0 --> 3.0.1 --> 3.0.2
 	 * 
+	 * @param node
+	 *            Current node
 	 * @return Id of node
 	 */
 	private String createHierarchy(final Node node) {
@@ -96,7 +95,7 @@ public class ControlFlowGraph {
 					key.append(internalNodeCounter);
 					String predKey = key.toString();
 					if (internalNodeCounter == 0) {
-						node.setPredsIntraProcedural(predKey.substring(0, predKey.length() - 2));
+						node.setPredsInterProcedural(predKey.substring(0, predKey.length() - 2));
 					}
 				} else {
 					key.append(priorLevel);
@@ -122,14 +121,6 @@ public class ControlFlowGraph {
 
 	boolean hasNodes() {
 		return !nodes.isEmpty();
-	}
-
-	int getDefCounter() {
-		return defCounter;
-	}
-
-	void incrementDefCounter() {
-		this.defCounter++;
 	}
 
 	public void incrementRecursionCounter() {

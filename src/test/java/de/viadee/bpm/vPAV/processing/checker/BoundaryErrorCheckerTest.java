@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -59,161 +60,158 @@ import java.util.Map;
 
 public class BoundaryErrorCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+	private static final String BASE_PATH = "src/test/resources/";
 
-    private static BoundaryErrorChecker checker;
+	private static BoundaryErrorChecker checker;
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    private final Rule rule = new Rule("BoundaryErrorChecker", true, null, null, null, null);
+	private final Rule rule = new Rule("BoundaryErrorChecker", true, null, null, null, null);
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
 
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().setTest(true);
-        RuntimeConfig.getInstance().getResource("en_US");
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java");
+		final URL[] classUrls = { classUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().setTest(true);
+		RuntimeConfig.getInstance().getResource("en_US");
 
-        // Bean-Mapping
-        final Map<String, String> beanMapping = new HashMap<String, String>();
-        beanMapping.put("correctBoundaryErrorEvent", "de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateCorrect");
-        beanMapping.put("wrongBoundaryErrorEvent", "de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateWrong");
-        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
-    }
+		// Bean-Mapping
+		final Map<String, String> beanMapping = new HashMap<String, String>();
+		beanMapping.put("correctBoundaryErrorEvent", "de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateCorrect");
+		beanMapping.put("wrongBoundaryErrorEvent", "de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateWrong");
+		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+	}
 
-    /**
-     * Case: Correct BoundaryErrorEvent with corresponding ErrorCodes
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testBoundaryErrorEventClass_Correct() throws ParserConfigurationException, SAXException, IOException {
+	/**
+	 * Case: Correct BoundaryErrorEvent with corresponding ErrorCodes
+	 *
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws XPathExpressionException
+	 */
+	@Test
+	public void testBoundaryErrorEventClass_Correct() throws ParserConfigurationException, SAXException, IOException {
 
-        final String PATH = BASE_PATH + "BoundaryErrorEventClass_Correct.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
+		final String PATH = BASE_PATH + "BoundaryErrorEventClass_Correct.bpmn";
+		checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		// parse bpmn model
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		for (BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        if (issues.size() > 0) {
-            Assert.fail("correct model generates an issue");
-        }
+		if (issues.size() > 0) {
+			Assert.fail("correct model generates an issue");
+		}
 
-    }
+	}
 
-    /**
-     * Case: Correct BoundaryErrorEvent with not corresponding ErrorCodes
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testBoundaryErrorEventClass_Wrong() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "BoundaryErrorEventClass_Wrong.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
+	/**
+	 * Case: Correct BoundaryErrorEvent with not corresponding ErrorCodes
+	 *
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws XPathExpressionException
+	 */
+	@Test
+	public void testBoundaryErrorEventClass_Wrong() throws ParserConfigurationException, SAXException, IOException {
+		final String PATH = BASE_PATH + "BoundaryErrorEventClass_Wrong.bpmn";
+		checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		// parse bpmn model
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		for (BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        if (issues.size() != 1) {
-            Assert.fail("Incorrect model should generate an issue");
-        }
-    }
+		if (issues.size() != 1) {
+			Assert.fail("Incorrect model should generate an issue");
+		}
+	}
 
-    /**
-     * Case: Correct BoundaryErrorEvent with corresponding ErrorCodes, usage of bean
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testBoundaryErrorEventBean_Correct() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "BoundaryErrorEventBean_Correct.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
+	/**
+	 * Case: Correct BoundaryErrorEvent with corresponding ErrorCodes, usage of bean
+	 *
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws XPathExpressionException
+	 */
+	@Test
+	public void testBoundaryErrorEventBean_Correct() throws ParserConfigurationException, SAXException, IOException {
+		final String PATH = BASE_PATH + "BoundaryErrorEventBean_Correct.bpmn";
+		checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		// parse bpmn model
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		for (BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        if (issues.size() > 0) {
-            Assert.fail("correct model generates an issue");
-        }
-    }
+		if (issues.size() > 0) {
+			Assert.fail("correct model generates an issue");
+		}
+	}
 
-    /**
-     * Case: Correct BoundaryErrorEvent with not corresponding ErrorCodes, usage of bean
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testBoundaryErrorEventBean_Wrong() throws ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "BoundaryErrorEventBean_Wrong.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
+	/**
+	 * Case: Correct BoundaryErrorEvent with not corresponding ErrorCodes, usage of
+	 * bean
+	 *
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws XPathExpressionException
+	 */
+	@Test
+	public void testBoundaryErrorEventBean_Wrong() throws ParserConfigurationException, SAXException, IOException {
+		final String PATH = BASE_PATH + "BoundaryErrorEventBean_Wrong.bpmn";
+		checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
-        // parse bpmn model
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		// parse bpmn model
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		for (BaseElement baseElement : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        if (issues.size() != 1) {
-            Assert.fail("Incorrect model should generate an issue");
-        }
-    }
+		if (issues.size() != 1) {
+			Assert.fail("Incorrect model should generate an issue");
+		}
+	}
 
 }

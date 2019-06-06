@@ -92,8 +92,8 @@ public class Node implements AnalysisElement {
 	 *            Current process variable operation
 	 */
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
-		final String id = String.valueOf(controlFlowGraph.getDefCounter());
-		this.operations.put(String.valueOf(id), processVariableOperation);
+		final String id = String.valueOf(parentElement.getFlowAnalysis().getOperationCounter());
+		this.operations.put(processVariableOperation.getId(), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
 			defined.put(id, processVariableOperation);
@@ -105,13 +105,15 @@ public class Node implements AnalysisElement {
 			killed.put(id, processVariableOperation);
 			break;
 		}
-		controlFlowGraph.incrementDefCounter();
 	}
 
 	/**
-	 * Set the predecessor nodes of the current node for intraprocedural methods
+	 * Set the predecessor nodes of the current node for interprocedural methods
+	 * 
+	 * @param key
+	 *            Key of node
 	 */
-	void setPredsIntraProcedural(final String key) {
+	void setPredsInterProcedural(final String key) {
 		AnalysisElement ae = controlFlowGraph.getNodes().get(key);
 		this.predecessors.put(ae.getId(), ae);
 	}

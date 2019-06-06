@@ -53,6 +53,8 @@ public class BpmnElement implements AnalysisElement {
 
 	private ControlFlowGraph controlFlowGraph;
 
+	private FlowAnalysis flowAnalysis;
+
 	private LinkedHashMap<String, ProcessVariableOperation> operations;
 	private LinkedHashMap<String, ProcessVariableOperation> defined;
 	private LinkedHashMap<String, ProcessVariableOperation> used;
@@ -68,10 +70,11 @@ public class BpmnElement implements AnalysisElement {
 	private List<AnomalyContainer> sourceCodeAnomalies;
 
 	public BpmnElement(final String processDefinition, final BaseElement element,
-			final ControlFlowGraph controlFlowGraph) {
+			final ControlFlowGraph controlFlowGraph, final FlowAnalysis flowAnalysis) {
 		this.processDefinition = processDefinition;
 		this.baseElement = element;
 		this.controlFlowGraph = controlFlowGraph;
+		this.flowAnalysis = flowAnalysis;
 		this.operations = new LinkedHashMap<>();
 
 		this.predecessors = new LinkedHashMap<>();
@@ -174,8 +177,17 @@ public class BpmnElement implements AnalysisElement {
 		return anomalyMap;
 	}
 
+	public FlowAnalysis getFlowAnalysis() {
+		return flowAnalysis;
+	}
+
 	public BaseElement getBaseElement() {
 		return baseElement;
+	}
+
+	@Override
+	public BpmnElement getParentElement() {
+		return this;
 	}
 
 	public void addSourceCodeAnomaly(AnomalyContainer anomaly) {

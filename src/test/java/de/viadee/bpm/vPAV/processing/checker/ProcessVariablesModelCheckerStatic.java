@@ -91,7 +91,7 @@ public class ProcessVariablesModelCheckerStatic {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
 		// create data flow graphs
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), new ArrayList<>(), scanner);
+				processDefinition.getPath(), new ArrayList<>(), scanner, new FlowAnalysis());
 
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		flowAnalysis.analyze(graphCollection);

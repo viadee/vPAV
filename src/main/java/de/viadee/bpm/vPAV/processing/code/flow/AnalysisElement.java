@@ -94,4 +94,6 @@ public interface AnalysisElement {
 	Map<BpmnElement, List<AnomalyContainer>> getAnomalies();
 
 	BaseElement getBaseElement();
+
+	BpmnElement getParentElement();
 }

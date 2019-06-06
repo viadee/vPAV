@@ -88,10 +88,10 @@ public class AnomaliesSetCreationTest {
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -121,10 +121,10 @@ public class AnomaliesSetCreationTest {
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -133,7 +133,7 @@ public class AnomaliesSetCreationTest {
 
 		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
 		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
-		assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.DU, anomaly);
+		assertEquals("Expected a DU anomaly but found " + anomaly, Anomaly.DU, anomaly);
 	}
 
 	@Test
@@ -153,10 +153,10 @@ public class AnomaliesSetCreationTest {
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -165,10 +165,10 @@ public class AnomaliesSetCreationTest {
 
 		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
 		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
-		assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.UR, anomaly);
+		assertEquals("Expected a UR anomaly but found " + anomaly, Anomaly.UR, anomaly);
 	}
 
-	// @Test
+	@Test
 	public void findUU() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
@@ -185,19 +185,21 @@ public class AnomaliesSetCreationTest {
 
 		// create data flow graphs
 		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
 		flowAnalysis.getNodes().values().forEach(
 				analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
 
-		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
-		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
-		assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.UU, anomaly);
+		Anomaly anomaly1 = anomalies.iterator().next().getAnomaly();
+		Anomaly anomaly2 = anomalies.iterator().next().getAnomaly();
+		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 2, anomalies.size());
+		assertEquals("Expected a UU anomaly but found " + anomaly1, Anomaly.UU, anomaly1);
+		assertEquals("Expected a UU anomaly but found " + anomaly2, Anomaly.UU, anomaly2);
 	}
 
 	@Test

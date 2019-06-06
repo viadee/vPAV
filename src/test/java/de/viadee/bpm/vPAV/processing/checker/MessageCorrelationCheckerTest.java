@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -107,7 +108,7 @@ public class MessageCorrelationCheckerTest {
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			issues.addAll(checker.check(element));
 		}
 
@@ -144,7 +145,7 @@ public class MessageCorrelationCheckerTest {
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			issues.addAll(checker.check(element));
 		}
 
@@ -181,7 +182,7 @@ public class MessageCorrelationCheckerTest {
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			issues.addAll(checker.check(element));
 		}
 
@@ -218,7 +219,7 @@ public class MessageCorrelationCheckerTest {
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph());
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			issues.addAll(checker.check(element));
 		}
 

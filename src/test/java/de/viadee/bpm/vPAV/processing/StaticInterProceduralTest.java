@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -71,7 +72,8 @@ public class StaticInterProceduralTest {
 
 		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph());
+		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
+				new FlowAnalysis());
 		final ControlFlowGraph cg = new ControlFlowGraph();
 
 		// Set custom basepath.
