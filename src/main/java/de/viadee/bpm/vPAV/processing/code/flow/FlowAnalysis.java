@@ -131,17 +131,20 @@ public class FlowAnalysis {
 					firstNode.setInUnused(initialVariables);
 				}
 
+				// Replace element with first block
 				analysisElement.getPredecessors().forEach(pred -> {
 					pred.removePredecessor(analysisElement.getId());
 					pred.addSuccessor(new NodeDecorator(firstNode));
 					firstNode.addPredecessor(pred);
 				});
 
+				// Replace element with last block
 				analysisElement.getSuccessors().forEach(succ -> {
 					succ.removePredecessor(analysisElement.getId());
 					succ.addPredecessor(new NodeDecorator(lastNode));
 				});
 
+				// Set predecessor relation for blocks across delegates
 				Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
 				Node predDelegate = null;
 				while (iterator.hasNext()) {
@@ -156,20 +159,21 @@ public class FlowAnalysis {
 						}
 					}
 				}
+
+				// Remember id of elements to be removed
 				analysisElement.getControlFlowGraph().getNodes().values()
 						.forEach(node -> cfgNodes.put(node.getId(), node));
 				ids.add(firstNode.getParentElement().getBaseElement().getId());
+			} else {
+				// In case we have start event that maps a message to a method
+				final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
+				analysisElement.getOperations().values().forEach(operation -> {
+					if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
+						initialOperations.put(operation.getId(), operation);
+					}
+				});
+				analysisElement.setInUsed(initialOperations);
 			}
-
-			// In case we have start event that maps a message to a method
-			final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
-			analysisElement.getOperations().values().forEach(operation -> {
-				if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
-					initialOperations.put(operation.getId(), operation);
-				}
-			});
-			analysisElement.setInUsed(initialOperations);
-
 		});
 
 		temp.putAll(cfgNodes);
@@ -201,17 +205,25 @@ public class FlowAnalysis {
 				final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = analysisElement.getOutUsed();
 
 				// Calculate out-sets for used definitions (transfer functions)
-				final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>();
-				outUsed.putAll(analysisElement.getUsed());
-				outUsed.putAll(getSetDifference(analysisElement.getInUsed(), analysisElement.getKilled()));
+				final LinkedHashMap<String, ProcessVariableOperation> tempUnion = new LinkedHashMap<>();
+				tempUnion.putAll(analysisElement.getInUsed());
+				tempUnion.putAll(getIntersection(analysisElement.getInUnused(), analysisElement.getUsed()));
+				tempUnion.putAll(getIntersection(analysisElement.getDefined(), analysisElement.getUsed()));
+				final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>(
+						getSetDifference(tempUnion, analysisElement.getKilled()));
 
 				// Calculate out-sets for unused definitions (transfer functions)
-				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
-						analysisElement.getDefined());
+				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> tempUnion2 = new LinkedHashMap<>();
+				tempUnion2.putAll(analysisElement.getDefined());
+				tempUnion2.putAll(analysisElement.getInUnused());
 				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>();
-				tempIntersection.putAll(getSetDifference(analysisElement.getInUnused(), analysisElement.getKilled()));
-				tempIntersection.putAll(getSetDifference(tempIntersection, analysisElement.getUsed()));
-				outUnused.putAll(tempIntersection);
+				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection2 = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection3 = new LinkedHashMap<>();
+				tempIntersection.putAll(getSetDifference(tempUnion2, analysisElement.getKilled()));
+				tempIntersection2.putAll(getSetDifference(tempIntersection, analysisElement.getUsed()));
+				tempIntersection3.putAll(getSetDifference(tempIntersection2, analysisElement.getKilled()));
+				outUnused.putAll(tempIntersection3);
 
 				// If the current element contains input mapping operations, remove from
 				// outgoing sets due to scope (only locally accessible)
@@ -351,7 +363,7 @@ public class FlowAnalysis {
 
 		urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
 			if (value.getName().equals(value2.getName())) {
-				if (value.getIndex() < value2.getIndex()) {
+				if (value.getIndex() > value2.getIndex()) {
 					urAnomalies.remove(key);
 				}
 			}
@@ -540,11 +552,11 @@ public class FlowAnalysis {
 			final LinkedHashMap<String, ProcessVariableOperation> mapTwo) {
 		final LinkedHashMap<String, ProcessVariableOperation> setDifference = new LinkedHashMap<>(mapOne);
 
-		mapOne.keySet().forEach(key -> {
-			if (mapTwo.containsKey(key)) {
+		mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
+			if (value.getName().equals(value2.getName())) {
 				setDifference.remove(key);
 			}
-		});
+		}));
 		return setDifference;
 	}
 

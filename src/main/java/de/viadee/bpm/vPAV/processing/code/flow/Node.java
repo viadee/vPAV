@@ -93,7 +93,7 @@ public class Node implements AnalysisElement {
 	 */
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
 		final String id = String.valueOf(parentElement.getFlowAnalysis().getOperationCounter());
-		this.operations.put(String.valueOf(id), processVariableOperation);
+		this.operations.put(processVariableOperation.getId(), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
 			defined.put(id, processVariableOperation);

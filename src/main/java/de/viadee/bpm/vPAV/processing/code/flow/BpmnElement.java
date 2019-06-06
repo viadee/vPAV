@@ -111,8 +111,7 @@ public class BpmnElement implements AnalysisElement {
 	 *            Current operation
 	 */
 	private void addOperation(final ProcessVariableOperation processVariableOperation) {
-		final String id = String.valueOf(flowAnalysis.getOperationCounter());
-		this.operations.put(String.valueOf(id), processVariableOperation);
+		this.operations.put(processVariableOperation.getId(), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:
 			defined.put(processVariableOperation.getId(), processVariableOperation);

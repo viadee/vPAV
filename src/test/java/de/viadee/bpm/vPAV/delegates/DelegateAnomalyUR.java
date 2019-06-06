@@ -52,7 +52,6 @@ public class DelegateAnomalyUR implements JavaDelegate {
         execution.removeVariable(first);
         if (r.nextInt(5) > 2) {
             int i = 3;
-
         }
         execution.getVariable(first);
     }
