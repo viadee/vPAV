@@ -5,6 +5,7 @@ The Process Variables Model Checker processes BPMN models and checks a model for
 - DD (Overwritten)
 - DU (Defined-Deleted)
 - UR (Undefined-Reference)
+- UU (Undefined-Undefined)
 ```
 U – Deletion of a value (undefine)  
 D – Value assignment (define)  
@@ -24,25 +25,6 @@ The rule should be configured as follows:
 
 ```
 
-Important: All variables used at runtime should be declared beforehand to maximize correctness of the conducted analysis. The declaration has to be done in a class called "InitialProcessVariables". This class can be either a separate class or inner class. 
-
-```java
-public class InitialProcessVariables extends InitialProcessVariablesBase {
-
-    String filename;
-    
-}
-```
-
-```java
-public class Example {
-
-   class InitialProcessVariables extends InitialProcessVariablesBase {
-
-   	String filename;
-    }    
-}
-```
 
 ## Error messages
 **process variable creates an anomaly (compare %Chapter%,%ElementFieldType%)**
