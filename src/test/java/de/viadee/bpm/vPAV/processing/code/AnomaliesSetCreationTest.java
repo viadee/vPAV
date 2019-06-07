@@ -87,7 +87,7 @@ public class AnomaliesSetCreationTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
@@ -99,9 +99,8 @@ public class AnomaliesSetCreationTest {
 				analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
 
 		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
-		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
+		assertEquals("Expected 2 anomalies but found " + anomalies.size(), 1, anomalies.size());
 		assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.DD, anomaly);
-
 	}
 
 	@Test
@@ -120,7 +119,7 @@ public class AnomaliesSetCreationTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
@@ -152,7 +151,7 @@ public class AnomaliesSetCreationTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
@@ -184,7 +183,7 @@ public class AnomaliesSetCreationTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
@@ -200,14 +199,6 @@ public class AnomaliesSetCreationTest {
 		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 2, anomalies.size());
 		assertEquals("Expected a UU anomaly but found " + anomaly1, Anomaly.UU, anomaly1);
 		assertEquals("Expected a UU anomaly but found " + anomaly2, Anomaly.UU, anomaly2);
-	}
-
-	@Test
-	public void findNOPR() {
-	}
-
-	@Test
-	public void findDNOP() {
 	}
 
 }

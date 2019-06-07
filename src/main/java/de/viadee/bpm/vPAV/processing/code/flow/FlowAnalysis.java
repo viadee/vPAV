@@ -213,17 +213,17 @@ public class FlowAnalysis {
 						getSetDifference(tempUnion, analysisElement.getKilled()));
 
 				// Calculate out-sets for unused definitions (transfer functions)
-				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>();
 				final LinkedHashMap<String, ProcessVariableOperation> tempUnion2 = new LinkedHashMap<>();
 				tempUnion2.putAll(analysisElement.getDefined());
 				tempUnion2.putAll(analysisElement.getInUnused());
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection2 = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection3 = new LinkedHashMap<>();
-				tempIntersection.putAll(getSetDifference(tempUnion2, analysisElement.getKilled()));
-				tempIntersection2.putAll(getSetDifference(tempIntersection, analysisElement.getUsed()));
-				tempIntersection3.putAll(getSetDifference(tempIntersection2, analysisElement.getKilled()));
-				outUnused.putAll(tempIntersection3);
+				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>(
+						getSetDifference(tempUnion2, analysisElement.getKilled()));
+				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection2 = new LinkedHashMap<>(
+						getSetDifference(tempIntersection, analysisElement.getUsed()));
+				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection3 = new LinkedHashMap<>(
+						getSetDifference(tempIntersection2, analysisElement.getKilled()));
+				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
+						tempIntersection3);
 
 				// If the current element contains input mapping operations, remove from
 				// outgoing sets due to scope (only locally accessible)
@@ -288,24 +288,13 @@ public class FlowAnalysis {
 	 */
 	private void extractAnomalies() {
 		nodes.values().forEach(node -> {
-			// DD (inUnused U defined)
 			ddAnomalies(node);
 
-			// DU (inUnused U killed)
 			duAnomalies(node);
 
-			// UR (used - inUnused - inUsed - defined)
 			urAnomalies(node);
 
-			// UU ()
 			uuAnomalies(node);
-
-			// -R ()
-			// nopRAnomalies(element, node);
-
-			// D- (inUnused U inUsed - (defined - killed - used))
-			// dNopAnomalies(element, node);
-
 		});
 	}
 
@@ -408,57 +397,6 @@ public class FlowAnalysis {
 		if (!uuAnomalies.isEmpty()) {
 			uuAnomalies.forEach((k, v) -> node
 					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(), v)));
-		}
-
-	}
-
-	/**
-	 * Extract -R anomalies
-	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param node
-	 *            Current node
-	 */
-	private void nopRAnomalies(BpmnElement element, Node node) {
-
-	}
-
-	/**
-	 * Extract D- anomalies
-	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param node
-	 *            Current node
-	 */
-	private void dNopAnomalies(final BpmnElement element, final Node node) {
-		final LinkedHashMap<String, ProcessVariableOperation> dNopAnomaliesTemp = new LinkedHashMap<>(
-				node.getInUnused());
-		dNopAnomaliesTemp.putAll(node.getInUsed());
-		final LinkedHashMap<String, ProcessVariableOperation> dNopAnomalies = new LinkedHashMap<>(dNopAnomaliesTemp);
-
-		dNopAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				dNopAnomalies.remove(key);
-			}
-		}));
-
-		dNopAnomaliesTemp.forEach((key, value) -> node.getKilled().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				dNopAnomalies.remove(key);
-			}
-		}));
-
-		dNopAnomaliesTemp.forEach((key, value) -> node.getUsed().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				dNopAnomalies.remove(key);
-			}
-		}));
-
-		if (!dNopAnomalies.isEmpty()) {
-			dNopAnomalies.forEach((k, v) -> element.addSourceCodeAnomaly(
-					new AnomalyContainer(v.getName(), Anomaly.D, element.getBaseElement().getId(), v)));
 		}
 	}
 
