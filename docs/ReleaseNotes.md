@@ -1,5 +1,80 @@
 # Release notes
 
+## 3.0.1
+
+### Features  
+[**Issue 133**](https://github.com/viadee/vPAV/issues/133) Added scope information to data flow analysis 
+
+### Fixes
+
+### Misc
+[**Issue 130**](https://github.com/viadee/vPAV/issues/130) Redefined anomalies and improved calculations   
+
+## 3.0.0
+
+### Features
+[**Issue 103**](https://github.com/viadee/vPAV/issues/103) Reworked entire ProcessVariableModelChecker to improve accuracy of data flow analysis  
+[**Issue 109**](https://github.com/viadee/vPAV/issues/109) Created unique (global) identification mechanism for proper access to process variable operations  
+[**Issue 119**](https://github.com/viadee/vPAV/issues/119) Separation of properties (introduction of a properties file) and rules  
+[**Issue 121**](https://github.com/viadee/vPAV/issues/121) Multiple instances of checkers are now allowed (see [#59](https://github.com/viadee/vPAV/issues/59))  
+
+### Fixes
+
+### Misc
+
+
+## 2.8.3
+
+### Features
+[**Issue 59**](https://github.com/viadee/vPAV/issues/59) Multiple instances of checkers are now allowed  
+[**Issue 80**](https://github.com/viadee/vPAV/issues/80) Location of BPMN files now configurable  
+
+### Fixes
+[**Issue 120**](https://github.com/viadee/vPAV/issues/120) Fixed CheckerFactory warning  
+
+### Misc
+[**Issue 115**](https://github.com/viadee/vPAV/issues/115) Improved documentation for inheritance of ruleSets  
+[**Issue 113**](https://github.com/viadee/vPAV/issues/113) Adjusted SonarQube rules
+
+## 2.8.2
+
+### Features
+[**Issue 106**](https://github.com/viadee/vPAV/issues/106) Make bean mapping passable as argument to ProcessApplicationvalidator  
+### Fixes  
+
+### Misc
+[**Issue 116**](https://github.com/viadee/vPAV/issues/16) Clean up of unit tests
+
+## 2.8.1
+
+### Features
+[**Issue 60**](https://github.com/viadee/vPAV/issues/60) Support of transitive interface implementation  
+[**Issue 94**](https://github.com/viadee/vPAV/issues/94) Added MessageChecker
+
+### Fixes
+[**Issue 104**](https://github.com/viadee/vPAV/issues/104) Resolved dependencies
+
+### Misc
+[**Issue 102**](https://github.com/viadee/vPAV/issues/102) Improved discovery of intermediate injection of process variables
+
+## 2.8.0
+
+### Features
+[**Issue 95**](https://github.com/viadee/vPAV/issues/95) Refactoring of process variable discovery (adapted to Camunda injection order)
+
+### Fixes
+
+### Misc
+
+## 2.7.3
+
+### Features
+
+### Fixes
+[**Issue 93**](https://github.com/viadee/vPAV/issues/93) Fixed endless recursion and StackOverflow
+
+### Misc
+
 ## 2.7.2
 
 ### Features
