@@ -355,13 +355,20 @@ public class JavaReaderStatic {
 			// Retrieve the method and its body based on the used interface
 			List<Type> parameterTypes = new ArrayList<>();
 			RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution");
+			RefType activityExecutionType = RefType.v("org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution");
 			RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
 			RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap");
 			VoidType returnType = VoidType.v();
 
 			switch (methodName) {
 			case "execute":
-				parameterTypes.add(delegateExecutionType);
+				for (SootClass clazz : sootClass.getInterfaces()) {
+					if (clazz.getName().equals("org.camunda.bpm.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior")) {
+						parameterTypes.add(activityExecutionType);
+					} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.JavaDelegate")) {
+						parameterTypes.add(delegateExecutionType);
+					}
+				}
 				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args, controlFlowGraph);
 				break;
