@@ -101,8 +101,7 @@ public class ProcessVariableReaderStaticTest {
 		assertEquals(3, variables.asMap().size());
 	}
 
-	
-	// TODO: Repair test case
+
 	@Test
 	public void findInitialProcessVariables() {
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
@@ -119,19 +118,14 @@ public class ProcessVariableReaderStaticTest {
 				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java", "startProcess",
 				"schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage");
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		final Set<String> resources = new HashSet<String>();
-		resources.add("");
 
-		ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
-		/*
-		 * variables.putAll(new JavaReaderStatic().getVariablesFromClass(
-		 * "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables",
-		 * scanner, element, null, entry));
-		 * 
-		 * 
-		 * assertEquals(3, variables.size());
-		 */
+		variables.putAll(new JavaReaderStatic().getVariablesFromClass(
+		"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables", element, null, entry));
+
+		assertEquals(3, variables.size());
 
 	}
 
