@@ -237,6 +237,9 @@ public class Node implements AnalysisElement {
 	}
 
 	@Override
+	public void removeSuccessor(String successor) { this.successors.remove(successor); }
+
+	@Override
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		return getParentElement().getAnomalies();
 	}

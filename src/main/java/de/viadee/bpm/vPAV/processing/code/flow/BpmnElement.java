@@ -303,6 +303,9 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	@Override
+	public void removeSuccessor(String successor) { this.successors.remove(successor); }
+
+	@Override
 	public int hashCode() {
 		return baseElement.getId().hashCode();
 	}

@@ -133,7 +133,7 @@ public class FlowAnalysis {
 
 				// Replace element with first block
 				analysisElement.getPredecessors().forEach(pred -> {
-					pred.removePredecessor(analysisElement.getId());
+					pred.removeSuccessor(analysisElement.getId());
 					pred.addSuccessor(new NodeDecorator(firstNode));
 					firstNode.addPredecessor(pred);
 				});
