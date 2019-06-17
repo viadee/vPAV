@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -68,7 +69,7 @@ public class Runner {
 
     private Collection<CheckerIssue> filteredIssues;
 
-    private Map<String, Map<String, Rule>> rules = new HashMap<>();
+    private RuleSet rules = new RuleSet();
 
     private Map<String, String> ignoredIssuesMap = new HashMap<>();
 
@@ -128,7 +129,7 @@ public class Runner {
      *
      * @return Map(String, Map ( String, Rule)) ruleSet
      */
-    private Map<String, Map<String, Rule>> readConfig() {
+    private RuleSet readConfig() {
 
         prepareOutputFolder();
 
@@ -137,10 +138,10 @@ public class Runner {
         final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
         try {
             if (new File(ConfigConstants.TEST_BASEPATH + ConfigConstants.RULESET).exists()) {
-                Map<String, Map<String, Rule>> localRule = new XmlConfigReader().read(ConfigConstants.RULESET);
+                RuleSet localRule = new XmlConfigReader().read(ConfigConstants.RULESET);
 
-                if (localRule.containsKey(ConfigConstants.HASPARENTRULESET)
-                        && localRule.get(ConfigConstants.HASPARENTRULESET).get(ConfigConstants.HASPARENTRULESET).isActive()) {
+                if (localRule.getElementRules().containsKey(ConfigConstants.HASPARENTRULESET)
+                        && localRule.getElementRules().get(ConfigConstants.HASPARENTRULESET).get(ConfigConstants.HASPARENTRULESET).isActive()) {
                     rules = mergeRuleSet(rules, new XmlConfigReader().read(ConfigConstants.RULESETPARENT));
                     rules = mergeRuleSet(rules, localRule);
                 } else {
@@ -151,13 +152,12 @@ public class Runner {
             }
 
             ruleSetOutputWriter.write(rules);
-            RuntimeConfig.getInstance().addActiveRules(rules);
-
+            RuntimeConfig.getInstance().setRuleSet(rules);
         } catch (final ConfigReaderException | OutputWriterException e) {
             throw new RuntimeException(e);
         }
 
-        rules.remove(ConfigConstants.HASPARENTRULESET);
+        rules.getElementRules().remove(ConfigConstants.HASPARENTRULESET);
 
         RuntimeConfig.getInstance().retrieveLocale(rules);
 
@@ -189,13 +189,13 @@ public class Runner {
      * @param childRules  New RuleSet
      * @return Map(String, Rule) finalRules merged ruleSet
      */
-    protected Map<String, Map<String, Rule>> mergeRuleSet(final Map<String, Map<String, Rule>> parentRules,
-                                                          final Map<String, Map<String, Rule>> childRules) {
+    protected RuleSet mergeRuleSet(final RuleSet parentRules,
+                                   final RuleSet childRules) {
         final Map<String, Map<String, Rule>> finalRules = new HashMap<>();
 
-        finalRules.putAll(parentRules);
+        finalRules.putAll(parentRules.getElementRules());
 
-        for (Map.Entry<String, Map<String, Rule>> entry : childRules.entrySet()) {
+        for (Map.Entry<String, Map<String, Rule>> entry : childRules.getElementRules().entrySet()) {
             if (finalRules.containsKey(entry.getKey())) {
                 finalRules.get(entry.getKey()).putAll(entry.getValue());
             } else {
@@ -203,7 +203,7 @@ public class Runner {
             }
         }
 
-        return finalRules;
+        return new RuleSet(finalRules);
     }
 
     /**
@@ -212,10 +212,10 @@ public class Runner {
      *
      * @param rules Rules defined in ruleSet
      */
-    protected void getProcessVariables(final Map<String, Map<String, Rule>> rules) {
-        if (oneCheckerIsActive(rules, "ProcessVariablesModelChecker")
-                || oneCheckerIsActive(rules, "ProcessVariablesNameConventionChecker")
-                || oneCheckerIsActive(rules, "DataFlowChecker")) {
+    protected void getProcessVariables(final RuleSet rules) {
+        if (oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesModelChecker")
+                || oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesNameConventionChecker")
+                || oneCheckerIsActive(rules.getElementRules(), "DataFlowChecker")) {
             variableScanner = new ProcessVariablesScanner(getFileScanner().getJavaResourcesFileInputStream());
             readOuterProcessVariables(variableScanner);
             setCheckProcessVariables(true);
@@ -240,7 +240,7 @@ public class Runner {
      *
      * @param rules Map of rules
      */
-    private void createIssues(Map<String, Map<String, Rule>> rules, Collection<DataFlowRule> dataFlowRules) {
+    private void createIssues(RuleSet rules, Collection<DataFlowRule> dataFlowRules) {
         issues = checkModels(rules, getFileScanner(), variableScanner, dataFlowRules);
     }
 
@@ -331,7 +331,7 @@ public class Runner {
         for (String file : allOutputFilesArray)
             outputFiles.add(Paths.get(fileMapping.get(file), file));
 
-        if (ConfigConstants.getInstance().isHtmlOutputEnabled(rules.get(ConfigConstants.CREATE_OUTPUT_RULE))) {
+        if (ConfigConstants.getInstance().isHtmlOutputEnabled(rules.getElementRules().get(ConfigConstants.CREATE_OUTPUT_RULE).get(ConfigConstants.CREATE_OUTPUT_RULE))) {
             for (String file : allOutputFilesArray)
                 copyFileToVPAVFolder(file);
         }
@@ -530,7 +530,7 @@ public class Runner {
      * @param dataFlowRules   dataFlowRules
      * @return foundIssues ConfigItem not found
      */
-    private Collection<CheckerIssue> checkModels(final Map<String, Map<String, Rule>> rules, final FileScanner fileScanner,
+    private Collection<CheckerIssue> checkModels(final RuleSet rules, final FileScanner fileScanner,
                                                  final ProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules) {
         final Collection<CheckerIssue> issues = new ArrayList<>();
 
@@ -553,7 +553,7 @@ public class Runner {
      *            variableScanner
      * @return modelIssues
      */
-    private Collection<CheckerIssue> checkModel(final Map<String, Map<String, Rule>> rules, final String processDefinition,
+    private Collection<CheckerIssue> checkModel(final RuleSet rules, final String processDefinition,
                                                 final FileScanner fileScanner, final ProcessVariablesScanner variableScanner,
                                                 Collection<DataFlowRule> dataFlowRules) {
         BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();

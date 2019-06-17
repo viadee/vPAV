@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.model.data;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -44,11 +45,8 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -76,9 +74,9 @@ public class CallActivityTest {
 	}
 
 	// @Test
-	public void testEmbedding() throws ParserConfigurationException, SAXException, IOException {
+	public void testEmbedding() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
 		final File processdefinition = new File(PATH);
 
@@ -86,7 +84,7 @@ public class CallActivityTest {
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
 
 		// add reference for called process
-		final Map<String, String> processIdToPathMap = new HashMap<String, String>();
+		final Map<String, String> processIdToPathMap = new HashMap<>();
 		processIdToPathMap.put("calledProcess", BASE_PATH + "CallActivityTest_calledProcess.bpmn");
 		processIdToPathMap.put("calledcalledProcess", BASE_PATH + "CallActivityTest_calledcalledProcess.bpmn");
 
@@ -94,7 +92,7 @@ public class CallActivityTest {
 				new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
 				processdefinition.getPath(), calledElementHierarchy, scanner, new FlowAnalysis());
 

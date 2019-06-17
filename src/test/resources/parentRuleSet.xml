@@ -1,33 +1,35 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!DOCTYPE xml>
 <ruleSet>
-    <rule>
-        <name>CreateOutputHTML</name>
-        <state>true</state>
-    </rule>
-    <rule id="messageTrue">
-        <name>MessageEventChecker</name>
-        <state>true</state>
-    </rule>
-    <rule>
-        <name>OverlapChecker</name>
-        <state>true</state>
-    </rule>
-    <rule>
-        <name>ExtensionChecker</name>
-        <state>true</state>
-        <settings>
-            <setting name="CALLBACK_TIMEOUT" type="ServiceTask">\d+</setting>
-        </settings>
-    </rule>
-    <rule>
-        <name>TimerExpressionChecker</name>
-        <state>true</state>
-    </rule>
-    <rule>
-        <name>NoScriptChecker</name>
-        <state>true</state>
-        <settings>
-        </settings>
-    </rule>
+    <elementRules>
+        <rule>
+            <name>CreateOutputHTML</name>
+            <state>true</state>
+        </rule>
+        <rule id="messageTrue">
+            <name>MessageEventChecker</name>
+            <state>true</state>
+        </rule>
+        <rule>
+            <name>OverlapChecker</name>
+            <state>true</state>
+        </rule>
+        <rule>
+            <name>ExtensionChecker</name>
+            <state>true</state>
+            <settings>
+                <setting name="CALLBACK_TIMEOUT" type="ServiceTask">\d+</setting>
+            </settings>
+        </rule>
+        <rule>
+            <name>TimerExpressionChecker</name>
+            <state>true</state>
+        </rule>
+        <rule>
+            <name>NoScriptChecker</name>
+            <state>true</state>
+            <settings>
+            </settings>
+        </rule>
+    </elementRules>
 </ruleSet>

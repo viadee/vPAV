@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV;
 
-import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -41,8 +40,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FileScannerTest {
 
@@ -61,7 +58,6 @@ public class FileScannerTest {
 
     @Test
     public void testSootPathLoading() {
-        FileScanner fileScanner = new FileScanner(new HashMap<String, Map<String, Rule>>());
         String testTarget = "target/test-classes";
         String sootPath = FileScanner.getSootPath();
         boolean contains = false;

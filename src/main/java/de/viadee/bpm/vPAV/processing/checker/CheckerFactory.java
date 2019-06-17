@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -62,7 +63,7 @@ public class CheckerFactory {
      * @param scanner                 ProcessVariablesScanner for process variables, if active
      * @return checkers returns checkers
      */
-    public Collection<ElementChecker> createCheckerInstances(final Map<String, Map<String, Rule>> ruleConf,
+    public Collection<ElementChecker> createCheckerInstances(final RuleSet ruleConf,
                                                              final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
                                                              final ProcessVariablesScanner scanner) {
 
@@ -70,7 +71,7 @@ public class CheckerFactory {
         final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
         AbstractElementChecker newChecker;
 
-        for (Map<String, Rule> rules : ruleConf.values()) {
+        for (Map<String, Rule> rules : ruleConf.getElementRules().values()) {
             for (Rule rule : rules.values()) {
                 String fullyQualifiedName = getFullyQualifiedName(rule);
 

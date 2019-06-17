@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.config.reader;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -71,14 +72,14 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When
-        Map<String, Map<String, Rule>> result = reader.read(ConfigConstants.RULESET);
+        RuleSet result = reader.read(ConfigConstants.RULESET);
 
         // Then
-        assertFalse("No rules could be read", result.isEmpty());
-        for (Map.Entry<String, Map<String, Rule>> entry : result.entrySet()) {
+        assertFalse("No rules could be read", result.getElementRules().isEmpty());
+        for (Map.Entry<String, Map<String, Rule>> entry : result.getElementRules().entrySet()) {
             assertFalse("Rules of type " + entry.getKey() + " could not be read.", entry.getValue().isEmpty());
         }
-        assertTrue("ID of XorNamingConventionChecker was not loaded.", result.get("XorNamingConventionChecker").containsKey("XorCheckerId"));
+        assertTrue("ID of XorNamingConventionChecker was not loaded.", result.getElementRules().get("XorNamingConventionChecker").containsKey("XorCheckerId"));
     }
 
     /**
@@ -90,15 +91,14 @@ public class XmlConfigReaderTest {
     public void testLoadingNonExistingXMLConfigFile() throws ConfigReaderException {
         // Given
         XmlConfigReader reader = new XmlConfigReader();
-        Map<String, Map<String, Rule>> result = null;
 
         // When
         try {
-            result = reader.read("non-existing.xml");
+            RuleSet result = reader.read("non-existing.xml");
             assertTrue("Exception expected, but no one was thrown.", result != null);
         } catch (ConfigReaderException e) {
             // load DefaultRuleSet
-            result = reader.read("ruleSetDefault.xml");
+            Map<String, Map<String, Rule>> result = reader.read("ruleSetDefault.xml").getElementRules();
 
             // Default rules correct
             assertTrue("False Default ruleSet ", result.get("JavaDelegateChecker").get("JavaDelegateChecker").isActive());

@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import org.junit.BeforeClass;
@@ -67,11 +68,11 @@ public class RunnerTest {
     public void testMergeRuleSet() throws ConfigReaderException {
         XmlConfigReader reader = new XmlConfigReader();
 
-        Map<String, Map<String, Rule>> childRuleSet = reader.read("ruleSetChild.xml");
-        Map<String, Map<String, Rule>> parentRuleSet = reader.read("parentRuleSet.xml");
+        RuleSet childRuleSet = reader.read("ruleSetChild.xml");
+        RuleSet parentRuleSet = reader.read("parentRuleSet.xml");
 
         Runner runner = new Runner();
-        Map<String, Map<String, Rule>> rules = runner.mergeRuleSet(parentRuleSet, childRuleSet);
+        Map<String, Map<String, Rule>> rules = runner.mergeRuleSet(parentRuleSet, childRuleSet).getElementRules();
         assertFalse("No rules could be read", rules.isEmpty());
 
         // Check if inheritance worked correctly.

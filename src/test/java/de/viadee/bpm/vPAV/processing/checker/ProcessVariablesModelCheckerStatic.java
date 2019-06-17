@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -81,7 +82,7 @@ public class ProcessVariablesModelCheckerStatic {
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -125,7 +126,7 @@ public class ProcessVariablesModelCheckerStatic {
 		Assert.assertEquals("DU", issue4.getAnomaly().toString());
 		final CheckerIssue issue5 = iterator.next();
 		Assert.assertEquals("Task_0oj9gln", issue5.getElementId());
-		Assert.assertEquals("ProcessVariable2", issue5.getVariable().toString());
+		Assert.assertEquals("ProcessVariable2", issue5.getVariable());
 		Assert.assertEquals("UR", issue5.getAnomaly().toString());
 		final CheckerIssue issue6 = iterator.next();
 		Assert.assertEquals("ServiceTask_05g4a96", issue6.getElementId());

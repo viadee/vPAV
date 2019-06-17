@@ -61,7 +61,7 @@ public final class XmlConfigReader implements ConfigReader {
      * @throws ConfigReaderException If file can not be found in classpath
      */
     @Override
-    public Map<String, Map<String, Rule>> read(final String file) throws ConfigReaderException {
+    public RuleSet read(final String file) throws ConfigReaderException {
 
         try {
             final JAXBContext jaxbContext = JAXBContext.newInstance(XmlRuleSet.class);
@@ -85,7 +85,7 @@ public final class XmlConfigReader implements ConfigReader {
      *
      * @return rules
      */
-    public Map<String, Map<String, Rule>> getDeactivatedRuleSet() {
+    public RuleSet getDeactivatedRuleSet() {
         final Map<String, Map<String, Rule>> rules = new HashMap<>();
         Map<String, Rule> newrule;
 
@@ -99,9 +99,9 @@ public final class XmlConfigReader implements ConfigReader {
                                 name,
                                 true,
                                 null,
-                                new HashMap<String, Setting>(),
-                                new ArrayList<ElementConvention>(),
-                                new ArrayList<ModelConvention>()));
+                                new HashMap<>(),
+                                new ArrayList<>(),
+                                new ArrayList<>()));
             } else {
                 newrule.put(
                         name,
@@ -109,14 +109,14 @@ public final class XmlConfigReader implements ConfigReader {
                                 name,
                                 false,
                                 null,
-                                new HashMap<String, Setting>(),
-                                new ArrayList<ElementConvention>(),
-                                new ArrayList<ModelConvention>()));
+                                new HashMap<>(),
+                                new ArrayList<>(),
+                                new ArrayList<>()));
             }
             rules.put(name, newrule);
         }
 
-        return rules;
+        return new RuleSet(rules);
     }
 
     /**
@@ -126,11 +126,17 @@ public final class XmlConfigReader implements ConfigReader {
      * @return rules
      * @throws ConfigReaderException If file could not be read properly
      */
-    private static Map<String, Map<String, Rule>> transformFromXmlDatastructues(
+    private static RuleSet transformFromXmlDatastructues(
             final XmlRuleSet ruleSet) throws ConfigReaderException {
         final Map<String, Map<String, Rule>> rules = new HashMap<>();
 
-        final Collection<XmlRule> xmlRules = ruleSet.getRules();
+        Collection<XmlRule> xmlRules = ruleSet.getElementRules();
+        if (xmlRules.isEmpty()) {
+            // TODO use old rules without tag
+            xmlRules = ruleSet.getRules();
+            ruleSet.setElementRules(ruleSet.getRules());
+        }
+
         for (final XmlRule rule : xmlRules) {
             final String id = (rule.getId() == null) ? rule.getName() : rule.getId();
             final String name = rule.getName();
@@ -138,7 +144,7 @@ public final class XmlConfigReader implements ConfigReader {
             final boolean state = rule.isState();
             final String ruleDescription = rule.getDescription();
             final Collection<XmlElementConvention> xmlElementConventions = rule.getElementConventions();
-            final ArrayList<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+            final ArrayList<ElementConvention> elementConventions = new ArrayList<>();
             if (xmlElementConventions != null) {
                 for (final XmlElementConvention xmlElementConvention : xmlElementConventions) {
                     final XmlElementFieldTypes xmlElementFieldTypes =
@@ -213,7 +219,7 @@ public final class XmlConfigReader implements ConfigReader {
             checkSingletonRule(rules, DataFlowChecker.class.getSimpleName());
         }
 
-        return rules;
+        return new RuleSet(rules);
     }
 
     private static void checkSingletonRule(Map<String, Map<String, Rule>> rules, String rulename) {

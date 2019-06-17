@@ -36,7 +36,6 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -205,12 +204,12 @@ public class ConfigConstants {
      * @param createoutputrule Rule
      * @return true/false
      */
-    public boolean isHtmlOutputEnabled(Map<String, Rule> createoutputrule) {
+    public boolean isHtmlOutputEnabled(Rule createoutputrule) {
         if (properties.containsKey("outputhtml")) {
             return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
         } else if (createoutputrule != null) {
-            // Backwards compatibility: allow create-output flag to be defined in ruleset
-            return createoutputrule.get(ConfigConstants.CREATE_OUTPUT_RULE).isActive();
+            // Todo Backwards compatibility: allow create-output flag to be defined in ruleset
+            return createoutputrule.isActive();
         } else {
             return true;
         }

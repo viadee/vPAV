@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.code;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -77,7 +78,7 @@ public class AnomaliesSetCreationTest {
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDD.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -109,7 +110,7 @@ public class AnomaliesSetCreationTest {
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDU.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -141,7 +142,7 @@ public class AnomaliesSetCreationTest {
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUR.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -173,7 +174,7 @@ public class AnomaliesSetCreationTest {
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUU.bpmn";
 		final File processDefinition = new File(PATH);
 

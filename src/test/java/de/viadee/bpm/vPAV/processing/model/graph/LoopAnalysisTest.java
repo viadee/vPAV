@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -44,15 +45,15 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class LoopAnalysisTest {
 
@@ -73,17 +74,14 @@ public class LoopAnalysisTest {
 
 	/**
 	 * Case: Data flow graph creation and calculation of invalid paths
-	 * 
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
+	 *
 	 */
 	// @Test
 	// TODO: Refactor test once reaching definition algorithm is properly
 	// implemented
-	public void testLoop() throws ParserConfigurationException, SAXException, IOException {
+	public void testLoop() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "LoopAnalysisTest_TestLoop.bpmn";
 		final File processdefinition = new File(PATH);
 
@@ -93,7 +91,7 @@ public class LoopAnalysisTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
 		// create data flow graphs
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processdefinition.getPath(), new ArrayList<String>(), scanner, new FlowAnalysis());
+				processdefinition.getPath(), new ArrayList<>(), scanner, new FlowAnalysis());
 
 		graphBuilder.createInvalidPaths(graphCollection);
 
