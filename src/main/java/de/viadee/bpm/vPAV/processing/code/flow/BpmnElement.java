@@ -34,7 +34,6 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.InOutState;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
@@ -48,6 +47,8 @@ import java.util.stream.Collectors;
 public class BpmnElement implements AnalysisElement {
 
 	private String processDefinition;
+
+	private boolean visited = false;
 
 	private BaseElement baseElement;
 
@@ -125,15 +126,26 @@ public class BpmnElement implements AnalysisElement {
 		}
 	}
 
-	private Map<String, InOutState> in = new HashMap<String, InOutState>();
-
-	private Map<String, InOutState> out = new HashMap<String, InOutState>();
-
-	/* in interface for call activity */
-	private Collection<String> inCa;
-
-	/* out interface for call activity */
-	private Collection<String> outCa;
+	/**
+	 * Removes process variable operations from sets
+	 *
+	 * @param processVariableOperation
+	 *            Current operation
+	 */
+	private void removeOperationFromSet(final ProcessVariableOperation processVariableOperation) {
+		this.operations.remove(processVariableOperation.getId());
+		switch (processVariableOperation.getOperation()) {
+		case WRITE:
+			defined.remove(processVariableOperation.getId());
+			break;
+		case READ:
+			used.remove(processVariableOperation.getId());
+			break;
+		case DELETE:
+			killed.remove(processVariableOperation.getId());
+			break;
+		}
+	}
 
 	private ListMultimap<String, ProcessVariableOperation> processVariables;
 
@@ -153,28 +165,20 @@ public class BpmnElement implements AnalysisElement {
 		processVariables.put(variableName, variableObject);
 	}
 
-	public Map<String, InOutState> getIn() {
-		return in;
-	}
-
-	public Map<String, InOutState> getOut() {
-		return out;
-	}
-
-	public void setInCa(final Collection<String> in) {
-		this.inCa = in;
-	}
-
-	public void setOutCa(final Collection<String> out) {
-		this.outCa = out;
-	}
-
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<>();
 		if (!getSourceCodeAnomalies().isEmpty()) {
 			anomalyMap.put(this, getSourceCodeAnomalies());
 		}
 		return anomalyMap;
+	}
+
+	public boolean isVisited() {
+		return visited;
+	}
+
+	public void setVisited(boolean visited) {
+		this.visited = visited;
 	}
 
 	public FlowAnalysis getFlowAnalysis() {
@@ -188,6 +192,11 @@ public class BpmnElement implements AnalysisElement {
 	@Override
 	public BpmnElement getParentElement() {
 		return this;
+	}
+
+	@Override
+	public void removeOperation(ProcessVariableOperation op) {
+		removeOperationFromSet(op);
 	}
 
 	public void addSourceCodeAnomaly(AnomalyContainer anomaly) {
@@ -303,7 +312,9 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	@Override
-	public void removeSuccessor(String successor) { this.successors.remove(successor); }
+	public void removeSuccessor(String successor) {
+		this.successors.remove(successor);
+	}
 
 	@Override
 	public int hashCode() {

@@ -135,10 +135,10 @@ public class ProcessVariableOperationReaderTest {
 
 		final List<ProcessVariableOperation> someVariableInMainProcess = variables.get("someVariableInMainProcess");
 		Assert.assertNotNull(someVariableInMainProcess);
-		Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess.get(0).getOperation());
+		Assert.assertEquals(VariableOperation.WRITE, someVariableInMainProcess.get(0).getOperation());
 
 		final List<ProcessVariableOperation> someVariableInMainProcess2 = variables.get("someVariableInMainProcess2");
 		Assert.assertNotNull(someVariableInMainProcess2);
-		Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.get(0).getOperation());
+		Assert.assertEquals(VariableOperation.WRITE, someVariableInMainProcess2.get(0).getOperation());
 	}
 }

@@ -44,34 +44,35 @@ import java.util.Map;
 import java.util.Properties;
 
 public class ProcessApplicationValidatorTest {
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        // Set custom basepath.
-        Properties myProperties = new Properties();
-        myProperties.put("basepath", "src/test/resources/ProcessApplicationValidatorTest/");
-        ConfigConstants.getInstance().setProperties(myProperties);
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		// Set custom basepath.
+		Properties myProperties = new Properties();
+		myProperties.put("basepath", "src/test/resources/ProcessApplicationValidatorTest/");
+		ConfigConstants.getInstance().setProperties(myProperties);
 
-        // Bean-Mapping
-        final Map<String, String> beanMapping = new HashMap<String, String>();
-        beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.TestDelegate");
-        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+		// Bean-Mapping
+		final Map<String, String> beanMapping = new HashMap<String, String>();
+		beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.TestDelegate");
+		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = {classUrl};
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        ConfigConstants.getInstance().setIsTest(true);
-    }
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java");
+		final URL[] classUrls = { classUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().setTest(true);
+	}
 
-    /**
-     * This test fails if soot is not able to process Lambda expressions.
-     */
-    @Test
-    public void testLamdbaExpression() {
-        ProcessApplicationValidator.findModelInconsistencies((HashMap<String, String>) RuntimeConfig.getInstance().getBeanMapping());
-    }
+	/**
+	 * This test fails if soot is not able to process Lambda expressions.
+	 */
+	@Test
+	public void testLamdbaExpression() {
+		ProcessApplicationValidator
+				.findModelInconsistencies((HashMap<String, String>) RuntimeConfig.getInstance().getBeanMapping());
+	}
 }

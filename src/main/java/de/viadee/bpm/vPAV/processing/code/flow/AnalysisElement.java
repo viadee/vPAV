@@ -98,4 +98,6 @@ public interface AnalysisElement {
 	BaseElement getBaseElement();
 
 	BpmnElement getParentElement();
+
+	void removeOperation(ProcessVariableOperation op);
 }

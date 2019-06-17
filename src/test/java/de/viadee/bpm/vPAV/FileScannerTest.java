@@ -32,7 +32,6 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,31 +45,31 @@ import java.util.Map;
 
 public class FileScannerTest {
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        ConfigConstants.getInstance().setIsTest(true);
-    }
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java");
+		final URL[] classUrls = { classUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().setTest(true);
+	}
 
-    @Test
-    public void testSootPathLoading() {
-        FileScanner fileScanner = new FileScanner(new HashMap<String, Map<String, Rule>>());
-        String testTarget = "target/test-classes";
-        String sootPath = FileScanner.getSootPath();
-        boolean contains = false;
+	@Test
+	public void testSootPathLoading() {
+		new FileScanner(new HashMap<String, Map<String, Rule>>());
+		String testTarget = "target/test-classes";
+		String sootPath = FileScanner.getSootPath();
+		boolean contains = false;
 
-        if (sootPath.contains(testTarget)) {
-            contains = true;
-        }
+		if (sootPath.contains(testTarget)) {
+			contains = true;
+		}
 
-        Assert.assertTrue("SootPath should contain 'target/test-classes'.", contains);
-    }
+		Assert.assertTrue("SootPath should contain 'target/test-classes'.", contains);
+	}
 
 }

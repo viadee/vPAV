@@ -34,7 +34,6 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -44,11 +43,9 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.xml.sax.SAXException;
+import org.junit.Test;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -68,33 +65,31 @@ public class LoopAnalysisTest {
 		final URL[] classUrls = { classUrl };
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
-		ConfigConstants.getInstance().setIsTest(true);
+		RuntimeConfig.getInstance().setTest(true);
 	}
 
 	/**
 	 * Case: Data flow graph creation and calculation of invalid paths
-	 * 
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
+	 *
 	 */
-	// @Test
-	// TODO: Refactor test once reaching definition algorithm is properly
-	// implemented
-	public void testLoop() throws ParserConfigurationException, SAXException, IOException {
+	@Test
+	public void testLoop() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final String PATH = BASE_PATH + "LoopAnalysisTest_TestLoop.bpmn";
-		final File processdefinition = new File(PATH);
+		final File processDefinition = new File(PATH);
 
 		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
 		// create data flow graphs
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processdefinition.getPath(), new ArrayList<String>(), scanner, new FlowAnalysis());
 
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), new ArrayList<String>(), scanner, flowAnalysis);
+
+		flowAnalysis.analyze(graphCollection);
 		graphBuilder.createInvalidPaths(graphCollection);
 
 		// calculate invalid paths based on data flow graphs
@@ -103,8 +98,15 @@ public class LoopAnalysisTest {
 		// get invalid paths
 		final List<Path> varTest = invalidPathMap
 				.get(new AnomalyContainer("dd", Anomaly.DD, "ServiceTask_1ev9i13", null));
+
+		final Iterator<Path> iterator = varTest.iterator();
+		final Path firstPath = iterator.next();
+		final Path secondPath = iterator.next();
 		Assert.assertEquals(
-				"[[ServiceTask_1ev9i13, SequenceFlow_0s4fyqh, ExclusiveGateway_1vhe4nv, SequenceFlow_12tyqqh, ExclusiveGateway_0utydka, SequenceFlow_0g3rb21, ServiceTask_1ev9i13]]",
-				varTest.toString());
+				"[StartEvent_1, SequenceFlow_0uop1ch, ExclusiveGateway_0utydka, SequenceFlow_0g3rb21, ServiceTask_1ev9i13]",
+				firstPath.toString());
+		Assert.assertEquals(
+				"[ServiceTask_1ev9i13, SequenceFlow_0s4fyqh, ExclusiveGateway_1vhe4nv, SequenceFlow_12tyqqh, ExclusiveGateway_0utydka, SequenceFlow_0g3rb21, ServiceTask_1ev9i13]",
+				secondPath.toString());
 	}
 }

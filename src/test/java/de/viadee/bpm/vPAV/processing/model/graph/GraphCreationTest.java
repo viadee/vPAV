@@ -44,11 +44,9 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.xml.sax.SAXException;
+import org.junit.Test;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -82,25 +80,25 @@ public class GraphCreationTest {
 
 	/**
 	 * Case: Data flow graph creation and calculation of invalid paths
-	 * 
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
 	 */
-	// @Test
-	public void testGraph() throws ParserConfigurationException, SAXException, IOException {
+	@Test
+	public void testGraph() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
-		final File processdefinition = new File(PATH);
+		final File processDefinition = new File(PATH);
 
 		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
 		// create data flow graphs
+
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processdefinition.getPath(), new ArrayList<String>(), scanner, new FlowAnalysis());
+				processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
+
+		flowAnalysis.analyze(graphCollection);
 
 		// calculate invalid paths based on data flow graphs
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
@@ -118,9 +116,7 @@ public class GraphCreationTest {
 
 		final List<Path> testHallo2 = invalidPathMap
 				.get(new AnomalyContainer("hallo2", Anomaly.UR, "BusinessRuleTask_119jb6t", null));
-		Assert.assertEquals(
-				"[[StartEvent_1, SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, SequenceFlow_1ck3twv, StartEvent_0bcezfo, SequenceFlow_0jkf21p, StartEvent_0sqm3mr, SequenceFlow_1qax2e0, BusinessRuleTask_119jb6t]]",
-				testHallo2.toString());
+		Assert.assertEquals("[[BusinessRuleTask_119jb6t]]", testHallo2.toString());
 
 		final List<Path> geloeschteVarTest = invalidPathMap
 				.get(new AnomalyContainer("geloeschteVariable", Anomaly.DU, "SequenceFlow_0bi6kaa", null));

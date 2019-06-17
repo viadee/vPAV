@@ -68,7 +68,6 @@ public class AnomaliesSetCreationTest {
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 		RuntimeConfig.getInstance().setTest(true);
-		ConfigConstants.getInstance().setIsTest(true);
 	}
 
 	@Test

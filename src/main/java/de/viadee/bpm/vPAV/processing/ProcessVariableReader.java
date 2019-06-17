@@ -736,7 +736,8 @@ public final class ProcessVariableReader {
 				if (source != null && !source.isEmpty()) {
 					processVariables.put(source,
 							new ProcessVariableOperation(source, element, ElementChapter.InputData,
-									KnownElementFieldType.CamundaIn, null, VariableOperation.READ, scopeId,
+									KnownElementFieldType.CamundaIn, null, VariableOperation.WRITE,
+									((CallActivity) baseElement).getCalledElement(),
 									element.getFlowAnalysis().getOperationCounter()));
 				}
 			}
