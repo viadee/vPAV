@@ -21,6 +21,9 @@ The rule should be configured as follows:
 <rule>
   <name>ProcessVariablesModelChecker</name>
   <state>true</state>
+  <settings>
+    <setting name="UseStaticAnalysisBoolean">true</setting>
+  </settings>
 </rule>
 
 ```
