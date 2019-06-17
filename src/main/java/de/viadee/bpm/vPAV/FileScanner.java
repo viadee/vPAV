@@ -113,9 +113,9 @@ public class FileScanner {
         scanner.scan();
         processDefinitions = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
 
-        if (processDefinitions.size() < 1) {
+        if (processDefinitions.size() < 1 && !RuntimeConfig.getInstance().isTest()) {
             LOGGER.log(Level.SEVERE, "No model present in given location (" + basepath + ")");
-            // System.exit(0);
+            System.exit(0);
         }
 
         scanPath = ConfigConstants.getInstance().getScanPath();
