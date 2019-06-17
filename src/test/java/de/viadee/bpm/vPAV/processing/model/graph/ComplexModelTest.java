@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -58,138 +59,138 @@ import java.util.*;
 
 public class ComplexModelTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+	private static final String BASE_PATH = "src/test/resources/";
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-        final URL[] classUrls = { classUrl, resourcesUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-    }
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		RuntimeConfig.getInstance().setTest(true);
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java/");
+		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+		final URL[] classUrls = { classUrl, resourcesUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+	}
 
-    /**
-     * Case: Check complex model for invalid paths
-     * 
-     * Included: * sub processes * boundary events * java delegate * spring bean * DMN model
-     * 
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     */
-    @Test
-    public void testGraphOnComplexModel() throws ParserConfigurationException, SAXException, IOException {
-    	final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
-        final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
-        final File processdefinition = new File(PATH);
+	/**
+	 * Case: Check complex model for invalid paths
+	 * 
+	 * Included: * sub processes * boundary events * java delegate * spring bean *
+	 * DMN model
+	 * 
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 */
+	@Test
+	public void testGraphOnComplexModel() throws ParserConfigurationException, SAXException, IOException {
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+		final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
+		final File processdefinition = new File(PATH);
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
 
-        // create many gateway paths to increase the complexity
-        createGatewayPaths("ExclusiveGateway_0mkf3hf", "ExclusiveGateway_00pfwgg", modelInstance, 1);
-        // createGatewayPaths("ExclusiveGateway_10gsr88", "ExclusiveGateway_13qew7s", modelInstance,
-        // 500);
+		// create many gateway paths to increase the complexity
+		createGatewayPaths("ExclusiveGateway_0mkf3hf", "ExclusiveGateway_00pfwgg", modelInstance, 1);
+		// createGatewayPaths("ExclusiveGateway_10gsr88", "ExclusiveGateway_13qew7s",
+		// modelInstance,
+		// 500);
 
-        final Map<String, String> decisionRefToPathMap = new HashMap<String, String>();
-        decisionRefToPathMap.put("decision", "table.dmn");
+		final Map<String, String> decisionRefToPathMap = new HashMap<String, String>();
+		decisionRefToPathMap.put("decision", "table.dmn");
 
-        final Map<String, String> beanMappings = new HashMap<String, String>();
-        beanMappings.put("springBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
+		final Map<String, String> beanMappings = new HashMap<String, String>();
+		beanMappings.put("springBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
 
-        long startTime = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, null, null, null,
-                new BpmnScanner(PATH));
-        // create data flow graphs
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processdefinition.getPath(), new ArrayList<String>(), scanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, null, null, null,
+				new BpmnScanner(PATH));
+		// create data flow graphs
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processdefinition.getPath(), new ArrayList<String>(), scanner, new FlowAnalysis());
 
-        long estimatedTime = System.currentTimeMillis() - startTime;
-        System.out.println("Graph creation: " + estimatedTime + "ms");
-        long startTime2 = System.currentTimeMillis();
+		long estimatedTime = System.currentTimeMillis() - startTime;
+		System.out.println("Graph creation: " + estimatedTime + "ms");
+		long startTime2 = System.currentTimeMillis();
 
-        // calculate invalid paths based on data flow graphs
-        @SuppressWarnings("unused")
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder
-                .createInvalidPaths(graphCollection);
+		// calculate invalid paths based on data flow graphs
+		@SuppressWarnings("unused")
+		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-        long estimatedTime2 = System.currentTimeMillis() - startTime2;
-        System.out.println("Graph search: " + estimatedTime2 + "ms");
-    }
+		long estimatedTime2 = System.currentTimeMillis() - startTime2;
+		System.out.println("Graph search: " + estimatedTime2 + "ms");
+	}
 
-    /**
-     * Create paths between two gateways
-     * 
-     * @param gateway1_id
-     * @param gateway2_id
-     * @param modelInstance
-     * @param count
-     */
-    private void createGatewayPaths(final String gateway1_id, final String gateway2_id,
-            final BpmnModelInstance modelInstance, final int count) {
+	/**
+	 * Create paths between two gateways
+	 * 
+	 * @param gateway1_id
+	 * @param gateway2_id
+	 * @param modelInstance
+	 * @param count
+	 */
+	private void createGatewayPaths(final String gateway1_id, final String gateway2_id,
+			final BpmnModelInstance modelInstance, final int count) {
 
-        final ModelElementInstance element_von = modelInstance.getModelElementById(gateway1_id);
-        final ModelElementInstance element_zu = modelInstance.getModelElementById(gateway2_id);
+		final ModelElementInstance element_von = modelInstance.getModelElementById(gateway1_id);
+		final ModelElementInstance element_zu = modelInstance.getModelElementById(gateway2_id);
 
-        for (int i = 1; i < count + 1; i++) {
-            // 1) create task
-            final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
-            final FlowNode task = createElement(modelInstance, processes.iterator().next(), "task" + i,
-                    Task.class);
-            // 2) connect with sequence flows
-            createSequenceFlow(modelInstance, processes.iterator().next(), (FlowNode) element_von, task);
-            createSequenceFlow(modelInstance, processes.iterator().next(), task, (FlowNode) element_zu);
-        }
-    }
+		for (int i = 1; i < count + 1; i++) {
+			// 1) create task
+			final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
+			final FlowNode task = createElement(modelInstance, processes.iterator().next(), "task" + i, Task.class);
+			// 2) connect with sequence flows
+			createSequenceFlow(modelInstance, processes.iterator().next(), (FlowNode) element_von, task);
+			createSequenceFlow(modelInstance, processes.iterator().next(), task, (FlowNode) element_zu);
+		}
+	}
 
-    /**
-     * create an bpmn element
-     * 
-     * @param parentElement
-     * @param id
-     * @param elementClass
-     * @return
-     */
-    private <T extends BpmnModelElementInstance> T createElement(
-            final BpmnModelInstance modelInstance, BpmnModelElementInstance parentElement, String id,
-            Class<T> elementClass) {
-        T element = modelInstance.newInstance(elementClass);
-        element.setAttributeValue("id", id, true);
-        parentElement.addChildElement(element);
-        return element;
-    }
+	/**
+	 * create an bpmn element
+	 * 
+	 * @param parentElement
+	 * @param id
+	 * @param elementClass
+	 * @return
+	 */
+	private <T extends BpmnModelElementInstance> T createElement(final BpmnModelInstance modelInstance,
+			BpmnModelElementInstance parentElement, String id, Class<T> elementClass) {
+		T element = modelInstance.newInstance(elementClass);
+		element.setAttributeValue("id", id, true);
+		parentElement.addChildElement(element);
+		return element;
+	}
 
-    /**
-     * create a sequence flow
-     * 
-     * @param process
-     * @param from
-     * @param to
-     * @return
-     */
-    private SequenceFlow createSequenceFlow(final BpmnModelInstance modelInstance, Process process,
-            FlowNode from, FlowNode to) {
-        SequenceFlow sequenceFlow = createElement(modelInstance, process,
-                from.getId() + "-" + to.getId(), SequenceFlow.class);
-        process.addChildElement(sequenceFlow);
-        sequenceFlow.setSource(from);
-        from.getOutgoing().add(sequenceFlow);
-        sequenceFlow.setTarget(to);
-        to.getIncoming().add(sequenceFlow);
-        return sequenceFlow;
-    }
+	/**
+	 * create a sequence flow
+	 * 
+	 * @param process
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	private SequenceFlow createSequenceFlow(final BpmnModelInstance modelInstance, Process process, FlowNode from,
+			FlowNode to) {
+		SequenceFlow sequenceFlow = createElement(modelInstance, process, from.getId() + "-" + to.getId(),
+				SequenceFlow.class);
+		process.addChildElement(sequenceFlow);
+		sequenceFlow.setSource(from);
+		from.getOutgoing().add(sequenceFlow);
+		sequenceFlow.setTarget(to);
+		to.getIncoming().add(sequenceFlow);
+		return sequenceFlow;
+	}
 
-    @AfterClass
-    public static void tearDown() {
-        RuntimeConfig.getInstance().setTest(false);
-    }
+	@AfterClass
+	public static void tearDown() {
+		RuntimeConfig.getInstance().setTest(false);
+	}
+
 }
-

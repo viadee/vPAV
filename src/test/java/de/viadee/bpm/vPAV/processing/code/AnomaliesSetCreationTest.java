@@ -68,12 +68,16 @@ public class AnomaliesSetCreationTest {
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 		RuntimeConfig.getInstance().setTest(true);
+		ConfigConstants.getInstance().setIsTest(true);
 	}
 
 	@Test
 	public void findDD() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDD.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -83,11 +87,11 @@ public class AnomaliesSetCreationTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -95,15 +99,17 @@ public class AnomaliesSetCreationTest {
 				analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
 
 		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
-		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
+		assertEquals("Expected 2 anomalies but found " + anomalies.size(), 1, anomalies.size());
 		assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.DD, anomaly);
-
 	}
 
 	@Test
 	public void findDU() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDU.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -113,11 +119,11 @@ public class AnomaliesSetCreationTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -126,13 +132,16 @@ public class AnomaliesSetCreationTest {
 
 		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
 		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
-		assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.DU, anomaly);
+		assertEquals("Expected a DU anomaly but found " + anomaly, Anomaly.DU, anomaly);
 	}
 
 	@Test
 	public void findUR() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUR.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -142,11 +151,11 @@ public class AnomaliesSetCreationTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
@@ -155,13 +164,16 @@ public class AnomaliesSetCreationTest {
 
 		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
 		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
-		assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.UR, anomaly);
+		assertEquals("Expected a UR anomaly but found " + anomaly, Anomaly.UR, anomaly);
 	}
 
-	// @Test
+	@Test
 	public void findUU() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUU.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -171,28 +183,22 @@ public class AnomaliesSetCreationTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner);
-
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
 		flowAnalysis.analyze(graphCollection);
 
 		Set<AnomalyContainer> anomalies = new HashSet<>();
 		flowAnalysis.getNodes().values().forEach(
 				analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
 
-		Anomaly anomaly = anomalies.iterator().next().getAnomaly();
-		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 1, anomalies.size());
-		assertEquals("Expected a DD anomaly but found " + anomaly, Anomaly.UU, anomaly);
-	}
-
-	@Test
-	public void findNOPR() {
-	}
-
-	@Test
-	public void findDNOP() {
+		Anomaly anomaly1 = anomalies.iterator().next().getAnomaly();
+		Anomaly anomaly2 = anomalies.iterator().next().getAnomaly();
+		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 2, anomalies.size());
+		assertEquals("Expected a UU anomaly but found " + anomaly1, Anomaly.UU, anomaly1);
+		assertEquals("Expected a UU anomaly but found " + anomaly2, Anomaly.UU, anomaly2);
 	}
 
 }

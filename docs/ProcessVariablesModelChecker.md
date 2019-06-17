@@ -5,6 +5,7 @@ The Process Variables Model Checker processes BPMN models and checks a model for
 - DD (Overwritten)
 - DU (Defined-Deleted)
 - UR (Undefined-Reference)
+- UU (Undefined-Undefined)
 ```
 U – Deletion of a value (undefine)  
 D – Value assignment (define)  

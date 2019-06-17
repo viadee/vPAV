@@ -35,9 +35,9 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -78,7 +78,7 @@ public class ProcessVariablesModelCheckerTest {
 		RuntimeConfig.getInstance().getResource("en_US");
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.TEST_JAVAPATH);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -88,7 +88,7 @@ public class ProcessVariablesModelCheckerTest {
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
 		// create data flow graphs
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), new ArrayList<String>(), scanner);
+				processDefinition.getPath(), new ArrayList<String>(), scanner, new FlowAnalysis());
 
 		// calculate invalid paths based on data flow graphs
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
@@ -100,7 +100,7 @@ public class ProcessVariablesModelCheckerTest {
 	/**
 	 * Case: there is an empty script reference
 	 */
-	//@Test
+	// @Test
 	public void testProcessVariablesModelChecker() {
 		final Collection<CheckerIssue> issues = checker.check();
 

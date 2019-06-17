@@ -32,11 +32,11 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -54,7 +54,7 @@ public class ProcessApplicationVariableParser {
 		RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
 		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
 
-		FileScanner fileScanner = new FileScanner(new HashMap<>(), ConfigConstants.JAVAPATH);
+		FileScanner fileScanner = new FileScanner(new HashMap<>());
 		ProcessVariablesScanner variableScanner = readOuterProcessVariables(fileScanner);
 
 		BpmnScanner bpmnScanner = createScanner(modelFile);
@@ -68,7 +68,7 @@ public class ProcessApplicationVariableParser {
 				variableScanner.getProcessIdToVariableMap(), bpmnScanner);
 
 		final Collection<BpmnElement> bpmnElements = BpmnModelDispatcher.getBpmnElements(modelFile, baseElements,
-				graphBuilder);
+				graphBuilder, new FlowAnalysis());
 
 		return BpmnModelDispatcher.getProcessVariables(bpmnElements);
 	}

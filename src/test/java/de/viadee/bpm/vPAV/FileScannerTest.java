@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,11 +56,12 @@ public class FileScannerTest {
         final URL[] classUrls = { classUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     @Test
     public void testSootPathLoading() {
-        new FileScanner(new HashMap<String, Map<String, Rule>>(), "src/test/java");
+        FileScanner fileScanner = new FileScanner(new HashMap<String, Map<String, Rule>>());
         String testTarget = "target/test-classes";
         String sootPath = FileScanner.getSootPath();
         boolean contains = false;

@@ -218,10 +218,8 @@ public final class XmlConfigReader implements ConfigReader {
 
     private static void checkSingletonRule(Map<String, Map<String, Rule>> rules, String rulename) {
         Map<String, Rule> rulesSubset = rules.get(rulename);
-        if (rulesSubset != null) {
-            if (rulesSubset.size() > 1 || rulesSubset.get(rulename) == null) {
-                LOGGER.severe("Rule '" + rulename + "' is only allowed once and without defining an ID.");
-            }
+        if (rulesSubset != null && (rulesSubset.size() > 1 || rulesSubset.get(rulename) == null)) {
+            LOGGER.severe("Rule '" + rulename + "' is only allowed once and without defining an ID.");
         }
     }
 

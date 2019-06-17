@@ -5,7 +5,7 @@
 	<groupId>de.viadee</groupId>
 	<artifactId>viadeeProcessApplicationValidator</artifactId>
 
-	<version>3.0.0</version>
+	<version>3.0.1</version>
 
 	<name>viadee Process Application Validator</name>
 

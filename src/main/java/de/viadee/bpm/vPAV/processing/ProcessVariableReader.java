@@ -700,7 +700,8 @@ public final class ProcessVariableReader {
 				for (final CamundaFormField field : formFields) {
 					processVariables.put(field.getCamundaId(),
 							new ProcessVariableOperation(field.getCamundaId(), element, ElementChapter.FormData,
-									KnownElementFieldType.FormField, null, VariableOperation.WRITE, scopeElementId));
+									KnownElementFieldType.FormField, null, VariableOperation.WRITE, scopeElementId,
+									element.getFlowAnalysis().getOperationCounter()));
 				}
 			}
 		}
@@ -733,8 +734,10 @@ public final class ProcessVariableReader {
 			for (final CamundaIn inputAssociation : inputAssociations) {
 				final String source = inputAssociation.getCamundaSource();
 				if (source != null && !source.isEmpty()) {
-					processVariables.put(source, new ProcessVariableOperation(source, element, ElementChapter.InputData,
-							KnownElementFieldType.CamundaIn, null, VariableOperation.READ, scopeId));
+					processVariables.put(source,
+							new ProcessVariableOperation(source, element, ElementChapter.InputData,
+									KnownElementFieldType.CamundaIn, null, VariableOperation.READ, scopeId,
+									element.getFlowAnalysis().getOperationCounter()));
 				}
 			}
 			final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
@@ -744,7 +747,8 @@ public final class ProcessVariableReader {
 				if (target != null && !target.isEmpty()) {
 					processVariables.put(target,
 							new ProcessVariableOperation(target, element, ElementChapter.OutputData,
-									KnownElementFieldType.CamundaOut, null, VariableOperation.WRITE, scopeId));
+									KnownElementFieldType.CamundaOut, null, VariableOperation.WRITE, scopeId,
+									element.getFlowAnalysis().getOperationCounter()));
 				}
 			}
 		}
@@ -837,16 +841,17 @@ public final class ProcessVariableReader {
 					BpmnConstants.ATTR_EX);
 			if (t_expression != null) {
 
-				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
-						t_expression, element, ElementChapter.Implementation, KnownElementFieldType.Expression, scopeId));
+				processVariables
+						.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner, t_expression,
+								element, ElementChapter.Implementation, KnownElementFieldType.Expression, scopeId));
 			}
 
 			final String t_delegateExpression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
 					BpmnConstants.ATTR_DEL);
 			if (t_delegateExpression != null) {
-				processVariables.putAll(
-						findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner, t_delegateExpression,
-								element, ElementChapter.Implementation, KnownElementFieldType.DelegateExpression, scopeId));
+				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+						t_delegateExpression, element, ElementChapter.Implementation,
+						KnownElementFieldType.DelegateExpression, scopeId));
 			}
 
 			final ArrayList<String> t_fieldInjectionExpressions = bpmnScanner
@@ -863,13 +868,17 @@ public final class ProcessVariableReader {
 			if (t_resultVariable != null && t_resultVariable.trim().length() > 0) {
 				processVariables.put(t_resultVariable,
 						new ProcessVariableOperation(t_resultVariable, element, ElementChapter.Details,
-								KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId));
+								KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId,
+								element.getFlowAnalysis().getOperationCounter()));
 			}
 
 			if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS) != null) {
-				processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
-						baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS),
-						element, ElementChapter.Implementation, KnownElementFieldType.Class, scopeId, controlFlowGraph));
+				processVariables
+						.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
+								baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+										BpmnConstants.ATTR_CLASS),
+								element, ElementChapter.Implementation, KnownElementFieldType.Class, scopeId,
+								controlFlowGraph));
 			}
 
 			if (baseElement instanceof BusinessRuleTask) {
@@ -931,7 +940,8 @@ public final class ProcessVariableReader {
 			if (resultVariable != null && resultVariable.trim().length() > 0) {
 				processVariables.put(resultVariable,
 						new ProcessVariableOperation(resultVariable, element, ElementChapter.Details,
-								KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId));
+								KnownElementFieldType.ResultVariable, null, VariableOperation.WRITE, scopeId,
+								element.getFlowAnalysis().getOperationCounter()));
 			}
 		} else if (baseElement instanceof CallActivity) {
 			final CallActivity callActivity = (CallActivity) baseElement;
@@ -988,14 +998,16 @@ public final class ProcessVariableReader {
 			if (collectionName != null && collectionName.trim().length() > 0) {
 				processVariables.put(collectionName,
 						new ProcessVariableOperation(collectionName, element, ElementChapter.MultiInstance,
-								KnownElementFieldType.CollectionElement, null, VariableOperation.READ, scopeId));
+								KnownElementFieldType.CollectionElement, null, VariableOperation.READ, scopeId,
+								element.getFlowAnalysis().getOperationCounter()));
 			}
 			final String elementVariable = loopCharacteristics.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
 					BpmnConstants.ELEMENT_VARIABLE);
 			if (elementVariable != null && elementVariable.trim().length() > 0) {
 				processVariables.put(elementVariable,
 						new ProcessVariableOperation(elementVariable, element, ElementChapter.MultiInstance,
-								KnownElementFieldType.ElementVariable, null, VariableOperation.READ, scopeId));
+								KnownElementFieldType.ElementVariable, null, VariableOperation.READ, scopeId,
+								element.getFlowAnalysis().getOperationCounter()));
 			}
 			final ModelElementInstance loopCardinality = loopCharacteristics
 					.getUniqueChildElementByType(LoopCardinality.class);
@@ -1076,14 +1088,17 @@ public final class ProcessVariableReader {
 						.getModelElementsByType(InputExpression.class);
 				for (final InputExpression inputExpression : inputExpressions) {
 					final Text variable = inputExpression.getText();
-					variables.put(variable.getTextContent(), new ProcessVariableOperation(variable.getTextContent(),
-							element, chapter, fieldType, fileName, VariableOperation.READ, scopeId));
+					variables.put(variable.getTextContent(),
+							new ProcessVariableOperation(variable.getTextContent(), element, chapter, fieldType,
+									fileName, VariableOperation.READ, scopeId,
+									element.getFlowAnalysis().getOperationCounter()));
 				}
 				final Collection<Output> outputs = decision.getModelInstance().getModelElementsByType(Output.class);
 				for (final Output output : outputs) {
 					final String variable = output.getName();
-					variables.put(variable, new ProcessVariableOperation(variable, element, chapter, fieldType,
-							fileName, VariableOperation.WRITE, scopeId));
+					variables.put(variable,
+							new ProcessVariableOperation(variable, element, chapter, fieldType, fileName,
+									VariableOperation.WRITE, scopeId, element.getFlowAnalysis().getOperationCounter()));
 				}
 			}
 		}
@@ -1144,8 +1159,10 @@ public final class ProcessVariableReader {
 							chapter, fieldType, scopeId, controlFlowGraph));
 				} else {
 					// save variable
-					variables.put(node.getName(), new ProcessVariableOperation(node.getName(), element, chapter,
-							fieldType, element.getProcessDefinition(), VariableOperation.READ, scopeId));
+					variables.put(node.getName(),
+							new ProcessVariableOperation(node.getName(), element, chapter, fieldType,
+									element.getProcessDefinition(), VariableOperation.READ, scopeId,
+									element.getFlowAnalysis().getOperationCounter()));
 				}
 			}
 			// extract written variables
@@ -1200,8 +1217,10 @@ public final class ProcessVariableReader {
 					variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
 							isBean(matcher.group(1)), element, chapter, fieldType, scopeId, controlFlowGraph));
 				} else {
-					variables.put(expression, new ProcessVariableOperation(expression, element, chapter, fieldType,
-							element.getProcessDefinition(), VariableOperation.READ, scopeId));
+					variables.put(expression,
+							new ProcessVariableOperation(expression, element, chapter, fieldType,
+									element.getProcessDefinition(), VariableOperation.READ, scopeId,
+									element.getFlowAnalysis().getOperationCounter()));
 				}
 			}
 		} catch (final ELException e) {
@@ -1255,12 +1274,15 @@ public final class ProcessVariableReader {
 					variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
 							isBean(matcher.group(1)), element, chapter, fieldType, scopeId, controlFlowGraph));
 				} else {
-					variables.put(name, new ProcessVariableOperation(name, element, chapter, fieldType,
-							element.getProcessDefinition(), VariableOperation.READ, scopeId));
+					variables.put(name,
+							new ProcessVariableOperation(name, element, chapter, fieldType,
+									element.getProcessDefinition(), VariableOperation.READ, scopeId,
+									element.getFlowAnalysis().getOperationCounter()));
 				}
 			} else {
-				variables.put(name, new ProcessVariableOperation(name, element, chapter, fieldType,
-						element.getProcessDefinition(), VariableOperation.WRITE, scopeId));
+				variables.put(name,
+						new ProcessVariableOperation(name, element, chapter, fieldType, element.getProcessDefinition(),
+								VariableOperation.WRITE, scopeId, element.getFlowAnalysis().getOperationCounter()));
 			}
 		} catch (final ELException e) {
 			throw new ProcessingException("EL expression " + expression + " in " + element.getProcessDefinition()

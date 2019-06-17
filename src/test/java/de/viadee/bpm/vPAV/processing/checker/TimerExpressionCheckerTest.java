@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -61,122 +62,119 @@ import java.util.Collection;
  */
 public class TimerExpressionCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
+	private static final String BASE_PATH = "src/test/resources/";
 
-    private static TimerExpressionChecker checker;
+	private static TimerExpressionChecker checker;
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    private final Rule rule = new Rule("TimerExpressionChecker", true, null, null, null, null);
+	private final Rule rule = new Rule("TimerExpressionChecker", true, null, null, null, null);
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
 
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
-    }
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java");
+		final URL[] classUrls = { classUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().getResource("en_US");
+	}
 
-    /**
-     * Case: TimerExpression in start event is correct
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
+	/**
+	 * Case: TimerExpression in start event is correct
+	 *
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws XPathExpressionException
+	 */
 
-    @Test
-    public void testTimerExpression_Correct()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Correct.bpmn";
-        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+	@Test
+	public void testTimerExpression_Correct()
+			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+		final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Correct.bpmn";
+		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		for (BaseElement event : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        if (issues.size() > 0) {
-            Assert.fail("correct timer expression generates an issue");
-        }
-    }
+		if (issues.size() > 0) {
+			Assert.fail("correct timer expression generates an issue");
+		}
+	}
 
-    /**
-     * Case: TimerExpression in start event is wrong
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testTimerExpression_Wrong()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong.bpmn";
-        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+	/**
+	 * Case: TimerExpression in start event is wrong
+	 *
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws XPathExpressionException
+	 */
+	@Test
+	public void testTimerExpression_Wrong()
+			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+		final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong.bpmn";
+		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		for (BaseElement event : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        if (issues.size() != 1) {
-            Assert.fail("wrong timer expression should generate an issue");
-        }
-    }
+		if (issues.size() != 1) {
+			Assert.fail("wrong timer expression should generate an issue");
+		}
+	}
 
-    /**
-     * Case: Several timer expressions
-     *
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     */
-    @Test
-    public void testTimerExpressions()
-            throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        final String PATH = BASE_PATH + "TimerExpressionCheckerTest.bpmn";
-        checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+	/**
+	 * Case: Several timer expressions
+	 *
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws XPathExpressionException
+	 */
+	@Test
+	public void testTimerExpressions()
+			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+		final String PATH = BASE_PATH + "TimerExpressionCheckerTest.bpmn";
+		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final Collection<BaseElement> baseElements = modelInstance
-                .getModelElementsByType(BaseElement.class);
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        for (BaseElement event : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph());
-            issues.addAll(checker.check(element));
-        }
+		for (BaseElement event : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
+			issues.addAll(checker.check(element));
+		}
 
-        if (issues.size() != 2) {
-            Assert.fail("model should consist of two issues");
-        }
+		if (issues.size() != 2) {
+			Assert.fail("model should consist of two issues");
+		}
 
-    }
+	}
 
 }

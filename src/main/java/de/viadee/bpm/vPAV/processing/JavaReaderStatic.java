@@ -355,13 +355,20 @@ public class JavaReaderStatic {
 			// Retrieve the method and its body based on the used interface
 			List<Type> parameterTypes = new ArrayList<>();
 			RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution");
+			RefType activityExecutionType = RefType.v("org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution");
 			RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
 			RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap");
 			VoidType returnType = VoidType.v();
 
 			switch (methodName) {
 			case "execute":
-				parameterTypes.add(delegateExecutionType);
+				for (SootClass clazz : sootClass.getInterfaces()) {
+					if (clazz.getName().equals("org.camunda.bpm.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior")) {
+						parameterTypes.add(activityExecutionType);
+					} else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.JavaDelegate")) {
+						parameterTypes.add(delegateExecutionType);
+					}
+				}
 				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args, controlFlowGraph);
 				break;
@@ -872,16 +879,16 @@ public class JavaReaderStatic {
 			if (expr.getArgBox(location).getValue() instanceof StringConstant) {
 				StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
 				String name = variableName.value.replaceAll("\"", "");
-				node.addOperation(
-						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
-				variableBlock.addProcessVariable(
-						new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type, scopeId));
+				node.addOperation(new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type,
+						scopeId, element.getFlowAnalysis().getOperationCounter()));
+				variableBlock.addProcessVariable(new ProcessVariableOperation(name, element, chapter, fieldType,
+						filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
 
 			} else if (!paramName.isEmpty()) {
 				node.addOperation(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element, chapter,
-						fieldType, filePath, type, scopeId));
+						fieldType, filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
 				variableBlock.addProcessVariable(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
-						chapter, fieldType, filePath, type, scopeId));
+						chapter, fieldType, filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
 			} else {
 				// TODO: Warnmeldung mit PV operation
 			}
@@ -922,7 +929,8 @@ public class JavaReaderStatic {
 				initialOperations.put(name,
 						new ProcessVariableOperation(name, element, ElementChapter.Code, KnownElementFieldType.Initial,
 								resourceFilePath, type,
-								element.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID)));
+								element.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID),
+								element.getFlowAnalysis().getOperationCounter()));
 			}
 		}
 		return initialOperations;

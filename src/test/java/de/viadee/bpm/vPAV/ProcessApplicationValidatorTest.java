@@ -64,6 +64,7 @@ public class ProcessApplicationValidatorTest {
         final URL[] classUrls = {classUrl};
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        ConfigConstants.getInstance().setIsTest(true);
     }
 
     /**
