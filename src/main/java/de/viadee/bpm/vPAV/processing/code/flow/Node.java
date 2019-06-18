@@ -237,7 +237,9 @@ public class Node implements AnalysisElement {
 	}
 
 	@Override
-	public void removeSuccessor(String successor) { this.successors.remove(successor); }
+	public void removeSuccessor(String successor) {
+		this.successors.remove(successor);
+	}
 
 	@Override
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
@@ -309,6 +311,11 @@ public class Node implements AnalysisElement {
 
 	public BpmnElement getParentElement() {
 		return parentElement;
+	}
+
+	@Override
+	public void removeOperation(ProcessVariableOperation op) {
+		this.operations.remove(op.getId());
 	}
 
 	@Override

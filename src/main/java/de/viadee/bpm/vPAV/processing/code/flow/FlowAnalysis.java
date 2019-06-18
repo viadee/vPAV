@@ -36,6 +36,9 @@ import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
+import org.camunda.bpm.model.bpmn.instance.CallActivity;
+import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.StartEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +62,7 @@ public class FlowAnalysis {
 
 	/**
 	 * Given a collection of graphs, this method is the sole entrance to the
-	 * analysis of the graphs First process model and control flow graph of
+	 * analysis of the graphs. First process model and control flow graph of
 	 * delegates are embedded to create a single graph. Then the graph is analyzed
 	 * conservatively by following the Reaching Definition algorithm. For
 	 * discovering data flow anomalies inside a single block, a sequential check on
@@ -173,6 +176,51 @@ public class FlowAnalysis {
 					}
 				});
 				analysisElement.setInUsed(initialOperations);
+
+				// In case we have a call activity, pass variable mappings
+				final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> camundaOut = new LinkedHashMap<>();
+				final ArrayList<ProcessVariableOperation> operationList = new ArrayList<>();
+				if (analysisElement.getBaseElement() instanceof CallActivity) {
+					for (AnalysisElement succ : analysisElement.getSuccessors()) {
+						if (succ.getBaseElement() instanceof StartEvent) {
+							analysisElement.getOperations().values().forEach(operation -> {
+
+								if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
+									camundaIn.put(operation.getId(), operation);
+									operationList.add(operation);
+								}
+								if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
+									camundaOut.put(operation.getId(), operation);
+									operationList.add(operation);
+								}
+							});
+							succ.setInUnused(camundaIn);
+						} else {
+							analysisElement.removeSuccessor(succ.getId());
+							succ.removePredecessor(analysisElement.getId());
+						}
+					}
+					analysisElement.setOutUnused(camundaOut);
+				}
+
+				operationList.forEach(analysisElement::removeOperation);
+
+				if (analysisElement.getBaseElement() instanceof StartEvent) {
+					for (AnalysisElement pred : analysisElement.getPredecessors()) {
+						if (pred.getBaseElement() instanceof EndEvent) {
+							analysisElement.removePredecessor(pred.getId());
+						}
+					}
+				}
+
+				if (analysisElement.getBaseElement() instanceof EndEvent) {
+					for (AnalysisElement succ : analysisElement.getSuccessors()) {
+						if (succ.getBaseElement() instanceof StartEvent) {
+							analysisElement.removeSuccessor(succ.getId());
+						}
+					}
+				}
 			}
 		});
 

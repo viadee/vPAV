@@ -70,7 +70,6 @@ public class ReachingDefinitionTest {
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
-		ConfigConstants.getInstance().setIsTest(true);
 	}
 
 	@Test

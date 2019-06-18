@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,30 +44,31 @@ import java.net.URLClassLoader;
 
 public class FileScannerTest {
 
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().setTest(true);
-    }
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java");
+		final URL[] classUrls = { classUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().setTest(true);
+	}
 
-    @Test
-    public void testSootPathLoading() {
-        String testTarget = "target/test-classes";
-        String sootPath = FileScanner.getSootPath();
-        boolean contains = false;
+	@Test
+	public void testSootPathLoading() {
+		new FileScanner(new RuleSet());
+		String testTarget = "target/test-classes";
+		String sootPath = FileScanner.getSootPath();
+		boolean contains = false;
 
-        if (sootPath.contains(testTarget)) {
-            contains = true;
-        }
+		if (sootPath.contains(testTarget)) {
+			contains = true;
+		}
 
-        Assert.assertTrue("SootPath should contain 'target/test-classes'.", contains);
-    }
+		Assert.assertTrue("SootPath should contain 'target/test-classes'.", contains);
+	}
 
 }

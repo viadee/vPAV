@@ -173,7 +173,9 @@ public class NodeDecorator implements AnalysisElement {
 	}
 
 	@Override
-	public void removeSuccessor(String successor) { this.decoratedNode.removeSuccessor(successor); }
+	public void removeSuccessor(String successor) {
+		this.decoratedNode.removeSuccessor(successor);
+	}
 
 	@Override
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
@@ -188,6 +190,11 @@ public class NodeDecorator implements AnalysisElement {
 	@Override
 	public BpmnElement getParentElement() {
 		return decoratedNode.getParentElement();
+	}
+
+	@Override
+	public void removeOperation(ProcessVariableOperation op) {
+		this.decoratedNode.removeOperation(op);
 	}
 
 }

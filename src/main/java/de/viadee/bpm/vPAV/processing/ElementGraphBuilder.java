@@ -49,8 +49,6 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
 
 import java.io.File;
 import java.util.*;
@@ -131,7 +129,7 @@ public class ElementGraphBuilder {
 	 */
 	public Collection<Graph> createProcessGraph(final FileScanner fileScanner, final BpmnModelInstance modelInstance,
 			final String processDefinition, final Collection<String> calledElementHierarchy,
-			final ProcessVariablesScanner scanner, FlowAnalysis flowAnalysis) {
+			final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
 
 		final Collection<Graph> graphCollection = new ArrayList<>();
 
@@ -142,7 +140,7 @@ public class ElementGraphBuilder {
 			final Collection<SequenceFlow> flows = new ArrayList<>();
 			final Collection<BoundaryEvent> boundaryEvents = new ArrayList<>();
 			final Collection<SubProcess> subProcesses = new ArrayList<>();
-			final Collection<CallActivity> callActivities = new ArrayList<>();
+			final HashMap<BpmnElement, FlowElement> callActivities = new HashMap<>();
 
 			for (final FlowElement element : elements) {
 
@@ -160,8 +158,7 @@ public class ElementGraphBuilder {
 					boundaryEvents.add(event);
 				} else if (element instanceof CallActivity) {
 					// mention call activities
-					final CallActivity callActivity = (CallActivity) element;
-					callActivities.add(callActivity);
+					callActivities.put(node, element);
 				} else if (element instanceof SubProcess) {
 					final SubProcess subprocess = (SubProcess) element;
 					addElementsSubprocess(fileScanner, subProcesses, flows, boundaryEvents, graph, subprocess,
@@ -224,10 +221,9 @@ public class ElementGraphBuilder {
 			addEdges(graph, flows, boundaryEvents, subProcesses);
 
 			// resolve call activities and integrate called processes
-			for (final CallActivity callActivity : callActivities) {
-				ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
-				integrateCallActivityFlow(fileScanner, processDefinition, modelInstance, callActivity, graph,
-						calledElementHierarchy, scanner, controlFlowGraph, flowAnalysis);
+			for (Map.Entry<BpmnElement, FlowElement> entry : callActivities.entrySet()) {
+				integrateCallActivityFlow(fileScanner, processDefinition, entry.getKey(), entry.getValue(), graph,
+						calledElementHierarchy, scanner, flowAnalysis);
 			}
 
 			graphCollection.add(graph);
@@ -408,11 +404,9 @@ public class ElementGraphBuilder {
 	 *
 	 * @param fileScanner
 	 *            FileScanner
-	 * @param processdefinition
+	 * @param processDefinition
 	 *            Current Path to process
-	 * @param modelInstance
-	 *            BpmnModelInstance
-	 * @param callActivity
+	 * @param element
 	 *            CallActivity
 	 * @param graph
 	 *            Current Graph
@@ -420,21 +414,20 @@ public class ElementGraphBuilder {
 	 *            Collection of Element Hierarchy
 	 * @param scanner
 	 *            ProcessVariableScanner
-	 * @param controlFlowGraph
-	 *            ControlFlowGraph
 	 * @param flowAnalysis
 	 *            FlowAnalysis
 	 */
-	private void integrateCallActivityFlow(final FileScanner fileScanner, final String processdefinition,
-			final BpmnModelInstance modelInstance, final CallActivity callActivity, final Graph graph,
+	private void integrateCallActivityFlow(final FileScanner fileScanner, final String processDefinition,
+			final BpmnElement element, final FlowElement activity, final Graph graph,
 			final Collection<String> calledElementHierarchy, final ProcessVariablesScanner scanner,
-			final ControlFlowGraph controlFlowGraph, final FlowAnalysis flowAnalysis) {
+			final FlowAnalysis flowAnalysis) {
 
+		final CallActivity callActivity = (CallActivity) activity;
 		final String calledElement = callActivity.getCalledElement();
 
 		// check call hierarchy to avoid deadlocks
 		if (calledElementHierarchy.contains(calledElement)) {
-			throw new RuntimeException("call activity hierarchy causes a deadlock (see " + processdefinition + ", "
+			throw new RuntimeException("call activity hierarchy causes a deadlock (see " + processDefinition + ", "
 					+ callActivity.getId() + "). please avoid loops.");
 		}
 		calledElementHierarchy.add(calledElement);
@@ -442,32 +435,18 @@ public class ElementGraphBuilder {
 		// integrate only, if file locations for process ids are known
 		if (processIdToPathMap != null && processIdToPathMap.get(calledElement) != null) {
 
-			// 1) read in- and output variables from call activity
-			final Collection<String> inVariables = new ArrayList<>();
-			final Collection<String> outVariables = new ArrayList<>();
-			readCallActivityDataInterfaces(callActivity, inVariables, outVariables);
-
-			// 2) add parallel gateways before and after the call activity in the main data
-			// flow
-			// They are necessary for connecting the sub process with the main flow
-			final List<BpmnElement> parallelGateways = addParallelGatewaysBeforeAndAfterCallActivityInMainDataFlow(
-					modelInstance, callActivity, graph, controlFlowGraph, flowAnalysis);
-			final BpmnElement parallelGateway1 = parallelGateways.get(0);
-			final BpmnElement parallelGateway2 = parallelGateways.get(1);
-
 			// get file path of the called process
 			final String callActivityPath = processIdToPathMap.get(calledElement);
 			if (callActivityPath != null) {
-				// 3) load process and transform it into a data flow graph
-				final Collection<Graph> subgraphs = createSubDataFlowsFromCallActivity(fileScanner,
+				// load process and transform it into a data flow graph
+				final Collection<Graph> subGraphs = createSubDataFlowsFromCallActivity(fileScanner,
 						calledElementHierarchy, callActivityPath, scanner, flowAnalysis);
 
-				for (final Graph subgraph : subgraphs) {
+				for (final Graph subGraph : subGraphs) {
 					// look only on the called process!
-					if (subgraph.getProcessId().equals(calledElement)) {
-						// 4) connect sub data flow with the main data flow
-						connectParallelGatewaysWithSubDataFlow(graph, inVariables, outVariables, parallelGateway1,
-								parallelGateway2, subgraph);
+					if (subGraph.getProcessId().equals(calledElement)) {
+						// connect sub data flow with the main data flow
+						connectGraphs(graph, subGraph, element);
 					}
 				}
 			}
@@ -475,68 +454,16 @@ public class ElementGraphBuilder {
 	}
 
 	/**
-	 * Add parallel gateways before and after a call activity. They are needed to
-	 * connect the called process with the main flow
-	 *
-	 * @param modelInstance
-	 *            BpmnModelInstance
-	 * @param callActivity
-	 *            CallActivity
-	 * @param graph
-	 *            Current Graph
-	 * @param controlFlowGraph
-	 *            ControlFlowGraph
-	 * @param flowAnalysis
-	 *            FlowAnalysis
-	 * @return parallel gateway elements
-	 */
-	private List<BpmnElement> addParallelGatewaysBeforeAndAfterCallActivityInMainDataFlow(
-			final BpmnModelInstance modelInstance, final CallActivity callActivity, final Graph graph,
-			final ControlFlowGraph controlFlowGraph, final FlowAnalysis flowAnalysis) {
-
-		final ParallelGateway element1 = modelInstance.newInstance(ParallelGateway.class);
-		element1.setAttributeValue(BpmnConstants.ATTR_ID, "_gw_in", true);
-
-		final ParallelGateway element2 = modelInstance.newInstance(ParallelGateway.class);
-		element2.setAttributeValue(BpmnConstants.ATTR_ID, "_gw_out", true);
-
-		final List<BpmnElement> elements = new ArrayList<>();
-		final BpmnElement parallelGateway1 = new BpmnElement(null, element1, controlFlowGraph, flowAnalysis);
-		final BpmnElement parallelGateway2 = new BpmnElement(null, element2, controlFlowGraph, flowAnalysis);
-		elements.add(parallelGateway1);
-		elements.add(parallelGateway2);
-
-		graph.addVertex(parallelGateway1);
-		graph.addVertex(parallelGateway2);
-
-		connectParallelGatewaysWithMainDataFlow(callActivity, graph, parallelGateway1, parallelGateway2);
-
-		return elements;
-	}
-
-	/**
-	 * Connect the parallel gateways in the data flow before and after the call
-	 * activity
+	 * Connect graph with sub graph
 	 *
 	 * @param graph
 	 *            Current Graph
-	 * @param inVariables
-	 *            Collection of ingoing variables
-	 * @param outVariables
-	 *            Collection of outgoing variables
-	 * @param parallelGateway1
-	 *            First parallel gateway (BpmnElement)
-	 * @param parallelGateway2
-	 *            Second parallel gateway (BpmnElement)
-	 * @param subgraph
-	 *            Subgraph
+	 * @param subGraph
+	 *            Sub Graph
 	 */
-	private void connectParallelGatewaysWithSubDataFlow(final Graph graph, final Collection<String> inVariables,
-			final Collection<String> outVariables, final BpmnElement parallelGateway1,
-			final BpmnElement parallelGateway2, final Graph subgraph) {
-
+	private void connectGraphs(final Graph graph, final Graph subGraph, final BpmnElement callActivity) {
 		// read nodes of the sub data flow
-		final Collection<BpmnElement> vertices = subgraph.getVertices();
+		final Collection<BpmnElement> vertices = subGraph.getVertices();
 		for (final BpmnElement vertex : vertices) {
 			// add _ before the element id to avoid name clashes
 			final BaseElement baseElement = vertex.getBaseElement();
@@ -544,9 +471,10 @@ public class ElementGraphBuilder {
 			// add node to the main data flow
 			graph.addVertex(vertex);
 		}
+
 		// read edges of the sub data flow
-		final Collection<List<Edge>> edges = subgraph.getEdges();
-		for (final List<Edge> list : edges) {
+		final Collection<List<Edge>> subGraphEdges = subGraph.getEdges();
+		for (final List<Edge> list : subGraphEdges) {
 			for (final Edge edge : list) {
 				final BpmnElement from = edge.getFrom();
 				final BpmnElement to = edge.getTo();
@@ -555,20 +483,18 @@ public class ElementGraphBuilder {
 			}
 		}
 
-		// get start and end nodes of the sub data flow and connect parallel gateways in
-		// the main flow
-		// with it
-		final Collection<BpmnElement> startNodes = subgraph.getStartNodes();
+		// get start nodes of the sub data flow and connect
+		final Collection<BpmnElement> startNodes = subGraph.getStartNodes();
 		for (final BpmnElement startNode : startNodes) {
 			// set variables from in interface of the call activity
-			startNode.setInCa(inVariables);
-			graph.addEdge(parallelGateway1, startNode, 100);
+			graph.addEdge(callActivity, startNode, 100);
 		}
-		final Collection<BpmnElement> endNodes = subgraph.getEndNodes();
+
+		final Collection<BpmnElement> endNodes = subGraph.getEndNodes();
 		for (final BpmnElement endNode : endNodes) {
-			// set variables from out interface of the call activity
-			endNode.setOutCa(outVariables);
-			graph.addEdge(endNode, parallelGateway2, 100);
+			for (final BpmnElement succ : graph.getAdjacencyListSuccessor(callActivity)) {
+				graph.addEdge(endNode, succ, 100);
+			}
 		}
 	}
 
@@ -598,70 +524,5 @@ public class ElementGraphBuilder {
 				messageIdToVariables, processIdToVariables, rule, bpmnScanner);
 		return graphBuilder.createProcessGraph(fileScanner, subModel, callActivityPath, calledElementHierarchy, scanner,
 				flowAnalysis);
-	}
-
-	/**
-	 * Integrate parallel gateways into the main data flow before and after the call
-	 * activity
-	 *
-	 * @param callActivity
-	 *            CallActivity
-	 * @param graph
-	 *            Current Graph
-	 * @param parallelGateway1
-	 *            First parallel gateway (BpmnElement)
-	 * @param parallelGateway2
-	 *            Second parallel gateway (BpmnElement)
-	 */
-	private void connectParallelGatewaysWithMainDataFlow(final CallActivity callActivity, final Graph graph,
-			final BpmnElement parallelGateway1, final BpmnElement parallelGateway2) {
-
-		// read incoming and outgoing sequence flows of the call activity
-		final SequenceFlow incomingSequenceFlow = callActivity.getIncoming().iterator().next();
-		final SequenceFlow outgoingSequenceFlow = callActivity.getOutgoing().iterator().next();
-
-		// remove edges
-		graph.removeEdge(elementMap.get(incomingSequenceFlow.getId()), elementMap.get(callActivity.getId()));
-		graph.removeEdge(elementMap.get(callActivity.getId()), elementMap.get(outgoingSequenceFlow.getId()));
-
-		// link parallel gateways with the existing data flow
-		graph.addEdge(elementMap.get(incomingSequenceFlow.getId()), parallelGateway1, 100);
-		graph.addEdge(parallelGateway2, elementMap.get(outgoingSequenceFlow.getId()), 100);
-		graph.addEdge(parallelGateway1, elementMap.get(callActivity.getId()), 100);
-		graph.addEdge(elementMap.get(callActivity.getId()), parallelGateway2, 100);
-	}
-
-	/**
-	 * Read in- and output variables for a call activity
-	 *
-	 * @param callActivity
-	 *            CallActivity
-	 * @param inVariables
-	 *            Collection of ingoing variables
-	 * @param outVariables
-	 *            Collection of outgoing variables
-	 */
-	private void readCallActivityDataInterfaces(final CallActivity callActivity, final Collection<String> inVariables,
-			final Collection<String> outVariables) {
-
-		final ExtensionElements extensionElements = callActivity.getExtensionElements();
-		if (extensionElements != null) {
-			final List<CamundaIn> inputAssociations = extensionElements.getElementsQuery().filterByType(CamundaIn.class)
-					.list();
-			for (final CamundaIn inputAssociation : inputAssociations) {
-				final String source = inputAssociation.getCamundaSource();
-				if (source != null && !source.isEmpty()) {
-					inVariables.add(source);
-				}
-			}
-			final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
-					.filterByType(CamundaOut.class).list();
-			for (final CamundaOut outputAssociation : outputAssociations) {
-				final String target = outputAssociation.getCamundaTarget();
-				if (target != null && !target.isEmpty()) {
-					outVariables.add(target);
-				}
-			}
-		}
 	}
 }

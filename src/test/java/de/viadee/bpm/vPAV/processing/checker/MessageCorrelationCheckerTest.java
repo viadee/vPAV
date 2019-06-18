@@ -79,7 +79,6 @@ public class MessageCorrelationCheckerTest {
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 		RuntimeConfig.getInstance().setTest(true);
-		ConfigConstants.getInstance().setIsTest(true);
 		rule = createRule();
 	}
 

@@ -54,10 +54,6 @@ public class Graph {
 
 	private LinkedHashMap<BpmnElement, List<Edge>> adjacencyListPredecessor; // [vertices] -> [edge]
 
-	public LinkedHashMap<BpmnElement, VertexInfo> getVertexInfo() {
-		return vertexInfo;
-	}
-
 	private LinkedHashMap<BpmnElement, VertexInfo> vertexInfo; // [vertex] -> [info]
 
 	private Collection<BpmnElement> startNodes = new ArrayList<>();
@@ -99,6 +95,10 @@ public class Graph {
 		adjacencyListSuccessor.put(v, new ArrayList<>());
 		adjacencyListPredecessor.put(v, new ArrayList<>());
 		vertexInfo.put(v, new VertexInfo(v));
+	}
+
+	public LinkedHashMap<BpmnElement, VertexInfo> getVertexInfo() {
+		return vertexInfo;
 	}
 
 	public Collection<BpmnElement> getVertices() {
@@ -257,7 +257,8 @@ public class Graph {
 
 		// go back to the node, where the variable was deleted
 		// or go back to the start
-		if (anomaly.getAnomaly() == Anomaly.UR || ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.START_EVENT)
+		if (anomaly.getAnomaly() == Anomaly.UR
+				|| ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.START_EVENT)
 						&& startNode.getBaseElement().getParentElement().getElementType().getTypeName()
 								.equals(BpmnConstants.PROCESS)))) {
 
@@ -270,7 +271,6 @@ public class Graph {
 		return null;
 	}
 
-
 	/**
 	 * Exit condition for path finding (du / dd anomaly)
 	 *
@@ -280,8 +280,8 @@ public class Graph {
 
 		// go back to the node where the element is defined
 		// skip the startpoint
-		if ((anomaly.getAnomaly() == Anomaly.DD || anomaly.getAnomaly() == Anomaly.DU) && currentPath.size() > 1 &&
-				containsAnomaly(startNode, anomaly)) {
+		if ((anomaly.getAnomaly() == Anomaly.DD || anomaly.getAnomaly() == Anomaly.DU) && currentPath.size() > 1
+				&& containsAnomaly(startNode, anomaly)) {
 			final List<BpmnElement> newPath = new ArrayList<>(currentPath);
 			invalidPaths.add(new Path(newPath));
 
@@ -295,8 +295,10 @@ public class Graph {
 	 *
 	 * Checks whether current element contains certain anomaly
 	 *
-	 * @param bpmnElement Current element
-	 * @param anomaly Container of anomaly
+	 * @param bpmnElement
+	 *            Current element
+	 * @param anomaly
+	 *            Container of anomaly
 	 * @return true/false
 	 */
 	private boolean containsAnomaly(final BpmnElement bpmnElement, final AnomalyContainer anomaly) {
