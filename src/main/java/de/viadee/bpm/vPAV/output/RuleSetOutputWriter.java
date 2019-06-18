@@ -96,8 +96,8 @@ public class RuleSetOutputWriter {
      */
     private static XmlRuleSet transformToXmlDatastructure(final RuleSet rules) {
         XmlRuleSet xmlRuleSet = new XmlRuleSet();
-        Collection<XmlRule> elementRules = transformRuleMapToXml(rules.getElementRules());
-        xmlRuleSet.setElementRules(elementRules);
+        Collection<XmlRule> allRules = transformRuleMapToXml(rules.getAllRules());
+        xmlRuleSet.setRules(allRules);
         return xmlRuleSet;
     }
 

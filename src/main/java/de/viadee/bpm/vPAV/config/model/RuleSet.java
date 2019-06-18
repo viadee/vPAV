@@ -38,18 +38,26 @@ import java.util.stream.Collectors;
 public class RuleSet {
     private Map<String, Map<String, Rule>> elementRules;
     private Map<String, Map<String, Rule>> modelRules;
+    private Map<String, Map<String, Rule>> allRules;
     private boolean hasParentRuleSet = false;
-    private String language = null;
-    private Rule createOutputHtml;
 
     public RuleSet() {
         this.elementRules = new HashMap<>();
         this.modelRules = new HashMap<>();
+        this.allRules = new HashMap<>();
     }
 
-    public RuleSet(Map<String, Map<String, Rule>> elementRules) {
+    public RuleSet(Map<String, Map<String, Rule>> elementRules, Map<String, Map<String, Rule>> modelRules) {
         this.elementRules = elementRules;
-        this.modelRules = new HashMap<>();
+        this.modelRules = modelRules;
+        updateAllRules();
+    }
+
+    private void updateAllRules() {
+        Map<String, Map<String, Rule>> allRules = new HashMap<>();
+        allRules.putAll(elementRules);
+        allRules.putAll(modelRules);
+        this.allRules = allRules;
     }
 
     public Map<String, Map<String, Rule>> getModelRules() {
@@ -60,11 +68,11 @@ public class RuleSet {
         return elementRules;
     }
 
-    public Map<String, Map<String, Rule>> getAllActiveRules() {
-        Map<String, Map<String, Rule>> allRules = new HashMap<>();
-        allRules.putAll(elementRules);
-        allRules.putAll(modelRules);
+    public Map<String, Map<String, Rule>> getAllRules() {
+        return this.allRules;
+    }
 
+    public Map<String, Map<String, Rule>> getAllActiveRules() {
         return allRules.entrySet().stream().filter(
                 e -> e.getValue().entrySet().stream().allMatch(
                         r -> r.getValue().isActive()))
@@ -73,22 +81,5 @@ public class RuleSet {
 
     public boolean hasParentRuleSet() {
         return hasParentRuleSet;
-    }
-
-    public String getLanguage() {
-        /*
-        final Rule rule = rules.get("language").get("language");
-            final Map<String, Setting> settings = rule.getSettings();
-            if (settings.get("locale").getValue().equals("de")) {
-                getResource("de_DE");
-            } else if (settings.get("locale").getValue().equals("en")) {
-                getResource("en_US");
-            }
-         */
-        return language;
-    }
-
-    public Rule getCreateOutputHtml() {
-        return createOutputHtml;
     }
 }

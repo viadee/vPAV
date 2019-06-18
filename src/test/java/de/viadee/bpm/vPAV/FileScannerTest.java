@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV;
 
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,7 +52,7 @@ public class FileScannerTest {
         final URL[] classUrls = { classUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        ConfigConstants.getInstance().setIsTest(true);
+        RuntimeConfig.getInstance().setTest(true);
     }
 
     @Test

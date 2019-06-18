@@ -203,7 +203,7 @@ public class Runner {
             }
         }
 
-        return new RuleSet(finalRules);
+        return new RuleSet(finalRules, new HashMap<>());
     }
 
     /**

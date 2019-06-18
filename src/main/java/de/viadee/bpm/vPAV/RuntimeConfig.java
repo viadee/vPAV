@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 public class RuntimeConfig {
 
@@ -64,12 +65,18 @@ public class RuntimeConfig {
 
 	private static Logger logger = Logger.getLogger(RuntimeConfig.class.getName());
 
-	private final String[] viadeeRules = { "XorConventionChecker", "TimerExpressionChecker", "JavaDelegateChecker",
+	private final String[] viadeeConfigRules = {"CreateOutputHTML"};
+
+	private final String[] viadeeElementRules = {
+			"XorConventionChecker", "TimerExpressionChecker", "JavaDelegateChecker",
 			"NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker", "VersioningChecker",
-			"DmnTaskChecker", "ProcessVariablesModelChecker", "ProcessVariablesNameConventionChecker",
+			"DmnTaskChecker", "ProcessVariablesNameConventionChecker",
 			"TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
 			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
-			"DataFlowChecker", "MessageCorrelationChecker", "CreateOutputHTML"};
+			"MessageCorrelationChecker"
+	};
+
+	private final String[] viadeeModelRules = {"ProcessVariablesModelChecker", "DataFlowChecker"};
 
 	private RuntimeConfig() {
 	}
@@ -113,7 +120,7 @@ public class RuntimeConfig {
 	}
 
 	public String[] getViadeeRules() {
-		return viadeeRules;
+		return Stream.of(viadeeConfigRules, viadeeElementRules, viadeeModelRules).flatMap(Stream::of).toArray(String[]::new);
 	}
 
 	public ArrayList<String> getActiveRules() {

@@ -32,31 +32,22 @@
 package de.viadee.bpm.vPAV.config.reader;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
 
 @XmlRootElement(name = "ruleSet")
 public class XmlRuleSet {
-    // TODO delete old rules - will break backwards compatibility
+
     private Collection<XmlRule> rules;
-    private Collection<XmlRule> elementRules;
 
     public XmlRuleSet() {
     }
 
     public XmlRuleSet(Collection<XmlRule> rules) {
         super();
-        this.elementRules = rules;
+        this.rules = rules;
     }
 
-    @XmlElementWrapper(name = "elementRules")
-    @XmlElement(name = "rule", type = XmlRule.class)
-    public Collection<XmlRule> getElementRules() {
-        return elementRules;
-    }
-
-    @XmlElementWrapper(name = "ruleSet")
     @XmlElement(name = "rule", type = XmlRule.class)
     public Collection<XmlRule> getRules() {
         return rules;
@@ -64,9 +55,5 @@ public class XmlRuleSet {
 
     public void setRules(Collection<XmlRule> rules) {
         this.rules = rules;
-    }
-
-    public void setElementRules(Collection<XmlRule> rules) {
-        this.elementRules = rules;
     }
 }

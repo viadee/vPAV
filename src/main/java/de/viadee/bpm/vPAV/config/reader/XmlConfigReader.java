@@ -116,7 +116,7 @@ public final class XmlConfigReader implements ConfigReader {
             rules.put(name, newrule);
         }
 
-        return new RuleSet(rules);
+        return new RuleSet(rules, new HashMap<>());
     }
 
     /**
@@ -130,12 +130,7 @@ public final class XmlConfigReader implements ConfigReader {
             final XmlRuleSet ruleSet) throws ConfigReaderException {
         final Map<String, Map<String, Rule>> rules = new HashMap<>();
 
-        Collection<XmlRule> xmlRules = ruleSet.getElementRules();
-        if (xmlRules.isEmpty()) {
-            // TODO use old rules without tag
-            xmlRules = ruleSet.getRules();
-            ruleSet.setElementRules(ruleSet.getRules());
-        }
+        Collection<XmlRule> xmlRules = ruleSet.getRules();
 
         for (final XmlRule rule : xmlRules) {
             final String id = (rule.getId() == null) ? rule.getName() : rule.getId();
@@ -219,7 +214,7 @@ public final class XmlConfigReader implements ConfigReader {
             checkSingletonRule(rules, DataFlowChecker.class.getSimpleName());
         }
 
-        return new RuleSet(rules);
+        return new RuleSet(rules, new HashMap<>());
     }
 
     private static void checkSingletonRule(Map<String, Map<String, Rule>> rules, String rulename) {
