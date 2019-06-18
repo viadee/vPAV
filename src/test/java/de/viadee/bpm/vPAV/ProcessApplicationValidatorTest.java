@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -39,9 +40,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class ProcessApplicationValidatorTest {
 	private static ClassLoader cl;
@@ -54,7 +53,7 @@ public class ProcessApplicationValidatorTest {
 		ConfigConstants.getInstance().setProperties(myProperties);
 
 		// Bean-Mapping
-		final Map<String, String> beanMapping = new HashMap<String, String>();
+		final Map<String, String> beanMapping = new HashMap<>();
 		beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.TestDelegate");
 		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
@@ -72,7 +71,12 @@ public class ProcessApplicationValidatorTest {
 	 */
 	@Test
 	public void testLamdbaExpression() {
-		ProcessApplicationValidator
-				.findModelInconsistencies((HashMap<String, String>) RuntimeConfig.getInstance().getBeanMapping());
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final Set<String> testSet = new HashSet<>();
+		testSet.add("de/viadee/bpm/vPAV/TestDelegate.java");
+		fileScanner.setJavaResourcesFileInputStream(testSet);
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+				fileScanner.getJavaResourcesFileInputStream());
+		scanner.scanProcessVariables();
 	}
 }

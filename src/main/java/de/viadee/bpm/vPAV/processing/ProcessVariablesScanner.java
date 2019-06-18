@@ -104,7 +104,6 @@ public class ProcessVariablesScanner {
         Options.v().set_no_bodies_for_excluded(true);
         Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
 
-
         SootClass sootClass = Scene.v().forceResolve(cleanString(filePath, true), SootClass.SIGNATURES);
 
         if (sootClass != null && !sootClass.isInterface()) {
