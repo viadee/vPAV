@@ -62,7 +62,7 @@ public class FlowAnalysis {
 
 	/**
 	 * Given a collection of graphs, this method is the sole entrance to the
-	 * analysis of the graphs First process model and control flow graph of
+	 * analysis of the graphs. First process model and control flow graph of
 	 * delegates are embedded to create a single graph. Then the graph is analyzed
 	 * conservatively by following the Reaching Definition algorithm. For
 	 * discovering data flow anomalies inside a single block, a sequential check on

@@ -36,7 +36,6 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -177,17 +176,6 @@ public class Graph {
 		}
 
 		return null;
-	}
-
-	public List<BpmnElement> getCallActivities() {
-		List<BpmnElement> callActivities = new ArrayList<>();
-		for (BpmnElement entry : this.getVertexInfo().keySet()) {
-			if (entry.getBaseElement() instanceof CallActivity && !entry.isVisited()) {
-				callActivities.add(entry);
-				entry.setVisited(true);
-			}
-		}
-		return callActivities;
 	}
 
 	/**
