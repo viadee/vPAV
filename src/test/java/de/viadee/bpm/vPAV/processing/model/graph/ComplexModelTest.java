@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -41,8 +42,8 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -88,7 +89,7 @@ public class ComplexModelTest {
 	@Test
 	public void testGraphOnComplexModel() throws ParserConfigurationException, SAXException, IOException {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
 		final File processdefinition = new File(PATH);
@@ -102,10 +103,10 @@ public class ComplexModelTest {
 		// modelInstance,
 		// 500);
 
-		final Map<String, String> decisionRefToPathMap = new HashMap<String, String>();
+		final Map<String, String> decisionRefToPathMap = new HashMap<>();
 		decisionRefToPathMap.put("decision", "table.dmn");
 
-		final Map<String, String> beanMappings = new HashMap<String, String>();
+		final Map<String, String> beanMappings = new HashMap<>();
 		beanMappings.put("springBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
 
 		long startTime = System.currentTimeMillis();
@@ -114,7 +115,7 @@ public class ComplexModelTest {
 				new BpmnScanner(PATH));
 		// create data flow graphs
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processdefinition.getPath(), new ArrayList<String>(), scanner, new FlowAnalysis());
+				processdefinition.getPath(), new ArrayList<>(), scanner, new FlowAnalysis());
 
 		long estimatedTime = System.currentTimeMillis() - startTime;
 		System.out.println("Graph creation: " + estimatedTime + "ms");

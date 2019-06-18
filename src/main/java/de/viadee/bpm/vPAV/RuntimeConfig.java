@@ -32,14 +32,19 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.springframework.context.ApplicationContext;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 public class RuntimeConfig {
 
@@ -49,7 +54,7 @@ public class RuntimeConfig {
 
 	private Map<String, String> beanMap;
 
-	private Map<String, Map<String, Rule>> activeRuleSet = new HashMap<>();
+	private RuleSet ruleSet;
 
 	private ClassLoader classLoader;
 
@@ -60,14 +65,18 @@ public class RuntimeConfig {
 
 	private static Logger logger = Logger.getLogger(RuntimeConfig.class.getName());
 
-	private final String[] viadeeRules = { "XorConventionChecker", "TimerExpressionChecker", "JavaDelegateChecker",
+	private final String[] viadeeConfigRules = {"CreateOutputHTML"};
+
+	private final String[] viadeeElementRules = {
+			"XorConventionChecker", "TimerExpressionChecker", "JavaDelegateChecker",
 			"NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker", "VersioningChecker",
-			"DmnTaskChecker", "ProcessVariablesModelChecker", "ProcessVariablesNameConventionChecker",
+			"DmnTaskChecker", "ProcessVariablesNameConventionChecker",
 			"TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
 			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
-			"DataFlowChecker", "MessageCorrelationChecker", "CreateOutputHTML"};
+			"MessageCorrelationChecker"
+	};
 
-	private ArrayList<String> allActiveRules = new ArrayList<>();
+	private final String[] viadeeModelRules = {"ProcessVariablesModelChecker", "DataFlowChecker"};
 
 	private RuntimeConfig() {
 	}
@@ -110,32 +119,17 @@ public class RuntimeConfig {
 		this.test = test;
 	}
 
-	public ArrayList<String> getActiveRules() {
-		return allActiveRules;
-	}
-
 	public String[] getViadeeRules() {
-		return viadeeRules;
+		return Stream.of(viadeeConfigRules, viadeeElementRules, viadeeModelRules).flatMap(Stream::of).toArray(String[]::new);
 	}
 
-	public void addActiveRules(Map<String, Map<String, Rule>> rules) {
-		for (Map.Entry<String, Map<String, Rule>> entry : rules.entrySet()) {
-			for (Map.Entry<String, Rule> ruleEntry : entry.getValue().entrySet()) {
-				Rule rule = ruleEntry.getValue();
-				if (rule.isActive() && !rule.getName().equals(ConfigConstants.HASPARENTRULESET)) {
-					if (!activeRuleSet.containsKey(entry.getKey())) {
-						activeRuleSet.put(entry.getKey(), new HashMap<>());
-					}
-					activeRuleSet.get(entry.getKey()).put(ruleEntry.getKey(), ruleEntry.getValue());
-				}
-
-				allActiveRules.add(entry.getKey());
-			}
-		}
+	public ArrayList<String> getActiveRules() {
+		ArrayList<String> activeRules = new ArrayList<>(ruleSet.getAllActiveRules().keySet());
+		return activeRules;
 	}
 
-	public Map<String, Map<String, Rule>> getActiveRuleSet() {
-		return activeRuleSet;
+	public void setRuleSet(RuleSet ruleSet) {
+		this.ruleSet = ruleSet;
 	}
 
 	public void setApplicationContext(ApplicationContext ctx) {
@@ -153,10 +147,10 @@ public class RuntimeConfig {
 	 * @param rules
 	 *            RuleSet Rules from ruleset
 	 */
-	public void retrieveLocale(Map<String, Map<String, Rule>> rules) {
+	public void retrieveLocale(RuleSet rules) {
 		try {
 			// Todo don't allow definition of language in rule set in future versions
-			final Rule rule = rules.get("language").get("language");
+			final Rule rule = rules.getElementRules().get("language").get("language");
 			final Map<String, Setting> settings = rule.getSettings();
 			if (settings.get("locale").getValue().equals("de")) {
 				getResource("de_DE");

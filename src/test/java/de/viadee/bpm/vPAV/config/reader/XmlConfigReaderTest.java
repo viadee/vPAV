@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.config.reader;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -69,37 +70,34 @@ public class XmlConfigReaderTest {
 		// Given
 		XmlConfigReader reader = new XmlConfigReader();
 
-		// When
-		Map<String, Map<String, Rule>> result = reader.read(ConfigConstants.RULESET);
+        // When
+        RuleSet result = reader.read(ConfigConstants.RULESET);
 
-		// Then
-		assertFalse("No rules could be read", result.isEmpty());
-		for (Map.Entry<String, Map<String, Rule>> entry : result.entrySet()) {
-			assertFalse("Rules of type " + entry.getKey() + " could not be read.", entry.getValue().isEmpty());
-		}
-		assertTrue("ID of XorNamingConventionChecker was not loaded.",
-				result.get("XorNamingConventionChecker").containsKey("XorCheckerId"));
-	}
+        // Then
+        assertFalse("No rules could be read", result.getElementRules().isEmpty());
+        for (Map.Entry<String, Map<String, Rule>> entry : result.getElementRules().entrySet()) {
+            assertFalse("Rules of type " + entry.getKey() + " could not be read.", entry.getValue().isEmpty());
+        }
+        assertTrue("ID of XorNamingConventionChecker was not loaded.", result.getElementRules().get("XorNamingConventionChecker").containsKey("XorCheckerId"));
+    }
 
-	/**
-	 * Test loading a non-existing config file and check for defaults
-	 *
-	 * @throws ConfigReaderException
-	 *             Exception if config file could not be found
-	 */
-	@Test()
-	public void testLoadingNonExistingXMLConfigFile() throws ConfigReaderException {
-		// Given
-		XmlConfigReader reader = new XmlConfigReader();
-		Map<String, Map<String, Rule>> result;
+    /**
+     * Test loading a non-existing config file and check for defaults
+     *
+     * @throws ConfigReaderException
+     */
+    @Test()
+    public void testLoadingNonExistingXMLConfigFile() throws ConfigReaderException {
+        // Given
+        XmlConfigReader reader = new XmlConfigReader();
 
 		// When
 		try {
-			result = reader.read("non-existing.xml");
+			RuleSet result = reader.read("non-existing.xml");
             assertNotNull("Exception expected, but no one was thrown.", result);
 		} catch (ConfigReaderException e) {
 			// load DefaultRuleSet
-			result = reader.read("ruleSetDefault.xml");
+            Map<String, Map<String, Rule>> result = reader.read("ruleSetDefault.xml").getElementRules();
 
 			// Default rules correct
 			assertTrue("False Default ruleSet ",

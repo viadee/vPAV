@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!DOCTYPE xml>
 <ruleSet>
-	<rule>
-		<name>HasParentRuleSet</name>
-		<state>true</state>
-	</rule>
-	<rule id="messageFalse">
-		<name>MessageEventChecker</name>
-		<state>false</state>
-	</rule>
-	<rule>
-		<name>OverlapChecker</name>
-		<state>false</state>
-	</rule>
-	<rule id="extensionChild">
-		<name>ExtensionChecker</name>
-		<state>true</state>
-		<settings>
-			<setting name="CALLBACK_TIMEOUT" type="ServiceTask">\d+</setting>
-		</settings>
-	</rule>
-	<rule>
-		<name>TimerExpressionChecker</name>
-		<state>true</state>
-	</rule>
-	<rule id="xorChecker1">
-		<name>XorConventionChecker</name>
-		<state>true</state>
-		<settings>
-			<setting name="requiredDefault">true</setting>
-		</settings>
-		<elementConventions>
-			<elementConvention>
-				<name>convention</name>
-				<description>gateway name has to end with an question mark</description>
-				<pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
-			</elementConvention>
-		</elementConventions>
-	</rule>
-	<rule id="xorChecker2">
-		<name>XorConventionChecker</name>
-		<state>true</state>
-		<settings>
-			<setting name="requiredDefault">true</setting>
-		</settings>
-		<elementConventions>
-			<elementConvention>
-				<name>convention2</name>
-				<description>gateway edge has to be named</description>
-				<pattern>[A-ZÄÖÜ][a-zäöü]*</pattern>
-			</elementConvention>
-		</elementConventions>
-	</rule>
+    <rule>
+        <name>HasParentRuleSet</name>
+        <state>true</state>
+    </rule>
+    <rule id="messageFalse">
+        <name>MessageEventChecker</name>
+        <state>false</state>
+    </rule>
+    <rule>
+        <name>OverlapChecker</name>
+        <state>false</state>
+    </rule>
+    <rule id="extensionChild">
+        <name>ExtensionChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="CALLBACK_TIMEOUT" type="ServiceTask">\d+</setting>
+        </settings>
+    </rule>
+    <rule>
+        <name>TimerExpressionChecker</name>
+        <state>true</state>
+    </rule>
+    <rule id="xorChecker1">
+        <name>XorConventionChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="requiredDefault">true</setting>
+        </settings>
+        <elementConventions>
+            <elementConvention>
+                <name>convention</name>
+                <description>gateway name has to end with an question mark</description>
+                <pattern>[A-ZÄÖÜ][a-zäöü]*\\?</pattern>
+            </elementConvention>
+        </elementConventions>
+    </rule>
+    <rule id="xorChecker2">
+        <name>XorConventionChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="requiredDefault">true</setting>
+        </settings>
+        <elementConventions>
+            <elementConvention>
+                <name>convention2</name>
+                <description>gateway edge has to be named</description>
+                <pattern>[A-ZÄÖÜ][a-zäöü]*</pattern>
+            </elementConvention>
+        </elementConventions>
+    </rule>
 </ruleSet>

@@ -34,7 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
@@ -49,7 +49,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -70,8 +69,8 @@ public class BpmnModelDispatcherTest {
 	public void testCreateCheckerInstances() throws ConfigReaderException {
 		// Load rule set.
 		XmlConfigReader reader = new XmlConfigReader();
-		Map<String, Map<String, Rule>> rules = reader.read("ruleSetChild.xml");
-		rules.remove("HasParentRuleSet");
+		RuleSet rules = reader.read("ruleSetChild.xml");
+		rules.getElementRules().remove("HasParentRuleSet");
 
 		BpmnScanner bpmnScanner = new BpmnScanner(
 				(new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());

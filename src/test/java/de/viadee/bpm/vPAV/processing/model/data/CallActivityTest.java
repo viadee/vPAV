@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.model.data;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -74,7 +75,7 @@ public class CallActivityTest {
 	@Test
 	public void testEmbedding() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -82,7 +83,7 @@ public class CallActivityTest {
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
 		// add reference for called process
-		final Map<String, String> processIdToPathMap = new HashMap<String, String>();
+		final Map<String, String> processIdToPathMap = new HashMap<>();
 		processIdToPathMap.put("calledProcess", BASE_PATH + "CallActivityTest_calledProcess.bpmn");
 		processIdToPathMap.put("calledcalledProcess", BASE_PATH + "CallActivityTest_calledcalledProcess.bpmn");
 
@@ -92,7 +93,7 @@ public class CallActivityTest {
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 
 		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<String>();
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
 				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
@@ -120,7 +121,7 @@ public class CallActivityTest {
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "CallActivityWithListenerTest.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -151,7 +152,6 @@ public class CallActivityTest {
 		Assert.assertEquals("Expected only one anomaly", 1, invalidPathMap.size());
 		Assert.assertEquals("Expected a DD anomaly but got " + anomaly.getAnomaly().toString(), Anomaly.DD,
 				anomaly.getAnomaly());
-
 
 	}
 }

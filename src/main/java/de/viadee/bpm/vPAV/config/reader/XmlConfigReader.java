@@ -63,7 +63,7 @@ public final class XmlConfigReader implements ConfigReader {
 	 *             If file can not be found in classpath
 	 */
 	@Override
-	public Map<String, Map<String, Rule>> read(final String file) throws ConfigReaderException {
+	public RuleSet read(final String file) throws ConfigReaderException {
 
 		try {
 			final JAXBContext jaxbContext = JAXBContext.newInstance(XmlRuleSet.class);
@@ -82,14 +82,14 @@ public final class XmlConfigReader implements ConfigReader {
 		}
 	}
 
-	/**
-	 * Retrieves all rules, by default deactivated
-	 *
-	 * @return rules
-	 */
-	public Map<String, Map<String, Rule>> getDeactivatedRuleSet() {
-		final Map<String, Map<String, Rule>> rules = new HashMap<>();
-		Map<String, Rule> newrule;
+    /**
+     * Retrieves all rules, by default deactivated
+     *
+     * @return rules
+     */
+    public RuleSet getDeactivatedRuleSet() {
+        final Map<String, Map<String, Rule>> rules = new HashMap<>();
+        Map<String, Rule> newrule;
 
 		for (String name : RuntimeConfig.getInstance().getViadeeRules()) {
 			newrule = new HashMap<>();
@@ -104,8 +104,8 @@ public final class XmlConfigReader implements ConfigReader {
 			rules.put(name, newrule);
 		}
 
-		return rules;
-	}
+        return new RuleSet(rules, new HashMap<>());
+    }
 
 	/**
 	 * Transforms XmlRuleSet to rules
@@ -116,7 +116,7 @@ public final class XmlConfigReader implements ConfigReader {
 	 * @throws ConfigReaderException
 	 *             If file could not be read properly
 	 */
-	private static Map<String, Map<String, Rule>> transformFromXmlDatastructures(final XmlRuleSet ruleSet)
+	private static RuleSet transformFromXmlDatastructures(final XmlRuleSet ruleSet)
 			throws ConfigReaderException {
 		final Map<String, Map<String, Rule>> rules = new HashMap<>();
 
@@ -188,8 +188,8 @@ public final class XmlConfigReader implements ConfigReader {
 			checkSingletonRule(rules, DataFlowChecker.class.getSimpleName());
 		}
 
-		return rules;
-	}
+        return new RuleSet(rules, new HashMap<>());
+    }
 
 	private static void checkSingletonRule(Map<String, Map<String, Rule>> rules, String rulename) {
 		Map<String, Rule> rulesSubset = rules.get(rulename);

@@ -36,6 +36,7 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.checker.*;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -86,10 +87,10 @@ public class BpmnModelDispatcher {
 	 * @return issues
 	 */
 	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processDefinition,
-			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
-			final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
-			final Collection<String> resourcesNewestVersions, final Map<String, Map<String, Rule>> conf,
-			final FlowAnalysis flowAnalysis) {
+													 final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
+													 final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
+													 final Collection<String> resourcesNewestVersions, final RuleSet conf,
+													 final FlowAnalysis flowAnalysis) {
 
 		final BpmnScanner bpmnScanner = createScanner(processDefinition);
 
@@ -99,7 +100,7 @@ public class BpmnModelDispatcher {
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Rule rule = conf.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER)
+		final Rule rule = conf.getElementRules().get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER)
 				.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
@@ -127,7 +128,7 @@ public class BpmnModelDispatcher {
 			final ModelChecker processVarChecker = new ProcessVariablesModelChecker(rule, invalidPathMap);
 			issues.addAll(processVarChecker.check());
 		}
-		final Rule dataFlowRule = conf.get(getClassName(DataFlowChecker.class))
+		final Rule dataFlowRule = conf.getElementRules().get(getClassName(DataFlowChecker.class))
 				.get(getClassName(DataFlowChecker.class));
 		if (dataFlowRule != null && dataFlowRule.isActive() && !dataFlowRules.isEmpty()) {
 			final DataFlowChecker dataFlowChecker = new DataFlowChecker(dataFlowRule, dataFlowRules, processVariables);
@@ -163,9 +164,9 @@ public class BpmnModelDispatcher {
 	 * @return issues
 	 */
 	public ModelDispatchResult dispatchWithoutVariables(final File processDefinition,
-			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
-			final Collection<String> resourcesNewestVersions, final Map<String, Map<String, Rule>> conf,
-			final FlowAnalysis flowAnalysis) {
+														final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
+														final Collection<String> resourcesNewestVersions, final RuleSet conf,
+														final FlowAnalysis flowAnalysis) {
 
 		BpmnScanner bpmnScanner = createScanner(processDefinition);
 
@@ -309,8 +310,8 @@ public class BpmnModelDispatcher {
 	 * @return CheckerCollection
 	 */
 	protected Collection<ElementChecker> createCheckerInstances(final Collection<String> resourcesNewestVersions,
-			final Map<String, Map<String, Rule>> conf, final BpmnScanner bpmnScanner,
-			final ProcessVariablesScanner scanner) {
+																final RuleSet conf, final BpmnScanner bpmnScanner,
+																final ProcessVariablesScanner scanner) {
 		CheckerFactory checkerFactory = new CheckerFactory();
 
 		final Collection<ElementChecker> checkerCollection = checkerFactory.createCheckerInstances(conf,

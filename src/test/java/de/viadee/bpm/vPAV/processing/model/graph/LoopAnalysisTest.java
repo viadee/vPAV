@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -75,7 +76,7 @@ public class LoopAnalysisTest {
 	@Test
 	public void testLoop() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "LoopAnalysisTest_TestLoop.bpmn";
 		final File processDefinition = new File(PATH);
 
@@ -87,7 +88,7 @@ public class LoopAnalysisTest {
 
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), new ArrayList<String>(), scanner, flowAnalysis);
+				processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
 
 		flowAnalysis.analyze(graphCollection);
 		graphBuilder.createInvalidPaths(graphCollection);

@@ -29,31 +29,57 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.config.reader;
+package de.viadee.bpm.vPAV.config.model;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-@XmlRootElement(name = "ruleSet")
-public class XmlRuleSet {
+public class RuleSet {
+    private Map<String, Map<String, Rule>> elementRules;
+    private Map<String, Map<String, Rule>> modelRules;
+    private Map<String, Map<String, Rule>> allRules;
+    private boolean hasParentRuleSet = false;
 
-    private Collection<XmlRule> rules;
-
-    public XmlRuleSet() {
+    public RuleSet() {
+        this.elementRules = new HashMap<>();
+        this.modelRules = new HashMap<>();
+        this.allRules = new HashMap<>();
     }
 
-    public XmlRuleSet(Collection<XmlRule> rules) {
-        super();
-        this.rules = rules;
+    public RuleSet(Map<String, Map<String, Rule>> elementRules, Map<String, Map<String, Rule>> modelRules) {
+        this.elementRules = elementRules;
+        this.modelRules = modelRules;
+        updateAllRules();
     }
 
-    @XmlElement(name = "rule", type = XmlRule.class)
-    public Collection<XmlRule> getRules() {
-        return rules;
+    private void updateAllRules() {
+        Map<String, Map<String, Rule>> allRules = new HashMap<>();
+        allRules.putAll(elementRules);
+        allRules.putAll(modelRules);
+        this.allRules = allRules;
     }
 
-    public void setRules(Collection<XmlRule> rules) {
-        this.rules = rules;
+    public Map<String, Map<String, Rule>> getModelRules() {
+        return modelRules;
+    }
+
+    public Map<String, Map<String, Rule>> getElementRules() {
+        return elementRules;
+    }
+
+    public Map<String, Map<String, Rule>> getAllRules() {
+        return this.allRules;
+    }
+
+    public Map<String, Map<String, Rule>> getAllActiveRules() {
+        return allRules.entrySet().stream().filter(
+                e -> e.getValue().entrySet().stream().allMatch(
+                        r -> r.getValue().isActive()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public boolean hasParentRuleSet() {
+        return hasParentRuleSet;
     }
 }

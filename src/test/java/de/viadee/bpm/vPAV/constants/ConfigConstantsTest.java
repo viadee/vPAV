@@ -39,7 +39,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Properties;
 
 public class ConfigConstantsTest {
 
@@ -83,10 +85,8 @@ public class ConfigConstantsTest {
 
     @Test
     public void testCreateOutputHtmlPropertyBackwardsCompatiblity() {
-        Map<String, Rule> htmlrulemap = new HashMap<>();
         Rule htmlrule = new Rule("id", "name", false, null, null, null, null);
-        htmlrulemap.put(ConfigConstants.CREATE_OUTPUT_RULE, htmlrule);
-        Assert.assertFalse("Output Html property was not read from rule.", ConfigConstants.getInstance().isHtmlOutputEnabled(htmlrulemap));
+        Assert.assertFalse("Output Html property was not read from rule.", ConfigConstants.getInstance().isHtmlOutputEnabled(htmlrule));
     }
 
     @Test

@@ -35,6 +35,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -50,7 +52,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -81,7 +82,7 @@ public class ReachingDefinitionTest {
 		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 		final ControlFlowGraph cg = new ControlFlowGraph();
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), cg, new FlowAnalysis());
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, cg));

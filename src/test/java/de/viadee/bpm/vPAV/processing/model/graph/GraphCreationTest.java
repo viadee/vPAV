@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -50,7 +51,10 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Unit Tests for data flow graph creation and calculation of invalid paths
@@ -84,7 +88,7 @@ public class GraphCreationTest {
 	@Test
 	public void testGraph() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
 		final File processDefinition = new File(PATH);
 

@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import org.junit.BeforeClass;
@@ -60,7 +61,7 @@ public class ProcessApplicationValidatorTest {
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
+		final URL[] classUrls = {classUrl};
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
@@ -71,7 +72,7 @@ public class ProcessApplicationValidatorTest {
 	 */
 	@Test
 	public void testLamdbaExpression() {
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final Set<String> testSet = new HashSet<>();
 		testSet.add("de/viadee/bpm/vPAV/TestDelegate.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);

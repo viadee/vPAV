@@ -35,6 +35,8 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -54,7 +56,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MessageCorrelationCheckerTest {
 
@@ -86,7 +91,7 @@ public class MessageCorrelationCheckerTest {
 
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessageStartEvent.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final Set<String> testSet = new HashSet<String>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -123,7 +128,7 @@ public class MessageCorrelationCheckerTest {
 	public void testCorrectMessageReceiveTask() throws IOException, SAXException, ParserConfigurationException {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessageReceiveTask.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final Set<String> testSet = new HashSet<String>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate2.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
@@ -160,8 +165,8 @@ public class MessageCorrelationCheckerTest {
 	public void testAllCorrectMessages() throws IOException, SAXException, ParserConfigurationException {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessages.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		final Set<String> testSet = new HashSet<String>();
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		final Set<String> testSet = new HashSet<>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate3.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
@@ -197,8 +202,8 @@ public class MessageCorrelationCheckerTest {
 	public void testIncorrectMessages() throws IOException, SAXException, ParserConfigurationException {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_incorrectMessage.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		final Set<String> testSet = new HashSet<String>();
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		final Set<String> testSet = new HashSet<>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate4.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 

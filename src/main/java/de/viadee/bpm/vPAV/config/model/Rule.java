@@ -120,4 +120,8 @@ public class Rule {
     public void deactivate() {
         isActive = false;
     }
+
+    public boolean isElementRule() {
+        return true;
+    }
 }
