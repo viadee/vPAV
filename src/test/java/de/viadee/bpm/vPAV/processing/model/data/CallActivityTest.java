@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.model.data;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -44,11 +45,8 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -62,21 +60,19 @@ public class CallActivityTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
 
-	private static ClassLoader cl;
-
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
 	}
 
 	@Test
-	public void testEmbedding() throws ParserConfigurationException, SAXException, IOException {
+	public void testEmbedding() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new HashMap<>());
 		final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
@@ -116,5 +112,46 @@ public class CallActivityTest {
 				anomaly2.getAnomaly());
 		Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
 				anomaly3.getAnomaly());
+	}
+
+	@Test
+	public void testEmbeddingCallActivitiesWithListener() {
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final String PATH = BASE_PATH + "CallActivityWithListenerTest.bpmn";
+		final File processDefinition = new File(PATH);
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+		// add reference for called process
+		final Map<String, String> processIdToPathMap = new HashMap<>();
+		processIdToPathMap.put("calledElement", BASE_PATH + "CalledActivityWithListenerTest.bpmn");
+
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
+				new BpmnScanner(PATH));
+
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
+
+		// create data flow graphs
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+		flowAnalysis.analyze(graphCollection);
+
+		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+		Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+
+		AnomalyContainer anomaly = iterator.next();
+
+		Assert.assertEquals("Expected only one anomaly", 1, invalidPathMap.size());
+		Assert.assertEquals("Expected a DD anomaly but got " + anomaly.getAnomaly().toString(), Anomaly.DD,
+				anomaly.getAnomaly());
+
+
 	}
 }

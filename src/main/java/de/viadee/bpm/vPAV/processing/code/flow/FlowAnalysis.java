@@ -120,6 +120,10 @@ public class FlowAnalysis {
 						outputVariables.put(operation.getId(), operation);
 					} else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
 						initialVariables.put(operation.getId(), operation);
+					} else if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
+						inputVariables.put(operation.getId(), operation);
+					} else if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
+						outputVariables.put(operation.getId(), operation);
 					}
 				});
 
@@ -148,7 +152,7 @@ public class FlowAnalysis {
 				});
 
 				// Set predecessor relation for blocks across delegates
-				Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
+				final Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
 				Node predDelegate = null;
 				while (iterator.hasNext()) {
 					Node currNode = iterator.next();
@@ -167,6 +171,9 @@ public class FlowAnalysis {
 				analysisElement.getControlFlowGraph().getNodes().values()
 						.forEach(node -> cfgNodes.put(node.getId(), node));
 				ids.add(firstNode.getParentElement().getBaseElement().getId());
+
+				// In case we have a call activity, pass variable mappings
+				embedCallActivities(analysisElement);
 			} else {
 				// In case we have start event that maps a message to a method
 				final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
@@ -178,55 +185,74 @@ public class FlowAnalysis {
 				analysisElement.setInUsed(initialOperations);
 
 				// In case we have a call activity, pass variable mappings
-				final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> camundaOut = new LinkedHashMap<>();
-				final ArrayList<ProcessVariableOperation> operationList = new ArrayList<>();
-				if (analysisElement.getBaseElement() instanceof CallActivity) {
-					for (AnalysisElement succ : analysisElement.getSuccessors()) {
-						if (succ.getBaseElement() instanceof StartEvent) {
-							analysisElement.getOperations().values().forEach(operation -> {
-
-								if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
-									camundaIn.put(operation.getId(), operation);
-									operationList.add(operation);
-								}
-								if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
-									camundaOut.put(operation.getId(), operation);
-									operationList.add(operation);
-								}
-							});
-							succ.setInUnused(camundaIn);
-						} else {
-							analysisElement.removeSuccessor(succ.getId());
-							succ.removePredecessor(analysisElement.getId());
-						}
-					}
-					analysisElement.setOutUnused(camundaOut);
-				}
-
-				operationList.forEach(analysisElement::removeOperation);
-
-				if (analysisElement.getBaseElement() instanceof StartEvent) {
-					for (AnalysisElement pred : analysisElement.getPredecessors()) {
-						if (pred.getBaseElement() instanceof EndEvent) {
-							analysisElement.removePredecessor(pred.getId());
-						}
-					}
-				}
-
-				if (analysisElement.getBaseElement() instanceof EndEvent) {
-					for (AnalysisElement succ : analysisElement.getSuccessors()) {
-						if (succ.getBaseElement() instanceof StartEvent) {
-							analysisElement.removeSuccessor(succ.getId());
-						}
-					}
-				}
+				embedCallActivities(analysisElement);
 			}
 		});
 
 		temp.putAll(cfgNodes);
 		nodes.putAll(temp);
 		ids.forEach(id -> nodes.remove(id));
+	}
+
+	/**
+	 * Embeds call activities
+	 *
+	 * @param analysisElement Current element
+	 */
+	private void embedCallActivities(AnalysisElement analysisElement) {
+		final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
+		final LinkedHashMap<String, ProcessVariableOperation> camundaOut = new LinkedHashMap<>();
+		final ArrayList<ProcessVariableOperation> operationList = new ArrayList<>();
+		if (analysisElement.getBaseElement() instanceof CallActivity) {
+			analysisElement.getSuccessors().forEach(succ -> {
+				if (succ.getBaseElement() instanceof StartEvent) {
+					analysisElement.getOperations().values().forEach(operation -> {
+						if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
+							camundaIn.put(operation.getId(), operation);
+							operationList.add(operation);
+						}
+						if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
+							camundaOut.put(operation.getId(), operation);
+							operationList.add(operation);
+						}
+					});
+					succ.setInUnused(camundaIn);
+				} else {
+					analysisElement.removeSuccessor(succ.getId());
+					succ.removePredecessor(analysisElement.getId());
+				}
+			});
+			analysisElement.setOutUnused(camundaOut);
+		}
+
+		// Remove operation from base sets, because we moved them to In/Out
+		operationList.forEach(analysisElement::removeOperation);
+
+		// Clear wrong predecessors in case of call activities
+		if (analysisElement.getBaseElement() instanceof StartEvent) {
+			analysisElement.getPredecessors().forEach(pred -> {
+				if (pred.getBaseElement() instanceof EndEvent) {
+					analysisElement.removePredecessor(pred.getId());
+				}
+			});
+		}
+
+		// Clear wrong successors in case of call activities
+		if (analysisElement.getBaseElement() instanceof EndEvent) {
+			analysisElement.getSuccessors().forEach(succ -> {
+				if (succ.getBaseElement() instanceof StartEvent) {
+					analysisElement.removeSuccessor(succ.getId());
+				} else {
+					ArrayList<String> predsToRemove = new ArrayList<>();
+					succ.getPredecessors().forEach(pred -> {
+						if (pred.getBaseElement() instanceof CallActivity) {
+							predsToRemove.add(pred.getId());
+						}
+					});
+					predsToRemove.forEach(succ::removePredecessor);
+				}
+			});
+		}
 	}
 
 	/**
