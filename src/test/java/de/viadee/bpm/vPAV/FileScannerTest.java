@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV;
 
-import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import org.junit.Assert;
 import org.junit.BeforeClass;

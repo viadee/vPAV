@@ -171,9 +171,6 @@ public class FlowAnalysis {
 				analysisElement.getControlFlowGraph().getNodes().values()
 						.forEach(node -> cfgNodes.put(node.getId(), node));
 				ids.add(firstNode.getParentElement().getBaseElement().getId());
-
-				// In case we have a call activity, pass variable mappings
-				embedCallActivities(analysisElement);
 			} else {
 				// In case we have start event that maps a message to a method
 				final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
@@ -183,10 +180,9 @@ public class FlowAnalysis {
 					}
 				});
 				analysisElement.setInUsed(initialOperations);
-
-				// In case we have a call activity, pass variable mappings
-				embedCallActivities(analysisElement);
 			}
+			// In case we have a call activity, pass variable mappings
+			embedCallActivities(analysisElement);
 		});
 
 		temp.putAll(cfgNodes);
