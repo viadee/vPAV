@@ -65,7 +65,7 @@ public class XmlConfigReaderTest {
 	 * @throws ConfigReaderException
 	 *             Exception if config file could not be found
 	 */
-	@Test()
+    @Test
 	public void testLoadingCorrectXMLConfigFile() throws ConfigReaderException {
 		// Given
 		XmlConfigReader reader = new XmlConfigReader();
@@ -78,7 +78,11 @@ public class XmlConfigReaderTest {
         for (Map.Entry<String, Map<String, Rule>> entry : result.getElementRules().entrySet()) {
             assertFalse("Rules of type " + entry.getKey() + " could not be read.", entry.getValue().isEmpty());
         }
-        assertTrue("ID of XorNamingConventionChecker was not loaded.", result.getElementRules().get("XorNamingConventionChecker").containsKey("XorCheckerId"));
+    }
+
+    @Test
+    public void testLoadingCorrectXMLConfigFileWithExternalChecker() {
+        // TODO
     }
 
     /**

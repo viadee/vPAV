@@ -193,6 +193,7 @@ public class Runner {
                                    final RuleSet childRules) {
         final Map<String, Map<String, Rule>> finalRules = new HashMap<>();
 
+        // TODO merge model rules as well
         finalRules.putAll(parentRules.getElementRules());
 
         for (Map.Entry<String, Map<String, Rule>> entry : childRules.getElementRules().entrySet()) {
@@ -203,7 +204,7 @@ public class Runner {
             }
         }
 
-        return new RuleSet(finalRules, new HashMap<>());
+        return new RuleSet(finalRules, new HashMap<>(), false);
     }
 
     /**
@@ -331,7 +332,7 @@ public class Runner {
         for (String file : allOutputFilesArray)
             outputFiles.add(Paths.get(fileMapping.get(file), file));
 
-        if (ConfigConstants.getInstance().isHtmlOutputEnabled(rules.getElementRules().get(ConfigConstants.CREATE_OUTPUT_RULE).get(ConfigConstants.CREATE_OUTPUT_RULE))) {
+        if (ConfigConstants.getInstance().isHtmlOutputEnabled()) {
             for (String file : allOutputFilesArray)
                 copyFileToVPAVFolder(file);
         }

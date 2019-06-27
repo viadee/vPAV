@@ -76,7 +76,7 @@ public class RunnerTest {
         assertFalse("No rules could be read", rules.isEmpty());
 
         // Check if inheritance worked correctly.
-        assertEquals("Number of total rules is wrong.", 8, rules.size());
+        assertEquals("Number of total rules is wrong.", 6, rules.size());
         assertEquals("Merging of MessageEventChecker rules did not work.", 2, rules.get("MessageEventChecker").size());
         assertFalse("Child rule of MessageEventChecker was not loaded correctly.", rules.get("MessageEventChecker").get("messageFalse").isActive());
         assertTrue("Parent rule of MessageEventChecker was not loaded correctly.", rules.get("MessageEventChecker").get("messageTrue").isActive());
