@@ -151,19 +151,17 @@ public class FlowAnalysis {
 					succ.addPredecessor(new NodeDecorator(lastNode));
 				});
 
+
 				// Set predecessor relation for blocks across delegates
 				final Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
-				Node predDelegate = null;
+				Node prevNode = null;
 				while (iterator.hasNext()) {
 					Node currNode = iterator.next();
-					if (predDelegate == null) {
-						predDelegate = currNode;
+					if (prevNode == null) {
+						prevNode = currNode;
 					} else {
-						if (currNode.firstOperation() != null && predDelegate.lastOperation() != null && !currNode
-								.firstOperation().getChapter().equals(predDelegate.lastOperation().getChapter())) {
-							currNode.setPredsInterProcedural(predDelegate.getId());
-							predDelegate = currNode;
-						}
+						currNode.setPredsInterProcedural(prevNode.getId());
+						prevNode = currNode;
 					}
 				}
 
