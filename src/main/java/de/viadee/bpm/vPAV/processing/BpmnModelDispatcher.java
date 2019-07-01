@@ -38,7 +38,9 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.checker.*;
+import de.viadee.bpm.vPAV.processing.checker.CheckerFactory;
+import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
+import de.viadee.bpm.vPAV.processing.checker.ModelChecker;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -122,24 +124,16 @@ public class BpmnModelDispatcher {
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		// call model checkers
-		// TODO: move it to a factory class later
-		if (rule != null && rule.isActive()) {
-			final ModelChecker processVarChecker = new ProcessVariablesModelChecker(rule, invalidPathMap);
-			issues.addAll(processVarChecker.check());
-		}
-		final Rule dataFlowRule = conf.getElementRules().get(getClassName(DataFlowChecker.class))
-				.get(getClassName(DataFlowChecker.class));
-		if (dataFlowRule != null && dataFlowRule.isActive() && !dataFlowRules.isEmpty()) {
-			final DataFlowChecker dataFlowChecker = new DataFlowChecker(dataFlowRule, dataFlowRules, processVariables);
-			issues.addAll(dataFlowChecker.check());
+		final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner,
+				scanner, dataFlowRules, processVariables, invalidPathMap);
+
+		// Execute model checkers.
+		for (ModelChecker checker : (Collection<ModelChecker>) checkers[1]) {
+			issues.addAll(checker.check());
 		}
 
-		// create checkerInstances
-		Collection<ElementChecker> checkerInstances = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner,
-				scanner);
-
-		executeCheckers(processDefinition, baseElements, graphBuilder, issues, checkerInstances, flowAnalysis);
+		// Execute element checkers.
+		executeCheckers(processDefinition, baseElements, graphBuilder, issues, (Collection<ElementChecker>) checkers[0], flowAnalysis);
 
 		return new ModelDispatchResult(issues, bpmnElements, processVariables);
 	}
@@ -168,6 +162,7 @@ public class BpmnModelDispatcher {
 														final Collection<String> resourcesNewestVersions, final RuleSet conf,
 														final FlowAnalysis flowAnalysis) {
 
+		// TODO check how relevant this method still is
 		BpmnScanner bpmnScanner = createScanner(processDefinition);
 
 		// parse bpmn model
@@ -181,11 +176,12 @@ public class BpmnModelDispatcher {
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		// create checkerInstances as singletons
-		Collection<ElementChecker> checkerInstances = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner,
-				null);
+		final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner,
+				null, null, null, null);
 
-		executeCheckers(processDefinition, baseElements, graphBuilder, issues, checkerInstances, flowAnalysis);
+
+		// Execute element checkers.
+		executeCheckers(processDefinition, baseElements, graphBuilder, issues, (Collection<ElementChecker>) checkers[0], flowAnalysis);
 
 		return new ModelDispatchResult(issues,
 				getBpmnElements(processDefinition, baseElements, graphBuilder, flowAnalysis), Collections.emptyList());
@@ -309,13 +305,16 @@ public class BpmnModelDispatcher {
 	 *            ProcessVariablesScanner
 	 * @return CheckerCollection
 	 */
-	protected Collection<ElementChecker> createCheckerInstances(final Collection<String> resourcesNewestVersions,
-																final RuleSet conf, final BpmnScanner bpmnScanner,
-																final ProcessVariablesScanner scanner) {
+	protected Collection[] createCheckerInstances(final Collection<String> resourcesNewestVersions,
+												  final RuleSet conf, final BpmnScanner bpmnScanner,
+												  final ProcessVariablesScanner scanner,
+												  final Collection<DataFlowRule> dataFlowRules,
+												  final Collection<ProcessVariable> processVariables,
+												  final Map<AnomalyContainer, List<Path>> invalidPathMap) {
 		CheckerFactory checkerFactory = new CheckerFactory();
 
-		final Collection<ElementChecker> checkerCollection = checkerFactory.createCheckerInstances(conf,
-				resourcesNewestVersions, bpmnScanner, scanner);
+		final Collection[] checkerCollection = checkerFactory.createCheckerInstances(conf,
+				resourcesNewestVersions, bpmnScanner, scanner, dataFlowRules, processVariables, invalidPathMap);
 
 		setIncorrectCheckers(checkerFactory.getIncorrectCheckers());
 

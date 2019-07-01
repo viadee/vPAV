@@ -77,7 +77,7 @@ public class BpmnModelDispatcherTest {
 		FileScanner fileScanner = new FileScanner(rules);
 		BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
 		Collection<ElementChecker> checkerInstances = dispatcher
-				.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null);
+				.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null, null, null, null)[0];
 
 		// Check if all checkers were created.
 		assertEquals("Wrong number of loaded checkers.", 4, checkerInstances.size());

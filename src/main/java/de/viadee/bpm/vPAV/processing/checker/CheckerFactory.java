@@ -37,8 +37,11 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -63,24 +66,35 @@ public class CheckerFactory {
      * @param scanner                 ProcessVariablesScanner for process variables, if active
      * @return checkers returns checkers
      */
-    public Collection<ElementChecker> createCheckerInstances(final RuleSet ruleConf,
-                                                             final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
-                                                             final ProcessVariablesScanner scanner) {
+    public Collection[] createCheckerInstances(final RuleSet ruleConf,
+                                               final Collection<String> resourcesNewestVersions, final BpmnScanner bpmnScanner,
+                                               final ProcessVariablesScanner scanner,
+                                               final Collection<DataFlowRule> dataFlowRules,
+                                               final Collection<ProcessVariable> processVariables,
+                                               final Map<AnomalyContainer, List<Path>> invalidPathMap) {
 
         final HashSet<String> instantiatedCheckerClasses = new HashSet<>();
-        final Collection<ElementChecker> checkers = new ArrayList<ElementChecker>();
-        AbstractElementChecker newChecker;
+        final Collection[] checkers = new Collection[2];
+        // TODO generate checkeres only, if rule is active!!
+        checkers[0] = createElementCheckers(instantiatedCheckerClasses, ruleConf, resourcesNewestVersions, bpmnScanner, scanner);
+        checkers[1] = createModelCheckers(instantiatedCheckerClasses, ruleConf, dataFlowRules, processVariables, invalidPathMap);
 
+        return checkers;
+    }
+
+    private Collection<ElementChecker> createElementCheckers(final HashSet<String> instantiatedCheckerClasses,
+                                                             final RuleSet ruleConf,
+                                                             final Collection<String> resourcesNewestVersions,
+                                                             final BpmnScanner bpmnScanner,
+                                                             final ProcessVariablesScanner scanner) {
+        final Collection<ElementChecker> elementCheckers = new ArrayList<>();
+        AbstractElementChecker newChecker;
+        // Create element checkers.
         for (Map<String, Rule> rules : ruleConf.getElementRules().values()) {
             for (Rule rule : rules.values()) {
                 String fullyQualifiedName = getFullyQualifiedName(rule);
 
-                if (rule.getName().equals(ConfigConstants.CREATE_OUTPUT_RULE)) {
-                    continue;
-                }
-
-                if (!fullyQualifiedName.isEmpty() && !rule.getName().equals("ProcessVariablesModelChecker")
-                        && !rule.getName().equals("DataFlowChecker")) { //$NON-NLS-1$
+                if (!fullyQualifiedName.isEmpty()) { //$NON-NLS-1$
                     try {
                         if (!rule.getName().equals("VersioningChecker") && !rule.getName()
                                 .equals("MessageCorrelationChecker")) { //$NON-NLS-1$
@@ -107,11 +121,11 @@ public class CheckerFactory {
                                         rule.getName()));
                                 LOGGER.warning("Multiple rule definitions of checker '" + rule.getName() + "' found. Only the first rule will be applied.");
                             } else {
-                                checkers.add(newChecker);
+                                elementCheckers.add(newChecker);
                             }
                         } else {
                             instantiatedCheckerClasses.add(fullyQualifiedName);
-                            checkers.add(newChecker);
+                            elementCheckers.add(newChecker);
                         }
                     } catch (NoSuchMethodException | SecurityException | ClassNotFoundException | IllegalAccessException
                             | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
@@ -122,8 +136,45 @@ public class CheckerFactory {
                 }
             }
         }
+        return elementCheckers;
+    }
 
-        return checkers;
+    private Collection<ModelChecker> createModelCheckers(final HashSet<String> instantiatedCheckerClasses,
+                                                         final RuleSet ruleConf,
+                                                         final Collection<DataFlowRule> dataFlowRules,
+                                                         final Collection<ProcessVariable> processVariables,
+                                                         final Map<AnomalyContainer, List<Path>> invalidPathMap) {
+        final Collection<ModelChecker> modelCheckers = new ArrayList<>();
+        ModelChecker newModelChecker;
+        // Create model checkers.
+        for (Map<String, Rule> rules : ruleConf.getModelRules().values()) {
+            for (Rule rule : rules.values()) {
+                String fullyQualifiedName = getFullyQualifiedName(rule);
+                if (!fullyQualifiedName.isEmpty()) {
+                    try {
+                        Class<?> clazz = Class.forName(fullyQualifiedName);
+                        if (rule.getName().equals("DataFlowChecker")) {
+                            Constructor<?> c = clazz.getConstructor(Rule.class, Collection.class, Collection.class);
+                            newModelChecker = (ModelChecker) c.newInstance(rule, dataFlowRules, processVariables);
+                        } else if (rule.getName().equals("ProcessVariablesModelChecker")) {
+                            Constructor<?> c = clazz.getConstructor(Rule.class, Map.class);
+                            newModelChecker = (ModelChecker) c.newInstance(rule, invalidPathMap);
+                        } else {
+                            // TODO build generic model checker
+                            // TODO this wont work yet
+                            Constructor<?> c = clazz.getConstructor(Rule.class, Map.class);
+                            newModelChecker = (ModelChecker) c.newInstance(rule, invalidPathMap);
+                        }
+                        instantiatedCheckerClasses.add(fullyQualifiedName);
+                        modelCheckers.add(newModelChecker);
+                    } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                        // TODO set incorrect checkers etc.
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return modelCheckers;
     }
 
     /**
