@@ -75,7 +75,6 @@ public class CheckerFactory {
 
         final HashSet<String> instantiatedCheckerClasses = new HashSet<>();
         final Collection[] checkers = new Collection[2];
-        // TODO generate checkeres only, if rule is active!!
         checkers[0] = createElementCheckers(instantiatedCheckerClasses, ruleConf, resourcesNewestVersions, bpmnScanner, scanner);
         checkers[1] = createModelCheckers(instantiatedCheckerClasses, ruleConf, bpmnScanner, dataFlowRules, processVariables, invalidPathMap);
 
@@ -94,7 +93,7 @@ public class CheckerFactory {
             for (Rule rule : rules.values()) {
                 String fullyQualifiedName = getFullyQualifiedName(rule);
 
-                if (!fullyQualifiedName.isEmpty()) { //$NON-NLS-1$
+                if (rule.isActive() && !fullyQualifiedName.isEmpty()) { //$NON-NLS-1$
                     try {
                         if (!rule.getName().equals("VersioningChecker") && !rule.getName()
                                 .equals("MessageCorrelationChecker")) { //$NON-NLS-1$
@@ -151,7 +150,7 @@ public class CheckerFactory {
         for (Map<String, Rule> rules : ruleConf.getModelRules().values()) {
             for (Rule rule : rules.values()) {
                 String fullyQualifiedName = getFullyQualifiedName(rule);
-                if (!fullyQualifiedName.isEmpty()) {
+                if (rule.isActive() && !fullyQualifiedName.isEmpty()) {
                     try {
                         Class<?> clazz = Class.forName(fullyQualifiedName);
                         if (rule.getName().equals("DataFlowChecker")) {
@@ -185,16 +184,15 @@ public class CheckerFactory {
      */
     private String getFullyQualifiedName(Rule rule) {
         String fullyQualifiedName = ""; //$NON-NLS-1$
-        if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getName())
-                && rule.isActive()) {
+        if (Arrays.asList(RuntimeConfig.getInstance().getViadeeRules()).contains(rule.getName())) {
             fullyQualifiedName = BpmnConstants.INTERN_LOCATION + rule.getName().trim();
-        } else if (rule.isActive() && rule.getSettings() != null
+        } else if (rule.getSettings() != null
                 && rule.getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
             fullyQualifiedName =
                     rule.getSettings().get(BpmnConstants.EXTERN_LOCATION).getValue() + "." //$NON-NLS-1$
                             + rule.getName().trim();
         }
-        if (fullyQualifiedName.isEmpty() && rule.isActive()) {
+        if (fullyQualifiedName.isEmpty()) {
             LOGGER.warning("Checker '" + rule.getName() //$NON-NLS-1$
                     + "' not found. Please add setting for external_location in ruleSet.xml."); //$NON-NLS-1$
             rule.deactivate();
