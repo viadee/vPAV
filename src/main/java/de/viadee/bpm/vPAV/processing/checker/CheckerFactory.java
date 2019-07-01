@@ -163,8 +163,22 @@ public class CheckerFactory {
                             Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class);
                             newModelChecker = (ModelChecker) c.newInstance(rule, bpmnScanner);
                         }
-                        instantiatedCheckerClasses.add(fullyQualifiedName);
-                        modelCheckers.add(newModelChecker);
+
+                        // Check if checker is singleton and if an instance already exists
+                        if (instantiatedCheckerClasses.contains(fullyQualifiedName)) {
+                            if (newModelChecker.isSingletonChecker()) {
+                                // Multiple instances of a singleton checker are considered incorrect
+                                this.setIncorrectCheckers(rule, String.format(Messages.getString("CheckerFactory.9"), //$NON-NLS-1$
+                                        rule.getName()));
+                                LOGGER.warning("Multiple rule definitions of checker '" + rule.getName() + "' found. Only the first rule will be applied.");
+                            } else {
+                                modelCheckers.add(newModelChecker);
+                            }
+                        } else {
+                            instantiatedCheckerClasses.add(fullyQualifiedName);
+                            modelCheckers.add(newModelChecker);
+                        }
+
                     } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                         LOGGER.warning("Class " + fullyQualifiedName
                                 + " not found or couldn't be instantiated"); //$NON-NLS-1$ //$NON-NLS-2$

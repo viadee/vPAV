@@ -155,7 +155,6 @@ public class CheckerFactoryTest {
     @Test
     public void testMultipleRulesOfSingletonChecker() {
         RuleSet rules = new RuleSet();
-        // TODO delete this check as soon as the singleton check is moved to config reader
         // Given rule set
         Rule ruleMessageEvent = new Rule("MessageEventChecker", true, null, null, null, null);
         Rule ruleJavaDelegate = new Rule("JavaDelegateChecker", true, null, null, null, null);
