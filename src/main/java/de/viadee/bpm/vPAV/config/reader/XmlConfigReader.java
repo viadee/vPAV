@@ -242,8 +242,14 @@ public final class XmlConfigReader implements ConfigReader {
                     // Load class and check implemented interface
                     try {
                         Class<?> clazz = Class.forName(className);
-                        // TODO continue here
-                        clazz.getInterfaces();
+                        Class<?> superClazz = clazz.getSuperclass();
+                        if (superClazz.getName().equals("de.viadee.bpm.vPAV.processing.checker.AbstractElementChecker")) {
+                            // Element checker
+                            elementRules.put(checkerRules.getKey(), checkerRules.getValue());
+                        } else {
+                            // TODO check if it is a model checker
+                            // else throw error
+                        }
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }

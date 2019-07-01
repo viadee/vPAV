@@ -53,7 +53,7 @@ public class XmlConfigReaderTest {
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
+		final URL[] classUrls = {classUrl};
         ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
@@ -85,8 +85,17 @@ public class XmlConfigReaderTest {
 	}
 
     @Test
-    public void testLoadingCorrectXMLConfigFileWithExternalChecker() {
-        // TODO
+	public void testLoadingCorrectXMLConfigFileWithExternalChecker() throws ConfigReaderException {
+		// Given
+		XmlConfigReader reader = new XmlConfigReader();
+
+		// When
+		RuleSet result = reader.read("ruleSetWithExternalChecker.xml");
+
+		// Then
+		assertEquals("Not all element rules could be read.", 5, result.getElementRules().size());
+		assertNotNull("External checker rule could not be loaded", result.getElementRules().get("TaskNamingConventionCheckerExtern"));
+		assertFalse("No model rules could be read", result.getModelRules().isEmpty());
     }
 
     /**
