@@ -32,7 +32,6 @@
 package de.viadee.bpm.vPAV.constants;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.config.model.Rule;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -197,23 +196,10 @@ public class ConfigConstants {
 		return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
 	}
 
-	/**
-	 * Method for backwards compatiblity. Should be deleted in the future and
-	 * replaced by the method without parameters.
-	 *
-	 * @param createoutputrule
-	 *            Rule
-	 * @return true/false
-	 */
-	public boolean isHtmlOutputEnabled(Rule createoutputrule) {
-		if (properties.containsKey("outputhtml")) {
-			return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
-		} else if (createoutputrule != null) {
-			//Todo Backwards compatibility: allow create-output flag to be defined in ruleset
-			return createoutputrule.isActive();
-		} else {
-			return true;
-		}
+	//Todo Backwards compatibility: allow create-output flag to be defined in ruleset, can be removed in future
+	@Deprecated
+	public void setHtmlOutputEnabled(boolean htmlOutput) {
+		properties.setProperty("outputhtml", String.valueOf(htmlOutput));
 	}
 
 	/**
@@ -233,5 +219,11 @@ public class ConfigConstants {
 				return "en";
 			}
 		}
+	}
+
+	// TODO can be removed in future, if only properties file is used
+	@Deprecated
+	public void setLanguage(String languageCode) {
+		properties.setProperty("language", languageCode);
 	}
 }

@@ -101,7 +101,7 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 		return issues;
 	}
 
-	public static boolean isSingletonChecker() {
+	public boolean isSingletonChecker() {
         return true;
     }
 

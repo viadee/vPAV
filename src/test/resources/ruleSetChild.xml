@@ -13,6 +13,17 @@
         <name>OverlapChecker</name>
         <state>false</state>
     </rule>
+    <rule>
+        <name>DataFlowChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>ProcessVariablesModelChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="UseStaticAnalysisBoolean">false</setting>
+        </settings>
+    </rule>
     <rule id="extensionChild">
         <name>ExtensionChecker</name>
         <state>true</state>

@@ -40,7 +40,6 @@ import de.viadee.bpm.vPAV.output.*;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
@@ -157,8 +156,6 @@ public class Runner {
             throw new RuntimeException(e);
         }
 
-        rules.getElementRules().remove(ConfigConstants.HASPARENTRULESET);
-
         RuntimeConfig.getInstance().retrieveLocale(rules);
 
         return rules;
@@ -191,19 +188,31 @@ public class Runner {
      */
     protected RuleSet mergeRuleSet(final RuleSet parentRules,
                                    final RuleSet childRules) {
-        final Map<String, Map<String, Rule>> finalRules = new HashMap<>();
+        final Map<String, Map<String, Rule>> finalElementRules = new HashMap<>();
+        final Map<String, Map<String, Rule>> finalModelRules = new HashMap<>();
 
-        finalRules.putAll(parentRules.getElementRules());
+        finalElementRules.putAll(parentRules.getElementRules());
+        finalModelRules.putAll(parentRules.getModelRules());
 
+        // Merge element rules.
         for (Map.Entry<String, Map<String, Rule>> entry : childRules.getElementRules().entrySet()) {
-            if (finalRules.containsKey(entry.getKey())) {
-                finalRules.get(entry.getKey()).putAll(entry.getValue());
+            if (finalElementRules.containsKey(entry.getKey())) {
+                finalElementRules.get(entry.getKey()).putAll(entry.getValue());
             } else {
-                finalRules.put(entry.getKey(), entry.getValue());
+                finalElementRules.put(entry.getKey(), entry.getValue());
             }
         }
 
-        return new RuleSet(finalRules, new HashMap<>());
+        // Merge model rules.
+        for (Map.Entry<String, Map<String, Rule>> entry : childRules.getModelRules().entrySet()) {
+            if (finalModelRules.containsKey(entry.getKey())) {
+                finalModelRules.get(entry.getKey()).putAll(entry.getValue());
+            } else {
+                finalModelRules.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return new RuleSet(finalElementRules, finalModelRules, false);
     }
 
     /**
@@ -331,7 +340,7 @@ public class Runner {
         for (String file : allOutputFilesArray)
             outputFiles.add(Paths.get(fileMapping.get(file), file));
 
-        if (ConfigConstants.getInstance().isHtmlOutputEnabled(rules.getElementRules().get(ConfigConstants.CREATE_OUTPUT_RULE).get(ConfigConstants.CREATE_OUTPUT_RULE))) {
+        if (ConfigConstants.getInstance().isHtmlOutputEnabled()) {
             for (String file : allOutputFilesArray)
                 copyFileToVPAVFolder(file);
         }
@@ -560,7 +569,6 @@ public class Runner {
         ModelDispatchResult dispatchResult;
         File bpmnfile = null;
         String basepath = ConfigConstants.getInstance().getBasepath();
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
 
         if (basepath.startsWith("file:/")) {
             // Convert URI
@@ -576,10 +584,10 @@ public class Runner {
         if (variableScanner != null) {
             dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, bpmnfile, fileScanner.getDecisionRefToPathMap(),
                     fileScanner.getProcessIdToPathMap(), variableScanner, dataFlowRules,
-                    fileScanner.getResourcesNewestVersions(), rules, flowAnalysis);
+                    fileScanner.getResourcesNewestVersions(), rules);
         } else {
             dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(bpmnfile, fileScanner.getDecisionRefToPathMap(),
-                    fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules, flowAnalysis);
+                    fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
         }
         elements.addAll(dispatchResult.getBpmnElements());
         processVariables.addAll(dispatchResult.getProcessVariables());

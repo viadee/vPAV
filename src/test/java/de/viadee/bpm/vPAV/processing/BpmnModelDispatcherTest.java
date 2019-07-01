@@ -63,6 +63,7 @@ public class BpmnModelDispatcherTest {
 		final URL[] classUrls = { classUrl };
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().setTest(true);
 	}
 
 	@Test
@@ -70,7 +71,6 @@ public class BpmnModelDispatcherTest {
 		// Load rule set.
 		XmlConfigReader reader = new XmlConfigReader();
 		RuleSet rules = reader.read("ruleSetChild.xml");
-		rules.getElementRules().remove("HasParentRuleSet");
 
 		BpmnScanner bpmnScanner = new BpmnScanner(
 				(new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());
@@ -78,7 +78,7 @@ public class BpmnModelDispatcherTest {
 		FileScanner fileScanner = new FileScanner(rules);
 		BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
 		Collection<ElementChecker> checkerInstances = dispatcher
-				.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null);
+				.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null, null, null, null)[0];
 
 		// Check if all checkers were created.
 		assertEquals("Wrong number of loaded checkers.", 4, checkerInstances.size());

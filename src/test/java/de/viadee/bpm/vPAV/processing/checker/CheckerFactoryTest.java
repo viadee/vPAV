@@ -69,8 +69,6 @@ public class CheckerFactoryTest {
 
     private static Map<String, Setting> settings = new HashMap<>();
 
-    private static RuleSet rules = new RuleSet();
-
     private final String PATH = BASE_PATH + "CheckerFactoryTest.bpmn";
 
     @BeforeClass
@@ -90,16 +88,23 @@ public class CheckerFactoryTest {
     @Test
     public void testCorrectInternalChecker()
             throws ParserConfigurationException, SAXException, IOException {
+        RuleSet rules = new RuleSet();
         Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
         HashMap<String, Rule> delegateRules = new HashMap<>();
         delegateRules.put("JavaDelegateChecker", rule);
         rules.getElementRules().put("JavaDelegateChecker", delegateRules);
+        rule = new Rule("DataFlowChecker", true, null, null, null, null);
+        HashMap<String, Rule> dataFlowRules = new HashMap<>();
+        dataFlowRules.put("DataFlowChecker", rule);
+        rules.getModelRules().put("DataFlowChecker", dataFlowRules);
+
         CheckerFactory checkerFactory = new CheckerFactory();
 
-        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH), null);
+        Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
+                new BpmnScanner(PATH), null, null, null, null);
 
-        assertTrue("Collection of Checker should not be empty", !cElChecker.isEmpty());
+        assertTrue("Collection of Element Checker should not be empty", !checkers[0].isEmpty());
+        assertTrue("Collection of Model Checker should not be empty", !checkers[1].isEmpty());
     }
 
     /**
@@ -108,16 +113,18 @@ public class CheckerFactoryTest {
     @Test
     public void testIncorrectInternalChecker()
             throws ParserConfigurationException, SAXException, IOException {
+        RuleSet rules = new RuleSet();
         Rule rule = new Rule("WrongChecker", true, null, null, null, null);
         HashMap<String, Rule> wrongCheckerRules = new HashMap<>();
         wrongCheckerRules.put("WrongChecker", rule);
         rules.getElementRules().put("WrongChecker", wrongCheckerRules);
         CheckerFactory checkerFactory = new CheckerFactory();
-        
-        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH), null);
 
-        assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
+        Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
+                new BpmnScanner(PATH), null, null, null, null);
+
+        assertTrue("Collection of Element Checker should be empty", checkers[0].isEmpty());
+        assertTrue("Collection of Model Checker should be empty", checkers[1].isEmpty());
     }
 
     /**
@@ -127,17 +134,19 @@ public class CheckerFactoryTest {
     @Test
     public void testIncorrectExternalChecker()
             throws ParserConfigurationException, SAXException, IOException {
+        RuleSet rules = new RuleSet();
         settings.put("external_Location", setting);
         Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
         HashMap<String, Rule> wrongCheckerRules = new HashMap<>();
         wrongCheckerRules.put("WrongChecker", rule);
         rules.getElementRules().put("WrongChecker", wrongCheckerRules);
         CheckerFactory checkerFactory = new CheckerFactory();
-        
-        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH), null);
 
-        assertTrue("Collection of Checker should be empty", cElChecker.isEmpty());
+        Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
+                new BpmnScanner(PATH), null, null, null, null);
+
+        assertTrue("Collection of Checker should be empty", checkers[0].isEmpty());
+        assertTrue("Collection of Model Checker should be empty", checkers[1].isEmpty());
     }
 
     /**
@@ -145,6 +154,7 @@ public class CheckerFactoryTest {
      */
     @Test
     public void testMultipleRulesOfSingletonChecker() {
+        RuleSet rules = new RuleSet();
         // Given rule set
         Rule ruleMessageEvent = new Rule("MessageEventChecker", true, null, null, null, null);
         Rule ruleJavaDelegate = new Rule("JavaDelegateChecker", true, null, null, null, null);
@@ -169,17 +179,16 @@ public class CheckerFactoryTest {
 
         // When
         CheckerFactory checkerFactory = new CheckerFactory();
-        Collection<ElementChecker> cElChecker = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH), null);
+        Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
+                new BpmnScanner(PATH), null, null, null, null);
 
         // Then
-        Assert.assertEquals("Wrong number of checkers was created.", 4, cElChecker.size());
+        Assert.assertEquals("Wrong number of checkers was created.", 4, checkers[0].size());
         Assert.assertEquals("Duplicated versioning checker rule was not added to incorrect checker map.", 1, checkerFactory.getIncorrectCheckers().size());
     }
 
     @After
     public void clearLists() {
-        rules.getElementRules().clear();
         settings.clear();
     }
 }
