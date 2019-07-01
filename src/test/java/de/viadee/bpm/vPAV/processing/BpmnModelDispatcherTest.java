@@ -70,7 +70,6 @@ public class BpmnModelDispatcherTest {
 		// Load rule set.
 		XmlConfigReader reader = new XmlConfigReader();
 		RuleSet rules = reader.read("ruleSetChild.xml");
-		rules.getElementRules().remove("HasParentRuleSet");
 
 		BpmnScanner bpmnScanner = new BpmnScanner(
 				(new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());
