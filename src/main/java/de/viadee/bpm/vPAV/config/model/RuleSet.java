@@ -40,7 +40,6 @@ public class RuleSet {
     private final Map<String, Map<String, Rule>> elementRules;
     private final Map<String, Map<String, Rule>> modelRules;
     private final Map<String, Map<String, Rule>> allRules;
-    // TODO set has Parent Rule Set
     private boolean hasParentRuleSet = false;
 
     public RuleSet() {
