@@ -84,16 +84,13 @@ public class BpmnModelDispatcher {
 	 *            - Collection with newest versions of class files
 	 * @param conf
 	 *            - ruleSet
-	 * @param flowAnalysis
-	 *            FLowAnalysis
 	 * @return issues
 	 */
 	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processDefinition,
 													 final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
 													 final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules,
-													 final Collection<String> resourcesNewestVersions, final RuleSet conf,
-													 final FlowAnalysis flowAnalysis) {
-
+													 final Collection<String> resourcesNewestVersions, final RuleSet conf) {
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		final BpmnScanner bpmnScanner = createScanner(processDefinition);
 
 		// parse bpmn model
@@ -159,9 +156,8 @@ public class BpmnModelDispatcher {
 	 */
 	public ModelDispatchResult dispatchWithoutVariables(final File processDefinition,
 														final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
-														final Collection<String> resourcesNewestVersions, final RuleSet conf,
-														final FlowAnalysis flowAnalysis) {
-
+														final Collection<String> resourcesNewestVersions, final RuleSet conf) {
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		// TODO check how relevant this method still is
 		BpmnScanner bpmnScanner = createScanner(processDefinition);
 

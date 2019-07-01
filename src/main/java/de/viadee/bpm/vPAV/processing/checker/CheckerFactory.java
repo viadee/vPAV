@@ -77,7 +77,7 @@ public class CheckerFactory {
         final Collection[] checkers = new Collection[2];
         // TODO generate checkeres only, if rule is active!!
         checkers[0] = createElementCheckers(instantiatedCheckerClasses, ruleConf, resourcesNewestVersions, bpmnScanner, scanner);
-        checkers[1] = createModelCheckers(instantiatedCheckerClasses, ruleConf, dataFlowRules, processVariables, invalidPathMap);
+        checkers[1] = createModelCheckers(instantiatedCheckerClasses, ruleConf, bpmnScanner, dataFlowRules, processVariables, invalidPathMap);
 
         return checkers;
     }
@@ -141,6 +141,7 @@ public class CheckerFactory {
 
     private Collection<ModelChecker> createModelCheckers(final HashSet<String> instantiatedCheckerClasses,
                                                          final RuleSet ruleConf,
+                                                         final BpmnScanner bpmnScanner,
                                                          final Collection<DataFlowRule> dataFlowRules,
                                                          final Collection<ProcessVariable> processVariables,
                                                          final Map<AnomalyContainer, List<Path>> invalidPathMap) {
@@ -160,16 +161,15 @@ public class CheckerFactory {
                             Constructor<?> c = clazz.getConstructor(Rule.class, Map.class);
                             newModelChecker = (ModelChecker) c.newInstance(rule, invalidPathMap);
                         } else {
-                            // TODO build generic model checker
-                            // TODO this wont work yet
-                            Constructor<?> c = clazz.getConstructor(Rule.class, Map.class);
-                            newModelChecker = (ModelChecker) c.newInstance(rule, invalidPathMap);
+                            Constructor<?> c = clazz.getConstructor(Rule.class, BpmnScanner.class);
+                            newModelChecker = (ModelChecker) c.newInstance(rule, bpmnScanner);
                         }
                         instantiatedCheckerClasses.add(fullyQualifiedName);
                         modelCheckers.add(newModelChecker);
                     } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                        // TODO set incorrect checkers etc.
-                        e.printStackTrace();
+                        LOGGER.warning("Class " + fullyQualifiedName
+                                + " not found or couldn't be instantiated"); //$NON-NLS-1$ //$NON-NLS-2$
+                        rule.deactivate();
                     }
                 }
             }

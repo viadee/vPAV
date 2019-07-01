@@ -63,6 +63,7 @@ public class BpmnModelDispatcherTest {
 		final URL[] classUrls = { classUrl };
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().setTest(true);
 	}
 
 	@Test
