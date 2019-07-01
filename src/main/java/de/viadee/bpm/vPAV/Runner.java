@@ -188,20 +188,31 @@ public class Runner {
      */
     protected RuleSet mergeRuleSet(final RuleSet parentRules,
                                    final RuleSet childRules) {
-        final Map<String, Map<String, Rule>> finalRules = new HashMap<>();
+        final Map<String, Map<String, Rule>> finalElementRules = new HashMap<>();
+        final Map<String, Map<String, Rule>> finalModelRules = new HashMap<>();
 
-        // TODO merge model rules as well
-        finalRules.putAll(parentRules.getElementRules());
+        finalElementRules.putAll(parentRules.getElementRules());
+        finalModelRules.putAll(parentRules.getModelRules());
 
+        // Merge element rules.
         for (Map.Entry<String, Map<String, Rule>> entry : childRules.getElementRules().entrySet()) {
-            if (finalRules.containsKey(entry.getKey())) {
-                finalRules.get(entry.getKey()).putAll(entry.getValue());
+            if (finalElementRules.containsKey(entry.getKey())) {
+                finalElementRules.get(entry.getKey()).putAll(entry.getValue());
             } else {
-                finalRules.put(entry.getKey(), entry.getValue());
+                finalElementRules.put(entry.getKey(), entry.getValue());
             }
         }
 
-        return new RuleSet(finalRules, new HashMap<>(), false);
+        // Merge model rules.
+        for (Map.Entry<String, Map<String, Rule>> entry : childRules.getModelRules().entrySet()) {
+            if (finalModelRules.containsKey(entry.getKey())) {
+                finalModelRules.get(entry.getKey()).putAll(entry.getValue());
+            } else {
+                finalModelRules.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return new RuleSet(finalElementRules, finalModelRules, false);
     }
 
     /**
