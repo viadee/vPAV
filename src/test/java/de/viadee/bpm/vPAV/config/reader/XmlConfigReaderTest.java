@@ -53,7 +53,7 @@ public class XmlConfigReaderTest {
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
+		final URL[] classUrls = {classUrl};
         ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
@@ -65,7 +65,7 @@ public class XmlConfigReaderTest {
 	 * @throws ConfigReaderException
 	 *             Exception if config file could not be found
 	 */
-	@Test()
+    @Test
 	public void testLoadingCorrectXMLConfigFile() throws ConfigReaderException {
 		// Given
 		XmlConfigReader reader = new XmlConfigReader();
@@ -74,11 +74,28 @@ public class XmlConfigReaderTest {
         RuleSet result = reader.read(ConfigConstants.RULESET);
 
         // Then
-        assertFalse("No rules could be read", result.getElementRules().isEmpty());
+		assertFalse("No element rules could be read", result.getElementRules().isEmpty());
         for (Map.Entry<String, Map<String, Rule>> entry : result.getElementRules().entrySet()) {
             assertFalse("Rules of type " + entry.getKey() + " could not be read.", entry.getValue().isEmpty());
-        }
-        assertTrue("ID of XorNamingConventionChecker was not loaded.", result.getElementRules().get("XorNamingConventionChecker").containsKey("XorCheckerId"));
+		}
+		assertFalse("No model rules could be read", result.getModelRules().isEmpty());
+		for (Map.Entry<String, Map<String, Rule>> entry : result.getModelRules().entrySet()) {
+			assertFalse("Rules of type " + entry.getKey() + " could not be read.", entry.getValue().isEmpty());
+		}
+	}
+
+    @Test
+	public void testLoadingCorrectXMLConfigFileWithExternalChecker() throws ConfigReaderException {
+		// Given
+		XmlConfigReader reader = new XmlConfigReader();
+
+		// When
+		RuleSet result = reader.read("ruleSetWithExternalChecker.xml");
+
+		// Then
+		assertEquals("Not all element rules could be read.", 5, result.getElementRules().size());
+		assertNotNull("External checker rule could not be loaded", result.getElementRules().get("TaskNamingConventionCheckerExtern"));
+		assertFalse("No model rules could be read", result.getModelRules().isEmpty());
     }
 
     /**
@@ -97,21 +114,24 @@ public class XmlConfigReaderTest {
             assertNotNull("Exception expected, but no one was thrown.", result);
 		} catch (ConfigReaderException e) {
 			// load DefaultRuleSet
-            Map<String, Map<String, Rule>> result = reader.read("ruleSetDefault.xml").getElementRules();
+			RuleSet result = reader.read("ruleSetDefault.xml");
+			Map<String, Map<String, Rule>> elementRules = result.getElementRules();
 
 			// Default rules correct
 			assertTrue("False Default ruleSet ",
-					result.get("JavaDelegateChecker").get("JavaDelegateChecker").isActive());
+					elementRules.get("JavaDelegateChecker").get("JavaDelegateChecker").isActive());
 			assertTrue("False Default ruleSet ",
-					result.get("EmbeddedGroovyScriptChecker").get("EmbeddedGroovyScriptChecker").isActive());
-			assertFalse("False Default ruleSet ", result.get("VersioningChecker").get("VersioningChecker").isActive());
-			assertFalse("False Default ruleSet ", result.get("DmnTaskChecker").get("DmnTaskChecker").isActive());
-			// assertFalse("False Default ruleSet ",
-			// result.get("ProcessVariablesModelChecker").isActive());
-			assertFalse("False Default ruleSet ", result.get("ProcessVariablesNameConventionChecker")
+					elementRules.get("EmbeddedGroovyScriptChecker").get("EmbeddedGroovyScriptChecker").isActive());
+			assertFalse("False Default ruleSet ", elementRules.get("VersioningChecker").get("VersioningChecker").isActive());
+			assertFalse("False Default ruleSet ", elementRules.get("DmnTaskChecker").get("DmnTaskChecker").isActive());
+			assertFalse("False Default ruleSet ", elementRules.get("ProcessVariablesNameConventionChecker")
 					.get("ProcessVariablesNameConventionChecker").isActive());
 			assertFalse("False Default ruleSet ",
-					result.get("TaskNamingConventionChecker").get("TaskNamingConventionChecker").isActive());
+					elementRules.get("TaskNamingConventionChecker").get("TaskNamingConventionChecker").isActive());
+
+			Map<String, Map<String, Rule>> modelRules = result.getModelRules();
+			assertTrue("False Default ruleSet ", modelRules.get("DataFlowChecker").get("DataFlowChecker").isActive());
+			assertTrue("False Default ruleSet ", modelRules.get("ProcessVariablesModelChecker").get("ProcessVariablesModelChecker").isActive());
 		}
 	}
 
@@ -127,7 +147,6 @@ public class XmlConfigReaderTest {
 
 		// When Then
 		reader.read("ruleSetIncorrectName.xml");
-
 	}
 
 	/**
@@ -140,7 +159,5 @@ public class XmlConfigReaderTest {
 
 		// When Then
 		reader.read("ruleSetIncorrect.xml");
-
 	}
-
 }

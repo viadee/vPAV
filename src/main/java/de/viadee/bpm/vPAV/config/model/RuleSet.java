@@ -31,14 +31,15 @@
  */
 package de.viadee.bpm.vPAV.config.model;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RuleSet {
-    private Map<String, Map<String, Rule>> elementRules;
-    private Map<String, Map<String, Rule>> modelRules;
-    private Map<String, Map<String, Rule>> allRules;
+    private final Map<String, Map<String, Rule>> elementRules;
+    private final Map<String, Map<String, Rule>> modelRules;
+    private final Map<String, Map<String, Rule>> allRules;
     private boolean hasParentRuleSet = false;
 
     public RuleSet() {
@@ -47,17 +48,15 @@ public class RuleSet {
         this.allRules = new HashMap<>();
     }
 
-    public RuleSet(Map<String, Map<String, Rule>> elementRules, Map<String, Map<String, Rule>> modelRules) {
-        this.elementRules = elementRules;
-        this.modelRules = modelRules;
-        updateAllRules();
-    }
+    public RuleSet(Map<String, Map<String, Rule>> elementRules, Map<String, Map<String, Rule>> modelRules, boolean hasParentRuleSet) {
+        this.elementRules = Collections.unmodifiableMap(elementRules);
+        this.modelRules = Collections.unmodifiableMap(modelRules);
+        this.hasParentRuleSet = hasParentRuleSet;
 
-    private void updateAllRules() {
         Map<String, Map<String, Rule>> allRules = new HashMap<>();
         allRules.putAll(elementRules);
         allRules.putAll(modelRules);
-        this.allRules = allRules;
+        this.allRules = Collections.unmodifiableMap(allRules);
     }
 
     public Map<String, Map<String, Rule>> getModelRules() {
