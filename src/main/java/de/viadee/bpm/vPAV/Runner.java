@@ -188,10 +188,9 @@ public class Runner {
      */
     protected RuleSet mergeRuleSet(final RuleSet parentRules,
                                    final RuleSet childRules) {
-        final Map<String, Map<String, Rule>> finalElementRules = new HashMap<>();
         final Map<String, Map<String, Rule>> finalModelRules = new HashMap<>();
 
-        finalElementRules.putAll(parentRules.getElementRules());
+        final Map<String, Map<String, Rule>> finalElementRules = new HashMap<>(parentRules.getElementRules());
         finalModelRules.putAll(parentRules.getModelRules());
 
         // Merge element rules.
@@ -222,9 +221,9 @@ public class Runner {
      * @param rules Rules defined in ruleSet
      */
     protected void getProcessVariables(final RuleSet rules) {
-        if (oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesModelChecker")
-                || oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesNameConventionChecker")
-                || oneCheckerIsActive(rules.getElementRules(), "DataFlowChecker")) {
+        if (oneCheckerIsActive(rules.getAllRules(), "ProcessVariablesModelChecker")
+                || oneCheckerIsActive(rules.getAllRules(), "ProcessVariablesNameConventionChecker")
+                || oneCheckerIsActive(rules.getAllRules(), "DataFlowChecker")) {
             variableScanner = new ProcessVariablesScanner(getFileScanner().getJavaResourcesFileInputStream());
             readOuterProcessVariables(variableScanner);
             setCheckProcessVariables(true);
@@ -233,7 +232,7 @@ public class Runner {
         }
     }
 
-    public boolean oneCheckerIsActive(final Map<String, Map<String, Rule>> rules, String name) {
+    private boolean oneCheckerIsActive(final Map<String, Map<String, Rule>> rules, String name) {
         for (Rule r : rules.get(name).values()) {
             if (r.isActive()) {
                 return true;

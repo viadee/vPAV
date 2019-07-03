@@ -233,19 +233,23 @@ public final class XmlConfigReader implements ConfigReader {
                     try {
                         Class<?> clazz = Class.forName(className);
                         Class<?> superClazz = clazz.getSuperclass();
-                        if (superClazz.getName().equals("de.viadee.bpm.vPAV.processing.checker.AbstractElementChecker")) {
-                            // Element checker
-                            elementRules.put(checkerRules.getKey(), checkerRules.getValue());
-                        } else if (superClazz.getName().equals("de.viadee.bpm.vPAV.processing.checker.AbstractModelChecker")) {
-                            // Model checker
-                            modelRules.put(checkerRules.getKey(), checkerRules.getValue());
-                        } else {
-                            // Class does not extend a know abstract checker
-                            for (Rule rule : checkerRules.getValue().values()) {
-                                rule.deactivate();
-                            }
-                            LOGGER.warning("Class " + className
-                                    + " does not extend a valid checker class. All rules of this type were deactivated.");
+                        switch (superClazz.getName()) {
+                            case "de.viadee.bpm.vPAV.processing.checker.AbstractElementChecker":
+                                // Element checker
+                                elementRules.put(checkerRules.getKey(), checkerRules.getValue());
+                                break;
+                            case "de.viadee.bpm.vPAV.processing.checker.AbstractModelChecker":
+                                // Model checker
+                                modelRules.put(checkerRules.getKey(), checkerRules.getValue());
+                                break;
+                            default:
+                                // Class does not extend a know abstract checker
+                                for (Rule rule : checkerRules.getValue().values()) {
+                                    rule.deactivate();
+                                }
+                                LOGGER.warning("Class " + className
+                                        + " does not extend a valid checker class. All rules of this type were deactivated.");
+                                break;
                         }
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
