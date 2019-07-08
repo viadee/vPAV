@@ -84,8 +84,8 @@ public class CallActivityTest {
 
 		// add reference for called process
 		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledProcess", BASE_PATH + "CallActivityTest_calledProcess.bpmn");
-		processIdToPathMap.put("calledcalledProcess", BASE_PATH + "CallActivityTest_calledcalledProcess.bpmn");
+		processIdToPathMap.put("calledProcess", "CallActivityTest_calledProcess.bpmn");
+		processIdToPathMap.put("calledcalledProcess", "CallActivityTest_calledcalledProcess.bpmn");
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
 				new BpmnScanner(PATH));
@@ -130,7 +130,7 @@ public class CallActivityTest {
 
 		// add reference for called process
 		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledElement", BASE_PATH + "CalledActivityWithListenerTest.bpmn");
+		processIdToPathMap.put("calledElement", "CalledActivityWithListenerTest.bpmn");
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
 				new BpmnScanner(PATH));
