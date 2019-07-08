@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -47,8 +48,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.*;
 
 import java.io.File;
 import java.util.*;
@@ -517,7 +518,7 @@ public class ElementGraphBuilder {
 			final Collection<String> calledElementHierarchy, final String callActivityPath,
 			final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
 		// read called process
-		final BpmnModelInstance subModel = Bpmn.readModelFromFile(new File(callActivityPath));
+		final BpmnModelInstance subModel = Bpmn.readModelFromFile(new File(ConfigConstants.getInstance().getBasepath() + callActivityPath));
 
 		// transform process into data flow
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
