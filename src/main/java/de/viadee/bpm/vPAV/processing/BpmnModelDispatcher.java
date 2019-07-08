@@ -99,7 +99,7 @@ public class BpmnModelDispatcher {
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Rule rule = conf.getElementRules().get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER)
+		final Rule rule = conf.getModelRules().get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER)
 				.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
