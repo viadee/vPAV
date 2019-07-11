@@ -957,6 +957,16 @@ public final class ProcessVariableReader {
 				processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
 						caseRef, element, ElementChapter.Details, KnownElementFieldType.CaseRef, scopeId));
 			}
+
+			// Check DelegateVariableMapping
+			if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
+				processVariables
+						.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
+								baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+										BpmnConstants.ATTR_VAR_MAPPING_CLASS),
+								element, ElementChapter.Implementation, KnownElementFieldType.Class, scopeId,
+								controlFlowGraph));
+			}
 		}
 
 		// Check multi instance attributes
