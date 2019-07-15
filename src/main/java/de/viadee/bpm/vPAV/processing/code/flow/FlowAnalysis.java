@@ -151,7 +151,6 @@ public class FlowAnalysis {
 					succ.addPredecessor(new NodeDecorator(lastNode));
 				});
 
-
 				// Set predecessor relation for blocks across delegates
 				final Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
 				Node prevNode = null;
@@ -191,7 +190,8 @@ public class FlowAnalysis {
 	/**
 	 * Embeds call activities
 	 *
-	 * @param analysisElement Current element
+	 * @param analysisElement
+	 *            Current element
 	 */
 	private void embedCallActivities(AnalysisElement analysisElement) {
 		final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
@@ -261,37 +261,43 @@ public class FlowAnalysis {
 				// Calculate in-sets (intersection of predecessors)
 				final LinkedHashMap<String, ProcessVariableOperation> inUsed = analysisElement.getInUsed();
 				final LinkedHashMap<String, ProcessVariableOperation> inUnused = analysisElement.getInUnused();
+				final LinkedHashMap<String, ProcessVariableOperation> inUsTemp = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> inUnTemp = new LinkedHashMap<>();
+
 				for (AnalysisElement pred : analysisElement.getPredecessors()) {
-					inUsed.putAll(pred.getOutUsed());
-					inUnused.putAll(pred.getOutUnused());
+					inUsTemp.putAll(getIntersection(pred.getOutUsed(), inUsed));
+					inUnTemp.putAll(getIntersection(pred.getOutUnused(), inUnused));
 				}
-				analysisElement.setInUsed(inUsed);
-				analysisElement.setInUnused(inUnused);
+				analysisElement.setInUsed(inUsTemp);
+				analysisElement.setInUnused(inUnTemp);
 
 				// Get old values before calculating new values and later check for changes
 				final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = analysisElement.getOutUnused();
 				final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = analysisElement.getOutUsed();
 
 				// Calculate out-sets for used definitions (transfer functions)
-				final LinkedHashMap<String, ProcessVariableOperation> tempUnion = new LinkedHashMap<>();
-				tempUnion.putAll(analysisElement.getInUsed());
-				tempUnion.putAll(getIntersection(analysisElement.getInUnused(), analysisElement.getUsed()));
-				tempUnion.putAll(getIntersection(analysisElement.getDefined(), analysisElement.getUsed()));
+				final LinkedHashMap<String, ProcessVariableOperation> inUsedTemp = new LinkedHashMap<>(
+						analysisElement.getInUsed());
+				final LinkedHashMap<String, ProcessVariableOperation> internalUnion = new LinkedHashMap<>();
+				internalUnion.putAll(analysisElement.getInUnused());
+				internalUnion.putAll(analysisElement.getDefined());
+				final LinkedHashMap<String, ProcessVariableOperation> internalIntersection = new LinkedHashMap<>(
+						getIntersection(internalUnion, analysisElement.getUsed()));
+				inUsedTemp.putAll(internalIntersection);
 				final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>(
-						getSetDifference(tempUnion, analysisElement.getKilled()));
+						getSetDifference(inUsedTemp, analysisElement.getKilled()));
 
 				// Calculate out-sets for unused definitions (transfer functions)
 				final LinkedHashMap<String, ProcessVariableOperation> tempUnion2 = new LinkedHashMap<>();
 				tempUnion2.putAll(analysisElement.getDefined());
 				tempUnion2.putAll(analysisElement.getInUnused());
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>(
-						getSetDifference(tempUnion2, analysisElement.getKilled()));
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection2 = new LinkedHashMap<>(
-						getSetDifference(tempIntersection, analysisElement.getUsed()));
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection3 = new LinkedHashMap<>(
-						getSetDifference(tempIntersection2, analysisElement.getKilled()));
+
+				final LinkedHashMap<String, ProcessVariableOperation> tempKillSet = new LinkedHashMap<>();
+				tempKillSet.putAll(analysisElement.getKilled());
+				tempKillSet.putAll(analysisElement.getUsed());
+
 				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
-						tempIntersection3);
+						getSetDifference(tempUnion2, tempKillSet));
 
 				// If the current element contains input mapping operations, remove from
 				// outgoing sets due to scope (only locally accessible)

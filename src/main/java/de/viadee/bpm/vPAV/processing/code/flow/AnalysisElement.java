@@ -67,9 +67,9 @@ public interface AnalysisElement {
 
 	LinkedHashMap<String, ProcessVariableOperation> getOutUnused();
 
-	void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsedB);
+	void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed);
 
-	void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnusedB);
+	void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused);
 
 	void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed);
 
