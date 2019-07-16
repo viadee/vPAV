@@ -72,6 +72,42 @@ public class AnomaliesSetCreationTest {
 	}
 
 	@Test
+	public void findModelAnomalies() {
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_AnomaliesCreationModel.bpmn";
+		final File processDefinition = new File(PATH);
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+
+		// create data flow graphs
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+		flowAnalysis.analyze(graphCollection);
+
+		Set<AnomalyContainer> anomalies = new HashSet<>();
+		flowAnalysis.getNodes().values().forEach(
+				analysisElement -> analysisElement.getAnomalies().forEach((key, value) -> anomalies.addAll(value)));
+
+		Iterator<AnomalyContainer> iterator = anomalies.iterator();
+
+		AnomalyContainer anomaly1 = iterator.next();
+		AnomalyContainer anomaly2 = iterator.next();
+		assertEquals("Expected 2 anomalies but found " + anomalies.size(), 2, anomalies.size());
+		assertEquals("Expected a UR anomaly but found " + anomaly1.getAnomaly(), Anomaly.UR, anomaly1.getAnomaly());
+		assertEquals("Expected a DU anomaly but found " + anomaly2.getAnomaly(), Anomaly.DU, anomaly2.getAnomaly());
+	}
+
+	@Test
 	public void findDD() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
@@ -196,7 +232,7 @@ public class AnomaliesSetCreationTest {
 
 		Anomaly anomaly1 = anomalies.iterator().next().getAnomaly();
 		Anomaly anomaly2 = anomalies.iterator().next().getAnomaly();
-		assertEquals("Expected 1 anomalie but found " + anomalies.size(), 2, anomalies.size());
+		assertEquals("Expected 2 anomalies but found " + anomalies.size(), 2, anomalies.size());
 		assertEquals("Expected a UU anomaly but found " + anomaly1, Anomaly.UU, anomaly1);
 		assertEquals("Expected a UU anomaly but found " + anomaly2, Anomaly.UU, anomaly2);
 	}

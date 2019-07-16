@@ -32,11 +32,11 @@
 package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import soot.toolkits.graph.Block;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,16 +59,18 @@ public class Node implements AnalysisElement {
 
 	private Block block;
 	private BpmnElement parentElement;
+	private ElementChapter elementChapter;
 
 	private LinkedHashMap<String, AnalysisElement> predecessors;
 	private LinkedHashMap<String, AnalysisElement> successors;
 
 	private String id;
 
-	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block) {
+	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block, final ElementChapter elementChapter) {
 		this.controlFlowGraph = controlFlowGraph;
 		this.parentElement = parentElement;
 		this.block = block;
+		this.elementChapter = elementChapter;
 
 		this.predecessors = new LinkedHashMap<>();
 		this.successors = new LinkedHashMap<>();
@@ -173,23 +175,6 @@ public class Node implements AnalysisElement {
 				}
 			}
 		}
-	}
-
-	ProcessVariableOperation lastOperation() {
-		Iterator<ProcessVariableOperation> iterator = operations.values().iterator();
-		if (iterator.hasNext()) {
-			return iterator.next();
-		}
-		return null;
-	}
-
-	ProcessVariableOperation firstOperation() {
-		Iterator<ProcessVariableOperation> iterator = operations.values().iterator();
-		ProcessVariableOperation processVariableOperation = null;
-		while (iterator.hasNext()) {
-			processVariableOperation = iterator.next();
-		}
-		return processVariableOperation;
 	}
 
 	@Override
@@ -348,4 +333,7 @@ public class Node implements AnalysisElement {
 		this.successors.put(successor.getId(), successor);
 	}
 
+	public ElementChapter getElementChapter() {
+		return elementChapter;
+	}
 }

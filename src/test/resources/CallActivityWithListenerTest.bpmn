@@ -8,7 +8,6 @@
     <bpmn:endEvent id="EndEvent_0sp8rr7">
       <bpmn:incoming>SequenceFlow_PRED</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_PRED" sourceRef="CallActivity" targetRef="EndEvent_0sp8rr7" />
     <bpmn:callActivity id="CallActivity" name="CallActivity" calledElement="calledElement">
       <bpmn:extensionElements>
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.CallActivityListenerDelegate" event="start" />
@@ -17,6 +16,7 @@
       <bpmn:incoming>SequenceFlow_16gjehx</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_PRED</bpmn:outgoing>
     </bpmn:callActivity>
+    <bpmn:sequenceFlow id="SequenceFlow_PRED" sourceRef="CallActivity" targetRef="EndEvent_0sp8rr7" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
@@ -29,7 +29,7 @@
         <di:waypoint xsi:type="dc:Point" x="231" y="120" />
         <di:waypoint xsi:type="dc:Point" x="253" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="246" y="113.5" width="0" height="13" />
+          <dc:Bounds x="201" y="114" width="90" height="13" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="EndEvent_0sp8rr7_di" bpmnElement="EndEvent_0sp8rr7">
@@ -38,16 +38,16 @@
           <dc:Bounds x="415" y="141" width="0" height="13" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CallActivity_0n6ybek_di" bpmnElement="CallActivity">
+        <dc:Bounds x="253" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0eiyrv8_di" bpmnElement="SequenceFlow_PRED">
         <di:waypoint xsi:type="dc:Point" x="353" y="120" />
         <di:waypoint xsi:type="dc:Point" x="397" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="375" y="98.5" width="0" height="13" />
+          <dc:Bounds x="330" y="99" width="90" height="13" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="CallActivity_0n6ybek_di" bpmnElement="CallActivity">
-        <dc:Bounds x="253" y="80" width="100" height="80" />
-      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

@@ -590,7 +590,7 @@ public class JavaReaderStatic {
 			final ControlFlowGraph controlFlowGraph) {
 
 		for (Block block : graph.getBlocks()) {
-			Node node = new Node(controlFlowGraph, element, block);
+			Node node = new Node(controlFlowGraph, element, block, chapter);
 			controlFlowGraph.addNode(node);
 
 			// Collect the functions Unit by Unit via the blockIterator
