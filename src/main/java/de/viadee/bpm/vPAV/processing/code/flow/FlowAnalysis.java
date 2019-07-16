@@ -69,10 +69,15 @@ public class FlowAnalysis {
 	public void analyze(final Collection<Graph> graphCollection) {
 		for (Graph graph : graphCollection) {
 			embedControlFlowGraph(graph);
+			printGraph();
 			computeReachingDefinitions();
 			computeLineByLine();
 			extractAnomalies();
 		}
+	}
+
+	private void printGraph() {
+		nodes.forEach((k, v) -> v.getPredecessors().forEach(pred ->  System.out.println("Curr: " + k + " <- " + "Pred: " + pred.getId())));
 	}
 
 	/**
@@ -136,18 +141,32 @@ public class FlowAnalysis {
 				analysisElement.getPredecessors().forEach(pred -> {
 					pred.removeSuccessor(analysisElement.getId());
 					if (analysisElement.getBaseElement() instanceof CallActivity) {
-//						if () {
-//
-//						}
+						if (firstNode.getElementChapter().equals(ElementChapter.ExecutionListenerStart)) {
+							pred.addSuccessor(new NodeDecorator(firstNode));
+							firstNode.addPredecessor(pred);
+						} else {
+							analysisElement.getSuccessors().forEach(pred::addSuccessor);
+						}
+					} else {
+						pred.addSuccessor(new NodeDecorator(firstNode));
+						firstNode.addPredecessor(pred);
 					}
-					pred.addSuccessor(new NodeDecorator(firstNode));
-					firstNode.addPredecessor(pred);
+
 				});
 
 				// Replace element with last block
 				analysisElement.getSuccessors().forEach(succ -> {
-					succ.removePredecessor(analysisElement.getId());
-					succ.addPredecessor(new NodeDecorator(lastNode));
+					if (analysisElement.getBaseElement() instanceof CallActivity) {
+						if (lastNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)) {
+							succ.clearPredecessors();
+							succ.addPredecessor(new NodeDecorator(lastNode));
+						} else {
+
+						}
+					} else {
+						succ.removePredecessor(analysisElement.getId());
+						succ.addPredecessor(new NodeDecorator(lastNode));
+					}
 				});
 
 				// Set predecessor relation for blocks across delegates

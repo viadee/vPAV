@@ -10,7 +10,7 @@
     </bpmn:endEvent>
     <bpmn:callActivity id="CallActivity" name="CallActivity" calledElement="calledElement">
       <bpmn:extensionElements>
-        <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.CallActivityListenerDelegate" event="start" />
+        <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.CallActivityListenerDelegate" event="end" />
         <camunda:in source="test" target="test" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_16gjehx</bpmn:incoming>
