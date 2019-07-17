@@ -78,7 +78,6 @@ public class FlowAnalysis {
 		}
 	}
 
-
 	/**
 	 * Embeds the control flow graphs of bpmn elements into the process model
 	 *
@@ -224,6 +223,24 @@ public class FlowAnalysis {
 						.forEach(node -> cfgNodes.put(node.getId(), node));
 				ids.add(firstNode.getParentElement().getBaseElement().getId());
 			} else {
+				if (analysisElement.getBaseElement() instanceof CallActivity) {
+					analysisElement.getSuccessors().forEach(succ -> {
+						if (succ.getBaseElement() instanceof StartEvent) {
+							succ.clearPredecessors();
+							LinkedHashMap<String, AnalysisElement> preds = new LinkedHashMap<>(
+									analysisElement.getPredecessors().stream()
+											.collect(Collectors.toMap(AnalysisElement::getId, Function.identity())));
+							succ.setPredecessors(preds);
+						} else if (succ.getBaseElement() instanceof SequenceFlow) {
+							succ.getPredecessors().forEach(pred -> {
+								if (pred.getBaseElement() instanceof CallActivity) {
+									succ.removePredecessor(pred.getId());
+								}
+							});
+						}
+					});
+					ids.add(analysisElement.getId());
+				}
 				// In case we have start event that maps a message to a method
 				final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 				analysisElement.getOperations().values().forEach(operation -> {
