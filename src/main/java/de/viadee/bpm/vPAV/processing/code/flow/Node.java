@@ -336,7 +336,7 @@ public class Node implements AnalysisElement {
 		this.successors.put(successor.getId(), successor);
 	}
 
-	public ElementChapter getElementChapter() {
+	ElementChapter getElementChapter() {
 		return elementChapter;
 	}
 }

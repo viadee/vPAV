@@ -43,7 +43,7 @@ public class NodeDecorator implements AnalysisElement {
 
 	private AnalysisElement decoratedNode;
 
-	public NodeDecorator(final AnalysisElement node) {
+	NodeDecorator(final AnalysisElement node) {
 		this.decoratedNode = node;
 	}
 
