@@ -173,6 +173,9 @@ public class NodeDecorator implements AnalysisElement {
 	}
 
 	@Override
+	public void clearSuccessors() { this.decoratedNode.clearSuccessors(); }
+
+	@Override
 	public void removeSuccessor(String successor) {
 		this.decoratedNode.removeSuccessor(successor);
 	}

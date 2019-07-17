@@ -91,6 +91,8 @@ public interface AnalysisElement {
 
 	void removePredecessor(String predecessor);
 
+	void clearSuccessors();
+
 	void removeSuccessor(String successor);
 
 	Map<BpmnElement, List<AnomalyContainer>> getAnomalies();
@@ -100,4 +102,5 @@ public interface AnalysisElement {
 	BpmnElement getParentElement();
 
 	void removeOperation(ProcessVariableOperation op);
+
 }

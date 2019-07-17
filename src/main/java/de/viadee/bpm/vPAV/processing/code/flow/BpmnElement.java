@@ -311,6 +311,9 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	@Override
+	public void clearSuccessors() { this.successors.clear(); }
+
+	@Override
 	public void removeSuccessor(String successor) {
 		this.successors.remove(successor);
 	}
