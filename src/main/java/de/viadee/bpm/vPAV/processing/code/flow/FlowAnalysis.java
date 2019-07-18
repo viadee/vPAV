@@ -72,18 +72,11 @@ public class FlowAnalysis {
 	public void analyze(final Collection<Graph> graphCollection) {
 		for (Graph graph : graphCollection) {
 			embedControlFlowGraph(graph);
-			printGraph();
 			computeReachingDefinitions();
 			computeLineByLine();
 			extractAnomalies();
 		}
 	}
-
-	private void printGraph() {
-		nodes.forEach((k, v) -> v.getPredecessors()
-				.forEach(pred -> System.out.println("Curr: " + k + " -> " + "Pred: " + pred.getId())));
-	}
-
 
 	/**
 	 * Embeds the control flow graphs of bpmn elements into the process model
@@ -131,15 +124,15 @@ public class FlowAnalysis {
 					}
 				});
 
-				firstNode.setInUnused(inputVariables);
-				lastNode.setOutUnused(outputVariables);
+				firstNode.addDefined(inputVariables);
+				lastNode.addDefined(outputVariables);
 
 				// If we have initial operations, we cant have input mapping (restriction of
 				// start event)
 				// Set initial operations as input for the first block and later remove bpmn
 				// element
 				if (!initialVariables.isEmpty()) {
-					firstNode.setInUnused(initialVariables);
+					firstNode.addDefined(initialVariables);
 				}
 
 				if (analysisElement.getBaseElement() instanceof CallActivity) {
@@ -230,24 +223,32 @@ public class FlowAnalysis {
 						.forEach(node -> cfgNodes.put(node.getId(), node));
 				ids.add(firstNode.getParentElement().getBaseElement().getId());
 			} else {
-			    if (analysisElement.getBaseElement() instanceof CallActivity) {
-			        analysisElement.getSuccessors().forEach(succ -> {
-			            if (succ.getBaseElement() instanceof StartEvent) {
-			                succ.clearPredecessors();
-                            LinkedHashMap<String, AnalysisElement> preds = new LinkedHashMap<>(
-                                    analysisElement.getPredecessors().stream().collect(
-                                            Collectors.toMap(AnalysisElement::getId, Function.identity())));
-                            succ.setPredecessors(preds);
-                        } else if (succ.getBaseElement() instanceof SequenceFlow) {
-			                succ.getPredecessors().forEach(pred -> {
-			                    if (pred.getBaseElement() instanceof CallActivity) {
-			                        succ.removePredecessor(pred.getId());
-                                }
-                            });
-                        }
-                    });
-			        ids.add(analysisElement.getId());
-                }
+				if (analysisElement.getBaseElement() instanceof CallActivity) {
+					analysisElement.getSuccessors().forEach(succ -> {
+						if (succ.getBaseElement() instanceof StartEvent) {
+							succ.clearPredecessors();
+							LinkedHashMap<String, AnalysisElement> preds = new LinkedHashMap<>(
+									analysisElement.getPredecessors().stream()
+											.collect(Collectors.toMap(AnalysisElement::getId, Function.identity())));
+							succ.setPredecessors(preds);
+						} else if (succ.getBaseElement() instanceof SequenceFlow) {
+							final LinkedHashMap<String, ProcessVariableOperation> camundaOut = new LinkedHashMap<>();
+							analysisElement.getOperations().values().forEach(operation -> {
+								if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)
+										|| operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
+									camundaOut.put(operation.getId(), operation);
+								}
+							});
+							succ.addDefined(camundaOut);
+							succ.getPredecessors().forEach(pred -> {
+								if (pred.getBaseElement() instanceof CallActivity) {
+									succ.removePredecessor(pred.getId());
+								}
+							});
+						}
+					});
+					ids.add(analysisElement.getId());
+				}
 				// In case we have start event that maps a message to a method
 				final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
 				analysisElement.getOperations().values().forEach(operation -> {
@@ -255,7 +256,7 @@ public class FlowAnalysis {
 						initialOperations.put(operation.getId(), operation);
 					}
 				});
-				analysisElement.setInUsed(initialOperations);
+				analysisElement.addDefined(initialOperations);
 			}
 			embedCallActivities(analysisElement);
 		});
@@ -273,7 +274,6 @@ public class FlowAnalysis {
 	 */
 	private void embedCallActivities(AnalysisElement analysisElement) {
 		final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
-		final LinkedHashMap<String, ProcessVariableOperation> camundaOut = new LinkedHashMap<>();
 		final ArrayList<ProcessVariableOperation> operationList = new ArrayList<>();
 		if (analysisElement.getBaseElement() instanceof CallActivity) {
 			analysisElement.getSuccessors().forEach(succ -> {
@@ -284,13 +284,8 @@ public class FlowAnalysis {
 							camundaIn.put(operation.getId(), operation);
 							operationList.add(operation);
 						}
-						if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)
-								|| operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
-							camundaOut.put(operation.getId(), operation);
-							operationList.add(operation);
-						}
 					});
-					succ.setInUnused(camundaIn);
+					succ.addDefined(camundaIn);
 				} else if (succ.getBaseElement() instanceof SequenceFlow) {
 					analysisElement.removeSuccessor(succ.getId());
 				} else {
@@ -299,7 +294,6 @@ public class FlowAnalysis {
 				}
 			});
 		}
-		analysisElement.setOutUnused(camundaOut);
 
 		// Remove operation from base sets, because we moved them to In/Out
 		operationList.forEach(analysisElement::removeOperation);
@@ -342,27 +336,34 @@ public class FlowAnalysis {
 			change = false;
 			for (AnalysisElement analysisElement : nodes.values()) {
 				// Calculate in-sets (intersection of predecessors)
-				final LinkedHashMap<String, ProcessVariableOperation> inUsed = analysisElement.getInUsed();
-				final LinkedHashMap<String, ProcessVariableOperation> inUnused = analysisElement.getInUnused();
-				final LinkedHashMap<String, ProcessVariableOperation> inUsTemp = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> inUnTemp = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> inUsed = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> inUnused = new LinkedHashMap<>();
+				final Set<ProcessVariableOperation> inUsedT = new HashSet<>(inUsed.values());
+				final Set<ProcessVariableOperation> inUnusedT = new HashSet<>(inUnused.values());
+				final List<AnalysisElement> predecessors = analysisElement.getPredecessors();
 
-				List<AnalysisElement> predecessors = analysisElement.getPredecessors();
-
+				// If more than one predecessor, take intersection of operations (conservatism)
 				if (predecessors.size() > 1) {
-					for (AnalysisElement pred : predecessors) {
-						inUsTemp.putAll(getIntersection(pred.getOutUsed(), inUsed));
-						inUnTemp.putAll(getIntersection(pred.getOutUnused(), inUnused));
+					for (int i = 0; i < predecessors.size(); i++) {
+						if (i == 0) {
+							inUsedT.addAll(predecessors.get(i).getOutUsed().values());
+							inUnusedT.addAll(predecessors.get(i).getOutUnused().values());
+						} else {
+							inUsedT.retainAll(predecessors.get(i).getOutUsed().values());
+							inUnusedT.retainAll(predecessors.get(i).getOutUnused().values());
+						}
 					}
+					inUsedT.forEach(pvo -> inUsed.put(pvo.getId(), pvo));
+					inUnusedT.forEach(pvo -> inUnused.put(pvo.getId(), pvo));
+					// Else take union to propagate operations
 				} else {
 					for (AnalysisElement pred : predecessors) {
-						inUsTemp.putAll(pred.getOutUsed());
-						inUnTemp.putAll(pred.getOutUnused());
+						inUsed.putAll(pred.getOutUsed());
+						inUnused.putAll(pred.getOutUnused());
 					}
 				}
-
-				analysisElement.setInUsed(inUsTemp);
-				analysisElement.setInUnused(inUnTemp);
+				analysisElement.setInUsed(inUsed);
+				analysisElement.setInUnused(inUnused);
 
 				// Get old values before calculating new values and later check for changes
 				final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = analysisElement.getOutUnused();
@@ -422,11 +423,6 @@ public class FlowAnalysis {
 
 				analysisElement.setOutUsed(outUsed);
 				analysisElement.setOutUnused(outUnused);
-
-				analysisElement.getSuccessors().forEach(succ -> {
-					succ.setInUnused(outUnused);
-					succ.setInUsed(outUsed);
-				});
 
 				if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
 					change = true;

@@ -44,6 +44,7 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -73,6 +74,7 @@ public class LoopAnalysisTest {
 	 * Case: Data flow graph creation and calculation of invalid paths
 	 *
 	 */
+	@Ignore
 	@Test
 	public void testLoop() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
@@ -91,7 +93,6 @@ public class LoopAnalysisTest {
 				processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
 
 		flowAnalysis.analyze(graphCollection);
-		graphBuilder.createInvalidPaths(graphCollection);
 
 		// calculate invalid paths based on data flow graphs
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);

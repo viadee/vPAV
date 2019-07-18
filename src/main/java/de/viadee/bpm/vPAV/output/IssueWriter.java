@@ -152,7 +152,7 @@ public class IssueWriter {
 
 		issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				var.getElement().getProcessDefinition(), var.getResourceFilePath(),
-				var.getElement().getBaseElement().getId(),
+				anomaly.getElementId(),
 				var.getElement().getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),
 				var.getName(), anomaly.getAnomaly(), paths, message));
 

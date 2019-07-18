@@ -75,7 +75,7 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 				} else if (anomaly.getAnomaly() == Anomaly.DU) {
 					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
 							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.1"), //$NON-NLS-1$
-									var.getName(), var.getElement().getBaseElement().getId(),
+									var.getName(), anomaly.getElementId(),
 									var.getChapter(), var.getFieldType().getDescription())));
 				} else if (anomaly.getAnomaly() == Anomaly.UR) {
 					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
