@@ -99,7 +99,7 @@ public class LoopAnalysisTest {
 
 		// get invalid paths
 		final List<Path> varTest = invalidPathMap
-				.get(new AnomalyContainer("dd", Anomaly.DD, "ServiceTask_1ev9i13", null));
+				.get(new AnomalyContainer("dd", Anomaly.DD, "ServiceTask_1ev9i13", "", null));
 
 		final Iterator<Path> iterator = varTest.iterator();
 		final Path firstPath = iterator.next();

@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.EndEvent;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
@@ -469,7 +470,8 @@ public class FlowAnalysis {
 				getIntersection(node.getInUnused(), node.getDefined()));
 		if (!ddAnomalies.isEmpty()) {
 			ddAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getId(), v)));
+					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getBaseElement().getId(),
+							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
 
@@ -484,7 +486,8 @@ public class FlowAnalysis {
 				getIntersection(node.getInUnused(), node.getKilled()));
 		if (!duAnomalies.isEmpty()) {
 			duAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getId(), v)));
+					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getBaseElement().getId(),
+							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
 
@@ -520,7 +523,8 @@ public class FlowAnalysis {
 
 		if (!urAnomalies.isEmpty()) {
 			urAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getId(), v)));
+					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getBaseElement().getId(),
+							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
 
@@ -556,7 +560,8 @@ public class FlowAnalysis {
 
 		if (!uuAnomalies.isEmpty()) {
 			uuAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(), v)));
+					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getBaseElement().getId(),
+							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
 
@@ -574,19 +579,23 @@ public class FlowAnalysis {
 			final ProcessVariableOperation prev) {
 		if (urSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
+					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(),
+							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 		if (ddSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(), curr));
+					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(),
+							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
 		}
 		if (duSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(), curr));
+					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(),
+							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 		if (uuSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(), curr));
+					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(),
+							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 	}
 

@@ -41,13 +41,16 @@ public class AnomalyContainer {
 
   private String elementId;
 
+  private String elementName;
+
   private ProcessVariableOperation variable;
 
-  public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId,
+  public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId, final String elementName,
       final ProcessVariableOperation variable) {
     this.name = name;
     this.anomaly = anomaly;
     this.elementId = elementId;
+    this.elementName = elementName;
     this.variable = variable;
   }
 
@@ -61,6 +64,10 @@ public class AnomalyContainer {
 
   public String getElementId() {
     return elementId;
+  }
+
+  public String getElementName() {
+    return elementName;
   }
 
   public ProcessVariableOperation getVariable() {
