@@ -107,34 +107,6 @@ public class FlowAnalysis {
 				final Node firstNode = analysisElement.getControlFlowGraph().firstNode();
 				final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
 
-				final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
-				analysisElement.getOperations().values().forEach(operation -> {
-					if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
-						inputVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
-						outputVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
-						initialVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
-						inputVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
-						outputVariables.put(operation.getId(), operation);
-					}
-				});
-
-				firstNode.addDefined(inputVariables);
-				lastNode.addDefined(outputVariables);
-
-				// If we have initial operations, we cant have input mapping (restriction of
-				// start event)
-				// Set initial operations as input for the first block and later remove bpmn
-				// element
-				if (!initialVariables.isEmpty()) {
-					firstNode.addDefined(initialVariables);
-				}
-
 				if (analysisElement.getBaseElement() instanceof CallActivity) {
 					analysisElement.getOperations().forEach((k, v) -> {
 						if (v.getChapter().equals(ElementChapter.ExecutionListenerEnd)) {
@@ -145,6 +117,7 @@ public class FlowAnalysis {
 											analysisElement.getPredecessors().stream().collect(
 													Collectors.toMap(AnalysisElement::getId, Function.identity())));
 									succ.setPredecessors(preds);
+									// TODO wann  tritt dieser fall auf (nur fürs Verständnis)
 								} else {
 									succ.getPredecessors().forEach(nestedSucc -> {
 										if (nestedSucc.getBaseElement() instanceof EndEvent) {
@@ -153,6 +126,8 @@ public class FlowAnalysis {
 									});
 									succ.clearPredecessors();
 									succ.addPredecessor(new NodeDecorator(lastNode));
+									lastNode.clearSuccessors();
+									lastNode.addSuccessor(succ);
 								}
 							});
 
@@ -217,6 +192,40 @@ public class FlowAnalysis {
 							prevNode = currNode;
 						}
 					}
+				}
+
+				final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
+				final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
+				analysisElement.getOperations().values().forEach(operation -> {
+					if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
+						inputVariables.put(operation.getId(), operation);
+					} else if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
+						outputVariables.put(operation.getId(), operation);
+					} else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
+						initialVariables.put(operation.getId(), operation);
+					} else if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
+						inputVariables.put(operation.getId(), operation);
+					} else if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
+						outputVariables.put(operation.getId(), operation);
+					}
+				});
+
+				firstNode.addDefined(inputVariables);
+				if (analysisElement.getBaseElement() instanceof CallActivity && lastNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)) {
+					lastNode.getSuccessors().forEach((element) -> {
+						element.setDefined(outputVariables);
+					});
+				} else {
+					lastNode.addDefined(outputVariables);
+				}
+
+				// If we have initial operations, we cant have input mapping (restriction of
+				// start event)
+				// Set initial operations as input for the first block and later remove bpmn
+				// element
+				if (!initialVariables.isEmpty()) {
+					firstNode.addDefined(initialVariables);
 				}
 
 				// Remember id of elements to be removed
@@ -350,10 +359,14 @@ public class FlowAnalysis {
 					// Else take union to propagate operations
 				} else {
 					for (AnalysisElement pred : predecessors) {
-						inUsed.putAll(pred.getOutUsed());
-						inUnused.putAll(pred.getOutUnused());
+						// Don't use out sets as input set if the predecessor is part of a call activity
+						if (!((pred.getParentElement().getBaseElement() instanceof CallActivity) || pred.getId().startsWith("_"))) {
+							inUsed.putAll(pred.getOutUsed());
+							inUnused.putAll(pred.getOutUnused());
+						}
 					}
 				}
+
 				analysisElement.setInUsed(inUsed);
 				analysisElement.setInUnused(inUnused);
 
