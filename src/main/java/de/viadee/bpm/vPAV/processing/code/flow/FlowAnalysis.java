@@ -198,6 +198,7 @@ public class FlowAnalysis {
 					});
 				}
 
+				boolean del = analysisElement.getControlFlowGraph().hasImplementedDelegate();
 				// Set predecessor relation for blocks across delegates
 				final Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
 				Node prevNode = null;
@@ -209,7 +210,7 @@ public class FlowAnalysis {
 						// Ensure that the pointers wont get set for beginning delegate and ending
 						// delegate
 						if (currNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)
-								&& prevNode.getElementChapter().equals(ElementChapter.ExecutionListenerStart)) {
+								&& prevNode.getElementChapter().equals(ElementChapter.ExecutionListenerStart) && del) {
 							prevNode = currNode;
 						} else {
 							currNode.setPredsInterProcedural(prevNode.getId());
@@ -312,15 +313,6 @@ public class FlowAnalysis {
 			analysisElement.getSuccessors().forEach(succ -> {
 				if (succ.getBaseElement() instanceof StartEvent) {
 					analysisElement.removeSuccessor(succ.getId());
-				} else if (!(succ.getBaseElement() instanceof SequenceFlow)
-						&& !(succ.getBaseElement() instanceof StartEvent)) {
-					ArrayList<String> predsToRemove = new ArrayList<>();
-					succ.getPredecessors().forEach(pred -> {
-						if (pred.getBaseElement() instanceof CallActivity) {
-							predsToRemove.add(pred.getId());
-						}
-					});
-					predsToRemove.forEach(succ::removePredecessor);
 				}
 			});
 		}
