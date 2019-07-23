@@ -100,25 +100,26 @@ public class ProcessVariablesLifecycleOrderTest {
 		// Start from end event and go to start.
 		AnalysisElement endEvent = nodes.get("MyEndEvent");
 		AnalysisElement sequenceFlow1 = endEvent.getPredecessors().get(0);
-		assertEquals("Second Sequence Flow should have two input parameters because the service task has two output parameters.", 1, sequenceFlow1.getInUnused().size());
-
 		AnalysisElement endListener = sequenceFlow1.getPredecessors().get(0);
-		assertEquals("End Listener was not correctly included.", "MyServiceTask__1", endListener.getId());
-
 		AnalysisElement startListener = endListener.getPredecessors().get(0);
-		assertEquals("Start Listener was not correctly included.", "MyServiceTask__0", startListener.getId());
-		assertEquals("Start Listener should have two input parameters.", 1, startListener.getInUnused().size());
-
 		AnalysisElement sequenceFlow0 = startListener.getPredecessors().get(0);
 		AnalysisElement startEvent = sequenceFlow0.getPredecessors().get(0);
+
+		assertEquals("End Listener was not correctly included.", "MyServiceTask__1", endListener.getId());
+		assertEquals("Start Listener was not correctly included.", "MyServiceTask__0", startListener.getId());
 		assertEquals("Start event was not reached.", "MyStartEvent", startEvent.getId());
 		assertEquals("Start event should not have any predecessors.", 0,startEvent.getPredecessors().size());
+
+		// Check discovery of process variables
+		assertEquals("Second Sequence Flow should have two input parameters because the service task has two output parameters.", 2, sequenceFlow1.getInUnused().size());
+		assertEquals("Start Listener should have one input parameter.", 1, startListener.getDefined().size());
 	}
 
 	@Test
 	public void testProcessVariablesLifecycleWithCallActivity() {
 		// Test with In/Out Variable Injection, Input/Output Parameters and Start/End Listeners
 		// TODO add all other things linke links, signals, messages, ... Delegate Variable Mapping
+		// TODO graph has only one end listener, add start listener as soon as it is supported
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
@@ -149,29 +150,23 @@ public class ProcessVariablesLifecycleOrderTest {
 		// Start from end event and go to start.
 		AnalysisElement endEvent = nodes.get("MyEndEvent");
 		AnalysisElement sequenceFlow1 = endEvent.getPredecessors().get(0);
-		// TODO this is three because the camunda:in variable is also passed
-		assertEquals("Second Sequence Flow should have two input parameters because the service task has two output parameters.", 2, sequenceFlow1.getInUnused().size());
-
 		AnalysisElement endListener = sequenceFlow1.getPredecessors().get(0);
-		assertEquals("End Listener was not correctly included.", "MyCallActivity__1", endListener.getId());
-
 		AnalysisElement endEventCalledProcess = endListener.getPredecessors().get(0);
-		assertEquals("_EndEvent_SUCC", endEventCalledProcess.getId());
-
 		AnalysisElement serviceTaskCalledProcess = endEventCalledProcess.getPredecessors().get(0).getPredecessors().get(0);
-		assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getId());
-
 		AnalysisElement startEventCalledProcess = serviceTaskCalledProcess.getPredecessors().get(0).getPredecessors().get(0);
-		assertEquals("_StartEvent_1", startEventCalledProcess.getId());
-		assertEquals( "Start Event in Subprocess should have two input parameters.", 2, startEventCalledProcess.getInUnused().size());
-
-		AnalysisElement startListener = startEventCalledProcess.getPredecessors().get(0);
-		assertEquals("Start Listener was not correctly included.", "MyCallActivity__0", startListener.getId());
-		assertEquals("Start Listener should have two input parameters.", 2, startListener.getInUnused().size());
-
-		AnalysisElement sequenceFlow0 = startListener.getPredecessors().get(0);
+		AnalysisElement sequenceFlow0 = startEventCalledProcess.getPredecessors().get(0);
 		AnalysisElement startEvent = sequenceFlow0.getPredecessors().get(0);
+
+		assertEquals("End Listener was not correctly included.", "MyCallActivity__0", endListener.getId());
+		assertEquals("_EndEvent_SUCC", endEventCalledProcess.getId());
+		assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getId());
+		assertEquals("_StartEvent_1", startEventCalledProcess.getId());
 		assertEquals("Start event was not reached.", "MyStartEvent", startEvent.getId());
-		assertEquals("Start event should not have any predecessors.", 0,startEvent.getPredecessors().size());
+		assertEquals("Start event should not have any predecessors.", 0, startEvent.getPredecessors().size());
+
+		// Check discovery of process variables
+		assertEquals("Input variables of call activity parent should be listed as defined in child start event.", 2, startEventCalledProcess.getDefined().size());
+		assertEquals("Second Sequence Flow should have two input parameters because the service task has two output parameters.", 2, sequenceFlow1.getInUnused().size());
+		assertEquals( "Start Event in Subprocess should have two input parameters.", 2, startEventCalledProcess.getInUnused().size());
 	}
 }

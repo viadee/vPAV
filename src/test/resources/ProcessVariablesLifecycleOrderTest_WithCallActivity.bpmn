@@ -11,13 +11,12 @@
     <bpmn:sequenceFlow id="SequenceFlow_1qw9mzs" sourceRef="MyCallActivity" targetRef="MyEndEvent" />
     <bpmn:callActivity id="MyCallActivity" name="Serve Customers" calledElement="calledProcess">
       <bpmn:extensionElements>
-        <camunda:in source="someInVariableSource" target="someInVariableTarget"/>
-        <camunda:out source="someOutVariableSource" target="someOutVariableTarget"/>
+        <camunda:in source="someInVariableSource" target="someInVariableTarget" />
+        <camunda:out source="someOutVariableSource" target="someOutVariableTarget" />
         <camunda:inputOutput>
           <camunda:inputParameter name="MyInputParameter">123</camunda:inputParameter>
           <camunda:outputParameter name="MyOutputParameter">321</camunda:outputParameter>
         </camunda:inputOutput>
-        <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.MappingDelegate" event="start" />
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.DelegateWithCorrectVariable" event="end" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1tij1gh</bpmn:incoming>
