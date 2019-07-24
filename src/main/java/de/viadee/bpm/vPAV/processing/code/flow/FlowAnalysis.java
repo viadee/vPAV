@@ -483,7 +483,7 @@ public class FlowAnalysis {
 				getIntersection(node.getInUnused(), node.getDefined()));
 		if (!ddAnomalies.isEmpty()) {
 			ddAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getBaseElement().getId(),
+					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getId(), node.getBaseElement().getId(),
 							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
@@ -499,7 +499,7 @@ public class FlowAnalysis {
 				getIntersection(node.getInUnused(), node.getKilled()));
 		if (!duAnomalies.isEmpty()) {
 			duAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getBaseElement().getId(),
+					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getId(), node.getBaseElement().getId(),
 							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
@@ -536,7 +536,7 @@ public class FlowAnalysis {
 
 		if (!urAnomalies.isEmpty()) {
 			urAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getBaseElement().getId(),
+					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getId(), node.getBaseElement().getId(),
 							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
@@ -573,7 +573,7 @@ public class FlowAnalysis {
 
 		if (!uuAnomalies.isEmpty()) {
 			uuAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getBaseElement().getId(),
+					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(), node.getBaseElement().getId(),
 							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
@@ -592,22 +592,22 @@ public class FlowAnalysis {
 			final ProcessVariableOperation prev) {
 		if (urSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getId(), element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 		if (ddSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getId(), element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
 		}
 		if (duSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getId(), element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 		if (uuSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getId(), element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 	}

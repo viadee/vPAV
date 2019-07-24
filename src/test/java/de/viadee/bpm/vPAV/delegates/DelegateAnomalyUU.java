@@ -52,5 +52,6 @@ public class DelegateAnomalyUU implements JavaDelegate {
             int i = 3;
         }
         execution.removeVariable(first);
+        execution.removeVariable(first);
     }
 }
