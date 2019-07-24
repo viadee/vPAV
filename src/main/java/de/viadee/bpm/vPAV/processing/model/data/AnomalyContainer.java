@@ -87,11 +87,6 @@ public class AnomalyContainer {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode());
-  }
-
-  @Override
   public String toString() {
     return name + "(" + elementId + ", " + anomaly + ")";
   }
