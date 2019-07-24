@@ -592,22 +592,22 @@ public class FlowAnalysis {
 			final ProcessVariableOperation prev) {
 		if (urSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getId(), element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 		if (ddSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getId(), element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
 		}
 		if (duSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getId(), element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 		if (uuSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getId(), element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME),  curr));
 		}
 	}

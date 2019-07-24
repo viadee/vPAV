@@ -103,8 +103,8 @@ public class AnomaliesSetCreationTest {
 		AnomalyContainer anomaly1 = iterator.next();
 		AnomalyContainer anomaly2 = iterator.next();
 		assertEquals("Expected 2 anomalies but found " + anomalies.size(), 2, anomalies.size());
-		assertEquals("Expected a UR anomaly but found " + anomaly1.getAnomaly(), Anomaly.UR, anomaly1.getAnomaly());
-		assertEquals("Expected a DU anomaly but found " + anomaly2.getAnomaly(), Anomaly.DU, anomaly2.getAnomaly());
+		assertEquals("Expected a DU anomaly but found " + anomaly2.getAnomaly(), Anomaly.DU, anomaly1.getAnomaly());
+		assertEquals("Expected a UR anomaly but found " + anomaly1.getAnomaly(), Anomaly.UR, anomaly2.getAnomaly());
 	}
 
 	@Test
