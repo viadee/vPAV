@@ -155,7 +155,8 @@ public class ProcessVariablesLifecycleOrderTest {
 		AnalysisElement serviceTaskCalledProcess = endEventCalledProcess.getPredecessors().get(0).getPredecessors().get(0);
 		AnalysisElement startEventCalledProcess = serviceTaskCalledProcess.getPredecessors().get(0).getPredecessors().get(0);
 		AnalysisElement sequenceFlow0 = startEventCalledProcess.getPredecessors().get(0);
-		AnalysisElement startEvent = sequenceFlow0.getPredecessors().get(0);
+		AnalysisElement serviceTask = sequenceFlow0.getPredecessors().get(0);
+		AnalysisElement startEvent = serviceTask.getPredecessors().get(0).getPredecessors().get(0);
 
 		assertEquals("End Listener was not correctly included.", "MyCallActivity__0", endListener.getId());
 		assertEquals("_EndEvent_SUCC", endEventCalledProcess.getId());
@@ -166,7 +167,9 @@ public class ProcessVariablesLifecycleOrderTest {
 
 		// Check discovery of process variables
 		assertEquals("Input variables of call activity parent should be listed as defined in child start event.", 2, startEventCalledProcess.getDefined().size());
-		assertEquals("Second Sequence Flow should have two input parameters because the service task has two output parameters.", 2, sequenceFlow1.getDefined().size());
-		assertEquals("Second Sequence Flow should not have any unsed input variables.", 0, sequenceFlow1.getInUnused().size());
+		assertEquals("Child start event should have one passed input variable.", 1, startEventCalledProcess.getInUnused().size());
+		assertEquals("Second Sequence Flow should have two defined parameters because the service task has two output parameters.", 2, sequenceFlow1.getDefined().size());
+		assertEquals("Second Sequence Flow should have one passed input variable.", 1, sequenceFlow1.getInUsed().size());
+		assertEquals("End event should have three unused input variables.", 3, endEvent.getInUnused().size());
 	}
 }

@@ -213,6 +213,7 @@ public class FlowAnalysis {
 				});
 
 				firstNode.addDefined(inputVariables);
+
 				if (analysisElement.getBaseElement() instanceof CallActivity && lastNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)) {
 					lastNode.getSuccessors().forEach((element) -> {
 						element.setDefined(outputVariables);
@@ -360,11 +361,8 @@ public class FlowAnalysis {
 					// Else take union to propagate operations
 				} else {
 					for (AnalysisElement pred : predecessors) {
-						// Don't use out sets as input set if the predecessor is part of a call activity
-						if (!((pred.getParentElement().getBaseElement() instanceof CallActivity) || pred.getId().startsWith("_"))) {
-							inUsed.putAll(pred.getOutUsed());
-							inUnused.putAll(pred.getOutUnused());
-						}
+						inUsed.putAll(pred.getOutUsed());
+						inUnused.putAll(pred.getOutUnused());
 					}
 				}
 
