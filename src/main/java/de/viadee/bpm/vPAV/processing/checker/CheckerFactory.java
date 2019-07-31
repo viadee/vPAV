@@ -59,11 +59,13 @@ public class CheckerFactory {
 
     /**
      * create checkers
-     *
-     * @param ruleConf                rules for checker
+     * @param ruleConf rules for checker
      * @param resourcesNewestVersions resourcesNewestVersions in context
-     * @param bpmnScanner             bpmnScanner for model
-     * @param scanner                 ProcessVariablesScanner for process variables, if active
+     * @param bpmnScanner     bpmnScanner for model
+     * @param scanner  ProcessVariablesScanner for process variables, if active
+     * @param dataFlowRules dataFlowRules
+     * @param processVariables Process Variables
+     * @param invalidPathMap invalidPathMap
      * @return checkers returns checkers
      */
     public Collection[] createCheckerInstances(final RuleSet ruleConf,
