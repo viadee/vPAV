@@ -16,12 +16,12 @@
     <bpmn:callActivity id="CallActivity_0vlq6qr" name="Call Activty" calledElement="calledProcess">
       <bpmn:extensionElements>
         <camunda:in sourceExpression="${5}" target="inMapping" />
-        <camunda:out source="${inMapping+5}" target="outMapping" />
+        <camunda:out source="z" target="outMapping" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1sofdlp</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wp7vka</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:serviceTask id="ServiceTask_0mfcclv" name="Task 2" camunda:expression="${outputMapping}">
+    <bpmn:serviceTask id="ServiceTask_0mfcclv" name="Task 2" camunda:expression="${outMapping}">
       <bpmn:incoming>SequenceFlow_1wp7vka</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0sl5h6d</bpmn:outgoing>
     </bpmn:serviceTask>

@@ -121,6 +121,7 @@ public class CallActivityTest {
 
 	@Test
 	public void testEmbeddedWithDelegateVariableMapping() {
+		// Test with source expression
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "CallActivityTest_delegatedVarMapping.bpmn";

@@ -732,13 +732,28 @@ public final class ProcessVariableReader {
 			final List<CamundaIn> inputAssociations = extensionElements.getElementsQuery().filterByType(CamundaIn.class)
 					.list();
 			for (final CamundaIn inputAssociation : inputAssociations) {
-				final String source = inputAssociation.getCamundaSource();
+				String source = inputAssociation.getCamundaSource();
 				if (source != null && !source.isEmpty()) {
+					// todo überprüfen, ob richtig mit source
 					processVariables.put(source,
 							new ProcessVariableOperation(source, element, ElementChapter.InputData,
 									KnownElementFieldType.CamundaIn, null, VariableOperation.WRITE,
 									((CallActivity) baseElement).getCalledElement(),
 									element.getFlowAnalysis().getOperationCounter()));
+				} else {
+					// Check for source expression
+					source = inputAssociation.getCamundaSourceExpression();
+					if (source != null && !source.isEmpty()) {
+						String target = inputAssociation.getCamundaTarget();
+
+						// TODO muss das noch weiter verarbeitet werden?!
+						// check if expression is valid
+						processVariables.put(source,
+								new ProcessVariableOperation(target, element, ElementChapter.InputData,
+										KnownElementFieldType.CamundaIn, null, VariableOperation.WRITE,
+										((CallActivity) baseElement).getCalledElement(),
+										element.getFlowAnalysis().getOperationCounter()));
+					}
 				}
 			}
 			final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
