@@ -400,6 +400,7 @@ public class FlowAnalysis {
                 // outgoing sets due to scope (only locally accessible)
                 final LinkedHashMap<String, ProcessVariableOperation> tempOutUnused = new LinkedHashMap<>(outUnused);
                 final LinkedHashMap<String, ProcessVariableOperation> tempOutUsed = new LinkedHashMap<>(outUsed);
+                // TODO why isn't that working anymore?
                 analysisElement.getParentElement().getOperations().forEach((key, value) -> {
                     if (value.getScopeId().equals(analysisElement.getParentElement().getId())) {
                         tempOutUnused.forEach((key1, value1) -> {
@@ -441,7 +442,7 @@ public class FlowAnalysis {
         LinkedHashMap<String, ProcessVariableOperation> tempInUnused = new LinkedHashMap<>(predecessor.getOutUnused());
 
         if (!scopeElement.equals(scopePredecessor)) {
-            // TODO was ist mit end event listenern
+            // TODO was ist mit end event listenern des subprocesses
             if (predecessor.getBaseElement() instanceof EndEvent) {
                 predecessor.getOutUnused().forEach((key, value) -> {
                     if(value.getScopeId().equals(scopePredecessor)) {
@@ -454,6 +455,18 @@ public class FlowAnalysis {
                     }
                 });
             }
+        } else {
+            // Check for local variables in element like input parameters
+            predecessor.getOutUnused().forEach((key, value) -> {
+                if (value.getScopeId().equals(predecessor.getParentElement().getId())) {
+                    tempInUnused.remove(key);
+                }
+            });
+            predecessor.getOutUsed().forEach((key, value) -> {
+                if (value.getScopeId().equals(predecessor.getParentElement().getId())) {
+                    tempInUsed.remove(key);
+                }
+            });
         }
 
         return new LinkedHashMap[]{tempInUsed, tempInUnused};
