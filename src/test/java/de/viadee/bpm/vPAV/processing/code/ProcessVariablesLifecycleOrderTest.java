@@ -168,8 +168,12 @@ public class ProcessVariablesLifecycleOrderTest {
 		// Check discovery of process variables
 		assertEquals("Input variables of call activity parent should be listed as defined in child start event.", 2, startEventCalledProcess.getDefined().size());
 		assertEquals("Child start event should have one passed input variable.", 1, startEventCalledProcess.getInUnused().size());
-		assertEquals("Second Sequence Flow should have two defined parameters because the service task has two output parameters.", 2, sequenceFlow1.getDefined().size());
-		assertEquals("Second Sequence Flow should have one passed input variable.", 1, sequenceFlow1.getInUsed().size());
+		assertEquals("End Listener should have two input variables", 2, endListener.getInUnused().size());
+		assertEquals("End Listener should have no defined variables", 0, endListener.getDefined().size());
+
+		assertEquals("Third Sequence Flow (1qw9mzs) should have two defined variables because the call activity has two output mappings/parameters.", 2, sequenceFlow1.getDefined().size());
+		assertEquals("Third Sequence Flow (1qw9mzs) should have one input variable.", 1, sequenceFlow1.getInUnused().size());
+
 		assertEquals("End event should have three unused input variables.", 3, endEvent.getInUnused().size());
 	}
 }

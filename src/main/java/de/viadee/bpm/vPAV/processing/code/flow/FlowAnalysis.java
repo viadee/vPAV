@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -197,6 +197,13 @@ public class FlowAnalysis {
                 final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
                 final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
                 final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
+
+                if (analysisElement.getBaseElement() instanceof CallActivity &&
+                        firstNode.getElementChapter() == ElementChapter.ExecutionListenerEnd) {
+                    // Input variables are passed to Start event if call activity, not to end listener
+
+                }
+
                 analysisElement.getOperations().values().forEach(operation -> {
                     if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
                         inputVariables.put(operation.getId(), operation);
@@ -211,7 +218,11 @@ public class FlowAnalysis {
                     }
                 });
 
-                firstNode.addDefined(inputVariables);
+                // Input variables are passed later to Start event if call activity, not to end listener
+                if (!(analysisElement.getBaseElement() instanceof CallActivity &&
+                        firstNode.getElementChapter() == ElementChapter.ExecutionListenerEnd)) {
+                    firstNode.addDefined(inputVariables);
+                }
 
                 if (analysisElement.getBaseElement() instanceof CallActivity && lastNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)) {
                     lastNode.getSuccessors().forEach((element) -> {
@@ -445,12 +456,12 @@ public class FlowAnalysis {
             // TODO was ist mit end event listenern des subprocesses
             if (predecessor.getBaseElement() instanceof EndEvent) {
                 predecessor.getOutUnused().forEach((key, value) -> {
-                    if(value.getScopeId().equals(scopePredecessor)) {
+                    if (value.getScopeId().equals(scopePredecessor)) {
                         tempInUnused.remove(key);
                     }
                 });
                 predecessor.getOutUsed().forEach((key, value) -> {
-                    if(value.getScopeId().equals(scopePredecessor)) {
+                    if (value.getScopeId().equals(scopePredecessor)) {
                         tempInUsed.remove(key);
                     }
                 });
