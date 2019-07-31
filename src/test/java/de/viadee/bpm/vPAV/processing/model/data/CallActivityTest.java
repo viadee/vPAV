@@ -104,23 +104,18 @@ public class CallActivityTest {
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 		Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
+		Assert.assertEquals("There are exactly three anomalies", 3, invalidPathMap.size());
 		AnomalyContainer anomaly1 = iterator.next();
 		AnomalyContainer anomaly2 = iterator.next();
 		AnomalyContainer anomaly3 = iterator.next();
-		AnomalyContainer anomaly4 = iterator.next();
-		AnomalyContainer anomaly5 = iterator.next();
-		Assert.assertEquals("there are only five anomalies", 5, invalidPathMap.size());
-		// TODO order might be different
-		// TODO DD Anomaly (in main process) is not found
+		// var2
 		Assert.assertEquals("Expected a DD anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.DD,
 				anomaly1.getAnomaly());
+		// var4
 		Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
 				anomaly2.getAnomaly());
+		// var3
 		Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
-				anomaly3.getAnomaly());
-		Assert.assertEquals("Expected a UR anomaly but got " + anomaly4.getAnomaly().toString(), Anomaly.UR,
-				anomaly3.getAnomaly());
-		Assert.assertEquals("Expected a UR anomaly but got " + anomaly5.getAnomaly().toString(), Anomaly.UR,
 				anomaly3.getAnomaly());
 	}
 
