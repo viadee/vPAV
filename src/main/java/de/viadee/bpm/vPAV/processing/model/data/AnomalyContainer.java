@@ -35,57 +35,76 @@ import java.util.Objects;
 
 public class AnomalyContainer {
 
-  private String name;
+    private String name;
 
-  private Anomaly anomaly;
+    private Anomaly anomaly;
 
-  private String elementId;
+    private String elementId;
 
-  private ProcessVariableOperation variable;
+    private String elementName;
 
-  public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId,
-      final ProcessVariableOperation variable) {
-    this.name = name;
-    this.anomaly = anomaly;
-    this.elementId = elementId;
-    this.variable = variable;
-  }
+    private String nodeId;
 
-  public String getName() {
-    return name;
-  }
+    private ProcessVariableOperation variable;
 
-  public Anomaly getAnomaly() {
-    return anomaly;
-  }
-
-  public String getElementId() {
-    return elementId;
-  }
-
-  public ProcessVariableOperation getVariable() {
-    return variable;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof AnomalyContainer) {
-      final AnomalyContainer anomalyContainer = (AnomalyContainer) obj;
-      if (this.name.equals(anomalyContainer.getName())
-          && this.anomaly == anomalyContainer.getAnomaly()) {
-        return true;
-      }
+    public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId, final String elementName,
+                            final ProcessVariableOperation variable) {
+        this(name, anomaly, elementId, elementId, elementName, variable);
     }
-    return false;
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode());
-  }
+    public AnomalyContainer(final String name, final Anomaly anomaly, final String nodeId, final String elementId, final String elementName,
+                            final ProcessVariableOperation variable) {
+        this.name = name;
+        this.anomaly = anomaly;
+        this.elementId = elementId;
+        this.elementName = elementName;
+        this.variable = variable;
+        this.nodeId = nodeId;
+    }
 
-  @Override
-  public String toString() {
-    return name + "(" + elementId + ", " + anomaly + ")";
-  }
+    public String getName() {
+        return name;
+    }
+
+    public Anomaly getAnomaly() {
+        return anomaly;
+    }
+
+    public String getElementId() {
+        return elementId;
+    }
+
+    public String getElementName() {
+        return elementName;
+    }
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public ProcessVariableOperation getVariable() {
+        return variable;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AnomalyContainer) {
+            final AnomalyContainer anomalyContainer = (AnomalyContainer) obj;
+            if (this.name.equals(anomalyContainer.getName())
+                    && this.anomaly == anomalyContainer.getAnomaly()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode(), nodeId);
+    }
+
+    @Override
+    public String toString() {
+        return name + "(" + elementId + ", " + anomaly + ")";
+    }
 }

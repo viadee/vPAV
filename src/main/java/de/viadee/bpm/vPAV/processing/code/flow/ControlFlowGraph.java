@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 import java.util.Iterator;
@@ -117,6 +118,15 @@ public class ControlFlowGraph {
 			node.setOutUnused(new LinkedHashMap<>());
 			node.setOutUsed(new LinkedHashMap<>());
 		});
+	}
+
+	boolean hasImplementedDelegate() {
+		for (Node node : nodes.values()) {
+			if (node.getElementChapter().equals(ElementChapter.Implementation)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	boolean hasNodes() {

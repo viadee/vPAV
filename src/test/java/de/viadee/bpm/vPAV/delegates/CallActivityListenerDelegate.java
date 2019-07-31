@@ -34,10 +34,16 @@ package de.viadee.bpm.vPAV.delegates;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
+import java.util.Random;
+
 public class CallActivityListenerDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        execution.setVariable("test", true);
+        Random r = new Random();
+        if (r.nextInt(5) > 2) {
+            execution.setVariable("test", true);
+        }
+
     }
 }

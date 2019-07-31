@@ -31,580 +31,720 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 import org.camunda.bpm.model.bpmn.instance.StartEvent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.viadee.bpm.vPAV.processing.model.data.VariableOperation.*;
 
 public class FlowAnalysis {
 
-	private LinkedHashMap<String, AnalysisElement> nodes;
-	private LinkedHashMap<String, ProcessVariableOperation> scopedOperations;
+    private LinkedHashMap<String, AnalysisElement> nodes;
+    private LinkedHashMap<String, ProcessVariableOperation> scopedOperations;
 
-	private int operationCounter = 0;
+    private int operationCounter = 0;
 
-	public FlowAnalysis() {
-		this.nodes = new LinkedHashMap<>();
-		this.scopedOperations = new LinkedHashMap<>();
-	}
+    public FlowAnalysis() {
+        this.nodes = new LinkedHashMap<>();
+        this.scopedOperations = new LinkedHashMap<>();
+    }
 
-	/**
-	 * Given a collection of graphs, this method is the sole entrance to the
-	 * analysis of the graphs. First process model and control flow graph of
-	 * delegates are embedded to create a single graph. Then the graph is analyzed
-	 * conservatively by following the Reaching Definition algorithm. For
-	 * discovering data flow anomalies inside a single block, a sequential check on
-	 * unit basis is performed. Lastly, anomalies are extracted and appended to the
-	 * parent element (for visualization)
-	 *
-	 * @param graphCollection
-	 *            Collection of graphs
-	 */
-	public void analyze(final Collection<Graph> graphCollection) {
-		for (Graph graph : graphCollection) {
-			embedControlFlowGraph(graph);
-			computeReachingDefinitions();
-			computeLineByLine();
-			extractAnomalies();
-		}
-	}
+    /**
+     * Given a collection of graphs, this method is the sole entrance to the
+     * analysis of the graphs. First process model and control flow graph of
+     * delegates are embedded to create a single graph. Then the graph is analyzed
+     * conservatively by following the Reaching Definition algorithm. For
+     * discovering data flow anomalies inside a single block, a sequential check on
+     * unit basis is performed. Lastly, anomalies are extracted and appended to the
+     * parent element (for visualization)
+     *
+     * @param graphCollection Collection of graphs
+     */
+    public void analyze(final Collection<Graph> graphCollection) {
+        for (Graph graph : graphCollection) {
+            embedControlFlowGraph(graph);
+            computeReachingDefinitions();
+            computeLineByLine();
+            extractAnomalies();
+        }
+    }
 
-	/**
-	 * Embeds the control flow graphs of bpmn elements into the process model
-	 *
-	 * @param graph
-	 *            Given Graph
-	 */
-	private void embedControlFlowGraph(final Graph graph) {
-		// Add all elements on bpmn level
-		graph.getVertexInfo().keySet().forEach(element -> {
-			AnalysisElement analysisElement = new BpmnElementDecorator(element);
-			analysisElement.clearPredecessors();
-			graph.getAdjacencyListPredecessor(element)
-					.forEach(value -> analysisElement.addPredecessor(new BpmnElementDecorator(value)));
-			graph.getAdjacencyListSuccessor(element)
-					.forEach(value -> analysisElement.addSuccessor(new BpmnElementDecorator(value)));
-			this.nodes.put(analysisElement.getId(), analysisElement);
-		});
+    /**
+     * Embeds the control flow graphs of bpmn elements into the process model
+     *
+     * @param graph Given Graph
+     */
+    private void embedControlFlowGraph(final Graph graph) {
+        // Add all elements on bpmn level
+        graph.getVertexInfo().keySet().forEach(element -> {
+            AnalysisElement analysisElement = new BpmnElementDecorator(element);
+            analysisElement.clearPredecessors();
+            graph.getAdjacencyListPredecessor(element)
+                    .forEach(value -> analysisElement.addPredecessor(new BpmnElementDecorator(value)));
+            graph.getAdjacencyListSuccessor(element)
+                    .forEach(value -> analysisElement.addSuccessor(new BpmnElementDecorator(value)));
+            this.nodes.put(analysisElement.getId(), analysisElement);
+        });
 
-		// Add all nodes on source code level and correct the pointers
-		final LinkedHashMap<String, AnalysisElement> temp = new LinkedHashMap<>(nodes);
-		final LinkedHashMap<String, AnalysisElement> cfgNodes = new LinkedHashMap<>();
-		final ArrayList<String> ids = new ArrayList<>();
-		temp.values().forEach(analysisElement -> {
-			if (analysisElement.getControlFlowGraph().hasNodes()) {
-				analysisElement.getControlFlowGraph().computePredecessorRelations();
+        // Add all nodes on source code level and correct the pointers
+        final LinkedHashMap<String, AnalysisElement> temp = new LinkedHashMap<>(nodes);
+        final LinkedHashMap<String, AnalysisElement> cfgNodes = new LinkedHashMap<>();
+        final ArrayList<String> ids = new ArrayList<>();
+        temp.values().forEach(analysisElement -> {
+            if (analysisElement.getControlFlowGraph().hasNodes()) {
+                analysisElement.getControlFlowGraph().computePredecessorRelations();
 
-				final Node firstNode = analysisElement.getControlFlowGraph().firstNode();
-				final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
+                final Node firstNode = analysisElement.getControlFlowGraph().firstNode();
+                final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
 
-				final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
-				analysisElement.getOperations().values().forEach(operation -> {
-					if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
-						inputVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
-						outputVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
-						initialVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
-						inputVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
-						outputVariables.put(operation.getId(), operation);
-					}
-				});
+                if (analysisElement.getBaseElement() instanceof CallActivity) {
+                    analysisElement.getOperations().forEach((k, v) -> {
+                        if (v.getChapter().equals(ElementChapter.ExecutionListenerEnd)) {
+                            analysisElement.getSuccessors().forEach(succ -> {
+                                if (succ.getBaseElement() instanceof StartEvent) {
+                                    succ.clearPredecessors();
+                                    LinkedHashMap<String, AnalysisElement> preds = new LinkedHashMap<>(
+                                            analysisElement.getPredecessors().stream().collect(
+                                                    Collectors.toMap(AnalysisElement::getId, Function.identity())));
+                                    succ.setPredecessors(preds);
+                                    // TODO wann  tritt dieser fall auf (nur fürs Verständnis)
+                                } else {
+                                    succ.getPredecessors().forEach(nestedSucc -> {
+                                        if (nestedSucc.getBaseElement() instanceof EndEvent) {
+                                            firstNode.addPredecessor(nestedSucc);
+                                        }
+                                    });
+                                    succ.clearPredecessors();
+                                    succ.addPredecessor(new NodeDecorator(lastNode));
+                                    lastNode.clearSuccessors();
+                                    lastNode.addSuccessor(succ);
+                                }
+                            });
 
-				firstNode.setInUnused(inputVariables);
-				lastNode.setOutUnused(outputVariables);
+                        } else if (v.getChapter().equals(ElementChapter.ExecutionListenerStart)) {
+                            // Replace element with first block
+                            analysisElement.getPredecessors().forEach(pred -> {
+                                pred.removeSuccessor(analysisElement.getId());
+                                pred.addSuccessor(new NodeDecorator(firstNode));
+                                firstNode.addPredecessor(pred);
+                            });
 
-				// If we have initial operations, we cant have input mapping (restriction of
-				// start event)
-				// Set initial operations as input for the first block and later remove bpmn
-				// element
-				if (!initialVariables.isEmpty()) {
-					firstNode.setInUnused(initialVariables);
-				}
+                            // Replace element with last block
+                            analysisElement.getSuccessors().forEach(succ -> {
+                                if (succ.getBaseElement() instanceof SequenceFlow) {
+                                    succ.getPredecessors().forEach(nestedSucc -> {
+                                        if (nestedSucc.getBaseElement() instanceof EndEvent) {
+                                            succ.clearPredecessors();
+                                            succ.addPredecessor(nestedSucc);
+                                        } else {
+                                            succ.clearPredecessors();
+                                            succ.addPredecessor(new NodeDecorator(lastNode));
+                                        }
+                                    });
+                                } else {
+                                    succ.removePredecessor(analysisElement.getId());
+                                    succ.addPredecessor(new NodeDecorator(lastNode));
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    // Replace element with first block
+                    analysisElement.getPredecessors().forEach(pred -> {
+                        pred.removeSuccessor(analysisElement.getId());
+                        pred.addSuccessor(new NodeDecorator(firstNode));
+                        firstNode.addPredecessor(pred);
+                    });
 
-				// Replace element with first block
-				analysisElement.getPredecessors().forEach(pred -> {
-					pred.removeSuccessor(analysisElement.getId());
-					pred.addSuccessor(new NodeDecorator(firstNode));
-					firstNode.addPredecessor(pred);
-				});
+                    // Replace element with last block
+                    analysisElement.getSuccessors().forEach(succ -> {
+                        succ.removePredecessor(analysisElement.getId());
+                        succ.addPredecessor(new NodeDecorator(lastNode));
+                    });
+                }
 
-				// Replace element with last block
-				analysisElement.getSuccessors().forEach(succ -> {
-					succ.removePredecessor(analysisElement.getId());
-					succ.addPredecessor(new NodeDecorator(lastNode));
-				});
+                boolean del = analysisElement.getControlFlowGraph().hasImplementedDelegate();
+                // Set predecessor relation for blocks across delegates
+                final Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
+                Node prevNode = null;
+                while (iterator.hasNext()) {
+                    Node currNode = iterator.next();
+                    if (prevNode == null) {
+                        prevNode = currNode;
+                    } else {
+                        // Ensure that the pointers wont get set for beginning delegate and ending
+                        // delegate
+                        if (currNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)
+                                && prevNode.getElementChapter().equals(ElementChapter.ExecutionListenerStart) && del) {
+                            prevNode = currNode;
+                        } else {
+                            currNode.setPredsInterProcedural(prevNode.getId());
+                            prevNode = currNode;
+                        }
+                    }
+                }
 
+                final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
+                final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
+                final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
 
-				// Set predecessor relation for blocks across delegates
-				final Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
-				Node prevNode = null;
-				while (iterator.hasNext()) {
-					Node currNode = iterator.next();
-					if (prevNode == null) {
-						prevNode = currNode;
-					} else {
-						currNode.setPredsInterProcedural(prevNode.getId());
-						prevNode = currNode;
-					}
-				}
+                if (analysisElement.getBaseElement() instanceof CallActivity &&
+                        firstNode.getElementChapter() == ElementChapter.ExecutionListenerEnd) {
+                    // Input variables are passed to Start event if call activity, not to end listener
 
-				// Remember id of elements to be removed
-				analysisElement.getControlFlowGraph().getNodes().values()
-						.forEach(node -> cfgNodes.put(node.getId(), node));
-				ids.add(firstNode.getParentElement().getBaseElement().getId());
-			} else {
-				// In case we have start event that maps a message to a method
-				final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
-				analysisElement.getOperations().values().forEach(operation -> {
-					if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
-						initialOperations.put(operation.getId(), operation);
-					}
-				});
-				analysisElement.setInUsed(initialOperations);
-			}
-			// In case we have a call activity, pass variable mappings
-			embedCallActivities(analysisElement);
-		});
+                }
 
-		temp.putAll(cfgNodes);
-		nodes.putAll(temp);
-		ids.forEach(id -> nodes.remove(id));
-	}
+                analysisElement.getOperations().values().forEach(operation -> {
+                    if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
+                        inputVariables.put(operation.getId(), operation);
+                    } else if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
+                        outputVariables.put(operation.getId(), operation);
+                    } else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
+                        initialVariables.put(operation.getId(), operation);
+                    } else if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
+                        inputVariables.put(operation.getId(), operation);
+                    } else if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
+                        outputVariables.put(operation.getId(), operation);
+                    }
+                });
 
-	/**
-	 * Embeds call activities
-	 *
-	 * @param analysisElement Current element
-	 */
-	private void embedCallActivities(AnalysisElement analysisElement) {
-		final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
-		final LinkedHashMap<String, ProcessVariableOperation> camundaOut = new LinkedHashMap<>();
-		final ArrayList<ProcessVariableOperation> operationList = new ArrayList<>();
-		if (analysisElement.getBaseElement() instanceof CallActivity) {
-			analysisElement.getSuccessors().forEach(succ -> {
-				if (succ.getBaseElement() instanceof StartEvent) {
-					analysisElement.getOperations().values().forEach(operation -> {
-						if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
-							camundaIn.put(operation.getId(), operation);
-							operationList.add(operation);
-						}
-						if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
-							camundaOut.put(operation.getId(), operation);
-							operationList.add(operation);
-						}
-					});
-					succ.setInUnused(camundaIn);
-				} else {
-					analysisElement.removeSuccessor(succ.getId());
-					succ.removePredecessor(analysisElement.getId());
-				}
-			});
-			analysisElement.setOutUnused(camundaOut);
-		}
+                // Input variables are passed later to Start event if call activity, not to end listener
+                if (!(analysisElement.getBaseElement() instanceof CallActivity &&
+                        firstNode.getElementChapter() == ElementChapter.ExecutionListenerEnd)) {
+                    firstNode.addDefined(inputVariables);
+                }
 
-		// Remove operation from base sets, because we moved them to In/Out
-		operationList.forEach(analysisElement::removeOperation);
+                if (analysisElement.getBaseElement() instanceof CallActivity && lastNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)) {
+                    lastNode.getSuccessors().forEach((element) -> {
+                        element.setDefined(outputVariables);
+                    });
+                } else {
+                    lastNode.addDefined(outputVariables);
+                }
 
-		// Clear wrong predecessors in case of call activities
-		if (analysisElement.getBaseElement() instanceof StartEvent) {
-			analysisElement.getPredecessors().forEach(pred -> {
-				if (pred.getBaseElement() instanceof EndEvent) {
-					analysisElement.removePredecessor(pred.getId());
-				}
-			});
-		}
+                // If we have initial operations, we cant have input mapping (restriction of
+                // start event)
+                // Set initial operations as input for the first block and later remove bpmn
+                // element
+                if (!initialVariables.isEmpty()) {
+                    firstNode.addDefined(initialVariables);
+                }
 
-		// Clear wrong successors in case of call activities
-		if (analysisElement.getBaseElement() instanceof EndEvent) {
-			analysisElement.getSuccessors().forEach(succ -> {
-				if (succ.getBaseElement() instanceof StartEvent) {
-					analysisElement.removeSuccessor(succ.getId());
-				} else {
-					ArrayList<String> predsToRemove = new ArrayList<>();
-					succ.getPredecessors().forEach(pred -> {
-						if (pred.getBaseElement() instanceof CallActivity) {
-							predsToRemove.add(pred.getId());
-						}
-					});
-					predsToRemove.forEach(succ::removePredecessor);
-				}
-			});
-		}
-	}
+                // Remember id of elements to be removed
+                analysisElement.getControlFlowGraph().getNodes().values()
+                        .forEach(node -> cfgNodes.put(node.getId(), node));
+                ids.add(firstNode.getParentElement().getBaseElement().getId());
+            } else {
+                if (analysisElement.getBaseElement() instanceof CallActivity) {
+                    analysisElement.getSuccessors().forEach(succ -> {
+                        if (succ.getBaseElement() instanceof StartEvent) {
+                            succ.clearPredecessors();
+                            LinkedHashMap<String, AnalysisElement> preds = new LinkedHashMap<>(
+                                    analysisElement.getPredecessors().stream()
+                                            .collect(Collectors.toMap(AnalysisElement::getId, Function.identity())));
+                            succ.setPredecessors(preds);
+                        } else if (succ.getBaseElement() instanceof SequenceFlow) {
+                            final LinkedHashMap<String, ProcessVariableOperation> camundaOut = new LinkedHashMap<>();
+                            analysisElement.getOperations().values().forEach(operation -> {
+                                if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)
+                                        || operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
+                                    camundaOut.put(operation.getId(), operation);
+                                }
+                            });
+                            succ.addDefined(camundaOut);
+                            succ.getPredecessors().forEach(pred -> {
+                                if (pred.getBaseElement() instanceof CallActivity) {
+                                    succ.removePredecessor(pred.getId());
+                                }
+                            });
+                        }
+                    });
+                    ids.add(analysisElement.getId());
+                }
+                // In case we have start event that maps a message to a method
+                final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
+                analysisElement.getOperations().values().forEach(operation -> {
+                    if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
+                        initialOperations.put(operation.getId(), operation);
+                    }
+                });
+                analysisElement.addDefined(initialOperations);
+            }
+            embedCallActivities(analysisElement);
+        });
 
-	/**
-	 * Uses the approach from ALSU07 (Reaching Definitions) to compute data flow
-	 * anomalies across the embedded CFG
-	 */
-	private void computeReachingDefinitions() {
-		boolean change = true;
-		while (change) {
-			change = false;
-			for (AnalysisElement analysisElement : nodes.values()) {
-				// Calculate in-sets (intersection of predecessors)
-				final LinkedHashMap<String, ProcessVariableOperation> inUsed = analysisElement.getInUsed();
-				final LinkedHashMap<String, ProcessVariableOperation> inUnused = analysisElement.getInUnused();
-				for (AnalysisElement pred : analysisElement.getPredecessors()) {
-					inUsed.putAll(pred.getOutUsed());
-					inUnused.putAll(pred.getOutUnused());
-				}
-				analysisElement.setInUsed(inUsed);
-				analysisElement.setInUnused(inUnused);
+        temp.putAll(cfgNodes);
+        nodes.putAll(temp);
+        ids.forEach(id -> nodes.remove(id));
+    }
 
-				// Get old values before calculating new values and later check for changes
-				final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = analysisElement.getOutUnused();
-				final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = analysisElement.getOutUsed();
+    /**
+     * Embeds call activities
+     *
+     * @param analysisElement Current element
+     */
+    private void embedCallActivities(AnalysisElement analysisElement) {
+        final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
+        final ArrayList<ProcessVariableOperation> operationList = new ArrayList<>();
+        if (analysisElement.getBaseElement() instanceof CallActivity) {
+            analysisElement.getSuccessors().forEach(succ -> {
+                if (succ.getBaseElement() instanceof StartEvent) {
+                    analysisElement.getOperations().values().forEach(operation -> {
+                        if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)
+                                || operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
+                            camundaIn.put(operation.getId(), operation);
+                            operationList.add(operation);
+                        }
+                    });
+                    succ.addDefined(camundaIn);
+                } else if (succ.getBaseElement() instanceof SequenceFlow) {
+                    analysisElement.removeSuccessor(succ.getId());
+                } else {
+                    analysisElement.removeSuccessor(succ.getId());
+                    succ.removePredecessor(analysisElement.getId());
+                }
+            });
+        }
 
-				// Calculate out-sets for used definitions (transfer functions)
-				final LinkedHashMap<String, ProcessVariableOperation> tempUnion = new LinkedHashMap<>();
-				tempUnion.putAll(analysisElement.getInUsed());
-				tempUnion.putAll(getIntersection(analysisElement.getInUnused(), analysisElement.getUsed()));
-				tempUnion.putAll(getIntersection(analysisElement.getDefined(), analysisElement.getUsed()));
-				final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>(
-						getSetDifference(tempUnion, analysisElement.getKilled()));
+        // Remove operation from base sets, because we moved them to In/Out
+        operationList.forEach(analysisElement::removeOperation);
 
-				// Calculate out-sets for unused definitions (transfer functions)
-				final LinkedHashMap<String, ProcessVariableOperation> tempUnion2 = new LinkedHashMap<>();
-				tempUnion2.putAll(analysisElement.getDefined());
-				tempUnion2.putAll(analysisElement.getInUnused());
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection = new LinkedHashMap<>(
-						getSetDifference(tempUnion2, analysisElement.getKilled()));
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection2 = new LinkedHashMap<>(
-						getSetDifference(tempIntersection, analysisElement.getUsed()));
-				final LinkedHashMap<String, ProcessVariableOperation> tempIntersection3 = new LinkedHashMap<>(
-						getSetDifference(tempIntersection2, analysisElement.getKilled()));
-				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
-						tempIntersection3);
+        // Clear wrong predecessors in case of call activities
+        if (analysisElement.getBaseElement() instanceof StartEvent) {
+            analysisElement.getPredecessors().forEach(pred -> {
+                if (pred.getBaseElement() instanceof EndEvent) {
+                    analysisElement.removePredecessor(pred.getId());
+                }
+            });
+        }
 
-				// If the current element contains input mapping operations, remove from
-				// outgoing sets due to scope (only locally accessible)
-				final LinkedHashMap<String, ProcessVariableOperation> tempOutUnused = new LinkedHashMap<>(outUnused);
-				final LinkedHashMap<String, ProcessVariableOperation> tempOutUsed = new LinkedHashMap<>(outUsed);
-				analysisElement.getParentElement().getOperations().forEach((key, value) -> {
-					if (value.getScopeId().equals(analysisElement.getParentElement().getId())) {
-						tempOutUnused.forEach((key1, value1) -> {
-							if (value1.getName().equals(value.getName())) {
-								outUnused.remove(key1);
-							}
-						});
-						tempOutUsed.forEach((key1, value1) -> {
-							if (value1.getName().equals(value.getName())) {
-								outUsed.remove(key1);
-							}
-						});
-						scopedOperations.put(value.getName(), value);
-					}
-				});
+        // Clear wrong successors in case of call activities
+        if (analysisElement.getBaseElement() instanceof EndEvent) {
+            analysisElement.getSuccessors().forEach(succ -> {
+                if (succ.getBaseElement() instanceof StartEvent) {
+                    analysisElement.removeSuccessor(succ.getId());
+                }
+            });
+        }
+    }
 
-				Stream<ProcessVariableOperation> operations = analysisElement.getOperations().values().stream()
-						.filter(value -> scopedOperations.containsKey(value.getName()))
-						.filter(operation -> operation.getOperation().equals(WRITE));
-				operations.forEach(operation -> {
-					scopedOperations.remove(operation.getName());
-					outUnused.put(operation.getId(), operation);
-				});
+    /**
+     * Uses the approach from ALSU07 (Reaching Definitions) to compute data flow
+     * anomalies across the embedded CFG
+     */
+    private void computeReachingDefinitions() {
+        boolean change = true;
+        while (change) {
+            change = false;
+            for (AnalysisElement analysisElement : nodes.values()) {
+                // Calculate in-sets (intersection of predecessors)
+                final LinkedHashMap<String, ProcessVariableOperation> inUsed = new LinkedHashMap<>();
+                final LinkedHashMap<String, ProcessVariableOperation> inUnused = new LinkedHashMap<>();
+                final Set<ProcessVariableOperation> inUsedT = new HashSet<>(inUsed.values());
+                final Set<ProcessVariableOperation> inUnusedT = new HashSet<>(inUnused.values());
+                final List<AnalysisElement> predecessors = analysisElement.getPredecessors();
 
-				analysisElement.setOutUsed(outUsed);
-				analysisElement.setOutUnused(outUnused);
+                // If more than one predecessor, take intersection of operations (conservatism)
+                if (predecessors.size() > 1) {
+                    for (int i = 0; i < predecessors.size(); i++) {
+                        if (i == 0) {
+                            inUsedT.addAll(predecessors.get(i).getOutUsed().values());
+                            inUnusedT.addAll(predecessors.get(i).getOutUnused().values());
+                        } else {
+                            inUsedT.retainAll(predecessors.get(i).getOutUsed().values());
+                            inUnusedT.retainAll(predecessors.get(i).getOutUnused().values());
+                        }
+                    }
+                    inUsedT.forEach(pvo -> inUsed.put(pvo.getId(), pvo));
+                    inUnusedT.forEach(pvo -> inUnused.put(pvo.getId(), pvo));
+                    // Else take union to propagate operations
+                } else {
+                    for (AnalysisElement pred : predecessors) {
+                        LinkedHashMap<String, ProcessVariableOperation>[] inSets = filterInputVariables(pred, analysisElement);
+                        inUsed.putAll(inSets[0]);
+                        inUnused.putAll(inSets[1]);
+                    }
+                }
 
-				if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
-					change = true;
-				}
-			}
-		}
-	}
+                analysisElement.setInUsed(inUsed);
+                analysisElement.setInUnused(inUnused);
 
-	/**
-	 * Finds anomalies inside blocks by checking statements unit by unit
-	 */
-	private void computeLineByLine() {
-		nodes.values().forEach(analysisElement -> {
-			if (analysisElement.getOperations().size() >= 2) {
-				ProcessVariableOperation prev = null;
-				for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
-					if (prev == null) {
-						prev = operation;
-						continue;
-					}
-					checkAnomaly(operation.getElement(), operation, prev);
-					prev = operation;
-				}
-			}
-		});
-	}
+                // Get old values before calculating new values and later check for changes
+                final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = analysisElement.getOutUnused();
+                final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = analysisElement.getOutUsed();
 
-	/**
-	 * Based on the calculated sets, extract the anomalies found on source code leve
-	 *
-	 */
-	private void extractAnomalies() {
-		nodes.values().forEach(node -> {
-			ddAnomalies(node);
+                // Calculate out-sets for used definitions (transfer functions)
+                final LinkedHashMap<String, ProcessVariableOperation> inUsedTemp = new LinkedHashMap<>(
+                        analysisElement.getInUsed());
+                final LinkedHashMap<String, ProcessVariableOperation> internalUnion = new LinkedHashMap<>();
+                internalUnion.putAll(analysisElement.getInUnused());
+                internalUnion.putAll(analysisElement.getDefined());
+                final LinkedHashMap<String, ProcessVariableOperation> internalIntersection = new LinkedHashMap<>(
+                        getIntersection(internalUnion, analysisElement.getUsed()));
+                inUsedTemp.putAll(internalIntersection);
+                final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>(
+                        getSetDifference(inUsedTemp, analysisElement.getKilled()));
 
-			duAnomalies(node);
+                // Calculate out-sets for unused definitions (transfer functions)
+                final LinkedHashMap<String, ProcessVariableOperation> tempUnion2 = new LinkedHashMap<>();
+                tempUnion2.putAll(analysisElement.getDefined());
+                tempUnion2.putAll(analysisElement.getInUnused());
 
-			urAnomalies(node);
+                final LinkedHashMap<String, ProcessVariableOperation> tempKillSet = new LinkedHashMap<>();
+                tempKillSet.putAll(analysisElement.getKilled());
+                tempKillSet.putAll(analysisElement.getUsed());
 
-			uuAnomalies(node);
-		});
-	}
+                final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
+                        getSetDifference(tempUnion2, tempKillSet));
 
-	/**
-	 * Extract DD anomalies
-	 *
-	 * @param node
-	 *            Current node
-	 */
-	private void ddAnomalies(final AnalysisElement node) {
-		final LinkedHashMap<String, ProcessVariableOperation> ddAnomalies = new LinkedHashMap<>(
-				getIntersection(node.getInUnused(), node.getDefined()));
-		if (!ddAnomalies.isEmpty()) {
-			ddAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getId(), v)));
-		}
-	}
+                // If the current element contains input mapping operations, remove from
+                // outgoing sets due to scope (only locally accessible)
+                final LinkedHashMap<String, ProcessVariableOperation> tempOutUnused = new LinkedHashMap<>(outUnused);
+                final LinkedHashMap<String, ProcessVariableOperation> tempOutUsed = new LinkedHashMap<>(outUsed);
+                // TODO why isn't that working anymore?
+                analysisElement.getParentElement().getOperations().forEach((key, value) -> {
+                    if (value.getScopeId().equals(analysisElement.getParentElement().getId())) {
+                        tempOutUnused.forEach((key1, value1) -> {
+                            if (value1.getName().equals(value.getName())) {
+                                outUnused.remove(key1);
+                            }
+                        });
+                        tempOutUsed.forEach((key1, value1) -> {
+                            if (value1.getName().equals(value.getName())) {
+                                outUsed.remove(key1);
+                            }
+                        });
+                        scopedOperations.put(value.getName(), value);
+                    }
+                });
 
-	/**
-	 * Extract DU anomalies
-	 *
-	 * @param node
-	 *            Current node
-	 */
-	private void duAnomalies(final AnalysisElement node) {
-		final LinkedHashMap<String, ProcessVariableOperation> duAnomalies = new LinkedHashMap<>(
-				getIntersection(node.getInUnused(), node.getKilled()));
-		if (!duAnomalies.isEmpty()) {
-			duAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getId(), v)));
-		}
-	}
+                Stream<ProcessVariableOperation> operations = analysisElement.getOperations().values().stream()
+                        .filter(value -> scopedOperations.containsKey(value.getName()))
+                        .filter(operation -> operation.getOperation().equals(WRITE));
+                operations.forEach(operation -> {
+                    scopedOperations.remove(operation.getName());
+                    outUnused.put(operation.getId(), operation);
+                });
 
-	/**
-	 * Extract UR anomalies
-	 *
-	 * @param node
-	 *            Current node
-	 */
-	private void urAnomalies(final AnalysisElement node) {
-		final LinkedHashMap<String, ProcessVariableOperation> urAnomaliesTemp = new LinkedHashMap<>(node.getUsed());
-		final LinkedHashMap<String, ProcessVariableOperation> urAnomalies = new LinkedHashMap<>(urAnomaliesTemp);
+                analysisElement.setOutUsed(outUsed);
+                analysisElement.setOutUnused(outUnused);
 
-		urAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				urAnomalies.remove(key);
-			}
-		}));
+                if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
+                    change = true;
+                }
+            }
+        }
+    }
 
-		urAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				urAnomalies.remove(key);
-			}
-		}));
+    private LinkedHashMap<String, ProcessVariableOperation>[] filterInputVariables(AnalysisElement predecessor, AnalysisElement analysisElement) {
+        String scopePredecessor = predecessor.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
+        String scopeElement = analysisElement.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
+        LinkedHashMap<String, ProcessVariableOperation> tempInUsed = new LinkedHashMap<>(predecessor.getOutUsed());
+        LinkedHashMap<String, ProcessVariableOperation> tempInUnused = new LinkedHashMap<>(predecessor.getOutUnused());
 
-		urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				if (value.getIndex() > value2.getIndex()) {
-					urAnomalies.remove(key);
-				}
-			}
-		}));
+        if (!scopeElement.equals(scopePredecessor)) {
+            // TODO was ist mit end event listenern des subprocesses
+            if (predecessor.getBaseElement() instanceof EndEvent) {
+                predecessor.getOutUnused().forEach((key, value) -> {
+                    if (value.getScopeId().equals(scopePredecessor)) {
+                        tempInUnused.remove(key);
+                    }
+                });
+                predecessor.getOutUsed().forEach((key, value) -> {
+                    if (value.getScopeId().equals(scopePredecessor)) {
+                        tempInUsed.remove(key);
+                    }
+                });
+            }
+        } else {
+            // Check for local variables in element like input parameters
+            predecessor.getOutUnused().forEach((key, value) -> {
+                if (value.getScopeId().equals(predecessor.getParentElement().getId())) {
+                    tempInUnused.remove(key);
+                }
+            });
+            predecessor.getOutUsed().forEach((key, value) -> {
+                if (value.getScopeId().equals(predecessor.getParentElement().getId())) {
+                    tempInUsed.remove(key);
+                }
+            });
+        }
 
-		if (!urAnomalies.isEmpty()) {
-			urAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getId(), v)));
-		}
-	}
+        return new LinkedHashMap[]{tempInUsed, tempInUnused};
+    }
 
-	/**
-	 * Extract UU anomalies
-	 *
-	 * @param node
-	 *            Current node
-	 */
-	private void uuAnomalies(final AnalysisElement node) {
-		final LinkedHashMap<String, ProcessVariableOperation> uuAnomaliesTemp = new LinkedHashMap<>(node.getKilled());
-		final LinkedHashMap<String, ProcessVariableOperation> uuAnomalies = new LinkedHashMap<>(uuAnomaliesTemp);
+    /**
+     * Finds anomalies inside blocks by checking statements unit by unit
+     */
+    private void computeLineByLine() {
+        nodes.values().forEach(analysisElement -> {
+            if (analysisElement.getOperations().size() >= 2) {
+                ProcessVariableOperation prev = null;
+                for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
+                    if (prev == null) {
+                        prev = operation;
+                        continue;
+                    }
+                    checkAnomaly(operation.getElement(), operation, prev);
+                    prev = operation;
+                }
+            }
+        });
+    }
 
-		uuAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				uuAnomalies.remove(key);
-			}
-		}));
+    /**
+     * Based on the calculated sets, extract the anomalies found on source code leve
+     */
+    private void extractAnomalies() {
+        nodes.values().forEach(node -> {
+            ddAnomalies(node);
 
-		uuAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				uuAnomalies.remove(key);
-			}
-		}));
+            duAnomalies(node);
 
-		uuAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				if (value.getIndex() > value2.getIndex()) {
-					uuAnomalies.remove(key);
-				}
-			}
-		}));
+            urAnomalies(node);
 
-		if (!uuAnomalies.isEmpty()) {
-			uuAnomalies.forEach((k, v) -> node
-					.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(), v)));
-		}
-	}
+            uuAnomalies(node);
+        });
+    }
 
-	/**
-	 * Check for data-flow anomaly between current and previous variable operation
-	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param curr
-	 *            current operation
-	 * @param prev
-	 *            previous operation
-	 */
-	private void checkAnomaly(final BpmnElement element, final ProcessVariableOperation curr,
-			final ProcessVariableOperation prev) {
-		if (urSourceCode(prev, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(), curr));
-		}
-		if (ddSourceCode(prev, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(), curr));
-		}
-		if (duSourceCode(prev, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(), curr));
-		}
-		if (uuSourceCode(prev, curr)) {
-			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(), curr));
-		}
-	}
+    /**
+     * Extract DD anomalies
+     *
+     * @param node Current node
+     */
+    private void ddAnomalies(final AnalysisElement node) {
+        final LinkedHashMap<String, ProcessVariableOperation> ddAnomalies = new LinkedHashMap<>(
+                getIntersection(node.getInUnused(), node.getDefined()));
+        if (!ddAnomalies.isEmpty()) {
+            ddAnomalies.forEach((k, v) -> node
+                    .addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getId(), node.getBaseElement().getId(),
+                            node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+        }
+    }
 
-	/**
-	 * UU anomaly: second last operation of PV is DELETE, last operation is DELETE
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean uuSourceCode(ProcessVariableOperation prev, ProcessVariableOperation curr) {
-		return curr.getOperation().equals(DELETE) && prev.getOperation().equals(DELETE);
-	}
+    /**
+     * Extract DU anomalies
+     *
+     * @param node Current node
+     */
+    private void duAnomalies(final AnalysisElement node) {
+        final LinkedHashMap<String, ProcessVariableOperation> duAnomalies = new LinkedHashMap<>(
+                getIntersection(node.getInUnused(), node.getKilled()));
+        if (!duAnomalies.isEmpty()) {
+            duAnomalies.forEach((k, v) -> node
+                    .addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getId(), node.getBaseElement().getId(),
+                            node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+        }
+    }
 
-	/**
-	 * UR anomaly: second last operation of PV is DELETE, last operation is READ
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(READ) && prev.getOperation().equals(DELETE);
-	}
+    /**
+     * Extract UR anomalies
+     *
+     * @param node Current node
+     */
+    private void urAnomalies(final AnalysisElement node) {
+        final LinkedHashMap<String, ProcessVariableOperation> urAnomaliesTemp = new LinkedHashMap<>(node.getUsed());
+        final LinkedHashMap<String, ProcessVariableOperation> urAnomalies = new LinkedHashMap<>(urAnomaliesTemp);
 
-	/**
-	 * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(WRITE) && prev.getOperation().equals(WRITE);
-	}
+        urAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
+            if (value.getName().equals(value2.getName())) {
+                urAnomalies.remove(key);
+            }
+        }));
 
-	/**
-	 * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
-	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
-	 * @return true/false
-	 */
-	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(DELETE) && prev.getOperation().equals(WRITE);
-	}
+        urAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
+            if (value.getName().equals(value2.getName())) {
+                urAnomalies.remove(key);
+            }
+        }));
 
-	/**
-	 * Helper method to create the set difference of two given maps (based on
-	 * variable names)
-	 *
-	 * @param mapOne
-	 *            First map
-	 * @param mapTwo
-	 *            Second map
-	 * @return Set difference of given maps
-	 */
-	private LinkedHashMap<String, ProcessVariableOperation> getSetDifference(
-			final LinkedHashMap<String, ProcessVariableOperation> mapOne,
-			final LinkedHashMap<String, ProcessVariableOperation> mapTwo) {
-		final LinkedHashMap<String, ProcessVariableOperation> setDifference = new LinkedHashMap<>(mapOne);
+        urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+            if (value.getName().equals(value2.getName())) {
+                if (value.getIndex() > value2.getIndex()) {
+                    urAnomalies.remove(key);
+                }
+            }
+        }));
 
-		mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				setDifference.remove(key);
-			}
-		}));
-		return setDifference;
-	}
+        if (!urAnomalies.isEmpty()) {
+            urAnomalies.forEach((k, v) -> node
+                    .addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getId(), node.getBaseElement().getId(),
+                            node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+        }
+    }
 
-	/**
-	 * Helper method to create the intersection of two given maps
-	 *
-	 * @param mapOne
-	 *            First map
-	 * @param mapTwo
-	 *            Second map
-	 * @return Intersection of given maps
-	 */
-	private LinkedHashMap<String, ProcessVariableOperation> getIntersection(
-			final LinkedHashMap<String, ProcessVariableOperation> mapOne,
-			final LinkedHashMap<String, ProcessVariableOperation> mapTwo) {
-		final LinkedHashMap<String, ProcessVariableOperation> intersection = new LinkedHashMap<>();
+    /**
+     * Extract UU anomalies
+     *
+     * @param node Current node
+     */
+    private void uuAnomalies(final AnalysisElement node) {
+        final LinkedHashMap<String, ProcessVariableOperation> uuAnomaliesTemp = new LinkedHashMap<>(node.getKilled());
+        final LinkedHashMap<String, ProcessVariableOperation> uuAnomalies = new LinkedHashMap<>(uuAnomaliesTemp);
 
-		mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
-				intersection.put(key, value);
-			}
-		}));
-		return intersection;
-	}
+        uuAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
+            if (value.getName().equals(value2.getName())) {
+                uuAnomalies.remove(key);
+            }
+        }));
 
-	public LinkedHashMap<String, AnalysisElement> getNodes() {
-		return nodes;
-	}
+        uuAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
+            if (value.getName().equals(value2.getName())) {
+                uuAnomalies.remove(key);
+            }
+        }));
 
-	public int getOperationCounter() {
-		return operationCounter;
-	}
+        uuAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
+            if (value.getName().equals(value2.getName())) {
+                if (value.getIndex() > value2.getIndex()) {
+                    uuAnomalies.remove(key);
+                }
+            }
+        }));
 
-	public void incrementOperationCounter() {
-		this.operationCounter++;
-	}
+        if (!uuAnomalies.isEmpty()) {
+            uuAnomalies.forEach((k, v) -> node
+                    .addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(), node.getBaseElement().getId(),
+                            node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+        }
+    }
+
+    /**
+     * Check for data-flow anomaly between current and previous variable operation
+     *
+     * @param element Current BpmnElement
+     * @param curr    current operation
+     * @param prev    previous operation
+     */
+    private void checkAnomaly(final BpmnElement element, final ProcessVariableOperation curr,
+                              final ProcessVariableOperation prev) {
+        if (urSourceCode(prev, curr)) {
+            element.addSourceCodeAnomaly(
+                    new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(),
+                            element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
+        }
+        if (ddSourceCode(prev, curr)) {
+            element.addSourceCodeAnomaly(
+                    new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(),
+                            element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
+        }
+        if (duSourceCode(prev, curr)) {
+            element.addSourceCodeAnomaly(
+                    new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(),
+                            element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
+        }
+        if (uuSourceCode(prev, curr)) {
+            element.addSourceCodeAnomaly(
+                    new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(),
+                            element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
+        }
+    }
+
+    /**
+     * UU anomaly: second last operation of PV is DELETE, last operation is DELETE
+     *
+     * @param prev Previous ProcessVariable
+     * @param curr Current ProcessVariable
+     * @return true/false
+     */
+    private boolean uuSourceCode(ProcessVariableOperation prev, ProcessVariableOperation curr) {
+        return curr.getOperation().equals(DELETE) && prev.getOperation().equals(DELETE);
+    }
+
+    /**
+     * UR anomaly: second last operation of PV is DELETE, last operation is READ
+     *
+     * @param prev Previous ProcessVariable
+     * @param curr Current ProcessVariable
+     * @return true/false
+     */
+    private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+        return curr.getOperation().equals(READ) && prev.getOperation().equals(DELETE);
+    }
+
+    /**
+     * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
+     *
+     * @param prev Previous ProcessVariable
+     * @param curr Current ProcessVariable
+     * @return true/false
+     */
+    private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+        return curr.getOperation().equals(WRITE) && prev.getOperation().equals(WRITE);
+    }
+
+    /**
+     * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
+     *
+     * @param prev Previous ProcessVariable
+     * @param curr Current ProcessVariable
+     * @return true/false
+     */
+    private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+        return curr.getOperation().equals(DELETE) && prev.getOperation().equals(WRITE);
+    }
+
+    /**
+     * Helper method to create the set difference of two given maps (based on
+     * variable names)
+     *
+     * @param mapOne First map
+     * @param mapTwo Second map
+     * @return Set difference of given maps
+     */
+    private LinkedHashMap<String, ProcessVariableOperation> getSetDifference(
+            final LinkedHashMap<String, ProcessVariableOperation> mapOne,
+            final LinkedHashMap<String, ProcessVariableOperation> mapTwo) {
+        final LinkedHashMap<String, ProcessVariableOperation> setDifference = new LinkedHashMap<>(mapOne);
+
+        mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
+            if (value.getName().equals(value2.getName())) {
+                setDifference.remove(key);
+            }
+        }));
+        return setDifference;
+    }
+
+    /**
+     * Helper method to create the intersection of two given maps
+     *
+     * @param mapOne First map
+     * @param mapTwo Second map
+     * @return Intersection of given maps
+     */
+    private LinkedHashMap<String, ProcessVariableOperation> getIntersection(
+            final LinkedHashMap<String, ProcessVariableOperation> mapOne,
+            final LinkedHashMap<String, ProcessVariableOperation> mapTwo) {
+        final LinkedHashMap<String, ProcessVariableOperation> intersection = new LinkedHashMap<>();
+
+        mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
+            if (value.getName().equals(value2.getName())) {
+                intersection.put(key, value);
+            }
+        }));
+        return intersection;
+    }
+
+    public LinkedHashMap<String, AnalysisElement> getNodes() {
+        return nodes;
+    }
+
+    public int getOperationCounter() {
+        return operationCounter;
+    }
+
+    public void incrementOperationCounter() {
+        this.operationCounter++;
+    }
 
 }

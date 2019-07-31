@@ -81,7 +81,6 @@ public class BpmnElement implements AnalysisElement {
 		this.predecessors = new LinkedHashMap<>();
 		this.successors = new LinkedHashMap<>();
 
-		this.operations = new LinkedHashMap<>();
 		this.processVariables = ArrayListMultimap.create();
 		this.defined = new LinkedHashMap<>();
 		this.used = new LinkedHashMap<>();
@@ -310,6 +309,9 @@ public class BpmnElement implements AnalysisElement {
 	public void removePredecessor(String predecessor) {
 		this.predecessors.remove(predecessor);
 	}
+
+	@Override
+	public void clearSuccessors() { this.successors.clear(); }
 
 	@Override
 	public void removeSuccessor(String successor) {

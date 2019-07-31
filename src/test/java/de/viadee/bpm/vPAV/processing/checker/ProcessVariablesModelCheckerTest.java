@@ -101,6 +101,7 @@ public class ProcessVariablesModelCheckerTest {
 	/**
 	 * Case: there is an empty script reference
 	 */
+	// TODO: Anpassen
 	// @Test
 	public void testProcessVariablesModelChecker() {
 		final Collection<CheckerIssue> issues = checker.check();

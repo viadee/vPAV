@@ -37,8 +37,7 @@ public class TestDelegate implements org.camunda.bpm.engine.delegate.JavaDelegat
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        // TODO Auto-generated method stub
-        execution.setVariable("dshfhdsfhfds", true);
-        execution.getVariable("dshfhdsfds");
+        execution.setVariable("isExternalProcess", true);
+        execution.getVariable("numberEntities");
     }
 }

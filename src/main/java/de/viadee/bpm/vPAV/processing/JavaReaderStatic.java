@@ -503,9 +503,9 @@ public class JavaReaderStatic {
                                     VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
                                     final ControlFlowGraph controlFlowGraph) {
 
-        for (Block block : graph.getBlocks()) {
-            Node node = new Node(controlFlowGraph, element, block);
-            controlFlowGraph.addNode(node);
+		for (Block block : graph.getBlocks()) {
+			Node node = new Node(controlFlowGraph, element, block, chapter);
+			controlFlowGraph.addNode(node);
 
             // Collect the functions Unit by Unit via the blockIterator
             final VariableBlock vb = blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,

@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -103,14 +104,17 @@ public class CallActivityTest {
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 		Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
+		Assert.assertEquals("There are exactly three anomalies", 3, invalidPathMap.size());
 		AnomalyContainer anomaly1 = iterator.next();
 		AnomalyContainer anomaly2 = iterator.next();
 		AnomalyContainer anomaly3 = iterator.next();
-		Assert.assertEquals("there are only three anomalies", 3, invalidPathMap.size());
+		// var2
 		Assert.assertEquals("Expected a DD anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.DD,
 				anomaly1.getAnomaly());
+		// var4
 		Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
 				anomaly2.getAnomaly());
+		// var3
 		Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
 				anomaly3.getAnomaly());
 	}
@@ -152,13 +156,13 @@ public class CallActivityTest {
 	}
 
 	@Test
-	public void testEmbeddingCallActivitiesWithListener() {
+	public void testEmbeddingCallActivitiesWithListenerStart() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityWithListenerTest.bpmn";
+		final String PATH = BASE_PATH + "CallActivityWithListenerStartTest.bpmn";
 		final File processDefinition = new File(PATH);
 
 		// parse bpmn model
@@ -179,15 +183,88 @@ public class CallActivityTest {
 				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
 		flowAnalysis.analyze(graphCollection);
-
-		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-		Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
-
-		AnomalyContainer anomaly = iterator.next();
-
-		Assert.assertEquals("Expected only one anomaly", 1, invalidPathMap.size());
-		Assert.assertEquals("Expected a DD anomaly but got " + anomaly.getAnomaly().toString(), Anomaly.DD,
-				anomaly.getAnomaly());
-
+		Iterator<AnalysisElement> iterator = flowAnalysis.getNodes().values().iterator();
+		AnalysisElement startEvent1 = iterator.next();
+		Assert.assertEquals("", 0, startEvent1.getPredecessors().size());
+		AnalysisElement sequenceFlow1 = iterator.next();
+		Assert.assertEquals("", "StartEvent_1", sequenceFlow1.getPredecessors().get(0).getId());
+		AnalysisElement endEvent1 = iterator.next();
+		Assert.assertEquals("", "SequenceFlow_2", endEvent1.getPredecessors().get(0).getId());
+		AnalysisElement sequenceFlow2 = iterator.next();
+		Assert.assertEquals("", "_EndEvent_1_1", sequenceFlow2.getPredecessors().get(0).getId());
+		AnalysisElement startEvent1_1 = iterator.next();
+		Assert.assertEquals("", "CallActivity__2", startEvent1_1.getPredecessors().get(0).getId());
+		AnalysisElement endEvent1_1 = iterator.next();
+		Assert.assertEquals("", "_SequenceFlow_2_2", endEvent1_1.getPredecessors().get(0).getId());
+		AnalysisElement sequenceFlow1_1 = iterator.next();
+		Assert.assertEquals("", "_StartEvent_1_1", sequenceFlow1_1.getPredecessors().get(0).getId());
+		AnalysisElement sequenceFlow2_2 = iterator.next();
+		Assert.assertEquals("", "_Task_1_1", sequenceFlow2_2.getPredecessors().get(0).getId());
+		AnalysisElement task1_1 = iterator.next();
+		Assert.assertEquals("", "_SequenceFlow_1_1", task1_1.getPredecessors().get(0).getId());
+		AnalysisElement ca0 = iterator.next();
+		Assert.assertEquals("", "SequenceFlow_1", ca0.getPredecessors().get(0).getId());
+		AnalysisElement ca1 = iterator.next();
+		Assert.assertEquals("", "CallActivity__0", ca1.getPredecessors().get(0).getId());
+		AnalysisElement ca2 = iterator.next();
+		Assert.assertEquals("", "CallActivity__0", ca2.getPredecessors().get(0).getId());
+		Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(1).getId());
 	}
+
+	@Test
+	public void testEmbeddingCallActivitiesWithListenerEnd() {
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", "src/test/java");
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		final String PATH = BASE_PATH + "CallActivityWithListenerEndTest.bpmn";
+		final File processDefinition = new File(PATH);
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+		// add reference for called process
+		final Map<String, String> processIdToPathMap = new HashMap<>();
+		processIdToPathMap.put("calledElement", "CalledActivityWithListenerTest.bpmn");
+
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
+				new BpmnScanner(PATH));
+
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
+
+		// create data flow graphs
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+		flowAnalysis.analyze(graphCollection);
+		Iterator<AnalysisElement> iterator = flowAnalysis.getNodes().values().iterator();
+		AnalysisElement startEvent1 = iterator.next();
+		Assert.assertEquals("", 0, startEvent1.getPredecessors().size());
+		AnalysisElement sequenceFlow1 = iterator.next();
+		Assert.assertEquals("", "StartEvent_1", sequenceFlow1.getPredecessors().get(0).getId());
+		AnalysisElement endEvent1 = iterator.next();
+		Assert.assertEquals("", "SequenceFlow_2", endEvent1.getPredecessors().get(0).getId());
+		AnalysisElement sequenceFlow2 = iterator.next();
+		Assert.assertEquals("", "CallActivity__2", sequenceFlow2.getPredecessors().get(0).getId());
+		AnalysisElement startEvent1_1 = iterator.next();
+		Assert.assertEquals("", "SequenceFlow_1", startEvent1_1.getPredecessors().get(0).getId());
+		AnalysisElement endEvent1_1 = iterator.next();
+		Assert.assertEquals("", "_SequenceFlow_2_2", endEvent1_1.getPredecessors().get(0).getId());
+		AnalysisElement sequenceFlow1_1 = iterator.next();
+		Assert.assertEquals("", "_StartEvent_1_1", sequenceFlow1_1.getPredecessors().get(0).getId());
+		AnalysisElement sequenceFlow2_2 = iterator.next();
+		Assert.assertEquals("", "_Task_1_1", sequenceFlow2_2.getPredecessors().get(0).getId());
+		AnalysisElement task1_1 = iterator.next();
+		Assert.assertEquals("", "_SequenceFlow_1_1", task1_1.getPredecessors().get(0).getId());
+		AnalysisElement ca0 = iterator.next();
+		Assert.assertEquals("", "_EndEvent_1_1", ca0.getPredecessors().get(0).getId());
+		AnalysisElement ca1 = iterator.next();
+		Assert.assertEquals("", "CallActivity__0", ca1.getPredecessors().get(0).getId());
+		AnalysisElement ca2 = iterator.next();
+		Assert.assertEquals("", "CallActivity__0", ca2.getPredecessors().get(0).getId());
+		Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(1).getId());
+	}
+
 }

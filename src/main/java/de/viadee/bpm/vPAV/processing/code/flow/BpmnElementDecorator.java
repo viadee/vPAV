@@ -173,6 +173,9 @@ public class BpmnElementDecorator implements AnalysisElement {
 	}
 
 	@Override
+	public void clearSuccessors() { this.decoratedBpmnElement.clearSuccessors(); }
+
+	@Override
 	public void removeSuccessor(String successor) {
 		this.decoratedBpmnElement.removeSuccessor(successor);
 	}
