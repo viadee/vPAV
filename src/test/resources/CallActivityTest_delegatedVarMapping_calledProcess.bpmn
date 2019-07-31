@@ -13,7 +13,7 @@
       <bpmn:outgoing>SequenceFlow_1orddr9</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1orddr9" sourceRef="ServiceTask_1gq1azp" targetRef="EndEvent_14d2wd1" />
-    <bpmn:serviceTask id="ServiceTask_06muelw" name="Task 1b" camunda:expression="${inputVar}">
+    <bpmn:serviceTask id="ServiceTask_06muelw" name="Task 1b" camunda:expression="${inMapping}">
       <bpmn:incoming>SequenceFlow_1e6n8rj</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1dcgmbb</bpmn:outgoing>
     </bpmn:serviceTask>
