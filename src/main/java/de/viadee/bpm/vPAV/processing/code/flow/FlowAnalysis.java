@@ -108,56 +108,83 @@ public class FlowAnalysis {
                 final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
 
                 if (analysisElement.getBaseElement() instanceof CallActivity) {
-                    analysisElement.getOperations().forEach((k, v) -> {
-                        if (v.getChapter().equals(ElementChapter.ExecutionListenerEnd)) {
-                            analysisElement.getSuccessors().forEach(succ -> {
-                                if (succ.getBaseElement() instanceof StartEvent) {
-                                    succ.clearPredecessors();
-                                    LinkedHashMap<String, AnalysisElement> preds = new LinkedHashMap<>(
-                                            analysisElement.getPredecessors().stream().collect(
-                                                    Collectors.toMap(AnalysisElement::getId, Function.identity())));
-                                    succ.setPredecessors(preds);
-                                    // TODO wann  tritt dieser fall auf (nur fürs Verständnis)
-                                } else {
-                                    succ.getPredecessors().forEach(nestedSucc -> {
-                                        if (nestedSucc.getBaseElement() instanceof EndEvent) {
-                                            firstNode.addPredecessor(nestedSucc);
-                                        }
-                                    });
-                                    succ.clearPredecessors();
-                                    succ.addPredecessor(new NodeDecorator(lastNode));
-                                    lastNode.clearSuccessors();
-                                    lastNode.addSuccessor(succ);
-                                }
-                            });
+                    // Split nodes in "before" and "after" nodes.
+                    Node lastNodeBefore = null;
+                    Node firstNodeAfter = null;
 
-                        } else if (v.getChapter().equals(ElementChapter.ExecutionListenerStart)) {
-                            // Replace element with first block
-                            analysisElement.getPredecessors().forEach(pred -> {
-                                pred.removeSuccessor(analysisElement.getId());
-                                pred.addSuccessor(new NodeDecorator(firstNode));
-                                firstNode.addPredecessor(pred);
-                            });
+                    Node previousNode = firstNode;
+                    ElementChapter chapter;
+                    for (Node curNode : analysisElement.getControlFlowGraph().getNodes().values()) {
+                        chapter = curNode.getElementChapter();
+                        if (chapter.equals(ElementChapter.OutputImplementation) ||
+                                chapter.equals(ElementChapter.ExecutionListenerEnd)) {
+                            lastNodeBefore = previousNode;
+                            firstNodeAfter = curNode;
+                            break;
 
-                            // Replace element with last block
-                            analysisElement.getSuccessors().forEach(succ -> {
-                                if (succ.getBaseElement() instanceof SequenceFlow) {
-                                    succ.getPredecessors().forEach(nestedSucc -> {
-                                        if (nestedSucc.getBaseElement() instanceof EndEvent) {
-                                            succ.clearPredecessors();
-                                            succ.addPredecessor(nestedSucc);
-                                        } else {
-                                            succ.clearPredecessors();
-                                            succ.addPredecessor(new NodeDecorator(lastNode));
-                                        }
-                                    });
-                                } else {
-                                    succ.removePredecessor(analysisElement.getId());
-                                    succ.addPredecessor(new NodeDecorator(lastNode));
-                                }
-                            });
+                        } else {
+                            previousNode = curNode;
                         }
-                    });
+                    }
+
+                    boolean hasNodesAfter = (lastNodeBefore != null);
+                    boolean hasNodesBefore = (firstNode != firstNodeAfter);
+
+                    for (AnalysisElement succ : analysisElement.getSuccessors()) {
+                        if (succ.getBaseElement() instanceof StartEvent) {
+                            if (hasNodesBefore) {
+                                // Replace call activity by "before" nodes
+
+                                // Predecessor of child start event is last node before
+                                succ.clearPredecessors();
+                                succ.addPredecessor(new NodeDecorator(lastNodeBefore));
+                                lastNodeBefore.clearSuccessors();
+                                lastNodeBefore.addSuccessor(succ);
+
+                                // Replace incoming element connections with first node
+                                firstNode.clearPredecessors();
+                                analysisElement.getPredecessors().forEach(preds -> {
+                                    preds.removeSuccessor(analysisElement.getId());
+                                    preds.addSuccessor(new NodeDecorator(firstNode));
+                                    firstNode.addPredecessor(preds);
+                                });
+
+                            } else {
+                                // Build direct connections between predecessors of call activity and child start event
+                                succ.clearPredecessors();
+                                analysisElement.getPredecessors().forEach(preds -> {
+                                    preds.removeSuccessor(analysisElement.getId());
+                                    preds.addSuccessor(succ);
+                                    succ.addPredecessor(preds);
+                                });
+                            }
+
+                        } else if ((succ.getBaseElement() instanceof SequenceFlow)) {
+                            AnalysisElement endEvent = succ;
+                            // Find end event;
+                            for (AnalysisElement nestedPreds : succ.getPredecessors()) {
+                                if (nestedPreds.getBaseElement() instanceof EndEvent) {
+                                    endEvent = nestedPreds;
+                                }
+                            }
+
+                            // TODO Fehlermeldung werfen, wenn end event nicht gefunden wird.
+                            succ.clearPredecessors();
+                            endEvent.clearSuccessors();
+
+                            if (hasNodesAfter) {
+                                endEvent.addSuccessor(new NodeDecorator(firstNodeAfter));
+                                firstNodeAfter.addPredecessor(endEvent);
+                                succ.addPredecessor(new NodeDecorator(lastNode));
+                                lastNode.addSuccessor(succ);
+                            } else {
+                                succ.addPredecessor(endEvent);
+                                endEvent.addSuccessor(succ);
+                            }
+
+                        }
+                        // TODO können die Successors noch etwas anderes außer sequence flows und start events sein?
+                    }
                 } else {
                     // Replace element with first block
                     analysisElement.getPredecessors().forEach(pred -> {
