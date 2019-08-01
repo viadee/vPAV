@@ -37,13 +37,15 @@ import org.camunda.bpm.engine.delegate.VariableScope;
 import org.camunda.bpm.engine.variable.VariableMap;
 
 public class DelegatedVarMapping implements DelegateVariableMapping {
+
     @Override
     public void mapInputVariables(DelegateExecution delegateExecution, VariableMap variableMap) {
-        variableMap.putValue("inputVar", "myInputValue");
+        variableMap.putValue("inMapping", "myInputValue");
+        delegateExecution.getVariable("inputVariable");
     }
 
     @Override
     public void mapOutputVariables(DelegateExecution delegateExecution, VariableScope variableScope) {
-        delegateExecution.setVariable("outputVar", "myOutputValue");
+        delegateExecution.setVariable("outMapping", "myOutputValue");
     }
 }

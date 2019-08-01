@@ -120,11 +120,13 @@ public class CallActivityTest {
 	}
 
 	@Test
-	public void testEmbeddedWithDelegateVariableMapping() {
+	public void testEmbeddedWithVariableMapping() {
+		// TODO out in source expression verändern
+		// Usage of camunda:in and camunda:out
 		// Test with source expression
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityTest_delegatedVarMapping.bpmn";
+		final String PATH = BASE_PATH + "CallActivityTest_variableMapping.bpmn";
 		final File processDefinition = new File(PATH);
 
 		// parse bpmn model
@@ -155,6 +157,48 @@ public class CallActivityTest {
 		Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
 				anomaly1.getAnomaly());
 	}
+
+
+	@Test
+	public void testEmbeddedWithDelegateVariableMapping() {
+		//T ODO test also delegate expression
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		final String PATH = BASE_PATH + "CallActivityTest_delegatedVarMapping.bpmn";
+		final File processDefinition = new File(PATH);
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+		// add reference for called process
+		final Map<String, String> processIdToPathMap = new HashMap<>();
+		processIdToPathMap.put("calledProcess", "CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
+
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
+				new BpmnScanner(PATH));
+
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
+
+		// create data flow graphs
+		final Collection<String> calledElementHierarchy = new ArrayList<>();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+		flowAnalysis.analyze(graphCollection);
+
+		// calculate invalid paths based on data flow graphs
+		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+		Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+
+		Assert.assertEquals("There should be exactly one anomaly", 2, invalidPathMap.size());
+		AnomalyContainer anomaly1 = iterator.next();
+		AnomalyContainer anomaly2 = iterator.next();
+		Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+				anomaly1.getAnomaly());
+		Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
+				anomaly2.getAnomaly());
+	}
+
 
 	@Test
 	public void testEmbeddingCallActivitiesWithListenerStart() {
