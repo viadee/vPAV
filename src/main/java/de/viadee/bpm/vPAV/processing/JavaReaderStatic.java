@@ -113,7 +113,45 @@ public class JavaReaderStatic {
         return variables;
     }
 
-    // TODO use different scopes for input and output variables
+
+    public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaVariablesMappingDelegate(
+            final FileScanner fileScanner,
+            final String classFile, final BpmnElement element,
+            final KnownElementFieldType fieldType, final String scopeId, final String subprocessScopeId,
+            final ControlFlowGraph controlFlowGraph) {
+
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+
+        if (classFile != null && classFile.trim().length() > 0) {
+
+            final String sootPath = FileScanner.getSootPath();
+            System.setProperty("soot.class.path", sootPath);
+            final Set<String> classPaths = fileScanner.getJavaResourcesFileInputStream();
+
+            // TODO sepearte between read and write
+            variables.putAll(classFetcher(classPaths, classFile, "mapInputVariables", classFile, element, ElementChapter.InputImplementation,
+                    fieldType, scopeId, controlFlowGraph));
+            for (ProcessVariableOperation variable : variables.values()) {
+                if (variable.getOperation() == VariableOperation.WRITE) {
+                    variable.setScopeId(subprocessScopeId);
+                }
+                // TODO what about delete (oder abhängig machen davon, ob delegateExecution oder VariableMap verwendet wird?!
+            }
+            for (Node node : controlFlowGraph.getNodes().values()) {
+                for (ProcessVariableOperation variable : node.getOperations().values()) {
+                    if (variable.getOperation() == VariableOperation.WRITE) {
+                        variable.setScopeId(subprocessScopeId);
+                    }
+                    // TODO what about delete (oder abhängig machen davon, ob delegateExecution oder VariableMap verwendet wird?!
+                }
+            }
+
+            variables.putAll(classFetcher(classPaths, classFile, "mapOutputVariables", classFile, element, ElementChapter.OutputImplementation,
+                    fieldType, scopeId, controlFlowGraph));
+
+        }
+        return variables;
+    }
 
     /**
      * Retrieves variables from a class

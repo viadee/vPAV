@@ -976,10 +976,10 @@ public final class ProcessVariableReader {
 			// Check DelegateVariableMapping
 			if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
 				processVariables
-						.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
+						.putAll(javaReaderStatic.getVariablesFromJavaVariablesMappingDelegate(fileScanner,
 								baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
 										BpmnConstants.ATTR_VAR_MAPPING_CLASS),
-								element, ElementChapter.Implementation, KnownElementFieldType.Class, scopeId,
+								element, KnownElementFieldType.Class, scopeId, calledElement,
 								controlFlowGraph));
 			}
 		}

@@ -113,6 +113,10 @@ public class ProcessVariableOperation {
 		return scopeId;
 	}
 
+	public void setScopeId(String scopeId) {
+		this.scopeId = scopeId;
+	}
+
 	public void setOperationType(boolean type) {
 		this.operationType = type;
 	}
