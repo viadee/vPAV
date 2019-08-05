@@ -41,7 +41,6 @@ public class TestDelegateStaticInterProc implements org.camunda.bpm.engine.deleg
         final String variableName = "ProcessVariable1";
         execution.setVariable(variableName, true);
 
-        // TODO Auto-generated method stub
         /* execution.setVariable("dshfhdsfhfds", true); */
         execution.getVariable("ProcessVariable2");
 

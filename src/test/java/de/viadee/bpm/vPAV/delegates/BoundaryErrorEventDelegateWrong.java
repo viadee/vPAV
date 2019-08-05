@@ -38,7 +38,6 @@ public class BoundaryErrorEventDelegateWrong implements org.camunda.bpm.engine.d
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        // TODO Auto-generated method stub
         throw new BpmnError("13");
     }
 

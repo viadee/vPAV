@@ -41,7 +41,6 @@ public class TestDelegateStatic implements org.camunda.bpm.engine.delegate.JavaD
         final String variableName = "ProcessVariable1";
         execution.setVariable(variableName, true);
 
-        // TODO Auto-generated method stub
         /* execution.setVariable("dshfhdsfhfds", true); */
         execution.getVariable("ProcessVariable2");
 
