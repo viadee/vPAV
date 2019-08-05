@@ -129,6 +129,9 @@ public class FlowAnalysis {
 
                     boolean hasNodesAfter = (lastNodeBefore != null);
                     boolean hasNodesBefore = (firstNode != firstNodeAfter);
+                    if (hasNodesBefore && !hasNodesAfter) {
+                        lastNodeBefore = lastNode;
+                    }
 
                     for (AnalysisElement succ : analysisElement.getSuccessors()) {
                         if (succ.getBaseElement() instanceof StartEvent) {
