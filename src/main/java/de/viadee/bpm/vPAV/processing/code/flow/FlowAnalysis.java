@@ -505,7 +505,7 @@ public class FlowAnalysis {
                     }
                 });
             }
-        } else {
+        } else if (!predecessor.getParentElement().getId().equals(analysisElement.getParentElement().getId())) {
             // Check for local variables in element like input parameters
             predecessor.getOutUnused().forEach((key, value) -> {
                 if (value.getScopeId().equals(predecessor.getParentElement().getId())) {
