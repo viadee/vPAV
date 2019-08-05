@@ -44,6 +44,5 @@ public class CallActivityListenerDelegate implements JavaDelegate {
         if (r.nextInt(5) > 2) {
             execution.setVariable("test", true);
         }
-
     }
 }

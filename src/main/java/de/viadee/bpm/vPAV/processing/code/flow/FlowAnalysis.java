@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -111,24 +111,39 @@ public class FlowAnalysis {
                     // Split nodes in "before" and "after" nodes.
                     Node lastNodeBefore = null;
                     Node firstNodeAfter = null;
-
-                    Node previousNode = firstNode;
+                    Node predecessor = null;
                     ElementChapter chapter;
-                    for (Node curNode : analysisElement.getControlFlowGraph().getNodes().values()) {
-                        chapter = curNode.getElementChapter();
-                        if (chapter.equals(ElementChapter.OutputImplementation) ||
-                                chapter.equals(ElementChapter.ExecutionListenerEnd)) {
-                            lastNodeBefore = previousNode;
-                            firstNodeAfter = curNode;
-                            break;
+                    chapter = firstNode.getElementChapter();
+                    boolean isFirstHalf = !(chapter.equals(ElementChapter.OutputImplementation) ||
+                            chapter.equals(ElementChapter.ExecutionListenerEnd));
 
-                        } else {
-                            previousNode = curNode;
+                    // Set predecessor and successor relationships between nodes
+                    for (Node curNode : analysisElement.getControlFlowGraph().getNodes().values()) {
+                        if (predecessor != null) {
+                            chapter = curNode.getElementChapter();
+                            if (chapter.equals(ElementChapter.OutputImplementation) ||
+                                    chapter.equals(ElementChapter.ExecutionListenerEnd)
+                                            && isFirstHalf) {
+                                // Split in before and after nodes
+                                isFirstHalf = false;
+                                lastNodeBefore = predecessor;
+                                firstNodeAfter = curNode;
+                            } else {
+                                // Build connection between nodes
+                                curNode.clearPredecessors();
+                                predecessor.clearSuccessors();
+                                curNode.addPredecessor(predecessor);
+                                predecessor.addSuccessor(curNode);
+                            }
+
+
                         }
+                        predecessor = curNode;
                     }
 
-                    boolean hasNodesAfter = (lastNodeBefore != null);
-                    boolean hasNodesBefore = (firstNode != firstNodeAfter);
+                    boolean hasNodesBefore = isFirstHalf || lastNodeBefore != null;
+                    boolean hasNodesAfter = !isFirstHalf;
+
                     if (hasNodesBefore && !hasNodesAfter) {
                         lastNodeBefore = lastNode;
                     }
@@ -164,7 +179,7 @@ public class FlowAnalysis {
 
                         } else if ((succ.getBaseElement() instanceof SequenceFlow)) {
                             AnalysisElement endEvent = succ;
-                            // Find end event;
+                            // Find end event of subprocess
                             for (AnalysisElement nestedPreds : succ.getPredecessors()) {
                                 if (nestedPreds.getBaseElement() instanceof EndEvent) {
                                     endEvent = nestedPreds;
@@ -227,12 +242,6 @@ public class FlowAnalysis {
                 final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
                 final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
                 final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
-
-                if (analysisElement.getBaseElement() instanceof CallActivity &&
-                        firstNode.getElementChapter() == ElementChapter.ExecutionListenerEnd) {
-                    // Input variables are passed to Start event if call activity, not to end listener
-
-                }
 
                 analysisElement.getOperations().values().forEach(operation -> {
                     if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {

@@ -119,7 +119,7 @@ public class ProcessVariablesLifecycleOrderTest {
 	public void testProcessVariablesLifecycleWithCallActivity() {
 		// Test with In/Out Variable Injection, Input/Output Parameters and Start/End Listeners
 		// TODO add all other things linke links, signals, messages, ... Delegate Variable Mapping
-		// TODO graph has only one end listener, add start listener as soon as it is supported
+		// TODO Add delegate
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
@@ -150,15 +150,22 @@ public class ProcessVariablesLifecycleOrderTest {
 		// Start from end event and go to start.
 		AnalysisElement endEvent = nodes.get("MyEndEvent");
 		AnalysisElement sequenceFlow1 = endEvent.getPredecessors().get(0);
-		AnalysisElement endListener = sequenceFlow1.getPredecessors().get(0);
-		AnalysisElement endEventCalledProcess = endListener.getPredecessors().get(0);
+		AnalysisElement endListener2 = sequenceFlow1.getPredecessors().get(0);
+		AnalysisElement endListener1 = endListener2.getPredecessors().get(0);
+		AnalysisElement endEventCalledProcess = endListener1.getPredecessors().get(0);
 		AnalysisElement serviceTaskCalledProcess = endEventCalledProcess.getPredecessors().get(0).getPredecessors().get(0);
 		AnalysisElement startEventCalledProcess = serviceTaskCalledProcess.getPredecessors().get(0).getPredecessors().get(0);
-		AnalysisElement sequenceFlow0 = startEventCalledProcess.getPredecessors().get(0);
-		AnalysisElement serviceTask = sequenceFlow0.getPredecessors().get(0);
+		AnalysisElement startListener2 = startEventCalledProcess.getPredecessors().get(0);
+		AnalysisElement startListener13 = startListener2.getPredecessors().get(0);
+		AnalysisElement startListener12 = startListener13.getPredecessors().get(0);
+		AnalysisElement startListener11 = startListener12.getPredecessors().get(0);
+		AnalysisElement serviceTask = startListener11.getPredecessors().get(0).getPredecessors().get(0);
 		AnalysisElement startEvent = serviceTask.getPredecessors().get(0).getPredecessors().get(0);
 
-		assertEquals("End Listener was not correctly included.", "MyCallActivity__0", endListener.getId());
+		assertEquals("End Listener 2 was not correctly included.", "MyCallActivity__5", endListener2.getId());
+		assertEquals("End Listener 1 was not correctly included.", "MyCallActivity__4", endListener1.getId());
+		assertEquals("Start Listener 1 was not correctly included.", "MyCallActivity__0", startListener11.getId());
+		assertEquals("Start Listener 2 was not correctly included.", "MyCallActivity__3", startListener2.getId());
 		assertEquals("_EndEvent_SUCC", endEventCalledProcess.getId());
 		assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getId());
 		assertEquals("_StartEvent_1", startEventCalledProcess.getId());
@@ -166,10 +173,13 @@ public class ProcessVariablesLifecycleOrderTest {
 		assertEquals("Start event should not have any predecessors.", 0, startEvent.getPredecessors().size());
 
 		// Check discovery of process variables
+		assertEquals("Start Listener should have one input variable from service task.", 1, startListener11.getInUnused().size());
+		assertEquals("Start Listener should have two variables from input parameters.", 2, startListener11.getDefined().size());
+		assertEquals("Start Listener 2 should have four input variables.", 4, startListener2.getInUnused().size());
 		assertEquals("Input variables of call activity parent should be listed as defined in child start event.", 2, startEventCalledProcess.getDefined().size());
 		assertEquals("Child start event should have one passed input variable.", 1, startEventCalledProcess.getInUnused().size());
-		assertEquals("End Listener should have two input variables", 2, endListener.getInUnused().size());
-		assertEquals("End Listener should have no defined variables", 0, endListener.getDefined().size());
+		assertEquals("End Listener should have two input variables", 2, endListener2.getInUnused().size());
+		assertEquals("End Listener should have no defined variables", 0, endListener2.getDefined().size());
 
 		assertEquals("Third Sequence Flow (1qw9mzs) should have two defined variables because the call activity has two output mappings/parameters.", 2, sequenceFlow1.getDefined().size());
 		assertEquals("Third Sequence Flow (1qw9mzs) should have one input variable.", 1, sequenceFlow1.getInUnused().size());
