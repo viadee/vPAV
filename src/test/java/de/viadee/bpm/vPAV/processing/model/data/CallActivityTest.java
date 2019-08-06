@@ -252,8 +252,7 @@ public class CallActivityTest {
 		AnalysisElement ca1 = iterator.next();
 		Assert.assertEquals("", "CallActivity__0", ca1.getPredecessors().get(0).getId());
 		AnalysisElement ca2 = iterator.next();
-		Assert.assertEquals("", "CallActivity__0", ca2.getPredecessors().get(0).getId());
-		Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(1).getId());
+		Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(0).getId());
 	}
 
 	@Test
@@ -308,8 +307,7 @@ public class CallActivityTest {
 		AnalysisElement ca1 = iterator.next();
 		Assert.assertEquals("", "CallActivity__0", ca1.getPredecessors().get(0).getId());
 		AnalysisElement ca2 = iterator.next();
-		Assert.assertEquals("", "CallActivity__0", ca2.getPredecessors().get(0).getId());
-		Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(1).getId());
+		Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(0).getId());
 	}
 
 }

@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -101,11 +101,19 @@ public class FlowAnalysis {
         final LinkedHashMap<String, AnalysisElement> cfgNodes = new LinkedHashMap<>();
         final ArrayList<String> ids = new ArrayList<>();
         temp.values().forEach(analysisElement -> {
+            boolean hasNodesBefore;
+            if (analysisElement.getBaseElement() instanceof CallActivity) {
+                hasNodesBefore = false;
+            } else {
+                hasNodesBefore = true;
+            }
+
             if (analysisElement.getControlFlowGraph().hasNodes()) {
                 analysisElement.getControlFlowGraph().computePredecessorRelations();
 
                 final Node firstNode = analysisElement.getControlFlowGraph().firstNode();
                 final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
+                boolean hasNodesAfter = false;
 
                 if (analysisElement.getBaseElement() instanceof CallActivity) {
                     // Split nodes in "before" and "after" nodes.
@@ -141,12 +149,16 @@ public class FlowAnalysis {
                         predecessor = curNode;
                     }
 
-                    boolean hasNodesBefore = isFirstHalf || lastNodeBefore != null;
-                    boolean hasNodesAfter = !isFirstHalf;
+                    hasNodesBefore = isFirstHalf || lastNodeBefore != null;
+                    hasNodesAfter = !isFirstHalf;
 
                     if (hasNodesBefore && !hasNodesAfter) {
                         lastNodeBefore = lastNode;
                     }
+                    if (!hasNodesBefore && hasNodesAfter) {
+                        firstNodeAfter = firstNode;
+                    }
+
 
                     for (AnalysisElement succ : analysisElement.getSuccessors()) {
                         if (succ.getBaseElement() instanceof StartEvent) {
@@ -257,13 +269,13 @@ public class FlowAnalysis {
                     }
                 });
 
-                // Input variables are passed later to Start event if call activity, not to end listener
-                if (!(analysisElement.getBaseElement() instanceof CallActivity &&
-                        firstNode.getElementChapter() == ElementChapter.ExecutionListenerEnd)) {
+                // Input variables are passed later to start event of call activity if no nodes before exist
+                if (!(analysisElement.getBaseElement() instanceof CallActivity && !hasNodesBefore)) {
                     firstNode.addDefined(inputVariables);
                 }
 
-                if (analysisElement.getBaseElement() instanceof CallActivity && lastNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)) {
+                // Pass output variables to successors
+                if (analysisElement.getBaseElement() instanceof CallActivity && !hasNodesAfter) {
                     lastNode.getSuccessors().forEach((element) -> {
                         element.setDefined(outputVariables);
                     });
@@ -275,7 +287,8 @@ public class FlowAnalysis {
                 // start event)
                 // Set initial operations as input for the first block and later remove bpmn
                 // element
-                if (!initialVariables.isEmpty()) {
+                // TODO angukcen
+                if (!initialVariables.isEmpty() && hasNodesBefore) {
                     firstNode.addDefined(initialVariables);
                 }
 
@@ -319,7 +332,7 @@ public class FlowAnalysis {
                 });
                 analysisElement.addDefined(initialOperations);
             }
-            embedCallActivities(analysisElement);
+            embedCallActivities(analysisElement, hasNodesBefore);
         });
 
         temp.putAll(cfgNodes);
@@ -332,7 +345,7 @@ public class FlowAnalysis {
      *
      * @param analysisElement Current element
      */
-    private void embedCallActivities(AnalysisElement analysisElement) {
+    private void embedCallActivities(AnalysisElement analysisElement, boolean hasNodesBefore) {
         final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
         final ArrayList<ProcessVariableOperation> operationList = new ArrayList<>();
         if (analysisElement.getBaseElement() instanceof CallActivity) {
@@ -345,7 +358,10 @@ public class FlowAnalysis {
                             operationList.add(operation);
                         }
                     });
-                    succ.addDefined(camundaIn);
+                    // Add input variables only as defined if Call Activity has no nodes that are executed before the start event
+                    if (!hasNodesBefore) {
+                        succ.addDefined(camundaIn);
+                    }
                 } else if (succ.getBaseElement() instanceof SequenceFlow) {
                     analysisElement.removeSuccessor(succ.getId());
                 } else {
@@ -426,8 +442,18 @@ public class FlowAnalysis {
                 final LinkedHashMap<String, ProcessVariableOperation> inUsedTemp = new LinkedHashMap<>(
                         analysisElement.getInUsed());
                 final LinkedHashMap<String, ProcessVariableOperation> internalUnion = new LinkedHashMap<>();
+                // TODO hier nach external gucken
                 internalUnion.putAll(analysisElement.getInUnused());
-                internalUnion.putAll(analysisElement.getDefined());
+
+                Optional<Map.Entry<String, ProcessVariableOperation>> oldOperation;
+                // Variables are overwritten if new operation
+                for (Map.Entry<String, ProcessVariableOperation> operation : analysisElement.getDefined().entrySet()) {
+                    oldOperation = internalUnion.entrySet().stream().filter(entry -> entry.getValue().getName().equals(operation.getValue().getName())).findFirst();
+                    // Remove old operation from input set
+                    oldOperation.ifPresent(stringProcessVariableOperationEntry -> internalUnion.remove(stringProcessVariableOperationEntry.getKey()));
+                    internalUnion.put(operation.getKey(), operation.getValue());
+                }
+
                 final LinkedHashMap<String, ProcessVariableOperation> internalIntersection = new LinkedHashMap<>(
                         getIntersection(internalUnion, analysisElement.getUsed()));
                 inUsedTemp.putAll(internalIntersection);
@@ -435,16 +461,12 @@ public class FlowAnalysis {
                         getSetDifference(inUsedTemp, analysisElement.getKilled()));
 
                 // Calculate out-sets for unused definitions (transfer functions)
-                final LinkedHashMap<String, ProcessVariableOperation> tempUnion2 = new LinkedHashMap<>();
-                tempUnion2.putAll(analysisElement.getDefined());
-                tempUnion2.putAll(analysisElement.getInUnused());
-
                 final LinkedHashMap<String, ProcessVariableOperation> tempKillSet = new LinkedHashMap<>();
                 tempKillSet.putAll(analysisElement.getKilled());
                 tempKillSet.putAll(analysisElement.getUsed());
 
                 final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
-                        getSetDifference(tempUnion2, tempKillSet));
+                        getSetDifference(internalUnion, tempKillSet));
 
                 // If the current element contains input mapping operations, remove from
                 // outgoing sets due to scope (only locally accessible)
