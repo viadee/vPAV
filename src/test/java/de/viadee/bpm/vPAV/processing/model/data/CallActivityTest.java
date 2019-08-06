@@ -60,7 +60,7 @@ import java.util.*;
  */
 public class CallActivityTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+	private static final String BASE_PATH = "src/test/resources/CallActivityTest/";
 
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
@@ -85,8 +85,8 @@ public class CallActivityTest {
 
 		// add reference for called process
 		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledProcess", "CallActivityTest_calledProcess.bpmn");
-		processIdToPathMap.put("calledcalledProcess", "CallActivityTest_calledcalledProcess.bpmn");
+		processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_calledProcess.bpmn");
+		processIdToPathMap.put("calledcalledProcess", "CallActivityTest/CallActivityTest_calledcalledProcess.bpmn");
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
 				new BpmnScanner(PATH));
@@ -134,7 +134,7 @@ public class CallActivityTest {
 
 		// add reference for called process
 		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledProcess", "CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
+		processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
 				new BpmnScanner(PATH));
@@ -172,7 +172,7 @@ public class CallActivityTest {
 
 		// add reference for called process
 		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledProcess", "CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
+		processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
 				new BpmnScanner(PATH));
@@ -207,7 +207,7 @@ public class CallActivityTest {
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityWithListenerStartTest.bpmn";
+		final String PATH = BASE_PATH + "CallActivityTest_StartListener.bpmn";
 		final File processDefinition = new File(PATH);
 
 		// parse bpmn model
@@ -215,7 +215,7 @@ public class CallActivityTest {
 
 		// add reference for called process
 		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledElement", "CalledActivityWithListenerTest.bpmn");
+		processIdToPathMap.put("calledElement", "CallActivityTest/CallActivityTest_calledElement.bpmn");
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
 				new BpmnScanner(PATH));
@@ -262,7 +262,7 @@ public class CallActivityTest {
 		myProperties.put("scanpath", "src/test/java");
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityWithListenerEndTest.bpmn";
+		final String PATH = BASE_PATH + "CallActivityTest_EndListener.bpmn";
 		final File processDefinition = new File(PATH);
 
 		// parse bpmn model
@@ -270,7 +270,7 @@ public class CallActivityTest {
 
 		// add reference for called process
 		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledElement", "CalledActivityWithListenerTest.bpmn");
+		processIdToPathMap.put("calledElement", "CallActivityTest/CallActivityTest_calledElement.bpmn");
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
 				new BpmnScanner(PATH));
