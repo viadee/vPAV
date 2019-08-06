@@ -44,6 +44,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.CallActivity;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,258 +58,224 @@ import java.util.*;
 
 /**
  * test the handling of call activities
- *
  */
 public class CallActivityTest {
 
-	private static final String BASE_PATH = "src/test/resources/CallActivityTest/";
+    private static final String BASE_PATH = "src/test/resources/CallActivityTest/";
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		ClassLoader cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().setTest(true);
-	}
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = {classUrl};
+        ClassLoader cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().setTest(true);
+    }
 
-	@Test
-	public void testEmbedding() {
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
-		final File processDefinition = new File(PATH);
+    @Test
+    public void testEmbedding() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
+        final File processDefinition = new File(PATH);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		// add reference for called process
-		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_calledProcess.bpmn");
-		processIdToPathMap.put("calledcalledProcess", "CallActivityTest/CallActivityTest_calledcalledProcess.bpmn");
+        // add reference for called process
+        final Map<String, String> processIdToPathMap = new HashMap<>();
+        processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_calledProcess.bpmn");
+        processIdToPathMap.put("calledcalledProcess", "CallActivityTest/CallActivityTest_calledcalledProcess.bpmn");
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-				new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
+                new BpmnScanner(PATH));
 
-		FlowAnalysis flowAnalysis = new FlowAnalysis();
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
 
-		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
-		flowAnalysis.analyze(graphCollection);
+        flowAnalysis.analyze(graphCollection);
 
-		// calculate invalid paths based on data flow graphs
-		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-		Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
-		Assert.assertEquals("There are exactly three anomalies", 3, invalidPathMap.size());
-		AnomalyContainer anomaly1 = iterator.next();
-		AnomalyContainer anomaly2 = iterator.next();
-		AnomalyContainer anomaly3 = iterator.next();
-		// var2
-		Assert.assertEquals("Expected a DD anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.DD,
-				anomaly1.getAnomaly());
-		// var4
-		Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
-				anomaly2.getAnomaly());
-		// var3
-		Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
-				anomaly3.getAnomaly());
-	}
+        Assert.assertEquals("There are exactly three anomalies", 3, invalidPathMap.size());
+        AnomalyContainer anomaly1 = iterator.next();
+        AnomalyContainer anomaly2 = iterator.next();
+        AnomalyContainer anomaly3 = iterator.next();
+        // var2
+        Assert.assertEquals("Expected a DD anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.DD,
+                anomaly1.getAnomaly());
+        // var4
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
+                anomaly2.getAnomaly());
+        // var3
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
+                anomaly3.getAnomaly());
+    }
 
-	@Test
-	public void testEmbeddedWithVariableMapping() {
-		// TODO out in source expression verändern
-		// Usage of camunda:in and camunda:out
-		// Test with source expression
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityTest_variableMapping.bpmn";
-		final File processDefinition = new File(PATH);
+    @Test
+    public void testEmbeddedWithVariableMapping() {
+        // TODO out in source expression verändern
+        // Usage of camunda:in and camunda:out
+        // Test with source expression
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "CallActivityTest_variableMapping.bpmn";
+        final File processDefinition = new File(PATH);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		// add reference for called process
-		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
+        // add reference for called process
+        final Map<String, String> processIdToPathMap = new HashMap<>();
+        processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-				new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
+                new BpmnScanner(PATH));
 
-		FlowAnalysis flowAnalysis = new FlowAnalysis();
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
 
-		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
-		flowAnalysis.analyze(graphCollection);
+        flowAnalysis.analyze(graphCollection);
 
-		// calculate invalid paths based on data flow graphs
-		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-		Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
-		AnomalyContainer anomaly1 = iterator.next();
-		Assert.assertEquals("There should be exactly one anomaly", 1, invalidPathMap.size());
-		Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
-				anomaly1.getAnomaly());
-	}
-
-
-	@Test
-	public void testEmbeddedWithDelegateVariableMapping() {
-		//T ODO test also delegate expression
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityTest_delegatedVarMapping.bpmn";
-		final File processDefinition = new File(PATH);
-
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-
-		// add reference for called process
-		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
-
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-				new BpmnScanner(PATH));
-
-		FlowAnalysis flowAnalysis = new FlowAnalysis();
-
-		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
-
-		flowAnalysis.analyze(graphCollection);
-
-		// calculate invalid paths based on data flow graphs
-		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-		Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
-
-		Assert.assertEquals("There should be exactly one anomaly", 2, invalidPathMap.size());
-		AnomalyContainer anomaly1 = iterator.next();
-		AnomalyContainer anomaly2 = iterator.next();
-		Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
-				anomaly1.getAnomaly());
-		Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
-				anomaly2.getAnomaly());
-	}
+        AnomalyContainer anomaly1 = iterator.next();
+        Assert.assertEquals("There should be exactly one anomaly", 1, invalidPathMap.size());
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                anomaly1.getAnomaly());
+    }
 
 
-	@Test
-	public void testEmbeddingCallActivitiesWithListenerStart() {
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
-		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityTest_StartListener.bpmn";
-		final File processDefinition = new File(PATH);
+    @Test
+    public void testEmbeddedWithDelegateVariableMapping() {
+        //T ODO test also delegate expression
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "CallActivityTest_delegatedVarMapping.bpmn";
+        final File processDefinition = new File(PATH);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		// add reference for called process
-		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledElement", "CallActivityTest/CallActivityTest_calledElement.bpmn");
+        // add reference for called process
+        final Map<String, String> processIdToPathMap = new HashMap<>();
+        processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-				new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
+                new BpmnScanner(PATH));
 
-		FlowAnalysis flowAnalysis = new FlowAnalysis();
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
 
-		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
-		flowAnalysis.analyze(graphCollection);
-		Iterator<AnalysisElement> iterator = flowAnalysis.getNodes().values().iterator();
-		AnalysisElement startEvent1 = iterator.next();
-		Assert.assertEquals("", 0, startEvent1.getPredecessors().size());
-		AnalysisElement sequenceFlow1 = iterator.next();
-		Assert.assertEquals("", "StartEvent_1", sequenceFlow1.getPredecessors().get(0).getId());
-		AnalysisElement endEvent1 = iterator.next();
-		Assert.assertEquals("", "SequenceFlow_2", endEvent1.getPredecessors().get(0).getId());
-		AnalysisElement sequenceFlow2 = iterator.next();
-		Assert.assertEquals("", "_EndEvent_1_1", sequenceFlow2.getPredecessors().get(0).getId());
-		AnalysisElement startEvent1_1 = iterator.next();
-		Assert.assertEquals("", "CallActivity__2", startEvent1_1.getPredecessors().get(0).getId());
-		AnalysisElement endEvent1_1 = iterator.next();
-		Assert.assertEquals("", "_SequenceFlow_2_2", endEvent1_1.getPredecessors().get(0).getId());
-		AnalysisElement sequenceFlow1_1 = iterator.next();
-		Assert.assertEquals("", "_StartEvent_1_1", sequenceFlow1_1.getPredecessors().get(0).getId());
-		AnalysisElement sequenceFlow2_2 = iterator.next();
-		Assert.assertEquals("", "_Task_1_1", sequenceFlow2_2.getPredecessors().get(0).getId());
-		AnalysisElement task1_1 = iterator.next();
-		Assert.assertEquals("", "_SequenceFlow_1_1", task1_1.getPredecessors().get(0).getId());
-		AnalysisElement ca0 = iterator.next();
-		Assert.assertEquals("", "SequenceFlow_1", ca0.getPredecessors().get(0).getId());
-		AnalysisElement ca1 = iterator.next();
-		Assert.assertEquals("", "CallActivity__0", ca1.getPredecessors().get(0).getId());
-		AnalysisElement ca2 = iterator.next();
-		Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(0).getId());
-	}
+        flowAnalysis.analyze(graphCollection);
 
-	@Test
-	public void testEmbeddingCallActivitiesWithListenerEnd() {
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
-		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "CallActivityTest_EndListener.bpmn";
-		final File processDefinition = new File(PATH);
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        Assert.assertEquals("There should be exactly one anomaly", 2, invalidPathMap.size());
+        AnomalyContainer anomaly1 = iterator.next();
+        AnomalyContainer anomaly2 = iterator.next();
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                anomaly1.getAnomaly());
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
+                anomaly2.getAnomaly());
+    }
 
-		// add reference for called process
-		final Map<String, String> processIdToPathMap = new HashMap<>();
-		processIdToPathMap.put("calledElement", "CallActivityTest/CallActivityTest_calledElement.bpmn");
+    @Test
+    public void testEmbeddingCallActivitiesWithListener() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        Properties myProperties = new Properties();
+        myProperties.put("scanpath", "src/test/java");
+        ConfigConstants.getInstance().setProperties(myProperties);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "CallActivityTest_SingleCallActivity.bpmn";
+        final File processDefinition = new File(PATH);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-				new BpmnScanner(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        CallActivity callActivity = modelInstance.getModelElementById("CallActivity");
 
-		FlowAnalysis flowAnalysis = new FlowAnalysis();
+        // add reference for called process
+        final Map<String, String> processIdToPathMap = new HashMap<>();
+        processIdToPathMap.put("calledElement", "CallActivityTest/CallActivityTest_calledElement.bpmn");
 
-		// create data flow graphs
-		final Collection<String> calledElementHierarchy = new ArrayList<>();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
+                new BpmnScanner(PATH));
 
-		flowAnalysis.analyze(graphCollection);
-		Iterator<AnalysisElement> iterator = flowAnalysis.getNodes().values().iterator();
-		AnalysisElement startEvent1 = iterator.next();
-		Assert.assertEquals("", 0, startEvent1.getPredecessors().size());
-		AnalysisElement sequenceFlow1 = iterator.next();
-		Assert.assertEquals("", "StartEvent_1", sequenceFlow1.getPredecessors().get(0).getId());
-		AnalysisElement endEvent1 = iterator.next();
-		Assert.assertEquals("", "SequenceFlow_2", endEvent1.getPredecessors().get(0).getId());
-		AnalysisElement sequenceFlow2 = iterator.next();
-		Assert.assertEquals("", "CallActivity__2", sequenceFlow2.getPredecessors().get(0).getId());
-		AnalysisElement startEvent1_1 = iterator.next();
-		Assert.assertEquals("", "SequenceFlow_1", startEvent1_1.getPredecessors().get(0).getId());
-		AnalysisElement endEvent1_1 = iterator.next();
-		Assert.assertEquals("", "_SequenceFlow_2_2", endEvent1_1.getPredecessors().get(0).getId());
-		AnalysisElement sequenceFlow1_1 = iterator.next();
-		Assert.assertEquals("", "_StartEvent_1_1", sequenceFlow1_1.getPredecessors().get(0).getId());
-		AnalysisElement sequenceFlow2_2 = iterator.next();
-		Assert.assertEquals("", "_Task_1_1", sequenceFlow2_2.getPredecessors().get(0).getId());
-		AnalysisElement task1_1 = iterator.next();
-		Assert.assertEquals("", "_SequenceFlow_1_1", task1_1.getPredecessors().get(0).getId());
-		AnalysisElement ca0 = iterator.next();
-		Assert.assertEquals("", "_EndEvent_1_1", ca0.getPredecessors().get(0).getId());
-		AnalysisElement ca1 = iterator.next();
-		Assert.assertEquals("", "CallActivity__0", ca1.getPredecessors().get(0).getId());
-		AnalysisElement ca2 = iterator.next();
-		Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(0).getId());
-	}
+        // Test 1: Add Start Listener
+        callActivity.builder().camundaExecutionListenerClass("start",
+                "de.viadee.bpm.vPAV.delegates.CallActivityListenerDelegate");
 
+        for (int i = 0; i < 2; i++) {
+            if (i == 1) {
+                // Test 2: Change start listener to end listener
+                CamundaExecutionListener startListener = callActivity.getExtensionElements().getElementsQuery().filterByType(CamundaExecutionListener.class).singleResult();
+                startListener.setCamundaEvent("end");
+            }
+
+            // create data flow graphs
+            FlowAnalysis flowAnalysis = new FlowAnalysis();
+            final Collection<String> calledElementHierarchy = new ArrayList<>();
+            final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                    processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+            flowAnalysis.analyze(graphCollection);
+            Iterator<AnalysisElement> iterator = flowAnalysis.getNodes().values().iterator();
+            AnalysisElement startEvent1 = iterator.next();
+            AnalysisElement sequenceFlow1 = iterator.next();
+            AnalysisElement endEvent1 = iterator.next();
+            AnalysisElement sequenceFlow2 = iterator.next();
+            AnalysisElement startEvent1_1 = iterator.next();
+            AnalysisElement endEvent1_1 = iterator.next();
+            AnalysisElement sequenceFlow1_1 = iterator.next();
+            AnalysisElement sequenceFlow2_2 = iterator.next();
+            AnalysisElement task1_1 = iterator.next();
+            AnalysisElement ca0 = iterator.next();
+            AnalysisElement ca1 = iterator.next();
+            AnalysisElement ca2 = iterator.next();
+
+            Assert.assertEquals("", 0, startEvent1.getPredecessors().size());
+            Assert.assertEquals("", "StartEvent_1", sequenceFlow1.getPredecessors().get(0).getId());
+            Assert.assertEquals("", "SequenceFlow_2", endEvent1.getPredecessors().get(0).getId());
+            Assert.assertEquals("", "_SequenceFlow_2_2", endEvent1_1.getPredecessors().get(0).getId());
+            Assert.assertEquals("", "_StartEvent_1_1", sequenceFlow1_1.getPredecessors().get(0).getId());
+            Assert.assertEquals("", "_Task_1_1", sequenceFlow2_2.getPredecessors().get(0).getId());
+            Assert.assertEquals("", "_SequenceFlow_1_1", task1_1.getPredecessors().get(0).getId());
+            Assert.assertEquals("", "CallActivity__0", ca1.getPredecessors().get(0).getId());
+            Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(0).getId());
+
+            if (i == 0) {
+                // Start Listener
+                Assert.assertEquals("", "SequenceFlow_1", ca0.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "_EndEvent_1_1", sequenceFlow2.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "CallActivity__2", startEvent1_1.getPredecessors().get(0).getId());
+
+            } else {
+                // End Listener
+                Assert.assertEquals("", "_EndEvent_1_1", ca0.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "CallActivity__2", sequenceFlow2.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "SequenceFlow_1", startEvent1_1.getPredecessors().get(0).getId());
+
+            }
+        }
+    }
 }
