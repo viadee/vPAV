@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -73,7 +73,6 @@ import java.util.regex.Pattern;
 
 /**
  * search process variables for an bpmn element
- *
  */
 public final class ProcessVariableReader {
 
@@ -418,7 +417,8 @@ public final class ProcessVariableReader {
             processVariables.putAll(getVariablesFromFormData(element, extensionElements, scopeElementId));
 
             // 3) Search in Input/Output-Associations (Call Activities)
-            processVariables.putAll(searchVariablesInInputOutputExtensions(element, extensionElements, scopeElementId));
+            processVariables.putAll(searchVariablesInInputOutputExtensions(javaReaderStatic, fileScanner, element,
+                    extensionElements, scopeElementId));
         }
 
         return processVariables;
@@ -652,6 +652,7 @@ public final class ProcessVariableReader {
      * @return variables
      */
     private ListMultimap<String, ProcessVariableOperation> searchVariablesInInputOutputExtensions(
+            final JavaReaderStatic javaReaderStatic, final FileScanner fileScanner,
             final BpmnElement element, final ExtensionElements extensionElements, final String scopeId) {
 
         final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
@@ -663,32 +664,48 @@ public final class ProcessVariableReader {
                     .list();
             for (final CamundaIn inputAssociation : inputAssociations) {
                 String source = inputAssociation.getCamundaSource();
-                if (source != null && !source.isEmpty()) {
-                    // todo überprüfen, ob richtig mit source
+                if (source == null || source.isEmpty()) {
+                    // TODO again check for null and empty
+                    source = inputAssociation.getCamundaSourceExpression();
+                    processVariables.putAll(findVariablesInExpression(javaReaderStatic, element.getControlFlowGraph(),
+                            fileScanner, source, element, ElementChapter.InputData,
+                            KnownElementFieldType.CamundaIn, scopeId));
+
+                } else {
                     processVariables.put(source,
                             new ProcessVariableOperation(source, element, ElementChapter.InputData,
-                                    KnownElementFieldType.CamundaIn, null, VariableOperation.WRITE,
-                                    ((CallActivity) baseElement).getCalledElement(),
+                                    KnownElementFieldType.CamundaIn, null, VariableOperation.READ,
+                                    scopeId,
                                     element.getFlowAnalysis().getOperationCounter()));
-                } else {
-                    // Check for source expression
-                    source = inputAssociation.getCamundaSourceExpression();
-                    if (source != null && !source.isEmpty()) {
-                        String target = inputAssociation.getCamundaTarget();
-
-                        // TODO muss das noch weiter verarbeitet werden?!
-                        // check if expression is valid
-                        processVariables.put(source,
-                                new ProcessVariableOperation(target, element, ElementChapter.InputData,
-                                        KnownElementFieldType.CamundaIn, null, VariableOperation.WRITE,
-                                        ((CallActivity) baseElement).getCalledElement(),
-                                        element.getFlowAnalysis().getOperationCounter()));
-                    }
                 }
+
+                // TODO target hinzufügen, wenn source nicht existiert, macht nicht so viel Sinn
+                // Add target operation
+                String target = inputAssociation.getCamundaTarget();
+                processVariables.put(target,
+                        new ProcessVariableOperation(target, element, ElementChapter.InputData,
+                                KnownElementFieldType.CamundaIn, null, VariableOperation.WRITE,
+                                ((CallActivity) baseElement).getCalledElement(),
+                                element.getFlowAnalysis().getOperationCounter()));
+
             }
             final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
                     .filterByType(CamundaOut.class).list();
             for (final CamundaOut outputAssociation : outputAssociations) {
+                String source = outputAssociation.getCamundaSource();
+                if (source == null || source.isEmpty()) {
+                    source = outputAssociation.getCamundaSourceExpression();
+                    processVariables.putAll(findVariablesInExpression(javaReaderStatic, element.getControlFlowGraph(),
+                            fileScanner, source, element, ElementChapter.OutputData,
+                            KnownElementFieldType.CamundaOut, ((CallActivity) baseElement).getCalledElement()));
+                } else {
+                    processVariables.put(source,
+                            new ProcessVariableOperation(source, element, ElementChapter.OutputData,
+                                    KnownElementFieldType.CamundaOut, null, VariableOperation.READ,
+                                    ((CallActivity) baseElement).getCalledElement(),
+                                    element.getFlowAnalysis().getOperationCounter()));
+                }
+
                 final String target = outputAssociation.getCamundaTarget();
                 if (target != null && !target.isEmpty()) {
                     processVariables.put(target,
