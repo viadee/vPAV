@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -46,6 +46,8 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -124,45 +126,64 @@ public class CallActivityTest {
     public void testEmbeddedWithVariableMapping() {
         // TODO out in source expression verändern
         // Usage of camunda:in and camunda:out
+        // TODO test with source expression
         // Test with source expression
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final String PATH = BASE_PATH + "CallActivityTest_variableMapping.bpmn";
+        final String PATH = BASE_PATH + "CallActivityTest_TwoLevels.bpmn";
         final File processDefinition = new File(PATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        CallActivity callActivity = modelInstance.getModelElementById("CallActivity");
 
         // add reference for called process
         final Map<String, String> processIdToPathMap = new HashMap<>();
         processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
 
+        callActivity.builder().camundaIn("varIn", "inMapping");
+        callActivity.builder().camundaOut("z", "outMapping");
+
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
                 new BpmnScanner(PATH));
 
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        for (int i = 0; i < 2; i++) {
+            if (i == 1) {
+                // Test 2: Use source expression instead of source
+                CamundaIn inVariable = callActivity.getExtensionElements().
+                        getElementsQuery().filterByType(CamundaIn.class).singleResult();
+                inVariable.setCamundaSourceExpression("${varIn}");
+                inVariable.removeAttribute("source");
+                CamundaOut outVariable = callActivity.getExtensionElements().
+                        getElementsQuery().filterByType(CamundaOut.class).singleResult();
+                outVariable.setCamundaSourceExpression("${z}");
+                outVariable.removeAttribute("source");
+            }
 
-        // create data flow graphs
-        final Collection<String> calledElementHierarchy = new ArrayList<>();
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+            FlowAnalysis flowAnalysis = new FlowAnalysis();
 
-        flowAnalysis.analyze(graphCollection);
+            // create data flow graphs
+            final Collection<String> calledElementHierarchy = new ArrayList<>();
+            final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                    processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+            flowAnalysis.analyze(graphCollection);
 
-        AnomalyContainer anomaly1 = iterator.next();
-        Assert.assertEquals("There should be exactly one anomaly", 1, invalidPathMap.size());
-        Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
-                anomaly1.getAnomaly());
+            // calculate invalid paths based on data flow graphs
+            final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+            Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+
+            AnomalyContainer anomaly1 = iterator.next();
+            Assert.assertEquals("There should be exactly one anomaly", 1, invalidPathMap.size());
+            Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                    anomaly1.getAnomaly());
+        }
     }
 
 
     @Test
     public void testEmbeddedWithDelegateVariableMapping() {
-        //T ODO test also delegate expression
+        //TODO test also delegate expression und zwar so, dass gleiches ergebnis, damit vereinfachung
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "CallActivityTest_delegatedVarMapping.bpmn";
@@ -179,6 +200,7 @@ public class CallActivityTest {
                 new BpmnScanner(PATH));
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
+        flowAnalysis.getNodes().get("");
 
         // create data flow graphs
         final Collection<String> calledElementHierarchy = new ArrayList<>();
@@ -186,6 +208,7 @@ public class CallActivityTest {
                 processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
         flowAnalysis.analyze(graphCollection);
+
 
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
@@ -274,7 +297,6 @@ public class CallActivityTest {
                 Assert.assertEquals("", "_EndEvent_1_1", ca0.getPredecessors().get(0).getId());
                 Assert.assertEquals("", "CallActivity__2", sequenceFlow2.getPredecessors().get(0).getId());
                 Assert.assertEquals("", "SequenceFlow_1", startEvent1_1.getPredecessors().get(0).getId());
-
             }
         }
     }
