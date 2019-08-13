@@ -42,10 +42,8 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -57,85 +55,48 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.List;
 
 public class ProcessVariableOperationReaderTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/";
 
-	private static ClassLoader cl;
+    private static ClassLoader cl;
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		RuntimeConfig.getInstance().setTest(true);
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java/");
-		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-		final URL[] classUrls = { classUrl, resourcesUrl };
-		cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-	}
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        RuntimeConfig.getInstance().setTest(true);
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java/");
+        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+        final URL[] classUrls = {classUrl, resourcesUrl};
+        cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+    }
 
-	@AfterClass
-	public static void tearDown() {
-		RuntimeConfig.getInstance().setTest(false);
-	}
+    @AfterClass
+    public static void tearDown() {
+        RuntimeConfig.getInstance().setTest(false);
+    }
 
-	@Test
-	public void testRecogniseVariablesInClass() {
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-		final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
+    @Test
+    public void testRecogniseVariablesInClass() {
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+        final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
-		final ControlFlowGraph cg = new ControlFlowGraph();
-		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), cg, new FlowAnalysis());
-		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+        final ControlFlowGraph cg = new ControlFlowGraph();
+        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), cg, new FlowAnalysis());
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
 
-		Assert.assertEquals(2, variables.size());
-	}
-
-	@Test
-	public void testRecogniseInputOutputAssociations() {
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-		final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
-
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-		final Collection<CallActivity> allServiceTasks = modelInstance.getModelElementsByType(CallActivity.class);
-
-		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
-
-		final ControlFlowGraph cg = new ControlFlowGraph();
-		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), cg, new FlowAnalysis());
-		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
-
-		final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables.get("nameOfVariableInMainProcess");
-		Assert.assertNotNull(nameOfVariableInMainProcess);
-		Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess.get(0).getOperation());
-
-		final List<ProcessVariableOperation> nameOfVariableInMainProcess2 = variables
-				.get("nameOfVariableInMainProcess2");
-		Assert.assertNotNull(nameOfVariableInMainProcess2);
-		Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess2.get(0).getOperation());
-
-		final List<ProcessVariableOperation> someVariableInMainProcess = variables.get("someVariableInMainProcess");
-		Assert.assertNotNull(someVariableInMainProcess);
-		Assert.assertEquals(VariableOperation.WRITE, someVariableInMainProcess.get(0).getOperation());
-
-		final List<ProcessVariableOperation> someVariableInMainProcess2 = variables.get("someVariableInMainProcess2");
-		Assert.assertNotNull(someVariableInMainProcess2);
-		Assert.assertEquals(VariableOperation.WRITE, someVariableInMainProcess2.get(0).getOperation());
-	}
+        Assert.assertEquals(2, variables.size());
+    }
 }
