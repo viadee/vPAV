@@ -17,7 +17,7 @@
           <camunda:inputParameter name="MyInputParameter">123</camunda:inputParameter>
           <camunda:outputParameter name="MyOutputParameter">321</camunda:outputParameter>
         </camunda:inputOutput>
-        <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.CallActivityListenerDelegate" event="start" />
+        <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.SimpleSetDelegate" event="start" />
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.TestDelegate" event="start" />
         <camunda:executionListener expression="${var2}" event="start" />
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.TestDelegate" event="end" />
