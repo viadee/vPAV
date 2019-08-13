@@ -156,16 +156,14 @@ public class ProcessVariablesLifecycleOrderTest {
         AnalysisElement serviceTaskCalledProcess = endEventCalledProcess.getPredecessors().get(0).getPredecessors().get(0);
         AnalysisElement startEventCalledProcess = serviceTaskCalledProcess.getPredecessors().get(0).getPredecessors().get(0);
         AnalysisElement startListener2 = startEventCalledProcess.getPredecessors().get(0);
-        AnalysisElement startListener13 = startListener2.getPredecessors().get(0);
-        AnalysisElement startListener12 = startListener13.getPredecessors().get(0);
-        AnalysisElement startListener11 = startListener12.getPredecessors().get(0);
-        AnalysisElement serviceTask = startListener11.getPredecessors().get(0).getPredecessors().get(0);
+        AnalysisElement startListener1 = startListener2.getPredecessors().get(0);
+        AnalysisElement serviceTask = startListener1.getPredecessors().get(0).getPredecessors().get(0);
         AnalysisElement startEvent = serviceTask.getPredecessors().get(0).getPredecessors().get(0);
 
-        assertEquals("End Listener 2 was not correctly included.", "MyCallActivity__5", endListener2.getId());
-        assertEquals("End Listener 1 was not correctly included.", "MyCallActivity__4", endListener1.getId());
-        assertEquals("Start Listener 1 was not correctly included.", "MyCallActivity__0", startListener11.getId());
-        assertEquals("Start Listener 2 was not correctly included.", "MyCallActivity__3", startListener2.getId());
+        assertEquals("End Listener 2 was not correctly included.", "MyCallActivity__3", endListener2.getId());
+        assertEquals("End Listener 1 was not correctly included.", "MyCallActivity__2", endListener1.getId());
+        assertEquals("Start Listener 1 was not correctly included.", "MyCallActivity__0", startListener1.getId());
+        assertEquals("Start Listener 2 was not correctly included.", "MyCallActivity__1", startListener2.getId());
         assertEquals("_EndEvent_SUCC", endEventCalledProcess.getId());
         assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getId());
         assertEquals("_StartEvent_1", startEventCalledProcess.getId());
@@ -173,17 +171,19 @@ public class ProcessVariablesLifecycleOrderTest {
         assertEquals("Start event should not have any predecessors.", 0, startEvent.getPredecessors().size());
 
         // Check discovery of process variables
-        assertEquals("Start Listener should have one input variable from service task.", 1, startListener11.getInUnused().size());
-        assertEquals("Start Listener should have two variables from input parameters.", 2, startListener11.getDefined().size());
-        assertEquals("Start Listener 2 should have four input variables.", 4, startListener2.getInUnused().size());
-        assertEquals("Child start event should have five input variables.", 5, startEventCalledProcess.getInUnused().size());
-        assertEquals("Input variables of call activity parent should not be listed as defined in child start event.", 0, startEventCalledProcess.getDefined().size());
+        assertEquals("Start Listener should have one input variable from service task.", 1, startListener1.getInUnused().size());
+        assertEquals("Start Listener should have one input parameter variable and one own defined variable.", 2, startListener1.getDefined().size());
+        assertEquals("Start Listener 2 should have three input variables.", 3, startListener2.getInUnused().size());
+        assertEquals("Child start event should have four input variables.", 4, startEventCalledProcess.getInUnused().size());
+        assertEquals("Child start event should have one defined input variable mapping.", 1, startEventCalledProcess.getDefined().size());
+        assertEquals("Child end event should have one defined output variable mapping.", 1, endEventCalledProcess.getDefined().size());
         assertEquals("End Listener should have five input variables", 5, endListener1.getInUnused().size());
-        assertEquals("End Listener should have seven output variables", 7, endListener2.getOutUnused().size() + endListener2.getOutUsed().size());
-        assertEquals("End Listener should have to defined variables because the call activity has two output mappings/parameters.", 2, endListener2.getDefined().size());
+        assertEquals("End Listener should have six output variables", 6, endListener2.getOutUnused().size() + endListener2.getOutUsed().size());
+        assertEquals("End Listener should have one defined variables because the call activity has one output parameter.", 1, endListener2.getDefined().size());
 
         assertEquals("Third Sequence Flow (1qw9mzs) shouldn't have defined variables because the output parameters are already defined in the listener.", 0, sequenceFlow1.getDefined().size());
 
+        // TODO expressions listener operations disappear
         assertEquals("End event should have five unused input variables.", 5, endEvent.getInUnused().size());
         assertEquals("End event should have one used input variable.", 1, endEvent.getInUsed().size());
     }
