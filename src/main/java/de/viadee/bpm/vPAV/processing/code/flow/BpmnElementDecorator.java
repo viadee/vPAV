@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -42,7 +42,6 @@ import java.util.Map;
 
 public class BpmnElementDecorator implements AnalysisElement, Cloneable {
 
-    private String id = null;
     private AnalysisElement decoratedBpmnElement;
 
     BpmnElementDecorator(final AnalysisElement element) {
@@ -56,11 +55,7 @@ public class BpmnElementDecorator implements AnalysisElement, Cloneable {
 
     @Override
     public String getId() {
-        if (id == null) {
-            return decoratedBpmnElement.getId();
-        } else {
-            return id;
-        }
+        return decoratedBpmnElement.getId();
     }
 
     @Override
@@ -210,22 +205,5 @@ public class BpmnElementDecorator implements AnalysisElement, Cloneable {
 
     public ListMultimap<String, ProcessVariableOperation> getProcessVariables() {
         return ((BpmnElement) decoratedBpmnElement).getProcessVariables();
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setProcessVariable(final String variableName, final ProcessVariableOperation variableObject) {
-        ((BpmnElement) decoratedBpmnElement).setProcessVariable(variableName, variableObject);
-    }
-
-    @Override
-    public BpmnElementDecorator clone() throws CloneNotSupportedException {
-        BpmnElementDecorator clone = (BpmnElementDecorator) super.clone();
-        BpmnElement decorated = (BpmnElement) clone.decoratedBpmnElement;
-        clone.decoratedBpmnElement = new BpmnElement(decorated.getProcessDefinition(),
-                decorated.getBaseElement(), decorated.getControlFlowGraph(), decorated.getFlowAnalysis());
-        return clone;
     }
 }
