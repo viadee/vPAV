@@ -17,6 +17,8 @@
         </camunda:inputOutput>
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.MappingDelegate" event="start" />
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.TestDelegate" event="end" />
+        <camunda:executionListener expression="${var2}" event="start" />
+        <camunda:executionListener expression="${varEnd}" event="end" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1tij1gh</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1qw9mzs</bpmn:outgoing>
