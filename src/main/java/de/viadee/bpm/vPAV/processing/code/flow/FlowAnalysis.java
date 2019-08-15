@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -111,17 +111,17 @@ public class FlowAnalysis {
             if (analysisElement.getControlFlowGraph().hasNodes()) {
                 analysisElement.getControlFlowGraph().computePredecessorRelations();
 
-                final Node firstNode = analysisElement.getControlFlowGraph().firstNode();
-                final Node lastNode = analysisElement.getControlFlowGraph().lastNode();
+                AnalysisElement firstNode = analysisElement.getControlFlowGraph().firstNode();
+                AnalysisElement lastNode = analysisElement.getControlFlowGraph().lastNode();
                 boolean hasNodesAfter = false;
 
                 if (analysisElement.getBaseElement() instanceof CallActivity) {
                     // Split nodes in "before" and "after" nodes.
-                    Node lastNodeBefore = null;
-                    Node firstNodeAfter = null;
-                    Node predecessor = null;
+                    AnalysisElement lastNodeBefore = null;
+                    AnalysisElement firstNodeAfter = null;
+                    AnalysisElement predecessor = null;
                     ElementChapter chapter;
-                    chapter = firstNode.getElementChapter();
+                    chapter = ((Node) firstNode).getElementChapter();
                     boolean isFirstHalf = !(chapter.equals(ElementChapter.OutputImplementation) ||
                             chapter.equals(ElementChapter.ExecutionListenerEnd));
 
@@ -143,8 +143,6 @@ public class FlowAnalysis {
                                 curNode.addPredecessor(predecessor);
                                 predecessor.addSuccessor(curNode);
                             }
-
-
                         }
                         predecessor = curNode;
                     }
@@ -159,21 +157,47 @@ public class FlowAnalysis {
                         firstNodeAfter = firstNode;
                     }
 
-                    // Extract operations from listeners with expressions
-                    // TODO listener expression order is not considered yet
-         /*           for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
-                        if (operation.getChapter().equals(ElementChapter.ExecutionListenerStart) &&
-                                operation.getFieldType().equals(KnownElementFieldType.Expression)) {
-                            firstNode.getOperations().put(operation.getId(), operation);
-                            firstNode.getUsed().put(operation.getId(), operation);
+                    BpmnElementDecorator beforeElement = null;
+                    BpmnElementDecorator afterElement = null;
+                    if (analysisElement.getOperations().size() > 0 || analysisElement.getDefined().size() > 0) {
+                        // Split element in nodes before and after with associated operations
+                        try {
+                            // TODO listener expression order is not considered yet
+                            beforeElement = ((BpmnElementDecorator) analysisElement).clone();
+                            afterElement = ((BpmnElementDecorator) analysisElement).clone();
+                            // Get last used node id
+                            int lastNumber = Integer.parseInt(lastNode.getId().substring(lastNode.getId().lastIndexOf("_") + 1));
+                            beforeElement.setId(beforeElement.getId() + "__" + ++lastNumber);
+                            afterElement.setId(afterElement.getId() + "__" + ++lastNumber);
 
-                        } else if (operation.getChapter().equals(ElementChapter.ExecutionListenerEnd) &&
-                                operation.getFieldType().equals(KnownElementFieldType.Expression)) {
-                            lastNode.getOperations().put(operation.getId(), operation);
-                            lastNode.getUsed().put(operation.getId(), operation);
+                            extractExpressionsToElements((BpmnElementDecorator) analysisElement, beforeElement, afterElement);
+                        } catch (CloneNotSupportedException e) {
+                            e.printStackTrace();
                         }
                     }
-                    */
+
+                    if (beforeElement != null && beforeElement.getProcessVariables().size() > 0) {
+                        if (hasNodesBefore) {
+                            beforeElement.addPredecessor(lastNodeBefore);
+                            lastNodeBefore.addSuccessor(beforeElement);
+                        } else {
+                            hasNodesBefore = true;
+                            firstNode = beforeElement;
+                        }
+                        lastNodeBefore = beforeElement;
+                        this.getNodes().put(beforeElement.getId(), beforeElement);
+                    }
+                    if (afterElement != null && afterElement.getProcessVariables().size() > 0) {
+                        if (hasNodesAfter) {
+                            afterElement.addSuccessor(firstNodeAfter);
+                            firstNodeAfter.addPredecessor(afterElement);
+                        } else {
+                            hasNodesAfter = true;
+                            lastNode = afterElement;
+                        }
+                        firstNodeAfter = afterElement;
+                        this.getNodes().put(afterElement.getId(), afterElement);
+                    }
 
                     for (AnalysisElement succ : analysisElement.getSuccessors()) {
                         if (succ.getBaseElement() instanceof StartEvent) {
@@ -188,11 +212,11 @@ public class FlowAnalysis {
 
                                 // Replace incoming element connections with first node
                                 firstNode.clearPredecessors();
-                                analysisElement.getPredecessors().forEach(preds -> {
+                                for (AnalysisElement preds : analysisElement.getPredecessors()) {
                                     preds.removeSuccessor(analysisElement.getId());
                                     preds.addSuccessor(new NodeDecorator(firstNode));
                                     firstNode.addPredecessor(preds);
-                                });
+                                }
 
                             } else {
                                 // Build direct connections between predecessors of call activity and child start event
@@ -242,17 +266,17 @@ public class FlowAnalysis {
                     }
                 } else {
                     // Replace element with first block
-                    analysisElement.getPredecessors().forEach(pred -> {
+                    for (AnalysisElement pred : analysisElement.getPredecessors()) {
                         pred.removeSuccessor(analysisElement.getId());
                         pred.addSuccessor(new NodeDecorator(firstNode));
                         firstNode.addPredecessor(pred);
-                    });
+                    }
 
                     // Replace element with last block
-                    analysisElement.getSuccessors().forEach(succ -> {
+                    for (AnalysisElement succ : analysisElement.getSuccessors()) {
                         succ.removePredecessor(analysisElement.getId());
                         succ.addPredecessor(new NodeDecorator(lastNode));
-                    });
+                    }
                 }
 
                 // TODO überprüfen, ob dieser Teil noch nötig ist
@@ -489,6 +513,8 @@ public class FlowAnalysis {
                 final LinkedHashMap<String, ProcessVariableOperation> internalUnion = new LinkedHashMap<>();
                 // TODO hier nach external gucken
                 internalUnion.putAll(analysisElement.getInUnused());
+                final LinkedHashMap<String, ProcessVariableOperation> tempUsed = new LinkedHashMap<>();
+                tempUsed.putAll(analysisElement.getUsed());
 
                 Optional<Map.Entry<String, ProcessVariableOperation>> oldOperation;
                 // Variables are overwritten if new operation
@@ -497,6 +523,10 @@ public class FlowAnalysis {
                     // Remove old operation from input set
                     oldOperation.ifPresent(stringProcessVariableOperationEntry -> internalUnion.remove(stringProcessVariableOperationEntry.getKey()));
                     internalUnion.put(operation.getKey(), operation.getValue());
+
+                    // Add operation to used set if variable is defined again although it was used before
+                    oldOperation = inUsed.entrySet().stream().filter(entry -> entry.getValue().getName().equals(operation.getValue().getName())).findFirst();
+                    oldOperation.ifPresent(o -> tempUsed.put(o.getKey(), o.getValue()));
                 }
 
                 final LinkedHashMap<String, ProcessVariableOperation> internalIntersection = new LinkedHashMap<>(
@@ -508,7 +538,7 @@ public class FlowAnalysis {
                 // Calculate out-sets for unused definitions (transfer functions)
                 final LinkedHashMap<String, ProcessVariableOperation> tempKillSet = new LinkedHashMap<>();
                 tempKillSet.putAll(analysisElement.getKilled());
-                tempKillSet.putAll(analysisElement.getUsed());
+                tempKillSet.putAll(tempUsed);
 
                 final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
                         getSetDifference(internalUnion, tempKillSet));
@@ -819,6 +849,43 @@ public class FlowAnalysis {
             }
         }));
         return setDifference;
+    }
+
+    private void extractExpressionsToElements(BpmnElementDecorator analysisElement, BpmnElementDecorator beforeElement,
+                                              BpmnElementDecorator afterElement) {
+        for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
+            if (operation.getChapter().equals(ElementChapter.ExecutionListenerStart) &&
+                    operation.getFieldType().equals(KnownElementFieldType.Expression)) {
+                beforeElement.getOperations().put(operation.getId(), operation);
+                beforeElement.setProcessVariable(operation.getId(), operation);
+            } else if (operation.getChapter().equals(ElementChapter.ExecutionListenerEnd) &&
+                    operation.getFieldType().equals(KnownElementFieldType.Expression)) {
+                afterElement.getOperations().put(operation.getId(), operation);
+                afterElement.setProcessVariable(operation.getId(), operation);
+            }
+        }
+        for (ProcessVariableOperation operation : analysisElement.getDefined().values()) {
+            if (operation.getChapter().equals(ElementChapter.ExecutionListenerStart) &&
+                    operation.getFieldType().equals(KnownElementFieldType.Expression)) {
+                beforeElement.getDefined().put(operation.getId(), operation);
+                beforeElement.setProcessVariable(operation.getId(), operation);
+            } else if (operation.getChapter().equals(ElementChapter.ExecutionListenerEnd) &&
+                    operation.getFieldType().equals(KnownElementFieldType.Expression)) {
+                afterElement.getOperations().put(operation.getId(), operation);
+                afterElement.setProcessVariable(operation.getId(), operation);
+            }
+        }
+        for (ProcessVariableOperation operation : analysisElement.getUsed().values()) {
+            if (operation.getChapter().equals(ElementChapter.ExecutionListenerStart) &&
+                    operation.getFieldType().equals(KnownElementFieldType.Expression)) {
+                beforeElement.getUsed().put(operation.getId(), operation);
+                beforeElement.setProcessVariable(operation.getId(), operation);
+            } else if (operation.getChapter().equals(ElementChapter.ExecutionListenerEnd) &&
+                    operation.getFieldType().equals(KnownElementFieldType.Expression)) {
+                afterElement.getUsed().put(operation.getId(), operation);
+                afterElement.setProcessVariable(operation.getId(), operation);
+            }
+        }
     }
 
     /**

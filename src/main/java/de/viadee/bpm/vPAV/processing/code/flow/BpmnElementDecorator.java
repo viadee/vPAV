@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -39,164 +40,192 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BpmnElementDecorator implements AnalysisElement {
+public class BpmnElementDecorator implements AnalysisElement, Cloneable {
 
-	private AnalysisElement decoratedBpmnElement;
+    private String id = null;
+    private AnalysisElement decoratedBpmnElement;
 
-	BpmnElementDecorator(final AnalysisElement element) {
-		this.decoratedBpmnElement = element;
-	}
+    BpmnElementDecorator(final AnalysisElement element) {
+        this.decoratedBpmnElement = element;
+    }
 
-	@Override
-	public ControlFlowGraph getControlFlowGraph() {
-		return decoratedBpmnElement.getControlFlowGraph();
-	}
+    @Override
+    public ControlFlowGraph getControlFlowGraph() {
+        return decoratedBpmnElement.getControlFlowGraph();
+    }
 
-	@Override
-	public String getId() {
-		return decoratedBpmnElement.getId();
-	}
+    @Override
+    public String getId() {
+        if (id == null) {
+            return decoratedBpmnElement.getId();
+        } else {
+            return id;
+        }
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
-		return decoratedBpmnElement.getOperations();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
+        return decoratedBpmnElement.getOperations();
+    }
 
-	@Override
-	public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
-		decoratedBpmnElement.setPredecessors(predecessors);
-	}
+    @Override
+    public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
+        decoratedBpmnElement.setPredecessors(predecessors);
+    }
 
-	@Override
-	public void addPredecessor(AnalysisElement predecessor) {
-		decoratedBpmnElement.addPredecessor(predecessor);
-	}
+    @Override
+    public void addPredecessor(AnalysisElement predecessor) {
+        decoratedBpmnElement.addPredecessor(predecessor);
+    }
 
-	@Override
-	public List<AnalysisElement> getPredecessors() {
-		return decoratedBpmnElement.getPredecessors();
-	}
+    @Override
+    public List<AnalysisElement> getPredecessors() {
+        return decoratedBpmnElement.getPredecessors();
+    }
 
-	@Override
-	public List<AnalysisElement> getSuccessors() {
-		return decoratedBpmnElement.getSuccessors();
-	}
+    @Override
+    public List<AnalysisElement> getSuccessors() {
+        return decoratedBpmnElement.getSuccessors();
+    }
 
-	@Override
-	public void setSuccessors(LinkedHashMap<String, AnalysisElement> successors) {
-		this.decoratedBpmnElement.setSuccessors(successors);
-	}
+    @Override
+    public void setSuccessors(LinkedHashMap<String, AnalysisElement> successors) {
+        this.decoratedBpmnElement.setSuccessors(successors);
+    }
 
-	@Override
-	public void addSuccessor(AnalysisElement successor) {
-		this.decoratedBpmnElement.addSuccessor(successor);
-	}
+    @Override
+    public void addSuccessor(AnalysisElement successor) {
+        this.decoratedBpmnElement.addSuccessor(successor);
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
-		return this.decoratedBpmnElement.getInUsed();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
+        return this.decoratedBpmnElement.getInUsed();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
-		return this.decoratedBpmnElement.getInUnused();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
+        return this.decoratedBpmnElement.getInUnused();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
-		return this.decoratedBpmnElement.getOutUsed();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
+        return this.decoratedBpmnElement.getOutUsed();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
-		return this.decoratedBpmnElement.getOutUnused();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
+        return this.decoratedBpmnElement.getOutUnused();
+    }
 
-	@Override
-	public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
-		this.decoratedBpmnElement.setInUsed(inUsed);
-	}
+    @Override
+    public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
+        this.decoratedBpmnElement.setInUsed(inUsed);
+    }
 
-	@Override
-	public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
-		this.decoratedBpmnElement.setInUnused(inUnused);
-	}
+    @Override
+    public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
+        this.decoratedBpmnElement.setInUnused(inUnused);
+    }
 
-	@Override
-	public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
-		this.decoratedBpmnElement.setOutUsed(outUsed);
-	}
+    @Override
+    public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
+        this.decoratedBpmnElement.setOutUsed(outUsed);
+    }
 
-	@Override
-	public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
-		this.decoratedBpmnElement.setOutUnused(outUnused);
-	}
+    @Override
+    public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
+        this.decoratedBpmnElement.setOutUnused(outUnused);
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getUsed() {
-		return this.decoratedBpmnElement.getUsed();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getUsed() {
+        return this.decoratedBpmnElement.getUsed();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getKilled() {
-		return this.decoratedBpmnElement.getKilled();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getKilled() {
+        return this.decoratedBpmnElement.getKilled();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getDefined() {
-		return this.decoratedBpmnElement.getDefined();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getDefined() {
+        return this.decoratedBpmnElement.getDefined();
+    }
 
-	@Override
-	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
-		this.decoratedBpmnElement.setDefined(defined);
-	}
+    @Override
+    public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+        this.decoratedBpmnElement.setDefined(defined);
+    }
 
-	@Override
-	public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
-		this.decoratedBpmnElement.addDefined(defined);
-	}
+    @Override
+    public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+        this.decoratedBpmnElement.addDefined(defined);
+    }
 
-	@Override
-	public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
-		this.decoratedBpmnElement.addSourceCodeAnomaly(anomalyContainer);
-	}
+    @Override
+    public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
+        this.decoratedBpmnElement.addSourceCodeAnomaly(anomalyContainer);
+    }
 
-	@Override
-	public void clearPredecessors() {
-		this.decoratedBpmnElement.clearPredecessors();
-	}
+    @Override
+    public void clearPredecessors() {
+        this.decoratedBpmnElement.clearPredecessors();
+    }
 
-	@Override
-	public void removePredecessor(String predecessor) {
-		this.decoratedBpmnElement.removePredecessor(predecessor);
-	}
+    @Override
+    public void removePredecessor(String predecessor) {
+        this.decoratedBpmnElement.removePredecessor(predecessor);
+    }
 
-	@Override
-	public void clearSuccessors() { this.decoratedBpmnElement.clearSuccessors(); }
+    @Override
+    public void clearSuccessors() {
+        this.decoratedBpmnElement.clearSuccessors();
+    }
 
-	@Override
-	public void removeSuccessor(String successor) {
-		this.decoratedBpmnElement.removeSuccessor(successor);
-	}
+    @Override
+    public void removeSuccessor(String successor) {
+        this.decoratedBpmnElement.removeSuccessor(successor);
+    }
 
-	@Override
-	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
-		return decoratedBpmnElement.getAnomalies();
-	}
+    @Override
+    public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
+        return decoratedBpmnElement.getAnomalies();
+    }
 
-	@Override
-	public BaseElement getBaseElement() {
-		return decoratedBpmnElement.getBaseElement();
-	}
+    @Override
+    public BaseElement getBaseElement() {
+        return decoratedBpmnElement.getBaseElement();
+    }
 
-	@Override
-	public BpmnElement getParentElement() {
-		return decoratedBpmnElement.getParentElement();
-	}
+    @Override
+    public BpmnElement getParentElement() {
+        return decoratedBpmnElement.getParentElement();
+    }
 
-	@Override
-	public void removeOperation(ProcessVariableOperation op) {
-		this.decoratedBpmnElement.removeOperation(op);
-	}
+    @Override
+    public void removeOperation(ProcessVariableOperation op) {
+        this.decoratedBpmnElement.removeOperation(op);
+    }
+
+    public ListMultimap<String, ProcessVariableOperation> getProcessVariables() {
+        return ((BpmnElement) decoratedBpmnElement).getProcessVariables();
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setProcessVariable(final String variableName, final ProcessVariableOperation variableObject) {
+        ((BpmnElement) decoratedBpmnElement).setProcessVariable(variableName, variableObject);
+    }
+
+    @Override
+    public BpmnElementDecorator clone() throws CloneNotSupportedException {
+        BpmnElementDecorator clone = (BpmnElementDecorator) super.clone();
+        BpmnElement decorated = (BpmnElement) clone.decoratedBpmnElement;
+        clone.decoratedBpmnElement = new BpmnElement(decorated.getProcessDefinition(),
+                decorated.getBaseElement(), decorated.getControlFlowGraph(), decorated.getFlowAnalysis());
+        return clone;
+    }
 }
