@@ -159,6 +159,21 @@ public class FlowAnalysis {
                         firstNodeAfter = firstNode;
                     }
 
+                    // Extract operations from listeners with expressions
+                    // TODO listener expression order is not considered yet
+         /*           for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
+                        if (operation.getChapter().equals(ElementChapter.ExecutionListenerStart) &&
+                                operation.getFieldType().equals(KnownElementFieldType.Expression)) {
+                            firstNode.getOperations().put(operation.getId(), operation);
+                            firstNode.getUsed().put(operation.getId(), operation);
+
+                        } else if (operation.getChapter().equals(ElementChapter.ExecutionListenerEnd) &&
+                                operation.getFieldType().equals(KnownElementFieldType.Expression)) {
+                            lastNode.getOperations().put(operation.getId(), operation);
+                            lastNode.getUsed().put(operation.getId(), operation);
+                        }
+                    }
+                    */
 
                     for (AnalysisElement succ : analysisElement.getSuccessors()) {
                         if (succ.getBaseElement() instanceof StartEvent) {
@@ -199,6 +214,16 @@ public class FlowAnalysis {
                             }
 
                             // TODO Fehlermeldung werfen, wenn end event nicht gefunden wird.
+                            for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
+                                if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
+                                    if (operation.getOperation().equals(READ)) {
+                                        endEvent.getOperations().put(operation.getId(), operation);
+                                    } else {
+                                        endEvent.getDefined().put(operation.getId(), operation);
+                                    }
+                                }
+                            }
+
                             succ.clearPredecessors();
                             endEvent.clearSuccessors();
 
@@ -230,6 +255,7 @@ public class FlowAnalysis {
                     });
                 }
 
+                // TODO überprüfen, ob dieser Teil noch nötig ist
                 boolean del = analysisElement.getControlFlowGraph().hasImplementedDelegate();
                 // Set predecessor relation for blocks across delegates
                 final Iterator<Node> iterator = analysisElement.getControlFlowGraph().getNodes().values().iterator();
@@ -242,8 +268,10 @@ public class FlowAnalysis {
                         // Ensure that the pointers wont get set for beginning delegate and ending
                         // delegate
                         if (currNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)
-                                && prevNode.getElementChapter().equals(ElementChapter.ExecutionListenerStart) && del) {
-                            prevNode = currNode;
+                                && prevNode.getElementChapter().equals(ElementChapter.ExecutionListenerStart)) {
+                            if (del) {
+                                prevNode = currNode;
+                            }
                         } else {
                             currNode.setPredsInterProcedural(prevNode.getId());
                             prevNode = currNode;
@@ -253,9 +281,7 @@ public class FlowAnalysis {
 
                 final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
                 final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
-                final LinkedHashMap<String, ProcessVariableOperation> outputReadVariables = new LinkedHashMap<>();
                 final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
-                final LinkedHashMap<String, ProcessVariableOperation> inputReadVariables = new LinkedHashMap<>();
 
                 analysisElement.getOperations().values().forEach(operation -> {
                     if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
@@ -264,37 +290,21 @@ public class FlowAnalysis {
                         outputVariables.put(operation.getId(), operation);
                     } else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
                         initialVariables.put(operation.getId(), operation);
-                    } else if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
-                        if (operation.getOperation().equals(VariableOperation.READ)) {
-                            inputReadVariables.put(operation.getId(), operation);
-                        } else {
-                            inputVariables.put(operation.getId(), operation);
-                        }
-                    } else if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
-                        if (operation.getOperation().equals(VariableOperation.READ)) {
-                            outputReadVariables.put(operation.getId(), operation);
-                        } else {
-                            outputVariables.put(operation.getId(), operation);
-                        }
                     }
                 });
 
                 // Input variables are passed later to start event of call activity if no nodes before exist
                 if (!(analysisElement.getBaseElement() instanceof CallActivity && !hasNodesBefore)) {
                     firstNode.addDefined(inputVariables);
-                    firstNode.getOperations().putAll(inputReadVariables);
                 }
 
-                // TODO camunda:in und camunda:out mappings müssen eigentlich beim end event liegen und nicht beim letzen call activiyt node
                 // Pass output variables to successors
                 if (analysisElement.getBaseElement() instanceof CallActivity && !hasNodesAfter) {
                     lastNode.getSuccessors().forEach((element) -> {
                         element.setDefined(outputVariables);
-                        element.getOperations().putAll(outputReadVariables);
                     });
                 } else {
                     lastNode.addDefined(outputVariables);
-                    lastNode.getOperations().putAll(outputReadVariables);
                 }
 
                 // If we have initial operations, we cant have input mapping (restriction of
@@ -319,14 +329,30 @@ public class FlowAnalysis {
                                             .collect(Collectors.toMap(AnalysisElement::getId, Function.identity())));
                             succ.setPredecessors(preds);
                         } else if (succ.getBaseElement() instanceof SequenceFlow) {
-                            final LinkedHashMap<String, ProcessVariableOperation> camundaOut = new LinkedHashMap<>();
-                            analysisElement.getOperations().values().forEach(operation -> {
-                                if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)
-                                        || operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
-                                    camundaOut.put(operation.getId(), operation);
+                            // Find end event
+                            AnalysisElement endEvent = null;
+                            for (AnalysisElement nestedPred : succ.getPredecessors()) {
+                                if (nestedPred.getBaseElement() instanceof EndEvent) {
+                                    endEvent = nestedPred;
                                 }
-                            });
-                            succ.addDefined(camundaOut);
+                            }
+
+                            final LinkedHashMap<String, ProcessVariableOperation> camundaOutput = new LinkedHashMap<>();
+
+                            for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
+                                if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
+                                    if (operation.getOperation().equals(READ)) {
+                                        endEvent.getOperations().put(operation.getId(), operation);
+                                    } else {
+                                        endEvent.getDefined().put(operation.getId(), operation);
+                                    }
+
+                                } else if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
+                                    camundaOutput.put(operation.getId(), operation);
+                                }
+                            }
+
+                            succ.addDefined(camundaOutput);
                             succ.getPredecessors().forEach(pred -> {
                                 if (pred.getBaseElement() instanceof CallActivity) {
                                     succ.removePredecessor(pred.getId());
@@ -360,26 +386,26 @@ public class FlowAnalysis {
      */
     private void embedCallActivities(AnalysisElement analysisElement, boolean hasNodesBefore) {
         final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
-        final LinkedHashMap<String, ProcessVariableOperation> camundaInRead = new LinkedHashMap<>();
         final ArrayList<ProcessVariableOperation> operationList = new ArrayList<>();
         if (analysisElement.getBaseElement() instanceof CallActivity) {
             analysisElement.getSuccessors().forEach(succ -> {
                 if (succ.getBaseElement() instanceof StartEvent) {
                     analysisElement.getOperations().values().forEach(operation -> {
-                        if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)
-                                || operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
+                        if (operation.getFieldType().equals(KnownElementFieldType.CamundaIn)) {
                             if (operation.getOperation().equals(VariableOperation.READ)) {
-                                camundaInRead.put(operation.getId(), operation);
+                                succ.getOperations().put(operation.getId(), operation);
                             } else {
-                                camundaIn.put(operation.getId(), operation);
+                                succ.getDefined().put(operation.getId(), operation);
                             }
+                            operationList.add(operation);
+                        } else if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
+                            camundaIn.put(operation.getId(), operation);
                             operationList.add(operation);
                         }
                     });
-                    // Add input variables only as defined if Call Activity has no nodes that are executed before the start event
+                    // Add input parameters only as defined if Call Activity has no nodes that are executed before the start event
                     if (!hasNodesBefore) {
                         succ.addDefined(camundaIn);
-                        succ.getOperations().putAll(camundaInRead);
                     }
                 } else if (succ.getBaseElement() instanceof SequenceFlow) {
                     analysisElement.removeSuccessor(succ.getId());
