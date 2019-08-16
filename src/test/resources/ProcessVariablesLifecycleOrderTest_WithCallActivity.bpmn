@@ -20,9 +20,9 @@
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.SimpleSetDelegate" event="start" />
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.TestDelegate" event="start" />
         <camunda:executionListener expression="${var2}" event="start" />
+        <camunda:executionListener expression="${isExternalProcess}" event="end" />
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.TestDelegate" event="end" />
         <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.TransitiveDelegate" event="end" />
-        <camunda:executionListener expression="${isExternalProcess}" event="end" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_09g2qw7</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1qw9mzs</bpmn:outgoing>

@@ -97,22 +97,29 @@ public class ProcessVariablesLifecycleOrderTest {
         flowAnalysis.analyze(graphCollection);
 
         LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        assertEquals("There should be 9 nodes.", 9, nodes.size());
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("MyEndEvent");
         AnalysisElement sequenceFlow1 = endEvent.getPredecessors().get(0);
-        AnalysisElement endListener = sequenceFlow1.getPredecessors().get(0);
-        AnalysisElement startListener = endListener.getPredecessors().get(0);
-        AnalysisElement sequenceFlow0 = startListener.getPredecessors().get(0);
+        // TODO contain order bzw. order listeners correctly
+        // Order is only correct because the listeners are ordered like this in the bpmn file
+        AnalysisElement endListenerDelegate = sequenceFlow1.getPredecessors().get(0);
+        AnalysisElement endListenerExpression = endListenerDelegate.getPredecessors().get(0);
+        AnalysisElement implementationExpression = endListenerExpression.getPredecessors().get(0);
+        AnalysisElement startListenerExpression = implementationExpression.getPredecessors().get(0);
+        AnalysisElement startListenerDelegate = startListenerExpression.getPredecessors().get(0);
+        AnalysisElement sequenceFlow0 = startListenerDelegate.getPredecessors().get(0);
         AnalysisElement startEvent = sequenceFlow0.getPredecessors().get(0);
 
-        assertEquals("End Listener was not correctly included.", "MyServiceTask__1", endListener.getId());
-        assertEquals("Start Listener was not correctly included.", "MyServiceTask__0", startListener.getId());
+        assertEquals("Delegate End Listener was not correctly included.", "MyServiceTask__4", endListenerDelegate.getId());
+        assertEquals("Expression End Listener was not correctly included.", "MyServiceTask__3", endListenerExpression.getId());
+        assertEquals("Delegate Start Listener was not correctly included.", "MyServiceTask__0", startListenerDelegate.getId());
         assertEquals("Start event was not reached.", "MyStartEvent", startEvent.getId());
         assertEquals("Start event should not have any predecessors.", 0, startEvent.getPredecessors().size());
 
         // Check discovery of process variables
         assertEquals("Second Sequence Flow should have two input parameters because the service task has two output parameters.", 2, sequenceFlow1.getInUnused().size());
-        assertEquals("Start Listener should have one input parameter.", 1, startListener.getDefined().size());
+        assertEquals("Delegate Start Listener should have one input parameter.", 1, startListenerDelegate.getDefined().size());
     }
 
     @Test
@@ -162,14 +169,11 @@ public class ProcessVariablesLifecycleOrderTest {
         AnalysisElement serviceTask = startListener1.getPredecessors().get(0).getPredecessors().get(0);
         AnalysisElement startEvent = serviceTask.getPredecessors().get(0).getPredecessors().get(0);
 
-        assertEquals("End Listener 2 was not correctly included.", "MyCallActivity__3", endListener2.getId());
-        assertEquals("End Listener 1 was not correctly included.", "MyCallActivity__2", endListener1.getId());
+        // TODO successor relations are not set correctly
+        assertEquals("End Listener 2 was not correctly included.", "MyCallActivity__5", endListener2.getId());
+        assertEquals("Expression End Listener was not correctly included.", "MyCallActivity__3", endListenerExpression.getId());
         assertEquals("Start Listener 1 was not correctly included.", "MyCallActivity__0", startListener1.getId());
-        assertEquals("Start Listener 2 was not correctly included.", "MyCallActivity__1", startListener2.getId());
-        assertEquals("Start Listener with Expresion was not correctly included",
-                "MyCallActivity__4", startListenerExpression.getId());
-        assertEquals("End Listener with Expresion was not correctly included",
-                "MyCallActivity__5", endListenerExpression.getId());
+        assertEquals("Expression Start Listener was not correctly included.", "MyCallActivity__2", startListenerExpression.getId());
         assertEquals("_EndEvent_SUCC", endEventCalledProcess.getId());
         assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getId());
         assertEquals("_StartEvent_1", startEventCalledProcess.getId());

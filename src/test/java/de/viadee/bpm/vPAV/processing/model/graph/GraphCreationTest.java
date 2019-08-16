@@ -113,17 +113,17 @@ public class GraphCreationTest {
 		Assert.assertNull("valid variable is marked as invalid", validVarTest);
 
 		final List<Path> jepppaTest = invalidPathMap
-				.get(new AnomalyContainer("jepppa", Anomaly.DD, "SequenceFlow_0btqo3y", "",null));
+				.get(new AnomalyContainer("jepppa", Anomaly.DD, "SequenceFlow_0btqo3y__0","SequenceFlow_0btqo3y", "",null));
 		Assert.assertEquals(
 				"[[SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_0t7iwpj, Task_0546a8y, SequenceFlow_1m6lt2o, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y], [SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, SequenceFlow_06ehu4z, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y]]",
 				jepppaTest.toString());
 
 		final List<Path> testHallo2 = invalidPathMap
-				.get(new AnomalyContainer("hallo2", Anomaly.UR, "BusinessRuleTask_119jb6t", "",null));
+				.get(new AnomalyContainer("hallo2", Anomaly.UR, "BusinessRuleTask_119jb6t__0", "BusinessRuleTask_119jb6t", "",null));
 		Assert.assertEquals("[[BusinessRuleTask_119jb6t]]", testHallo2.toString());
 
 		final List<Path> geloeschteVarTest = invalidPathMap
-				.get(new AnomalyContainer("geloeschteVariable", Anomaly.DU, "SequenceFlow_0bi6kaa", "",null));
+				.get(new AnomalyContainer("geloeschteVariable", Anomaly.DU, "SequenceFlow_0bi6kaa__0","SequenceFlow_0bi6kaa", "",null));
 		Assert.assertEquals(
 				"[[SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, BoundaryEvent_11udorz, SequenceFlow_0bi6kaa]]",
 				geloeschteVarTest.toString());
