@@ -39,7 +39,7 @@ import java.util.LinkedHashMap;
 
 public class ControlFlowGraph {
 
-	private LinkedHashMap<String, Node> nodes;
+	private LinkedHashMap<String, AbstractNode> nodes;
 
 	private LinkedHashMap<String, ProcessVariableOperation> operations;
 
@@ -66,7 +66,7 @@ public class ControlFlowGraph {
 	 * @param node
 	 *            Node to be added to the control flow graph
 	 */
-	public void addNode(final Node node) {
+	public void addNode(final AbstractNode node) {
 		String key = createHierarchy(node);
 		node.setId(key);
 		this.nodes.put(key, node);
@@ -82,7 +82,7 @@ public class ControlFlowGraph {
 	 *            Current node
 	 * @return Id of node
 	 */
-	private String createHierarchy(final Node node) {
+	private String createHierarchy(final AbstractNode node) {
 		StringBuilder key = new StringBuilder();
 		key.append(node.getParentElement().getBaseElement().getId()).append("__");
 		if (recursionCounter == 0) {
@@ -121,7 +121,7 @@ public class ControlFlowGraph {
 	}
 
 	boolean hasImplementedDelegate() {
-		for (Node node : nodes.values()) {
+		for (AbstractNode node : nodes.values()) {
 			if (node.getElementChapter().equals(ElementChapter.Implementation)) {
 				return true;
 			}
@@ -153,7 +153,7 @@ public class ControlFlowGraph {
 		this.priorLevel = priorLevel;
 	}
 
-	public LinkedHashMap<String, Node> getNodes() {
+	public LinkedHashMap<String, AbstractNode> getNodes() {
 		return nodes;
 	}
 
@@ -165,14 +165,14 @@ public class ControlFlowGraph {
 		this.internalNodeCounter = internalNodeCounter;
 	}
 
-	Node firstNode() {
-		Iterator<Node> iterator = nodes.values().iterator();
+	AbstractNode firstNode() {
+		Iterator<AbstractNode> iterator = nodes.values().iterator();
 		return iterator.next();
 	}
 
-	Node lastNode() {
-		Iterator<Node> iterator = nodes.values().iterator();
-		Node node = null;
+	AbstractNode lastNode() {
+		Iterator<AbstractNode> iterator = nodes.values().iterator();
+		AbstractNode node = null;
 		while (iterator.hasNext()) {
 			node = iterator.next();
 		}

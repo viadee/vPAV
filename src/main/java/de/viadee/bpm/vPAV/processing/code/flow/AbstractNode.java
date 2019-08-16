@@ -148,6 +148,10 @@ public abstract class AbstractNode implements AnalysisElement {
 		}
 	}
 
+	abstract void setPreds();
+
+	abstract void setSuccs();
+
 	@Override
 	public ControlFlowGraph getControlFlowGraph() {
 		return null;

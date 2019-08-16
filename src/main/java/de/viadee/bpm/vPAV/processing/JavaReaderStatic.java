@@ -36,6 +36,7 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.processing.code.flow.AbstractNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
@@ -137,7 +138,7 @@ public class JavaReaderStatic {
                 }
                 // TODO what about delete (oder abhängig machen davon, ob delegateExecution oder VariableMap verwendet wird?!
             }
-            for (Node node : controlFlowGraph.getNodes().values()) {
+            for (AbstractNode node : controlFlowGraph.getNodes().values()) {
                 for (ProcessVariableOperation variable : node.getOperations().values()) {
                     if (variable.getOperation() == VariableOperation.WRITE) {
                         variable.setScopeId(subprocessScopeId);
