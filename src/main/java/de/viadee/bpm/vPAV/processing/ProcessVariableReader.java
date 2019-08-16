@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -1072,8 +1072,6 @@ public final class ProcessVariableReader {
             final FileScanner fileScanner, final String expression, final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        ExpressionNode expNode = new ExpressionNode(controlFlowGraph, element, expression, chapter);
-        controlFlowGraph.addNode(expNode);
 
         // HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
         // ${dateTime().plusWeeks(1).toDate()}
@@ -1084,6 +1082,8 @@ public final class ProcessVariableReader {
         if (matcher.matches()) {
             return variables;
         }
+
+        ExpressionNode expNode = new ExpressionNode(controlFlowGraph, element, expression, chapter);
 
         try {
             // remove object name from method calls, otherwise the method arguments could
@@ -1099,6 +1099,7 @@ public final class ProcessVariableReader {
                 final String className = isBean(node.getName());
                 if (className != null) {
                     // TODO is this working in combination with expression nodes?
+                    // TODO should there be a node?
                     // read variables in class file (bean)
                     variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner, className, element,
                             chapter, fieldType, scopeId, controlFlowGraph));
@@ -1129,11 +1130,15 @@ public final class ProcessVariableReader {
                 expNode.getOperations().put(op.getId(), op);
                 expNode.getKilled().put(op.getId(), op);
             }));
-
         } catch (final ELException e) {
             throw new ProcessingException("EL expression " + expression + " in " + element.getProcessDefinition()
                     + ", element ID: " + element.getBaseElement().getId() + ", Type: " + fieldType.getDescription()
                     + " couldn't be parsed", e);
+        }
+
+        // TODO are there other field Types that should be skipped?
+        if (!fieldType.equals(KnownElementFieldType.CalledElement)) {
+            controlFlowGraph.addNode(expNode);
         }
 
         return variables;
