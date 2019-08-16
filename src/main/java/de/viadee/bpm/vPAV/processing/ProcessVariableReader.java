@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,10 +41,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
-import de.viadee.bpm.vPAV.processing.code.flow.Node;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.camunda.bpm.engine.impl.juel.Builder;
@@ -1115,13 +1112,24 @@ public final class ProcessVariableReader {
                     expNode.getOperations().put(node.getName(), operation);
                 }
             }
-            // TODO add support with expression nodes
             // extract written variables
-            variables.putAll(ResourceFileReader.searchWrittenProcessVariablesInCode(element, chapter, fieldType,
-                    element.getProcessDefinition(), scopeId, expression));
+            ListMultimap<String, ProcessVariableOperation> writeOperations = ResourceFileReader.searchWrittenProcessVariablesInCode(element, chapter, fieldType,
+                    element.getProcessDefinition(), scopeId, expression);
+            variables.putAll(writeOperations);
+            writeOperations.asMap().forEach((key, value) -> value.forEach(op -> {
+                expNode.getOperations().put(op.getId(), op);
+                expNode.getDefined().put(op.getId(), op);
+            }));
+
             // extract deleted variables
-            variables.putAll(ResourceFileReader.searchRemovedProcessVariablesInCode(element, chapter, fieldType,
-                    element.getProcessDefinition(), scopeId, expression));
+            ListMultimap<String, ProcessVariableOperation> deleteOperations = ResourceFileReader.searchRemovedProcessVariablesInCode(element, chapter, fieldType,
+                    element.getProcessDefinition(), scopeId, expression);
+            variables.putAll(deleteOperations);
+            deleteOperations.asMap().forEach((key, value) -> value.forEach(op -> {
+                expNode.getOperations().put(op.getId(), op);
+                expNode.getKilled().put(op.getId(), op);
+            }));
+
         } catch (final ELException e) {
             throw new ProcessingException("EL expression " + expression + " in " + element.getProcessDefinition()
                     + ", element ID: " + element.getBaseElement().getId() + ", Type: " + fieldType.getDescription()
