@@ -149,6 +149,16 @@ public class BpmnElementDecorator implements AnalysisElement, Cloneable {
     }
 
     @Override
+    public void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations) {
+        this.decoratedBpmnElement.setOperations(operations);
+    }
+
+    @Override
+    public void setUsed(LinkedHashMap<String, ProcessVariableOperation> used) {
+        this.decoratedBpmnElement.setUsed(used);
+    }
+
+    @Override
     public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
         this.decoratedBpmnElement.setDefined(defined);
     }

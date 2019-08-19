@@ -81,6 +81,10 @@ public interface AnalysisElement {
 
 	LinkedHashMap<String, ProcessVariableOperation> getDefined();
 
+	void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations);
+
+	void setUsed(LinkedHashMap<String, ProcessVariableOperation> used);
+
 	void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
 
 	void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined);

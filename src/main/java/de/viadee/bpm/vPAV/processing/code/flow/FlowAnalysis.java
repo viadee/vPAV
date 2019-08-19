@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -582,9 +582,27 @@ public class FlowAnalysis {
      */
     private void computeLineByLine() {
         nodes.values().forEach(analysisElement -> {
-            if (analysisElement.getOperations().size() >= 2) {
+            final LinkedHashMap<String, ProcessVariableOperation> operations = new LinkedHashMap<>(analysisElement.getOperations());
+
+            // TODO operations on mapped variables are not recognized inside variable mapping delegate method/class
+            // If element is delegate variable mapping node, ignore mapped variables because they are only active inside child
+            if (analysisElement.getParentElement().getBaseElement() instanceof CallActivity
+                    && analysisElement instanceof Node) {
+                Node tmpNode = (Node) analysisElement;
+                if (tmpNode.getElementChapter().equals(ElementChapter.InputImplementation) ||
+                        tmpNode.getElementChapter().equals(ElementChapter.OutputImplementation)) {
+                    String childProcessId = ((CallActivity) analysisElement.getParentElement().getBaseElement()).getCalledElement();
+                    analysisElement.getOperations().forEach((key, value) -> {
+                        if (value.getScopeId().equals(childProcessId)) {
+                            operations.remove(key);
+                        }
+                    });
+                }
+            }
+
+            if (operations.size() >= 2) {
                 ProcessVariableOperation prev = null;
-                for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
+                for (ProcessVariableOperation operation : operations.values()) {
                     if (prev == null) {
                         prev = operation;
                         continue;
@@ -601,13 +619,62 @@ public class FlowAnalysis {
      */
     private void extractAnomalies() {
         nodes.values().forEach(node -> {
-            ddAnomalies(node);
+            if (node.getParentElement().getBaseElement() instanceof CallActivity
+                    && node instanceof Node) {
+                Node tmpNode = (Node) node;
+                if (tmpNode.getElementChapter().equals(ElementChapter.InputImplementation) ||
+                        tmpNode.getElementChapter().equals(ElementChapter.OutputImplementation)) {
+                    String childProcessId = ((CallActivity) node.getParentElement().getBaseElement()).getCalledElement();
+                    handleDelegateVariableMapping(node, childProcessId);
+                }
+            } else {
+                ddAnomalies(node);
 
-            duAnomalies(node);
+                duAnomalies(node);
 
-            urAnomalies(node);
+                urAnomalies(node);
 
-            uuAnomalies(node);
+                uuAnomalies(node);
+            }
+        });
+    }
+
+    private void handleDelegateVariableMapping(AnalysisElement element, String childProcessId) {
+        // Save original sets
+        final LinkedHashMap<String, ProcessVariableOperation> originalOperations = new LinkedHashMap<>(element.getOperations());
+        final LinkedHashMap<String, ProcessVariableOperation> originalDefined = new LinkedHashMap<>(element.getDefined());
+        final LinkedHashMap<String, ProcessVariableOperation> originalUsed = new LinkedHashMap<>(element.getUsed());
+        final LinkedHashMap<String, ProcessVariableOperation> originalInUnused = new LinkedHashMap<>(element.getInUnused());
+        final LinkedHashMap<String, ProcessVariableOperation> originalInUsed = new LinkedHashMap<>(element.getInUsed());
+
+        // Delete variables that are only used in the child process
+        filterDelegateVariables(originalOperations, element.getOperations(), childProcessId);
+        filterDelegateVariables(originalDefined, element.getDefined(), childProcessId);
+        filterDelegateVariables(originalUsed, element.getUsed(), childProcessId);
+        filterDelegateVariables(originalInUnused, element.getInUnused(), childProcessId);
+        filterDelegateVariables(originalInUsed, element.getInUsed(), childProcessId);
+
+        // Run anomaly check
+        ddAnomalies(element);
+        duAnomalies(element);
+        urAnomalies(element);
+        uuAnomalies(element);
+
+        // Restore original sets
+        element.setOperations(originalOperations);
+        element.setDefined(originalDefined);
+        element.setUsed(originalUsed);
+        element.setInUnused(originalInUnused);
+        element.setInUsed(originalInUsed);
+    }
+
+    private void filterDelegateVariables(final LinkedHashMap<String, ProcessVariableOperation> in,
+                                         final LinkedHashMap<String, ProcessVariableOperation> out,
+                                         String childProcessId) {
+        in.forEach((key, value) -> {
+            if (value.getScopeId().equals(childProcessId)) {
+                out.remove(key);
+            }
         });
     }
 
@@ -802,7 +869,11 @@ public class FlowAnalysis {
         final LinkedHashMap<String, ProcessVariableOperation> setDifference = new LinkedHashMap<>(mapOne);
 
         mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
-            if (value.getName().equals(value2.getName())) {
+            // TODO check if it does not break anything if delegated variables are ignored
+            boolean isDelegateVariable = (value2.getChapter().equals(ElementChapter.InputImplementation) ||
+                    value2.getChapter().equals(ElementChapter.OutputImplementation)) &&
+                    value2.getScopeId().equals(((CallActivity) value2.getElement().getBaseElement()).getCalledElement());
+            if (value.getName().equals(value2.getName()) && !isDelegateVariable) {
                 setDifference.remove(key);
             }
         }));

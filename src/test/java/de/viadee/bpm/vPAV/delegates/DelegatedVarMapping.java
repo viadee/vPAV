@@ -40,6 +40,7 @@ public class DelegatedVarMapping implements DelegateVariableMapping {
 
     @Override
     public void mapInputVariables(DelegateExecution delegateExecution, VariableMap variableMap) {
+        // TODO try to put another method here -> graph correct order?
         variableMap.putValue("inMapping", "myInputValue");
         delegateExecution.getVariable("inputVariable");
     }

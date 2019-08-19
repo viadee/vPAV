@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,163 +41,175 @@ import java.util.Map;
 
 public class NodeDecorator implements AnalysisElement {
 
-	private AnalysisElement decoratedNode;
+    private AnalysisElement decoratedNode;
 
-	NodeDecorator(final AnalysisElement node) {
-		this.decoratedNode = node;
-	}
+    NodeDecorator(final AnalysisElement node) {
+        this.decoratedNode = node;
+    }
 
-	@Override
-	public ControlFlowGraph getControlFlowGraph() {
-		return null;
-	}
+    @Override
+    public ControlFlowGraph getControlFlowGraph() {
+        return null;
+    }
 
-	@Override
-	public String getId() {
-		return decoratedNode.getId();
-	}
+    @Override
+    public String getId() {
+        return decoratedNode.getId();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
-		return decoratedNode.getOperations();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getOperations() {
+        return decoratedNode.getOperations();
+    }
 
-	@Override
-	public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
-		decoratedNode.setPredecessors(predecessors);
-	}
+    @Override
+    public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
+        decoratedNode.setPredecessors(predecessors);
+    }
 
-	@Override
-	public void addPredecessor(AnalysisElement predecessor) {
-		decoratedNode.addPredecessor(predecessor);
-	}
+    @Override
+    public void addPredecessor(AnalysisElement predecessor) {
+        decoratedNode.addPredecessor(predecessor);
+    }
 
-	@Override
-	public List<AnalysisElement> getPredecessors() {
-		return decoratedNode.getPredecessors();
-	}
+    @Override
+    public List<AnalysisElement> getPredecessors() {
+        return decoratedNode.getPredecessors();
+    }
 
-	@Override
-	public List<AnalysisElement> getSuccessors() {
-		return decoratedNode.getSuccessors();
-	}
+    @Override
+    public List<AnalysisElement> getSuccessors() {
+        return decoratedNode.getSuccessors();
+    }
 
-	@Override
-	public void setSuccessors(LinkedHashMap<String, AnalysisElement> successors) {
-		decoratedNode.setSuccessors(successors);
-	}
+    @Override
+    public void setSuccessors(LinkedHashMap<String, AnalysisElement> successors) {
+        decoratedNode.setSuccessors(successors);
+    }
 
-	@Override
-	public void addSuccessor(AnalysisElement successor) {
-		decoratedNode.addSuccessor(successor);
-	}
+    @Override
+    public void addSuccessor(AnalysisElement successor) {
+        decoratedNode.addSuccessor(successor);
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
-		return decoratedNode.getInUsed();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
+        return decoratedNode.getInUsed();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
-		return decoratedNode.getInUnused();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
+        return decoratedNode.getInUnused();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
-		return decoratedNode.getOutUsed();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
+        return decoratedNode.getOutUsed();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
-		return decoratedNode.getOutUnused();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
+        return decoratedNode.getOutUnused();
+    }
 
-	@Override
-	public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
-		decoratedNode.setInUsed(inUsed);
-	}
+    @Override
+    public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
+        decoratedNode.setInUsed(inUsed);
+    }
 
-	@Override
-	public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
-		decoratedNode.setInUnused(inUnused);
-	}
+    @Override
+    public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
+        decoratedNode.setInUnused(inUnused);
+    }
 
-	@Override
-	public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
-		decoratedNode.setOutUsed(outUsed);
-	}
+    @Override
+    public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
+        decoratedNode.setOutUsed(outUsed);
+    }
 
-	@Override
-	public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
-		decoratedNode.setOutUnused(outUnused);
-	}
+    @Override
+    public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
+        decoratedNode.setOutUnused(outUnused);
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getUsed() {
-		return decoratedNode.getUsed();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getUsed() {
+        return decoratedNode.getUsed();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getKilled() {
-		return decoratedNode.getKilled();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getKilled() {
+        return decoratedNode.getKilled();
+    }
 
-	@Override
-	public LinkedHashMap<String, ProcessVariableOperation> getDefined() {
-		return decoratedNode.getDefined();
-	}
+    @Override
+    public LinkedHashMap<String, ProcessVariableOperation> getDefined() {
+        return decoratedNode.getDefined();
+    }
 
-	@Override
-	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
-		decoratedNode.setDefined(defined);
-	}
+    @Override
+    public void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations) {
+        decoratedNode.setOperations(operations);
+    }
 
-	@Override
-	public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
-		this.decoratedNode.addDefined(defined);
-	}
+    @Override
+    public void setUsed(LinkedHashMap<String, ProcessVariableOperation> used) {
+        decoratedNode.setUsed(used);
+    }
 
-	@Override
-	public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
-		this.decoratedNode.addSourceCodeAnomaly(anomalyContainer);
-	}
+    @Override
+    public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+        decoratedNode.setDefined(defined);
+    }
 
-	@Override
-	public void clearPredecessors() {
-		this.decoratedNode.clearPredecessors();
-	}
+    @Override
+    public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+        this.decoratedNode.addDefined(defined);
+    }
 
-	@Override
-	public void removePredecessor(String predecessor) {
-		this.decoratedNode.removePredecessor(predecessor);
-	}
+    @Override
+    public void addSourceCodeAnomaly(AnomalyContainer anomalyContainer) {
+        this.decoratedNode.addSourceCodeAnomaly(anomalyContainer);
+    }
 
-	@Override
-	public void clearSuccessors() { this.decoratedNode.clearSuccessors(); }
+    @Override
+    public void clearPredecessors() {
+        this.decoratedNode.clearPredecessors();
+    }
 
-	@Override
-	public void removeSuccessor(String successor) {
-		this.decoratedNode.removeSuccessor(successor);
-	}
+    @Override
+    public void removePredecessor(String predecessor) {
+        this.decoratedNode.removePredecessor(predecessor);
+    }
 
-	@Override
-	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
-		return decoratedNode.getAnomalies();
-	}
+    @Override
+    public void clearSuccessors() {
+        this.decoratedNode.clearSuccessors();
+    }
 
-	@Override
-	public BaseElement getBaseElement() {
-		return decoratedNode.getBaseElement();
-	}
+    @Override
+    public void removeSuccessor(String successor) {
+        this.decoratedNode.removeSuccessor(successor);
+    }
 
-	@Override
-	public BpmnElement getParentElement() {
-		return decoratedNode.getParentElement();
-	}
+    @Override
+    public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
+        return decoratedNode.getAnomalies();
+    }
 
-	@Override
-	public void removeOperation(ProcessVariableOperation op) {
-		this.decoratedNode.removeOperation(op);
-	}
+    @Override
+    public BaseElement getBaseElement() {
+        return decoratedNode.getBaseElement();
+    }
+
+    @Override
+    public BpmnElement getParentElement() {
+        return decoratedNode.getParentElement();
+    }
+
+    @Override
+    public void removeOperation(ProcessVariableOperation op) {
+        this.decoratedNode.removeOperation(op);
+    }
 
 }

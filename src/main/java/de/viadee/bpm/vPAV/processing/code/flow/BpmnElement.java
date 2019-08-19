@@ -251,6 +251,16 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	@Override
+	public void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations) {
+		this.operations = operations;
+	}
+
+	@Override
+	public void setUsed(LinkedHashMap<String, ProcessVariableOperation> used) {
+		this.used = used;
+	}
+
+	@Override
 	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
 		this.defined = defined;
 	}
