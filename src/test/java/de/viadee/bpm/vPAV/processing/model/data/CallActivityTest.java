@@ -122,13 +122,9 @@ public class CallActivityTest {
                 anomaly3.getAnomaly());
     }
 
-  //  @Test
+    @Test
     public void testEmbeddedWithVariableMapping() {
-        // TODO diesen test überprüfen
-        // TODO out in source expression verändern
         // Usage of camunda:in and camunda:out
-        // TODO test with source expression
-        // Test with source expression
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "CallActivityTest_TwoLevels.bpmn";
@@ -140,7 +136,8 @@ public class CallActivityTest {
 
         // add reference for called process
         final Map<String, String> processIdToPathMap = new HashMap<>();
-        processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_delegatedVarMapping_calledProcess.bpmn");
+        processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_calledProcess.bpmn");
+        processIdToPathMap.put("calledcalledProcess", "CallActivityTest/CallActivityTest_calledcalledProcess.bpmn");
 
         callActivity.builder().camundaIn("varIn", "inMapping");
         callActivity.builder().camundaOut("z", "outMapping");
@@ -175,7 +172,14 @@ public class CallActivityTest {
             Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
             AnomalyContainer anomaly1 = iterator.next();
-            Assert.assertEquals("There should be exactly one anomaly", 1, invalidPathMap.size());
+            Assert.assertEquals("There should be exactly three anomalies.", 3, invalidPathMap.size());
+            // var1 ServiceTask_1gq1azp
+            Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                    anomaly1.getAnomaly());
+            // var1 ServiceTask_01owrcj
+            Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                    anomaly1.getAnomaly());
+            // var3 ServiceTask_0edbu4z
             Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                     anomaly1.getAnomaly());
         }

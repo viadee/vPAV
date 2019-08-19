@@ -41,7 +41,9 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.camunda.bpm.engine.impl.juel.Builder;
@@ -1137,7 +1139,9 @@ public final class ProcessVariableReader {
         }
 
         // TODO are there other field Types that should be skipped?
-        if (!fieldType.equals(KnownElementFieldType.CalledElement)) {
+        if (!fieldType.equals(KnownElementFieldType.CalledElement)
+                && !fieldType.equals(KnownElementFieldType.CamundaOut)
+                && !fieldType.equals(KnownElementFieldType.Expression.CamundaIn)) {
             controlFlowGraph.addNode(expNode);
         }
 
