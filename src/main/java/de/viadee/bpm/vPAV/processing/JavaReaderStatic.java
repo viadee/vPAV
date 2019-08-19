@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,12 +36,12 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
-import de.viadee.bpm.vPAV.processing.code.flow.AbstractNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.engine.variable.VariableMap;
+import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import soot.*;
 import soot.jimple.*;
 import soot.jimple.internal.*;
@@ -129,24 +129,9 @@ public class JavaReaderStatic {
             System.setProperty("soot.class.path", sootPath);
             final Set<String> classPaths = fileScanner.getJavaResourcesFileInputStream();
 
-            // TODO sepearte between read and write
+            // TODO ist überhaupt noch ein unterschied zum normalen java delegate? -> joinen
             variables.putAll(classFetcher(classPaths, classFile, "mapInputVariables", classFile, element, ElementChapter.InputImplementation,
                     fieldType, scopeId, controlFlowGraph));
-            for (ProcessVariableOperation variable : variables.values()) {
-                if (variable.getOperation() == VariableOperation.WRITE) {
-                    variable.setScopeId(subprocessScopeId);
-                }
-                // TODO what about delete (oder abhängig machen davon, ob delegateExecution oder VariableMap verwendet wird?!
-            }
-            for (AbstractNode node : controlFlowGraph.getNodes().values()) {
-                for (ProcessVariableOperation variable : node.getOperations().values()) {
-                    if (variable.getOperation() == VariableOperation.WRITE) {
-                        variable.setScopeId(subprocessScopeId);
-                    }
-                    // TODO what about delete (oder abhängig machen davon, ob delegateExecution oder VariableMap verwendet wird?!
-                }
-            }
-
             variables.putAll(classFetcher(classPaths, classFile, "mapOutputVariables", classFile, element, ElementChapter.OutputImplementation,
                     fieldType, scopeId, controlFlowGraph));
 
@@ -542,9 +527,9 @@ public class JavaReaderStatic {
                                     VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
                                     final ControlFlowGraph controlFlowGraph) {
 
-		for (Block block : graph.getBlocks()) {
-			Node node = new Node(controlFlowGraph, element, block, chapter);
-			controlFlowGraph.addNode(node);
+        for (Block block : graph.getBlocks()) {
+            Node node = new Node(controlFlowGraph, element, block, chapter);
+            controlFlowGraph.addNode(node);
 
             // Collect the functions Unit by Unit via the blockIterator
             final VariableBlock vb = blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
@@ -774,7 +759,7 @@ public class JavaReaderStatic {
      */
     private void parseExpression(final JInterfaceInvokeExpr expr, final VariableBlock variableBlock,
                                  final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-                                 final String filePath, final String scopeId, final String paramName, final Node node) {
+                                 final String filePath, String scopeId, final String paramName, final Node node) {
 
         String functionName = expr.getMethodRef().getName();
         int numberOfArg = expr.getArgCount();
@@ -786,6 +771,13 @@ public class JavaReaderStatic {
         if (foundMethod != null) {
             int location = foundMethod.getLocation() - 1;
             VariableOperation type = foundMethod.getOperationType();
+
+            // Check if method call is to variable map for delegate variable mappings
+            if (expr.getMethodRef().getDeclaringClass().getName().equals("org.camunda.bpm.engine.variable.VariableMap")) {
+                // If so, scope id is the id of the child process
+                scopeId = ((CallActivity) element.getBaseElement()).getCalledElement();
+            }
+
             if (expr.getArgBox(location).getValue() instanceof StringConstant) {
                 StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
                 String name = variableName.value.replaceAll("\"", "");
