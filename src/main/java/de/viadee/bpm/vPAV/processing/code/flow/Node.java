@@ -31,59 +31,53 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import soot.toolkits.graph.Block;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import soot.toolkits.graph.Block;
 
 public class Node extends AbstractNode {
 
-    private Block block;
+	private Block block;
 
-    public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block, final ElementChapter elementChapter) {
-        super(controlFlowGraph, parentElement, elementChapter);
-        this.block = block;
-    }
+	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block,
+			final ElementChapter elementChapter) {
+		super(controlFlowGraph, parentElement, elementChapter);
+		this.block = block;
+	}
 
-    /**
-     * Set the predecessor nodes of the current node
-     */
-    @Override
-    public void setPreds() {
-        final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
-        final Pattern idPattern = Pattern
-                .compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
+	/**
+	 * Set the predecessor nodes of the current node
+	 */
+	@Override
+	public void setPreds() {
+		final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
+		final Pattern idPattern = Pattern
+				.compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
 
-        for (Block block : this.block.getPreds()) {
-            Matcher blockMatcher = blockPattern.matcher(block.toShortString());
-            createIds(idPattern, blockMatcher, true);
-        }
-    }
+		for (Block block : this.block.getPreds()) {
+			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
+			createIds(idPattern, blockMatcher, true);
+		}
+	}
 
-    /**
-     * Set the successor nodes of the current node
-     */
-    @Override
-    public void setSuccs() {
-        final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
-        final Pattern idPattern = Pattern
-                .compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
+	/**
+	 * Set the successor nodes of the current node
+	 */
+	@Override
+	public void setSuccs() {
+		final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
+		final Pattern idPattern = Pattern
+				.compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
 
-        for (Block block : this.block.getSuccs()) {
-            Matcher blockMatcher = blockPattern.matcher(block.toShortString());
-            createIds(idPattern, blockMatcher, false);
-        }
-    }
+		for (Block block : this.block.getSuccs()) {
+			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
+			createIds(idPattern, blockMatcher, false);
+		}
+	}
 
-    public Block getBlock() {
-        return block;
-    }
+	public Block getBlock() {
+		return block;
+	}
 }

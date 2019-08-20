@@ -31,13 +31,14 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class NodeDecorator implements AnalysisElement {
 
@@ -173,7 +174,9 @@ public class NodeDecorator implements AnalysisElement {
 	}
 
 	@Override
-	public void clearSuccessors() { this.decoratedNode.clearSuccessors(); }
+	public void clearSuccessors() {
+		this.decoratedNode.clearSuccessors();
+	}
 
 	@Override
 	public void removeSuccessor(String successor) {
