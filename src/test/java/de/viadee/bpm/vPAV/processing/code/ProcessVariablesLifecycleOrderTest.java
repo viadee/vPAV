@@ -101,7 +101,6 @@ public class ProcessVariablesLifecycleOrderTest {
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("MyEndEvent");
         AnalysisElement sequenceFlow1 = endEvent.getPredecessors().get(0);
-        // TODO contain order bzw. order listeners correctly
         // Order is only correct because the listeners are ordered like this in the bpmn file
         AnalysisElement endListenerDelegate = sequenceFlow1.getPredecessors().get(0);
         AnalysisElement endListenerExpression = endListenerDelegate.getPredecessors().get(0);
