@@ -31,18 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import soot.toolkits.graph.Block;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class ExpressionNode extends AbstractNode {
 
@@ -60,11 +49,9 @@ public class ExpressionNode extends AbstractNode {
 
     @Override
     void setPreds() {
-        // TODO
     }
 
     @Override
     void setSuccs() {
-        // TODO
     }
 }

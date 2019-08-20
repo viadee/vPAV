@@ -42,6 +42,7 @@ import org.camunda.bpm.model.bpmn.instance.StartEvent;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,6 +50,7 @@ import static de.viadee.bpm.vPAV.processing.model.data.VariableOperation.*;
 
 public class FlowAnalysis {
 
+    public static final Logger LOGGER = Logger.getLogger(FlowAnalysis.class.getName());
     private LinkedHashMap<String, AnalysisElement> nodes;
     private LinkedHashMap<String, ProcessVariableOperation> scopedOperations;
 
@@ -195,7 +197,11 @@ public class FlowAnalysis {
                                 }
                             }
 
-                            // TODO Fehlermeldung werfen, wenn end event nicht gefunden wird.
+                            if (endEvent.equals(succ)) {
+                                // End event was not found
+                                LOGGER.severe("End event in child process was not found.");
+                            }
+
                             for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
                                 if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
                                     if (operation.getOperation().equals(READ)) {
@@ -220,7 +226,6 @@ public class FlowAnalysis {
                             }
 
                         }
-                        // TODO können die Successors noch etwas anderes außer sequence flows und start events sein?
                     }
                 } else {
                     // Replace element with first block
@@ -869,7 +874,6 @@ public class FlowAnalysis {
         final LinkedHashMap<String, ProcessVariableOperation> setDifference = new LinkedHashMap<>(mapOne);
 
         mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
-            // TODO check if it does not break anything if delegated variables are ignored
             boolean isDelegateVariable = (value2.getChapter().equals(ElementChapter.InputImplementation) ||
                     value2.getChapter().equals(ElementChapter.OutputImplementation)) &&
                     value2.getScopeId().equals(((CallActivity) value2.getElement().getBaseElement()).getCalledElement());
