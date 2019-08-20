@@ -100,7 +100,11 @@ public class AnomalyContainer {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode(), nodeId);
+        if (variable != null) {
+            return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode(), nodeId, variable.getIndex());
+        } else {
+            return Objects.hash(name.hashCode(), anomaly.toString().hashCode(), elementId.hashCode(), nodeId);
+        }
     }
 
     @Override
