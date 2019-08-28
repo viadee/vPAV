@@ -107,7 +107,9 @@ public class JavaReaderStatic {
             delegateMethods.add("mapOutputVariables");
 
             if (element.getBaseElement().getAttributeValueNs(
-                    BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
+                    BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null ||
+                    element.getBaseElement().getAttributeValueNs(
+                            BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
                 // Delegate Variable Mapping
                 variables.putAll(classFetcher(classPaths, classFile, "mapInputVariables",
                         classFile, element, ElementChapter.InputImplementation,

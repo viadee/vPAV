@@ -919,6 +919,11 @@ public final class ProcessVariableReader {
                                         BpmnConstants.ATTR_VAR_MAPPING_CLASS),
                                 element, null, KnownElementFieldType.Class, scopeId,
                                 controlFlowGraph));
+            } else if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
+                processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+                        callActivity.getCamundaVariableMappingDelegateExpression(), element, null,
+                        KnownElementFieldType.Class, scopeId));
+
             }
         }
 
@@ -1083,6 +1088,7 @@ public final class ProcessVariableReader {
             return variables;
         }
 
+        boolean isDelegated = false;
         ExpressionNode expNode = new ExpressionNode(controlFlowGraph, element, expression, chapter);
 
         try {
@@ -1098,11 +1104,10 @@ public final class ProcessVariableReader {
                 // checks, if found variable is a bean
                 final String className = isBean(node.getName());
                 if (className != null) {
-                    // TODO is this working in combination with expression nodes?
-                    // TODO should there be a node?
                     // read variables in class file (bean)
                     variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner, className, element,
                             chapter, fieldType, scopeId, controlFlowGraph));
+                    isDelegated = true;
                 } else {
                     // save variable
                     operation = new ProcessVariableOperation(node.getName(), element, chapter, fieldType,
@@ -1139,7 +1144,8 @@ public final class ProcessVariableReader {
         // TODO are there other field Types that should be skipped?
         if (!fieldType.equals(KnownElementFieldType.CalledElement)
                 && !fieldType.equals(KnownElementFieldType.CamundaOut)
-                && !fieldType.equals(KnownElementFieldType.Expression.CamundaIn)) {
+                && !fieldType.equals(KnownElementFieldType.CamundaIn)
+                && !isDelegated) {
             controlFlowGraph.addNode(expNode);
         }
 

@@ -186,6 +186,19 @@ public class CallActivityTest {
                 new BpmnScanner(PATH));
 
         checkTwoLevelsAnomalies(graphBuilder, fileScanner, modelInstance, processDefinition, scanner, true);
+
+        for (int i = 0; i < 2; i++) {
+            if (i == 1) {
+                // Test 2: Use expression instead of class
+                callActivity.setCamundaVariableMappingClass(null);
+                callActivity.setCamundaVariableMappingDelegateExpression("${de.viadee.bpm.vPAV.delegates.DelegatedVarMapping}");
+                final Map<String, String> beanMapping = new HashMap<>();
+                beanMapping.put("DelegatedVarMapping", "de/viadee/bpm/vPAV/delegates/DelegatedVarMapping.java");
+                RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+            }
+
+            checkTwoLevelsAnomalies(graphBuilder, fileScanner, modelInstance, processDefinition, scanner, true);
+        }
     }
 
     @Test
@@ -301,7 +314,7 @@ public class CallActivityTest {
             // inMapping CallActivity
             Assert.assertEquals("Expected a UR anomaly but got " + anomaly4.getAnomaly().toString(), Anomaly.UR,
                     anomaly4.getAnomaly());
-
+            Assert.assertEquals("There should be two input variables.", 2, flowAnalysis.getNodes().get("_StartEvent_1").getInUnused().size());
         }
     }
 }
