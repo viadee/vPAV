@@ -30,60 +30,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package de.viadee.bpm.vPAV.delegates;
-
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-
 import java.util.Random;
-
 public class HierarchyDelegate implements JavaDelegate {
 
+    private Random r = new Random();
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
         method1();
     }
 
-    void method1() {
-        System.out.println();
-        method2();
+    private void method1() {
+        if (r.nextInt(5) > 3) {
+            System.out.println("method1");
+            method2();
+        }
     }
 
-    void method2() {
-        System.out.println();
-        method3();
-    }
-
-    void method3() {
-        System.out.println();
-        method4();
-    }
-
-    void method4() {
-        System.out.println();
-        method5();
-    }
-
-    void method5() {
-        String num = "";
+    private void method2() {
         Random r = new Random();
+        System.out.println("method2");
+        whileMethod(r);
+    }
+
+    private void whileMethod(Random r) {
         if (r.nextInt(10) < 6) {
-            if (r.nextInt(10) < 5) {
-                if (r.nextInt(10) < 4) {
-                    if (r.nextInt(10) < 3) {
-                        num = "smaller than 3";
-                    } else {
-                        num = "must be 3";
-                    }
-                    System.out.println(num);
-                } else {
-                    num = "must be 4";
-                }
-                System.out.println(num);
-            } else {
-                num = "must be 5";
-            }
-            System.out.println(num);
+            System.out.println("whileMethod");
         }
     }
 }
