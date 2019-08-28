@@ -666,11 +666,14 @@ public final class ProcessVariableReader {
             for (final CamundaIn inputAssociation : inputAssociations) {
                 String source = inputAssociation.getCamundaSource();
                 if (source == null || source.isEmpty()) {
-                    // TODO again check for null and empty
                     source = inputAssociation.getCamundaSourceExpression();
-                    processVariables.putAll(findVariablesInExpression(javaReaderStatic, element.getControlFlowGraph(),
-                            fileScanner, source, element, ElementChapter.InputData,
-                            KnownElementFieldType.CamundaIn, scopeId));
+                    if (source != null && !source.isEmpty()) {
+                        processVariables.putAll(findVariablesInExpression(javaReaderStatic, element.getControlFlowGraph(),
+                                fileScanner, source, element, ElementChapter.InputData,
+                                KnownElementFieldType.CamundaIn, scopeId));
+                    } else {
+                        continue;
+                    }
 
                 } else {
                     processVariables.put(source,
@@ -680,7 +683,6 @@ public final class ProcessVariableReader {
                                     element.getFlowAnalysis().getOperationCounter()));
                 }
 
-                // TODO target hinzufügen, wenn source nicht existiert, macht nicht so viel Sinn
                 // Add target operation
                 String target = inputAssociation.getCamundaTarget();
                 processVariables.put(target,
