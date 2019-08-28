@@ -459,10 +459,6 @@ public final class ProcessVariableReader {
                 }
                 final String l_class = listener.getCamundaClass();
                 if (l_class != null) {
-                    LOGGER.warning(
-                            "Entered getVariablesFromJavaDelegate from getVariablesFromExecutionListenerStart for "
-                                    + element.getBaseElement().getAttributeValue("name"));
-
                     processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
                             listener.getCamundaClass(), element, ElementChapter.ExecutionListenerStart,
                             KnownElementFieldType.Class, scopeId, controlFlowGraph));
@@ -918,10 +914,10 @@ public final class ProcessVariableReader {
             // Check DelegateVariableMapping
             if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
                 processVariables
-                        .putAll(javaReaderStatic.getVariablesFromJavaVariablesMappingDelegate(fileScanner,
+                        .putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
                                 baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                         BpmnConstants.ATTR_VAR_MAPPING_CLASS),
-                                element, KnownElementFieldType.Class, scopeId, calledElement,
+                                element, null, KnownElementFieldType.Class, scopeId,
                                 controlFlowGraph));
             }
         }
