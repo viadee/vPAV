@@ -31,34 +31,17 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.camunda.bpm.engine.variable.VariableMap;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
-import de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.OutSetCFG;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableBlock;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
-
+import de.viadee.bpm.vPAV.processing.model.data.*;
+import org.camunda.bpm.engine.variable.VariableMap;
+import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import soot.*;
 import soot.jimple.*;
 import soot.jimple.internal.*;
@@ -68,6 +51,11 @@ import soot.options.Options;
 import soot.toolkits.graph.Block;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.ClassicCompleteBlockGraph;
+
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JavaReaderStatic {
 
