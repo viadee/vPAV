@@ -38,14 +38,10 @@ public class DelegateWithCorrectInterfaceSignal implements SignallableActivityBe
 
     @Override
     public void execute(ActivityExecution execution) throws Exception {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void signal(ActivityExecution execution, String signalEvent, Object signalData) throws Exception {
-        // TODO Auto-generated method stub
-
     }
 
 }
