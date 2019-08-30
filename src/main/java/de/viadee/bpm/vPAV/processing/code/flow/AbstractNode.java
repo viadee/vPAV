@@ -35,7 +35,6 @@ import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import soot.toolkits.graph.Block;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,7 +65,7 @@ public abstract class AbstractNode implements AnalysisElement {
 	protected String id;
 
 	AbstractNode(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement,
-				 final ElementChapter elementChapter) {
+			final ElementChapter elementChapter) {
 		this.controlFlowGraph = controlFlowGraph;
 		this.parentElement = parentElement;
 		this.elementChapter = elementChapter;
@@ -193,7 +192,9 @@ public abstract class AbstractNode implements AnalysisElement {
 	}
 
 	@Override
-	public void clearSuccessors() { this.successors.clear(); }
+	public void clearSuccessors() {
+		this.successors.clear();
+	}
 
 	@Override
 	public void removeSuccessor(String successor) {

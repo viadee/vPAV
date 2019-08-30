@@ -35,23 +35,23 @@ import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 
 public class ExpressionNode extends AbstractNode {
 
-    private String expression;
+	private String expression;
 
-    public ExpressionNode(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement,
-                          final String expression, final ElementChapter elementChapter) {
-        super(controlFlowGraph, parentElement, elementChapter);
-        this.expression = expression;
-    }
+	public ExpressionNode(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement,
+			final String expression, final ElementChapter elementChapter) {
+		super(controlFlowGraph, parentElement, elementChapter);
+		this.expression = expression;
+	}
 
-    public String getExpression() {
-        return this.expression;
-    }
+	public String getExpression() {
+		return this.expression;
+	}
 
-    @Override
-    void setPreds() {
-    }
+	@Override
+	void setPreds() {
+	}
 
-    @Override
-    void setSuccs() {
-    }
+	@Override
+	void setSuccs() {
+	}
 }

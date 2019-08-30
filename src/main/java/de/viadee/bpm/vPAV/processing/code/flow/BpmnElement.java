@@ -48,8 +48,6 @@ public class BpmnElement implements AnalysisElement {
 
 	private String processDefinition;
 
-	private boolean visited = false;
-
 	private BaseElement baseElement;
 
 	private ControlFlowGraph controlFlowGraph;
@@ -159,7 +157,6 @@ public class BpmnElement implements AnalysisElement {
 	public ListMultimap<String, ProcessVariableOperation> getProcessVariables() {
 		return processVariables;
 	}
-
 
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<>();
@@ -310,7 +307,9 @@ public class BpmnElement implements AnalysisElement {
 	}
 
 	@Override
-	public void clearSuccessors() { this.successors.clear(); }
+	public void clearSuccessors() {
+		this.successors.clear();
+	}
 
 	@Override
 	public void removeSuccessor(String successor) {

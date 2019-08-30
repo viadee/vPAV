@@ -31,16 +31,14 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import com.google.common.collect.ListMultimap;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-
-import com.google.common.collect.ListMultimap;
-
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class BpmnElementDecorator implements AnalysisElement, Cloneable {
 
@@ -150,20 +148,20 @@ public class BpmnElementDecorator implements AnalysisElement, Cloneable {
 		return this.decoratedBpmnElement.getDefined();
 	}
 
-    @Override
-    public void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations) {
-        this.decoratedBpmnElement.setOperations(operations);
-    }
+	@Override
+	public void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations) {
+		this.decoratedBpmnElement.setOperations(operations);
+	}
 
-    @Override
-    public void setUsed(LinkedHashMap<String, ProcessVariableOperation> used) {
-        this.decoratedBpmnElement.setUsed(used);
-    }
+	@Override
+	public void setUsed(LinkedHashMap<String, ProcessVariableOperation> used) {
+		this.decoratedBpmnElement.setUsed(used);
+	}
 
-    @Override
-    public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
-        this.decoratedBpmnElement.setDefined(defined);
-    }
+	@Override
+	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
+		this.decoratedBpmnElement.setDefined(defined);
+	}
 
 	@Override
 	public void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
