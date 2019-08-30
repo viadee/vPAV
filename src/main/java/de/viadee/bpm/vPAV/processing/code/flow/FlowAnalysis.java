@@ -338,7 +338,7 @@ public class FlowAnalysis {
 							final LinkedHashMap<String, ProcessVariableOperation> camundaOutput = new LinkedHashMap<>();
 
 							for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
-								if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
+								if (endEvent != null && operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
 									if (operation.getOperation().equals(READ)) {
 										endEvent.getOperations().put(operation.getId(), operation);
 									} else {

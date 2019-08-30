@@ -55,6 +55,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.Properties;
 
 public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
@@ -81,8 +82,10 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 	@Test
 	public void testRecogniseVariablesInInnerAnonymousClass() {
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
 
 		// parse bpmn model

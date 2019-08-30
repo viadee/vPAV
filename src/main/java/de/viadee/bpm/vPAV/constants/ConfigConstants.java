@@ -99,6 +99,12 @@ public class ConfigConstants {
 
 	public static final String JAVAPATH = "src/main/java/";
 
+	public static final String TARGET_PATH = "target/classes/";
+
+	public static final String TEST_TARGET_PATH = "target/test-classes/";
+
+	public static final String CLASS_FILE_PATTERN = "**/*.class";
+
 	public static final String TEST_JAVAPATH = "src/test/java/";
 
 	public static final String TEST_BASEPATH = "src/test/resources/";
@@ -178,13 +184,13 @@ public class ConfigConstants {
 
 	public String getScanPath() {
 		if (RuntimeConfig.getInstance().isTest()) {
-			return properties.getProperty("scanpath", ConfigConstants.TEST_JAVAPATH);
+			return properties.getProperty("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		}
-		return properties.getProperty("scanpath", ConfigConstants.JAVAPATH);
+		return properties.getProperty("scanpath", ConfigConstants.TARGET_PATH);
 	}
 
 	public String getFilePattern() {
-		return properties.getProperty("filepattern", ConfigConstants.JAVA_FILE_PATTERN);
+		return properties.getProperty("filepattern", ConfigConstants.CLASS_FILE_PATTERN);
 	}
 
 	/**

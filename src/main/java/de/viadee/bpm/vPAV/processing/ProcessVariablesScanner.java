@@ -191,23 +191,24 @@ public class ProcessVariablesScanner {
         final String replaceEmpty = "";
         final String replaceSingleBackSlash = "\\";
         final String replaceSingleForwardSlash = "/";
+        final String replaceDotClass = ".class";
         final String replaceDotJava = ".java";
 
         if (dot) {
             if (System.getProperty("os.name").startsWith("Windows")) {
                 className = className.replace(replaceSingleBackSlash, replaceDot)
-                        .replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotJava, replaceEmpty);
+                        .replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotClass, replaceEmpty);
             } else {
-                className = className.replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotJava,
-                        replaceEmpty);
+                className = className.replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotClass,
+                        replaceEmpty).replace(replaceDotJava, replaceEmpty);
             }
         } else {
             if (System.getProperty("os.name").startsWith("Windows")) {
                 className = className.replace(replaceDot, replaceSingleBackSlash);
-                className = className.concat(replaceDotJava);
+                className = className.concat(replaceDotClass);
             } else {
                 className = className.replace(replaceDot, replaceSingleForwardSlash);
-                className = className.concat(replaceDotJava);
+                className = className.concat(replaceDotClass);
             }
         }
         return className;

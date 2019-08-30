@@ -896,7 +896,7 @@ public class JavaReaderStatic {
 			String methodName = src.tgt().getName();
 			String className = src.tgt().getDeclaringClass().getName();
 			className = cleanString(className, false);
-			if (classPaths.contains(className) || className.contains("$")) {
+			if (classPaths.contains(className)) {
 				controlFlowGraph.incrementRecursionCounter();
 				controlFlowGraph.addPriorLevel(controlFlowGraph.getPriorLevel());
 				controlFlowGraph.resetInternalNodeCounter();

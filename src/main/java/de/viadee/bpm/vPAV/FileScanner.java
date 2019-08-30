@@ -125,8 +125,13 @@ public class FileScanner {
         scanner.setBasedir(scanPath);
         // get file paths of process definitions
         scanner.setIncludes(new String[]{filePattern});
-        scanner.scan();
-        resourcesFileInputStream = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
+
+        if (scanner.getBasedir().exists()) {
+            scanner.scan();
+            resourcesFileInputStream = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
+        } else {
+            LOGGER.log(Level.SEVERE, "No compiled files in target folder. Build project at least once.");
+        }
 
         scanner.setBasedir("target/generated-sources/");
         // get file paths of process definitions

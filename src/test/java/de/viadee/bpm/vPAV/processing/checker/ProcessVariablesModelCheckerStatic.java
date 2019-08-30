@@ -80,7 +80,7 @@ public class ProcessVariablesModelCheckerStatic {
 		final Set<String> resources = new HashSet<>();
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";
@@ -111,37 +111,40 @@ public class ProcessVariablesModelCheckerStatic {
 
 		Iterator<CheckerIssue> iterator = issues.iterator();
 		final CheckerIssue issue1 = iterator.next();
-		Assert.assertEquals("Task_0546a8y__0", issue1.getElementId());
+		Assert.assertEquals("Task_0546a8y", issue1.getElementId());
 		Assert.assertEquals("ProcessVariable2", issue1.getVariable());
 		Assert.assertEquals("UR", issue1.getAnomaly().toString());
 		final CheckerIssue issue2 = iterator.next();
-		Assert.assertEquals("Task_0546a8y__2", issue2.getElementId());
+		Assert.assertEquals("Task_0oj9gln", issue2.getElementId());
 		Assert.assertEquals("ProcessVariable3", issue2.getVariable());
 		Assert.assertEquals("UU", issue2.getAnomaly().toString());
 		final CheckerIssue issue3 = iterator.next();
-		Assert.assertEquals("SequenceFlow_0btqo3y", issue3.getElementId());
-		Assert.assertEquals("jepppa", issue3.getVariable());
-		Assert.assertEquals("DD", issue3.getAnomaly().toString());
+		Assert.assertEquals("SequenceFlow_0bi6kaa", issue3.getElementId());
+		Assert.assertEquals("geloeschteVariable", issue3.getVariable());
+		Assert.assertEquals("DU", issue3.getAnomaly().toString());
 		final CheckerIssue issue4 = iterator.next();
-		Assert.assertEquals("SequenceFlow_0bi6kaa", issue4.getElementId());
-		Assert.assertEquals("geloeschteVariable", issue4.getVariable());
-		Assert.assertEquals("DU", issue4.getAnomaly().toString());
+		Assert.assertEquals("ServiceTask_05g4a96", issue4.getElementId());
+		Assert.assertEquals("intHallo", issue4.getVariable());
+		Assert.assertEquals("UR", issue4.getAnomaly().toString());
 		final CheckerIssue issue5 = iterator.next();
-		Assert.assertEquals("Task_0oj9gln__0", issue5.getElementId());
-		Assert.assertEquals("ProcessVariable2", issue5.getVariable());
+		Assert.assertEquals("BusinessRuleTask_119jb6t", issue5.getElementId());
+		Assert.assertEquals("hallo2", issue5.getVariable());
 		Assert.assertEquals("UR", issue5.getAnomaly().toString());
 		final CheckerIssue issue6 = iterator.next();
-		Assert.assertEquals("Task_0oj9gln__2", issue6.getElementId());
+		Assert.assertEquals("Task_0546a8y", issue6.getElementId());
 		Assert.assertEquals("ProcessVariable3", issue6.getVariable());
 		Assert.assertEquals("UU", issue6.getAnomaly().toString());
 		final CheckerIssue issue7 = iterator.next();
-		Assert.assertEquals("ServiceTask_05g4a96", issue7.getElementId());
-		Assert.assertEquals("intHallo", issue7.getVariable());
-		Assert.assertEquals("UR", issue7.getAnomaly().toString());
+		Assert.assertEquals("SequenceFlow_0btqo3y", issue7.getElementId());
+		Assert.assertEquals("jepppa", issue7.getVariable());
+		Assert.assertEquals("DD", issue7.getAnomaly().toString());
 		final CheckerIssue issue8 = iterator.next();
-		Assert.assertEquals("BusinessRuleTask_119jb6t", issue8.getElementId());
-		Assert.assertEquals("hallo2", issue8.getVariable());
+		Assert.assertEquals("Task_0oj9gln", issue8.getElementId());
+		Assert.assertEquals("ProcessVariable2", issue8.getVariable());
 		Assert.assertEquals("UR", issue8.getAnomaly().toString());
+
+
+
 
 	}
 

@@ -143,7 +143,7 @@ public class ProcessVariableReaderStaticTest {
 				new FlowAnalysis());
 		final ControlFlowGraph cg = new ControlFlowGraph();
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -166,7 +166,7 @@ public class ProcessVariableReaderStaticTest {
 				new FlowAnalysis());
 		final ControlFlowGraph cg = new ControlFlowGraph();
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
@@ -180,9 +180,8 @@ public class ProcessVariableReaderStaticTest {
 		final String PATH = BASE_PATH + "ProcessVariableReader_RetrieveOperations.bpmn";
 		final File processDefinition = new File(PATH);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final Set<String> testSet = new HashSet<>();
-		testSet.add("de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
+		testSet.add("de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.class");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(

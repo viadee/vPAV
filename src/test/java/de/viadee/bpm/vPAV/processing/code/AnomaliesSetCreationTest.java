@@ -111,7 +111,7 @@ public class AnomaliesSetCreationTest {
 	public void findDD() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDD.bpmn";
@@ -143,7 +143,7 @@ public class AnomaliesSetCreationTest {
 	public void findDU() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyDU.bpmn";
@@ -175,7 +175,7 @@ public class AnomaliesSetCreationTest {
 	public void findUR() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUR.bpmn";
@@ -207,7 +207,7 @@ public class AnomaliesSetCreationTest {
 	public void findUU() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_AnomalyUU.bpmn";

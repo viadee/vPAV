@@ -160,9 +160,6 @@ public class BpmnElement implements AnalysisElement {
 		return processVariables;
 	}
 
-	public void setProcessVariable(final String variableName, final ProcessVariableOperation variableObject) {
-		processVariables.put(variableName, variableObject);
-	}
 
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
 		final Map<BpmnElement, List<AnomalyContainer>> anomalyMap = new HashMap<>();
@@ -170,14 +167,6 @@ public class BpmnElement implements AnalysisElement {
 			anomalyMap.put(this, getSourceCodeAnomalies());
 		}
 		return anomalyMap;
-	}
-
-	public boolean isVisited() {
-		return visited;
-	}
-
-	public void setVisited(boolean visited) {
-		this.visited = visited;
 	}
 
 	public FlowAnalysis getFlowAnalysis() {
