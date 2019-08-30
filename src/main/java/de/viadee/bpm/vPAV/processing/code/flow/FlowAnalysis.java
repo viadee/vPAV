@@ -31,40 +31,26 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import static de.viadee.bpm.vPAV.processing.model.data.VariableOperation.DELETE;
-import static de.viadee.bpm.vPAV.processing.model.data.VariableOperation.READ;
-import static de.viadee.bpm.vPAV.processing.model.data.VariableOperation.WRITE;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.EndEvent;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 import org.camunda.bpm.model.bpmn.instance.StartEvent;
 
-import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
-import de.viadee.bpm.vPAV.processing.model.graph.Graph;
+import java.util.*;
+import java.util.function.Function;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static de.viadee.bpm.vPAV.processing.model.data.VariableOperation.*;
 
 public class FlowAnalysis {
 
+	public static final Logger LOGGER = Logger.getLogger(FlowAnalysis.class.getName());
 	private LinkedHashMap<String, AnalysisElement> nodes;
 	private LinkedHashMap<String, ProcessVariableOperation> scopedOperations;
 
@@ -84,8 +70,7 @@ public class FlowAnalysis {
 	 * unit basis is performed. Lastly, anomalies are extracted and appended to the
 	 * parent element (for visualization)
 	 *
-	 * @param graphCollection
-	 *            Collection of graphs
+	 * @param graphCollection Collection of graphs
 	 */
 	public void analyze(final Collection<Graph> graphCollection) {
 		for (Graph graph : graphCollection) {
@@ -99,8 +84,7 @@ public class FlowAnalysis {
 	/**
 	 * Embeds the control flow graphs of bpmn elements into the process model
 	 *
-	 * @param graph
-	 *            Given Graph
+	 * @param graph Given Graph
 	 */
 	private void embedControlFlowGraph(final Graph graph) {
 		// Add all elements on bpmn level
@@ -208,7 +192,11 @@ public class FlowAnalysis {
 								}
 							}
 
-							// TODO Fehlermeldung werfen, wenn end event nicht gefunden wird.
+							if (endEvent.equals(succ)) {
+								// End event was not found
+								LOGGER.severe("End event in child process was not found.");
+							}
+
 							for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
 								if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
 									if (operation.getOperation().equals(READ)) {
@@ -233,8 +221,6 @@ public class FlowAnalysis {
 							}
 
 						}
-						// TODO können die Successors noch etwas anderes außer sequence flows und start
-						// events sein?
 					}
 				} else {
 					// Replace element with first block
@@ -380,8 +366,7 @@ public class FlowAnalysis {
 	/**
 	 * Embeds call activities
 	 *
-	 * @param analysisElement
-	 *            Current element
+	 * @param analysisElement Current element
 	 */
 	private void embedCallActivities(AnalysisElement analysisElement, boolean hasNodesBefore) {
 		final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
@@ -566,7 +551,7 @@ public class FlowAnalysis {
 	}
 
 	private LinkedHashMap<String, ProcessVariableOperation>[] filterInputVariables(AnalysisElement predecessor,
-			AnalysisElement analysisElement) {
+																				   AnalysisElement analysisElement) {
 		String scopePredecessor = predecessor.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
 		String scopeElement = analysisElement.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
 		LinkedHashMap<String, ProcessVariableOperation> tempInUsed = new LinkedHashMap<>(predecessor.getOutUsed());
@@ -600,7 +585,7 @@ public class FlowAnalysis {
 			});
 		}
 
-		return new LinkedHashMap[] { tempInUsed, tempInUnused };
+		return new LinkedHashMap[]{tempInUsed, tempInUnused};
 	}
 
 	/**
@@ -608,14 +593,32 @@ public class FlowAnalysis {
 	 */
 	private void computeLineByLine() {
 		nodes.values().forEach(analysisElement -> {
-			if (analysisElement.getOperations().size() >= 2) {
+			final LinkedHashMap<String, ProcessVariableOperation> operations = new LinkedHashMap<>(analysisElement.getOperations());
+
+			// TODO operations on mapped variables are not recognized inside variable mapping delegate method/class
+			// If element is delegate variable mapping node, ignore mapped variables because they are only active inside child
+			if (analysisElement.getParentElement().getBaseElement() instanceof CallActivity
+					&& analysisElement instanceof Node) {
+				Node tmpNode = (Node) analysisElement;
+				if (tmpNode.getElementChapter().equals(ElementChapter.InputImplementation) ||
+						tmpNode.getElementChapter().equals(ElementChapter.OutputImplementation)) {
+					String childProcessId = ((CallActivity) analysisElement.getParentElement().getBaseElement()).getCalledElement();
+					analysisElement.getOperations().forEach((key, value) -> {
+						if (value.getScopeId().equals(childProcessId)) {
+							operations.remove(key);
+						}
+					});
+				}
+			}
+
+			if (operations.size() >= 2) {
 				ProcessVariableOperation prev = null;
-				for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
+				for (ProcessVariableOperation operation : operations.values()) {
 					if (prev == null) {
 						prev = operation;
 						continue;
 					}
-					checkAnomaly(operation.getElement(), operation, prev);
+					checkAnomaly(operation.getElement(), operation, prev, analysisElement.getId());
 					prev = operation;
 				}
 			}
@@ -627,55 +630,101 @@ public class FlowAnalysis {
 	 */
 	private void extractAnomalies() {
 		nodes.values().forEach(node -> {
-			ddAnomalies(node);
+			if (node.getParentElement().getBaseElement() instanceof CallActivity
+					&& node instanceof Node) {
+				Node tmpNode = (Node) node;
+				if (tmpNode.getElementChapter().equals(ElementChapter.InputImplementation) ||
+						tmpNode.getElementChapter().equals(ElementChapter.OutputImplementation)) {
+					String childProcessId = ((CallActivity) node.getParentElement().getBaseElement()).getCalledElement();
+					handleDelegateVariableMapping(node, childProcessId);
+				}
+			} else {
+				ddAnomalies(node);
 
-			duAnomalies(node);
+				duAnomalies(node);
 
-			urAnomalies(node);
+				urAnomalies(node);
 
-			uuAnomalies(node);
+				uuAnomalies(node);
+			}
+		});
+	}
+
+	private void handleDelegateVariableMapping(AnalysisElement element, String childProcessId) {
+		// Save original sets
+		final LinkedHashMap<String, ProcessVariableOperation> originalOperations = new LinkedHashMap<>(element.getOperations());
+		final LinkedHashMap<String, ProcessVariableOperation> originalDefined = new LinkedHashMap<>(element.getDefined());
+		final LinkedHashMap<String, ProcessVariableOperation> originalUsed = new LinkedHashMap<>(element.getUsed());
+		final LinkedHashMap<String, ProcessVariableOperation> originalInUnused = new LinkedHashMap<>(element.getInUnused());
+		final LinkedHashMap<String, ProcessVariableOperation> originalInUsed = new LinkedHashMap<>(element.getInUsed());
+
+		// Delete variables that are only used in the child process
+		filterDelegateVariables(originalOperations, element.getOperations(), childProcessId);
+		filterDelegateVariables(originalDefined, element.getDefined(), childProcessId);
+		filterDelegateVariables(originalUsed, element.getUsed(), childProcessId);
+		filterDelegateVariables(originalInUnused, element.getInUnused(), childProcessId);
+		filterDelegateVariables(originalInUsed, element.getInUsed(), childProcessId);
+
+		// Run anomaly check
+		ddAnomalies(element);
+		duAnomalies(element);
+		urAnomalies(element);
+		uuAnomalies(element);
+
+		// Restore original sets
+		element.setOperations(originalOperations);
+		element.setDefined(originalDefined);
+		element.setUsed(originalUsed);
+		element.setInUnused(originalInUnused);
+		element.setInUsed(originalInUsed);
+	}
+
+	private void filterDelegateVariables(final LinkedHashMap<String, ProcessVariableOperation> in,
+										 final LinkedHashMap<String, ProcessVariableOperation> out,
+										 String childProcessId) {
+		in.forEach((key, value) -> {
+			if (value.getScopeId().equals(childProcessId)) {
+				out.remove(key);
+			}
 		});
 	}
 
 	/**
 	 * Extract DD anomalies
 	 *
-	 * @param node
-	 *            Current node
+	 * @param node Current node
 	 */
 	private void ddAnomalies(final AnalysisElement node) {
 		final LinkedHashMap<String, ProcessVariableOperation> ddAnomalies = new LinkedHashMap<>(
 				getIntersection(node.getInUnused(), node.getDefined()));
 		if (!ddAnomalies.isEmpty()) {
 			ddAnomalies.forEach((k,
-					v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getId(),
-							node.getBaseElement().getId(),
-							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+								 v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getId(),
+					node.getBaseElement().getId(),
+					node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
 
 	/**
 	 * Extract DU anomalies
 	 *
-	 * @param node
-	 *            Current node
+	 * @param node Current node
 	 */
 	private void duAnomalies(final AnalysisElement node) {
 		final LinkedHashMap<String, ProcessVariableOperation> duAnomalies = new LinkedHashMap<>(
 				getIntersection(node.getInUnused(), node.getKilled()));
 		if (!duAnomalies.isEmpty()) {
 			duAnomalies.forEach((k,
-					v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getId(),
-							node.getBaseElement().getId(),
-							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+								 v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getId(),
+					node.getBaseElement().getId(),
+					node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
 
 	/**
 	 * Extract UR anomalies
 	 *
-	 * @param node
-	 *            Current node
+	 * @param node Current node
 	 */
 	private void urAnomalies(final AnalysisElement node) {
 		final LinkedHashMap<String, ProcessVariableOperation> urAnomaliesTemp = new LinkedHashMap<>(node.getUsed());
@@ -703,17 +752,16 @@ public class FlowAnalysis {
 
 		if (!urAnomalies.isEmpty()) {
 			urAnomalies.forEach((k,
-					v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getId(),
-							node.getBaseElement().getId(),
-							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+								 v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getId(),
+					node.getBaseElement().getId(),
+					node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
 
 	/**
 	 * Extract UU anomalies
 	 *
-	 * @param node
-	 *            Current node
+	 * @param node Current node
 	 */
 	private void uuAnomalies(final AnalysisElement node) {
 		final LinkedHashMap<String, ProcessVariableOperation> uuAnomaliesTemp = new LinkedHashMap<>(node.getKilled());
@@ -741,42 +789,39 @@ public class FlowAnalysis {
 
 		if (!uuAnomalies.isEmpty()) {
 			uuAnomalies.forEach((k,
-					v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(),
-							node.getBaseElement().getId(),
-							node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+								 v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(),
+					node.getBaseElement().getId(),
+					node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
 		}
 	}
 
 	/**
 	 * Check for data-flow anomaly between current and previous variable operation
 	 *
-	 * @param element
-	 *            Current BpmnElement
-	 * @param curr
-	 *            current operation
-	 * @param prev
-	 *            previous operation
+	 * @param element Current BpmnElement
+	 * @param curr    current operation
+	 * @param prev    previous operation
 	 */
 	private void checkAnomaly(final BpmnElement element, final ProcessVariableOperation curr,
-			final ProcessVariableOperation prev) {
+							  final ProcessVariableOperation prev, final String nodeId) {
 		if (urSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UR, element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.UR, nodeId, element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
 		}
 		if (ddSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DD, element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.DD, nodeId, element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
 		}
 		if (duSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.DU, element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.DU, nodeId, element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
 		}
 		if (uuSourceCode(prev, curr)) {
 			element.addSourceCodeAnomaly(
-					new AnomalyContainer(curr.getName(), Anomaly.UU, element.getBaseElement().getId(),
+					new AnomalyContainer(curr.getName(), Anomaly.UU, nodeId, element.getBaseElement().getId(),
 							element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
 		}
 	}
@@ -784,10 +829,8 @@ public class FlowAnalysis {
 	/**
 	 * UU anomaly: second last operation of PV is DELETE, last operation is DELETE
 	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
+	 * @param prev Previous ProcessVariable
+	 * @param curr Current ProcessVariable
 	 * @return true/false
 	 */
 	private boolean uuSourceCode(ProcessVariableOperation prev, ProcessVariableOperation curr) {
@@ -797,10 +840,8 @@ public class FlowAnalysis {
 	/**
 	 * UR anomaly: second last operation of PV is DELETE, last operation is READ
 	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
+	 * @param prev Previous ProcessVariable
+	 * @param curr Current ProcessVariable
 	 * @return true/false
 	 */
 	private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
@@ -810,10 +851,8 @@ public class FlowAnalysis {
 	/**
 	 * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
 	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
+	 * @param prev Previous ProcessVariable
+	 * @param curr Current ProcessVariable
 	 * @return true/false
 	 */
 	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
@@ -823,10 +862,8 @@ public class FlowAnalysis {
 	/**
 	 * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
 	 *
-	 * @param prev
-	 *            Previous ProcessVariable
-	 * @param curr
-	 *            Current ProcessVariable
+	 * @param prev Previous ProcessVariable
+	 * @param curr Current ProcessVariable
 	 * @return true/false
 	 */
 	private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
@@ -837,10 +874,8 @@ public class FlowAnalysis {
 	 * Helper method to create the set difference of two given maps (based on
 	 * variable names)
 	 *
-	 * @param mapOne
-	 *            First map
-	 * @param mapTwo
-	 *            Second map
+	 * @param mapOne First map
+	 * @param mapTwo Second map
 	 * @return Set difference of given maps
 	 */
 	private LinkedHashMap<String, ProcessVariableOperation> getSetDifference(
@@ -849,7 +884,7 @@ public class FlowAnalysis {
 		final LinkedHashMap<String, ProcessVariableOperation> setDifference = new LinkedHashMap<>(mapOne);
 
 		mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
+			if (value.getName().equals(value2.getName()) && isDelegateVariable(value) == isDelegateVariable(value2)) {
 				setDifference.remove(key);
 			}
 		}));
@@ -859,10 +894,8 @@ public class FlowAnalysis {
 	/**
 	 * Helper method to create the intersection of two given maps
 	 *
-	 * @param mapOne
-	 *            First map
-	 * @param mapTwo
-	 *            Second map
+	 * @param mapOne First map
+	 * @param mapTwo Second map
 	 * @return Intersection of given maps
 	 */
 	private LinkedHashMap<String, ProcessVariableOperation> getIntersection(
@@ -871,7 +904,7 @@ public class FlowAnalysis {
 		final LinkedHashMap<String, ProcessVariableOperation> intersection = new LinkedHashMap<>();
 
 		mapOne.forEach((key, value) -> mapTwo.forEach((key2, value2) -> {
-			if (value.getName().equals(value2.getName())) {
+			if (value.getName().equals(value2.getName()) && isDelegateVariable(value) == isDelegateVariable(value2)) {
 				intersection.put(key, value);
 			}
 		}));
@@ -890,4 +923,9 @@ public class FlowAnalysis {
 		this.operationCounter++;
 	}
 
+	private boolean isDelegateVariable(ProcessVariableOperation value) {
+		return (value.getChapter().equals(ElementChapter.InputImplementation) ||
+				value.getChapter().equals(ElementChapter.OutputImplementation)) &&
+				value.getScopeId().equals(((CallActivity) value.getElement().getBaseElement()).getCalledElement());
+	}
 }

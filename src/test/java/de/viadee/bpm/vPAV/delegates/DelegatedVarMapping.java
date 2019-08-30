@@ -41,7 +41,7 @@ public class DelegatedVarMapping implements DelegateVariableMapping {
     @Override
     public void mapInputVariables(DelegateExecution delegateExecution, VariableMap variableMap) {
         variableMap.putValue("inMapping", "myInputValue");
-        delegateExecution.getVariable("inputVariable");
+        delegateExecution.getVariable("inMapping");
     }
 
     @Override

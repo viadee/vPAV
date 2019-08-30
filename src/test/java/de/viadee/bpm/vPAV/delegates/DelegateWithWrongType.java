@@ -40,8 +40,6 @@ public class DelegateWithWrongType implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        // TODO Auto-generated method stub
-
     }
 
     public void setTest(String t) {

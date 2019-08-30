@@ -41,7 +41,9 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.camunda.bpm.engine.impl.juel.Builder;
@@ -457,10 +459,6 @@ public final class ProcessVariableReader {
                 }
                 final String l_class = listener.getCamundaClass();
                 if (l_class != null) {
-                    LOGGER.warning(
-                            "Entered getVariablesFromJavaDelegate from getVariablesFromExecutionListenerStart for "
-                                    + element.getBaseElement().getAttributeValue("name"));
-
                     processVariables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
                             listener.getCamundaClass(), element, ElementChapter.ExecutionListenerStart,
                             KnownElementFieldType.Class, scopeId, controlFlowGraph));
@@ -664,11 +662,14 @@ public final class ProcessVariableReader {
             for (final CamundaIn inputAssociation : inputAssociations) {
                 String source = inputAssociation.getCamundaSource();
                 if (source == null || source.isEmpty()) {
-                    // TODO again check for null and empty
                     source = inputAssociation.getCamundaSourceExpression();
-                    processVariables.putAll(findVariablesInExpression(javaReaderStatic, element.getControlFlowGraph(),
-                            fileScanner, source, element, ElementChapter.InputData,
-                            KnownElementFieldType.CamundaIn, scopeId));
+                    if (source != null && !source.isEmpty()) {
+                        processVariables.putAll(findVariablesInExpression(javaReaderStatic, element.getControlFlowGraph(),
+                                fileScanner, source, element, ElementChapter.InputData,
+                                KnownElementFieldType.CamundaIn, scopeId));
+                    } else {
+                        continue;
+                    }
 
                 } else {
                     processVariables.put(source,
@@ -678,7 +679,6 @@ public final class ProcessVariableReader {
                                     element.getFlowAnalysis().getOperationCounter()));
                 }
 
-                // TODO target hinzufügen, wenn source nicht existiert, macht nicht so viel Sinn
                 // Add target operation
                 String target = inputAssociation.getCamundaTarget();
                 processVariables.put(target,
@@ -914,11 +914,16 @@ public final class ProcessVariableReader {
             // Check DelegateVariableMapping
             if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
                 processVariables
-                        .putAll(javaReaderStatic.getVariablesFromJavaVariablesMappingDelegate(fileScanner,
+                        .putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
                                 baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                         BpmnConstants.ATTR_VAR_MAPPING_CLASS),
-                                element, KnownElementFieldType.Class, scopeId, calledElement,
+                                element, null, KnownElementFieldType.Class, scopeId,
                                 controlFlowGraph));
+            } else if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
+                processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+                        callActivity.getCamundaVariableMappingDelegateExpression(), element, null,
+                        KnownElementFieldType.Class, scopeId));
+
             }
         }
 
@@ -1083,6 +1088,7 @@ public final class ProcessVariableReader {
             return variables;
         }
 
+        boolean isDelegated = false;
         ExpressionNode expNode = new ExpressionNode(controlFlowGraph, element, expression, chapter);
 
         try {
@@ -1098,11 +1104,10 @@ public final class ProcessVariableReader {
                 // checks, if found variable is a bean
                 final String className = isBean(node.getName());
                 if (className != null) {
-                    // TODO is this working in combination with expression nodes?
-                    // TODO should there be a node?
                     // read variables in class file (bean)
                     variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner, className, element,
                             chapter, fieldType, scopeId, controlFlowGraph));
+                    isDelegated = true;
                 } else {
                     // save variable
                     operation = new ProcessVariableOperation(node.getName(), element, chapter, fieldType,
@@ -1137,7 +1142,10 @@ public final class ProcessVariableReader {
         }
 
         // TODO are there other field Types that should be skipped?
-        if (!fieldType.equals(KnownElementFieldType.CalledElement)) {
+        if (!fieldType.equals(KnownElementFieldType.CalledElement)
+                && !fieldType.equals(KnownElementFieldType.CamundaOut)
+                && !fieldType.equals(KnownElementFieldType.CamundaIn)
+                && !isDelegated) {
             controlFlowGraph.addNode(expNode);
         }
 

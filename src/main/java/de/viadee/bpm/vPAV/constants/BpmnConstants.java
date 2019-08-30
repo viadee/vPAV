@@ -243,6 +243,8 @@ public class BpmnConstants {
 
 	public static final String ATTR_VAR_MAPPING_CLASS = "variableMappingClass";
 
+	public static final String ATTR_VAR_MAPPING_DELEGATE = "variableMappingDelegateExpression";
+
 	public static final String DEFAULT = "default";
 
 	public static final String REQUIRED_DEFAULT = "requiredDefault";
