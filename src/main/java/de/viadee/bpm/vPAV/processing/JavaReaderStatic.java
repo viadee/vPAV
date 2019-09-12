@@ -58,15 +58,15 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JavaReaderStatic {
+class JavaReaderStatic {
 
-	public static final Logger LOGGER = Logger.getLogger(JavaReaderStatic.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(JavaReaderStatic.class.getName());
 
 	private String returnStmt;
 
 	private List<Value> constructorArgs;
 
-	public JavaReaderStatic() {
+	JavaReaderStatic() {
 		this.setupSoot();
 	}
 
@@ -837,7 +837,7 @@ public class JavaReaderStatic {
 			String methodName = src.tgt().getName();
 			String className = src.tgt().getDeclaringClass().getName();
 			className = cleanString(className, false);
-			if (classPaths.contains(className) || className.contains("$")) {
+			if (classPaths.contains(className)) {
 				controlFlowGraph.incrementRecursionCounter();
 				controlFlowGraph.addPriorLevel(controlFlowGraph.getPriorLevel());
 				controlFlowGraph.resetInternalNodeCounter();

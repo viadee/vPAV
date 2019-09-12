@@ -68,7 +68,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,8 +81,6 @@ public final class ProcessVariableReader {
 	private final BpmnScanner bpmnScanner;
 
 	private final Rule rule;
-
-	public static final Logger LOGGER = Logger.getLogger(ProcessVariableReader.class.getName());
 
 	public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, final Rule rule, BpmnScanner scanner) {
 		this.decisionRefToPathMap = decisionRefToPathMap;
@@ -863,7 +860,6 @@ public final class ProcessVariableReader {
 			final String t_expression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
 					BpmnConstants.ATTR_EX);
 			if (t_expression != null) {
-
 				processVariables
 						.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner, t_expression,
 								element, ElementChapter.Implementation, KnownElementFieldType.Expression, scopeId));

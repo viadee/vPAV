@@ -110,7 +110,7 @@ public class ProcessVariablesScanner {
             sootClass.setApplicationClass();
             Scene.v().loadNecessaryClasses();
             for (SootMethod method : sootClass.getMethods()) {
-                if (!method.isPhantom()) {
+                if (!method.isPhantom() && !method.isAbstract()) {
                     final Body body = method.retrieveActiveBody();
                     for (String entryPoint : camundaProcessEntryPoints) {
                         if (body.toString().contains(entryPoint)) {
