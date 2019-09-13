@@ -94,7 +94,7 @@ class JavaReaderStatic {
 	 *            Control flow graph
 	 * @return Map of process variables from the referenced delegate
 	 */
-	public ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
+	ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, final ControlFlowGraph controlFlowGraph) {
 
@@ -107,11 +107,6 @@ class JavaReaderStatic {
 			System.setProperty("soot.class.path", sootPath);
 
 			final Set<String> classPaths = fileScanner.getJavaResourcesFileInputStream();
-			final ArrayList<String> delegateMethods = new ArrayList<>();
-			delegateMethods.add("execute");
-			delegateMethods.add("notify");
-			delegateMethods.add("mapInputVariables");
-			delegateMethods.add("mapOutputVariables");
 
 			if (element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
 					BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null
@@ -146,8 +141,8 @@ class JavaReaderStatic {
 	 *            Current entry point
 	 * @return Map of process variable operations
 	 */
-	public ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className,
-			final BpmnElement element, final String resourceFilePath, final EntryPoint entryPoint) {
+	ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className, final BpmnElement element,
+			final String resourceFilePath, final EntryPoint entryPoint) {
 
 		final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
@@ -295,7 +290,7 @@ class JavaReaderStatic {
 	 *            Control flow graph
 	 * @return Map of process variables for a given class
 	 */
-	public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
+	private ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
 			final String className, final String methodName, final String classFile, final BpmnElement element,
 			final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId,
 			final ControlFlowGraph controlFlowGraph) {
@@ -346,9 +341,8 @@ class JavaReaderStatic {
 	 *            List of arguments
 	 * @param controlFlowGraph
 	 *            Control flow graph
-	 * @return OutSetCFG which contains data flow information
 	 */
-	public OutSetCFG classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
+	private void classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
 			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
@@ -380,7 +374,7 @@ class JavaReaderStatic {
 						parameterTypes.add(delegateExecutionType);
 					}
 				}
-				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
+				retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args, controlFlowGraph);
 				break;
 			case "notify":
@@ -391,32 +385,30 @@ class JavaReaderStatic {
 						parameterTypes.add(delegateExecutionType);
 					}
 				}
-				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
+				retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args, controlFlowGraph);
 				break;
 			case "mapInputVariables":
 				parameterTypes.add(delegateExecutionType);
 				parameterTypes.add(mapVariablesType);
-				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
+				retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args, controlFlowGraph);
 				break;
 			case "mapOutputVariables":
 				parameterTypes.add(delegateExecutionType);
 				parameterTypes.add(mapVariablesType);
-				outSet = retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
+				retrieveMethod(classPaths, methodName, classFile, element, chapter, fieldType, scopeId, outSet,
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args, controlFlowGraph);
 				break;
 			default:
-				outSet = retrieveCustomMethod(classPaths, classFile, element, chapter, fieldType,
-						scopeId, outSet, originalBlock, assignmentStmt, args, controlFlowGraph, sootMethod);
+				retrieveCustomMethod(sootClass, classPaths, classFile, element, chapter, fieldType, scopeId, outSet,
+						originalBlock, assignmentStmt, args, controlFlowGraph, sootMethod, methodName);
 				break;
 			}
 
 		} else {
 			LOGGER.warning("Class " + classFile + " was not found by Soot");
 		}
-
-		return outSet;
 
 	}
 
@@ -448,9 +440,8 @@ class JavaReaderStatic {
 	 *            Soot representation of parameters
 	 * @param returnType
 	 *            Soot Representation of return type
-	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG retrieveMethod(final Set<String> classPaths, final String methodName, final String classFile,
+	private void retrieveMethod(final Set<String> classPaths, final String methodName, final String classFile,
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String scopeId, OutSetCFG outSet, final VariableBlock originalBlock, final SootClass sootClass,
 			final List<Type> parameterTypes, final VoidType returnType, final String assignmentStmt,
@@ -459,24 +450,25 @@ class JavaReaderStatic {
 		SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
 		if (method != null) {
-			outSet = fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet, originalBlock,
-					method, assignmentStmt, args, controlFlowGraph);
+			fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet, originalBlock, method,
+					assignmentStmt, args, controlFlowGraph);
 		} else {
 			method = sootClass.getMethodByNameUnsafe(methodName);
 			if (method != null) {
-				outSet = fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet,
-						originalBlock, method, assignmentStmt, args, controlFlowGraph);
+				fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet, originalBlock,
+						method, assignmentStmt, args, controlFlowGraph);
 			} else {
 				LOGGER.warning("In class " + classFile + " - " + methodName + " method was not found by Soot");
 			}
 		}
-		return outSet;
 	}
 
 	/**
 	 * Retrieve given custom methods to obtain a Soot representation of said method
 	 * to analyse its body
-	 *
+	 * 
+	 * @param sootClass
+	 *            Soot representation of class
 	 * @param classPaths
 	 *            Set of classes that is included in inter-procedural analysis
 	 * @param classFile
@@ -493,19 +485,25 @@ class JavaReaderStatic {
 	 *            Callgraph information
 	 * @param originalBlock
 	 *            VariableBlock
-	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG retrieveCustomMethod(final Set<String> classPaths, final String classFile, final BpmnElement element, final ElementChapter chapter,
-			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
-			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-			final ControlFlowGraph controlFlowGraph, final SootMethod sootMethod) {
+	private void retrieveCustomMethod(final SootClass sootClass, final Set<String> classPaths, final String classFile,
+			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+			final String scopeId, OutSetCFG outSet, final VariableBlock originalBlock, final String assignmentStmt,
+			final List<Value> args, final ControlFlowGraph controlFlowGraph, final SootMethod sootMethod, final String methodName) {
 
 		if (sootMethod != null) {
-			outSet = fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet,
-					originalBlock, sootMethod, assignmentStmt, args, controlFlowGraph);
+			fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet, originalBlock,
+					sootMethod, assignmentStmt, args, controlFlowGraph);
+		} else {
+			for (SootMethod method : sootClass.getMethods()) {
+				if (method != null) {
+					if (method.getName().equals(methodName)) {
+						fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet, originalBlock,
+								method, assignmentStmt, args, controlFlowGraph);
+					}
+				}
+			}
 		}
-
-		return outSet;
 	}
 
 	/**
@@ -530,14 +528,13 @@ class JavaReaderStatic {
 	 *            VariableBlock
 	 * @param method
 	 *            Soot representation of a given method
-	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG fetchMethodBody(final Set<String> classPaths, final String classFile, final BpmnElement element,
+	private void fetchMethodBody(final Set<String> classPaths, final String classFile, final BpmnElement element,
 			final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
 			final VariableBlock originalBlock, final SootMethod method, final String assignmentStmt,
 			final List<Value> args, final ControlFlowGraph controlFlowGraph) {
 
-		final Body body = method.retrieveActiveBody();
+ 		final Body body = method.retrieveActiveBody();
 
 		BlockGraph graph = new ClassicCompleteBlockGraph(body);
 		// Prepare call graph for inter-procedural recursive call
@@ -555,7 +552,6 @@ class JavaReaderStatic {
 					originalBlock, assignmentStmt, args, controlFlowGraph);
 		}
 
-		return outSet;
 	}
 
 	/**
@@ -686,7 +682,7 @@ class JavaReaderStatic {
 					assignmentStmt = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
 					JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 					checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-							variableBlock, unit, assignmentStmt, expr.getArgs(), controlFlowGraph);
+							variableBlock, unit, assignmentStmt, expr.getArgs(), controlFlowGraph, false);
 					paramName = this.getReturnStmt();
 				}
 				// Method call of implemented interface method with assignment to a variable
@@ -779,7 +775,7 @@ class JavaReaderStatic {
 		if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JVirtualInvokeExpr) {
 			JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
 			checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock, unit,
-					assignmentStmt, expr.getArgs(), controlFlowGraph);
+					assignmentStmt, expr.getArgs(), controlFlowGraph, true);
 		}
 		// Constructor call
 		if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
@@ -789,7 +785,7 @@ class JavaReaderStatic {
 				assignmentStmt = expr.getBaseBox().getValue().toString();
 			} else {
 				checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-						unit, assignmentStmt, expr.getArgs(), controlFlowGraph);
+						unit, assignmentStmt, expr.getArgs(), controlFlowGraph, true);
 			}
 		}
 		return assignmentStmt;
@@ -822,7 +818,7 @@ class JavaReaderStatic {
 	private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
-			final List<Value> args, final ControlFlowGraph controlFlowGraph) {
+			final List<Value> args, final ControlFlowGraph controlFlowGraph, final boolean isInvoke) {
 
 		final Iterator<Edge> sources = cg.edgesOutOf(unit);
 		Edge src;
@@ -832,7 +828,16 @@ class JavaReaderStatic {
 			String className = src.tgt().getDeclaringClass().getName();
 			className = cleanString(className, false);
 			if (classPaths.contains(className)) {
-				SootMethod sootMethod = ((JInvokeStmt) unit).getInvokeExpr().getMethodRef().resolve();
+
+				SootMethod sootMethod;
+				if (isInvoke && !className.contains("$")) {
+					sootMethod = ((JInvokeStmt) unit).getInvokeExpr().getMethodRef().resolve();
+				} else if (!isInvoke && !className.contains("$")) {
+					sootMethod = ((JAssignStmt) unit).getInvokeExpr().getMethodRef().resolve();
+				} else {
+					sootMethod = null;
+				}
+
 				controlFlowGraph.incrementRecursionCounter();
 				controlFlowGraph.addPriorLevel(controlFlowGraph.getPriorLevel());
 				controlFlowGraph.resetInternalNodeCounter();
