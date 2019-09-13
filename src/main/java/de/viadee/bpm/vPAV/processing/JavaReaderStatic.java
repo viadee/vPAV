@@ -34,8 +34,11 @@ package de.viadee.bpm.vPAV.processing;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Messages;
+import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
@@ -489,7 +492,8 @@ class JavaReaderStatic {
 	private void retrieveCustomMethod(final SootClass sootClass, final Set<String> classPaths, final String classFile,
 			final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
 			final String scopeId, OutSetCFG outSet, final VariableBlock originalBlock, final String assignmentStmt,
-			final List<Value> args, final ControlFlowGraph controlFlowGraph, final SootMethod sootMethod, final String methodName) {
+			final List<Value> args, final ControlFlowGraph controlFlowGraph, final SootMethod sootMethod,
+			final String methodName) {
 
 		if (sootMethod != null) {
 			fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet, originalBlock,
@@ -498,8 +502,8 @@ class JavaReaderStatic {
 			for (SootMethod method : sootClass.getMethods()) {
 				if (method != null) {
 					if (method.getName().equals(methodName)) {
-						fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet, originalBlock,
-								method, assignmentStmt, args, controlFlowGraph);
+						fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet,
+								originalBlock, method, assignmentStmt, args, controlFlowGraph);
 					}
 				}
 			}
@@ -534,7 +538,7 @@ class JavaReaderStatic {
 			final VariableBlock originalBlock, final SootMethod method, final String assignmentStmt,
 			final List<Value> args, final ControlFlowGraph controlFlowGraph) {
 
- 		final Body body = method.retrieveActiveBody();
+		final Body body = method.retrieveActiveBody();
 
 		BlockGraph graph = new ClassicCompleteBlockGraph(body);
 		// Prepare call graph for inter-procedural recursive call
@@ -905,7 +909,10 @@ class JavaReaderStatic {
 				variableBlock.addProcessVariable(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
 						chapter, fieldType, filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
 			} else {
-				// TODO: Warnmeldung mit PV operation
+				IssueWriter.createIssue(new Rule("ProcessVariablesModelChecker", true, null, null, null, null), //$NON-NLS-1$
+						CriticalityEnum.WARNING, filePath, element,
+						String.format(Messages.getString("ProcessVariablesModelChecker.4"),
+								CheckName.checkName(element.getBaseElement()), chapter, fieldType.getDescription()));
 			}
 		}
 	}
