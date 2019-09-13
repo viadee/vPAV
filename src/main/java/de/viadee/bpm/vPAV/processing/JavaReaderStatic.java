@@ -307,7 +307,7 @@ class JavaReaderStatic {
 		List<Value> args = new ArrayList<>();
 
 		classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-				outSet, null, "", args, controlFlowGraph);
+				outSet, null, "", args, controlFlowGraph, null);
 
 		if (outSet.getAllProcessVariables().size() > 0) {
 			processVariables.putAll(outSet.getAllProcessVariables());
@@ -352,7 +352,7 @@ class JavaReaderStatic {
 			final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
 			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-			final ControlFlowGraph controlFlowGraph) {
+			final ControlFlowGraph controlFlowGraph, final SootMethod sootMethod) {
 
 		className = cleanString(className, true);
 		SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
@@ -407,8 +407,8 @@ class JavaReaderStatic {
 						originalBlock, sootClass, parameterTypes, returnType, assignmentStmt, args, controlFlowGraph);
 				break;
 			default:
-				outSet = retrieveCustomMethod(sootClass, classPaths, methodName, classFile, element, chapter, fieldType,
-						scopeId, outSet, originalBlock, assignmentStmt, args, controlFlowGraph);
+				outSet = retrieveCustomMethod(classPaths, classFile, element, chapter, fieldType,
+						scopeId, outSet, originalBlock, assignmentStmt, args, controlFlowGraph, sootMethod);
 				break;
 			}
 
@@ -479,8 +479,6 @@ class JavaReaderStatic {
 	 *
 	 * @param classPaths
 	 *            Set of classes that is included in inter-procedural analysis
-	 * @param methodName
-	 *            Name of currently analysed method
 	 * @param classFile
 	 *            Location path of class
 	 * @param element
@@ -495,22 +493,18 @@ class JavaReaderStatic {
 	 *            Callgraph information
 	 * @param originalBlock
 	 *            VariableBlock
-	 * @param sootClass
-	 *            Soot representation of given class
 	 * @return OutSetCFG which contains data flow information
 	 */
-	private OutSetCFG retrieveCustomMethod(final SootClass sootClass, final Set<String> classPaths,
-			final String methodName, final String classFile, final BpmnElement element, final ElementChapter chapter,
+	private OutSetCFG retrieveCustomMethod(final Set<String> classPaths, final String classFile, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
 			final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-			final ControlFlowGraph controlFlowGraph) {
+			final ControlFlowGraph controlFlowGraph, final SootMethod sootMethod) {
 
-		for (SootMethod method : sootClass.getMethods()) {
-			if (method.getName().equals(methodName)) {
-				outSet = fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet,
-						originalBlock, method, assignmentStmt, args, controlFlowGraph);
-			}
+		if (sootMethod != null) {
+			outSet = fetchMethodBody(classPaths, classFile, element, chapter, fieldType, scopeId, outSet,
+					originalBlock, sootMethod, assignmentStmt, args, controlFlowGraph);
 		}
+
 		return outSet;
 	}
 
@@ -838,11 +832,12 @@ class JavaReaderStatic {
 			String className = src.tgt().getDeclaringClass().getName();
 			className = cleanString(className, false);
 			if (classPaths.contains(className)) {
+				SootMethod sootMethod = ((JInvokeStmt) unit).getInvokeExpr().getMethodRef().resolve();
 				controlFlowGraph.incrementRecursionCounter();
 				controlFlowGraph.addPriorLevel(controlFlowGraph.getPriorLevel());
 				controlFlowGraph.resetInternalNodeCounter();
 				classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
-						scopeId, outSet, variableBlock, assignmentStmt, args, controlFlowGraph);
+						scopeId, outSet, variableBlock, assignmentStmt, args, controlFlowGraph, sootMethod);
 				controlFlowGraph.removePriorLevel();
 				controlFlowGraph.decrementRecursionCounter();
 				controlFlowGraph.setInternalNodeCounter(controlFlowGraph.getPriorLevel());
