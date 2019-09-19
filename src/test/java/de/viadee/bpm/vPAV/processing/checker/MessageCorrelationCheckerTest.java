@@ -203,7 +203,7 @@ public class MessageCorrelationCheckerTest {
 
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final Set<String> testSet = new HashSet<>();
-		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate4.java");
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate4.class");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(

@@ -193,7 +193,7 @@ public class CallActivityTest {
                 callActivity.setCamundaVariableMappingClass(null);
                 callActivity.setCamundaVariableMappingDelegateExpression("${de.viadee.bpm.vPAV.delegates.DelegatedVarMapping}");
                 final Map<String, String> beanMapping = new HashMap<>();
-                beanMapping.put("DelegatedVarMapping", "de/viadee/bpm/vPAV/delegates/DelegatedVarMapping.java");
+                beanMapping.put("DelegatedVarMapping", "de/viadee/bpm/vPAV/delegates/DelegatedVarMapping.class");
                 RuntimeConfig.getInstance().setBeanMapping(beanMapping);
             }
 

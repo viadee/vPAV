@@ -77,7 +77,7 @@ public class ProcessVariableReaderStaticTest {
 		RuntimeConfig.getInstance().getResource("en_US");
 		RuntimeConfig.getInstance().setTest(true);
 		final Map<String, String> beanMapping = new HashMap<>();
-		beanMapping.put("testDelegate", "de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.java");
+		beanMapping.put("testDelegate", "de/viadee/bpm/vPAV/delegates/TestDelegateFlowGraph.class");
 		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 	}
 
