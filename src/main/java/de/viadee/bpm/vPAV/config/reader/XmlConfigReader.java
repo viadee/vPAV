@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -67,7 +67,7 @@ public final class XmlConfigReader implements ConfigReader {
 
             if (fRuleSet != null) {
                 final XmlRuleSet ruleSet = (XmlRuleSet) jaxbUnmarshaller.unmarshal(fRuleSet);
-                return transformFromXmlDatastructures(ruleSet);
+                return transformFromXmlDestructure(ruleSet);
             } else {
                 throw new ConfigReaderException("ConfigFile could not be found");
             }
@@ -108,61 +108,19 @@ public final class XmlConfigReader implements ConfigReader {
      * @return rules Transformed map of rules
      * @throws ConfigReaderException If file could not be read properly
      */
-    private static RuleSet transformFromXmlDatastructures(final XmlRuleSet ruleSet)
+    private static RuleSet transformFromXmlDestructure(final XmlRuleSet ruleSet)
             throws ConfigReaderException {
         final Map<String, Map<String, Rule>> rules = new HashMap<>();
 
         final Collection<XmlRule> xmlRules = ruleSet.getRules();
         for (final XmlRule rule : xmlRules) {
-            final String id = (rule.getId() == null) ? rule.getName() : rule.getId();
-            final String name = rule.getName();
-            if (name == null)
-                throw new ConfigReaderException("rule name is not set");
-            final boolean state = rule.isState();
-            final String ruleDescription = rule.getDescription();
-            final Collection<XmlElementConvention> xmlElementConventions = rule.getElementConventions();
-            final ArrayList<ElementConvention> elementConventions = new ArrayList<>();
-            if (xmlElementConventions != null) {
-                for (final XmlElementConvention xmlElementConvention : xmlElementConventions) {
-                    final XmlElementFieldTypes xmlElementFieldTypes = xmlElementConvention.getElementFieldTypes();
-                    ElementFieldTypes elementFieldTypes = null;
-                    if (xmlElementFieldTypes != null) {
-                        elementFieldTypes = new ElementFieldTypes(xmlElementFieldTypes.getElementFieldTypes(),
-                                xmlElementFieldTypes.isExcluded());
-                    }
-                    if (!checkRegEx(xmlElementConvention.getPattern()))
-                        throw new ConfigReaderException("RegEx (" + xmlElementConvention.getPattern() + ") of " + name
-                                + " (" + xmlElementConvention.getName() + ") is incorrect");
-                    elementConventions.add(new ElementConvention(xmlElementConvention.getName(), elementFieldTypes,
-                            xmlElementConvention.getDescription(), xmlElementConvention.getPattern()));
-                }
-            }
-            final Collection<XmlModelConvention> xmlModelConventions = rule.getModelConventions();
-            final ArrayList<ModelConvention> modelConventions = new ArrayList<>();
-            if (xmlModelConventions != null) {
-                for (final XmlModelConvention xmlModelConvention : xmlModelConventions) {
-                    modelConventions.add(new ModelConvention(xmlModelConvention.getType()));
-                }
-            }
-            final Collection<XmlSetting> xmlSettings = rule.getSettings();
-            final Map<String, Setting> settings = new HashMap<>();
-            if (xmlSettings != null) {
-                for (final XmlSetting xmlSetting : xmlSettings) {
-                    if (!settings.containsKey(xmlSetting.getName())) {
-                        settings.put(xmlSetting.getName(),
-                                new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getType(),
-                                        xmlSetting.getId(), xmlSetting.getRequired(), xmlSetting.getValue()));
-                    } else {
-                        settings.get(xmlSetting.getName()).addScriptPlace(xmlSetting.getScript());
-                    }
-                }
-            }
+            Rule ruleObj = transformXmlRule(rule);
 
-            if (!rules.containsKey(name)) {
-                rules.put(name, new HashMap<>());
+            if (!rules.containsKey(ruleObj.getName())) {
+                rules.put(ruleObj.getName(), new HashMap<>());
             }
-            rules.get(name).put(id,
-                    new Rule(id, name, state, ruleDescription, settings, elementConventions, modelConventions));
+            rules.get(ruleObj.getName()).put(ruleObj.getId(),
+                    ruleObj);
         }
 
         // TODO as soon as we finally move the properties to an external file, we don't
@@ -175,13 +133,148 @@ public final class XmlConfigReader implements ConfigReader {
         return splitRules(rules);
     }
 
+    /**
+     * Transforms a single XmlRule to Rule
+     *
+     * @return rule
+     */
+    private static Rule transformXmlRule(XmlRule rule) throws ConfigReaderException {
+        final String id = (rule.getId() == null) ? rule.getName() : rule.getId();
+        final String name = rule.getName();
+        if (name == null)
+            throw new ConfigReaderException("rule name is not set");
+
+        final Collection<XmlElementConvention> xmlElementConventions = rule.getElementConventions();
+        final ArrayList<ElementConvention> elementConventions = new ArrayList<>();
+        if (xmlElementConventions != null) {
+            for (final XmlElementConvention xmlElementConvention : xmlElementConventions) {
+                final XmlElementFieldTypes xmlElementFieldTypes = xmlElementConvention.getElementFieldTypes();
+                ElementFieldTypes elementFieldTypes = null;
+                if (xmlElementFieldTypes != null) {
+                    elementFieldTypes = new ElementFieldTypes(xmlElementFieldTypes.getElementFieldTypes(),
+                            xmlElementFieldTypes.isExcluded());
+                }
+                if (!checkRegEx(xmlElementConvention.getPattern()))
+                    throw new ConfigReaderException("RegEx (" + xmlElementConvention.getPattern() + ") of " + name
+                            + " (" + xmlElementConvention.getName() + ") is incorrect");
+                elementConventions.add(new ElementConvention(xmlElementConvention.getName(), elementFieldTypes,
+                        xmlElementConvention.getDescription(), xmlElementConvention.getPattern()));
+            }
+        }
+
+        final Collection<XmlModelConvention> xmlModelConventions = rule.getModelConventions();
+        final ArrayList<ModelConvention> modelConventions = new ArrayList<>();
+        if (xmlModelConventions != null) {
+            xmlModelConventions.forEach(xmlModelConvention -> {
+                modelConventions.add(new ModelConvention(xmlModelConvention.getType()));
+            });
+        }
+
+        final Collection<XmlSetting> xmlSettings = rule.getSettings();
+        final Map<String, Setting> settings = new HashMap<>();
+        if (xmlSettings != null) {
+            for (final XmlSetting xmlSetting : xmlSettings) {
+                if (!settings.containsKey(xmlSetting.getName())) {
+                    settings.put(xmlSetting.getName(),
+                            new Setting(xmlSetting.getName(), xmlSetting.getScript(), xmlSetting.getType(),
+                                    xmlSetting.getId(), xmlSetting.getRequired(), xmlSetting.getValue()));
+                } else {
+                    settings.get(xmlSetting.getName()).addScriptPlace(xmlSetting.getScript());
+                }
+            }
+        }
+
+        return new Rule(id, name, rule.isState(), rule.getDescription(), settings, elementConventions, modelConventions);
+    }
+
+    /**
+     * Splits given rules into model and element rules
+     *
+     * @param rules rules
+     * @return RuleSet which includes the rules
+     */
     private static RuleSet splitRules(Map<String, Map<String, Rule>> rules) {
-        boolean hasParentRuleSet = false;
+        // Check old config rules
+        boolean hasParentRuleSet = extractProperties(rules);
+
         HashMap<String, Map<String, Rule>> elementRules = new HashMap<>();
         HashMap<String, Map<String, Rule>> modelRules = new HashMap<>();
+        List<String> viadeeRules = Arrays.asList(RuntimeConfig.getInstance().getViadeeRules());
+        List<String> viadeeElementRules = Arrays.asList(RuntimeConfig.getInstance().getViadeeElementRules());
 
-        // Check config rules
-        // TODO can be removed in future if it is in properties
+        // Determine for each rule if it is a model or element checker
+        for (Map.Entry<String, Map<String, Rule>> checkerRules : rules.entrySet()) {
+            if (viadeeRules.contains(checkerRules.getKey())) {
+                if (viadeeElementRules.contains(checkerRules.getKey())) {
+                    // Element checker
+                    elementRules.put(checkerRules.getKey(), checkerRules.getValue());
+                } else {
+                    // Model checker
+                    modelRules.put(checkerRules.getKey(), checkerRules.getValue());
+                }
+            } else {
+                // Resolve external checker to determine checker type
+                resolveExternalChecker(checkerRules, elementRules, modelRules);
+            }
+        }
+
+        return new RuleSet(elementRules, modelRules, hasParentRuleSet);
+    }
+
+    /**
+     * Loads the external checker class to determine whether it is a model or element rule
+     *
+     * @param checkerRules rules of one checker type
+     * @param elementRules HashMap where rules are inserted if it is a element checker
+     * @param modelRules   HashMap where rules are inserted if it is a model checker
+     */
+    private static void resolveExternalChecker(Map.Entry<String, Map<String, Rule>> checkerRules,
+                                               HashMap<String, Map<String, Rule>> elementRules,
+                                               HashMap<String, Map<String, Rule>> modelRules) {
+        String className = "";
+        Rule firstRule = (Rule) checkerRules.getValue().values().toArray()[0];
+        if (firstRule.getSettings() != null
+                && firstRule.getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
+            className =
+                    firstRule.getSettings().get(BpmnConstants.EXTERN_LOCATION).getValue() + "." //$NON-NLS-1$
+                            + firstRule.getName().trim();
+            // Load class and check implemented interface
+            try {
+                Class<?> clazz = Class.forName(className);
+                Class<?> superClazz = clazz.getSuperclass();
+                if (superClazz.getName().equals("de.viadee.bpm.vPAV.processing.checker.AbstractElementChecker")) {
+                    // Element checker
+                    elementRules.put(checkerRules.getKey(), checkerRules.getValue());
+                    return;
+                }
+                if (superClazz.getName().equals("de.viadee.bpm.vPAV.processing.checker.AbstractModelChecker")) {
+                    // Model checker
+                    modelRules.put(checkerRules.getKey(), checkerRules.getValue());
+                    return;
+                } else {
+                    LOGGER.warning("Class " + className
+                            + " does not extend a valid checker class. All rules of this type were deactivated.");
+                }
+            } catch (ClassNotFoundException e) {
+                LOGGER.warning("Class " + className + " was not found. All rules of this type were deactivated");
+            }
+            // Class does not extend a know abstract checker, deactivate rules
+            for (Rule rule : checkerRules.getValue().values()) {
+                rule.deactivate();
+            }
+        }
+    }
+
+    /**
+     * Remove old properties from ruleset.
+     *
+     * @param rules rule set
+     * @return if ruleset has parent ruleset
+     */
+    // TODO can be removed in future if it is in properties
+    @Deprecated
+    private static boolean extractProperties(Map<String, Map<String, Rule>> rules) {
+        boolean hasParentRuleSet = false;
         if (rules.containsKey(ConfigConstants.HASPARENTRULESET)) {
             hasParentRuleSet = rules.get(ConfigConstants.HASPARENTRULESET).get(ConfigConstants.HASPARENTRULESET).isActive();
             rules.remove(ConfigConstants.HASPARENTRULESET);
@@ -205,60 +298,7 @@ public final class XmlConfigReader implements ConfigReader {
             rules.remove(ConfigConstants.HASPARENTRULESET);
         }
 
-        List<String> viadeeRules = Arrays.asList(RuntimeConfig.getInstance().getViadeeRules());
-        List<String> viadeeElementRules = Arrays.asList(RuntimeConfig.getInstance().getViadeeElementRules());
-
-        // Determine for each rule if it is a model or element checker
-        for (Map.Entry<String, Map<String, Rule>> checkerRules : rules.entrySet()) {
-            if (viadeeRules.contains(checkerRules.getKey())) {
-                if (viadeeElementRules.contains(checkerRules.getKey())) {
-                    // Element checker
-                    elementRules.put(checkerRules.getKey(), checkerRules.getValue());
-
-                } else {
-                    // Model checker
-                    modelRules.put(checkerRules.getKey(), checkerRules.getValue());
-                }
-
-            } else {
-                String className = "";
-                Rule firstRule = (Rule) checkerRules.getValue().values().toArray()[0];
-                if (firstRule.getSettings() != null
-                        && firstRule.getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
-                    className =
-                            firstRule.getSettings().get(BpmnConstants.EXTERN_LOCATION).getValue() + "." //$NON-NLS-1$
-                                    + firstRule.getName().trim();
-
-                    // Load class and check implemented interface
-                    try {
-                        Class<?> clazz = Class.forName(className);
-                        Class<?> superClazz = clazz.getSuperclass();
-                        switch (superClazz.getName()) {
-                            case "de.viadee.bpm.vPAV.processing.checker.AbstractElementChecker":
-                                // Element checker
-                                elementRules.put(checkerRules.getKey(), checkerRules.getValue());
-                                break;
-                            case "de.viadee.bpm.vPAV.processing.checker.AbstractModelChecker":
-                                // Model checker
-                                modelRules.put(checkerRules.getKey(), checkerRules.getValue());
-                                break;
-                            default:
-                                // Class does not extend a know abstract checker
-                                for (Rule rule : checkerRules.getValue().values()) {
-                                    rule.deactivate();
-                                }
-                                LOGGER.warning("Class " + className
-                                        + " does not extend a valid checker class. All rules of this type were deactivated.");
-                                break;
-                        }
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        return new RuleSet(elementRules, modelRules, hasParentRuleSet);
+        return hasParentRuleSet;
     }
 
     private static void checkSingletonRule(Map<String, Map<String, Rule>> rules, String rulename) {
@@ -278,6 +318,7 @@ public final class XmlConfigReader implements ConfigReader {
             Pattern.compile(regEx);
             correct = true;
         } catch (PatternSyntaxException e) {
+            LOGGER.info("PatternSyntaxException was catched.");
         }
         return correct;
     }

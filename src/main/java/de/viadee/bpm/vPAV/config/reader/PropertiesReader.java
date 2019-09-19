@@ -29,47 +29,43 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.beans;
+package de.viadee.bpm.vPAV.config.reader;
 
-import org.springframework.context.ApplicationContext;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
- * Helper methods for Maven Plugin CamundaStaticValidator
+ * Used to read the properties file (vPav.properties) and extract the configured rules
+ * Requirements: Existing vPav.properties in src/test/resources
  */
-public class BeanMappingGenerator {
+public class PropertiesReader {
 
-    /**
-     * Generates bean mapping HashMap for jUnit start
-     *
-     * @param ctx
-     *            ApplicationContext
-     * @return beanNameToClassMap contains beanmapping
-     */
-    public static Map<String, String> generateBeanMappingFile(final ApplicationContext ctx) {
+    private static final Logger LOGGER = Logger.getLogger(PropertiesReader.class.getName());
 
-        final Map<String, String> beanNameToClassMap = new HashMap<>();
+    public Properties read() {
+        InputStream input = null;
+        Properties properties = new Properties();
+        try {
+            input = this.getClass().getClassLoader().getResourceAsStream("vPav.properties");
+            if (input == null) {
+                LOGGER.info("vPav.properties file could not be found. Falling back to default values...");
+            } else {
+                properties.load(input);
+            }
 
-        // read bean names
-        for (final String beanName : ctx.getBeanDefinitionNames()) {
-            // don't add spring own classes
-            if (!beanName.startsWith("org.springframework")) {
-                final Object obj = ctx.getBean(beanName);
-                if (obj != null) {
-                    if (obj.getClass().getName().contains("$$")) {
-                        String name = obj.getClass().getName();
-                        while (name.contains("$$")) {
-                            name = name.substring(0, name.lastIndexOf("$$"));
-                        }
-                        beanNameToClassMap.put(beanName, name);
-                    } else {
-                        beanNameToClassMap.put(beanName, obj.getClass().getName());
-                    }
+        } catch (IOException e) {
+            LOGGER.warning("Could not read vPav.properties file. Falling back to default values...");
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    LOGGER.warning("InputStream from vPav.properties could not be closed.");
                 }
             }
         }
-        return beanNameToClassMap;
+        return properties;
     }
 }

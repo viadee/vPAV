@@ -53,10 +53,10 @@ public class RuleSet {
         this.modelRules = Collections.unmodifiableMap(modelRules);
         this.hasParentRuleSet = hasParentRuleSet;
 
-        Map<String, Map<String, Rule>> allRules = new HashMap<>();
-        allRules.putAll(elementRules);
-        allRules.putAll(modelRules);
-        this.allRules = Collections.unmodifiableMap(allRules);
+        Map<String, Map<String, Rule>> allRulesTemp = new HashMap<>();
+        allRulesTemp.putAll(elementRules);
+        allRulesTemp.putAll(modelRules);
+        this.allRules = Collections.unmodifiableMap(allRulesTemp);
     }
 
     public Map<String, Map<String, Rule>> getModelRules() {

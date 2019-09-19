@@ -32,8 +32,8 @@
 package de.viadee.bpm.vPAV.constants;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.reader.PropertiesReader;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import java.util.Properties;
@@ -135,27 +135,7 @@ public class ConfigConstants {
 
 	private ConfigConstants() {
 		InputStream input = null;
-		properties = new Properties();
-
-		try {
-			input = this.getClass().getClassLoader().getResourceAsStream("vPav.properties");
-			if (input == null) {
-				logger.info("vPav.properties file could not be found. Falling back to default values...");
-			} else {
-				properties.load(input);
-			}
-
-		} catch (IOException e) {
-			logger.warning("Could not read vPav.properties file. Falling back to default values...");
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					logger.warning("InputStream from vPav.properties could not be closed.");
-				}
-			}
-		}
+		properties = (new PropertiesReader()).read();
 	}
 
 	public static ConfigConstants getInstance() {

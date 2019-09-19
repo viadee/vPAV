@@ -51,20 +51,6 @@ public class Rule {
 
     private ArrayList<ModelConvention> modelConventions;
 
-    public Rule(final String name, final boolean isActive, final String ruleDescription,
-            final Map<String, Setting> settings,
-            final Collection<ElementConvention> elementConventions,
-            final ArrayList<ModelConvention> modelConventions) {
-        super();
-        this.id = name;
-        this.name = name;
-        this.isActive = isActive;
-        this.ruleDescription = ruleDescription;
-        this.settings = settings;
-        this.elementConventions = elementConventions;
-        this.modelConventions = modelConventions;
-    }
-
     public Rule(final String id, final String name, final boolean isActive, final String ruleDescription,
             final Map<String, Setting> settings,
             final Collection<ElementConvention> elementConventions,
@@ -77,6 +63,13 @@ public class Rule {
         this.settings = settings;
         this.elementConventions = elementConventions;
         this.modelConventions = modelConventions;
+    }
+
+    public Rule(final String name, final boolean isActive, final String ruleDescription,
+                final Map<String, Setting> settings,
+                final Collection<ElementConvention> elementConventions,
+                final ArrayList<ModelConvention> modelConventions) {
+        this(name, name, isActive, ruleDescription, settings, elementConventions, modelConventions);
     }
 
     public String getId() {
@@ -108,7 +101,7 @@ public class Rule {
     }
 
     public ArrayList<String> getWhiteList() {
-        final ArrayList<String> whiteList = new ArrayList<String>();
+        final ArrayList<String> whiteList = new ArrayList<>();
         for (ModelConvention modelConvention : modelConventions) {
             if (modelConvention.getType() != null) {
                 whiteList.add(modelConvention.getType());
