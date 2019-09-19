@@ -182,7 +182,10 @@ public class ConfigConstants {
 		return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
 	}
 
-	//Todo Backwards compatibility: allow create-output flag to be defined in ruleset, can be removed in future
+	/**
+	 * @param htmlOutput true if the results should be visualized as html page
+	 * @deprecated As of release 3.0.0, html output property should be set in property file
+	 */
 	@Deprecated
 	public void setHtmlOutputEnabled(boolean htmlOutput) {
 		properties.setProperty("outputhtml", String.valueOf(htmlOutput));
@@ -207,7 +210,10 @@ public class ConfigConstants {
 		}
 	}
 
-	// TODO can be removed in future, if only properties file is used
+	/**
+	 * @param languageCode language code like de_DE
+	 * @deprecated As of release 3.0.0, language should be directly set in properties file
+	 */
 	@Deprecated
 	public void setLanguage(String languageCode) {
 		properties.setProperty("language", languageCode);

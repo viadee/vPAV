@@ -581,9 +581,8 @@ public class Runner {
         }
 
         if (variableScanner != null) {
-            dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, bpmnfile, fileScanner.getDecisionRefToPathMap(),
-                    fileScanner.getProcessIdToPathMap(), variableScanner, dataFlowRules,
-                    fileScanner.getResourcesNewestVersions(), rules);
+            dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, bpmnfile,
+                    variableScanner, dataFlowRules, rules);
         } else {
             dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(bpmnfile, fileScanner.getDecisionRefToPathMap(),
                     fileScanner.getProcessIdToPathMap(), fileScanner.getResourcesNewestVersions(), rules);
