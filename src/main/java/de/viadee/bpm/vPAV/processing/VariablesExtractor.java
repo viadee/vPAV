@@ -181,7 +181,7 @@ class VariablesExtractor {
                                 final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
                                 final KnownElementFieldType fieldType, final String filePath, final String scopeId,
                                 VariableBlock variableBlock, String assignmentStmt, final List<Value> args,
-                                final ControlFlowGraph controlFlowGraph, final Node node) {
+                                final ControlFlowGraph controlFlowGraph, Node node) {
         if (variableBlock == null) {
             variableBlock = new VariableBlock(block, new ArrayList<>());
         }
@@ -189,6 +189,7 @@ class VariablesExtractor {
         String paramName = "";
         int argsCounter = 0;
         int instanceFieldRef = Integer.MAX_VALUE;
+        boolean nodeSaved = true;
 
         final Iterator<Unit> unitIt = block.iterator();
 
@@ -226,9 +227,22 @@ class VariablesExtractor {
                 if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JVirtualInvokeExpr) {
                     assignmentStmt = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
                     JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
-                    checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-                            variableBlock, unit, assignmentStmt, expr.getArgs(), controlFlowGraph, false);
-                    paramName = returnStmt;
+
+                    try {
+                        if(!nodeSaved) {
+                            controlFlowGraph.addNode(node);
+                        }
+
+                        Node newSectionNode = (Node) node.clone();
+                        checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
+                                variableBlock, unit, assignmentStmt, expr.getArgs(), controlFlowGraph, false);
+                        paramName = returnStmt;
+                        node = newSectionNode;
+                        nodeSaved = false;
+
+                    } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
+                    }
                 }
                 // Method call of implemented interface method with assignment to a variable
                 if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
@@ -257,6 +271,10 @@ class VariablesExtractor {
                     }
                 }
             }
+        }
+
+        if(!nodeSaved && node.getOperations().size() > 0) {
+            controlFlowGraph.addNode(node);
         }
 
         return variableBlock;

@@ -31,13 +31,14 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import soot.toolkits.graph.Block;
 
-public class Node extends AbstractNode {
+public class Node extends AbstractNode implements Cloneable {
 
 	private Block block;
 
@@ -79,5 +80,27 @@ public class Node extends AbstractNode {
 
 	public Block getBlock() {
 		return block;
+	}
+
+
+	public Object clone() throws
+			CloneNotSupportedException
+	{
+		Node myClone = (Node)super.clone();
+		myClone.block = block;
+		myClone.controlFlowGraph = controlFlowGraph;
+		myClone.parentElement = parentElement;
+		myClone.elementChapter = elementChapter;
+		myClone.operations = new LinkedHashMap<>();
+		myClone.defined = new LinkedHashMap<>();
+		myClone.used = new LinkedHashMap<>();
+		myClone.outUnused = new LinkedHashMap<>();
+		myClone.outUsed = new LinkedHashMap<>();
+		myClone.inUnused = new LinkedHashMap<>();
+		myClone.inUsed = new LinkedHashMap<>();
+		myClone.predecessors = new LinkedHashMap<>();
+		myClone.successors = new LinkedHashMap<>();
+
+		return myClone;
 	}
 }

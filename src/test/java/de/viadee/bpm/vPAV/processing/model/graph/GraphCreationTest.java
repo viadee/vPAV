@@ -73,9 +73,39 @@ public class GraphCreationTest {
 		RuntimeConfig.getInstance().setClassLoader(cl);
 	}
 
-	@After
-	public void tearDown() {
+	@AfterClass
+	public static void tearDown() {
 		RuntimeConfig.getInstance().setTest(false);
+	}
+
+	@Test
+	public void testMethodInvocationOrder() {
+		final Map<String, String> beanMapping = new HashMap<>();
+		beanMapping.put("methodDelegate", "de/viadee/bpm/vPAV/delegates/MethodInvocationDelegate.class");
+		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		final String PATH = BASE_PATH + "ProcessVariablesReader_MethodInvocation.bpmn";
+		final File processDefinition = new File(PATH);
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+		// create data flow graphs
+
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
+
+		flowAnalysis.analyze(graphCollection);
+
+		// calculate invalid paths based on data flow graphs
+		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+
+		// DU + DR anomaly
+		Assert.assertEquals(2, invalidPathMap.size());
 	}
 
 	/**
@@ -136,34 +166,5 @@ public class GraphCreationTest {
 		Assert.assertEquals(
 				"[[SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, BoundaryEvent_11udorz, SequenceFlow_0bi6kaa]]",
 				geloeschteVarTest.toString());
-	}
-
-	@Test
-	public void testMethodInvocationOrder() {
-		final Map<String, String> beanMapping = new HashMap<>();
-		beanMapping.put("methodDelegate", "de/viadee/bpm/vPAV/delegates/MethodInvocationDelegate.class");
-		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
-
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "ProcessVariablesReader_MethodInvocation.bpmn";
-		final File processDefinition = new File(PATH);
-
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-		// create data flow graphs
-
-		FlowAnalysis flowAnalysis = new FlowAnalysis();
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
-
-		flowAnalysis.analyze(graphCollection);
-
-		// calculate invalid paths based on data flow graphs
-		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-
-		Assert.assertEquals(1, invalidPathMap.size());
 	}
 }
