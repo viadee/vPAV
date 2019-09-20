@@ -38,12 +38,10 @@ public class MethodInvocationDelegate implements JavaDelegate {
 
     @Override
     public void execute(final DelegateExecution execution) throws Exception {
-
+        execution.setVariable("var", "hello");
         MethodInvocation ac = new MethodInvocation();
         String name = ac.manipulateVariables(execution, "var");
 
         String var = (String) execution.getVariable(name);
-
     }
-
 }

@@ -43,20 +43,14 @@ import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.mockito.Mockito;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Unit Tests for data flow graph creation and calculation of invalid paths
@@ -68,8 +62,8 @@ public class GraphCreationTest {
 
 	private static ClassLoader cl;
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
+	@Before
+	public void setup() throws MalformedURLException {
 		RuntimeConfig.getInstance().setTest(true);
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
@@ -79,8 +73,8 @@ public class GraphCreationTest {
 		RuntimeConfig.getInstance().setClassLoader(cl);
 	}
 
-	@AfterClass
-	public static void tearDown() {
+	@After
+	public void tearDown() {
 		RuntimeConfig.getInstance().setTest(false);
 	}
 
@@ -142,5 +136,34 @@ public class GraphCreationTest {
 		Assert.assertEquals(
 				"[[SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, BoundaryEvent_11udorz, SequenceFlow_0bi6kaa]]",
 				geloeschteVarTest.toString());
+	}
+
+	@Test
+	public void testMethodInvocationOrder() {
+		final Map<String, String> beanMapping = new HashMap<>();
+		beanMapping.put("methodDelegate", "de/viadee/bpm/vPAV/delegates/MethodInvocationDelegate.class");
+		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+
+		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		final String PATH = BASE_PATH + "ProcessVariablesReader_MethodInvocation.bpmn";
+		final File processDefinition = new File(PATH);
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+		// create data flow graphs
+
+		FlowAnalysis flowAnalysis = new FlowAnalysis();
+		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+				processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
+
+		flowAnalysis.analyze(graphCollection);
+
+		// calculate invalid paths based on data flow graphs
+		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+
+		Assert.assertEquals(1, invalidPathMap.size());
 	}
 }

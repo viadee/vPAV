@@ -152,7 +152,7 @@ public class ProcessVariableReaderStaticTest {
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, ElementChapter.Implementation,
 				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), cg));
-		assertEquals(2, variables.values().size());
+		assertEquals(3, variables.values().size());
 
 	}
 

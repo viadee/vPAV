@@ -6,13 +6,6 @@
       <bpmn:messageEventDefinition messageRef="Message_11bvdxe" />
     </bpmn:startEvent>
     <bpmn:serviceTask id="serviceDelegate" name="serviceDelegate" camunda:delegateExpression="${methodDelegate}">
-      <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="c">
-            <camunda:script scriptFormat="groovy">${1234}</camunda:script>
-          </camunda:inputParameter>
-        </camunda:inputOutput>
-      </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1jzeusz</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_12tpab4</bpmn:outgoing>
     </bpmn:serviceTask>
