@@ -73,7 +73,7 @@ public class ProcessVariablesLifecycleOrderTest {
     @Test
     public void testProcessVariablesLifecycle() {
         // Test with Input/Output Parameters and Start/End Listeners
-        // TODO add all other things linke links, signals, messages, ...
+        // TODO add all other things like links, signals, messages, ...
 
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();

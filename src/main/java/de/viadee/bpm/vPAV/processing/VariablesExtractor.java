@@ -58,6 +58,7 @@ import java.util.regex.Pattern;
 class VariablesExtractor {
     private List<Value> constructorArgs;
     private JavaReaderStatic javaReaderStatic;
+    private String returnStmt;
 
     VariablesExtractor(JavaReaderStatic reader) {
         this.javaReaderStatic = reader;
@@ -186,7 +187,6 @@ class VariablesExtractor {
         }
 
         String paramName = "";
-        String returnStmt = "";
         int argsCounter = 0;
         int instanceFieldRef = Integer.MAX_VALUE;
 
@@ -214,7 +214,7 @@ class VariablesExtractor {
             if (unit instanceof ReturnStmt) {
                 // Return statement
                 if (((JReturnStmt) unit).getOpBox().getValue().toString().equals(assignmentStmt)) {
-                    returnStmt = paramName;
+                    this.setReturnStmt(paramName);
                 }
             }
             if (unit instanceof InvokeStmt) {
@@ -471,5 +471,9 @@ class VariablesExtractor {
 
     private void setConstructorArgs(final List<Value> args) {
         this.constructorArgs = args;
+    }
+
+    private void setReturnStmt(final String returnStmt) {
+        this.returnStmt = returnStmt;
     }
 }
