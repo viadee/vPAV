@@ -219,8 +219,35 @@ class VariablesExtractor {
                 }
             }
             if (unit instanceof InvokeStmt) {
-                assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType, filePath,
-                        scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter, unit);
+                try {
+                    boolean passesDelegateExecution = false;
+                    // Split node only if DelegateExecution object (which is used for manipulating variables) is passed
+                    InvokeExpr calledMethod = (InvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
+                    for (Type parameter : calledMethod.getMethodRef().getParameterTypes()) {
+                        if (((RefType) parameter).getClassName().equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
+                            passesDelegateExecution = true;
+                            break;
+                        }
+                    }
+                    if (passesDelegateExecution) {
+                        // Node must be splitted
+                        if (!nodeSaved) {
+                            controlFlowGraph.addNode(node);
+                        }
+                        // Split node
+                        Node newSectionNode = (Node) node.clone();
+                        assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType, filePath,
+                                scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter, unit);
+                        paramName = returnStmt;
+                        node = newSectionNode;
+                        nodeSaved = false;
+                    } else {
+                        assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType, filePath,
+                                scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter, unit);
+                    }
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                }
             }
             if (unit instanceof AssignStmt) {
                 // Method call with assignment to a variable
@@ -229,10 +256,10 @@ class VariablesExtractor {
                     JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 
                     try {
-                        if(!nodeSaved) {
+                        if (!nodeSaved) {
                             controlFlowGraph.addNode(node);
                         }
-
+                        // Split node
                         Node newSectionNode = (Node) node.clone();
                         checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
                                 variableBlock, unit, assignmentStmt, expr.getArgs(), controlFlowGraph, false);
@@ -273,7 +300,7 @@ class VariablesExtractor {
             }
         }
 
-        if(!nodeSaved && node.getOperations().size() > 0) {
+        if (!nodeSaved && node.getOperations().size() > 0) {
             controlFlowGraph.addNode(node);
         }
 
