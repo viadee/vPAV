@@ -48,6 +48,7 @@ import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -74,6 +75,12 @@ public class CallActivityTest {
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().setTest(true);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        Properties myProperties = new Properties();
+        ConfigConstants.getInstance().setProperties(myProperties);
     }
 
     @Test
