@@ -46,12 +46,8 @@ import org.camunda.bpm.model.bpmn.instance.ExclusiveGateway;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -91,16 +87,11 @@ public class XorConventionCheckerTest {
 	 * Case: XOR gateway with correct naming convention and XOR join that should not
 	 * be checked
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 *
 	 */
 
 	@Test
-	public void testOutgoingXor()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+	public void testOutgoingXor() {
 		final String PATH = BASE_PATH + "XorConventionChecker_outgoingXor.bpmn";
 		checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
@@ -122,17 +113,12 @@ public class XorConventionCheckerTest {
 	/**
 	 * Case: XOR gateway with correct naming convention
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 *
 	 */
 
 	@Test
-	public void testCorrectXor()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "XorConventionChecker_correct.bpmn";
+	public void testCorrectXor() {
+		final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
 		checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
 		// parse bpmn model
@@ -153,24 +139,22 @@ public class XorConventionCheckerTest {
 	/**
 	 * Case: XOR gateway with wrong naming convention
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 *
 	 */
 
 	@Test
-	public void testFalseXor()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "XorConventionChecker_false.bpmn";
+	public void testFalseXor() {
+		final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
 		checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ExclusiveGateway> baseElements = modelInstance.getModelElementsByType(ExclusiveGateway.class);
+		// Create issue: name of XOR gate is not set
+		ExclusiveGateway myExclusiveGateway = modelInstance.getModelElementById("MyExclusiveGateway");
+		myExclusiveGateway.setName("");
 
+		final Collection<ExclusiveGateway> baseElements = modelInstance.getModelElementsByType(ExclusiveGateway.class);
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
@@ -183,18 +167,10 @@ public class XorConventionCheckerTest {
 
 	/**
 	 * Case: XOR gateway with correctly named outgoing edges
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 *
 	 */
-
 	@Test
-	public void testOutgoingEdgesCorrect()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "XorConventionChecker_outgoingEdgesCorrect.bpmn";
+	public void testOutgoingEdgesCorrect() {
+		final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
 		checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
 		// parse bpmn model
@@ -214,17 +190,9 @@ public class XorConventionCheckerTest {
 
 	/**
 	 * Case: XOR gateway with wrongly named outgoing edges
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 *
 	 */
-
 	@Test
-	public void testOutgoingEdgesFalse()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+	public void testOutgoingEdgesFalse() {
 		final String PATH = BASE_PATH + "XorConventionChecker_outgoingEdgesFalse.bpmn";
 		checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
 
@@ -250,7 +218,7 @@ public class XorConventionCheckerTest {
 	 */
 	private static Rule createRule() {
 
-		final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+		final Collection<ElementConvention> elementConventions = new ArrayList<>();
 
 		final ElementConvention elementConvention = new ElementConvention("convention", null, null,
 				"[A-ZÄÖÜ][a-zäöü]*\\?{1}");
@@ -272,7 +240,7 @@ public class XorConventionCheckerTest {
 	 */
 	private static Rule createRuleDefault() {
 
-		final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+		final Collection<ElementConvention> elementConventions = new ArrayList<>();
 
 		final ElementConvention elementConvention = new ElementConvention("convention", null, null,
 				"[A-ZÄÖÜ][a-zäöü]*\\?{1}");
@@ -283,7 +251,7 @@ public class XorConventionCheckerTest {
 		elementConventions.add(elementConvention2);
 
 		Setting s = new Setting("requiredDefault", null, null, null, false, "true");
-		final Map<String, Setting> settings = new HashMap<String, Setting>();
+		final Map<String, Setting> settings = new HashMap<>();
 		settings.put("requiredDefault", s);
 		final Rule ruleDefault = new Rule("XorConventionChecker", true, null, settings, elementConventions, null);
 
@@ -292,17 +260,10 @@ public class XorConventionCheckerTest {
 
 	/**
 	 * Case: XOR gateway with no default Path
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 *
 	 */
 	@Test
-	public void testDefaultPath()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "XorConventionChecker_NoDefault.bpmn";
+	public void testDefaultPath() {
+		final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
 		checker = new XorConventionChecker(ruleDefault, new BpmnScanner(PATH));
 
 		// parse bpmn model
@@ -322,21 +283,18 @@ public class XorConventionCheckerTest {
 
 	/**
 	 * Case: XOR gateway with correct default Path
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 *
 	 */
 	@Test
-	public void testCorrectDefaultPath()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "XorConventionChecker_CorrectDefault.bpmn";
+	public void testCorrectDefaultPath() {
+		final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
 		checker = new XorConventionChecker(ruleDefault, new BpmnScanner(PATH));
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+		// Set default path
+		ExclusiveGateway myExclusiveGateway = modelInstance.getModelElementById("MyExclusiveGateway");
+		myExclusiveGateway.setDefault(modelInstance.getModelElementById("SequenceFlow_0zux6bg"));
 
 		final Collection<ExclusiveGateway> baseElements = modelInstance.getModelElementsByType(ExclusiveGateway.class);
 
