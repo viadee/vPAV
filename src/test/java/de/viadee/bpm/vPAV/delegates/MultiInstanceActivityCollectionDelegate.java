@@ -34,14 +34,14 @@ package de.viadee.bpm.vPAV.delegates;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-public class MultiInstanceActivityDelegate implements JavaDelegate {
+import java.util.LinkedList;
+
+public class MultiInstanceActivityCollectionDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        execution.getVariable("nrOfInstances");
-        execution.getVariable("nrOfActiveInstances");
-        execution.getVariable("nrOfCompletedInstances");
-        execution.getVariable("loopCounter");
-        execution.getVariable("element");
+        LinkedList<String> collection = new LinkedList<>();
+        collection.push("test");
+        execution.setVariable("myCollection", collection);
     }
 }

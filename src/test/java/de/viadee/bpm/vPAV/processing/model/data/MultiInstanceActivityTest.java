@@ -71,10 +71,72 @@ public class MultiInstanceActivityTest {
     }
 
     @Test
-    public void testCorrectCollection() {
+    public void testCollection() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "MultiInstanceActivityTest_Collection.bpmn";
+        final File processDefinition = new File(PATH);
 
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+
+        Assert.assertEquals("There should  be one issue because 'element' is not available in non-multi instance tasks.",
+                1, invalidPathMap.size());
+
+        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+        AnomalyContainer anomaly1 = iterator.next();
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                anomaly1.getAnomaly());
     }
 
+
+    /**
+     * Test multi instance activity with collection that is defined with child elements instead of attributes
+     */
+    @Test
+    public void testCollectionChildElement() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "MultiInstanceActivityTest_Collection2.bpmn";
+        final File processDefinition = new File(PATH);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+
+        Assert.assertEquals("There should  be one issue because 'element' is not available in non-multi instance tasks.",
+                1, invalidPathMap.size());
+
+        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+        AnomalyContainer anomaly1 = iterator.next();
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                anomaly1.getAnomaly());
+    }
 
     @Test
     public void testCorrectLoopCardinality() {
@@ -100,13 +162,18 @@ public class MultiInstanceActivityTest {
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-        Assert.assertEquals("There should  be one issue because 'loopCounter' is not available in non-multi instance tasks.",
-                1,  invalidPathMap.size());
+        Assert.assertEquals("There should  be two issues.",
+                2, invalidPathMap.size());
 
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
         AnomalyContainer anomaly1 = iterator.next();
+        AnomalyContainer anomaly2 = iterator.next();
+        // "element" does not exist in delegate
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                 anomaly1.getAnomaly());
+        // "loopCounter" does not exist in second task
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
+                anomaly2.getAnomaly());
     }
 
     @Test
@@ -138,8 +205,8 @@ public class MultiInstanceActivityTest {
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-        Assert.assertEquals("There should two issues.",
-                2, invalidPathMap.size());
+        Assert.assertEquals("There should three issues.",
+                3, invalidPathMap.size());
 
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
         AnomalyContainer anomaly1 = iterator.next();

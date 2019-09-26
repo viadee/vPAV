@@ -52,6 +52,7 @@ import org.camunda.bpm.engine.impl.juel.Tree;
 import org.camunda.bpm.engine.impl.juel.TreeBuilder;
 import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import org.camunda.bpm.model.bpmn.impl.instance.LoopDataInputRef;
 import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.camunda.*;
 import org.camunda.bpm.model.dmn.Dmn;
@@ -193,6 +194,37 @@ public final class ProcessVariableReader {
                 scopeElementId, element.getFlowAnalysis().getOperationCounter());
         variables.put("loopCounter", operation);
         node.addOperation(operation);
+
+        // Add element variable if collection is used
+        // TODO check expression in collection
+        String collection = ((Task) element.getBaseElement()).getLoopCharacteristics().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                BpmnModelConstants.CAMUNDA_ATTRIBUTE_COLLECTION);
+        // TODO check if reference to collection is valid (expression check)
+        if (collection != null) {
+            String elementVariable = ((Task) element.getBaseElement()).getLoopCharacteristics().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_ELEMENT_VARIABLE);
+            if (elementVariable != null) {
+                operation = new ProcessVariableOperation(elementVariable, element,
+                        ElementChapter.MultiInstance,
+                        KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                        scopeElementId, element.getFlowAnalysis().getOperationCounter());
+                variables.put(elementVariable, operation);
+                node.addOperation(operation);
+            }
+        } else {
+            // Check if collection is defined in child elements
+            Collection<LoopDataInputRef> collectionObj = ((Task) element.getBaseElement()).getLoopCharacteristics().getChildElementsByType(LoopDataInputRef.class);
+            Collection<InputDataItem> elementObj = ((Task) element.getBaseElement()).getLoopCharacteristics().getChildElementsByType(InputDataItem.class);
+            if (!collectionObj.isEmpty() && !elementObj.isEmpty()) {
+                String elementVariable = elementObj.iterator().next().getName();
+                operation = new ProcessVariableOperation(elementVariable, element,
+                        ElementChapter.MultiInstance,
+                        KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                        scopeElementId, element.getFlowAnalysis().getOperationCounter());
+                variables.put(elementVariable, operation);
+                node.addOperation(operation);
+            }
+        }
 
         return variables;
     }
