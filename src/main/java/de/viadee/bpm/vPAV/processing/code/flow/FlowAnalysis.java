@@ -878,7 +878,8 @@ public class FlowAnalysis {
 	 * @return true/false
 	 */
 	private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-		return curr.getOperation().equals(WRITE) && prev.getOperation().equals(WRITE);
+		return curr.getOperation().equals(WRITE) && prev.getOperation().equals(WRITE) &&
+				curr.getName().equals(prev.getName());
 	}
 
 	/**

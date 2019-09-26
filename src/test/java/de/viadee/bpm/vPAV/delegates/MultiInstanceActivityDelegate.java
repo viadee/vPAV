@@ -29,46 +29,18 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.delegates;
 
-/**
- * Known element field types
- */
-public enum KnownElementFieldType {
-    Class("Class"),
-    FormField("Form Field"),
-    Expression("Expression"),
-    DelegateExpression("Delegate Expression"),
-    ResultVariable("Result Variable"),
-    CalledElement("Called Element"),
-    CaseRef("Case Ref"),
-    CollectionElement("Collection"),
-    ElementVariable("Element Variable"),
-    LoopCardinality("Loop Cardinality"),
-    CompletionCondition("Completion Condition"),
-    InlineScript("Inline Script"),
-    ExternalScript("External Script"),
-    Assignee("Assignee"),
-    CandidateUsers("Candidate Users"),
-    CandidateGroups("Candidate Groups"),
-    DueDate("Due Date"),
-    FollowUpDate("Follow Up Date"),
-    DMN("DMN"),
-    CamundaIn("Camunda:In"),
-    CamundaOut("Camunda:Out"),
-    OutputParameter("Output Parameters"),
-    InputParameter("Input Parameters"),
-    Signal("Signal Name"),
-    Message("Message Name"), Initial("Initial"),
-    CamundaStandardVariables("Camunda Standard Process Variables");
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-    private String description;
+public class MultiInstanceActivityDelegate implements JavaDelegate {
 
-    private KnownElementFieldType(final String description) {
-        this.description = description;
-    }
-
-    public String getDescription() {
-        return description;
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
+        execution.getVariable("nrOfInstances");
+        execution.getVariable("nrOfActiveInstances");
+        execution.getVariable("nrOfCompletedInstances");
+        execution.getVariable("loopCounter");
     }
 }

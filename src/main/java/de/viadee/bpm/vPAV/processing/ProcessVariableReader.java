@@ -108,43 +108,93 @@ public final class ProcessVariableReader {
         }
         final ExtensionElements extensionElements = baseElement.getExtensionElements();
 
-        // 1) Search variables in Input Parameters
+        if (isMultiInstanceActivity(element)) {
+            // 1) Add multi instance activity variables if necessary
+            processVariables.putAll(getMultiInstanceActivityVariables(element));
+        }
+
+        // 2) Search variables in Input Parameters
         processVariables.putAll(getVariablesFromInputMapping(javaReaderStatic, element, fileScanner, controlFlowGraph));
 
-        // 2) Search variables execution listener (start)
+        // 3) Search variables execution listener (start)
         if (extensionElements != null) {
             processVariables.putAll(getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
                     extensionElements, scopeElementId, ElementChapter.ExecutionListenerStart, controlFlowGraph));
         }
 
-        // 3) Search variables in task
+        // 4) Search variables in task
         processVariables.putAll(getVariablesFromTask(javaReaderStatic, fileScanner, element, controlFlowGraph));
 
-        // 4) Search variables in sequence flow
+        // 5) Search variables in sequence flow
         processVariables
                 .putAll(searchVariablesFromSequenceFlow(javaReaderStatic, fileScanner, element, controlFlowGraph));
 
-        // 5) Search variables in ExtensionElements
+        // 6) Search variables in ExtensionElements
         processVariables.putAll(searchExtensionsElements(javaReaderStatic, fileScanner, element, controlFlowGraph));
 
-        // 6) Search variables in Signals and Messages
+        // 7) Search variables in Signals and Messages
         processVariables
                 .putAll(getVariablesFromSignalsAndMessage(javaReaderStatic, element, fileScanner, controlFlowGraph));
 
-        // 7) Search variables in Links
+        // 8) Search variables in Links
         processVariables.putAll(getVariablesFromLinks(javaReaderStatic, element, fileScanner, controlFlowGraph));
 
-        // 8) Search variables execution listener (end)
+        // 9) Search variables execution listener (end)
         if (extensionElements != null) {
             processVariables.putAll(getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
                     extensionElements, scopeElementId, ElementChapter.ExecutionListenerEnd, controlFlowGraph));
         }
 
-        // 9) Search variables in Output Parameters
+        // 10) Search variables in Output Parameters
         processVariables
                 .putAll(getVariablesFromOutputMapping(javaReaderStatic, element, fileScanner, controlFlowGraph));
 
         return processVariables;
+    }
+
+    private boolean isMultiInstanceActivity(BpmnElement element) {
+        if (element.getBaseElement() instanceof Task) {
+            return ((Task) element.getBaseElement()).getLoopCharacteristics() != null;
+        }
+        return false;
+    }
+
+    private ListMultimap<String, ProcessVariableOperation> getMultiInstanceActivityVariables(final BpmnElement element) {
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        ExpressionNode node = new ExpressionNode(element.getControlFlowGraph(), element.getParentElement(),
+                "", ElementChapter.MultiInstance);
+        element.getControlFlowGraph().addNode(node);
+        String scopeElementId = element.getId();
+
+        ProcessVariableOperation operation = new ProcessVariableOperation("nrOfInstances", element,
+                ElementChapter.MultiInstance,
+                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                scopeElementId, element.getFlowAnalysis().getOperationCounter());
+        variables.put("nrOfInstances", operation);
+        node.addOperation(operation);
+
+        operation = new ProcessVariableOperation("nrOfActiveInstances", element,
+                ElementChapter.MultiInstance,
+                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                scopeElementId, element.getFlowAnalysis().getOperationCounter());
+        variables.put("nrOfActiveInstances", operation);
+        node.addOperation(operation);
+
+        operation = new ProcessVariableOperation("nrOfCompletedInstances", element,
+                ElementChapter.MultiInstance,
+                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                scopeElementId, element.getFlowAnalysis().getOperationCounter());
+        variables.put("nrOfCompletedInstances", operation);
+        node.addOperation(operation);
+
+        operation = new ProcessVariableOperation("loopCounter", element,
+                ElementChapter.MultiInstance,
+                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                scopeElementId, element.getFlowAnalysis().getOperationCounter());
+        variables.put("loopCounter", operation);
+        node.addOperation(operation);
+
+        return variables;
     }
 
     /**
