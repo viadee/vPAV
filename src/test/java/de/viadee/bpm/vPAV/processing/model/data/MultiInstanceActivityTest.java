@@ -42,6 +42,9 @@ import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.instance.LoopCardinalityImpl;
+import org.camunda.bpm.model.bpmn.instance.LoopCardinality;
+import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -97,12 +100,53 @@ public class MultiInstanceActivityTest {
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-        Assert.assertEquals("There should  be one issue because 'loopCounter' is not availabe in non-multi instance tasks.",
+        Assert.assertEquals("There should  be one issue because 'loopCounter' is not available in non-multi instance tasks.",
                 1,  invalidPathMap.size());
 
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
         AnomalyContainer anomaly1 = iterator.next();
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                 anomaly1.getAnomaly());
+    }
+
+    @Test
+    public void testLoopCardinalityExpressionVariables() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "MultiInstanceActivityTest.bpmn";
+        final File processDefinition = new File(PATH);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+        // Use undefined variable in loop cardinality expression
+        ServiceTask serviceTask = modelInstance.getModelElementById("Sequential_ServiceTask");
+        LoopCardinalityImpl loopCardinality = (LoopCardinalityImpl) serviceTask.getLoopCharacteristics().getChildElementsByType(LoopCardinality.class).iterator().next();
+        loopCardinality.setTextContent("${notExistingVariable}");
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+
+        Assert.assertEquals("There should two issues.",
+                2, invalidPathMap.size());
+
+        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+        AnomalyContainer anomaly1 = iterator.next();
+        AnomalyContainer anomaly2 = iterator.next();
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
+                anomaly2.getAnomaly());
+        Assert.assertEquals("The variable in the loop cardinality expression should raise an issue.",
+                "notExistingVariable", anomaly2.getVariable().getName());
     }
 }
