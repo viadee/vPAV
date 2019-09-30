@@ -204,6 +204,7 @@ public final class ProcessVariableReader {
             String elementVariable = ((Task) element.getBaseElement()).getLoopCharacteristics().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnModelConstants.CAMUNDA_ATTRIBUTE_ELEMENT_VARIABLE);
             if (elementVariable != null) {
+                // Add write opertion of element variable
                 operation = new ProcessVariableOperation(elementVariable, element,
                         ElementChapter.MultiInstance,
                         KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
@@ -211,6 +212,15 @@ public final class ProcessVariableReader {
                 variables.put(elementVariable, operation);
                 node.addOperation(operation);
             }
+
+            // Add read operation of collection
+            operation = new ProcessVariableOperation(collection, element,
+                    ElementChapter.MultiInstance,
+                    KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.READ,
+                    scopeElementId, element.getFlowAnalysis().getOperationCounter());
+            variables.put(collection, operation);
+            node.addOperation(operation);
+
         } else {
             // Check if collection is defined in child elements
             Collection<LoopDataInputRef> collectionObj = ((Task) element.getBaseElement()).getLoopCharacteristics().getChildElementsByType(LoopDataInputRef.class);
@@ -222,6 +232,14 @@ public final class ProcessVariableReader {
                         KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
                         scopeElementId, element.getFlowAnalysis().getOperationCounter());
                 variables.put(elementVariable, operation);
+                node.addOperation(operation);
+
+                collection = collectionObj.iterator().next().getTextContent();
+                operation = new ProcessVariableOperation(collection, element,
+                        ElementChapter.MultiInstance,
+                        KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.READ,
+                        scopeElementId, element.getFlowAnalysis().getOperationCounter());
+                variables.put(collection, operation);
                 node.addOperation(operation);
             }
         }

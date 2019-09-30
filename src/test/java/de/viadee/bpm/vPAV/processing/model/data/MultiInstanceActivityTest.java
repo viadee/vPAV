@@ -93,6 +93,9 @@ public class MultiInstanceActivityTest {
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
+        Assert.assertEquals("Collection read operation was not recognized.", "myCollection",
+                flowAnalysis.getNodes().get("Sequential_ServiceTask__0").getUsed().get("6").getName());
+
         Assert.assertEquals("There should  be one issue because 'element' is not available in non-multi instance tasks.",
                 1, invalidPathMap.size());
 
@@ -129,13 +132,19 @@ public class MultiInstanceActivityTest {
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-        Assert.assertEquals("There should  be one issue because 'element' is not available in non-multi instance tasks.",
-                1, invalidPathMap.size());
+        Assert.assertEquals("There should exactly two issues.",
+                2, invalidPathMap.size());
 
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
         AnomalyContainer anomaly1 = iterator.next();
+        // UR because 'element' is not available in non-multi instance tasks
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                 anomaly1.getAnomaly());
+        // UR because 'myUnkownCollection' is read in multi instance task but never defined
+        AnomalyContainer anomaly2 = iterator.next();
+        Assert.assertEquals("Expected another variable to raise an issue.", "myUnkownCollection", anomaly2.getName());
+        Assert.assertEquals("Expected a UR anomaly.", Anomaly.UR, anomaly2.getAnomaly());
+
     }
 
     @Test

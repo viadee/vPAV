@@ -19,7 +19,7 @@
       <bpmn:incoming>SequenceFlow_08kpgn5</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1k5clqq</bpmn:outgoing>
       <bpmn:multiInstanceLoopCharacteristics isSequential="true">
-        <bpmn:loopDataInputRef>myCollection</bpmn:loopDataInputRef>
+        <bpmn:loopDataInputRef>myUnkownCollection</bpmn:loopDataInputRef>
         <bpmn:inputDataItem name="element" />
       </bpmn:multiInstanceLoopCharacteristics>
     </bpmn:serviceTask>
