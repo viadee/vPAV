@@ -44,7 +44,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static de.viadee.bpm.vPAV.processing.model.data.VariableOperation.*;
 
@@ -512,35 +511,6 @@ public class FlowAnalysis {
 
 				final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
 						getSetDifference(internalUnion, tempKillSet));
-
-				// If the current element contains input mapping operations, remove from
-				// outgoing sets due to scope (only locally accessible)
-				final LinkedHashMap<String, ProcessVariableOperation> tempOutUnused = new LinkedHashMap<>(outUnused);
-				final LinkedHashMap<String, ProcessVariableOperation> tempOutUsed = new LinkedHashMap<>(outUsed);
-				// TODO why isn't that working anymore?
-				analysisElement.getParentElement().getOperations().forEach((key, value) -> {
-					if (value.getScopeId().equals(analysisElement.getParentElement().getId())) {
-						tempOutUnused.forEach((key1, value1) -> {
-							if (value1.getName().equals(value.getName())) {
-								outUnused.remove(key1);
-							}
-						});
-						tempOutUsed.forEach((key1, value1) -> {
-							if (value1.getName().equals(value.getName())) {
-								outUsed.remove(key1);
-							}
-						});
-						scopedOperations.put(value.getName(), value);
-					}
-				});
-
-				Stream<ProcessVariableOperation> operations = analysisElement.getOperations().values().stream()
-						.filter(value -> scopedOperations.containsKey(value.getName()))
-						.filter(operation -> operation.getOperation().equals(WRITE));
-				operations.forEach(operation -> {
-					scopedOperations.remove(operation.getName());
-					outUnused.put(operation.getId(), operation);
-				});
 
 				analysisElement.setOutUsed(outUsed);
 				analysisElement.setOutUnused(outUnused);

@@ -109,10 +109,9 @@ public final class ProcessVariableReader {
         }
         final ExtensionElements extensionElements = baseElement.getExtensionElements();
 
-        if (isMultiInstanceActivity(element)) {
-            // 1) Add multi instance activity variables if necessary
-            processVariables.putAll(getMultiInstanceActivityVariables(element));
-        }
+        // 1) Search for variables in multi instance task, if applicable
+        processVariables
+                .putAll(searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, controlFlowGraph));
 
         // 2) Search variables in Input Parameters
         processVariables.putAll(getVariablesFromInputMapping(javaReaderStatic, element, fileScanner, controlFlowGraph));
@@ -151,100 +150,6 @@ public final class ProcessVariableReader {
                 .putAll(getVariablesFromOutputMapping(javaReaderStatic, element, fileScanner, controlFlowGraph));
 
         return processVariables;
-    }
-
-    private boolean isMultiInstanceActivity(BpmnElement element) {
-        if (element.getBaseElement() instanceof Task) {
-            return ((Task) element.getBaseElement()).getLoopCharacteristics() != null;
-        }
-        return false;
-    }
-
-    private ListMultimap<String, ProcessVariableOperation> getMultiInstanceActivityVariables(final BpmnElement element) {
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        ExpressionNode node = new ExpressionNode(element.getControlFlowGraph(), element.getParentElement(),
-                "", ElementChapter.MultiInstance);
-        element.getControlFlowGraph().addNode(node);
-        String scopeElementId = element.getId();
-
-        ProcessVariableOperation operation = new ProcessVariableOperation("nrOfInstances", element,
-                ElementChapter.MultiInstance,
-                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
-                scopeElementId, element.getFlowAnalysis().getOperationCounter());
-        variables.put("nrOfInstances", operation);
-        node.addOperation(operation);
-
-        operation = new ProcessVariableOperation("nrOfActiveInstances", element,
-                ElementChapter.MultiInstance,
-                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
-                scopeElementId, element.getFlowAnalysis().getOperationCounter());
-        variables.put("nrOfActiveInstances", operation);
-        node.addOperation(operation);
-
-        operation = new ProcessVariableOperation("nrOfCompletedInstances", element,
-                ElementChapter.MultiInstance,
-                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
-                scopeElementId, element.getFlowAnalysis().getOperationCounter());
-        variables.put("nrOfCompletedInstances", operation);
-        node.addOperation(operation);
-
-        operation = new ProcessVariableOperation("loopCounter", element,
-                ElementChapter.MultiInstance,
-                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
-                scopeElementId, element.getFlowAnalysis().getOperationCounter());
-        variables.put("loopCounter", operation);
-        node.addOperation(operation);
-
-        // Add element variable if collection is used
-        // TODO check expression in collection
-        String collection = ((Task) element.getBaseElement()).getLoopCharacteristics().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                BpmnModelConstants.CAMUNDA_ATTRIBUTE_COLLECTION);
-        // TODO check if reference to collection is valid (expression check)
-        if (collection != null) {
-            String elementVariable = ((Task) element.getBaseElement()).getLoopCharacteristics().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_ELEMENT_VARIABLE);
-            if (elementVariable != null) {
-                // Add write opertion of element variable
-                operation = new ProcessVariableOperation(elementVariable, element,
-                        ElementChapter.MultiInstance,
-                        KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
-                        scopeElementId, element.getFlowAnalysis().getOperationCounter());
-                variables.put(elementVariable, operation);
-                node.addOperation(operation);
-            }
-
-            // Add read operation of collection
-            operation = new ProcessVariableOperation(collection, element,
-                    ElementChapter.MultiInstance,
-                    KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.READ,
-                    scopeElementId, element.getFlowAnalysis().getOperationCounter());
-            variables.put(collection, operation);
-            node.addOperation(operation);
-
-        } else {
-            // Check if collection is defined in child elements
-            Collection<LoopDataInputRef> collectionObj = ((Task) element.getBaseElement()).getLoopCharacteristics().getChildElementsByType(LoopDataInputRef.class);
-            Collection<InputDataItem> elementObj = ((Task) element.getBaseElement()).getLoopCharacteristics().getChildElementsByType(InputDataItem.class);
-            if (!collectionObj.isEmpty() && !elementObj.isEmpty()) {
-                String elementVariable = elementObj.iterator().next().getName();
-                operation = new ProcessVariableOperation(elementVariable, element,
-                        ElementChapter.MultiInstance,
-                        KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
-                        scopeElementId, element.getFlowAnalysis().getOperationCounter());
-                variables.put(elementVariable, operation);
-                node.addOperation(operation);
-
-                collection = collectionObj.iterator().next().getTextContent();
-                operation = new ProcessVariableOperation(collection, element,
-                        ElementChapter.MultiInstance,
-                        KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.READ,
-                        scopeElementId, element.getFlowAnalysis().getOperationCounter());
-                variables.put(collection, operation);
-                node.addOperation(operation);
-            }
-        }
-
-        return variables;
     }
 
     /**
@@ -965,10 +870,6 @@ public final class ProcessVariableReader {
             }
         }
 
-        // Check multi instance attributes
-        processVariables
-                .putAll(searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, controlFlowGraph));
-
         return processVariables;
     }
 
@@ -986,40 +887,61 @@ public final class ProcessVariableReader {
             final ControlFlowGraph controlFlowGraph) {
 
         final ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
+        final ListMultimap<String, ProcessVariableOperation> processVariablesExpression = ArrayListMultimap.create();
 
         final BaseElement baseElement = element.getBaseElement();
         BpmnModelElementInstance scopeElement = baseElement.getScope();
         String scopeId = null;
         if (scopeElement != null) {
-            scopeId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+            scopeId = element.getId();
         }
         final ModelElementInstance loopCharacteristics = baseElement
                 .getUniqueChildElementByType(LoopCharacteristics.class);
         if (loopCharacteristics != null) {
+            ExpressionNode node = new ExpressionNode(element.getControlFlowGraph(), element.getParentElement(),
+                    "", ElementChapter.MultiInstance);
+            element.getControlFlowGraph().addNode(node);
+
+            // Add default variables
+            processVariables.putAll(addDefaultMultiInstanceTaskVariables(element));
+
             final String collectionName = loopCharacteristics.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.COLLECTION);
             if (collectionName != null && collectionName.trim().length() > 0) {
-                processVariables.put(collectionName,
-                        new ProcessVariableOperation(collectionName, element, ElementChapter.MultiInstance,
-                                KnownElementFieldType.CollectionElement, null, VariableOperation.READ, scopeId,
-                                element.getFlowAnalysis().getOperationCounter()));
+
+                // Check if collection name includes expression
+                final Pattern pattern = Pattern.compile("\\$\\{.*\\}");
+                Matcher matcher = pattern.matcher(collectionName);
+                if (matcher.matches()) {
+                    processVariablesExpression.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+                            collectionName, element, ElementChapter.MultiInstance, KnownElementFieldType.CollectionElement,
+                            scopeId));
+                } else {
+                    processVariables.put(collectionName,
+                            new ProcessVariableOperation(collectionName, element, ElementChapter.MultiInstance,
+                                    KnownElementFieldType.CollectionElement, null, VariableOperation.READ, scopeId,
+                                    element.getFlowAnalysis().getOperationCounter()));
+                }
             }
             final String elementVariable = loopCharacteristics.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ELEMENT_VARIABLE);
             if (elementVariable != null && elementVariable.trim().length() > 0) {
                 processVariables.put(elementVariable,
                         new ProcessVariableOperation(elementVariable, element, ElementChapter.MultiInstance,
-                                KnownElementFieldType.ElementVariable, null, VariableOperation.READ, scopeId,
+                                KnownElementFieldType.ElementVariable, null, VariableOperation.WRITE, scopeId,
                                 element.getFlowAnalysis().getOperationCounter()));
             }
             final ModelElementInstance loopCardinality = loopCharacteristics
                     .getUniqueChildElementByType(LoopCardinality.class);
             if (loopCardinality != null) {
                 final String cardinality = loopCardinality.getTextContent();
+
                 if (cardinality != null && cardinality.trim().length() > 0) {
-                    processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
-                            cardinality, element, ElementChapter.MultiInstance, KnownElementFieldType.LoopCardinality,
-                            scopeId));
+                    if (!cardinality.matches("\\d+")) {
+                        processVariablesExpression.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+                                cardinality, element, ElementChapter.MultiInstance, KnownElementFieldType.LoopCardinality,
+                                scopeId));
+                    }
                 }
             }
             final ModelElementInstance completionCondition = loopCharacteristics
@@ -1027,13 +949,70 @@ public final class ProcessVariableReader {
             if (completionCondition != null) {
                 final String completionConditionExpression = completionCondition.getTextContent();
                 if (completionConditionExpression != null && completionConditionExpression.trim().length() > 0) {
-                    processVariables.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
+                    processVariablesExpression.putAll(findVariablesInExpression(javaReaderStatic, controlFlowGraph, fileScanner,
                             completionConditionExpression, element, ElementChapter.MultiInstance,
                             KnownElementFieldType.CompletionCondition, scopeId));
                 }
             }
+            final ModelElementInstance loopDataInputRef = loopCharacteristics.getUniqueChildElementByType(LoopDataInputRef.class);
+            if (loopDataInputRef != null) {
+                final String dataInputRefName = loopDataInputRef.getTextContent();
+                if (dataInputRefName != null && dataInputRefName.trim().length() > 0) {
+                    processVariables.put(dataInputRefName,
+                            new ProcessVariableOperation(dataInputRefName, element, ElementChapter.MultiInstance,
+                                    KnownElementFieldType.CollectionElement, null, VariableOperation.READ, scopeId,
+                                    element.getFlowAnalysis().getOperationCounter()));
+                }
+            }
+            final ModelElementInstance inputDataItem = loopCharacteristics.getUniqueChildElementByType(InputDataItem.class);
+            if (inputDataItem != null) {
+                final String inputDataItemName = inputDataItem.getAttributeValue("name");
+                if (inputDataItemName != null && inputDataItemName.trim().length() > 0) {
+                    processVariables.put(inputDataItemName,
+                            new ProcessVariableOperation(inputDataItemName, element, ElementChapter.MultiInstance,
+                                    KnownElementFieldType.CollectionElement, null, VariableOperation.WRITE, scopeId,
+                                    element.getFlowAnalysis().getOperationCounter()));
+                }
+            }
+
+            for (ProcessVariableOperation operation : processVariables.values()) {
+                node.addOperation(operation);
+            }
+            processVariables.putAll(processVariablesExpression);
+
         }
         return processVariables;
+    }
+
+    private ListMultimap<String, ProcessVariableOperation> addDefaultMultiInstanceTaskVariables(final BpmnElement element) {
+        ListMultimap<String, ProcessVariableOperation> defaultVariables = ArrayListMultimap.create();
+        String scopeElementId = element.getId();
+
+        ProcessVariableOperation operation = new ProcessVariableOperation("nrOfInstances", element,
+                ElementChapter.MultiInstance,
+                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                scopeElementId, element.getFlowAnalysis().getOperationCounter());
+        defaultVariables.put("nrOfInstances", operation);
+
+        operation = new ProcessVariableOperation("nrOfActiveInstances", element,
+                ElementChapter.MultiInstance,
+                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                scopeElementId, element.getFlowAnalysis().getOperationCounter());
+        defaultVariables.put("nrOfActiveInstances", operation);
+
+        operation = new ProcessVariableOperation("nrOfCompletedInstances", element,
+                ElementChapter.MultiInstance,
+                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                scopeElementId, element.getFlowAnalysis().getOperationCounter());
+        defaultVariables.put("nrOfCompletedInstances", operation);
+
+        operation = new ProcessVariableOperation("loopCounter", element,
+                ElementChapter.MultiInstance,
+                KnownElementFieldType.CamundaStandardVariables, null, VariableOperation.WRITE,
+                scopeElementId, element.getFlowAnalysis().getOperationCounter());
+        defaultVariables.put("loopCounter", operation);
+
+        return defaultVariables;
     }
 
     /**

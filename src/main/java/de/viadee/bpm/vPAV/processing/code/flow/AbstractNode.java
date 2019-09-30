@@ -92,7 +92,7 @@ public abstract class AbstractNode implements AnalysisElement {
 	 *            Current process variable operation
 	 */
 	public void addOperation(final ProcessVariableOperation processVariableOperation) {
-		final String id = String.valueOf(parentElement.getFlowAnalysis().getOperationCounter());
+		final String id = String.valueOf(processVariableOperation.getFlowOperationIndex());
 		this.operations.put(processVariableOperation.getId(), processVariableOperation);
 		switch (processVariableOperation.getOperation()) {
 		case WRITE:

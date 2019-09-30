@@ -60,6 +60,8 @@ public class ProcessVariableOperation {
 	// Guaranteed that the operation takes place or not
 	private boolean operationType;
 
+	private int flowOperationIndex;
+
 	public ProcessVariableOperation(final String name, final BpmnElement element, final ElementChapter chapter,
 			final KnownElementFieldType fieldType, final String resourceFilePath, final VariableOperation operation,
 			final String scopeId, final int index) {
@@ -74,6 +76,7 @@ public class ProcessVariableOperation {
 		this.index = index;
 		this.id = createId();
 		element.getFlowAnalysis().incrementOperationCounter();
+		this.flowOperationIndex = element.getFlowAnalysis().getOperationCounter();
 	}
 
 	private String createId() {
@@ -141,5 +144,9 @@ public class ProcessVariableOperation {
 			return name.equals(p.getName());
 		}
 		return false;
+	}
+
+	public int getFlowOperationIndex() {
+		return flowOperationIndex;
 	}
 }
