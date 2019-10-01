@@ -75,7 +75,7 @@ public class JavaDelegateCheckerTest {
 	public static void setup() throws MalformedURLException {
 
 		// Bean-Mapping
-		final Map<String, String> beanMapping = new HashMap<String, String>();
+		final Map<String, String> beanMapping = new HashMap<>();
 		beanMapping.put("FalschesDelegate_bla", "de.test.Test");
 		beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.delegates.TestDelegate");
 		beanMapping.put("transitiveDelegate", "de.viadee.bpm.vPAV.delegates.TransitiveDelegate");
@@ -128,7 +128,7 @@ public class JavaDelegateCheckerTest {
 	@Test
 	public void testCorrectJavaDelegateReference()
 			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReference.bpmn";
+		final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
 		checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
 
 		// parse bpmn model
