@@ -36,6 +36,8 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
+import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -135,6 +137,13 @@ public class ElementGraphBuilder {
             final Collection<BoundaryEvent> boundaryEvents = new ArrayList<>();
             final Collection<SubProcess> subProcesses = new ArrayList<>();
             final HashMap<BpmnElement, FlowElement> callActivities = new HashMap<>();
+            HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
+
+            try {
+                userVariables = (new XmlVariablesReader()).read(ConfigConstants.USER_VARIABLES_FILE);
+            } catch (ConfigReaderException e) {
+                e.printStackTrace();
+            }
 
             for (final FlowElement element : elements) {
                 final ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
@@ -157,9 +166,15 @@ public class ElementGraphBuilder {
                     final SubProcess subprocess = (SubProcess) element;
                     addElementsSubprocess(fileScanner, subProcesses, flows, boundaryEvents, graph, subprocess,
                             processDefinition, controlFlowGraph, flowAnalysis);
+                } else if (element instanceof StartEvent) {
+                    // Join with variables without a defined creation Point
+                    if (!userVariables.containsKey(element.getId())) {
+                        userVariables.put(element.getId(), ArrayListMultimap.create());
+                    }
+                    userVariables.get(element.getId()).putAll(userVariables.get("StartEvent"));
                 }
 
-                createVariablesOfFlowElement(scanner, graph, node, fileScanner);
+                createVariablesOfFlowElement(scanner, graph, node, fileScanner, userVariables.get(element.getId()));
 
                 // mention element
                 elementMap.put(element.getId(), node);
@@ -194,10 +209,14 @@ public class ElementGraphBuilder {
      * @param fileScanner FileScanner
      */
     private void createVariablesOfFlowElement(final ProcessVariablesScanner scanner, final Graph graph,
-                                              final BpmnElement node, final FileScanner fileScanner) {
+                                              final BpmnElement node, final FileScanner fileScanner,
+                                              final ListMultimap<String, ProcessVariableOperation> userVariables) {
         final FlowElement element = (FlowElement) node.getBaseElement();
         // Ordered map to hold operations in correct order
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+
+        // Add user defined variables
+        variables.putAll(userVariables);
 
         // retrieve initial variable operation (should be WRITE)
         if (element.getElementType().getTypeName().equals(BpmnConstants.START_EVENT)) {

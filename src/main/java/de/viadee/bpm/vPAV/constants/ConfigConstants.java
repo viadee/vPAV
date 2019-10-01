@@ -53,6 +53,8 @@ public class ConfigConstants {
 
 	public static final String HASPARENTRULESET = "HasParentRuleSet";
 
+	public static final String USER_VARIABLES_FILE = "variables.xml";
+
 	public static final String IGNORE_FILE = "src/test/resources/ignoreIssues.txt";
 
 	public static final String IGNORE_FILE_OLD = "src/test/resources/.ignoreIssues";

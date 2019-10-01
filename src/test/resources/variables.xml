@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE xml>
+<variables>
+    <variable>
+        <name>numberEntities</name>
+        <process>Process_1</process>
+        <creationPoint>ServiceTask_108g52x</creationPoint>
+        <scope>ServiceTask_108g52x</scope>
+    </variable>
+</variables>
