@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -170,7 +170,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      * @param implementationRef
      */
     private void checkBeanMapping(BpmnElement element, final Collection<CheckerIssue> issues,
-            final BaseElement bpmnElement, final String errorDefEntry, final String implementationRef) {
+                                  final BaseElement bpmnElement, final String errorDefEntry, final String implementationRef) {
         if (RuntimeConfig.getInstance().getBeanMapping() != null) {
             final TreeBuilder treeBuilder = new Builder();
             final Tree tree = treeBuilder.build(implementationRef);
@@ -272,9 +272,14 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                 String temp = methodBody.substring(methodBody.indexOf("throw new BpmnError")); //$NON-NLS-1$
                 temp = temp.substring(0, temp.indexOf(";") + 1); //$NON-NLS-1$
 
-                final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
-                if (delErrorCode.equals(errorCode)) {
-                    return true;
+                if (temp.contains("\"")) {
+                    // Let's assume a string is directly passed
+                    final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
+                    if (delErrorCode.equals(errorCode)) {
+                        return true;
+                    }
+                } else {
+                    logger.warning("The error code could not be read because currently only string literals are supported.");
                 }
             }
         }
@@ -289,8 +294,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      */
     private boolean checkClassFile(final String className) {
 
-        @SuppressWarnings("unused")
-        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        @SuppressWarnings("unused") final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             RuntimeConfig.getInstance().getClassLoader().loadClass(className);
