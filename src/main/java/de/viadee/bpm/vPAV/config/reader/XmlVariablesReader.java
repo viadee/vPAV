@@ -45,6 +45,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -73,7 +74,8 @@ public final class XmlVariablesReader {
                 final XmlVariables xmlVariables = (XmlVariables) jaxbUnmarshaller.unmarshal(fVariables);
                 return transformFromXmlDestructure(xmlVariables);
             } else {
-                throw new ConfigReaderException("variables.xml file could not be found");
+                LOGGER.log(Level.INFO, "No variables.xml file with user defined variables was found.");
+                return new HashMap<>();
             }
         } catch (JAXBException e) {
             throw new ConfigReaderException(e);

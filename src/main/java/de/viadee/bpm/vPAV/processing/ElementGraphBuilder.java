@@ -142,7 +142,7 @@ public class ElementGraphBuilder {
             HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
 
             try {
-                userVariables = (new XmlVariablesReader()).read(ConfigConstants.USER_VARIABLES_FILE);
+                userVariables = (new XmlVariablesReader()).read(ConfigConstants.getInstance().getUserVariablesFilePath());
             } catch (ConfigReaderException e) {
                 e.printStackTrace();
             }
