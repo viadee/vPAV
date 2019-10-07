@@ -92,11 +92,9 @@ public final class XmlVariablesReader {
     /**
      * @param xmlVariables
      * @return
-     * @throws ConfigReaderException
      */
     private static HashMap<String, ListMultimap<String, ProcessVariableOperation>> transformFromXmlDestructure(
-            final XmlVariables xmlVariables)
-            throws ConfigReaderException {
+            final XmlVariables xmlVariables) {
         final Collection<XmlVariable> variableCollection = xmlVariables.getVariables();
         HashMap<String, ListMultimap<String, ProcessVariableOperation>> operations = new HashMap<>();
 
@@ -106,6 +104,9 @@ public final class XmlVariablesReader {
                 operation = createOperationFromXml(variable);
             } catch (VariablesReaderException e) {
                 e.printStackTrace();
+            }
+            if (variable.getCreationPoint() == null) {
+                variable.setCreationPoint("StartEvent");
             }
             if(!operations.containsKey(variable.getCreationPoint())) {
                 operations.put(variable.getCreationPoint(), ArrayListMultimap.create());
@@ -125,10 +126,6 @@ public final class XmlVariablesReader {
 
         if (name == null || process == null) {
             throw new VariablesReaderException("Name or process id is not set.");
-        }
-
-        if (creationPoint == null) {
-            creationPoint = "StartEvent";
         }
 
         if (scope == null) {

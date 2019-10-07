@@ -7,4 +7,8 @@
         <creationPoint>ServiceTask_108g52x</creationPoint>
         <scope>ServiceTask_108g52x</scope>
     </variable>
+    <variable>
+        <name>anotherVariable</name>
+        <process>Process_1</process>
+    </variable>
 </variables>
