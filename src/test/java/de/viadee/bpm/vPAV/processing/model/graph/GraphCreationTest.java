@@ -171,12 +171,12 @@ public class GraphCreationTest {
         Assert.assertNull("valid variable is marked as invalid", validVarTest);
 
         ProcessVariableOperation jepppaOperation = Mockito.mock(ProcessVariableOperation.class);
-        Mockito.when(jepppaOperation.getIndex()).thenReturn(11);
+        Mockito.when(jepppaOperation.getIndex()).thenReturn(12);
         final List<Path> jepppaTest = invalidPathMap
                 .get(new AnomalyContainer("jepppa", Anomaly.DD,
                         "SequenceFlow_0btqo3y__0",
                         "SequenceFlow_0btqo3y",
-                        "",
+                        null,
                         jepppaOperation));
         Assert.assertEquals(
                 "[[SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_0t7iwpj, Task_0546a8y, SequenceFlow_1m6lt2o, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y], [SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, SequenceFlow_06ehu4z, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y]]",
