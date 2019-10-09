@@ -8,6 +8,12 @@
         <scope>ServiceTask_108g52x</scope>
     </variable>
     <variable>
+        <name>numberEntities</name>
+        <process>Process_1</process>
+        <creationPoint>EndEvent_13uioac</creationPoint>
+        <scope>EndEvent_13uioac</scope>
+    </variable>
+    <variable>
         <name>anotherVariable</name>
     </variable>
 </variables>
