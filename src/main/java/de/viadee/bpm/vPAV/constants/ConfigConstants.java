@@ -45,177 +45,183 @@ import java.util.logging.Logger;
 
 public class ConfigConstants {
 
-	public static final String RULESET = "ruleSet.xml";
+    public static final String RULESET = "ruleSet.xml";
 
-	public static final String RULESETDEFAULT = "ruleSetDefault.xml";
+    public static final String RULESETDEFAULT = "ruleSetDefault.xml";
 
-	public static final String RULESETPARENT = "parentRuleSet.xml";
+    public static final String RULESETPARENT = "parentRuleSet.xml";
 
-	public static final String HASPARENTRULESET = "HasParentRuleSet";
+    public static final String HASPARENTRULESET = "HasParentRuleSet";
 
-	public static final String IGNORE_FILE = "src/test/resources/ignoreIssues.txt";
+    public static final String USER_VARIABLES_FILE = "variables.xml";
 
-	public static final String IGNORE_FILE_OLD = "src/test/resources/.ignoreIssues";
+    public static final String IGNORE_FILE = "src/test/resources/ignoreIssues.txt";
 
-	public static final String BPMN_FILE_PATTERN = "**/*.bpmn";
+    public static final String IGNORE_FILE_OLD = "src/test/resources/.ignoreIssues";
 
-	public static final String DMN_FILE_PATTERN = "**/*.dmn";
+    public static final String BPMN_FILE_PATTERN = "**/*.bpmn";
 
-	public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
+    public static final String DMN_FILE_PATTERN = "**/*.dmn";
 
-	public static final String JAVA_FILE_PATTERN = "**/*.java";
+    public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
 
-	public static final String EFFECTIVE_RULESET = "target/vPAV/effectiveRuleSet.xml";
+    public static final String JAVA_FILE_PATTERN = "**/*.java";
 
-	public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
+    public static final String EFFECTIVE_RULESET = "target/vPAV/effectiveRuleSet.xml";
 
-	public static final String VALIDATION_JS_MODEL_OUTPUT = "target/vPAV/js/bpmn_model.js";
+    public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
 
-	public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
+    public static final String VALIDATION_JS_MODEL_OUTPUT = "target/vPAV/js/bpmn_model.js";
 
-	public static final String PROPERTIES_JS_OUTPUT = "target/vPAV/js/properties.js";
+    public static final String VALIDATION_JS_OUTPUT = "target/vPAV/js/bpmn_validation.js";
 
-	public static final String VALIDATION_CHECKERS = "target/vPAV/js/checkers.js";
+    public static final String PROPERTIES_JS_OUTPUT = "target/vPAV/js/properties.js";
 
-	public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
+    public static final String VALIDATION_CHECKERS = "target/vPAV/js/checkers.js";
 
-	public static final String VALIDATION_ISSUE_SEVERITY = "target/vPAV/js/issue_severity.js";
+    public static final String VALIDATION_JS_SUCCESS_OUTPUT = "target/vPAV/js/bpmn_validation_success.js";
 
-	public static final String VALIDATION_JS_PROCESSVARIABLES = "target/vPAV/js/processVariables.js";
+    public static final String VALIDATION_ISSUE_SEVERITY = "target/vPAV/js/issue_severity.js";
 
-	public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";
+    public static final String VALIDATION_JS_PROCESSVARIABLES = "target/vPAV/js/processVariables.js";
 
-	public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = "target/vPAV/js/ignoredIssues.js";
+    public static final String VALIDATION_JSON_OUTPUT = "target/vPAV/bpmn_validation.json";
 
-	public static final String VALIDATION_FOLDER = "target/vPAV/";
+    public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = "target/vPAV/js/ignoredIssues.js";
 
-	public static final String JS_FOLDER = "target/vPAV/js/";
+    public static final String VALIDATION_FOLDER = "target/vPAV/";
 
-	public static final String CSS_FOLDER = "target/vPAV/css/";
+    public static final String JS_FOLDER = "target/vPAV/js/";
 
-	public static final String IMG_FOLDER = "target/vPAV/img/";
+    public static final String CSS_FOLDER = "target/vPAV/css/";
 
-	private static final String BASEPATH = "src/main/resources/";
+    public static final String IMG_FOLDER = "target/vPAV/img/";
 
-	public static final String JAVAPATH = "src/main/java/";
+    private static final String BASEPATH = "src/main/resources/";
 
-	public static final String TARGET_PATH = "target/classes/";
+    public static final String JAVAPATH = "src/main/java/";
 
-	public static final String TEST_TARGET_PATH = "target/test-classes/";
+    public static final String TARGET_PATH = "target/classes/";
 
-	public static final String CLASS_FILE_PATTERN = "**/*.class";
+    public static final String TEST_TARGET_PATH = "target/test-classes/";
 
-	public static final String TEST_JAVAPATH = "src/test/java/";
+    public static final String CLASS_FILE_PATTERN = "**/*.class";
 
-	public static final String TEST_BASEPATH = "src/test/resources/";
+    public static final String TEST_JAVAPATH = "src/test/java/";
 
-	public static final String JS_BASEPATH = "src\\main\\resources\\";
+    public static final String TEST_BASEPATH = "src/test/resources/";
 
-	public static final String TARGET_CLASS_FOLDER = "target/classes";
+    public static final String JS_BASEPATH = "src\\main\\resources\\";
 
-	public static final String VERSIONINGSCHEMEPACKAGE = "versioningSchemePackage";
+    public static final String TARGET_CLASS_FOLDER = "target/classes";
 
-	public static final String VERSIONINGSCHEMECLASS = "versioningSchemeClass";
+    public static final String VERSIONINGSCHEMEPACKAGE = "versioningSchemePackage";
 
-	public static final String GROOVY = "groovy";
+    public static final String VERSIONINGSCHEMECLASS = "versioningSchemeClass";
 
-	public static final String RULENAME = "rulename";
+    public static final String GROOVY = "groovy";
 
-	public static final String MESSAGE = "message";
+    public static final String RULENAME = "rulename";
 
-	public static final String CRITICALITY = "Criticality";
+    public static final String MESSAGE = "message";
 
-	public static final String CREATE_OUTPUT_RULE = "CreateOutputHTML";
+    public static final String CRITICALITY = "Criticality";
 
-	private static Logger logger = Logger.getLogger(ConfigConstants.class.getName());
+    public static final String CREATE_OUTPUT_RULE = "CreateOutputHTML";
 
-	private static ConfigConstants instance;
+    private static Logger logger = Logger.getLogger(ConfigConstants.class.getName());
 
-	private Properties properties;
+    private static ConfigConstants instance;
 
-	private ConfigConstants() {
-		InputStream input = null;
-		properties = (new PropertiesReader()).read();
-	}
+    private Properties properties;
 
-	public static ConfigConstants getInstance() {
-		if (ConfigConstants.instance == null) {
-			ConfigConstants.instance = new ConfigConstants();
-		}
-		return ConfigConstants.instance;
-	}
+    private ConfigConstants() {
+        InputStream input = null;
+        properties = (new PropertiesReader()).read();
+    }
 
-	/**
-	 * Only used for tests in order to inject mocked properties.
-	 *
-	 * @param newProperties
-	 *            mocked properties
-	 */
-	public void setProperties(Properties newProperties) {
-		this.properties = newProperties;
-	}
+    public static ConfigConstants getInstance() {
+        if (ConfigConstants.instance == null) {
+            ConfigConstants.instance = new ConfigConstants();
+        }
+        return ConfigConstants.instance;
+    }
 
-	public String getBasepath() {
-		if (RuntimeConfig.getInstance().isTest()) {
-			return properties.getProperty("basepath", ConfigConstants.TEST_BASEPATH);
-		}
-		return properties.getProperty("basepath", ConfigConstants.BASEPATH);
-	}
+    /**
+     * Only used for tests in order to inject mocked properties.
+     *
+     * @param newProperties
+     *            mocked properties
+     */
+    public void setProperties(Properties newProperties) {
+        this.properties = newProperties;
+    }
 
-	public String getScanPath() {
-		if (RuntimeConfig.getInstance().isTest()) {
-			return properties.getProperty("scanpath", ConfigConstants.TEST_TARGET_PATH);
-		}
-		return properties.getProperty("scanpath", ConfigConstants.TARGET_PATH);
-	}
+    public String getBasepath() {
+        if (RuntimeConfig.getInstance().isTest()) {
+            return properties.getProperty("basepath", ConfigConstants.TEST_BASEPATH);
+        }
+        return properties.getProperty("basepath", ConfigConstants.BASEPATH);
+    }
 
-	public String getFilePattern() {
-		return properties.getProperty("filepattern", ConfigConstants.CLASS_FILE_PATTERN);
-	}
+    public String getScanPath() {
+        if (RuntimeConfig.getInstance().isTest()) {
+            return properties.getProperty("scanpath", ConfigConstants.TEST_TARGET_PATH);
+        }
+        return properties.getProperty("scanpath", ConfigConstants.TARGET_PATH);
+    }
 
-	/**
-	 * Checks whether the output of the result should be in html
-	 *
-	 * @return true (default) or false if false is defined in the properties file
-	 */
-	public boolean isHtmlOutputEnabled() {
-		return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
-	}
+    public String getUserVariablesFilePath() {
+        return properties.getProperty("userVariablesFilePath", ConfigConstants.USER_VARIABLES_FILE);
+    }
 
-	/**
-	 * @param htmlOutput true if the results should be visualized as html page
-	 * @deprecated As of release 3.0.0, html output property should be set in property file
-	 */
-	@Deprecated
-	public void setHtmlOutputEnabled(boolean htmlOutput) {
-		properties.setProperty("outputhtml", String.valueOf(htmlOutput));
-	}
+    public String getFilePattern() {
+        return properties.getProperty("filepattern", ConfigConstants.CLASS_FILE_PATTERN);
+    }
 
-	/**
-	 * Retrieves language property
-	 *
-	 * @return Language
-	 */
-	public String getLanguage() {
-		if (properties.containsKey("language")) {
-			return properties.getProperty("language");
-		} else {
-			if (Locale.getDefault().toString().equals("de_DE")) {
-				logger.warning("Could not retrieve localization from vpav.properties. Default localization: de_DE.");
-				return "de";
-			} else {
-				logger.warning("Could not retrieve localization from vpav.properties. Default localization: en_US.");
-				return "en";
-			}
-		}
-	}
+    /**
+     * Checks whether the output of the result should be in html
+     *
+     * @return true (default) or false if false is defined in the properties file
+     */
+    public boolean isHtmlOutputEnabled() {
+        return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
+    }
 
-	/**
-	 * @param languageCode language code like de_DE
-	 * @deprecated As of release 3.0.0, language should be directly set in properties file
-	 */
-	@Deprecated
-	public void setLanguage(String languageCode) {
-		properties.setProperty("language", languageCode);
-	}
+    /**
+     * @param htmlOutput true if the results should be visualized as html page
+     * @deprecated As of release 3.0.0, html output property should be set in property file
+     */
+    @Deprecated
+    public void setHtmlOutputEnabled(boolean htmlOutput) {
+        properties.setProperty("outputhtml", String.valueOf(htmlOutput));
+    }
+
+    /**
+     * Retrieves language property
+     *
+     * @return Language
+     */
+    public String getLanguage() {
+        if (properties.containsKey("language")) {
+            return properties.getProperty("language");
+        } else {
+            if (Locale.getDefault().toString().equals("de_DE")) {
+                logger.warning("Could not retrieve localization from vpav.properties. Default localization: de_DE.");
+                return "de";
+            } else {
+                logger.warning("Could not retrieve localization from vpav.properties. Default localization: en_US.");
+                return "en";
+            }
+        }
+    }
+
+    /**
+     * @param languageCode language code like de_DE
+     * @deprecated As of release 3.0.0, language should be directly set in properties file
+     */
+    @Deprecated
+    public void setLanguage(String languageCode) {
+        properties.setProperty("language", languageCode);
+    }
 }

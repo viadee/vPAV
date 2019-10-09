@@ -29,13 +29,69 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.config.reader;
 
-/**
- * Element chapter
- */
-public enum ElementChapter {
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-    Code, General, InputOutput, Details, ExecutionListenerStart, Implementation, ExecutionListenerEnd, TaskListener, MultiInstance, FormData, InputData, OutputData,
-    OutstandingVariable, FieldInjections, Signal, Message, InputImplementation, OutputImplementation, UserDefined
+@XmlRootElement(name = "variable")
+@XmlType(propOrder = { "name", "process", "creationPoint", "scope" })
+public class XmlVariable {
+
+    private String name;
+
+    private String process;
+
+    private String creationPoint;
+
+    private String scope;
+
+    public XmlVariable() {
+    }
+
+    public XmlVariable(String name, String process, String creationPoint, String scope) {
+        super();
+        this.name = name;
+        this.process = process;
+        this.creationPoint = creationPoint;
+        this.scope = scope;
+    }
+
+    @XmlElement(name = "name", required = true)
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @XmlElement(name = "process", required = true)
+    public String getProcess() {
+        return process;
+    }
+
+    public void setProcess(String process) {
+        this.process = process;
+    }
+
+    @XmlElement(name = "creationPoint", required = false)
+    public String getCreationPoint() {
+        return creationPoint;
+    }
+
+    public void setCreationPoint(String creationPoint) {
+        this.creationPoint = creationPoint;
+    }
+
+    @XmlElement(name = "scope", required = false)
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
 }

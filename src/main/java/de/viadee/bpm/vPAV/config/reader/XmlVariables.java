@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,13 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.config.reader;
 
-/**
- * Element chapter
- */
-public enum ElementChapter {
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collection;
 
-    Code, General, InputOutput, Details, ExecutionListenerStart, Implementation, ExecutionListenerEnd, TaskListener, MultiInstance, FormData, InputData, OutputData,
-    OutstandingVariable, FieldInjections, Signal, Message, InputImplementation, OutputImplementation, UserDefined
+@XmlRootElement(name = "variables")
+public class XmlVariables {
+
+
+    private Collection<XmlVariable> variables;
+
+    public XmlVariables() {
+    }
+
+    public XmlVariables(Collection<XmlVariable> variables) {
+        super();
+        this.variables = variables;
+    }
+
+    @XmlElement(name = "variable", type = XmlVariable.class)
+    public Collection<XmlVariable> getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Collection<XmlVariable> variables) {
+        this.variables = variables;
+    }
 }

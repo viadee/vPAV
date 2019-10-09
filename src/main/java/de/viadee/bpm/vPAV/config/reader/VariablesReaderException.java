@@ -29,13 +29,17 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.data;
+package de.viadee.bpm.vPAV.config.reader;
 
-/**
- * Element chapter
- */
-public enum ElementChapter {
+public class VariablesReaderException extends Exception {
 
-    Code, General, InputOutput, Details, ExecutionListenerStart, Implementation, ExecutionListenerEnd, TaskListener, MultiInstance, FormData, InputData, OutputData,
-    OutstandingVariable, FieldInjections, Signal, Message, InputImplementation, OutputImplementation, UserDefined
+  private static final long serialVersionUID = 7310325755339964000L;
+
+  public VariablesReaderException(final Throwable e) {
+    super(e);
+  }
+
+  public VariablesReaderException(final String message) {
+    super(message);
+  }
 }
