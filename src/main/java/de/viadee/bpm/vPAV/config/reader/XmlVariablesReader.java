@@ -61,80 +61,74 @@ public final class XmlVariablesReader {
      * @return
      * @throws ConfigReaderException If file can not be found in classpath
      */
-    public HashMap<String, ListMultimap<String, ProcessVariableOperation>> read(final String file)
-            throws ConfigReaderException {
+    public HashMap<String, ListMultimap<String, ProcessVariableOperation>> read(final String file,
+            final String defaultProcess) throws JAXBException {
 
-        try {
-            final JAXBContext jaxbContext = JAXBContext.newInstance(XmlVariables.class);
-            final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        final JAXBContext jaxbContext = JAXBContext.newInstance(XmlVariables.class);
+        final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            InputStream fVariables = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(file);
+        InputStream fVariables = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(file);
 
-            if (fVariables != null) {
-                final XmlVariables xmlVariables = (XmlVariables) jaxbUnmarshaller.unmarshal(fVariables);
-                return transformFromXmlDestructure(xmlVariables);
-            } else {
-                LOGGER.log(Level.INFO, "No variables.xml file with user defined variables was found.");
-                return new HashMap<>();
-            }
-        } catch (JAXBException e) {
-            throw new ConfigReaderException(e);
+        if (fVariables != null) {
+            final XmlVariables xmlVariables = (XmlVariables) jaxbUnmarshaller.unmarshal(fVariables);
+            return transformFromXmlDestructure(xmlVariables, defaultProcess);
+        } else {
+            LOGGER.log(Level.INFO, "No variables.xml file with user defined variables was found.");
+            return new HashMap<>();
         }
     }
 
     /**
-     * Transforms XmlRuleSet to rules
-     *
-     * @param ruleSet RuleSet as XmlRuleSet
-     * @return rules Transformed map of rules
-     * @throws ConfigReaderException If file could not be read properly
-     */
-    /**
+     * TODO docs
      * @param xmlVariables
+     * @param defaultProcess
      * @return
      */
     private static HashMap<String, ListMultimap<String, ProcessVariableOperation>> transformFromXmlDestructure(
-            final XmlVariables xmlVariables) {
+            final XmlVariables xmlVariables, final String defaultProcess) {
         final Collection<XmlVariable> variableCollection = xmlVariables.getVariables();
         HashMap<String, ListMultimap<String, ProcessVariableOperation>> operations = new HashMap<>();
 
         for (final XmlVariable variable : variableCollection) {
             ProcessVariableOperation operation = null;
             try {
-                operation = createOperationFromXml(variable);
+                operation = createOperationFromXml(variable, defaultProcess);
+
+                if (variable.getCreationPoint() == null) {
+                    variable.setCreationPoint("StartEvent");
+                }
+                if (!operations.containsKey(variable.getCreationPoint())) {
+                    operations.put(variable.getCreationPoint(), ArrayListMultimap.create());
+                }
+                operations.get(variable.getCreationPoint()).put(operation.getName(), operation);
             } catch (VariablesReaderException e) {
-                e.printStackTrace();
+                LOGGER.warning("Variable in variables.xml is missing name. It will be ignored.");
             }
-            if (variable.getCreationPoint() == null) {
-                variable.setCreationPoint("StartEvent");
-            }
-            if(!operations.containsKey(variable.getCreationPoint())) {
-                operations.put(variable.getCreationPoint(), ArrayListMultimap.create());
-            }
-            operations.get(variable.getCreationPoint()).put(operation.getName(), operation);
         }
 
         return operations;
     }
 
-    private static ProcessVariableOperation createOperationFromXml(XmlVariable variable)
+    private static ProcessVariableOperation createOperationFromXml(XmlVariable variable, String defaultProcess)
             throws VariablesReaderException {
         final String name = variable.getName();
-        final String process = variable.getProcess();
-        String creationPoint = variable.getCreationPoint();
+        String process = variable.getProcess();
         String scope = variable.getScope();
 
-        if (name == null || process == null) {
-            throw new VariablesReaderException("Name or process id is not set.");
+        if (name == null) {
+            throw new VariablesReaderException("Name is not set.");
+        }
+
+        if (process == null) {
+            process = defaultProcess;
         }
 
         if (scope == null) {
             scope = process;
         }
 
-        ProcessVariableOperation operation = new ProcessVariableOperation(name, ElementChapter.UserDefined, KnownElementFieldType.UserDefined,
+        return new ProcessVariableOperation(name, ElementChapter.UserDefined, KnownElementFieldType.UserDefined,
                 VariableOperation.WRITE, scope);
-        return operation;
 
     }
 

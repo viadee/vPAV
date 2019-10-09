@@ -55,6 +55,7 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.*;
 
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.util.*;
 
@@ -132,6 +133,16 @@ public class ElementGraphBuilder {
         final Collection<Graph> graphCollection = new ArrayList<>();
 
         final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
+
+        HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
+        try {
+            // Use first process as default process
+            userVariables = (new XmlVariablesReader()).read(ConfigConstants.getInstance().getUserVariablesFilePath(),
+                    processes.iterator().next().getId());
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+
         for (final Process process : processes) {
             final Graph graph = new Graph(process.getId());
             final Collection<FlowElement> elements = process.getFlowElements();
@@ -139,13 +150,6 @@ public class ElementGraphBuilder {
             final Collection<BoundaryEvent> boundaryEvents = new ArrayList<>();
             final Collection<SubProcess> subProcesses = new ArrayList<>();
             final HashMap<BpmnElement, FlowElement> callActivities = new HashMap<>();
-            HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
-
-            try {
-                userVariables = (new XmlVariablesReader()).read(ConfigConstants.getInstance().getUserVariablesFilePath());
-            } catch (ConfigReaderException e) {
-                e.printStackTrace();
-            }
 
             for (final FlowElement element : elements) {
                 final ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
@@ -220,12 +224,12 @@ public class ElementGraphBuilder {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
         // Add user defined variables
-        if(userVariables != null) {
+        if (userVariables != null) {
             ExpressionNode userVarNode = new ExpressionNode(node.getControlFlowGraph(), node.getParentElement(),
                     "", ElementChapter.UserDefined);
             node.getControlFlowGraph().addNode(userVarNode);
 
-            for(Map.Entry<String, ProcessVariableOperation> var : userVariables.entries()) {
+            for (Map.Entry<String, ProcessVariableOperation> var : userVariables.entries()) {
                 var.getValue().initializeOperation(node);
                 userVarNode.addOperation(var.getValue());
             }

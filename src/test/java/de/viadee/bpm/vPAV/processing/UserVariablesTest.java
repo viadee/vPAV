@@ -31,15 +31,20 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
+import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import fj.Hash;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
@@ -47,6 +52,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testng.Assert;
 
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -110,9 +116,20 @@ public class UserVariablesTest {
         Assert.assertEquals(flowAnalysis.getNodes().get("ServiceTask_108g52x__0").getDefined().get("2").getName(),
                 "numberEntities",
                 "'numberEntities' should be listed as defined because it was defined by the user.");
-        Assert.assertEquals(flowAnalysis.getNodes().get("StartEvent_1__0").getDefined().get("1").getName(), "anotherVariable",
+        Assert.assertEquals(flowAnalysis.getNodes().get("SequenceFlow_0znqs8t").getInUsed().size(), 0,
+                "Variable 'numberEntities' should not be passed to Sequence Flow because it is out of scope.");
+        Assert.assertEquals(flowAnalysis.getNodes().get("StartEvent_1__0").getDefined().get("1").getName(),
+                "anotherVariable",
                 "'anotherVariable' should be listed as defined in the start event");
     }
 
-    // TODO add test with invalid configuration
+    @Test
+    public void testUserDefinedVariablesIncorrect() throws JAXBException {
+        XmlVariablesReader xmlVariablesReader = new XmlVariablesReader();
+
+        HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = xmlVariablesReader
+                .read("UserVariablesTest/variables_incorrect.xml", "testProcess");
+
+        Assert.assertEquals(0, userVariables.size(), "Ill-defined user variable should not be included.");
+    }
 }
