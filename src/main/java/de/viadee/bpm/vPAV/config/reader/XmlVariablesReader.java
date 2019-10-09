@@ -57,9 +57,11 @@ public final class XmlVariablesReader {
     private static final Logger LOGGER = Logger.getLogger(XmlVariablesReader.class.getName());
 
     /**
-     * @param file Location of file relative to project
+     * Reads the variable file and transforms variables into another representation
+     * @param file Location of variables.xml file relative to project resources
+     * @param defaultProcess process variables are mapped to if no process is defined in file
      * @return
-     * @throws ConfigReaderException If file can not be found in classpath
+     * @throws JAXBException If file can not be found
      */
     public HashMap<String, ListMultimap<String, ProcessVariableOperation>> read(final String file,
             final String defaultProcess) throws JAXBException {
@@ -79,10 +81,10 @@ public final class XmlVariablesReader {
     }
 
     /**
-     * TODO docs
-     * @param xmlVariables
-     * @param defaultProcess
-     * @return
+     * Transforms XmlVariables to ProcessVariableOperations
+     * @param xmlVariables the Xml Representation of the variables file
+     * @param defaultProcess that is assigned to variables without a user defined process
+     * @return HashMap of all variables grouped by creation points of variables
      */
     private static HashMap<String, ListMultimap<String, ProcessVariableOperation>> transformFromXmlDestructure(
             final XmlVariables xmlVariables, final String defaultProcess) {
@@ -109,6 +111,11 @@ public final class XmlVariablesReader {
         return operations;
     }
 
+    /**
+     * Transforms a single Xml Variable to a ProcessVariableOperation
+     * @return ProcessVariableOperation
+     * @throws VariablesReaderException if variable's name is not set
+     */
     private static ProcessVariableOperation createOperationFromXml(XmlVariable variable, String defaultProcess)
             throws VariablesReaderException {
         final String name = variable.getName();
@@ -131,5 +138,4 @@ public final class XmlVariablesReader {
                 VariableOperation.WRITE, scope);
 
     }
-
 }
