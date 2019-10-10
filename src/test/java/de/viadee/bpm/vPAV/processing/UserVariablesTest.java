@@ -40,11 +40,13 @@ import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import fj.Hash;
+import groovy.lang.DelegatesTo;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
@@ -124,6 +126,63 @@ public class UserVariablesTest {
         Assert.assertEquals(flowAnalysis.getNodes().get("EndEvent_13uioac__0").getDefined().get("7").getName(),
                 "numberEntities",
                 "'numberEntities' should be listed as defined in end event");
+    }
+
+    @Test
+    public void testAllOperationsCorrect() throws JAXBException {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+        final String PATH = BASE_PATH + "ModelWithTwoDelegates_UR.bpmn";
+        final File processDefinition = new File(PATH);
+
+        Properties myProperties = new Properties();
+        myProperties.put("userVariablesFilePath", "UserVariablesTest/variables_allOperations.xml");
+        ConfigConstants.getInstance().setProperties(myProperties);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+
+        Assert.assertEquals(invalidPathMap.size(), 3);
+        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+        AnomalyContainer anomaly1 = iterator.next();
+        AnomalyContainer anomaly2 = iterator.next();
+        AnomalyContainer anomaly3 = iterator.next();
+
+        Assert.assertEquals(anomaly1.getAnomaly(), Anomaly.UR, "'ext_Blub' should create a UR because it is not availabe in the sequence flow.");
+        Assert.assertEquals(anomaly2.getAnomaly(), Anomaly.UR, "'int_Hallo' should create a UR because it is deleted in the sequence flow before accessed.");
+        Assert.assertEquals(anomaly3.getAnomaly(), Anomaly.DU, "'int_Hallo' should create a DU because no read operation exists between the user defined write and delete operations.");
+
+        Assert.assertEquals(flowAnalysis.getNodes().get("StartEvent_1__0").getDefined().get("1").getName(), "int_Hallo",
+                "Variable 'int_Hallo' should be defined in the start event.");
+        Assert.assertEquals(flowAnalysis.getNodes().get("ServiceTask_108g52x__0").getDefined().get("2").getName(),
+                "ext_Blub",
+                "Variable 'ext_Blub' should be defined in the first service task.");
+        Assert.assertEquals(flowAnalysis.getNodes().get("SequenceFlow_1g7pl28__0").getUsed().get("8").getName(),
+                "ext_Blub",
+                "Variable 'ext_Blub' should be used in the middle sequence flow.");
+        Assert.assertEquals(flowAnalysis.getNodes().get("SequenceFlow_1g7pl28__0").getKilled().get("7").getName(),
+                "int_Hallo",
+                "Variable 'int_Hallo' should be deleted in the middle sequence flow.");
+
+        // Write operation at start (var1)
+        // Write operation at the beginning of first service task (scoped) (var2)
+        // Read operation after first service task (var2)
+        // Delete operation after first service task (var1)
     }
 
     @Test

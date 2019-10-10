@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "variable")
-@XmlType(propOrder = { "name", "process", "creationPoint", "scope" })
+@XmlType(propOrder = { "name", "process", "creationPoint", "scope", "operation" })
 public class XmlVariable {
 
     private String name;
@@ -48,15 +48,18 @@ public class XmlVariable {
 
     private String scope;
 
+    private String operation;
+
     public XmlVariable() {
     }
 
-    public XmlVariable(String name, String process, String creationPoint, String scope) {
+    public XmlVariable(String name, String process, String creationPoint, String scope, String operation) {
         super();
         this.name = name;
         this.process = process;
         this.creationPoint = creationPoint;
         this.scope = scope;
+        this.operation = operation;
     }
 
     @XmlElement(name = "name", required = true)
@@ -93,5 +96,14 @@ public class XmlVariable {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    @XmlElement(name = "operation", required = false)
+    public String getOperation() {
+        return operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
     }
 }

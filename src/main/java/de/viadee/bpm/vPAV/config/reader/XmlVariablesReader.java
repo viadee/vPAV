@@ -58,7 +58,8 @@ public final class XmlVariablesReader {
 
     /**
      * Reads the variable file and transforms variables into another representation
-     * @param file Location of variables.xml file relative to project resources
+     *
+     * @param file           Location of variables.xml file relative to project resources
      * @param defaultProcess process variables are mapped to if no process is defined in file
      * @return
      * @throws JAXBException If file can not be found
@@ -82,7 +83,8 @@ public final class XmlVariablesReader {
 
     /**
      * Transforms XmlVariables to ProcessVariableOperations
-     * @param xmlVariables the Xml Representation of the variables file
+     *
+     * @param xmlVariables   the Xml Representation of the variables file
      * @param defaultProcess that is assigned to variables without a user defined process
      * @return HashMap of all variables grouped by creation points of variables
      */
@@ -113,6 +115,7 @@ public final class XmlVariablesReader {
 
     /**
      * Transforms a single Xml Variable to a ProcessVariableOperation
+     *
      * @return ProcessVariableOperation
      * @throws VariablesReaderException if variable's name is not set
      */
@@ -121,6 +124,7 @@ public final class XmlVariablesReader {
         final String name = variable.getName();
         String process = variable.getProcess();
         String scope = variable.getScope();
+        String operation = variable.getOperation();
 
         if (name == null) {
             throw new VariablesReaderException("Name is not set.");
@@ -134,8 +138,25 @@ public final class XmlVariablesReader {
             scope = process;
         }
 
+        if (operation == null) {
+            operation = "write";
+        }
+
+        VariableOperation op;
+
+        switch (operation) {
+            case "read":
+                op = VariableOperation.READ;
+                break;
+            case "delete":
+                op = VariableOperation.DELETE;
+                break;
+            default:
+                op = VariableOperation.WRITE;
+        }
+
         return new ProcessVariableOperation(name, ElementChapter.UserDefined, KnownElementFieldType.UserDefined,
-                VariableOperation.WRITE, scope);
+                op, scope);
 
     }
 }
