@@ -107,7 +107,7 @@ public class ProcessVariablesNameConventionCheckerTest {
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH
-				+ "ProcessVariablesNameConventionCheckerTest_CorrectProcessVariablesNamingConvention.bpmn";
+				+ "ModelWithTwoDelegates_UR.bpmn";
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

@@ -91,7 +91,7 @@ public class ProcessVariableReaderTest {
 
 	@Test
 	public void testRecogniseVariablesInClass() {
-		final String PATH = BASE_PATH + "ProcessVariableReaderTest_RecogniseVariablesInClass.bpmn";
+		final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
