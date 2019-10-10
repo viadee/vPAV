@@ -1,5 +1,20 @@
 # Release notes
 
+## 3.0.2
+
+### Features
+[**Issue 30**](https://github.com/viadee/vPAV/issues/30) In/Out mappings and delegate variable mappings for call activities are now supported\
+[**Issue 139**](https://github.com/viadee/vPAV/issues/139) Users can define variables which are integrated in the data flow graph in order to improve the accuracy of the analysis\
+[**Issue 142**](https://github.com/viadee/vPAV/issues/142) Call activities with multiple listeners are supported\
+[**Issue 146**](https://github.com/viadee/vPAV/issues/146) Added support for multi instance tasks
+
+### Fixes
+[**Issue 141**](https://github.com/viadee/vPAV/issues/141)  Fixed NPE if recursion in interprocedural calls goes deeper than 9 calls
+
+### Misc
+[**Issue 148**](https://github.com/viadee/vPAV/issues/148) Prevent soot from loading classes that are not part of the classpath to improve performance
+
+
 ## 3.0.1
 
 ### Features  
