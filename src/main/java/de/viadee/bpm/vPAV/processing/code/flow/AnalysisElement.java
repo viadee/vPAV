@@ -67,9 +67,9 @@ public interface AnalysisElement {
 
 	LinkedHashMap<String, ProcessVariableOperation> getOutUnused();
 
-	void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsedB);
+	void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed);
 
-	void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnusedB);
+	void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused);
 
 	void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed);
 
@@ -81,6 +81,10 @@ public interface AnalysisElement {
 
 	LinkedHashMap<String, ProcessVariableOperation> getDefined();
 
+	void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations);
+
+	void setUsed(LinkedHashMap<String, ProcessVariableOperation> used);
+
 	void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
 
 	void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
@@ -91,6 +95,8 @@ public interface AnalysisElement {
 
 	void removePredecessor(String predecessor);
 
+	void clearSuccessors();
+
 	void removeSuccessor(String successor);
 
 	Map<BpmnElement, List<AnomalyContainer>> getAnomalies();
@@ -98,4 +104,7 @@ public interface AnalysisElement {
 	BaseElement getBaseElement();
 
 	BpmnElement getParentElement();
+
+	void removeOperation(ProcessVariableOperation op);
+
 }

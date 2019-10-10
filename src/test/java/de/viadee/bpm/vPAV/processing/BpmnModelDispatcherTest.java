@@ -34,10 +34,9 @@ package de.viadee.bpm.vPAV.processing;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.checker.ElementChecker;
 import de.viadee.bpm.vPAV.processing.checker.ExtensionChecker;
 import de.viadee.bpm.vPAV.processing.checker.TimerExpressionChecker;
@@ -50,51 +49,51 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 public class BpmnModelDispatcherTest {
-    private static ClassLoader cl;
+	private static ClassLoader cl;
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        ConfigConstants.getInstance().setIsTest(true);
-    }
+	@BeforeClass
+	public static void setup() throws MalformedURLException {
+		final File file = new File(".");
+		final String currentPath = file.toURI().toURL().toString();
+		final URL classUrl = new URL(currentPath + "src/test/java");
+		final URL[] classUrls = { classUrl };
+		cl = new URLClassLoader(classUrls);
+		RuntimeConfig.getInstance().setClassLoader(cl);
+		RuntimeConfig.getInstance().setTest(true);
+	}
 
-    @Test
-    public void testCreateCheckerInstances() throws ConfigReaderException {
-        // Load rule set.
-        XmlConfigReader reader = new XmlConfigReader();
-        Map<String, Map<String, Rule>> rules = reader.read("ruleSetChild.xml");
-        rules.remove("HasParentRuleSet");
+	@Test
+	public void testCreateCheckerInstances() throws ConfigReaderException {
+		// Load rule set.
+		XmlConfigReader reader = new XmlConfigReader();
+		RuleSet rules = reader.read("ruleSetChild.xml");
 
-        BpmnScanner bpmnScanner = new BpmnScanner((new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());
+		BpmnScanner bpmnScanner = new BpmnScanner(
+				(new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());
 
-        FileScanner fileScanner = new FileScanner(rules);
-        BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
-        Collection<ElementChecker> checkerInstances = dispatcher.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null);
+		FileScanner fileScanner = new FileScanner(rules);
+		BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
+		Collection<ElementChecker> checkerInstances = dispatcher
+				.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null, null, null, null)[0];
 
-        // Check if all checkers were created.
-        assertEquals("Wrong number of loaded checkers.",4, checkerInstances.size());
-        int xor = 0, extension = 0, timer = 0;
-        for(ElementChecker c : checkerInstances) {
-            if (c instanceof XorConventionChecker) {
-                xor++;
-            } else if (c instanceof ExtensionChecker) {
-                extension++;
-            } else if (c instanceof TimerExpressionChecker) {
-                timer++;
-            }
-        }
-        assertEquals("Wrong number of loaded XorConventionCheckers.",2, xor);
-        assertEquals("Exactly one ExtensionChecker should exist.", 1, extension);
-        assertEquals("Exactly one TimerExpressionChecker should exist.", 1, timer);
-    }
+		// Check if all checkers were created.
+		assertEquals("Wrong number of loaded checkers.", 4, checkerInstances.size());
+		int xor = 0, extension = 0, timer = 0;
+		for (ElementChecker c : checkerInstances) {
+			if (c instanceof XorConventionChecker) {
+				xor++;
+			} else if (c instanceof ExtensionChecker) {
+				extension++;
+			} else if (c instanceof TimerExpressionChecker) {
+				timer++;
+			}
+		}
+		assertEquals("Wrong number of loaded XorConventionCheckers.", 2, xor);
+		assertEquals("Exactly one ExtensionChecker should exist.", 1, extension);
+		assertEquals("Exactly one TimerExpressionChecker should exist.", 1, timer);
+	}
 }

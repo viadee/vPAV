@@ -38,7 +38,6 @@ public class DelegateWithInterfaceActivityBehavior implements ActivityBehavior {
 
     @Override
     public void execute(ActivityExecution execution) throws Exception {
-        // TODO Auto-generated method stub
 
     }
 

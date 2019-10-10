@@ -170,7 +170,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      * @param implementationRef
      */
     private void checkBeanMapping(BpmnElement element, final Collection<CheckerIssue> issues,
-            final BaseElement bpmnElement, final String errorDefEntry, final String implementationRef) {
+                                  final BaseElement bpmnElement, final String errorDefEntry, final String implementationRef) {
         if (RuntimeConfig.getInstance().getBeanMapping() != null) {
             final TreeBuilder treeBuilder = new Builder();
             final Tree tree = treeBuilder.build(implementationRef);
@@ -272,9 +272,14 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                 String temp = methodBody.substring(methodBody.indexOf("throw new BpmnError")); //$NON-NLS-1$
                 temp = temp.substring(0, temp.indexOf(";") + 1); //$NON-NLS-1$
 
-                final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
-                if (delErrorCode.equals(errorCode)) {
-                    return true;
+                if (temp.contains("\"")) {
+                    // Let's assume a string is directly passed
+                    final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
+                    if (delErrorCode.equals(errorCode)) {
+                        return true;
+                    }
+                } else {
+                    logger.warning("The error code could not be read because currently only string literals are supported.");
                 }
             }
         }
@@ -289,8 +294,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      */
     private boolean checkClassFile(final String className) {
 
-        @SuppressWarnings("unused")
-        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        @SuppressWarnings("unused") final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             RuntimeConfig.getInstance().getClassLoader().loadClass(className);

@@ -81,7 +81,7 @@ public class EmbeddedGroovyScriptCheckerTest {
 	 * Case: there is an empty script reference
 	 */
 	@Test
-	public void testEmptyScriptReference() throws IOException, SAXException, ParserConfigurationException {
+	public void testEmptyScriptReference() {
 		final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptReference.bpmn";
 
 		final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
@@ -108,7 +108,7 @@ public class EmbeddedGroovyScriptCheckerTest {
 	 * Case: there is no script format for given script
 	 */
 	@Test
-	public void testEmptyScriptFormat() throws IOException, SAXException, ParserConfigurationException {
+	public void testEmptyScriptFormat() {
 		final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptFormat.bpmn";
 
 		final BpmnScanner bpmnScanner = new BpmnScanner(PATH);

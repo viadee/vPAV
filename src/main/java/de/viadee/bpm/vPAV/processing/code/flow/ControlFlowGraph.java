@@ -31,14 +31,17 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
+
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ControlFlowGraph {
 
-	private LinkedHashMap<String, Node> nodes;
+	private LinkedHashMap<String, AbstractNode> nodes;
 
 	private LinkedHashMap<String, ProcessVariableOperation> operations;
 
@@ -50,6 +53,8 @@ public class ControlFlowGraph {
 
 	private int priorLevel;
 
+	private List<Integer> priorLevels;
+
 	public ControlFlowGraph() {
 		nodes = new LinkedHashMap<>();
 		this.operations = new LinkedHashMap<>();
@@ -57,6 +62,7 @@ public class ControlFlowGraph {
 		internalNodeCounter = 0;
 		recursionCounter = 0;
 		priorLevel = 0;
+		priorLevels = new ArrayList<>();
 	}
 
 	/**
@@ -65,7 +71,7 @@ public class ControlFlowGraph {
 	 * @param node
 	 *            Node to be added to the control flow graph
 	 */
-	public void addNode(final Node node) {
+	public void addNode(final AbstractNode node) {
 		String key = createHierarchy(node);
 		node.setId(key);
 		this.nodes.put(key, node);
@@ -81,7 +87,7 @@ public class ControlFlowGraph {
 	 *            Current node
 	 * @return Id of node
 	 */
-	private String createHierarchy(final Node node) {
+	private String createHierarchy(final AbstractNode node) {
 		StringBuilder key = new StringBuilder();
 		key.append(node.getParentElement().getBaseElement().getId()).append("__");
 		if (recursionCounter == 0) {
@@ -98,11 +104,12 @@ public class ControlFlowGraph {
 						node.setPredsInterProcedural(predKey.substring(0, predKey.length() - 2));
 					}
 				} else {
-					key.append(priorLevel);
+					key.append(getPriorLevels().get(i));
 				}
 			}
 			internalNodeCounter++;
 		}
+		priorLevel = internalNodeCounter - 1;
 		return key.toString();
 	}
 
@@ -117,6 +124,15 @@ public class ControlFlowGraph {
 			node.setOutUnused(new LinkedHashMap<>());
 			node.setOutUsed(new LinkedHashMap<>());
 		});
+	}
+
+	boolean hasImplementedDelegate() {
+		for (AbstractNode node : nodes.values()) {
+			if (node.getElementChapter().equals(ElementChapter.Implementation)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	boolean hasNodes() {
@@ -135,15 +151,7 @@ public class ControlFlowGraph {
 		this.internalNodeCounter = 0;
 	}
 
-	public int getInternalNodeCounter() {
-		return internalNodeCounter;
-	}
-
-	public void setPriorLevel(int priorLevel) {
-		this.priorLevel = priorLevel;
-	}
-
-	public LinkedHashMap<String, Node> getNodes() {
+	public LinkedHashMap<String, AbstractNode> getNodes() {
 		return nodes;
 	}
 
@@ -155,17 +163,29 @@ public class ControlFlowGraph {
 		this.internalNodeCounter = internalNodeCounter;
 	}
 
-	Node firstNode() {
-		Iterator<Node> iterator = nodes.values().iterator();
+	AbstractNode firstNode() {
+		Iterator<AbstractNode> iterator = nodes.values().iterator();
 		return iterator.next();
 	}
 
-	Node lastNode() {
-		Iterator<Node> iterator = nodes.values().iterator();
-		Node node = null;
+	AbstractNode lastNode() {
+		Iterator<AbstractNode> iterator = nodes.values().iterator();
+		AbstractNode node = null;
 		while (iterator.hasNext()) {
 			node = iterator.next();
 		}
 		return node;
+	}
+
+	private List<Integer> getPriorLevels() {
+		return priorLevels;
+	}
+
+	public void addPriorLevel(int i) {
+		this.priorLevels.add(i);
+	}
+
+	public void removePriorLevel() {
+		this.priorLevels.remove(priorLevels.size() - 1);
 	}
 }

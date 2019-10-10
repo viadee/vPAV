@@ -4,14 +4,14 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_0ns2v6s</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:exclusiveGateway id="ExclusiveGateway_11xmbyv" name="Correct?">
+    <bpmn:exclusiveGateway id="MyExclusiveGateway" name="Correct?">
       <bpmn:incoming>SequenceFlow_0ns2v6s</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1pou10l</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_0zux6bg</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_1pou10l" name="Ja" sourceRef="ExclusiveGateway_11xmbyv" targetRef="Task_0fjchrm" />
-    <bpmn:sequenceFlow id="SequenceFlow_0zux6bg" name="Nein" sourceRef="ExclusiveGateway_11xmbyv" targetRef="Task_0a76rap" />
-    <bpmn:sequenceFlow id="SequenceFlow_0ns2v6s" sourceRef="StartEvent_1" targetRef="ExclusiveGateway_11xmbyv" />
+    <bpmn:sequenceFlow id="SequenceFlow_1pou10l" name="Ja" sourceRef="MyExclusiveGateway" targetRef="Task_0fjchrm" />
+    <bpmn:sequenceFlow id="SequenceFlow_0zux6bg" name="Nein" sourceRef="MyExclusiveGateway" targetRef="Task_0a76rap" />
+    <bpmn:sequenceFlow id="SequenceFlow_0ns2v6s" sourceRef="StartEvent_1" targetRef="MyExclusiveGateway" />
     <bpmn:endEvent id="EndEvent_01lnthr">
       <bpmn:incoming>SequenceFlow_1lqwk7x</bpmn:incoming>
     </bpmn:endEvent>
@@ -37,7 +37,7 @@
           <dc:Bounds x="148" y="189" width="90" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ExclusiveGateway_11xmbyv_di" bpmnElement="ExclusiveGateway_11xmbyv" isMarkerVisible="true">
+      <bpmndi:BPMNShape id="ExclusiveGateway_11xmbyv_di" bpmnElement="MyExclusiveGateway" isMarkerVisible="true">
         <dc:Bounds x="252" y="146" width="50" height="50" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="256" y="200" width="43" height="12" />

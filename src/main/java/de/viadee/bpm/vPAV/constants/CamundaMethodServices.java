@@ -33,6 +33,9 @@ package de.viadee.bpm.vPAV.constants;
 
 public class CamundaMethodServices {
 
+    private CamundaMethodServices() {
+    }
+
     public static final String DELEGATE = "org.camunda.bpm.engine.delegate.DelegateExecution";
     
     public static final String DELEGATE_TASK = "org.camunda.bpm.engine.delegate.DelegateTask";
@@ -54,7 +57,4 @@ public class CamundaMethodServices {
     public static final String START_PROCESS_INSTANCE_BY_KEY = "startProcessInstanceByKey";
     
     public static final String CORRELATE_MESSAGE = "createMessageCorrelation";
-    
-
-   
 }

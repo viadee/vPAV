@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!DOCTYPE xml>
 <ruleSet>
-    <rule>
-        <name>ProcessVariablesLocation</name>
-        <state>false</state>
-        <settings>
-            <setting name="location"></setting>
-        </settings>
-    </rule>
     <rule id="XorCheckerId">
-        <name>XorNamingConventionChecker</name>
+        <name>XorConventionChecker</name>
         <state>true</state>
         <elementConventions>
             <elementConvention>

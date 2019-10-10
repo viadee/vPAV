@@ -43,7 +43,7 @@ public class NodeDecorator implements AnalysisElement {
 
 	private AnalysisElement decoratedNode;
 
-	public NodeDecorator(final AnalysisElement node) {
+	NodeDecorator(final AnalysisElement node) {
 		this.decoratedNode = node;
 	}
 
@@ -148,6 +148,16 @@ public class NodeDecorator implements AnalysisElement {
 	}
 
 	@Override
+	public void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations) {
+		decoratedNode.setOperations(operations);
+	}
+
+	@Override
+	public void setUsed(LinkedHashMap<String, ProcessVariableOperation> used) {
+		decoratedNode.setUsed(used);
+	}
+
+	@Override
 	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
 		decoratedNode.setDefined(defined);
 	}
@@ -173,7 +183,14 @@ public class NodeDecorator implements AnalysisElement {
 	}
 
 	@Override
-	public void removeSuccessor(String successor) { this.decoratedNode.removeSuccessor(successor); }
+	public void clearSuccessors() {
+		this.decoratedNode.clearSuccessors();
+	}
+
+	@Override
+	public void removeSuccessor(String successor) {
+		this.decoratedNode.removeSuccessor(successor);
+	}
 
 	@Override
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
@@ -188,6 +205,11 @@ public class NodeDecorator implements AnalysisElement {
 	@Override
 	public BpmnElement getParentElement() {
 		return decoratedNode.getParentElement();
+	}
+
+	@Override
+	public void removeOperation(ProcessVariableOperation op) {
+		this.decoratedNode.removeOperation(op);
 	}
 
 }

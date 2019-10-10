@@ -241,6 +241,10 @@ public class BpmnConstants {
 
 	public static final String ATTR_MESSAGE_REF = "messageRef";
 
+	public static final String ATTR_VAR_MAPPING_CLASS = "variableMappingClass";
+
+	public static final String ATTR_VAR_MAPPING_DELEGATE = "variableMappingDelegateExpression";
+
 	public static final String DEFAULT = "default";
 
 	public static final String REQUIRED_DEFAULT = "requiredDefault";
@@ -272,6 +276,8 @@ public class BpmnConstants {
 	public static final String INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR = "SignallableActivityBehavior";
 
 	public static final String INTERFACE_ACTIVITY_BEHAVIOUR = "ActivityBehavior";
+
+	public static final String INTERFACE_DEL_VARIABLE_MAPPING = "DelegateVariableMapping";
 
 	public static final String SUPERCLASS_ABSTRACT_BPMN_ACTIVITY_BEHAVIOR = "AbstractBpmnActivityBehavior";
 

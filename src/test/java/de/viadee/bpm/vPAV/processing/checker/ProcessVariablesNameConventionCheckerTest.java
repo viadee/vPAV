@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -52,11 +53,8 @@ import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -77,14 +75,12 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 	private static ElementChecker checker;
 
-	private static Map<String, String> beanMapping;
-
 	private static ClassLoader cl;
 
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 		RuntimeConfig.getInstance().setTest(true);
-		beanMapping = new HashMap<String, String>();
+		Map<String, String> beanMapping = new HashMap<>();
 		beanMapping.put("myBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
 		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 		checker = new ProcessVariablesNameConventionChecker(createRule(), null);
@@ -104,24 +100,21 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 	/**
 	 * case: internal and external process variables follows the conventions
-	 * 
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
+	 *
 	 */
 	@Test
-	public void testCorrectProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+	public void testCorrectProcessVariableNames() {
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH
-				+ "ProcessVariablesNameConventionCheckerTest_CorrectProcessVariablesNamingConvention.bpmn";
+				+ "ModelWithTwoDelegates_UR.bpmn";
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
 			final ControlFlowGraph cg = new ControlFlowGraph();
 			final BpmnElement element = new BpmnElement(PATH, baseElement, cg, new FlowAnalysis());
@@ -142,14 +135,11 @@ public class ProcessVariablesNameConventionCheckerTest {
 	/**
 	 * case: recognise variables which are against the naming conventions
 	 * (internal/external)
-	 * 
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
+	 *
 	 */
 	@Test
-	public void testWrongProcessVariableNames() throws ParserConfigurationException, SAXException, IOException {
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+	public void testWrongProcessVariableNames() {
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH
 				+ "ProcessVariablesNameConventionCheckerTest_WrongProcessVariablesNamingConvention.bpmn";
@@ -159,7 +149,7 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
 			final ControlFlowGraph cg = new ControlFlowGraph();
 			final BpmnElement element = new BpmnElement(PATH, baseElement, cg, new FlowAnalysis());
@@ -196,8 +186,8 @@ public class ProcessVariablesNameConventionCheckerTest {
 	 */
 	private static Rule createRule() {
 
-		final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
-		final Collection<String> fieldTypeNames = new ArrayList<String>();
+		final Collection<ElementConvention> elementConventions = new ArrayList<>();
+		final Collection<String> fieldTypeNames = new ArrayList<>();
 		fieldTypeNames.add("Class");
 		fieldTypeNames.add("ExternalScript");
 		fieldTypeNames.add("DelegateExpression");
@@ -214,8 +204,6 @@ public class ProcessVariablesNameConventionCheckerTest {
 		elementConventions.add(internalElementConvention);
 		elementConventions.add(externalElementConvention);
 
-		final Rule rule = new Rule("ProcessVariablesNameConventionChecker", true, null, null, elementConventions, null);
-
-		return rule;
+		return new Rule("ProcessVariablesNameConventionChecker", true, null, null, elementConventions, null);
 	}
 }

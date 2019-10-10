@@ -35,6 +35,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -48,7 +49,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -78,9 +78,9 @@ public class StaticInterProceduralTest {
 
 		// Set custom basepath.
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", "src/test/java");
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, cg));

@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -39,7 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BpmnElementDecorator implements AnalysisElement {
+public class BpmnElementDecorator implements AnalysisElement, Cloneable {
 
 	private AnalysisElement decoratedBpmnElement;
 
@@ -148,6 +149,16 @@ public class BpmnElementDecorator implements AnalysisElement {
 	}
 
 	@Override
+	public void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations) {
+		this.decoratedBpmnElement.setOperations(operations);
+	}
+
+	@Override
+	public void setUsed(LinkedHashMap<String, ProcessVariableOperation> used) {
+		this.decoratedBpmnElement.setUsed(used);
+	}
+
+	@Override
 	public void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined) {
 		this.decoratedBpmnElement.setDefined(defined);
 	}
@@ -173,7 +184,14 @@ public class BpmnElementDecorator implements AnalysisElement {
 	}
 
 	@Override
-	public void removeSuccessor(String successor) { this.decoratedBpmnElement.removeSuccessor(successor); }
+	public void clearSuccessors() {
+		this.decoratedBpmnElement.clearSuccessors();
+	}
+
+	@Override
+	public void removeSuccessor(String successor) {
+		this.decoratedBpmnElement.removeSuccessor(successor);
+	}
 
 	@Override
 	public Map<BpmnElement, List<AnomalyContainer>> getAnomalies() {
@@ -188,5 +206,14 @@ public class BpmnElementDecorator implements AnalysisElement {
 	@Override
 	public BpmnElement getParentElement() {
 		return decoratedBpmnElement.getParentElement();
+	}
+
+	@Override
+	public void removeOperation(ProcessVariableOperation op) {
+		this.decoratedBpmnElement.removeOperation(op);
+	}
+
+	public ListMultimap<String, ProcessVariableOperation> getProcessVariables() {
+		return ((BpmnElement) decoratedBpmnElement).getProcessVariables();
 	}
 }

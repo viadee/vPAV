@@ -81,7 +81,7 @@ public class BoundaryErrorCheckerTest {
 		RuntimeConfig.getInstance().getResource("en_US");
 
 		// Bean-Mapping
-		final Map<String, String> beanMapping = new HashMap<String, String>();
+		final Map<String, String> beanMapping = new HashMap<>();
 		beanMapping.put("correctBoundaryErrorEvent", "de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateCorrect");
 		beanMapping.put("wrongBoundaryErrorEvent", "de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateWrong");
 		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
@@ -102,7 +102,7 @@ public class BoundaryErrorCheckerTest {
 		checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
 		// parse bpmn model
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -165,7 +165,7 @@ public class BoundaryErrorCheckerTest {
 		checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
 		// parse bpmn model
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -197,7 +197,7 @@ public class BoundaryErrorCheckerTest {
 		checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
 		// parse bpmn model
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+		final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

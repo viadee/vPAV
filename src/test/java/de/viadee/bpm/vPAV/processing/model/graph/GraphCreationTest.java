@@ -34,21 +34,22 @@ package de.viadee.bpm.vPAV.processing.model.graph;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.xml.sax.SAXException;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -56,76 +57,146 @@ import java.util.*;
 
 /**
  * Unit Tests for data flow graph creation and calculation of invalid paths
- *
  */
 public class GraphCreationTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/";
 
-	private static ClassLoader cl;
+    private static ClassLoader cl;
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		RuntimeConfig.getInstance().setTest(true);
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-	}
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        RuntimeConfig.getInstance().setTest(true);
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+    }
 
-	@AfterClass
-	public static void tearDown() {
-		RuntimeConfig.getInstance().setTest(false);
-	}
+    @AfterClass
+    public static void tearDown() {
+        RuntimeConfig.getInstance().setTest(false);
+    }
 
-	/**
-	 * Case: Data flow graph creation and calculation of invalid paths
-	 * 
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 */
-	// @Test
-	public void testGraph() throws ParserConfigurationException, SAXException, IOException {
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
-		final File processdefinition = new File(PATH);
+    @Test
+    public void testBlockSplitOrder() {
+        final Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("blockSplitDelegate", "de/viadee/bpm/vPAV/delegates/BlockSplitDelegate.class");
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "ProcessVariablesReader_BlockSplit.bpmn";
+        final File processDefinition = new File(PATH);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-		// create data flow graphs
-		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processdefinition.getPath(), new ArrayList<String>(), scanner, new FlowAnalysis());
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		// calculate invalid paths based on data flow graphs
-		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        // create data flow graphs
 
-		// get invalid paths
-		final List<Path> validVarTest = invalidPathMap
-				.get(new AnomalyContainer("validVar", Anomaly.UR, "SequenceFlow_1mggduw", null));
-		Assert.assertNull("valid variable is marked as invalid", validVarTest);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
 
-		final List<Path> jepppaTest = invalidPathMap
-				.get(new AnomalyContainer("jepppa", Anomaly.DD, "SequenceFlow_0btqo3y", null));
-		Assert.assertEquals(
-				"[[SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_0t7iwpj, Task_0546a8y, SequenceFlow_1m6lt2o, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y], [SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, SequenceFlow_06ehu4z, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y]]",
-				jepppaTest.toString());
+        flowAnalysis.analyze(graphCollection);
 
-		final List<Path> testHallo2 = invalidPathMap
-				.get(new AnomalyContainer("hallo2", Anomaly.UR, "BusinessRuleTask_119jb6t", null));
-		Assert.assertEquals(
-				"[[StartEvent_1, SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, SequenceFlow_1ck3twv, StartEvent_0bcezfo, SequenceFlow_0jkf21p, StartEvent_0sqm3mr, SequenceFlow_1qax2e0, BusinessRuleTask_119jb6t]]",
-				testHallo2.toString());
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
-		final List<Path> geloeschteVarTest = invalidPathMap
-				.get(new AnomalyContainer("geloeschteVariable", Anomaly.DU, "SequenceFlow_0bi6kaa", null));
-		Assert.assertEquals(
-				"[[SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, BoundaryEvent_11udorz, SequenceFlow_0bi6kaa]]",
-				geloeschteVarTest.toString());
-	}
+        // no anomaly expected
+        Assert.assertEquals(0, invalidPathMap.size());
+    }
+
+    @Test
+    public void testMethodInvocationOrder() {
+        final Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("methodDelegate", "de/viadee/bpm/vPAV/delegates/MethodInvocationDelegate.class");
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "ProcessVariablesReader_MethodInvocation.bpmn";
+        final File processDefinition = new File(PATH);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        // create data flow graphs
+
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+
+        // DU + DR anomaly
+        Assert.assertEquals(2, invalidPathMap.size());
+    }
+
+    /**
+     * Case: Data flow graph creation and calculation of invalid paths
+     */
+    @Test
+    public void testGraph() {
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_GraphCreation.bpmn";
+        final File processDefinition = new File(PATH);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        // create data flow graphs
+
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+
+        // get invalid paths
+        final List<Path> validVarTest = invalidPathMap
+                .get(new AnomalyContainer("validVar", Anomaly.UR, "SequenceFlow_1mggduw", "", null));
+        Assert.assertNull("valid variable is marked as invalid", validVarTest);
+
+        ProcessVariableOperation jepppaOperation = Mockito.mock(ProcessVariableOperation.class);
+        Mockito.when(jepppaOperation.getIndex()).thenReturn(11);
+        final List<Path> jepppaTest = invalidPathMap
+                .get(new AnomalyContainer("jepppa", Anomaly.DD,
+                        "SequenceFlow_0btqo3y__0",
+                        "SequenceFlow_0btqo3y",
+                        null,
+                        jepppaOperation));
+        Assert.assertEquals(
+                "[[SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_0t7iwpj, Task_0546a8y, SequenceFlow_1m6lt2o, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y], [SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, SequenceFlow_06ehu4z, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y]]",
+                jepppaTest.toString());
+
+        ProcessVariableOperation hallo2Operation = Mockito.mock(ProcessVariableOperation.class);
+        Mockito.when(hallo2Operation.getIndex()).thenReturn(2);
+        final List<Path> testHallo2 = invalidPathMap
+                .get(new AnomalyContainer("hallo2", Anomaly.UR,
+                        "BusinessRuleTask_119jb6t__0",
+                        "BusinessRuleTask_119jb6t", "", hallo2Operation));
+        Assert.assertEquals("[[BusinessRuleTask_119jb6t]]", testHallo2.toString());
+
+        ProcessVariableOperation geloeschteVarOperation = Mockito.mock(ProcessVariableOperation.class);
+        Mockito.when(geloeschteVarOperation.getIndex()).thenReturn(4);
+        final List<Path> geloeschteVarTest = invalidPathMap
+                .get(new AnomalyContainer("geloeschteVariable", Anomaly.DU, "SequenceFlow_0bi6kaa__0",
+                        "SequenceFlow_0bi6kaa", "", geloeschteVarOperation));
+        Assert.assertEquals(
+                "[[SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, BoundaryEvent_11udorz, SequenceFlow_0bi6kaa]]",
+                geloeschteVarTest.toString());
+    }
 }

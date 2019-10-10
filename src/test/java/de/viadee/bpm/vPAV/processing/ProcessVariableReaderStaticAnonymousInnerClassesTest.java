@@ -36,6 +36,7 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -48,16 +49,13 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Properties;
 
 public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
@@ -83,10 +81,11 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 	}
 
 	@Test
-	public void testRecogniseVariablesInInnerAnonymousClass()
-			throws ParserConfigurationException, SAXException, IOException {
-		final FileScanner fileScanner = new FileScanner(new HashMap<>());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+	public void testRecogniseVariablesInInnerAnonymousClass() {
+		Properties myProperties = new Properties();
+		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+		ConfigConstants.getInstance().setProperties(myProperties);
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
 
 		// parse bpmn model

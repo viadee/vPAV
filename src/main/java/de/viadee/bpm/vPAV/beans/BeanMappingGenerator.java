@@ -50,11 +50,10 @@ public class BeanMappingGenerator {
      */
     public static Map<String, String> generateBeanMappingFile(final ApplicationContext ctx) {
 
-        final Map<String, String> beanNameToClassMap = new HashMap<String, String>();
+        final Map<String, String> beanNameToClassMap = new HashMap<>();
 
         // read bean names
-        final String[] beanDefinitionNames = ctx.getBeanDefinitionNames();
-        for (final String beanName : beanDefinitionNames) {
+        for (final String beanName : ctx.getBeanDefinitionNames()) {
             // don't add spring own classes
             if (!beanName.startsWith("org.springframework")) {
                 final Object obj = ctx.getBean(beanName);

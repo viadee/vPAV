@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.0.1">
+  <bpmn:process id="Process_1" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_16gjehx</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_16gjehx" sourceRef="StartEvent_1" targetRef="CallActivity" />
+    <bpmn:endEvent id="EndEvent_0sp8rr7">
+      <bpmn:incoming>SequenceFlow_PRED</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_PRED" sourceRef="CallActivity" targetRef="EndEvent_0sp8rr7" />
+    <bpmn:callActivity id="CallActivity" name="CallActivity" calledElement="calledElement">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="de.viadee.bpm.vPAV.delegates.CallActivityListenerDelegate" event="start" />
+        <camunda:in source="test" target="test" />
+        <camunda:out source="testOut" target="testOut" />
+        <camunda:inputOutput>
+          <camunda:inputParameter name="MyInput">Example Input</camunda:inputParameter>
+          <camunda:outputParameter name="MyOutput">Example Output</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_16gjehx</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_PRED</bpmn:outgoing>
+    </bpmn:callActivity>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="173" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_16gjehx_di" bpmnElement="SequenceFlow_16gjehx">
+        <di:waypoint x="209" y="120" />
+        <di:waypoint x="231" y="120" />
+        <di:waypoint x="231" y="120" />
+        <di:waypoint x="253" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="246" y="113.5" width="0" height="13" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_0sp8rr7_di" bpmnElement="EndEvent_0sp8rr7">
+        <dc:Bounds x="397" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="415" y="141" width="0" height="13" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0eiyrv8_di" bpmnElement="SequenceFlow_PRED">
+        <di:waypoint x="353" y="120" />
+        <di:waypoint x="397" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="375" y="98.5" width="0" height="13" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="CallActivity_0n6ybek_di" bpmnElement="CallActivity">
+        <dc:Bounds x="253" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

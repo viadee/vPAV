@@ -38,22 +38,22 @@ import java.util.Collection;
 @XmlRootElement(name = "ruleSet")
 public class XmlRuleSet {
 
-  private Collection<XmlRule> rules;
+    private Collection<XmlRule> rules;
 
-  public XmlRuleSet() {
-  }
+    public XmlRuleSet() {
+    }
 
-  public XmlRuleSet(Collection<XmlRule> rules) {
-    super();
-    this.rules = rules;
-  }
+    public XmlRuleSet(Collection<XmlRule> rules) {
+        super();
+        this.rules = rules;
+    }
 
-  @XmlElement(name = "rule", type = XmlRule.class)
-  public Collection<XmlRule> getRules() {
-    return rules;
-  }
+    @XmlElement(name = "rule", type = XmlRule.class)
+    public Collection<XmlRule> getRules() {
+        return rules;
+    }
 
-  public void setRules(Collection<XmlRule> rules) {
-    this.rules = rules;
-  }
+    public void setRules(Collection<XmlRule> rules) {
+        this.rules = rules;
+    }
 }

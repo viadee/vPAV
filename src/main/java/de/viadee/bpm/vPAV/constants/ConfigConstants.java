@@ -31,12 +31,11 @@
  */
 package de.viadee.bpm.vPAV.constants;
 
-import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.reader.PropertiesReader;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -53,6 +52,8 @@ public class ConfigConstants {
     public static final String RULESETPARENT = "parentRuleSet.xml";
 
     public static final String HASPARENTRULESET = "HasParentRuleSet";
+
+    public static final String USER_VARIABLES_FILE = "variables.xml";
 
     public static final String IGNORE_FILE = "src/test/resources/ignoreIssues.txt";
 
@@ -100,6 +101,12 @@ public class ConfigConstants {
 
     public static final String JAVAPATH = "src/main/java/";
 
+    public static final String TARGET_PATH = "target/classes/";
+
+    public static final String TEST_TARGET_PATH = "target/test-classes/";
+
+    public static final String CLASS_FILE_PATTERN = "**/*.class";
+
     public static final String TEST_JAVAPATH = "src/test/java/";
 
     public static final String TEST_BASEPATH = "src/test/resources/";
@@ -128,31 +135,9 @@ public class ConfigConstants {
 
     private Properties properties;
 
-    private boolean isTest = false;
-
     private ConfigConstants() {
         InputStream input = null;
-        properties = new Properties();
-
-        try {
-            input = this.getClass().getClassLoader().getResourceAsStream("vPav.properties");
-            if (input == null) {
-                logger.info("vPav.properties file could not be found. Falling back to default values...");
-            } else {
-                properties.load(input);
-            }
-
-        } catch (IOException e) {
-            logger.warning("Could not read vPav.properties file. Falling back to default values...");
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    logger.warning("InputStream from vPav.properties could not be closed.");
-                }
-            }
-        }
+        properties = (new PropertiesReader()).read();
     }
 
     public static ConfigConstants getInstance() {
@@ -165,28 +150,33 @@ public class ConfigConstants {
     /**
      * Only used for tests in order to inject mocked properties.
      *
-     * @param newProperties mocked properties
+     * @param newProperties
+     *            mocked properties
      */
     public void setProperties(Properties newProperties) {
         this.properties = newProperties;
     }
 
     public String getBasepath() {
-        if (isTest) {
+        if (RuntimeConfig.getInstance().isTest()) {
             return properties.getProperty("basepath", ConfigConstants.TEST_BASEPATH);
         }
         return properties.getProperty("basepath", ConfigConstants.BASEPATH);
     }
 
     public String getScanPath() {
-        if (isTest) {
-            return properties.getProperty("scanpath", ConfigConstants.TEST_JAVAPATH);
+        if (RuntimeConfig.getInstance().isTest()) {
+            return properties.getProperty("scanpath", ConfigConstants.TEST_TARGET_PATH);
         }
-        return properties.getProperty("scanpath", ConfigConstants.JAVAPATH);
+        return properties.getProperty("scanpath", ConfigConstants.TARGET_PATH);
+    }
+
+    public String getUserVariablesFilePath() {
+        return properties.getProperty("userVariablesFilePath", ConfigConstants.USER_VARIABLES_FILE);
     }
 
     public String getFilePattern() {
-        return properties.getProperty("filepattern", ConfigConstants.JAVA_FILE_PATTERN);
+        return properties.getProperty("filepattern", ConfigConstants.CLASS_FILE_PATTERN);
     }
 
     /**
@@ -199,21 +189,12 @@ public class ConfigConstants {
     }
 
     /**
-     * Method for backwards compatiblity. Should be deleted in the future and
-     * replaced by the method without parameters.
-     *
-     * @param createoutputrule Rule
-     * @return true/false
+     * @param htmlOutput true if the results should be visualized as html page
+     * @deprecated As of release 3.0.0, html output property should be set in property file
      */
-    public boolean isHtmlOutputEnabled(Map<String, Rule> createoutputrule) {
-        if (properties.containsKey("outputhtml")) {
-            return Boolean.parseBoolean(properties.getProperty("outputhtml", "true"));
-        } else if (createoutputrule != null) {
-            // Backwards compatibility: allow create-output flag to be defined in ruleset
-            return createoutputrule.get(ConfigConstants.CREATE_OUTPUT_RULE).isActive();
-        } else {
-            return true;
-        }
+    @Deprecated
+    public void setHtmlOutputEnabled(boolean htmlOutput) {
+        properties.setProperty("outputhtml", String.valueOf(htmlOutput));
     }
 
     /**
@@ -235,7 +216,12 @@ public class ConfigConstants {
         }
     }
 
-    public void setIsTest(boolean isTest) {
-        this.isTest = isTest;
+    /**
+     * @param languageCode language code like de_DE
+     * @deprecated As of release 3.0.0, language should be directly set in properties file
+     */
+    @Deprecated
+    public void setLanguage(String languageCode) {
+        properties.setProperty("language", languageCode);
     }
 }
