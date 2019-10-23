@@ -123,12 +123,8 @@ public final class XmlConfigReader implements ConfigReader {
                     ruleObj);
         }
 
-        // TODO as soon as we finally move the properties to an external file, we don't
-        // need this checks anymore
-        // Some rules are only allowed once. Check this.
+        // Has-Parent-RuleSet rule is only allowed once. Check this.
         checkSingletonRule(rules, ConfigConstants.HASPARENTRULESET);
-        checkSingletonRule(rules, ConfigConstants.CREATE_OUTPUT_RULE);
-        checkSingletonRule(rules, "language");
 
         return splitRules(rules);
     }
@@ -194,8 +190,12 @@ public final class XmlConfigReader implements ConfigReader {
      * @return RuleSet which includes the rules
      */
     private static RuleSet splitRules(Map<String, Map<String, Rule>> rules) {
-        // Check old config rules
-        boolean hasParentRuleSet = extractProperties(rules);
+        // Check if rule set has parent
+        boolean hasParentRuleSet = false;
+        if (rules.containsKey(ConfigConstants.HASPARENTRULESET)) {
+            hasParentRuleSet = rules.get(ConfigConstants.HASPARENTRULESET).get(ConfigConstants.HASPARENTRULESET).isActive();
+            rules.remove(ConfigConstants.HASPARENTRULESET);
+        }
 
         HashMap<String, Map<String, Rule>> elementRules = new HashMap<>();
         HashMap<String, Map<String, Rule>> modelRules = new HashMap<>();
@@ -263,42 +263,6 @@ public final class XmlConfigReader implements ConfigReader {
                 rule.deactivate();
             }
         }
-    }
-
-    /**
-     * Remove old properties from ruleset.
-     *
-     * @param rules rule set
-     * @return if ruleset has parent ruleset
-     */
-    // TODO can be removed in future if it is in properties
-    @Deprecated
-    private static boolean extractProperties(Map<String, Map<String, Rule>> rules) {
-        boolean hasParentRuleSet = false;
-        if (rules.containsKey(ConfigConstants.HASPARENTRULESET)) {
-            hasParentRuleSet = rules.get(ConfigConstants.HASPARENTRULESET).get(ConfigConstants.HASPARENTRULESET).isActive();
-            rules.remove(ConfigConstants.HASPARENTRULESET);
-        }
-        if (rules.containsKey(ConfigConstants.CREATE_OUTPUT_RULE)) {
-            LOGGER.warning("Usage of 'CreateOutputHtml' rule is deprecated. Please use vpav.properties instead.");
-            ConfigConstants.getInstance().setHtmlOutputEnabled(
-                    rules
-                            .get(ConfigConstants.CREATE_OUTPUT_RULE)
-                            .get(ConfigConstants.CREATE_OUTPUT_RULE).isActive());
-            rules.remove(ConfigConstants.CREATE_OUTPUT_RULE);
-        }
-        if (rules.containsKey("language")) {
-            LOGGER.warning("Usage of 'language' rule is deprecated. Please use vpav.properties instead.");
-            final Map<String, Setting> settings = rules.get("language").get("language").getSettings();
-            if (settings.get("locale").getValue().equals("de")) {
-                ConfigConstants.getInstance().setLanguage("de_DE");
-            } else {
-                ConfigConstants.getInstance().setLanguage("en_US");
-            }
-            rules.remove(ConfigConstants.HASPARENTRULESET);
-        }
-
-        return hasParentRuleSet;
     }
 
     private static void checkSingletonRule(Map<String, Map<String, Rule>> rules, String rulename) {

@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!DOCTYPE xml>
 <ruleSet>
-    <rule>
-        <name>CreateOutputHTML</name>
-        <state>true</state>
-    </rule>
     <rule id="messageTrue">
         <name>MessageEventChecker</name>
         <state>true</state>
