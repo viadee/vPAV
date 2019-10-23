@@ -105,10 +105,18 @@ class JavaReaderStatic {
 						ElementChapter.OutputImplementation, fieldType, scopeId, controlFlowGraph));
 			} else {
 				// Java Delegate or Listener
-				variables.putAll(classFetcher(classPaths, classFile, "execute", classFile, element, chapter, fieldType,
-						scopeId, controlFlowGraph));
-				variables.putAll(classFetcher(classPaths, classFile, "notify", classFile, element, chapter, fieldType,
-						scopeId, controlFlowGraph));
+				SootClass sootClass = Scene.v().forceResolve(cleanString(classFile, true), SootClass.SIGNATURES);
+				if(sootClass.declaresMethodByName("notify")) {
+					variables.putAll(classFetcher(classPaths, classFile, "notify", classFile, element, chapter, fieldType,
+							scopeId, controlFlowGraph));
+				}
+				else if(sootClass.declaresMethodByName("execute")) {
+					variables.putAll(classFetcher(classPaths, classFile, "execute", classFile, element, chapter, fieldType,
+							scopeId, controlFlowGraph));
+				}
+				else {
+					LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
+				}
 			}
 		}
 		return variables;
