@@ -9,7 +9,7 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0qu31xl" sourceRef="StartEvent_1" targetRef="Task_0759yva" />
     <bpmn:sequenceFlow id="SequenceFlow_06nrl03" sourceRef="Task_0759yva" targetRef="EndEvent_00pidhm" />
-    <bpmn:serviceTask id="Task_0759yva" camunda:class="de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateCorrect">
+    <bpmn:serviceTask id="Task_0759yva" camunda:class="de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateCorrectWithVariable">
       <bpmn:incoming>SequenceFlow_0qu31xl</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_06nrl03</bpmn:outgoing>
     </bpmn:serviceTask>

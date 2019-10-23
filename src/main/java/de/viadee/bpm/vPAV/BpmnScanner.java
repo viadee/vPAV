@@ -205,7 +205,7 @@ public class BpmnScanner {
         String implementationReference = "";
 
         // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+        ArrayList<NodeList> listNodeList = new ArrayList<>();
 
         switch (modelVersion) {
             case V1:
