@@ -121,7 +121,7 @@ public class BoundaryErrorCheckerTest {
      */
     @Test
     public void testBoundaryErrorEventClassWithVariables_Correct() {
-
+        // TODO just check with regex if there is an object
         final String PATH = BASE_PATH + "BoundaryErrorEventClassWithVariable_Correct.bpmn";
         checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
 
