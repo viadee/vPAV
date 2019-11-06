@@ -59,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BoundaryErrorChecker extends AbstractElementChecker {
 
@@ -170,7 +172,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      * @param implementationRef
      */
     private void checkBeanMapping(BpmnElement element, final Collection<CheckerIssue> issues,
-                                  final BaseElement bpmnElement, final String errorDefEntry, final String implementationRef) {
+            final BaseElement bpmnElement, final String errorDefEntry, final String implementationRef) {
         if (RuntimeConfig.getInstance().getBeanMapping() != null) {
             final TreeBuilder treeBuilder = new Builder();
             final Tree tree = treeBuilder.build(implementationRef);
@@ -248,10 +250,12 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     final String methodBody = IOUtils.toString(resource);
                     return validateContent(methodBody, errorCode);
                 } else {
-                    logger.warning("Class " + fileName + " could not be read or does not exist"); //$NON-NLS-1$ //$NON-NLS-2$
+                    logger.warning(
+                            "Class " + fileName + " could not be read or does not exist"); //$NON-NLS-1$ //$NON-NLS-2$
                 }
             } catch (final IOException ex) {
-                logger.warning("Resource '" + fileName + "' could not be read: " + ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+                logger.warning("Resource '" + fileName + "' could not be read: " + ex
+                        .getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
 
@@ -262,25 +266,48 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      * Check methodBody for content and return true if a "throw new BpmnError.." declaration is found
      *
      * @param errorCode
-     * @param methodBody
      * @return boolean
      */
-    private boolean validateContent(final String methodBody, final String errorCode) {
+    private boolean validateContent(final String classBody, final String errorCode) {
 
-        if (methodBody != null && !methodBody.isEmpty()) {
-            if (methodBody.contains("throw new BpmnError")) { //$NON-NLS-1$
-                String temp = methodBody.substring(methodBody.indexOf("throw new BpmnError")); //$NON-NLS-1$
+        if (classBody != null && !classBody.isEmpty()) {
+            if (classBody.contains("throw new BpmnError")) { //$NON-NLS-1$
+                int exceptionIdx = classBody.indexOf("throw new BpmnError");
+                String temp = classBody.substring(exceptionIdx); //$NON-NLS-1$
                 temp = temp.substring(0, temp.indexOf(";") + 1); //$NON-NLS-1$
+                String delErrorCode = null;
 
                 if (temp.contains("\"")) {
                     // Let's assume a string is directly passed
-                    final String delErrorCode = temp.substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
-                    if (delErrorCode.equals(errorCode)) {
-                        return true;
-                    }
+                    delErrorCode = temp
+                            .substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
                 } else {
-                    logger.warning("The error code could not be read because currently only string literals are supported.");
+                    // Let's assume a object is passed
+                    String objErrorCode = temp
+                            .substring(temp.indexOf("(") + 1, temp.lastIndexOf(")"));
+                    // Check if string object is somewhere created in the class
+                    // Support only final string objects
+                    if (classBody.contains("final String " + objErrorCode + " =")) {
+                        // Check the only assignment
+                        Matcher m = Pattern.compile("final String " + objErrorCode + " = \".*\";")
+                                .matcher(classBody);
+                        // Assume that there is only one match
+                        if (m.find()) {
+                            temp = m.group();
+                            delErrorCode = temp
+                                    .substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\""));
+                        } else {
+                            logger.warning(
+                                    "The error code could not be parsed because the string declaration was not found.");
+                        }
+                    } else {
+                        logger.warning(
+                                "The error code could not be read because only string literals and final string objects (defined in the class) or "
+                                        + "local string objects (defined in the method) are supported.");
+                    }
                 }
+
+                return errorCode.equals(delErrorCode);
             }
         }
         return false;
@@ -294,7 +321,8 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      */
     private boolean checkClassFile(final String className) {
 
-        @SuppressWarnings("unused") final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        @SuppressWarnings("unused") final String classPath =
+                className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             RuntimeConfig.getInstance().getClassLoader().loadClass(className);

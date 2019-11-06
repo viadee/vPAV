@@ -38,7 +38,7 @@ public class BoundaryErrorEventDelegateCorrectWithVariable implements org.camund
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        String errorCode = "123";
+        final String errorCode = "123";
         throw new BpmnError(errorCode);
     }
 }
