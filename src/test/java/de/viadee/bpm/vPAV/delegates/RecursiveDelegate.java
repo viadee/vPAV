@@ -32,18 +32,21 @@
 package de.viadee.bpm.vPAV.delegates;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.ExecutionListener;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-public class BlockSplitDelegate implements ExecutionListener {
+public class RecursiveDelegate implements JavaDelegate {
 
-    @Override
-    public void notify(DelegateExecution execution) {
-        method1(execution);
-        execution.getVariable("var1");
+    @Override public void execute(DelegateExecution delegateExecution) throws Exception {
+        delegateExecution.setVariable("myVariable", "test");
+        recursiveMethod(delegateExecution, 10);
     }
 
-    private void method1(DelegateExecution execution) {
-        execution.setVariable("var1", true);
+    private void recursiveMethod(DelegateExecution execution, int depth) {
+        if(depth != 0) {
+            execution.removeVariable("myVariable");
+            execution.setVariable("myVariable", depth);
+            System.out.println("Depth: " + depth);
+            recursiveMethod(execution, depth-1);
+        }
     }
 }
-

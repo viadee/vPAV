@@ -224,9 +224,11 @@ class VariablesExtractor {
                     // Split node only if DelegateExecution object (which is used for manipulating variables) is passed
                     InvokeExpr calledMethod = (InvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
                     for (Type parameter : calledMethod.getMethodRef().getParameterTypes()) {
-                        if (((RefType) parameter).getClassName().equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
-                            passesDelegateExecution = true;
-                            break;
+                        if(parameter instanceof RefType) {
+                            if (((RefType) parameter).getClassName().equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
+                                passesDelegateExecution = true;
+                                break;
+                            }
                         }
                     }
                     if (passesDelegateExecution) {
