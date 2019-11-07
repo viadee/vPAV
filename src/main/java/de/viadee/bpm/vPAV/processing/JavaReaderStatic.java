@@ -181,6 +181,7 @@ public class JavaReaderStatic {
 
         List<Value> args = new ArrayList<>();
 
+        variablesExtractor.resetMethodStackTrace();
         classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
                 outSet, null, "", args, controlFlowGraph, null);
 
@@ -288,6 +289,12 @@ public class JavaReaderStatic {
             for (SootMethod method : toFetchedMethods) {
                 if (method != null) {
                     if (method.getName().equals(methodName)) {
+
+                        // check if method is recursive and was already two times called
+                        if (!variablesExtractor.visitMethod(method)) {
+                            return;
+                        }
+
                         // Replace fetchMethodBody
                         BlockGraph graph = getBlockGraph(method);
                         List<Block> graphHeads = graph.getHeads();
@@ -298,6 +305,7 @@ public class JavaReaderStatic {
                                     fieldType, classFile, scopeId,
                                     originalBlock, assignmentStmt, args, controlFlowGraph);
                         }
+                        variablesExtractor.leaveMethod(method);
                     }
                 }
             }

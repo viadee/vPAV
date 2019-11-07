@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -56,12 +56,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class VariablesExtractor {
+
     private List<Value> constructorArgs;
+
     private JavaReaderStatic javaReaderStatic;
+
+    private HashMap<SootMethod, Integer> methodStackTrace;
+
     private String returnStmt;
 
     VariablesExtractor(JavaReaderStatic reader) {
         this.javaReaderStatic = reader;
+        this.methodStackTrace = new HashMap<>();
     }
 
     /**
@@ -76,7 +82,7 @@ class VariablesExtractor {
      * the variable map
      */
     private boolean checkArgBoxes(final EntryPoint entry, final String assignment, final String invoke,
-                                  final JInterfaceInvokeExpr expr, final BpmnElement element) {
+            final JInterfaceInvokeExpr expr, final BpmnElement element) {
         if (expr.getMethodRef().getName().equals(entry.getEntryPoint())) {
             if (!assignment.isEmpty()) {
                 if (element.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.RECEIVE_TASK)) {
@@ -103,7 +109,7 @@ class VariablesExtractor {
      * @return Map of process variable operations
      */
     ListMultimap<String, ProcessVariableOperation> checkWriteAccess(final Body body, final BpmnElement element,
-                                                                    final String resourceFilePath, final EntryPoint entryPoint) {
+            final String resourceFilePath, final EntryPoint entryPoint) {
 
         final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
@@ -178,10 +184,10 @@ class VariablesExtractor {
      * @return VariableBlock
      */
     VariableBlock blockIterator(final Set<String> classPaths, final CallGraph cg, final Block block,
-                                final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
-                                final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-                                VariableBlock variableBlock, String assignmentStmt, final List<Value> args,
-                                final ControlFlowGraph controlFlowGraph, Node node) {
+            final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
+            final KnownElementFieldType fieldType, final String filePath, final String scopeId,
+            VariableBlock variableBlock, String assignmentStmt, final List<Value> args,
+            final ControlFlowGraph controlFlowGraph, Node node) {
         if (variableBlock == null) {
             variableBlock = new VariableBlock(block, new ArrayList<>());
         }
@@ -224,8 +230,9 @@ class VariablesExtractor {
                     // Split node only if DelegateExecution object (which is used for manipulating variables) is passed
                     InvokeExpr calledMethod = (InvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
                     for (Type parameter : calledMethod.getMethodRef().getParameterTypes()) {
-                        if(parameter instanceof RefType) {
-                            if (((RefType) parameter).getClassName().equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
+                        if (parameter instanceof RefType) {
+                            if (((RefType) parameter).getClassName()
+                                    .equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
                                 passesDelegateExecution = true;
                                 break;
                             }
@@ -238,14 +245,18 @@ class VariablesExtractor {
                         }
                         // Split node
                         Node newSectionNode = (Node) node.clone();
-                        assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType, filePath,
-                                scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter, unit);
+                        assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
+                                filePath,
+                                scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter,
+                                unit);
                         paramName = returnStmt;
                         node = newSectionNode;
                         nodeSaved = false;
                     } else {
-                        assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType, filePath,
-                                scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter, unit);
+                        assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
+                                filePath,
+                                scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter,
+                                unit);
                     }
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();
@@ -309,7 +320,6 @@ class VariablesExtractor {
         return variableBlock;
     }
 
-
     /**
      * Special parsing of statements to find Process Variable operations.
      *
@@ -322,8 +332,8 @@ class VariablesExtractor {
      * @param scopeId       Scope of BpmnElement
      */
     private void parseExpression(final JInterfaceInvokeExpr expr, final VariableBlock variableBlock,
-                                 final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-                                 final String filePath, String scopeId, final String paramName, final Node node) {
+            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+            final String filePath, String scopeId, final String paramName, final Node node) {
 
         String functionName = expr.getMethodRef().getName();
         int numberOfArg = expr.getArgCount();
@@ -357,14 +367,14 @@ class VariablesExtractor {
                 variableBlock.addProcessVariable(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
                         chapter, fieldType, filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
             } else {
-                IssueWriter.createIssue(new Rule("ProcessVariablesModelChecker", true, null, null, null, null), //$NON-NLS-1$
+                IssueWriter.createIssue(new Rule("ProcessVariablesModelChecker", true, null, null, null, null),
+                        //$NON-NLS-1$
                         CriticalityEnum.WARNING, filePath, element,
                         String.format(Messages.getString("ProcessVariablesModelChecker.4"),
                                 CheckName.checkName(element.getBaseElement()), chapter, fieldType.getDescription()));
             }
         }
     }
-
 
     /**
      * Parsing of initially discovered statements to find Process Variable
@@ -376,7 +386,7 @@ class VariablesExtractor {
      * @return inital operations
      */
     private ListMultimap<String, ProcessVariableOperation> parseInitialExpression(final JInterfaceInvokeExpr expr,
-                                                                                  final BpmnElement element, final String resourceFilePath) {
+            final BpmnElement element, final String resourceFilePath) {
 
         final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
@@ -426,10 +436,10 @@ class VariablesExtractor {
      * @return assignmentStmt
      */
     private String processInvokeStmt(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
-                                     final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-                                     final String filePath, final String scopeId, final VariableBlock variableBlock, String assignmentStmt,
-                                     final ControlFlowGraph controlFlowGraph, final Node node, final String paramName, final int argsCounter,
-                                     final Unit unit) {
+            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+            final String filePath, final String scopeId, final VariableBlock variableBlock, String assignmentStmt,
+            final ControlFlowGraph controlFlowGraph, final Node node, final String paramName, final int argsCounter,
+            final Unit unit) {
         // Method call of implemented interface method without prior assignment
         if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
             JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
@@ -482,9 +492,9 @@ class VariablesExtractor {
      * @param args           List of arguments
      */
     private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
-                                          final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-                                          final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
-                                          final List<Value> args, final ControlFlowGraph controlFlowGraph, final boolean isInvoke) {
+            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+            final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
+            final List<Value> args, final ControlFlowGraph controlFlowGraph, final boolean isInvoke) {
 
         final Iterator<Edge> sources = cg.edgesOutOf(unit);
         Edge src;
@@ -507,7 +517,9 @@ class VariablesExtractor {
                 controlFlowGraph.incrementRecursionCounter();
                 controlFlowGraph.addPriorLevel(controlFlowGraph.getPriorLevel());
                 controlFlowGraph.resetInternalNodeCounter();
-                javaReaderStatic.classFetcherRecursive(classPaths, className, methodName, className, element, chapter, fieldType,
+
+                javaReaderStatic.classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
+                        fieldType,
                         scopeId, outSet, variableBlock, assignmentStmt, args, controlFlowGraph, sootMethod);
                 controlFlowGraph.removePriorLevel();
                 controlFlowGraph.decrementRecursionCounter();
@@ -522,5 +534,32 @@ class VariablesExtractor {
 
     private void setReturnStmt(final String returnStmt) {
         this.returnStmt = returnStmt;
+    }
+
+    public void resetMethodStackTrace() {
+        this.methodStackTrace.clear();
+    }
+
+    public boolean visitMethod(SootMethod sootMethod) {
+        if (methodStackTrace.containsKey(sootMethod)) {
+            int num = methodStackTrace.get(sootMethod);
+            if (num >= 2) {
+                // break recursion
+                return false;
+            } else {
+                // increase method counter
+                methodStackTrace.put(sootMethod, num + 1);
+            }
+
+        } else {
+            // add method
+            methodStackTrace.put(sootMethod, 1);
+        }
+        return true;
+    }
+
+    public void leaveMethod(SootMethod sootMethod) {
+        int num = methodStackTrace.get(sootMethod);
+        methodStackTrace.put(sootMethod, num-1);
     }
 }
