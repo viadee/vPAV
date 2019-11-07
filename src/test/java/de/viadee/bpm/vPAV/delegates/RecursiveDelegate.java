@@ -45,8 +45,11 @@ public class RecursiveDelegate implements JavaDelegate {
         if(depth != 0) {
             execution.removeVariable("myVariable");
             execution.setVariable("myVariable", depth);
-            System.out.println("Depth: " + depth);
             recursiveMethod(execution, depth-1);
+            System.out.println("Depth: " + depth);
+        }
+        else {
+            execution.getVariable("myVariable");
         }
     }
 }
