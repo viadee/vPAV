@@ -94,6 +94,7 @@ public class Node extends AbstractNode implements Cloneable {
 		myClone.operations = new LinkedHashMap<>();
 		myClone.defined = new LinkedHashMap<>();
 		myClone.used = new LinkedHashMap<>();
+		myClone.killed = new LinkedHashMap<>();
 		myClone.outUnused = new LinkedHashMap<>();
 		myClone.outUsed = new LinkedHashMap<>();
 		myClone.inUnused = new LinkedHashMap<>();
