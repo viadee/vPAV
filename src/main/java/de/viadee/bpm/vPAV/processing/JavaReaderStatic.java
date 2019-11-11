@@ -35,9 +35,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.code.flow.Node;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import soot.*;
@@ -48,6 +46,7 @@ import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.ClassicCompleteBlockGraph;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -77,12 +76,11 @@ public class JavaReaderStatic {
      * @param chapter          ElementChapter
      * @param fieldType        KnownElementFieldType
      * @param scopeId          Scope of the element
-     * @param controlFlowGraph Control flow graph
      * @return Map of process variables from the referenced delegate
      */
     ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String scopeId) {
+            final KnownElementFieldType fieldType, final String scopeId, final LinkedHashMap<String, AnalysisElement> predecessors) {
 
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -100,20 +98,20 @@ public class JavaReaderStatic {
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
                 // Delegate Variable Mapping
                 variables.putAll(classFetcher(classPaths, classFile, "mapInputVariables", classFile, element,
-                        ElementChapter.InputImplementation, fieldType, scopeId));
+                        ElementChapter.InputImplementation, fieldType, scopeId, predecessors));
                 variables.putAll(classFetcher(classPaths, classFile, "mapOutputVariables", classFile, element,
-                        ElementChapter.OutputImplementation, fieldType, scopeId));
+                        ElementChapter.OutputImplementation, fieldType, scopeId, predecessors));
             } else {
                 // Java Delegate or Listener
                 SootClass sootClass = Scene.v().forceResolve(cleanString(classFile, true), SootClass.SIGNATURES);
                 if (sootClass.declaresMethodByName("notify")) {
                     variables.putAll(classFetcher(classPaths, classFile, "notify", classFile, element, chapter,
                             fieldType,
-                            scopeId));
+                            scopeId, predecessors));
                 } else if (sootClass.declaresMethodByName("execute")) {
                     variables.putAll(classFetcher(classPaths, classFile, "execute", classFile, element, chapter,
                             fieldType,
-                            scopeId));
+                            scopeId, predecessors));
                 } else {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
                 }
@@ -167,12 +165,12 @@ public class JavaReaderStatic {
      * @param chapter          ElementChapter
      * @param fieldType        KnownElementFieldType
      * @param scopeId          Scope of the element
-     * @param controlFlowGraph Control flow graph
      * @return Map of process variables for a given class
      */
     public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
             final String className, final String methodName, final String classFile, final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
+            final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId,
+            final LinkedHashMap<String, AnalysisElement> predecessors) {
 
         ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
@@ -182,7 +180,7 @@ public class JavaReaderStatic {
 
         variablesExtractor.resetMethodStackTrace();
         classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-                outSet, null, "", args,null);
+                outSet, null, "", args,null, predecessors);
 
         if (outSet.getAllProcessVariables().size() > 0) {
             processVariables.putAll(outSet.getAllProcessVariables());
@@ -260,13 +258,12 @@ public class JavaReaderStatic {
      * @param originalBlock    VariableBlock
      * @param assignmentStmt   Assignment statement (left side)
      * @param args             List of arguments
-     * @param controlFlowGraph Control flow graph
      */
     void classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
             final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-            SootMethod sootMethod) {
+            SootMethod sootMethod, final LinkedHashMap<String, AnalysisElement> predecessors) {
 
         SootClass sootClass = setupSootClass(className);
 
@@ -302,7 +299,7 @@ public class JavaReaderStatic {
                             outSet = graphIterator(classPaths, Scene.v().getCallGraph(), graph, outSet, element,
                                     chapter,
                                     fieldType, classFile, scopeId,
-                                    originalBlock, assignmentStmt, args);
+                                    originalBlock, assignmentStmt, args, predecessors);
                         }
                         variablesExtractor.leaveMethod(method);
                     }
@@ -358,17 +355,18 @@ public class JavaReaderStatic {
     private OutSetCFG graphIterator(final Set<String> classPaths, final CallGraph cg, final BlockGraph graph,
             OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-            VariableBlock originalBlock, final String assignmentStmt, final List<Value> args) {
+            VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
+            final LinkedHashMap<String, AnalysisElement> predecessors) {
         final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
 
         for (Block block : graph.getBlocks()) {
             Node node = new Node(element, block, chapter);
-            controlFlowGraph.addNode(node);
+            addNodeAndClearPredecessors(node, controlFlowGraph, predecessors);
 
             // Collect the functions Unit by Unit via the blockIterator
             final VariableBlock vb = variablesExtractor
                     .blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-                            scopeId, originalBlock, assignmentStmt, args, node);
+                            scopeId, originalBlock, assignmentStmt, args, node, predecessors);
 
             // depending if outset already has that Block, only add variables,
             // if not, then add the whole vb
@@ -389,6 +387,13 @@ public class JavaReaderStatic {
     private String cleanString(String className, boolean dot) {
         className = ProcessVariablesScanner.cleanString(className, dot);
         return className;
+    }
+
+    private void addNodeAndClearPredecessors(AbstractNode node, ControlFlowGraph cg, LinkedHashMap<String, AnalysisElement>  predecessors) {
+        cg.addNode(node);
+        node.setPredecessors(new LinkedHashMap<>(predecessors));
+        predecessors.clear();
+        predecessors.put(node.getId(), node);
     }
 
     private void setupSoot() {

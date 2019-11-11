@@ -49,6 +49,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -82,7 +83,7 @@ public class StaticInterProceduralTest {
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null));
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, new LinkedHashMap<>()));
 
 		// Then
 		assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,

@@ -219,7 +219,7 @@ public class ElementGraphBuilder {
         final FlowElement element = (FlowElement) node.getBaseElement();
         // Ordered map to hold operations in correct order
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        AbstractNode predecessor = null;
+        final LinkedHashMap<String, AnalysisElement>  predecessors = new LinkedHashMap<>();
 
         // Add user defined variables
         if (userVariables != null) {
@@ -232,7 +232,7 @@ public class ElementGraphBuilder {
             }
 
             node.getControlFlowGraph().addNode(userVarNode);
-            predecessor = userVarNode;
+            predecessors.put(userVarNode.getId(), userVarNode);
         }
 
         // retrieve initial variable operation (should be WRITE)
@@ -269,7 +269,7 @@ public class ElementGraphBuilder {
 
         // examine process variables and save it with access operation
         final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner);
-        variables.putAll(reader.getVariablesFromElement(fileScanner, node, predecessor));
+        variables.putAll(reader.getVariablesFromElement(fileScanner, node, predecessors));
         // examine process variables for element and set it
         node.setProcessVariables(variables);
     }
