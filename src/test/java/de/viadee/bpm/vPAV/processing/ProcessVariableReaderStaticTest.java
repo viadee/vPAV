@@ -98,7 +98,7 @@ public class ProcessVariableReaderStaticTest {
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, new LinkedHashMap<>()));
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, null));
 
 		assertEquals(3, variables.asMap().size());
 	}
@@ -149,7 +149,7 @@ public class ProcessVariableReaderStaticTest {
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, ElementChapter.Implementation,
-				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), new LinkedHashMap<>()));
+				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), null));
 		assertEquals(3, variables.values().size());
 
 	}
@@ -171,7 +171,7 @@ public class ProcessVariableReaderStaticTest {
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, new LinkedHashMap<>()));
+				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, null));
 		assertEquals(2, variables.values().size());
 	}
 

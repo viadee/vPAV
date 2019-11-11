@@ -185,7 +185,7 @@ class VariablesExtractor {
             final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId,
             VariableBlock variableBlock, String assignmentStmt, final List<Value> args,
-            Node node, final LinkedHashMap<String, AnalysisElement> predecessors) {
+            final AnalysisElement predecessor) {
         if (variableBlock == null) {
             variableBlock = new VariableBlock(block, new ArrayList<>());
         }
@@ -193,8 +193,9 @@ class VariablesExtractor {
         String paramName = "";
         int argsCounter = 0;
         int instanceFieldRef = Integer.MAX_VALUE;
-        boolean nodeSaved = true;
+        boolean nodeSaved = false;
         final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
+        Node node = new Node(element, block, chapter);
 
         final Iterator<Unit> unitIt = block.iterator();
 
@@ -239,15 +240,16 @@ class VariablesExtractor {
                     }
                     if (passesDelegateExecution) {
                         // Node must be splitted
-                        if (!nodeSaved) {
-                            addNodeAndClearPredecessors(node, controlFlowGraph, predecessors);
+                        if (!nodeSaved && node.getOperations().size() > 0) {
+                            addNodeAndClearPredecessors(node, controlFlowGraph, predecessor);
                         }
+                        // TODO maybe say increase hierachy if we would like to keep it
                         // Split node
                         Node newSectionNode = (Node) node.clone();
                         assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
                                 filePath,
                                 scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
-                                unit, predecessors);
+                                unit, predecessor);
                         paramName = returnStmt;
                         node = newSectionNode;
                         nodeSaved = false;
@@ -255,7 +257,7 @@ class VariablesExtractor {
                         assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
                                 filePath,
                                 scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
-                                unit, predecessors);
+                                unit, predecessor);
                     }
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();
@@ -268,13 +270,13 @@ class VariablesExtractor {
                     JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 
                     try {
-                        if (!nodeSaved) {
-                            addNodeAndClearPredecessors(node, controlFlowGraph, predecessors);
+                        if (!nodeSaved && node.getOperations().size() > 0) {
+                            addNodeAndClearPredecessors(node, controlFlowGraph, predecessor);
                         }
                         // Split node
                         Node newSectionNode = (Node) node.clone();
                         checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-                                variableBlock, unit, assignmentStmt, expr.getArgs(), false, predecessors);
+                                variableBlock, unit, assignmentStmt, expr.getArgs(), false, predecessor);
                         paramName = returnStmt;
                         node = newSectionNode;
                         nodeSaved = false;
@@ -313,7 +315,7 @@ class VariablesExtractor {
         }
 
         if (!nodeSaved && node.getOperations().size() > 0) {
-            addNodeAndClearPredecessors(node, controlFlowGraph, predecessors);
+            addNodeAndClearPredecessors(node, controlFlowGraph, predecessor);
         }
 
         return variableBlock;
@@ -437,7 +439,7 @@ class VariablesExtractor {
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String filePath, final String scopeId, final VariableBlock variableBlock, String assignmentStmt,
             final Node node, final String paramName, final int argsCounter,
-            final Unit unit, final LinkedHashMap<String, AnalysisElement> predecessors) {
+            final Unit unit, final AnalysisElement predecessor) {
         // Method call of implemented interface method without prior assignment
         if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
             JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
@@ -456,7 +458,7 @@ class VariablesExtractor {
             JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
                     unit,
-                    assignmentStmt, expr.getArgs(), true, predecessors);
+                    assignmentStmt, expr.getArgs(), true, predecessor);
         }
         // Constructor call
         else if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
@@ -467,7 +469,7 @@ class VariablesExtractor {
             } else {
                 checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
                         variableBlock,
-                        unit, assignmentStmt, expr.getArgs(), true, predecessors);
+                        unit, assignmentStmt, expr.getArgs(), true, predecessor);
             }
         }
         return assignmentStmt;
@@ -494,7 +496,7 @@ class VariablesExtractor {
     private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
-            final List<Value> args, final boolean isInvoke, LinkedHashMap<String, AnalysisElement> predecessors) {
+            final List<Value> args, final boolean isInvoke, AnalysisElement predecessor) {
 
         final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
         final Iterator<Edge> sources = cg.edgesOutOf(unit);
@@ -521,7 +523,7 @@ class VariablesExtractor {
 
                 javaReaderStatic.classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
                         fieldType,
-                        scopeId, outSet, variableBlock, assignmentStmt, args, sootMethod, predecessors);
+                        scopeId, outSet, variableBlock, assignmentStmt, args, sootMethod, predecessor);
                 controlFlowGraph.removePriorLevel();
                 controlFlowGraph.decrementRecursionCounter();
                 controlFlowGraph.setInternalNodeCounter(controlFlowGraph.getPriorLevel());
@@ -565,10 +567,12 @@ class VariablesExtractor {
     }
 
     private void addNodeAndClearPredecessors(AbstractNode node, ControlFlowGraph cg,
-            LinkedHashMap<String, AnalysisElement> predecessors) {
+            AnalysisElement predecessor) {
         cg.addNode(node);
-        node.setPredecessors(new LinkedHashMap<>(predecessors));
-        predecessors.clear();
-        predecessors.put(node.getId(), node);
+        if(predecessor != null) {
+            node.addPredecessor(predecessor);
+        }
+
+        predecessor = node;
     }
 }

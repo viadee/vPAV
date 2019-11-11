@@ -84,7 +84,7 @@ public class ReachingDefinitionTest {
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, new LinkedHashMap<>()));
+				"de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, null));
 		assertEquals(3, variables.asMap().size());
 	}
 }

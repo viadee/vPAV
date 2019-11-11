@@ -83,7 +83,7 @@ public class StaticInterProceduralTest {
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, new LinkedHashMap<>()));
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, null));
 
 		// Then
 		assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,

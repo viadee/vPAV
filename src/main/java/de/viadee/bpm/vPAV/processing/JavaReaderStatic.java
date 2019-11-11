@@ -80,7 +80,7 @@ public class JavaReaderStatic {
      */
     ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String scopeId, final LinkedHashMap<String, AnalysisElement> predecessors) {
+            final KnownElementFieldType fieldType, final String scopeId,  AnalysisElement predecessor) {
 
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -98,20 +98,20 @@ public class JavaReaderStatic {
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
                 // Delegate Variable Mapping
                 variables.putAll(classFetcher(classPaths, classFile, "mapInputVariables", classFile, element,
-                        ElementChapter.InputImplementation, fieldType, scopeId, predecessors));
+                        ElementChapter.InputImplementation, fieldType, scopeId, predecessor));
                 variables.putAll(classFetcher(classPaths, classFile, "mapOutputVariables", classFile, element,
-                        ElementChapter.OutputImplementation, fieldType, scopeId, predecessors));
+                        ElementChapter.OutputImplementation, fieldType, scopeId, predecessor));
             } else {
                 // Java Delegate or Listener
                 SootClass sootClass = Scene.v().forceResolve(cleanString(classFile, true), SootClass.SIGNATURES);
                 if (sootClass.declaresMethodByName("notify")) {
                     variables.putAll(classFetcher(classPaths, classFile, "notify", classFile, element, chapter,
                             fieldType,
-                            scopeId, predecessors));
+                            scopeId, predecessor));
                 } else if (sootClass.declaresMethodByName("execute")) {
                     variables.putAll(classFetcher(classPaths, classFile, "execute", classFile, element, chapter,
                             fieldType,
-                            scopeId, predecessors));
+                            scopeId, predecessor));
                 } else {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
                 }
@@ -170,7 +170,7 @@ public class JavaReaderStatic {
     public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
             final String className, final String methodName, final String classFile, final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId,
-            final LinkedHashMap<String, AnalysisElement> predecessors) {
+            AnalysisElement predecessor) {
 
         ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
@@ -180,7 +180,7 @@ public class JavaReaderStatic {
 
         variablesExtractor.resetMethodStackTrace();
         classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-                outSet, null, "", args,null, predecessors);
+                outSet, null, "", args,null, predecessor);
 
         if (outSet.getAllProcessVariables().size() > 0) {
             processVariables.putAll(outSet.getAllProcessVariables());
@@ -263,7 +263,7 @@ public class JavaReaderStatic {
             final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
             final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-            SootMethod sootMethod, final LinkedHashMap<String, AnalysisElement> predecessors) {
+            SootMethod sootMethod, final AnalysisElement predecessor) {
 
         SootClass sootClass = setupSootClass(className);
 
@@ -295,11 +295,11 @@ public class JavaReaderStatic {
                         BlockGraph graph = getBlockGraph(method);
                         List<Block> graphHeads = graph.getHeads();
 
-                        for (int i = 0; i < graphHeads.size(); i++) {
-                            outSet = graphIterator(classPaths, Scene.v().getCallGraph(), graph, outSet, element,
+                        for(Block block: graphHeads) {
+                            outSet = blockIterator(classPaths, Scene.v().getCallGraph(), graph, block, outSet, element,
                                     chapter,
                                     fieldType, classFile, scopeId,
-                                    originalBlock, assignmentStmt, args, predecessors);
+                                    originalBlock, assignmentStmt, args, null);
                         }
                         variablesExtractor.leaveMethod(method);
                     }
@@ -352,26 +352,39 @@ public class JavaReaderStatic {
      * @param originalBlock VariableBlock
      * @return OutSetCFG which contains data flow information
      */
-    private OutSetCFG graphIterator(final Set<String> classPaths, final CallGraph cg, final BlockGraph graph,
+    private OutSetCFG blockIterator(final Set<String> classPaths, final CallGraph cg, final BlockGraph graph,
+            final Block block,
             OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId,
             VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-            final LinkedHashMap<String, AnalysisElement> predecessors) {
-        final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
+            final AnalysisElement predecessor) {
 
-        for (Block block : graph.getBlocks()) {
-            Node node = new Node(element, block, chapter);
-            addNodeAndClearPredecessors(node, controlFlowGraph, predecessors);
 
+        // Process block
+
+        // Collect the functions Unit by Unit via the blockIterator
+        final VariableBlock vb = variablesExtractor
+                .blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
+                        scopeId, originalBlock, assignmentStmt, args, predecessor);
+
+        // depending if outset already has that Block, only add variables,
+        // if not, then add the whole vb
+        if (outSet.getVariableBlock(vb.getBlock()) == null) {
+            outSet.addVariableBlock(vb);
+        }
+
+
+        // Process successors
+        for(Block succ: block.getSuccs()) {
             // Collect the functions Unit by Unit via the blockIterator
-            final VariableBlock vb = variablesExtractor
+            final VariableBlock vb2 = variablesExtractor
                     .blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-                            scopeId, originalBlock, assignmentStmt, args, node, predecessors);
+                            scopeId, originalBlock, assignmentStmt, args, predecessor);
 
             // depending if outset already has that Block, only add variables,
             // if not, then add the whole vb
-            if (outSet.getVariableBlock(vb.getBlock()) == null) {
-                outSet.addVariableBlock(vb);
+            if (outSet.getVariableBlock(vb2.getBlock()) == null) {
+                outSet.addVariableBlock(vb2);
             }
         }
 
