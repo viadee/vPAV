@@ -94,12 +94,11 @@ public class ProcessVariableReaderStaticTest {
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
-		final ControlFlowGraph cg = new ControlFlowGraph();
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, cg));
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null));
 
 		assertEquals(3, variables.asMap().size());
 	}
@@ -143,7 +142,6 @@ public class ProcessVariableReaderStaticTest {
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
-		final ControlFlowGraph cg = new ControlFlowGraph();
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
@@ -151,7 +149,7 @@ public class ProcessVariableReaderStaticTest {
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, ElementChapter.Implementation,
-				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), cg));
+				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString()));
 		assertEquals(3, variables.values().size());
 
 	}
@@ -167,14 +165,13 @@ public class ProcessVariableReaderStaticTest {
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
-		final ControlFlowGraph cg = new ControlFlowGraph();
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, cg));
+				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null));
 		assertEquals(2, variables.values().size());
 	}
 

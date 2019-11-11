@@ -42,9 +42,9 @@ public class Node extends AbstractNode implements Cloneable {
 
 	private Block block;
 
-	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block,
+	public Node(final BpmnElement parentElement, final Block block,
 			final ElementChapter elementChapter) {
-		super(controlFlowGraph, parentElement, elementChapter);
+		super(parentElement, elementChapter);
 		this.block = block;
 	}
 

@@ -95,10 +95,9 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
-		final ControlFlowGraph cg = new ControlFlowGraph();
-		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), cg, new FlowAnalysis());
+		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, null));
 
 		Assert.assertEquals(3, variables.asMap().size());
 	}

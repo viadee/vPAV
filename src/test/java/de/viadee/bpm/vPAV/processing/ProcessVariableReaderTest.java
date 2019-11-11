@@ -101,11 +101,10 @@ public class ProcessVariableReaderTest {
 		final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
 		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
-		final ControlFlowGraph cg = new ControlFlowGraph();
-		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), cg, new FlowAnalysis());
+		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
 
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, null));
 
 		Assert.assertEquals(2, variables.size());
 	}
@@ -122,10 +121,9 @@ public class ProcessVariableReaderTest {
 		final Collection<CallActivity> allServiceTasks = modelInstance.getModelElementsByType(CallActivity.class);
 
 		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
-		final ControlFlowGraph cg = new ControlFlowGraph();
-		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), cg, new FlowAnalysis());
+		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, null));
 
 		final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables.get("nameOfVariableInMainProcess");
 		Assert.assertNotNull(nameOfVariableInMainProcess);

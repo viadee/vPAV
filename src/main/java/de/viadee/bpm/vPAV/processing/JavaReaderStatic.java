@@ -82,7 +82,7 @@ public class JavaReaderStatic {
      */
     ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String scopeId, final ControlFlowGraph controlFlowGraph) {
+            final KnownElementFieldType fieldType, final String scopeId) {
 
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -100,20 +100,20 @@ public class JavaReaderStatic {
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
                 // Delegate Variable Mapping
                 variables.putAll(classFetcher(classPaths, classFile, "mapInputVariables", classFile, element,
-                        ElementChapter.InputImplementation, fieldType, scopeId, controlFlowGraph));
+                        ElementChapter.InputImplementation, fieldType, scopeId));
                 variables.putAll(classFetcher(classPaths, classFile, "mapOutputVariables", classFile, element,
-                        ElementChapter.OutputImplementation, fieldType, scopeId, controlFlowGraph));
+                        ElementChapter.OutputImplementation, fieldType, scopeId));
             } else {
                 // Java Delegate or Listener
                 SootClass sootClass = Scene.v().forceResolve(cleanString(classFile, true), SootClass.SIGNATURES);
                 if (sootClass.declaresMethodByName("notify")) {
                     variables.putAll(classFetcher(classPaths, classFile, "notify", classFile, element, chapter,
                             fieldType,
-                            scopeId, controlFlowGraph));
+                            scopeId));
                 } else if (sootClass.declaresMethodByName("execute")) {
                     variables.putAll(classFetcher(classPaths, classFile, "execute", classFile, element, chapter,
                             fieldType,
-                            scopeId, controlFlowGraph));
+                            scopeId));
                 } else {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
                 }
@@ -172,8 +172,7 @@ public class JavaReaderStatic {
      */
     public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
             final String className, final String methodName, final String classFile, final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId,
-            final ControlFlowGraph controlFlowGraph) {
+            final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId) {
 
         ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
@@ -183,7 +182,7 @@ public class JavaReaderStatic {
 
         variablesExtractor.resetMethodStackTrace();
         classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-                outSet, null, "", args, controlFlowGraph, null);
+                outSet, null, "", args,null);
 
         if (outSet.getAllProcessVariables().size() > 0) {
             processVariables.putAll(outSet.getAllProcessVariables());
@@ -267,7 +266,7 @@ public class JavaReaderStatic {
             final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
             final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-            final ControlFlowGraph controlFlowGraph, SootMethod sootMethod) {
+            SootMethod sootMethod) {
 
         SootClass sootClass = setupSootClass(className);
 
@@ -303,7 +302,7 @@ public class JavaReaderStatic {
                             outSet = graphIterator(classPaths, Scene.v().getCallGraph(), graph, outSet, element,
                                     chapter,
                                     fieldType, classFile, scopeId,
-                                    originalBlock, assignmentStmt, args, controlFlowGraph);
+                                    originalBlock, assignmentStmt, args);
                         }
                         variablesExtractor.leaveMethod(method);
                     }
@@ -359,17 +358,17 @@ public class JavaReaderStatic {
     private OutSetCFG graphIterator(final Set<String> classPaths, final CallGraph cg, final BlockGraph graph,
             OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId,
-            VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-            final ControlFlowGraph controlFlowGraph) {
+            VariableBlock originalBlock, final String assignmentStmt, final List<Value> args) {
+        final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
 
         for (Block block : graph.getBlocks()) {
-            Node node = new Node(controlFlowGraph, element, block, chapter);
+            Node node = new Node(element, block, chapter);
             controlFlowGraph.addNode(node);
 
             // Collect the functions Unit by Unit via the blockIterator
             final VariableBlock vb = variablesExtractor
                     .blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-                            scopeId, originalBlock, assignmentStmt, args, controlFlowGraph, node);
+                            scopeId, originalBlock, assignmentStmt, args, node);
 
             // depending if outset already has that Block, only add variables,
             // if not, then add the whole vb

@@ -64,9 +64,9 @@ public abstract class AbstractNode implements AnalysisElement {
 
 	protected String id;
 
-	AbstractNode(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement,
+	AbstractNode(final BpmnElement parentElement,
 			final ElementChapter elementChapter) {
-		this.controlFlowGraph = controlFlowGraph;
+		this.controlFlowGraph = parentElement.getControlFlowGraph();
 		this.parentElement = parentElement;
 		this.elementChapter = elementChapter;
 

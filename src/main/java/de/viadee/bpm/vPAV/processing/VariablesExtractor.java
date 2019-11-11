@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -187,7 +187,7 @@ class VariablesExtractor {
             final OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId,
             VariableBlock variableBlock, String assignmentStmt, final List<Value> args,
-            final ControlFlowGraph controlFlowGraph, Node node) {
+            Node node) {
         if (variableBlock == null) {
             variableBlock = new VariableBlock(block, new ArrayList<>());
         }
@@ -196,6 +196,7 @@ class VariablesExtractor {
         int argsCounter = 0;
         int instanceFieldRef = Integer.MAX_VALUE;
         boolean nodeSaved = true;
+        final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
 
         final Iterator<Unit> unitIt = block.iterator();
 
@@ -247,7 +248,7 @@ class VariablesExtractor {
                         Node newSectionNode = (Node) node.clone();
                         assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
                                 filePath,
-                                scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter,
+                                scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
                                 unit);
                         paramName = returnStmt;
                         node = newSectionNode;
@@ -255,7 +256,7 @@ class VariablesExtractor {
                     } else {
                         assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
                                 filePath,
-                                scopeId, variableBlock, assignmentStmt, controlFlowGraph, node, paramName, argsCounter,
+                                scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
                                 unit);
                     }
                 } catch (CloneNotSupportedException e) {
@@ -275,7 +276,7 @@ class VariablesExtractor {
                         // Split node
                         Node newSectionNode = (Node) node.clone();
                         checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-                                variableBlock, unit, assignmentStmt, expr.getArgs(), controlFlowGraph, false);
+                                variableBlock, unit, assignmentStmt, expr.getArgs(), false);
                         paramName = returnStmt;
                         node = newSectionNode;
                         nodeSaved = false;
@@ -428,7 +429,6 @@ class VariablesExtractor {
      * @param filePath         ResourceFilePath for ProcessVariableOperation
      * @param scopeId          Scope of BpmnElement
      * @param variableBlock    VariableBlock
-     * @param controlFlowGraph Control Flow Graph
      * @param node             Current node of the CFG
      * @param paramName        Name of the parameter
      * @param argsCounter      Counts the arguments in case of a method or constructor call
@@ -438,7 +438,7 @@ class VariablesExtractor {
     private String processInvokeStmt(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String filePath, final String scopeId, final VariableBlock variableBlock, String assignmentStmt,
-            final ControlFlowGraph controlFlowGraph, final Node node, final String paramName, final int argsCounter,
+            final Node node, final String paramName, final int argsCounter,
             final Unit unit) {
         // Method call of implemented interface method without prior assignment
         if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JInterfaceInvokeExpr) {
@@ -457,7 +457,7 @@ class VariablesExtractor {
         if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JVirtualInvokeExpr) {
             JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock, unit,
-                    assignmentStmt, expr.getArgs(), controlFlowGraph, true);
+                    assignmentStmt, expr.getArgs(),true);
         }
         // Constructor call
         if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
@@ -467,7 +467,7 @@ class VariablesExtractor {
                 assignmentStmt = expr.getBaseBox().getValue().toString();
             } else {
                 checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                        unit, assignmentStmt, expr.getArgs(), controlFlowGraph, true);
+                        unit, assignmentStmt, expr.getArgs(), true);
             }
         }
         return assignmentStmt;
@@ -494,8 +494,9 @@ class VariablesExtractor {
     private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
-            final List<Value> args, final ControlFlowGraph controlFlowGraph, final boolean isInvoke) {
+            final List<Value> args, final boolean isInvoke) {
 
+        final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
         final Iterator<Edge> sources = cg.edgesOutOf(unit);
         Edge src;
         while (sources.hasNext()) {
@@ -520,7 +521,7 @@ class VariablesExtractor {
 
                 javaReaderStatic.classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
                         fieldType,
-                        scopeId, outSet, variableBlock, assignmentStmt, args, controlFlowGraph, sootMethod);
+                        scopeId, outSet, variableBlock, assignmentStmt, args, sootMethod);
                 controlFlowGraph.removePriorLevel();
                 controlFlowGraph.decrementRecursionCounter();
                 controlFlowGraph.setInternalNodeCounter(controlFlowGraph.getPriorLevel());

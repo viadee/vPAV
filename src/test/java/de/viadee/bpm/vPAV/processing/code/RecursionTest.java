@@ -96,6 +96,7 @@ public class RecursionTest {
                 processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
         flowAnalysis.analyze(graphCollection);
+        // TODO write better assert
         flowAnalysis.getNodes().values().forEach(element -> {
             if (!(element.getBaseElement() instanceof StartEvent)) {
                 Assert.assertTrue("Element without predecessor found", !element.getPredecessors().isEmpty());

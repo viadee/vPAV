@@ -116,13 +116,12 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
-			final ControlFlowGraph cg = new ControlFlowGraph();
-			final BpmnElement element = new BpmnElement(PATH, baseElement, cg, new FlowAnalysis());
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
 			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, null));
 
 			element.setProcessVariables(variables);
 
@@ -151,13 +150,12 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
-			final ControlFlowGraph cg = new ControlFlowGraph();
-			final BpmnElement element = new BpmnElement(PATH, baseElement, cg, new FlowAnalysis());
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
 			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, null));
 
 			element.setProcessVariables(variables);
 
