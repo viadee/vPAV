@@ -80,7 +80,7 @@ public class JavaReaderStatic {
      */
     ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String scopeId,  AnalysisElement predecessor) {
+            final KnownElementFieldType fieldType, final String scopeId,  AnalysisElement[] predecessor) {
 
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -170,7 +170,7 @@ public class JavaReaderStatic {
     public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
             final String className, final String methodName, final String classFile, final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId,
-            AnalysisElement predecessor) {
+            AnalysisElement[] predecessor) {
 
         ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
 
@@ -263,7 +263,7 @@ public class JavaReaderStatic {
             final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
             final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-            SootMethod sootMethod, final AnalysisElement predecessor) {
+            SootMethod sootMethod, final AnalysisElement[] predecessor) {
 
         SootClass sootClass = setupSootClass(className);
 
@@ -299,7 +299,7 @@ public class JavaReaderStatic {
                             outSet = blockIterator(classPaths, Scene.v().getCallGraph(), graph, block, outSet, element,
                                     chapter,
                                     fieldType, classFile, scopeId,
-                                    originalBlock, assignmentStmt, args, null);
+                                    originalBlock, assignmentStmt, args, predecessor);
                         }
                         variablesExtractor.leaveMethod(method);
                     }
@@ -357,7 +357,7 @@ public class JavaReaderStatic {
             OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId,
             VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-            final AnalysisElement predecessor) {
+            final AnalysisElement[] predecessor) {
 
 
         // Process block
@@ -371,21 +371,6 @@ public class JavaReaderStatic {
         // if not, then add the whole vb
         if (outSet.getVariableBlock(vb.getBlock()) == null) {
             outSet.addVariableBlock(vb);
-        }
-
-
-        // Process successors
-        for(Block succ: block.getSuccs()) {
-            // Collect the functions Unit by Unit via the blockIterator
-            final VariableBlock vb2 = variablesExtractor
-                    .blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,
-                            scopeId, originalBlock, assignmentStmt, args, predecessor);
-
-            // depending if outset already has that Block, only add variables,
-            // if not, then add the whole vb
-            if (outSet.getVariableBlock(vb2.getBlock()) == null) {
-                outSet.addVariableBlock(vb2);
-            }
         }
 
         return outSet;

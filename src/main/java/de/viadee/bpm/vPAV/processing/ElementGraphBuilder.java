@@ -219,7 +219,7 @@ public class ElementGraphBuilder {
         final FlowElement element = (FlowElement) node.getBaseElement();
         // Ordered map to hold operations in correct order
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        AnalysisElement  predecessor = null;
+        AnalysisElement[]  predecessor = new AnalysisElement[1];
 
         // Add user defined variables
         if (userVariables != null) {
@@ -232,7 +232,7 @@ public class ElementGraphBuilder {
             }
 
             node.getControlFlowGraph().addNode(userVarNode);
-            predecessor = userVarNode;
+            predecessor[0] = userVarNode;
         }
 
         // retrieve initial variable operation (should be WRITE)
