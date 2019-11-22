@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -98,7 +99,7 @@ public class ProcessVariableReaderStaticTest {
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, null));
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, new AnalysisElement[1]));
 
 		assertEquals(3, variables.asMap().size());
 	}
@@ -149,7 +150,7 @@ public class ProcessVariableReaderStaticTest {
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, ElementChapter.Implementation,
-				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), null));
+				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), new AnalysisElement[1]));
 		assertEquals(3, variables.values().size());
 
 	}
@@ -171,7 +172,7 @@ public class ProcessVariableReaderStaticTest {
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, null));
+				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, new AnalysisElement[1]));
 		assertEquals(2, variables.values().size());
 	}
 

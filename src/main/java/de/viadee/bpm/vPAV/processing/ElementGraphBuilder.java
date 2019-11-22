@@ -424,7 +424,7 @@ public class ElementGraphBuilder {
             // determine process variables with operations
             final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
             variables.putAll(new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner)
-                    .getVariablesFromElement(fileScanner, node, null));
+                    .getVariablesFromElement(fileScanner, node, new AnalysisElement[1]));
             // set process variables for the node
             node.setProcessVariables(variables);
             // mention the element

@@ -120,8 +120,7 @@ public class ControlFlowGraph {
 	void computePredecessorRelations() {
 		nodes.values().forEach(node -> {
 			this.operations.putAll(node.getOperations());
-			node.setPreds();
-			node.setSuccs();
+			// TODO evtl set succ
 			node.setOutUnused(new LinkedHashMap<>());
 			node.setOutUsed(new LinkedHashMap<>());
 		});

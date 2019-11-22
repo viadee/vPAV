@@ -350,7 +350,15 @@ class VariablesExtractor {
                         }
                     }
                 }
-                n.addPredecessor(predecessor[0]);
+                if(n == null) {
+                    // TODO find successors of n to add this predecessor
+                    // When does this happen?
+                    // assert false;
+                }
+                else {
+                    n.addPredecessor(predecessor[0]);
+                }
+
             }
         }
 
