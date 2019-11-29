@@ -133,12 +133,8 @@ public class FlowAnalysis {
 								isFirstHalf = false;
 								lastNodeBefore = predecessor;
 								firstNodeAfter = curNode;
-							} else {
-								// Build connection between nodes
-								curNode.clearPredecessors();
-								predecessor.clearSuccessors();
-								curNode.addPredecessor(predecessor);
-								predecessor.addSuccessor(curNode);
+								// Clear connection between before and after nodes
+								firstNodeAfter.clearPredecessors();
 							}
 						}
 						predecessor = curNode;
