@@ -358,10 +358,6 @@ public class JavaReaderStatic {
             final KnownElementFieldType fieldType, final String filePath, final String scopeId,
             VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
             final AnalysisElement[] predecessor) {
-
-
-        // Process block
-
         // Collect the functions Unit by Unit via the blockIterator
         final VariableBlock vb = variablesExtractor
                 .blockIterator(classPaths, cg, block, outSet, element, chapter, fieldType, filePath,

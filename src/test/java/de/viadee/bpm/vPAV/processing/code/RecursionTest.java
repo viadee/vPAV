@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -54,7 +55,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
 
 public class RecursionTest {
 
@@ -97,6 +101,17 @@ public class RecursionTest {
 
         flowAnalysis.analyze(graphCollection);
         // TODO write better assert
+        LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        // Start from end event and go to start.
+        AnalysisElement endEvent = nodes.get("EndEvent_13uioac");
+        AnalysisElement taskDelegateElse = endEvent.getPredecessors().get(0).getPredecessors().get(0);
+        AnalysisElement taskDelegateElse2 = taskDelegateElse.getPredecessors().get(0);
+        AnalysisElement taskDelegateExecute = taskDelegateElse2.getPredecessors().get(0);
+        AnalysisElement sequenceFlow1 = taskDelegateExecute = taskDelegateExecute.getPredecessors().get(0);
+        AnalysisElement startEvent = sequenceFlow1.getPredecessors().get(0);
+
+        assertEquals("End event was not correctly included", "EndEvent_13uioac", endEvent.getId());
+
         flowAnalysis.getNodes().values().forEach(element -> {
             if (!(element.getBaseElement() instanceof StartEvent)) {
                 Assert.assertTrue("Element without predecessor found", !element.getPredecessors().isEmpty());
