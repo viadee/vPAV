@@ -61,7 +61,7 @@ class VariablesExtractor {
 
     private HashMap<SootMethod, Integer> methodStackTrace;
 
-    private HashSet<Block> processedBlocks;
+    private HashSet<Integer> processedBlocks;
 
     private String returnStmt;
 
@@ -317,7 +317,7 @@ class VariablesExtractor {
             }
         }
 
-        if (!nodeSaved && node.getOperations().size() > 0) {
+        if ((!nodeSaved && node.getOperations().size() > 0)) {
             predecessor[0] = addNodeAndGetNewPredecessor(node, controlFlowGraph, predecessor[0]);
         }
 
@@ -326,10 +326,9 @@ class VariablesExtractor {
             AnalysisElement[] newPredecessor = new AnalysisElement[] { predecessor[0] };
 
             // Process block only if not yet processed
-            if (!processedBlocks.contains(succ)) {
-                processedBlocks.add(succ);
+            if (!processedBlocks.contains(getCustomHashForBlock(succ))) {
+                processedBlocks.add(getCustomHashForBlock(succ));
                 // Collect the functions Unit by Unit via the blockIterator
-                // TODO stimmt passing of variableBlock?!
                 final VariableBlock vb2 = this
                         .blockIterator(classPaths, cg, succ, outSet, element, chapter, fieldType, filePath,
                                 scopeId, null, assignmentStmt, args, newPredecessor);
@@ -342,23 +341,26 @@ class VariablesExtractor {
             } else {
                 // Find node and add predecessor
                 Node n = null;
+                int succHash = getCustomHashForBlock(succ);
                 for (AbstractNode tempNode : element.getControlFlowGraph().getNodes().values()) {
                     if (tempNode instanceof Node) {
-                        if (((Node) tempNode).getBlock().equals(succ)) {
+                        if (getCustomHashForBlock(((Node) tempNode).getBlock()) == succHash) {
                             n = (Node) tempNode;
                             break;
                         }
                     }
                 }
-                if(n == null) {
-                    // TODO find successors of n to add this predecessor
-                    // When does this happen?
-                    // assert false;
-                }
-                else {
+                if (n == null) {
+                    // Happens when block has a successor that is not included in the control flow graph because
+                    // is does not contain any operations
+                    // The successors of the successor have to be found and added
+                    // TODO add test case
+                    if(element.getControlFlowGraph().getNodes().size() > 0) {
+                        addPredecessorToSuccessors(succ, predecessor[0], element);
+                    }
+                } else {
                     n.addPredecessor(predecessor[0]);
                 }
-
             }
         }
 
@@ -618,5 +620,31 @@ class VariablesExtractor {
         }
 
         return node;
+    }
+
+    private int getCustomHashForBlock(Block block) {
+        // Ignore successors and predecessors when calculating hash
+        return Objects.hash(block.getHead().hashCode(), block.getTail().hashCode(), block.getBody().hashCode(),
+                block.getIndexInMethod());
+    }
+
+    private void addPredecessorToSuccessors(Block block, AnalysisElement pred, AnalysisElement element) {
+        Node n = null;
+        int succHash;
+        for (Block succ : block.getSuccs()) {
+            succHash = getCustomHashForBlock(succ);
+            for (AbstractNode tempNode : element.getControlFlowGraph().getNodes().values()) {
+                if (tempNode instanceof Node) {
+                    if (getCustomHashForBlock(((Node) tempNode).getBlock()) == succHash) {
+                        n = (Node) tempNode;
+                        n.addPredecessor(pred);
+                        break;
+                    }
+                }
+            }
+            if (n == null) {
+                addPredecessorToSuccessors(succ, pred, element);
+            }
+        }
     }
 }

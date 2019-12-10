@@ -114,18 +114,6 @@ public class ControlFlowGraph {
 		return key.toString();
 	}
 
-	/**
-	 * Set predecessor/successor relations for blocks and initialize sets
-	 */
-	void computePredecessorRelations() {
-		nodes.values().forEach(node -> {
-			this.operations.putAll(node.getOperations());
-			// TODO evtl set succ
-			node.setOutUnused(new LinkedHashMap<>());
-			node.setOutUsed(new LinkedHashMap<>());
-		});
-	}
-
 	boolean hasImplementedDelegate() {
 		for (AbstractNode node : nodes.values()) {
 			if (node.getElementChapter().equals(ElementChapter.Implementation)) {

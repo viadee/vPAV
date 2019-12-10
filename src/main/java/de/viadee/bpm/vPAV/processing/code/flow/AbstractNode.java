@@ -63,6 +63,7 @@ public abstract class AbstractNode implements AnalysisElement {
 	protected LinkedHashMap<String, AnalysisElement> successors;
 
 	protected String id;
+	protected boolean lastElement = false;
 
 	AbstractNode(final BpmnElement parentElement,
 			final ElementChapter elementChapter) {
@@ -310,5 +311,13 @@ public abstract class AbstractNode implements AnalysisElement {
 
 	ElementChapter getElementChapter() {
 		return elementChapter;
+	}
+
+	public void setLastElement(boolean le) {
+		lastElement = le;
+	}
+
+	public boolean isLastElement() {
+		return  lastElement;
 	}
 }

@@ -107,8 +107,6 @@ public class FlowAnalysis {
 			boolean hasNodesBefore = !(analysisElement.getBaseElement() instanceof CallActivity);
 
 			if (analysisElement.getControlFlowGraph().hasNodes()) {
-				analysisElement.getControlFlowGraph().computePredecessorRelations();
-
 				AnalysisElement firstNode = analysisElement.getControlFlowGraph().firstNode();
 				AnalysisElement lastNode = analysisElement.getControlFlowGraph().lastNode();
 				boolean hasNodesAfter = false;

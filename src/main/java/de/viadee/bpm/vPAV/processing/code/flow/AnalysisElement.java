@@ -41,70 +41,70 @@ import java.util.Map;
 
 public interface AnalysisElement {
 
-	ControlFlowGraph getControlFlowGraph();
+    ControlFlowGraph getControlFlowGraph();
 
-	String getId();
+    String getId();
 
-	LinkedHashMap<String, ProcessVariableOperation> getOperations();
+    LinkedHashMap<String, ProcessVariableOperation> getOperations();
 
-	void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors);
+    void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors);
 
-	void addPredecessor(AnalysisElement predecessor);
+    void addPredecessor(AnalysisElement predecessor);
 
-	List<AnalysisElement> getPredecessors();
+    List<AnalysisElement> getPredecessors();
 
-	List<AnalysisElement> getSuccessors();
+    List<AnalysisElement> getSuccessors();
 
-	void setSuccessors(LinkedHashMap<String, AnalysisElement> successors);
+    void setSuccessors(LinkedHashMap<String, AnalysisElement> successors);
 
-	void addSuccessor(AnalysisElement successor);
+    void addSuccessor(AnalysisElement successor);
 
-	LinkedHashMap<String, ProcessVariableOperation> getInUsed();
+    LinkedHashMap<String, ProcessVariableOperation> getInUsed();
 
-	LinkedHashMap<String, ProcessVariableOperation> getInUnused();
+    LinkedHashMap<String, ProcessVariableOperation> getInUnused();
 
-	LinkedHashMap<String, ProcessVariableOperation> getOutUsed();
+    LinkedHashMap<String, ProcessVariableOperation> getOutUsed();
 
-	LinkedHashMap<String, ProcessVariableOperation> getOutUnused();
+    LinkedHashMap<String, ProcessVariableOperation> getOutUnused();
 
-	void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed);
+    void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed);
 
-	void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused);
+    void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused);
 
-	void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed);
+    void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed);
 
-	void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused);
+    void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused);
 
-	LinkedHashMap<String, ProcessVariableOperation> getUsed();
+    LinkedHashMap<String, ProcessVariableOperation> getUsed();
 
-	LinkedHashMap<String, ProcessVariableOperation> getKilled();
+    LinkedHashMap<String, ProcessVariableOperation> getKilled();
 
-	LinkedHashMap<String, ProcessVariableOperation> getDefined();
+    LinkedHashMap<String, ProcessVariableOperation> getDefined();
 
-	void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations);
+    void setOperations(LinkedHashMap<String, ProcessVariableOperation> operations);
 
-	void setUsed(LinkedHashMap<String, ProcessVariableOperation> used);
+    void setUsed(LinkedHashMap<String, ProcessVariableOperation> used);
 
-	void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
+    void setDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
 
-	void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
+    void addDefined(LinkedHashMap<String, ProcessVariableOperation> defined);
 
-	void addSourceCodeAnomaly(AnomalyContainer anomalyContainer);
+    void addSourceCodeAnomaly(AnomalyContainer anomalyContainer);
 
-	void clearPredecessors();
+    void clearPredecessors();
 
-	void removePredecessor(String predecessor);
+    void removePredecessor(String predecessor);
 
-	void clearSuccessors();
+    void clearSuccessors();
 
-	void removeSuccessor(String successor);
+    void removeSuccessor(String successor);
 
-	Map<BpmnElement, List<AnomalyContainer>> getAnomalies();
+    Map<BpmnElement, List<AnomalyContainer>> getAnomalies();
 
-	BaseElement getBaseElement();
+    BaseElement getBaseElement();
 
-	BpmnElement getParentElement();
+    BpmnElement getParentElement();
 
-	void removeOperation(ProcessVariableOperation op);
+    void removeOperation(ProcessVariableOperation op);
 
 }
