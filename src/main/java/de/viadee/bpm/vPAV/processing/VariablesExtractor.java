@@ -382,7 +382,7 @@ class VariablesExtractor {
             }
         }
         if (unit instanceof JInvokeStmt) {
-            return ((JInvokeStmt) unit).getInvokeExpr().getMethod().getDeclaringClass().toString()
+            return !((JInvokeStmt) unit).getInvokeExpr().getMethod().getDeclaringClass().toString()
                     .equals("org.slf4j.Logger");
         }
         return true;
