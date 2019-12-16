@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -92,10 +93,9 @@ public class ProcessVariableOperationReaderTest {
 
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
-        final ControlFlowGraph cg = new ControlFlowGraph();
-        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), cg, new FlowAnalysis());
+        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
 
         Assert.assertEquals(2, variables.size());
     }

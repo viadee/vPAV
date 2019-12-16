@@ -42,6 +42,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -116,13 +117,12 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
-			final ControlFlowGraph cg = new ControlFlowGraph();
-			final BpmnElement element = new BpmnElement(PATH, baseElement, cg, new FlowAnalysis());
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
 			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
 
 			element.setProcessVariables(variables);
 
@@ -151,13 +151,12 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
-			final ControlFlowGraph cg = new ControlFlowGraph();
-			final BpmnElement element = new BpmnElement(PATH, baseElement, cg, new FlowAnalysis());
+			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
 			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, cg));
+			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
 
 			element.setProcessVariables(variables);
 

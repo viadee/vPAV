@@ -88,6 +88,7 @@ public class ControlFlowGraph {
 	 * @return Id of node
 	 */
 	private String createHierarchy(final AbstractNode node) {
+		// TODO renew method
 		StringBuilder key = new StringBuilder();
 		key.append(node.getParentElement().getBaseElement().getId()).append("__");
 		if (recursionCounter == 0) {
@@ -101,7 +102,7 @@ public class ControlFlowGraph {
 					key.append(internalNodeCounter);
 					String predKey = key.toString();
 					if (internalNodeCounter == 0) {
-						node.setPredsInterProcedural(predKey.substring(0, predKey.length() - 2));
+				//		node.setPredsInterProcedural(predKey.substring(0, predKey.length() - 2));
 					}
 				} else {
 					key.append(getPriorLevels().get(i));
@@ -111,19 +112,6 @@ public class ControlFlowGraph {
 		}
 		priorLevel = internalNodeCounter - 1;
 		return key.toString();
-	}
-
-	/**
-	 * Set predecessor/successor relations for blocks and initialize sets
-	 */
-	void computePredecessorRelations() {
-		nodes.values().forEach(node -> {
-			this.operations.putAll(node.getOperations());
-			node.setPreds();
-			node.setSuccs();
-			node.setOutUnused(new LinkedHashMap<>());
-			node.setOutUsed(new LinkedHashMap<>());
-		});
 	}
 
 	boolean hasImplementedDelegate() {

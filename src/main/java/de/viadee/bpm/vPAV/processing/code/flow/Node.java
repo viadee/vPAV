@@ -42,9 +42,9 @@ public class Node extends AbstractNode implements Cloneable {
 
 	private Block block;
 
-	public Node(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement, final Block block,
+	public Node(final BpmnElement parentElement, final Block block,
 			final ElementChapter elementChapter) {
-		super(controlFlowGraph, parentElement, elementChapter);
+		super(parentElement, elementChapter);
 		this.block = block;
 	}
 
@@ -94,6 +94,7 @@ public class Node extends AbstractNode implements Cloneable {
 		myClone.operations = new LinkedHashMap<>();
 		myClone.defined = new LinkedHashMap<>();
 		myClone.used = new LinkedHashMap<>();
+		myClone.killed = new LinkedHashMap<>();
 		myClone.outUnused = new LinkedHashMap<>();
 		myClone.outUsed = new LinkedHashMap<>();
 		myClone.inUnused = new LinkedHashMap<>();

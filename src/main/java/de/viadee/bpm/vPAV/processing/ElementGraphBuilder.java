@@ -40,10 +40,7 @@ import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -222,17 +219,20 @@ public class ElementGraphBuilder {
         final FlowElement element = (FlowElement) node.getBaseElement();
         // Ordered map to hold operations in correct order
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        AnalysisElement[]  predecessor = new AnalysisElement[1];
 
         // Add user defined variables
         if (userVariables != null) {
-            ExpressionNode userVarNode = new ExpressionNode(node.getControlFlowGraph(), node.getParentElement(),
+            ExpressionNode userVarNode = new ExpressionNode(node.getParentElement(),
                     "", ElementChapter.UserDefined);
-            node.getControlFlowGraph().addNode(userVarNode);
 
             for (Map.Entry<String, ProcessVariableOperation> var : userVariables.entries()) {
                 var.getValue().initializeOperation(node);
                 userVarNode.addOperation(var.getValue());
             }
+
+            node.getControlFlowGraph().addNode(userVarNode);
+            predecessor[0] = userVarNode;
         }
 
         // retrieve initial variable operation (should be WRITE)
@@ -251,9 +251,7 @@ public class ElementGraphBuilder {
                 }
             }
             graph.addStartNode(node);
-        }
-
-        if (element.getElementType().getTypeName().equals(BpmnConstants.RECEIVE_TASK)) {
+        } else if (element.getElementType().getTypeName().equals(BpmnConstants.RECEIVE_TASK)) {
             final ArrayList<String> messageRefs = bpmnScanner.getMessageRefs(element.getId());
             String messageName = "";
             if (messageRefs.size() == 1) {
@@ -271,7 +269,7 @@ public class ElementGraphBuilder {
 
         // examine process variables and save it with access operation
         final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner);
-        variables.putAll(reader.getVariablesFromElement(fileScanner, node, node.getControlFlowGraph()));
+        variables.putAll(reader.getVariablesFromElement(fileScanner, node, predecessor));
         // examine process variables for element and set it
         node.setProcessVariables(variables);
     }
@@ -426,7 +424,7 @@ public class ElementGraphBuilder {
             // determine process variables with operations
             final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
             variables.putAll(new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner)
-                    .getVariablesFromElement(fileScanner, node, controlFlowGraph));
+                    .getVariablesFromElement(fileScanner, node, new AnalysisElement[1]));
             // set process variables for the node
             node.setProcessVariables(variables);
             // mention the element
