@@ -382,7 +382,7 @@ public class Runner {
 
         allFiles.add("vPAV.png");
         allFiles.add("viadee_weiss.png");
-        allFiles.add("GitHub.png");
+        allFiles.add("github.png");
         allFiles.add("error.png");
         allFiles.add("warning.png");
         allFiles.add("info.png");
@@ -417,7 +417,7 @@ public class Runner {
 
         fMap.put("vPAV.png", ConfigConstants.IMG_FOLDER);
         fMap.put("viadee_weiss.png", ConfigConstants.IMG_FOLDER);
-        fMap.put("GitHub.png", ConfigConstants.IMG_FOLDER);
+        fMap.put("github.png", ConfigConstants.IMG_FOLDER);
         fMap.put("error.png", ConfigConstants.IMG_FOLDER);
         fMap.put("warning.png", ConfigConstants.IMG_FOLDER);
         fMap.put("info.png", ConfigConstants.IMG_FOLDER);
