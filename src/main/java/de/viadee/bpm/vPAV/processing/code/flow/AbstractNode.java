@@ -63,10 +63,11 @@ public abstract class AbstractNode implements AnalysisElement {
 	protected LinkedHashMap<String, AnalysisElement> successors;
 
 	protected String id;
+	protected boolean lastElement = false;
 
-	AbstractNode(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement,
+	AbstractNode(final BpmnElement parentElement,
 			final ElementChapter elementChapter) {
-		this.controlFlowGraph = controlFlowGraph;
+		this.controlFlowGraph = parentElement.getControlFlowGraph();
 		this.parentElement = parentElement;
 		this.elementChapter = elementChapter;
 
@@ -310,5 +311,13 @@ public abstract class AbstractNode implements AnalysisElement {
 
 	ElementChapter getElementChapter() {
 		return elementChapter;
+	}
+
+	public void setLastElement(boolean le) {
+		lastElement = le;
+	}
+
+	public boolean isLastElement() {
+		return  lastElement;
 	}
 }

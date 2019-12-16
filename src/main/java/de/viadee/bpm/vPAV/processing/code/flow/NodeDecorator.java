@@ -212,4 +212,7 @@ public class NodeDecorator implements AnalysisElement {
 		this.decoratedNode.removeOperation(op);
 	}
 
+	public AnalysisElement getDecoratedNode() {
+		return decoratedNode;
+	}
 }

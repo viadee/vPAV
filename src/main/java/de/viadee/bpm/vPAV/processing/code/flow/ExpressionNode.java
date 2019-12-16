@@ -37,9 +37,9 @@ public class ExpressionNode extends AbstractNode {
 
 	private String expression;
 
-	public ExpressionNode(final ControlFlowGraph controlFlowGraph, final BpmnElement parentElement,
+	public ExpressionNode(final BpmnElement parentElement,
 			final String expression, final ElementChapter elementChapter) {
-		super(controlFlowGraph, parentElement, elementChapter);
+		super(parentElement, elementChapter);
 		this.expression = expression;
 	}
 

@@ -37,7 +37,7 @@ import org.camunda.bpm.engine.delegate.ExecutionListener;
 public class BlockSplitDelegate implements ExecutionListener {
 
     @Override
-    public void notify(DelegateExecution execution) throws Exception {
+    public void notify(DelegateExecution execution) {
         method1(execution);
         execution.getVariable("var1");
     }

@@ -34,10 +34,22 @@ package de.viadee.bpm.vPAV.delegates;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-public class DelegateWithCorrectVariable implements JavaDelegate {
+public class RecursiveDelegate implements JavaDelegate {
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        execution.getVariable("ext_Blub");
+    @Override public void execute(DelegateExecution delegateExecution) throws Exception {
+        delegateExecution.setVariable("myVariable", "test");
+        recursiveMethod(delegateExecution, 10);
+    }
+
+    private void recursiveMethod(DelegateExecution execution, int depth) {
+        if(depth != 0) {
+            execution.removeVariable("myVariable");
+            execution.setVariable("myVariable", depth);
+            recursiveMethod(execution, depth-1);
+            System.out.println("Depth: " + depth);
+        }
+        else {
+            execution.getVariable("myVariable");
+        }
     }
 }

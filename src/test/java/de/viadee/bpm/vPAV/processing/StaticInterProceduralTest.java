@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -49,6 +50,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -74,7 +76,6 @@ public class StaticInterProceduralTest {
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
-		final ControlFlowGraph cg = new ControlFlowGraph();
 
 		// Set custom basepath.
 		Properties myProperties = new Properties();
@@ -83,7 +84,7 @@ public class StaticInterProceduralTest {
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, cg));
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, new AnalysisElement[1]));
 
 		// Then
 		assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,

@@ -38,10 +38,17 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.code.flow.NodeDecorator;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
+import org.camunda.bpm.model.bpmn.instance.StartEvent;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -49,11 +56,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Properties;
+import java.util.*;
 
-public class ExecutionListenerTest {
+import static org.junit.Assert.assertEquals;
+
+public class RecursionTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
@@ -70,17 +77,19 @@ public class ExecutionListenerTest {
     }
 
     @Test
-    public void executionListenerTest() {
+    public void recursionTest() {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
         ConfigConstants.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final String PATH = BASE_PATH + "ProcessVariablesModelChecker_ExecutionListenerTest.bpmn";
+        final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
 
-        // parse bpmn model
+        // parse bpmn model and set delegate
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
+        serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.RecursiveDelegate");
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
 
@@ -91,5 +100,21 @@ public class ExecutionListenerTest {
                 processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
         flowAnalysis.analyze(graphCollection);
+        LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        // Start from end event and go to start.
+        AnalysisElement endEvent = nodes.get("EndEvent_13uioac");
+        AnalysisElement sequenceFlow2 = endEvent.getPredecessors().get(0);
+        AnalysisElement taskDelegateElse = sequenceFlow2.getPredecessors().get(0);
+        AnalysisElement taskDelegateIf = taskDelegateElse.getPredecessors().get(0);
+        AnalysisElement taskDelegateExecute = taskDelegateElse.getPredecessors().get(1);
+        AnalysisElement sequenceFlow1 = taskDelegateExecute.getPredecessors().get(0);
+        AnalysisElement startEvent = sequenceFlow1.getPredecessors().get(0);
+
+        assertEquals("Last sequence flow should have exactly one predecessor (else node).", 1,sequenceFlow2.getPredecessors().size());
+        assertEquals("Else node should have two predecessors due to recursion",2, taskDelegateElse.getPredecessors().size());
+        assertEquals("If node should have two predecessors due to recursion", 2, taskDelegateIf.getPredecessors().size());
+        assertEquals("If node should be a predecessor of itself", ((NodeDecorator)taskDelegateIf).getDecoratedNode(), ((NodeDecorator) taskDelegateIf.getPredecessors().get(1)).getDecoratedNode());
+
+        // TODO check anomalies but at the moment we cannot recognize them correctly if the graph includes a loop
     }
 }

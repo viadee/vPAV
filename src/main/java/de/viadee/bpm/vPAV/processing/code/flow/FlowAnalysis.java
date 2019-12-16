@@ -107,8 +107,6 @@ public class FlowAnalysis {
 			boolean hasNodesBefore = !(analysisElement.getBaseElement() instanceof CallActivity);
 
 			if (analysisElement.getControlFlowGraph().hasNodes()) {
-				analysisElement.getControlFlowGraph().computePredecessorRelations();
-
 				AnalysisElement firstNode = analysisElement.getControlFlowGraph().firstNode();
 				AnalysisElement lastNode = analysisElement.getControlFlowGraph().lastNode();
 				boolean hasNodesAfter = false;
@@ -133,12 +131,8 @@ public class FlowAnalysis {
 								isFirstHalf = false;
 								lastNodeBefore = predecessor;
 								firstNodeAfter = curNode;
-							} else {
-								// Build connection between nodes
-								curNode.clearPredecessors();
-								predecessor.clearSuccessors();
-								curNode.addPredecessor(predecessor);
-								predecessor.addSuccessor(curNode);
+								// Clear connection between before and after nodes
+								firstNodeAfter.clearPredecessors();
 							}
 						}
 						predecessor = curNode;
