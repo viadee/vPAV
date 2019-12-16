@@ -19,37 +19,31 @@
 	<title>Process Model Validation Report</title>
 </head>
 
-<body class="container-fluid">
-	<header class="navbar sticky-top navbar-expand viadee-lightblue-bg">
-		<h3 class="h3-header" id=modell></h3>
-		<a id="model_download" class="nav-item nav-link mr-4" href="">
-			<img src="img/dl_button.png" alt="Download BPMN" height="50" title="Download BPMN" />
-		</a>
-		<ul class="navbar-nav flex-row ml-md-auto">
-			<li class="nav-item">
-				<a href="https://mvnrepository.com/artifact/de.viadee/viadeeProcessApplicationValidator" class="nav-item nav-link mr-4 mt-3 version"
-				 id="vPAV"></a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link mt-2 mr-4" id="logo" href="https://viadee.github.io/vPAV/">
-					<img src="img/vPAV.png" alt="vPAV" title="documentation" />
-				</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link mt-2 mr-4" id="logo" href="https://github.com/viadee/vPAV">
-					<img src="img/GitHub.png" alt="GitHub" title="GitHub vPAV" />
-				</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" href="https://www.viadee.de/">
-					<img src="img/viadee_weiss.png" alt="viadee Homepage" height="50" title="viadee Homepage" />
-				</a>
-			</li>
-		</ul>
-	</header>
+<header class="navbar sticky-top navbar-expand viadee-lightblue-bg header-size">
+	<a class="nav-link mt-2 mr-4" id="logo" href="https://viadee.github.io/vPAV/">
+		<img class="logo" src="img/vPAV.png" alt="vPAV" height="100" title="documentation" />
+	</a>
+	<h1 class="h1-header" id=modell></h1>
+	<a id="model_download" class="nav-item nav-link mr-4" href="">
+		<img src="img/dl_button.png" alt="Download BPMN" height="50" title="Download BPMN" />
+	</a>
+	<ul class="navbar-nav flex-row ml-md-auto">
+		<li class="nav-item">
+			<a class="nav-link mt-2 mr-4" id="github-logo" href="https://github.com/viadee/vPAV">
+				<img src="img/github.png" alt="GitHub" height="50" title="GitHub vPAV" />
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="https://www.viadee.de/">
+				<img src="img/viadee_weiss.png" alt="viadee Homepage" height="60" title="viadee Homepage" />
+			</a>
+		</li>
+	</ul>
+</header>
 
-	<!-- navBar -->
-	<div class="row">
+<body class="container-fluid">
+<!-- navBar -->
+	<div class="row placeholder-top">
 		<div class="col">
 			<ul id="linkList" class="nav nav-pills">
 			</ul>
@@ -66,7 +60,7 @@
 	<!-- element to draw bpmn diagram in -->
 	<div class="row">
 		<div class="col">
-			<div class="m-0 p-0 mt-1 viadee-darkblue-border" id="canvas"></div>
+			<div class="m-0 p-0 viadee-green-border" id="canvas"></div>
 		</div>
 	</div>
 
@@ -130,8 +124,6 @@
 	<!-- application -->
 	<script src="js/properties.js"></script>
 	<script src="js/bpmn.io.viewer.app.js"></script>
-
-	
 
 </body>
 
