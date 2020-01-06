@@ -386,7 +386,9 @@ function createIssueTable(bpmnFile, tableContent, mode) {
 
             //ruleName
             var myCell = document.createElement("td");
+            var innerDiv = document.createElement("div");
             var myText = document.createTextNode(issue.ruleName);
+            innerDiv.appendChild(myText);
 
             //buttons to add and remove issue
             var addIssueButton = document.createElement("button");
@@ -406,11 +408,11 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             var c = document.createElement("a");
             c.appendChild(removeIssueButton);
 
-            myCell.setAttribute("id", issue.classification) // mark cell
+            myCell.setAttribute("id", issue.classification); // mark cell
 
             //create link for default checkers
             var a = document.createElement("a");
-            a.appendChild(myText);
+            a.appendChild(innerDiv);
 
             defaultCheckers.forEach(element => {
                 if (issue.ruleName === element.rulename) {
