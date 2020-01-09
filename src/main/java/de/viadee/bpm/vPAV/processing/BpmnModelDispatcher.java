@@ -31,8 +31,21 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -45,15 +58,13 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
-import de.viadee.bpm.vPAV.processing.model.data.*;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-
-import java.io.File;
-import java.util.*;
 
 /**
  * Calls model and element checkers for a concrete bpmn processdefinition
@@ -68,17 +79,15 @@ public class BpmnModelDispatcher {
 	 * elements. Iterates through collection and checks each element for validity
 	 * Additionally a graph is created to check for invalid paths.
 	 *
-	 * @param fileScanner             - FileScanner
-	 * @param processDefinition       - Holds the path to the BPMN model
-	 * @param scanner                 - OuterProcessVariableScanner
-	 * @param dataFlowRules           - DataFlowRules to be checked for
-	 * @param conf                    - ruleSet
+	 * @param fileScanner       - FileScanner
+	 * @param processDefinition - Holds the path to the BPMN model
+	 * @param scanner           - OuterProcessVariableScanner
+	 * @param dataFlowRules     - DataFlowRules to be checked for
+	 * @param conf              - ruleSet
 	 * @return issues
 	 */
 	public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processDefinition,
-													 final ProcessVariablesScanner scanner,
-													 final Collection<DataFlowRule> dataFlowRules,
-													 final RuleSet conf) {
+			final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules, final RuleSet conf) {
 		final Map<String, String> decisionRefToPathMap = fileScanner.getDecisionRefToPathMap();
 		final Map<String, String> processIdToPathMap = fileScanner.getProcessIdToPathMap();
 		final Collection<String> resourcesNewestVersions = fileScanner.getResourcesNewestVersions();
@@ -141,10 +150,8 @@ public class BpmnModelDispatcher {
 	 * @return issues
 	 */
 	public ModelDispatchResult dispatchWithoutVariables(final File processDefinition,
-														final Map<String, String> decisionRefToPathMap,
-														final Map<String, String> processIdToPathMap,
-														final Collection<String> resourcesNewestVersions,
-														final RuleSet conf) {
+			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
+			final Collection<String> resourcesNewestVersions, final RuleSet conf) {
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		// TODO check how relevant this method still is
 		BpmnScanner bpmnScanner = createScanner(processDefinition);
@@ -179,8 +186,8 @@ public class BpmnModelDispatcher {
 	 * @return Collection of BpmnElements
 	 */
 	public static Collection<BpmnElement> getBpmnElements(final File processDefinition,
-														  final Collection<BaseElement> baseElements, final ElementGraphBuilder graphBuilder,
-														  final FlowAnalysis flowAnalysis) {
+			final Collection<BaseElement> baseElements, final ElementGraphBuilder graphBuilder,
+			final FlowAnalysis flowAnalysis) {
 		final List<BpmnElement> elements = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
 			BpmnElement element = graphBuilder.getElement(baseElement.getId());
@@ -212,15 +219,15 @@ public class BpmnModelDispatcher {
 				final Collection<ProcessVariable> processVariables = variables.asMap().get(variableName);
 				for (ProcessVariable pv : processVariables) {
 					switch (variableOperation.getOperation()) {
-						case READ:
-							pv.addRead(variableOperation);
-							break;
-						case WRITE:
-							pv.addWrite(variableOperation);
-							break;
-						case DELETE:
-							pv.addDelete(variableOperation);
-							break;
+					case READ:
+						pv.addRead(variableOperation);
+						break;
+					case WRITE:
+						pv.addWrite(variableOperation);
+						break;
+					case DELETE:
+						pv.addDelete(variableOperation);
+						break;
 					}
 				}
 			}
@@ -231,14 +238,15 @@ public class BpmnModelDispatcher {
 	/**
 	 * @param processDefinition Holds the path to the BPMN model
 	 * @param baseElements      List of baseElements
-	 * @param graphBuilder      ElementGraphBuilder used for data flow of a BPMN Model
+	 * @param graphBuilder      ElementGraphBuilder used for data flow of a BPMN
+	 *                          Model
 	 * @param issues            List of issues
 	 * @param checkerInstances  ElementCheckers from ruleSet
 	 * @param flowAnalysis      FlowAnalysis
 	 */
 	private void executeCheckers(final File processDefinition, final Collection<BaseElement> baseElements,
-								 final ElementGraphBuilder graphBuilder, final Collection<CheckerIssue> issues,
-								 Collection<ElementChecker> checkerInstances, final FlowAnalysis flowAnalysis) {
+			final ElementGraphBuilder graphBuilder, final Collection<CheckerIssue> issues,
+			Collection<ElementChecker> checkerInstances, final FlowAnalysis flowAnalysis) {
 		// execute element checkers
 		for (final BaseElement baseElement : baseElements) {
 			BpmnElement element = graphBuilder.getElement(baseElement.getId());
@@ -263,8 +271,8 @@ public class BpmnModelDispatcher {
 	}
 
 	/**
-	 * @param resourcesNewestVersions Resources with their newest version as found on classpath during
-	 *                                runtime
+	 * @param resourcesNewestVersions Resources with their newest version as found
+	 *                                on classpath during runtime
 	 * @param conf                    ruleSet
 	 * @param bpmnScanner             BPMNScanner
 	 * @param scanner                 ProcessVariablesScanner
@@ -274,9 +282,9 @@ public class BpmnModelDispatcher {
 	 * @return CheckerCollection
 	 */
 	Collection[] createCheckerInstances(final Collection<String> resourcesNewestVersions, final RuleSet conf,
-										final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner,
-										final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
-										final Map<AnomalyContainer, List<Path>> invalidPathMap) {
+			final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner,
+			final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
+			final Map<AnomalyContainer, List<Path>> invalidPathMap) {
 		CheckerFactory checkerFactory = new CheckerFactory();
 
 		final Collection[] checkerCollection = checkerFactory.createCheckerInstances(conf, resourcesNewestVersions,

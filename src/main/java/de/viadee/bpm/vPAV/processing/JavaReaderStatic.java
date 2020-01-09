@@ -31,25 +31,39 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.*;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import soot.*;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.OutSetCFG;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableBlock;
+import soot.Body;
+import soot.PackManager;
+import soot.RefType;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.Type;
+import soot.Value;
+import soot.VoidType;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
 import soot.toolkits.graph.Block;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.ClassicCompleteBlockGraph;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 
 public class JavaReaderStatic {
 
@@ -103,7 +117,7 @@ public class JavaReaderStatic {
                         ElementChapter.OutputImplementation, fieldType, scopeId, predecessor));
             } else {
                 // Java Delegate or Listener
-                SootClass sootClass = Scene.v().forceResolve(cleanString(classFile, true), SootClass.SIGNATURES);
+                SootClass sootClass = Scene.v().forceResolve(cleanString(classFile), SootClass.SIGNATURES);
                 if (sootClass.declaresMethodByName("notify")) {
                     variables.putAll(classFetcher(classPaths, classFile, "notify", classFile, element, chapter,
                             fieldType,
@@ -135,7 +149,7 @@ public class JavaReaderStatic {
         final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
         if (className != null && className.trim().length() > 0) {
-            className = cleanString(className, true);
+            className = cleanString(className);
             SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
             if (sootClass != null) {
@@ -190,7 +204,7 @@ public class JavaReaderStatic {
     }
 
     private SootClass setupSootClass(String className) {
-        className = cleanString(className, true);
+        className = cleanString(className);
         SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
         if (sootClass != null) {
 
@@ -378,16 +392,9 @@ public class JavaReaderStatic {
      * @param className Classname to be stripped of unused chars
      * @return cleaned String
      */
-    private String cleanString(String className, boolean dot) {
-        className = ProcessVariablesScanner.cleanString(className, dot);
+    private String cleanString(String className) {
+        className = ProcessVariablesScanner.cleanString(className, true);
         return className;
-    }
-
-    private void addNodeAndClearPredecessors(AbstractNode node, ControlFlowGraph cg, LinkedHashMap<String, AnalysisElement>  predecessors) {
-        cg.addNode(node);
-        node.setPredecessors(new LinkedHashMap<>(predecessors));
-        predecessors.clear();
-        predecessors.put(node.getId(), node);
     }
 
     private void setupSoot() {
