@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -191,7 +192,7 @@ public class RuntimeConfig {
 		ArrayList<URL> urlArrayList = new ArrayList<>();
 		Arrays.asList(classPathEntries).forEach(entry -> {
 			try {
-				urlArrayList.add(new URL("file:" + entry));
+				urlArrayList.add((new File(entry)).toURI().toURL());
 			} catch (MalformedURLException ignored) {
 				LOGGER.warning("Resource " + entry + " could not be loaded");
 			}
