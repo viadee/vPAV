@@ -247,6 +247,7 @@ public class FileScanner {
 			if (System.getProperty("os.name").startsWith("Windows")) {
 				sootPathCurrent = sootPathCurrent.replace("file:/", "");
 				sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
+				sootPathCurrent = sootPathCurrent.replaceAll("%20", " ");
 				if (!sootPaths.contains(sootPathCurrent)) {
 					sootPaths.add(sootPathCurrent);
 				}
