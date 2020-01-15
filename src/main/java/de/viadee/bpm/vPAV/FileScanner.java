@@ -93,7 +93,7 @@ public class FileScanner {
 
 	private static StringBuilder sootPath = new StringBuilder();
 
-	private static Collection<String> sootPaths = new ArrayList<>();
+	private static Collection<String> sootPaths = new HashSet<>();
 
 	private static boolean isDirectory = false;
 
@@ -241,23 +241,16 @@ public class FileScanner {
 	 * @param sootPathCurrent - one jar's local path
 	 */
 	private void addStringToSootPath(String sootPathCurrent) {
-
 		// Create a long String with every file and jar path for Soot.
 		if (sootPathCurrent != null) {
+			sootPathCurrent = sootPathCurrent.replaceAll("%20", " ");
+			sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
 			if (System.getProperty("os.name").startsWith("Windows")) {
 				sootPathCurrent = sootPathCurrent.replace("file:/", "");
-				sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
-				sootPathCurrent = sootPathCurrent.replaceAll("%20", " ");
-				if (!sootPaths.contains(sootPathCurrent)) {
-					sootPaths.add(sootPathCurrent);
-				}
 			} else {
 				sootPathCurrent = sootPathCurrent.replace("file:", "");
-				sootPathCurrent = sootPathCurrent.replace("/./", "\\\\").replaceAll("/$", "");
-				if (!sootPaths.contains(sootPathCurrent)) {
-					sootPaths.add(sootPathCurrent);
-				}
 			}
+			sootPaths.add(sootPathCurrent);
 		}
 	}
 
