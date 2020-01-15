@@ -179,6 +179,7 @@ public class JavaReaderStatic {
      * @param chapter          ElementChapter
      * @param fieldType        KnownElementFieldType
      * @param scopeId          Scope of the element
+     * @param predecessor      List of predecessors
      * @return Map of process variables for a given class
      */
     public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,

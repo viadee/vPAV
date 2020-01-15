@@ -181,6 +181,16 @@
 			<artifactId>groovy-all</artifactId>
 			<version>2.5.8</version>
 			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>org.codehaus.groovy</groupId>
+					<artifactId>groovy-ant</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.groovy</groupId>
+					<artifactId>groovy-sql</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -356,7 +366,7 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>4.0.2</version>
+				<version>5.2.4</version>
 				<configuration>
 					<suppressionFiles>
 						<suppressionFile>owasp-dependency-check-suppressions.xml</suppressionFile>
@@ -367,7 +377,7 @@
 				<executions>
 					<execution>
 						<goals>
-				<!--			<goal>check</goal> -->
+							<goal>check</goal>
 						</goals>
 					</execution>
 				</executions>
