@@ -190,6 +190,14 @@
 					<groupId>org.codehaus.groovy</groupId>
 					<artifactId>groovy-sql</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.groovy</groupId>
+					<artifactId>groovy-jmx</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.groovy</groupId>
+					<artifactId>groovy-json</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
