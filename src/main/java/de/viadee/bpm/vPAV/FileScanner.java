@@ -167,8 +167,8 @@ public class FileScanner {
 		// get file paths of java files
 		LinkedList<File> files;
 		LinkedList<File> dirs = new LinkedList<>();
-
-		URL[] urls = RuntimeConfig.getInstance().getURLs();
+		String pathSeparator = System.getProperty("path.separator");
+		String[] classPathEntries = System.getProperty("java.class.path").split(pathSeparator);
 
 		try {
 			URL urlTargetClass;
@@ -184,16 +184,15 @@ public class FileScanner {
 			LOGGER.warning("Could not find target/classes folder");
 		}
 
-		for (URL url : urls) {
+		for (String entry: classPathEntries) {
 			// retrieve all jars during runtime and pass them to get class files
-			if (Pattern.compile(".*target/classes.*").matcher(url.toString()).find()
-					|| Pattern.compile(".*target/test-classes.*").matcher(url.toString()).find()) {
-				String sootPathCurrent = url.toString();
-				addStringToSootPath(sootPathCurrent);
+			if (Pattern.compile(".*target/classes.*").matcher(entry).find()
+					|| Pattern.compile(".*target/test-classes.*").matcher(entry).find()) {
+				addStringToSootPath(entry);
 			}
 
-			if (url.getFile().contains(ConfigConstants.TARGET_CLASS_FOLDER)) {
-				File f = new File(url.getFile());
+			if (entry.contains(ConfigConstants.TARGET_CLASS_FOLDER)) {
+				File f = new File(entry);
 				if (!isDirectory && f.exists()) {
 					files = (LinkedList<File>) FileUtils.listFiles(f, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
 					addResources(files);

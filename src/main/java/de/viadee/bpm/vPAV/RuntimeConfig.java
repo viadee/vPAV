@@ -50,166 +50,166 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class RuntimeConfig {
 
-	private static RuntimeConfig instance;
+    private static RuntimeConfig instance;
 
-	private ApplicationContext ctx;
+    private ApplicationContext ctx;
 
-	private Map<String, String> beanMap;
+    private Map<String, String> beanMap;
 
-	private RuleSet ruleSet;
+    private RuleSet ruleSet;
 
-	private ClassLoader classLoader;
+    private ClassLoader classLoader;
 
-	private ResourceBundle resourceBundle;
+    private ResourceBundle resourceBundle;
 
-	private boolean test = false; // TODO: Replace with parameterized method calls, to improve separation of test
-	// and production code
+    private boolean test = false; // TODO: Replace with parameterized method calls, to improve separation of test
+    // and production code
 
-	private static Logger LOGGER = Logger.getLogger(RuntimeConfig.class.getName());
+    private static Logger LOGGER = Logger.getLogger(RuntimeConfig.class.getName());
 
-	private final String[] viadeeConfigRules = { "CreateOutputHTML" };
+    private final String[] viadeeConfigRules = { "CreateOutputHTML" };
 
-	private final String[] viadeeElementRules = { "XorConventionChecker", "TimerExpressionChecker",
-			"JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker",
-			"VersioningChecker", "DmnTaskChecker", "ProcessVariablesNameConventionChecker",
-			"TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
-			"BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
-			"MessageCorrelationChecker" };
+    private final String[] viadeeElementRules = { "XorConventionChecker", "TimerExpressionChecker",
+            "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker",
+            "VersioningChecker", "DmnTaskChecker", "ProcessVariablesNameConventionChecker",
+            "TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
+            "BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
+            "MessageCorrelationChecker" };
 
-	private final String[] viadeeModelRules = { "ProcessVariablesModelChecker", "DataFlowChecker" };
+    private final String[] viadeeModelRules = { "ProcessVariablesModelChecker", "DataFlowChecker" };
 
-	private final URL[] urls = setURLs();
+    private final URL[] urls = setURLs();
 
-	private RuntimeConfig() {
-	}
+    private RuntimeConfig() {
+    }
 
-	public static RuntimeConfig getInstance() {
-		if (RuntimeConfig.instance == null) {
-			RuntimeConfig.instance = new RuntimeConfig();
-		}
-		return RuntimeConfig.instance;
-	}
+    public static RuntimeConfig getInstance() {
+        if (RuntimeConfig.instance == null) {
+            RuntimeConfig.instance = new RuntimeConfig();
+        }
+        return RuntimeConfig.instance;
+    }
 
-	String findBeanByName(String string) {
-		if (string != null && !string.isEmpty() && beanMap != null && !beanMap.isEmpty()) {
-			return beanMap.get(string);
-		} else
-			return null;
-	}
+    String findBeanByName(String string) {
+        if (string != null && !string.isEmpty() && beanMap != null && !beanMap.isEmpty()) {
+            return beanMap.get(string);
+        } else
+            return null;
+    }
 
-	public void setBeanMapping(Map<String, String> beanMap) {
-		this.beanMap = beanMap;
-	}
+    public void setBeanMapping(Map<String, String> beanMap) {
+        this.beanMap = beanMap;
+    }
 
-	public Map<String, String> getBeanMapping() {
-		return beanMap;
-	}
+    public Map<String, String> getBeanMapping() {
+        return beanMap;
+    }
 
-	public void setClassLoader(ClassLoader classLoader) {
-		this.classLoader = classLoader;
-	}
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
 
-	public ClassLoader getClassLoader() {
-		return classLoader;
-	}
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
 
-	public boolean isTest() {
-		return test;
-	}
+    public boolean isTest() {
+        return test;
+    }
 
-	public void setTest(boolean test) {
-		this.test = test;
-	}
+    public void setTest(boolean test) {
+        this.test = test;
+    }
 
-	public String[] getViadeeRules() {
-		return Stream.of(viadeeConfigRules, viadeeElementRules, viadeeModelRules).flatMap(Stream::of)
-				.toArray(String[]::new);
-	}
+    public String[] getViadeeRules() {
+        return Stream.of(viadeeConfigRules, viadeeElementRules, viadeeModelRules).flatMap(Stream::of)
+                .toArray(String[]::new);
+    }
 
-	public String[] getViadeeElementRules() {
-		return viadeeElementRules;
-	}
+    public String[] getViadeeElementRules() {
+        return viadeeElementRules;
+    }
 
-	public ArrayList<String> getActiveRules() {
-		return new ArrayList<>(ruleSet.getAllActiveRules().keySet());
-	}
+    public ArrayList<String> getActiveRules() {
+        return new ArrayList<>(ruleSet.getAllActiveRules().keySet());
+    }
 
-	public void setRuleSet(RuleSet ruleSet) {
-		this.ruleSet = ruleSet;
-	}
+    public void setRuleSet(RuleSet ruleSet) {
+        this.ruleSet = ruleSet;
+    }
 
-	void setApplicationContext(ApplicationContext ctx) {
-		this.ctx = ctx;
-	}
+    void setApplicationContext(ApplicationContext ctx) {
+        this.ctx = ctx;
+    }
 
-	public ApplicationContext getApplicationContext() {
-		return ctx;
-	}
+    public ApplicationContext getApplicationContext() {
+        return ctx;
+    }
 
-	/**
-	 * Retrieve locale. If locale can not be retrieved, use system locale
-	 */
-	void retrieveLocale() {
-		if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
-			getResource("de_DE");
-		} else {
-			getResource("en_US");
-		}
-	}
+    /**
+     * Retrieve locale. If locale can not be retrieved, use system locale
+     */
+    void retrieveLocale() {
+        if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
+            getResource("de_DE");
+        } else {
+            getResource("en_US");
+        }
+    }
 
-	/**
-	 * Set base directory and set ResourceBundle
-	 *
-	 * @param locale Locale extracted from ruleSet or either default system locale
-	 *               Localization
-	 */
-	public void getResource(final String locale) {
-		setResourceBundle(fromClassLoader("messages_" + locale));
-	}
+    /**
+     * Set base directory and set ResourceBundle
+     *
+     * @param locale Locale extracted from ruleSet or either default system locale
+     *               Localization
+     */
+    public void getResource(final String locale) {
+        setResourceBundle(fromClassLoader("messages_" + locale));
+    }
 
-	/**
-	 * Retrieves ResourceBundle from base directy and returns it to RuntimeConfig
-	 *
-	 * @param bundleName Bundle name for localization
-	 * @return ResourceBundle
-	 */
-	private ResourceBundle fromClassLoader(final String bundleName) {
-		URL[] urls = getURLs();
-		ClassLoader loader = new URLClassLoader(urls);
-		return ResourceBundle.getBundle(bundleName, Locale.getDefault(), loader);
-	}
+    /**
+     * Retrieves ResourceBundle from base directy and returns it to RuntimeConfig
+     *
+     * @param bundleName Bundle name for localization
+     * @return ResourceBundle
+     */
+    private ResourceBundle fromClassLoader(final String bundleName) {
+        URL[] urls = getURLs();
+        ClassLoader loader = new URLClassLoader(urls);
+        return ResourceBundle.getBundle(bundleName, Locale.getDefault(), loader);
+    }
 
-	/**
-	 * Retrieves URLs from java classpath
-	 *
-	 * @return Array of URLs
-	 */
-	private URL[] setURLs() {
-		String pathSeparator = System.getProperty("path.separator");
+    /**
+     * Retrieves URLs from java classpath
+     *
+     * @return Array of URLs
+     */
+    private URL[] setURLs() {
+        String pathSeparator = System.getProperty("path.separator");
 
-		String[] classPathEntries = System.getProperty("java.class.path").split(pathSeparator);
+        String[] classPathEntries = System.getProperty("java.class.path").split(pathSeparator);
 
-		ArrayList<URL> urlArrayList = new ArrayList<>();
-		Arrays.asList(classPathEntries).forEach(entry -> {
-			try {
-				urlArrayList.add((new File(entry)).toURI().toURL());
-			} catch (MalformedURLException ignored) {
-				LOGGER.warning("Resource " + entry + " could not be loaded");
-			}
-		});
-		return urlArrayList.toArray(new URL[0]);
-	}
+        ArrayList<URL> urlArrayList = new ArrayList<>();
+        Arrays.asList(classPathEntries).forEach(entry -> {
+            try {
+                urlArrayList.add((new File(entry)).toURI().toURL());
+            } catch (MalformedURLException ignored) {
+                LOGGER.warning("Resource " + entry + " could not be loaded");
+            }
+        });
+        return urlArrayList.toArray(new URL[0]);
+    }
 
-	URL[] getURLs() {
-		return urls;
-	}
+    private URL[] getURLs() {
+        return urls;
+    }
 
-	ResourceBundle getResourceBundle() {
-		return resourceBundle;
-	}
+    ResourceBundle getResourceBundle() {
+        return resourceBundle;
+    }
 
-	private void setResourceBundle(ResourceBundle resourceBundle) {
-		this.resourceBundle = resourceBundle;
-	}
+    private void setResourceBundle(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
+    }
 
 }

@@ -5,7 +5,7 @@
 	<groupId>de.viadee</groupId>
 	<artifactId>viadeeProcessApplicationValidator</artifactId>
 
-	<version>3.0.3-SNAPSHOT</version>
+	<version>3.0.3-SOOT</version>
 
 	<name>viadee Process Application Validator</name>
 
@@ -367,7 +367,7 @@
 				<executions>
 					<execution>
 						<goals>
-							<goal>check</goal>
+				<!--			<goal>check</goal> -->
 						</goals>
 					</execution>
 				</executions>
