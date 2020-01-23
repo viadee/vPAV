@@ -31,38 +31,12 @@
  */
 package de.viadee.bpm.vPAV;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.output.IssueOutputWriter;
-import de.viadee.bpm.vPAV.output.JsOutputWriter;
-import de.viadee.bpm.vPAV.output.JsonOutputWriter;
-import de.viadee.bpm.vPAV.output.OutputWriterException;
-import de.viadee.bpm.vPAV.output.RuleSetOutputWriter;
-import de.viadee.bpm.vPAV.output.XmlOutputWriter;
+import de.viadee.bpm.vPAV.output.*;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -71,6 +45,17 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Runner {
 
 	private static Logger logger = Logger.getLogger(Runner.class.getName());
@@ -78,8 +63,6 @@ public class Runner {
 	private FileScanner fileScanner;
 
 	private ProcessVariablesScanner variableScanner;
-
-	private Collection<CheckerIssue> issues;
 
 	private Collection<CheckerIssue> filteredIssues;
 
@@ -264,14 +247,14 @@ public class Runner {
 	 * @param rules Map of rules
 	 */
 	private void createIssues(RuleSet rules, Collection<DataFlowRule> dataFlowRules) {
-		issues = checkModels(rules, getFileScanner(), variableScanner, dataFlowRules);
+		 checkModels(rules, getFileScanner(), variableScanner, dataFlowRules);
 	}
 
 	/**
 	 * Removes whitelisted issues from the list of issues found
 	 */
 	private void removeIgnoredIssues() {
-		filteredIssues = filterIssues(issues);
+		filteredIssues = filterIssues(IssueService.getInstance().getIssues());
 	}
 
 	/**
@@ -555,16 +538,12 @@ public class Runner {
 	 * @param fileScanner     fileScanner
 	 * @param variableScanner variableScanner
 	 * @param dataFlowRules   dataFlowRules
-	 * @return foundIssues ConfigItem not found
 	 */
-	private Collection<CheckerIssue> checkModels(final RuleSet rules, final FileScanner fileScanner,
+	private void checkModels(final RuleSet rules, final FileScanner fileScanner,
 			final ProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules) {
-		final Collection<CheckerIssue> issues = new ArrayList<>();
-
 		for (final String pathToModel : fileScanner.getProcessDefinitions()) {
-			issues.addAll(checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules));
+			checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules);
 		}
-		return issues;
 	}
 
 	/**
@@ -574,9 +553,8 @@ public class Runner {
 	 * @param processDefinition processDefinition
 	 * @param fileScanner       fileScanner
 	 * @param variableScanner   variableScanner
-	 * @return modelIssues
 	 */
-	private Collection<CheckerIssue> checkModel(final RuleSet rules, final String processDefinition,
+	private void checkModel(final RuleSet rules, final String processDefinition,
 			final FileScanner fileScanner, final ProcessVariablesScanner variableScanner,
 			Collection<DataFlowRule> dataFlowRules) {
 		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
@@ -606,8 +584,6 @@ public class Runner {
 		elements.addAll(dispatchResult.getBpmnElements());
 		processVariables.addAll(dispatchResult.getProcessVariables());
 		setWrongCheckersMap(bpmnModelDispatcher.getIncorrectCheckers());
-
-		return dispatchResult.getIssues();
 	}
 
 	/**

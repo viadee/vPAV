@@ -31,39 +31,26 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.OutSetCFG;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableBlock;
-import soot.Body;
-import soot.PackManager;
-import soot.RefType;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Type;
-import soot.Value;
-import soot.VoidType;
+import de.viadee.bpm.vPAV.processing.model.data.*;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import soot.*;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
 import soot.toolkits.graph.Block;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.ClassicCompleteBlockGraph;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public class JavaReaderStatic {
 
@@ -94,7 +81,7 @@ public class JavaReaderStatic {
      */
     ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String scopeId,  AnalysisElement[] predecessor) {
+            final KnownElementFieldType fieldType, final String scopeId, AnalysisElement[] predecessor) {
 
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -195,7 +182,7 @@ public class JavaReaderStatic {
 
         variablesExtractor.resetMethodStackTrace();
         classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-                outSet, null, "", args,null, predecessor);
+                outSet, null, "", args, null, predecessor);
 
         if (outSet.getAllProcessVariables().size() > 0) {
             processVariables.putAll(outSet.getAllProcessVariables());
@@ -223,27 +210,27 @@ public class JavaReaderStatic {
         List<Type> parameterTypes = new ArrayList<>();
 
         // Retrieve the method and its body based on the used interface
-        RefType delegateExecutionType = RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution");
-        RefType activityExecutionType = RefType.v("org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution");
-        RefType delegateTaskType = RefType.v("org.camunda.bpm.engine.delegate.DelegateTask");
-        RefType mapVariablesType = RefType.v("org.camunda.bpm.engine.variable.VariableMap");
+        RefType delegateExecutionType = CamundaMethodServices.DELEGATE_EXECUTION_TYPE;
+        RefType activityExecutionType = CamundaMethodServices.ACTIVITY_EXECUTION_TYPE;
+        RefType delegateTaskType = CamundaMethodServices.DELEGATE_TASK_TYPE;
+        RefType mapVariablesType = CamundaMethodServices.MAP_VARIABLES_TYPE;
 
         switch (methodName) {
             case "execute":
                 for (SootClass clazz : sootClass.getInterfaces()) {
                     if (clazz.getName()
-                            .equals("org.camunda.bpm.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior")) {
+                            .equals(CamundaMethodServices.ACTIVITY_BEHAVIOR)) {
                         parameterTypes.add(activityExecutionType);
-                    } else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.JavaDelegate")) {
+                    } else if (clazz.getName().equals(CamundaMethodServices.JAVA_DELEGATE)) {
                         parameterTypes.add(delegateExecutionType);
                     }
                 }
                 break;
             case "notify":
                 for (SootClass clazz : sootClass.getInterfaces()) {
-                    if (clazz.getName().equals("org.camunda.bpm.engine.delegate.TaskListener")) {
+                    if (clazz.getName().equals(CamundaMethodServices.TASK_LISTENER)) {
                         parameterTypes.add(delegateTaskType);
-                    } else if (clazz.getName().equals("org.camunda.bpm.engine.delegate.ExecutionListener")) {
+                    } else if (clazz.getName().equals(CamundaMethodServices.EXECUTION_LISTENER)) {
                         parameterTypes.add(delegateExecutionType);
                     }
                 }
@@ -310,11 +297,10 @@ public class JavaReaderStatic {
                         BlockGraph graph = getBlockGraph(method);
                         List<Block> graphHeads = graph.getHeads();
 
-                        for(Block block: graphHeads) {
+                        for (Block block : graphHeads) {
                             outSet = blockIterator(classPaths, Scene.v().getCallGraph(), graph, block, outSet, element,
-                                    chapter,
-                                    fieldType, classFile, scopeId,
-                                    originalBlock, assignmentStmt, args, predecessor);
+                                    chapter, fieldType, classFile, scopeId, originalBlock, assignmentStmt, args,
+                                    predecessor);
                         }
                         variablesExtractor.leaveMethod(method);
                     }
@@ -368,8 +354,7 @@ public class JavaReaderStatic {
      * @return OutSetCFG which contains data flow information
      */
     private OutSetCFG blockIterator(final Set<String> classPaths, final CallGraph cg, final BlockGraph graph,
-            final Block block,
-            OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
+            final Block block, OutSetCFG outSet, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String filePath, final String scopeId,
             VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
             final AnalysisElement[] predecessor) {

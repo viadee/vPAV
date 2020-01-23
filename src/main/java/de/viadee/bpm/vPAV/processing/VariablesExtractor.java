@@ -31,16 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.camunda.bpm.engine.variable.VariableMap;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -48,12 +40,18 @@ import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.*;
+import org.camunda.bpm.engine.variable.VariableMap;
+import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import soot.*;
 import soot.jimple.*;
 import soot.jimple.internal.*;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.toolkits.graph.Block;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class VariablesExtractor {
 
@@ -239,14 +237,15 @@ class VariablesExtractor {
                     InvokeExpr calledMethod = (InvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
                     for (Type parameter : calledMethod.getMethodRef().getParameterTypes()) {
                         try {
-                        if (parameter instanceof RefType) {
-                            if (((RefType) parameter).getClassName()
-                                    .equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
-                                passesDelegateExecution = true;
-                                break;
+                            if (parameter instanceof RefType) {
+                                if (((RefType) parameter).getClassName()
+                                        .equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
+                                    passesDelegateExecution = true;
+                                    break;
+                                }
                             }
+                        } catch (ClassCastException ignored) {
                         }
-                        } catch (ClassCastException ignored) { }
                     }
                     if (passesDelegateExecution) {
                         // Node must be splitted
@@ -257,16 +256,14 @@ class VariablesExtractor {
                         // Split node
                         Node newSectionNode = (Node) node.clone();
                         assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
-                                filePath,
-                                scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
+                                filePath, scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
                                 unit, predecessor);
                         paramName = returnStmt;
                         node = newSectionNode;
                         nodeSaved = false;
                     } else {
                         assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
-                                filePath,
-                                scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
+                                filePath, scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
                                 unit, predecessor);
                     }
                 } catch (CloneNotSupportedException e) {
@@ -299,10 +296,19 @@ class VariablesExtractor {
                 if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInterfaceInvokeExpr) {
                     JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
                     if (expr != null) {
-                        parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName,
-                                node);
+                        parseInterfaceInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath,
+                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor);
                     }
                 }
+                // Method call of private method with assignment to a variable
+                if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JSpecialInvokeExpr) {
+                    JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
+                    if (expr != null) {
+                        parseSpecialInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath,
+                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor);
+                    }
+                }
+
                 // Instance fields
                 if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JInstanceFieldRef) {
                     final Pattern pattern = Pattern.compile("(\\$r(\\d))");
@@ -362,7 +368,7 @@ class VariablesExtractor {
                     // is does not contain any operations
                     // The successors of the successor have to be found and added
                     // TODO add test case
-                    if(element.getControlFlowGraph().getNodes().size() > 0) {
+                    if (element.getControlFlowGraph().getNodes().size() > 0) {
                         addPredecessorToSuccessors(succ, predecessor[0], element);
                     }
                 } else {
@@ -391,7 +397,7 @@ class VariablesExtractor {
     /**
      * Special parsing of statements to find Process Variable operations.
      *
-     * @param expr          Expression Unit from Statement
+     * @param expr          Expression Unit from Statement (private access modifier)
      * @param variableBlock current VariableBlock
      * @param element       BpmnElement
      * @param chapter       ElementChapter
@@ -399,10 +405,11 @@ class VariablesExtractor {
      * @param filePath      ResourceFilePath for ProcessVariableOperation
      * @param scopeId       Scope of BpmnElement
      */
-    private void parseExpression(final JInterfaceInvokeExpr expr, final VariableBlock variableBlock,
+    private void parseSpecialInvokeExpression(final JSpecialInvokeExpr expr, final VariableBlock variableBlock,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String filePath, String scopeId, final String paramName, final Node node) {
-
+            final String filePath, String scopeId, final String paramName, final Node node, final Unit unit,
+            final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet, final String assignmentStmt,
+            final AnalysisElement[] predecessor) {
         String functionName = expr.getMethodRef().getName();
         int numberOfArg = expr.getArgCount();
         String baseBox = expr.getBaseBox().getValue().getType().toString();
@@ -416,7 +423,7 @@ class VariablesExtractor {
 
             // Check if method call is to variable map for delegate variable mappings
             if (expr.getMethodRef().getDeclaringClass().getName()
-                    .equals("org.camunda.bpm.engine.variable.VariableMap")) {
+                    .equals(CamundaMethodServices.VARIABLE_MAP)) {
                 // If so, scope id is the id of the child process
                 scopeId = ((CallActivity) element.getBaseElement()).getCalledElement();
             }
@@ -441,6 +448,69 @@ class VariablesExtractor {
                         String.format(Messages.getString("ProcessVariablesModelChecker.4"),
                                 CheckName.checkName(element.getBaseElement()), chapter, fieldType.getDescription()));
             }
+        } else {
+            checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
+                    unit, assignmentStmt, expr.getArgs(), false, predecessor);
+        }
+    }
+
+    /**
+     * Special parsing of statements to find Process Variable operations.
+     *
+     * @param expr          Expression Unit from Statement (public access modifier)
+     * @param variableBlock current VariableBlock
+     * @param element       BpmnElement
+     * @param chapter       ElementChapter
+     * @param fieldType     KnownElementFieldType
+     * @param filePath      ResourceFilePath for ProcessVariableOperation
+     * @param scopeId       Scope of BpmnElement
+     */
+    private void parseInterfaceInvokeExpression(final JInterfaceInvokeExpr expr, final VariableBlock variableBlock,
+            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
+            final String filePath, String scopeId, final String paramName, final Node node, final Unit unit,
+            final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet, final String assignmentStmt,
+            final AnalysisElement[] predecessor) {
+        String functionName = expr.getMethodRef().getName();
+        int numberOfArg = expr.getArgCount();
+        String baseBox = expr.getBaseBox().getValue().getType().toString();
+
+        CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
+                .findByNameAndNumberOfBoxes(functionName, baseBox, numberOfArg);
+
+        if (foundMethod != null) {
+            int location = foundMethod.getLocation() - 1;
+            VariableOperation type = foundMethod.getOperationType();
+
+            // Check if method call is to variable map for delegate variable mappings
+            if (expr.getMethodRef().getDeclaringClass().getName()
+                    .equals(CamundaMethodServices.VARIABLE_MAP)) {
+                // If so, scope id is the id of the child process
+                scopeId = ((CallActivity) element.getBaseElement()).getCalledElement();
+            }
+
+            if (expr.getArgBox(location).getValue() instanceof StringConstant) {
+                StringConstant variableName = (StringConstant) expr.getArgBox(location).getValue();
+                String name = variableName.value.replaceAll("\"", "");
+                node.addOperation(new ProcessVariableOperation(name, element, chapter, fieldType, filePath, type,
+                        scopeId, element.getFlowAnalysis().getOperationCounter()));
+                variableBlock.addProcessVariable(new ProcessVariableOperation(name, element, chapter, fieldType,
+                        filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
+
+            } else if (!paramName.isEmpty()) {
+                node.addOperation(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element, chapter,
+                        fieldType, filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
+                variableBlock.addProcessVariable(new ProcessVariableOperation(paramName.replaceAll("\"", ""), element,
+                        chapter, fieldType, filePath, type, scopeId, element.getFlowAnalysis().getOperationCounter()));
+            } else {
+                IssueWriter.createIssue(new Rule("ProcessVariablesModelChecker", true, null, null, null, null),
+                        //$NON-NLS-1$
+                        CriticalityEnum.WARNING, filePath, element,
+                        String.format(Messages.getString("ProcessVariablesModelChecker.4"),
+                                CheckName.checkName(element.getBaseElement()), chapter, fieldType.getDescription()));
+            }
+        } else {
+            checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
+                    unit, assignmentStmt, expr.getArgs(), false, predecessor);
         }
     }
 
@@ -512,11 +582,12 @@ class VariablesExtractor {
             JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
             if (expr != null) {
                 if (argsCounter > 0) {
-                    parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
-                            this.getConstructorArgs().get(argsCounter - 1).toString(), node);
+                    parseInterfaceInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
+                            this.getConstructorArgs().get(argsCounter - 1).toString(), node, unit, classPaths, cg,
+                            outSet, assignmentStmt, predecessor);
                 } else {
-                    parseExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId, paramName,
-                            node);
+                    parseInterfaceInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
+                            paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor);
                 }
             }
         }

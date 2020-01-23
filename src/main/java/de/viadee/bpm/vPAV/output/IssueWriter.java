@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.output;
 
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -66,7 +67,7 @@ public class IssueWriter {
 
 		final BaseElement baseElement = element.getBaseElement();
 
-		issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				element.getProcessDefinition(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message));
 
@@ -94,7 +95,7 @@ public class IssueWriter {
 
 		final BpmnElement element = variable.getOperations().get(0).getElement();
 
-		issues.add(new CheckerIssue(rule.getName(), ruleDescription, classification, element.getProcessDefinition(),
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), ruleDescription, classification, element.getProcessDefinition(),
 				null, null, message));
 
 		return issues;
@@ -121,7 +122,7 @@ public class IssueWriter {
 
 		final BaseElement baseElement = element.getBaseElement();
 
-		issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				element.getProcessDefinition(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, description));
 
@@ -150,7 +151,7 @@ public class IssueWriter {
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				var.getElement().getProcessDefinition(), var.getResourceFilePath(),
 				anomaly.getElementId(),
 				anomaly.getElementName(),
@@ -180,7 +181,7 @@ public class IssueWriter {
 
 		final BaseElement baseElement = element.getBaseElement();
 
-		issues.add(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				element.getProcessDefinition(), resourceFile,
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
@@ -207,6 +208,10 @@ public class IssueWriter {
 
 		final BaseElement baseElement = element.getBaseElement();
 
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+				element.getProcessDefinition(), entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message));
+
 		return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				element.getProcessDefinition(), entry.getKey().getAttribute(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message);
@@ -231,6 +236,10 @@ public class IssueWriter {
 			final BpmnElement element, final String bpmnFile, final String message) {
 
 		final BaseElement baseElement = element.getBaseElement();
+
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), classification, bpmnFile,
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message));
 
 		return new CheckerIssue(rule.getName(), classification, bpmnFile,
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
@@ -261,6 +270,12 @@ public class IssueWriter {
 
 		final BaseElement baseElement = element.getBaseElement();
 
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+				element.getProcessDefinition(), variableResourcePath,
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), varName, message,
+				convention.getDescription()));
+
 		return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				element.getProcessDefinition(), variableResourcePath,
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
@@ -288,6 +303,11 @@ public class IssueWriter {
 
 		final BaseElement baseElement = element.getBaseElement();
 
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+				element.getProcessDefinition(), classPath,
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
+
 		return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				element.getProcessDefinition(), classPath,
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
@@ -313,6 +333,11 @@ public class IssueWriter {
 			String javaReference, String message) {
 		final BaseElement baseElement = element.getBaseElement();
 
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+				element.getProcessDefinition(), javaReference,
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
+
 		return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				element.getProcessDefinition(), javaReference,
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
@@ -336,6 +361,11 @@ public class IssueWriter {
 	public static CheckerIssue createIssueWithBeanRef(Rule rule, CriticalityEnum classification, BpmnElement element,
 			String beanReference, String message) {
 		final BaseElement baseElement = element.getBaseElement();
+
+		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+				element.getProcessDefinition(), beanReference,
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
+				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
 
 		return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
 				element.getProcessDefinition(), beanReference,

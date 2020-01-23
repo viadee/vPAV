@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -131,7 +132,7 @@ public class SignalEventCheckerTest {
 			issues.addAll(checker.check(element));
 		}
 
-		if (issues.size() != 1) {
+		if (IssueService.getInstance().getIssues().size() != 1) {
 			Assert.fail("incorrect model should generate an issue");
 		}
 	}
