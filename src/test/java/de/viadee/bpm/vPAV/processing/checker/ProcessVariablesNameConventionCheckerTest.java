@@ -35,6 +35,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
@@ -51,6 +52,7 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -115,7 +117,7 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Collection<CheckerIssue> issues = new ArrayList<>();
+
 		for (final BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
@@ -126,10 +128,10 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 			element.setProcessVariables(variables);
 
-			issues.addAll(checker.check(element));
+			checker.check(element);
 		}
 
-		assertEquals(0, issues.size());
+		assertEquals(0, IssueService.getInstance().getIssues().size());
 	}
 
 	/**
@@ -149,7 +151,6 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
@@ -160,8 +161,10 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 			element.setProcessVariables(variables);
 
-			issues.addAll(checker.check(element));
+			checker.check(element);
 		}
+
+		final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 		int externalConventions = 0;
 		int internalConventions = 0;
 		for (CheckerIssue issue : issues) {
@@ -204,5 +207,10 @@ public class ProcessVariablesNameConventionCheckerTest {
 		elementConventions.add(externalElementConvention);
 
 		return new Rule("ProcessVariablesNameConventionChecker", true, null, null, elementConventions, null);
+	}
+
+	@After
+	public void clearIssues() {
+		IssueService.getInstance().clear();
 	}
 }

@@ -32,24 +32,21 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -91,14 +88,9 @@ public class FieldInjectionCheckerTest {
 	/**
 	 * Case: JavaDelegate with correct implemented fieldInjection variable
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testCorrectFieldInjection()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    public void testCorrectFieldInjection() {
 		final String PATH = BASE_PATH + "FieldInjectionCheckerTest_CorrectFieldInjection.bpmn";
 		checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
 
@@ -110,9 +102,9 @@ public class FieldInjectionCheckerTest {
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        checker.check(element);
 
-		if (issues.size() > 0) {
+        if (IssueService.getInstance().getIssues().size() > 0) {
 			Assert.fail("correct java delegate generates an issue");
 		}
 	}
@@ -120,14 +112,9 @@ public class FieldInjectionCheckerTest {
 	/**
 	 * Case: Type of fieldInjection variable is incorrect
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testWrongTypeOfFieldInjection()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    public void testWrongTypeOfFieldInjection() {
 		final String PATH = BASE_PATH + "FieldInjectionCheckerTest_WrongType.bpmn";
 		checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
 
@@ -139,9 +126,9 @@ public class FieldInjectionCheckerTest {
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        checker.check(element);
 
-		if (issues.size() != 1) {
+        if (IssueService.getInstance().getIssues().size() != 1) {
 			Assert.fail("wrong type doesn't generate an issue");
 		}
 	}
@@ -149,14 +136,9 @@ public class FieldInjectionCheckerTest {
 	/**
 	 * Case: No setter method for variable
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testNoSetterMethod()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    public void testNoSetterMethod() {
 		final String PATH = BASE_PATH + "FieldInjectionCheckerTest_NoSetter.bpmn";
 		checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
 
@@ -168,10 +150,15 @@ public class FieldInjectionCheckerTest {
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        checker.check(element);
 
-		if (issues.size() != 1) {
+        if (IssueService.getInstance().getIssues().size() != 1) {
 			Assert.fail("no setter method doesn't generate an issue");
 		}
 	}
+
+    @After
+    public void clearIssues() {
+        IssueService.getInstance().clear();
+    }
 }

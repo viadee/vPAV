@@ -267,7 +267,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 	 */
 	private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
 			ArrayList<String> aDelegate, ArrayList<String> aExpression, boolean taskListener) {
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		String location = ""; //$NON-NLS-1$
 		if (taskListener)
 			location = BpmnConstants.TASK_LISTENER;

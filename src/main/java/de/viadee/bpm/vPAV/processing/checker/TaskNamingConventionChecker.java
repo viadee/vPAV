@@ -62,7 +62,7 @@ public class TaskNamingConventionChecker extends AbstractElementChecker {
 	 */
 	@Override
 	public Collection<CheckerIssue> check(final BpmnElement element) {
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BaseElement baseElement = element.getBaseElement();
 
 		if (baseElement instanceof Task) {

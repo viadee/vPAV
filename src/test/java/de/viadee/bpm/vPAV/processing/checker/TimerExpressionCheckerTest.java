@@ -32,28 +32,24 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -84,20 +80,12 @@ public class TimerExpressionCheckerTest {
 
 	/**
 	 * Case: TimerExpression in start event is correct
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 
 	@Test
-	public void testTimerExpression_Correct()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+	public void testTimerExpression_Correct() {
 		final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Correct.bpmn";
 		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
-
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -106,29 +94,21 @@ public class TimerExpressionCheckerTest {
 
 		for (BaseElement event : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+			checker.check(element);
 		}
 
-		if (issues.size() > 0) {
+		if (IssueService.getInstance().getIssues().size() > 0) {
 			Assert.fail("correct timer expression generates an issue");
 		}
 	}
 
 	/**
 	 * Case: TimerExpression in start event is wrong
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testTimerExpression_Wrong()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+	public void testTimerExpression_Wrong() {
 		final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong.bpmn";
 		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
-
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -137,29 +117,21 @@ public class TimerExpressionCheckerTest {
 
 		for (BaseElement event : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+			checker.check(element);
 		}
 
-		if (issues.size() != 1) {
+		if (IssueService.getInstance().getIssues().size() != 1) {
 			Assert.fail("wrong timer expression should generate an issue");
 		}
 	}
 
 	/**
 	 * Case: Several timer expressions
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testTimerExpressions()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+	public void testTimerExpressions() {
 		final String PATH = BASE_PATH + "TimerExpressionCheckerTest.bpmn";
 		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
-
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -168,13 +140,17 @@ public class TimerExpressionCheckerTest {
 
 		for (BaseElement event : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+			checker.check(element);
 		}
 
-		if (issues.size() != 2) {
+		if (IssueService.getInstance().getIssues().size() != 2) {
 			Assert.fail("model should consist of two issues");
 		}
+	}
 
+	@After
+	public void clearIssues() {
+		IssueService.getInstance().clear();
 	}
 
 }

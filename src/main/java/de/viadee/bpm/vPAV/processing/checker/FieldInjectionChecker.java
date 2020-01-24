@@ -76,7 +76,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement bpmnElement = element.getBaseElement();
         String implementationAttr = null;
         ArrayList<String> executionDelegate = new ArrayList<String>();
@@ -195,7 +195,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
      */
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
             ArrayList<String> aDelegate, ArrayList<String> aExpression, String varName) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
         // classes
         if (aClass == null || aClass.size() > 0) {
@@ -256,7 +256,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
     private Collection<CheckerIssue> checkClassFileForVar(final BpmnElement element, final String className,
             final String varName) {
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {

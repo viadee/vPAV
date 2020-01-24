@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -48,11 +49,9 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -61,14 +60,12 @@ public class ProcessVariablesModelCheckerTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
 
-	private static BpmnModelInstance modelInstance;
-
 	private static ModelChecker checker;
 
 	private static ClassLoader cl;
 
 	@BeforeClass
-	public static void setup() throws ParserConfigurationException, SAXException, IOException {
+    public static void setup() throws MalformedURLException {
 		RuntimeConfig.getInstance().setTest(true);
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
@@ -84,12 +81,12 @@ public class ProcessVariablesModelCheckerTest {
 		final File processDefinition = new File(PATH);
 
 		// parse bpmn model
-		modelInstance = Bpmn.readModelFromFile(processDefinition);
+        BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
 		// create data flow graphs
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-				processDefinition.getPath(), new ArrayList<String>(), scanner, new FlowAnalysis());
+                processDefinition.getPath(), new ArrayList<>(), scanner, new FlowAnalysis());
 
 		// calculate invalid paths based on data flow graphs
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
@@ -104,7 +101,9 @@ public class ProcessVariablesModelCheckerTest {
 	// TODO: Anpassen
 	// @Test
 	public void testProcessVariablesModelChecker() {
-		final Collection<CheckerIssue> issues = checker.check();
+        checker.check();
+
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
 		if (issues.size() == 0) {
 			Assert.fail("there should be generated an issue");
@@ -132,5 +131,6 @@ public class ProcessVariablesModelCheckerTest {
 	@AfterClass
 	public static void tearDown() {
 		RuntimeConfig.getInstance().setTest(false);
+        IssueService.getInstance().clear();
 	}
 }

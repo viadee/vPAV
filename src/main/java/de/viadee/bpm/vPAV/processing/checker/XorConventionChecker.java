@@ -69,7 +69,7 @@ public class XorConventionChecker extends AbstractElementChecker {
 	@Override
 	public Collection<CheckerIssue> check(final BpmnElement element) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BaseElement bpmnElement = element.getBaseElement();
 		final Map<String, Setting> settings = rule.getSettings();
 

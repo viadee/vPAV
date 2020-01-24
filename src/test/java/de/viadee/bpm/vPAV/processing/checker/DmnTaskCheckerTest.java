@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.CheckName;
@@ -43,15 +44,12 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -85,16 +83,10 @@ public class DmnTaskCheckerTest {
 	/**
 	 * Case: DMN task with correct DMN-File
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 *
 	 */
 
 	@Test
-	public void testCorrectDMN()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    public void testCorrectDMN() {
 		final String PATH = BASE_PATH + "DmnTaskCheckerTest_CorrectDMN.bpmn";
 		checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
 
@@ -106,9 +98,9 @@ public class DmnTaskCheckerTest {
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        checker.check(element);
 
-		if (issues.size() > 0) {
+        if (IssueService.getInstance().getIssues().size() > 0) {
 			Assert.fail("correct DMN-File generates an issue");
 		}
 	}
@@ -116,16 +108,10 @@ public class DmnTaskCheckerTest {
 	/**
 	 * Case: DMN task without a reference should produce an error
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 *
 	 */
 
 	@Test
-	public void testDMNTaskWithoutReference()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    public void testDMNTaskWithoutReference() {
 		final String PATH = BASE_PATH + "DmnTaskCheckerTest_WrongDmnTask.bpmn";
 		checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
 
@@ -138,7 +124,9 @@ public class DmnTaskCheckerTest {
 				new FlowAnalysis());
 		final BaseElement baseElement = element.getBaseElement();
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        checker.check(element);
+
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
 		if (issues.size() != 1) {
 			Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -151,16 +139,10 @@ public class DmnTaskCheckerTest {
 	/**
 	 * Case: DMN task with wrong DMN-File
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 *
 	 */
 
 	@Test
-	public void testDMNTaskWithWrongDMN()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    public void testDMNTaskWithWrongDMN() {
 		final String PATH = BASE_PATH + "DmnTaskCheckerTest_wrongDMNReference.bpmn";
 		checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
 
@@ -173,7 +155,9 @@ public class DmnTaskCheckerTest {
 				new FlowAnalysis());
 		final BaseElement baseElement = element.getBaseElement();
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        checker.check(element);
+
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
 		if (issues.size() != 1) {
 			Assert.fail("collection with the issues is bigger or smaller as expected");
@@ -186,16 +170,10 @@ public class DmnTaskCheckerTest {
 	/**
 	 * Case: read referenced DMN
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 *
 	 */
 
 	@Test
-	public void testReadReferencedDMNFile()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+    public void testReadReferencedDMNFile() {
 		final String PATH = BASE_PATH + "DmnTaskCheckerTest_ReadReferencedDMN.bpmn";
 		checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
 
@@ -207,10 +185,15 @@ public class DmnTaskCheckerTest {
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        checker.check(element);
 
-		if (issues.size() > 1) {
+        if (IssueService.getInstance().getIssues().size() > 1) {
 			Assert.fail("collection with the issues is bigger or smaller as expected");
 		}
 	}
+
+    @After
+    public void clearIssues() {
+        IssueService.getInstance().clear();
+    }
 }

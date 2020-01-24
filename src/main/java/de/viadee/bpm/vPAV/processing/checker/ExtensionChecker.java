@@ -63,17 +63,16 @@ public class ExtensionChecker extends AbstractElementChecker {
 
 	@Override
 	public Collection<CheckerIssue> check(BpmnElement element) {
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BaseElement bpmnElement = element.getBaseElement();
 		final Map<String, Setting> settings = rule.getSettings();
 		final ArrayList<String> whiteList = rule.getWhiteList();
 
-		final Map<String, String> keyPairs = new HashMap<String, String>();
 		final ArrayList<Setting> optionalSettings = new ArrayList<Setting>();
 		final ArrayList<Setting> mandatorySettings = new ArrayList<Setting>();
 
 		// Retrieve extension key pair from bpmn model
-		keyPairs.putAll(bpmnScanner.getKeyPairs(bpmnElement.getId()));
+        final Map<String, String> keyPairs = new HashMap<>(bpmnScanner.getKeyPairs(bpmnElement.getId()));
 
 		// Create ArrayList for easier manipulation
 		for (Map.Entry<String, Setting> settingsEntry : settings.entrySet()) {
@@ -113,7 +112,7 @@ public class ExtensionChecker extends AbstractElementChecker {
 	private Collection<CheckerIssue> checkManExtension(final ArrayList<String> whiteList,
 			final ArrayList<Setting> settings, final Map<String, String> keyPairs, final BaseElement bpmnElement,
 			final BpmnElement element) {
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (Setting setting : settings) {
 			checkKey(whiteList, keyPairs, bpmnElement, element, issues, setting);
@@ -200,7 +199,7 @@ public class ExtensionChecker extends AbstractElementChecker {
 	private Collection<CheckerIssue> checkOptExtension(final ArrayList<String> whiteList,
 			final ArrayList<Setting> settings, final Map<String, String> keyPairs, final BaseElement bpmnElement,
 			final BpmnElement element) {
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		for (Setting setting : settings) {
 
@@ -290,7 +289,7 @@ public class ExtensionChecker extends AbstractElementChecker {
 	 *            Certain setting out of all settings
 	 * @return true/false
 	 */
-	public boolean checkMisconfiguration(Setting setting) {
+    private boolean checkMisconfiguration(Setting setting) {
 
 		boolean misconfigured = false;
 
@@ -312,11 +311,11 @@ public class ExtensionChecker extends AbstractElementChecker {
 					"Misconfiguration of rule for ExtensionChecker. Please provide either tasktype or a specific ID of an element.");
 	}
 
-	public boolean getIsMisconfigured() {
+    private boolean getIsMisconfigured() {
 		return isMisconfigured;
 	}
 
-	public void setIsMisconfigured(boolean isMisconfigured) {
+    private void setIsMisconfigured(boolean isMisconfigured) {
 		this.isMisconfigured = isMisconfigured;
 	}
 

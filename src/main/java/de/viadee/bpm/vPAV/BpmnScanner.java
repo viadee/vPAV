@@ -84,7 +84,7 @@ public class BpmnScanner {
         }
         try {
             setModelVersion(path);
-        } catch (SAXException | ParserConfigurationException | IOException e) {
+        } catch (SAXException | IOException | ParserConfigurationException e) {
             throw new ProcessingException("Could not instantiate BpmnScanner. Run aborted");
         }
     }
@@ -98,7 +98,7 @@ public class BpmnScanner {
      * @throws IOException
      * @throws ParserConfigurationException
      */
-    private void setModelVersion(String path) throws SAXException, IOException, ParserConfigurationException {
+    private void setModelVersion(String path) throws IOException, SAXException, ParserConfigurationException {
         // parse the given bpmn model
         doc = builder.parse(path);
 

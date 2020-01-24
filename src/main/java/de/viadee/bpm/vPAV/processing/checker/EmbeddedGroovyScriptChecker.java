@@ -155,7 +155,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 	 */
 	private Collection<CheckerIssue> checkScriptTask(final String bpmnFile, final BpmnElement element) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BaseElement baseElement = element.getBaseElement();
 
 		if (baseElement instanceof ScriptTask) {
@@ -191,7 +191,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 	 */
 	private Collection<CheckerIssue> checkExecutionListener(final String bpmnFile, final BpmnElement element, final ExtensionElements extensionElements) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		final List<CamundaExecutionListener> listenerList = extensionElements.getElementsQuery()
 				.filterByType(CamundaExecutionListener.class).list();
@@ -234,7 +234,7 @@ public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 	 */
 	private Collection<CheckerIssue> checkTaskListener(final String bpmnFile, final BpmnElement element, final ExtensionElements extensionElements) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		final List<CamundaTaskListener> listenerList = extensionElements.getElementsQuery()
 				.filterByType(CamundaTaskListener.class).list();

@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
@@ -43,15 +44,12 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.*;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -65,218 +63,195 @@ import java.util.Map;
  */
 public class NoScriptCheckerTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/";
 
-	private static NoScriptChecker checker;
+    private static NoScriptChecker checker;
 
-	private static ClassLoader cl;
+    private static ClassLoader cl;
 
-	private static Map<String, Setting> setting = new HashMap<String, Setting>();
+    private static Map<String, Setting> setting = new HashMap<String, Setting>();
 
-	private final Rule rule = new Rule("NoScriptChecker", true, null, setting, null, null);
+    private final Rule rule = new Rule("NoScriptChecker", true, null, setting, null, null);
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
-	}
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().getResource("en_US");
+    }
 
-	/**
-	 * Case: BPMN with no Script
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 */
-	@Test
-	public void testModelWithNoScript()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithoutScript.bpmn";
-		checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+    /**
+     * Case: BPMN with no Script
+     */
+    @Test
+    public void testModelWithNoScript() {
+        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithoutScript.bpmn";
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
+        new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        if (IssueService.getInstance().getIssues().size() > 0) {
+            Assert.fail("correct model generates an issue");
+        }
+    }
 
-		if (issues.size() > 0) {
-			Assert.fail("correct model generates an issue");
-		}
-	}
+    /**
+     * Case: Model with an InputScript
+     */
+    @Test
+    public void testModelWithInputScript() {
+        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithInputScript.bpmn";
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
-	/**
-	 * Case: Model with an InputScript
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 */
-	@Test
-	public void testModelWithInputScript()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithInputScript.bpmn";
-		checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
+        final BaseElement baseElement = element.getBaseElement();
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
-		final BaseElement baseElement = element.getBaseElement();
+        checker.check(element);
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
-		if (issues.size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		} else {
-			Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'inputParameter' script",
-					issues.iterator().next().getMessage());
-		}
-	}
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        } else {
+            Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'inputParameter' script",
+                    issues.iterator().next().getMessage());
+        }
+    }
 
-	/**
-	 * Case: Model with an OutputScript
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 */
-	@Test
-	public void testModelWithOutputScript()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithOutputScript.bpmn";
-		checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+    /**
+     * Case: Model with an OutputScript
+     */
+    @Test
+    public void testModelWithOutputScript() {
+        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithOutputScript.bpmn";
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
-		final BaseElement baseElement = element.getBaseElement();
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
+        final BaseElement baseElement = element.getBaseElement();
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        checker.check(element);
 
-		if (issues.size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		} else {
-			Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'outputParameter' script",
-					issues.iterator().next().getMessage());
-		}
-	}
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
-	/**
-	 * Case: Model with an executionlistenerScript
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 */
-	@Test
-	public void testModelWithExecutionlistenerScript()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithExecutionlistenerScript.bpmn";
-		checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        } else {
+            Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'outputParameter' script",
+                    issues.iterator().next().getMessage());
+        }
+    }
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+    /**
+     * Case: Model with an executionlistenerScript
+     */
+    @Test
+    public void testModelWithExecutionlistenerScript() {
+        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithExecutionlistenerScript.bpmn";
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
-		final Collection<Gateway> baseElementsGate = modelInstance.getModelElementsByType(Gateway.class);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final BpmnElement elementGate = new BpmnElement(PATH, baseElementsGate.iterator().next(),
-				new ControlFlowGraph(), new FlowAnalysis());
-		final BaseElement baseElementGate = elementGate.getBaseElement();
+        final Collection<Gateway> baseElementsGate = modelInstance.getModelElementsByType(Gateway.class);
 
-		Collection<CheckerIssue> issues = checker.check(elementGate);
+        final BpmnElement elementGate = new BpmnElement(PATH, baseElementsGate.iterator().next(),
+                new ControlFlowGraph(), new FlowAnalysis());
+        final BaseElement baseElementGate = elementGate.getBaseElement();
 
-		if (issues.size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		} else {
-			Assert.assertEquals("Task '" + CheckName.checkName(baseElementGate) + "' with 'executionListener' script",
-					issues.iterator().next().getMessage());
-		}
-	}
+        checker.check(elementGate);
 
-	/**
-	 * Case: Model with a TasklistenerScript
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 */
-	@Test
-	public void testModelWithTasklistenerScript()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithTasklistenerScript.bpmn";
-		checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        } else {
+            Assert.assertEquals("Task '" + CheckName.checkName(baseElementGate) + "' with 'executionListener' script",
+                    issues.iterator().next().getMessage());
+        }
+    }
 
-		final Collection<UserTask> baseElements = modelInstance.getModelElementsByType(UserTask.class);
+    /**
+     * Case: Model with a TasklistenerScript
+     */
+    @Test
+    public void testModelWithTasklistenerScript() {
+        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithTasklistenerScript.bpmn";
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
-		final BaseElement baseElement = element.getBaseElement();
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        final Collection<UserTask> baseElements = modelInstance.getModelElementsByType(UserTask.class);
 
-		if (issues.size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		} else {
-			Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'taskListener' script",
-					issues.iterator().next().getMessage());
-		}
-	}
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
+        final BaseElement baseElement = element.getBaseElement();
 
-	/**
-	 * Case: Model with a ScriptTask
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 */
-	@Test
-	public void testModelWithScriptTask()
-			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithScriptTask.bpmn";
-		checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        checker.check(element);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
-		final Collection<ScriptTask> baseElements = modelInstance.getModelElementsByType(ScriptTask.class);
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        } else {
+            Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with 'taskListener' script",
+                    issues.iterator().next().getMessage());
+        }
+    }
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
-		final BaseElement baseElement = element.getBaseElement();
+    /**
+     * Case: Model with a ScriptTask
+     */
+    @Test
+    public void testModelWithScriptTask() {
+        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithScriptTask.bpmn";
+        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
 
-		final Collection<CheckerIssue> issues = checker.check(element);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		if (issues.size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		} else {
-			Assert.assertEquals("ScriptTask '" + CheckName.checkName(baseElement) + "' not allowed",
-					issues.iterator().next().getMessage());
-		}
-	}
+        final Collection<ScriptTask> baseElements = modelInstance.getModelElementsByType(ScriptTask.class);
+
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
+        final BaseElement baseElement = element.getBaseElement();
+
+        checker.check(element);
+
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
+
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        } else {
+            Assert.assertEquals("ScriptTask '" + CheckName.checkName(baseElement) + "' not allowed",
+                    issues.iterator().next().getMessage());
+        }
+    }
+
+    @After
+    public void clearIssues() {
+        IssueService.getInstance().clear();
+    }
 }

@@ -138,7 +138,6 @@ public class XmlConfigReaderTest {
 	/**
 	 * Test loading an incorrect config file (rulename empty)
 	 *
-	 *
 	 */
 	@Test(expected = ConfigReaderException.class)
 	public void testLoadingIncorrectXMLNameConfigFile() throws ConfigReaderException {
@@ -160,4 +159,5 @@ public class XmlConfigReaderTest {
 		// When Then
 		reader.read("ruleSetIncorrect.xml");
 	}
+
 }

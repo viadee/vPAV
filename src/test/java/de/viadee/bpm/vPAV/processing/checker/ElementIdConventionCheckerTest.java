@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -41,6 +42,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -86,13 +88,13 @@ public class ElementIdConventionCheckerTest {
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+            checker.check(element);
 		}
 
-		if (issues.size() > 0) {
+        if (IssueService.getInstance().getIssues().size() > 0) {
 			fail("There are issues, altough the convention is correct.");
 		}
 	}
@@ -109,12 +111,11 @@ public class ElementIdConventionCheckerTest {
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 		for (final BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
-		}
-		assertEquals("The issue wasn't recognised", 1, issues.size());
+            checker.check(element);
+        }
+        assertEquals("The issue wasn't recognised", 1, IssueService.getInstance().getIssues().size());
 	}
 
 	/**
@@ -129,12 +130,11 @@ public class ElementIdConventionCheckerTest {
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 		for (final BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
-		}
-		assertEquals("The issue wasn't recognised", 2, issues.size());
+            checker.check(element);
+        }
+        assertEquals("The issue wasn't recognised", 2, IssueService.getInstance().getIssues().size());
 	}
 
 	/**
@@ -158,4 +158,9 @@ public class ElementIdConventionCheckerTest {
 
 		return rule;
 	}
+
+    @After
+    public void clearIssues() {
+        IssueService.getInstance().clear();
+    }
 }

@@ -67,7 +67,7 @@ public class NoScriptChecker extends AbstractElementChecker {
 	@Override
 	public Collection<CheckerIssue> check(final BpmnElement element) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BaseElement bpmnElement = element.getBaseElement();
 
 		if (!(bpmnElement instanceof Process) && !(bpmnElement instanceof SubProcess)

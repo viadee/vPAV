@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -40,11 +41,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -86,8 +84,7 @@ public class CheckerFactoryTest {
      * Test correct viadee checker 'JavaDelegateChecker'
      */
     @Test
-    public void testCorrectInternalChecker()
-            throws ParserConfigurationException, SAXException, IOException {
+    public void testCorrectInternalChecker() {
         RuleSet rules = new RuleSet();
         Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
         HashMap<String, Rule> delegateRules = new HashMap<>();
@@ -111,8 +108,7 @@ public class CheckerFactoryTest {
      * Test wrong internal checker
      */
     @Test
-    public void testIncorrectInternalChecker()
-            throws ParserConfigurationException, SAXException, IOException {
+    public void testIncorrectInternalChecker() {
         RuleSet rules = new RuleSet();
         Rule rule = new Rule("WrongChecker", true, null, null, null, null);
         HashMap<String, Rule> wrongCheckerRules = new HashMap<>();
@@ -132,8 +128,7 @@ public class CheckerFactoryTest {
      *
      */
     @Test
-    public void testIncorrectExternalChecker()
-            throws ParserConfigurationException, SAXException, IOException {
+    public void testIncorrectExternalChecker() {
         RuleSet rules = new RuleSet();
         settings.put("external_Location", setting);
         Rule rule = new Rule("WrongChecker", true, null, settings, null, null);
@@ -190,5 +185,6 @@ public class CheckerFactoryTest {
     @After
     public void clearLists() {
         settings.clear();
+        IssueService.getInstance().clear();
     }
 }

@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -43,14 +44,12 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -82,7 +81,7 @@ public class ProcessVariableMappingTest {
 	 * Case: Test a model with Input Mapping of type text code
 	 */
 	@Test
-	public void testInputTypeText() throws IOException, SAXException, ParserConfigurationException {
+	public void testInputTypeText() {
 
 		final String PATH = BASE_PATH + "ProcessVariablesMapping_InputText.bpmn";
 		final File processDefinition = new File(PATH);
@@ -118,7 +117,7 @@ public class ProcessVariableMappingTest {
 	 * Case: Test a model with Input Mapping of type list code
 	 */
 	@Test
-	public void testInputTypeList() throws IOException, SAXException, ParserConfigurationException {
+	public void testInputTypeList() {
 
 		final String PATH = BASE_PATH + "ProcessVariablesMapping_InputList.bpmn";
 		final File processDefinition = new File(PATH);
@@ -154,7 +153,7 @@ public class ProcessVariableMappingTest {
 	 * Case: Test a model with Input Mapping of type map code
 	 */
 	@Test
-	public void testInputTypeMap() throws IOException, SAXException, ParserConfigurationException {
+	public void testInputTypeMap() {
 
 		final String PATH = BASE_PATH + "ProcessVariablesMapping_InputMap.bpmn";
 		final File processDefinition = new File(PATH);
@@ -190,7 +189,7 @@ public class ProcessVariableMappingTest {
 	 * Case: Test a model with Output Mapping of type text code
 	 */
 	@Test
-	public void testOutputTypeText() throws IOException, SAXException, ParserConfigurationException {
+	public void testOutputTypeText() {
 
 		final String PATH = BASE_PATH + "ProcessVariablesMapping_OutputText.bpmn";
 		final File processDefinition = new File(PATH);
@@ -226,7 +225,7 @@ public class ProcessVariableMappingTest {
 	 * Case: Test a model with Output Mapping of type list code
 	 */
 	@Test
-	public void testOutputTypeList() throws IOException, SAXException, ParserConfigurationException {
+	public void testOutputTypeList() {
 
 		final String PATH = BASE_PATH + "ProcessVariablesMapping_OutputList.bpmn";
 		final File processDefinition = new File(PATH);
@@ -261,7 +260,7 @@ public class ProcessVariableMappingTest {
 	 * Case: Test a model with Output Mapping of type map code
 	 */
 	@Test
-	public void testOutputTypeMap() throws IOException, SAXException, ParserConfigurationException {
+	public void testOutputTypeMap() {
 
 		final String PATH = BASE_PATH + "ProcessVariablesMapping_OutputMap.bpmn";
 		final File processDefinition = new File(PATH);
@@ -297,7 +296,7 @@ public class ProcessVariableMappingTest {
 	 * Case: Test a model with Input Mapping of type text code
 	 */
 	@Test
-	public void testInputTypeScript() throws IOException, SAXException, ParserConfigurationException {
+	public void testInputTypeScript() {
 
 		final String PATH = BASE_PATH + "ProcessVariablesMapping_InputScript.bpmn";
 		final File processDefinition = new File(PATH);
@@ -328,6 +327,11 @@ public class ProcessVariableMappingTest {
 		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
 		Assert.assertEquals(1, processVariables.size());
+	}
+
+	@After
+	public void clearIssues() {
+		IssueService.getInstance().clear();
 	}
 
 }

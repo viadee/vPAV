@@ -39,15 +39,12 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Gateway;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class BpmnScannerTest {
@@ -56,14 +53,9 @@ public class BpmnScannerTest {
 
 	/**
 	 * Case: BPMN-Model in Version 1
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testModelVersionV1() throws SAXException, IOException, ParserConfigurationException {
+	public void testModelVersionV1() {
 		final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
 		final String impClass = "camunda:delegateExpression";
 
@@ -78,19 +70,14 @@ public class BpmnScannerTest {
 		BpmnScanner scanner = new BpmnScanner(PATH);
 		String imp = scanner.getImplementation(element.getBaseElement().getId());
 
-		assertTrue("Get unexpected implementation", imp.equals(impClass));
+		assertEquals("Get unexpected implementation", imp, impClass);
 	}
 
 	/**
 	 * Case: BPMN-Model in Version 2
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testModelVersionV2() throws SAXException, IOException, ParserConfigurationException {
+	public void testModelVersionV2() {
 		final String PATH = BASE_PATH + "BPMN_Model_Version_V2.bpmn";
 		final String impEx = "camunda:class";
 
@@ -105,19 +92,14 @@ public class BpmnScannerTest {
 		BpmnScanner scanner = new BpmnScanner(PATH);
 		String imp = scanner.getImplementation(element.getBaseElement().getId());
 
-		assertTrue("Get unexpected implementation", imp.equals(impEx));
+		assertEquals("Get unexpected implementation", imp, impEx);
 	}
 
 	/**
 	 * Case: BPMN-Model in Version 3
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testModelVersionV3() throws SAXException, IOException, ParserConfigurationException {
+	public void testModelVersionV3() {
 		final String PATH = BASE_PATH + "BPMN_Model_Version_V3.bpmn";
 		final String impDel = "camunda:expression";
 
@@ -132,19 +114,14 @@ public class BpmnScannerTest {
 		BpmnScanner scanner = new BpmnScanner(PATH);
 		String imp = scanner.getImplementation(element.getBaseElement().getId());
 
-		assertTrue("Get unexpected implementation", imp.equals(impDel));
+		assertEquals("Get unexpected implementation", imp, impDel);
 	}
 
 	/**
 	 * Case: Test getScriptType
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testGetScriptType() throws SAXException, IOException, ParserConfigurationException {
+	public void testGetScriptType() {
 		final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
 		final String scriptType = "inputParameter";
 
@@ -164,14 +141,9 @@ public class BpmnScannerTest {
 
 	/**
 	 * Case: Test getXorGateWays
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testGetXorGateWays() throws SAXException, IOException, ParserConfigurationException {
+	public void testGetXorGateWays() {
 		final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
 		final String gatewayId = "ExclusiveGateway_Id";
 
@@ -186,19 +158,14 @@ public class BpmnScannerTest {
 		BpmnScanner scanner = new BpmnScanner(PATH);
 		String gwId = scanner.getXorGateWays(element.getBaseElement().getId());
 
-		assertTrue("Get unexpected Element", gwId.equals(gatewayId));
+		assertEquals("Get unexpected Element", gwId, gatewayId);
 	}
 
 	/**
 	 * Case: Test getOutgoing
-	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testGetOutgoing() throws SAXException, IOException, ParserConfigurationException {
+	public void testGetOutgoing() {
 		final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
 		final int anzOut = 2;
 
@@ -213,6 +180,6 @@ public class BpmnScannerTest {
 		BpmnScanner scanner = new BpmnScanner(PATH);
 		int out = scanner.getOutgoing(element.getBaseElement().getId());
 
-		assertTrue("More or less outgoing sequentflows as expected", out == anzOut);
+		assertEquals("More or less outgoing sequentflows as expected", out, anzOut);
 	}
 }
