@@ -169,7 +169,7 @@ public class JavaReaderStatic {
      * @param predecessor      List of predecessors
      * @return Map of process variables for a given class
      */
-    public ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
+    private ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
             final String className, final String methodName, final String classFile, final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId,
             AnalysisElement[] predecessor) {
@@ -304,7 +304,7 @@ public class JavaReaderStatic {
                         List<Block> graphHeads = graph.getHeads();
 
                         for (Block block : graphHeads) {
-                            outSet = blockIterator(classPaths, Scene.v().getCallGraph(), graph, block, outSet, element,
+                            blockIterator(classPaths, Scene.v().getCallGraph(), graph, block, outSet, element,
                                     chapter, fieldType, classFile, scopeId, originalBlock, assignmentStmt, args,
                                     predecessor);
                         }

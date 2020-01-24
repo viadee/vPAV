@@ -239,6 +239,7 @@ class VariablesExtractor {
                     for (Type parameter : calledMethod.getMethodRef().getParameterTypes()) {
                         try {
                             if (parameter instanceof RefType) {
+                                // TODO: Check also other types of execution
                                 if (((RefType) parameter).getClassName()
                                         .equals(CamundaMethodServices.DELEGATE)) {
                                     passesDelegateExecution = true;

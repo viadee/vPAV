@@ -1119,6 +1119,7 @@ public final class ProcessVariableReader {
 
         boolean isDelegated = false;
         ExpressionNode expNode = new ExpressionNode(element, expression, chapter);
+        predecessor[0] = expNode;
 
         try {
             // remove object name from method calls, otherwise the method arguments could
