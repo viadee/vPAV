@@ -182,7 +182,7 @@ public class JavaReaderStatic {
 
         variablesExtractor.resetMethodStackTrace();
         classFetcherRecursive(classPaths, className, methodName, classFile, element, chapter, fieldType, scopeId,
-                outSet, null, "", args, null, predecessor);
+                outSet, null, "", args, null, predecessor, new ArrayList<>());
 
         if (outSet.getAllProcessVariables().size() > 0) {
             processVariables.putAll(outSet.getAllProcessVariables());
@@ -206,7 +206,8 @@ public class JavaReaderStatic {
     }
 
     private List<Type> prepareSootAndFetchedObjects(final String methodName,
-            final SootClass sootClass) {
+            final SootClass sootClass, final List<Type> params) {
+
         List<Type> parameterTypes = new ArrayList<>();
 
         // Retrieve the method and its body based on the used interface
@@ -240,6 +241,8 @@ public class JavaReaderStatic {
                 parameterTypes.add(delegateExecutionType);
                 parameterTypes.add(mapVariablesType);
                 break;
+            default:
+                parameterTypes.addAll(params);
         }
 
         return parameterTypes;
@@ -265,12 +268,12 @@ public class JavaReaderStatic {
             final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, final String scopeId, OutSetCFG outSet,
             final VariableBlock originalBlock, final String assignmentStmt, final List<Value> args,
-            SootMethod sootMethod, final AnalysisElement[] predecessor) {
+            SootMethod sootMethod, final AnalysisElement[] predecessor, List<Type> parameterTypes) {
 
         SootClass sootClass = setupSootClass(className);
 
         if (sootClass != null) {
-            List<Type> parameterTypes = prepareSootAndFetchedObjects(methodName, sootClass);
+            parameterTypes = prepareSootAndFetchedObjects(methodName, sootClass, parameterTypes);
             List<SootMethod> toFetchedMethods = new ArrayList<>();
             if (parameterTypes.size() > 0) {
                 // Replace retrieveCustomMethod()

@@ -239,7 +239,7 @@ class VariablesExtractor {
                         try {
                             if (parameter instanceof RefType) {
                                 if (((RefType) parameter).getClassName()
-                                        .equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
+                                        .equals(CamundaMethodServices.DELEGATE)) {
                                     passesDelegateExecution = true;
                                     break;
                                 }
@@ -283,7 +283,8 @@ class VariablesExtractor {
                         // Split node
                         Node newSectionNode = (Node) node.clone();
                         checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-                                variableBlock, unit, assignmentStmt, expr.getArgs(), false, predecessor);
+                                variableBlock, unit, assignmentStmt, expr.getArgs(), false, predecessor,
+                                expr.getMethod().getParameterTypes());
                         paramName = returnStmt;
                         node = newSectionNode;
                         nodeSaved = false;
@@ -452,7 +453,7 @@ class VariablesExtractor {
             }
         } else {
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), false, predecessor);
+                    unit, assignmentStmt, expr.getArgs(), false, predecessor, expr.getMethod().getParameterTypes());
         }
     }
 
@@ -512,7 +513,7 @@ class VariablesExtractor {
             }
         } else {
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), false, predecessor);
+                    unit, assignmentStmt, expr.getArgs(), false, predecessor, expr.getMethod().getParameterTypes());
         }
     }
 
@@ -597,8 +598,7 @@ class VariablesExtractor {
         else if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JVirtualInvokeExpr) {
             JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit,
-                    assignmentStmt, expr.getArgs(), true, predecessor);
+                    unit, assignmentStmt, expr.getArgs(), true, predecessor, expr.getMethod().getParameterTypes());
         }
         // Constructor call
         else if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
@@ -608,8 +608,8 @@ class VariablesExtractor {
                 assignmentStmt = expr.getBaseBox().getValue().toString();
             } else {
                 checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-                        variableBlock,
-                        unit, assignmentStmt, expr.getArgs(), true, predecessor);
+                        variableBlock, unit, assignmentStmt, expr.getArgs(), true, predecessor,
+                        expr.getMethod().getParameterTypes());
             }
         }
         return assignmentStmt;
@@ -636,7 +636,8 @@ class VariablesExtractor {
     private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
-            final List<Value> args, final boolean isInvoke, AnalysisElement[] predecessor) {
+            final List<Value> args, final boolean isInvoke, AnalysisElement[] predecessor,
+            List<Type> parameterTypes) {
 
         final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
         final Iterator<Edge> sources = cg.edgesOutOf(unit);
@@ -662,8 +663,8 @@ class VariablesExtractor {
                 controlFlowGraph.resetInternalNodeCounter();
 
                 javaReaderStatic.classFetcherRecursive(classPaths, className, methodName, className, element, chapter,
-                        fieldType,
-                        scopeId, outSet, variableBlock, assignmentStmt, args, sootMethod, predecessor);
+                        fieldType, scopeId, outSet, variableBlock, assignmentStmt, args, sootMethod, predecessor,
+                        parameterTypes);
                 controlFlowGraph.removePriorLevel();
                 controlFlowGraph.decrementRecursionCounter();
                 controlFlowGraph.setInternalNodeCounter(controlFlowGraph.getPriorLevel());
