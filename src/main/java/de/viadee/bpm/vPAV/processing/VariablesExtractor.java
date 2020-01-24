@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.statement.Statement;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
@@ -283,7 +284,7 @@ class VariablesExtractor {
                         // Split node
                         Node newSectionNode = (Node) node.clone();
                         checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-                                variableBlock, unit, assignmentStmt, expr.getArgs(), false, predecessor,
+                                variableBlock, unit, assignmentStmt, expr.getArgs(), Statement.ASSIGNMENT, predecessor,
                                 expr.getMethod().getParameterTypes());
                         paramName = returnStmt;
                         node = newSectionNode;
@@ -453,7 +454,7 @@ class VariablesExtractor {
             }
         } else {
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), false, predecessor, expr.getMethod().getParameterTypes());
+                    unit, assignmentStmt, expr.getArgs(), Statement.ASSIGNMENT_INVOKE, predecessor, expr.getMethod().getParameterTypes());
         }
     }
 
@@ -513,7 +514,7 @@ class VariablesExtractor {
             }
         } else {
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), true, predecessor, expr.getMethod().getParameterTypes());
+                    unit, assignmentStmt, expr.getArgs(), Statement.INVOKE, predecessor, expr.getMethod().getParameterTypes());
         }
     }
 
@@ -598,7 +599,7 @@ class VariablesExtractor {
         else if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JVirtualInvokeExpr) {
             JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), true, predecessor, expr.getMethod().getParameterTypes());
+                    unit, assignmentStmt, expr.getArgs(), Statement.INVOKE, predecessor, expr.getMethod().getParameterTypes());
         }
         // Constructor call
         else if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
@@ -608,7 +609,7 @@ class VariablesExtractor {
                 assignmentStmt = expr.getBaseBox().getValue().toString();
             } else {
                 checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
-                        variableBlock, unit, assignmentStmt, expr.getArgs(), true, predecessor,
+                        variableBlock, unit, assignmentStmt, expr.getArgs(), Statement.INVOKE, predecessor,
                         expr.getMethod().getParameterTypes());
             }
         }
@@ -636,7 +637,7 @@ class VariablesExtractor {
     private void checkInterProceduralCall(final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String scopeId, final VariableBlock variableBlock, final Unit unit, final String assignmentStmt,
-            final List<Value> args, final boolean isInvoke, AnalysisElement[] predecessor,
+            final List<Value> args, final Statement statement, AnalysisElement[] predecessor,
             List<Type> parameterTypes) {
 
         final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
@@ -647,12 +648,11 @@ class VariablesExtractor {
             String methodName = src.tgt().getName();
             String className = src.tgt().getDeclaringClass().getName();
             className = ProcessVariablesScanner.cleanString(className, false);
-            if (classPaths.contains(className)) {
-
+            if (classPaths.contains(className) && !className.contains("$")) {
                 SootMethod sootMethod;
-                if (isInvoke && !className.contains("$")) {
+                if (Statement.INVOKE.equals(statement)) {
                     sootMethod = ((JInvokeStmt) unit).getInvokeExpr().getMethodRef().resolve();
-                } else if (!isInvoke && !className.contains("$")) {
+                } else if (Statement.ASSIGNMENT.equals(statement) || Statement.ASSIGNMENT_INVOKE.equals(statement)) {
                     sootMethod = ((JAssignStmt) unit).getInvokeExpr().getMethodRef().resolve();
                 } else {
                     sootMethod = null;
