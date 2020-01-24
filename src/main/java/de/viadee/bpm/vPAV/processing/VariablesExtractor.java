@@ -513,7 +513,7 @@ class VariablesExtractor {
             }
         } else {
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), false, predecessor, expr.getMethod().getParameterTypes());
+                    unit, assignmentStmt, expr.getArgs(), true, predecessor, expr.getMethod().getParameterTypes());
         }
     }
 

@@ -297,6 +297,9 @@ public class JavaReaderStatic {
                         }
 
                         // Replace fetchMethodBody
+                        if (method.isAbstract()) {
+                            return;
+                        }
                         BlockGraph graph = getBlockGraph(method);
                         List<Block> graphHeads = graph.getHeads();
 
@@ -326,7 +329,6 @@ public class JavaReaderStatic {
     }
 
     private BlockGraph getBlockGraph(final SootMethod method) {
-
         final Body body = method.retrieveActiveBody();
 
         BlockGraph graph = new ClassicCompleteBlockGraph(body);
