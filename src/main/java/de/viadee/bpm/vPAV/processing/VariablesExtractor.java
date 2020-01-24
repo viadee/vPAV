@@ -299,7 +299,7 @@ class VariablesExtractor {
                     JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
                     if (expr != null) {
                         parseInterfaceInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath,
-                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor);
+                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor, Statement.ASSIGNMENT);
                     }
                 }
                 // Method call of private method with assignment to a variable
@@ -307,7 +307,7 @@ class VariablesExtractor {
                     JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
                     if (expr != null) {
                         parseSpecialInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath,
-                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor);
+                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor, Statement.ASSIGNMENT);
                     }
                 }
 
@@ -413,7 +413,7 @@ class VariablesExtractor {
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String filePath, String scopeId, final String paramName, final Node node, final Unit unit,
             final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet, final String assignmentStmt,
-            final AnalysisElement[] predecessor) {
+            final AnalysisElement[] predecessor, final Statement statement) {
         String functionName = expr.getMethodRef().getName();
         int numberOfArg = expr.getArgCount();
         String baseBox = expr.getBaseBox().getValue().getType().toString();
@@ -454,7 +454,7 @@ class VariablesExtractor {
             }
         } else {
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), Statement.ASSIGNMENT_INVOKE, predecessor, expr.getMethod().getParameterTypes());
+                    unit, assignmentStmt, expr.getArgs(), statement, predecessor, expr.getMethod().getParameterTypes());
         }
     }
 
@@ -473,7 +473,7 @@ class VariablesExtractor {
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
             final String filePath, String scopeId, final String paramName, final Node node, final Unit unit,
             final Set<String> classPaths, final CallGraph cg, final OutSetCFG outSet, final String assignmentStmt,
-            final AnalysisElement[] predecessor) {
+            final AnalysisElement[] predecessor, final Statement statement) {
         String functionName = expr.getMethodRef().getName();
         int numberOfArg = expr.getArgCount();
         String baseBox = expr.getBaseBox().getValue().getType().toString();
@@ -514,7 +514,7 @@ class VariablesExtractor {
             }
         } else {
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), Statement.INVOKE, predecessor, expr.getMethod().getParameterTypes());
+                    unit, assignmentStmt, expr.getArgs(), statement, predecessor, expr.getMethod().getParameterTypes());
         }
     }
 
@@ -588,10 +588,10 @@ class VariablesExtractor {
                 if (argsCounter > 0) {
                     parseInterfaceInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
                             this.getConstructorArgs().get(argsCounter - 1).toString(), node, unit, classPaths, cg,
-                            outSet, assignmentStmt, predecessor);
+                            outSet, assignmentStmt, predecessor, Statement.INVOKE);
                 } else {
                     parseInterfaceInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
-                            paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor);
+                            paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor, Statement.INVOKE);
                 }
             }
         }
@@ -652,7 +652,7 @@ class VariablesExtractor {
                 SootMethod sootMethod;
                 if (Statement.INVOKE.equals(statement)) {
                     sootMethod = ((JInvokeStmt) unit).getInvokeExpr().getMethodRef().resolve();
-                } else if (Statement.ASSIGNMENT.equals(statement) || Statement.ASSIGNMENT_INVOKE.equals(statement)) {
+                } else if (Statement.ASSIGNMENT.equals(statement)) {
                     sootMethod = ((JAssignStmt) unit).getInvokeExpr().getMethodRef().resolve();
                 } else {
                     sootMethod = null;
