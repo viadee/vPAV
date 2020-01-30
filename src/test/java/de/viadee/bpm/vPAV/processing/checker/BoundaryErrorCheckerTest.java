@@ -40,6 +40,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.After;
 import org.junit.Assert;
@@ -54,9 +55,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Used model: single task (+ boundary event)
+ */
 public class BoundaryErrorCheckerTest {
 
     private static final String BASE_PATH = "src/test/resources/";
+
+    private static final String PATH = BASE_PATH + "Model_With_Boundary_Event.bpmn";
+
+    private static final String DELEGATE_PACKAGE = "de.viadee.bpm.vPAV.delegates.BoundaryError.";
 
     private static BoundaryErrorChecker checker;
 
@@ -78,29 +86,46 @@ public class BoundaryErrorCheckerTest {
 
         // Bean-Mapping
         final Map<String, String> beanMapping = new HashMap<>();
-        beanMapping.put("correctBoundaryErrorEvent", "de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateCorrect");
-        beanMapping.put("wrongBoundaryErrorEvent", "de.viadee.bpm.vPAV.delegates.BoundaryErrorEventDelegateWrong");
+        beanMapping.put("correctBoundaryErrorEvent", DELEGATE_PACKAGE + "BoundaryErrorEventDelegateCorrect");
+        beanMapping.put("wrongBoundaryErrorEvent", DELEGATE_PACKAGE + "BoundaryErrorEventDelegateWrong");
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
     }
 
-    /**
-     * Case: Correct BoundaryErrorEvent with corresponding ErrorCodes
-     */
-    @Test
-    public void testBoundaryErrorEventClass_Correct() {
-
-        final String PATH = BASE_PATH + "BoundaryErrorEventClass_Correct.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
+    private void setupAndRunChecker(String delegate, boolean delegateExpression) {
+        BpmnScanner scanner = new BpmnScanner(PATH);
+        checker = new BoundaryErrorChecker(rule, scanner);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
+        // Set delegate
+        ServiceTaskImpl task = modelInstance.getModelElementById("Task_0759yva");
+        if (delegateExpression) {
+            // Use delegate expression
+            task.setAttributeValueNs("http://camunda.org/schema/1.0/bpmn", "delegateExpression", delegate);
+        } else {
+            // Use class
+            task.setCamundaClass(DELEGATE_PACKAGE + delegate);
+
+        }
+        scanner.setModelInstance(modelInstance);
+
+        // Run checker
         final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
         for (BaseElement baseElement : baseElements) {
             final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
             checker.check(element);
         }
+    }
+
+    /**
+     * Case: Correct BoundaryErrorEvent with corresponding ErrorCodes
+     * Model - Task Implementation: Java Class Delegate (BoundaryErrorEventDelegateCorrect)
+     */
+    @Test
+    public void testBoundaryErrorEventClass_Correct() {
+        setupAndRunChecker("BoundaryErrorEventDelegateCorrect", false);
 
         if (IssueService.getInstance().getIssues().size() > 0) {
             Assert.fail("correct model generates an issue");
@@ -109,22 +134,11 @@ public class BoundaryErrorCheckerTest {
 
     /**
      * Case: Correct BoundaryErrorEvent with corresponding ErrorCodes
-     *
+     * Model - Task Implementation: Java Class Delegate (BoundaryErrorEventDelegateCorrectWithVariable)
      */
     @Test
     public void testBoundaryErrorEventClassWithVariables_Correct() {
-        final String PATH = BASE_PATH + "BoundaryErrorEventClassWithVariable_Correct.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-            checker.check(element);
-        }
+        setupAndRunChecker("BoundaryErrorEventDelegateCorrectWithVariable", false);
 
         if (IssueService.getInstance().getIssues().size() > 0) {
             Assert.fail("correct model generates an issue");
@@ -133,22 +147,11 @@ public class BoundaryErrorCheckerTest {
 
     /**
      * Case: Correct BoundaryErrorEvent with not corresponding ErrorCodes
-     *
+     * Model - Task Implementation: Java Class Delegate (BoundaryErrorEventDelegateWrong)
      */
     @Test
     public void testBoundaryErrorEventClass_Wrong() {
-        final String PATH = BASE_PATH + "BoundaryErrorEventClass_Wrong.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-            checker.check(element);
-        }
+        setupAndRunChecker("BoundaryErrorEventDelegateWrong", false);
 
         if (IssueService.getInstance().getIssues().size() != 1) {
             Assert.fail("Incorrect model should generate an issue");
@@ -157,22 +160,11 @@ public class BoundaryErrorCheckerTest {
 
     /**
      * Case: Correct BoundaryErrorEvent with corresponding ErrorCodes, usage of bean
-     *
+     * Model - Task Implementation: Delegate Expression with Bean
      */
     @Test
     public void testBoundaryErrorEventBean_Correct() {
-        final String PATH = BASE_PATH + "BoundaryErrorEventBean_Correct.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-            checker.check(element);
-        }
+        setupAndRunChecker("${correctBoundaryErrorEvent}", true);
 
         if (IssueService.getInstance().getIssues().size() > 0) {
             Assert.fail("correct model generates an issue");
@@ -182,21 +174,11 @@ public class BoundaryErrorCheckerTest {
     /**
      * Case: Correct BoundaryErrorEvent with not corresponding ErrorCodes, usage of
      * bean
+     * Model - Task Implementation: Delegate Expression with Bean
      */
     @Test
     public void testBoundaryErrorEventBean_Wrong() {
-        final String PATH = BASE_PATH + "BoundaryErrorEventBean_Wrong.bpmn";
-        checker = new BoundaryErrorChecker(rule, new BpmnScanner(PATH));
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-            checker.check(element);
-        }
+        setupAndRunChecker("${wrongBoundaryErrorEvent}", true);
 
         if (IssueService.getInstance().getIssues().size() != 1) {
             Assert.fail("Incorrect model should generate an issue");
@@ -207,5 +189,4 @@ public class BoundaryErrorCheckerTest {
     public void clearIssues() {
         IssueService.getInstance().clear();
     }
-
 }

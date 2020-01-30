@@ -29,16 +29,16 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.delegates;
+package de.viadee.bpm.vPAV.delegates.BoundaryError;
 
 import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-public class BoundaryErrorEventDelegateCorrectWithVariable implements org.camunda.bpm.engine.delegate.JavaDelegate {
+public class BoundaryErrorEventDelegateCorrect implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        final String errorCode = "123";
-        throw new BpmnError(errorCode);
+        throw new BpmnError("123");
     }
+
 }

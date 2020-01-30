@@ -113,8 +113,10 @@ public class BpmnScannerTest {
 
 		BpmnScanner scanner = new BpmnScanner(PATH);
 		String imp = scanner.getImplementation(element.getBaseElement().getId());
+		String reference = scanner.getImplementationReference(element.getBaseElement().getId(), imp);
 
 		assertEquals("Get unexpected implementation", imp, impDel);
+		assertEquals("Get unexpected implementation reference", reference, "org.camunda.bpm.platform.example.servlet.ExampleServiceTask");
 	}
 
 	/**
