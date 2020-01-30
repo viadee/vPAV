@@ -47,6 +47,7 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+// TODO still relevant since I changed the getimplementation method to be independent of version?
 public class BpmnScannerTest {
 
 	private static final String BASE_PATH = "src/test/resources/";

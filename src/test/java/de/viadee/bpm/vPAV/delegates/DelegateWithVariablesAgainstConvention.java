@@ -38,7 +38,6 @@ public class DelegateWithVariablesAgainstConvention implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-
         execution.setVariable("extBlub", true);
     }
 }

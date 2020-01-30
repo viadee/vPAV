@@ -1109,7 +1109,8 @@ public final class ProcessVariableReader {
 
         // HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
         // ${dateTime().plusWeeks(1).toDate()}
-        final Pattern pattern = Pattern.compile("\\$\\{(\\w*)\\.(\\w*\\(.*\\))*\\}|\\$\\{(\\w*\\(.*\\))*\\}");
+        final Pattern pattern = Pattern.compile("\\$\\{(\\w)*\\(.*\\)\\}");
+        // final Pattern pattern = Pattern.compile("\\$\\{(\\w*)\\.(\\w*\\(.*\\))*\\}|\\$\\{(\\w*\\(.*\\))*\\}");
 
         Matcher matcher = pattern.matcher(expression);
 
