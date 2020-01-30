@@ -112,6 +112,7 @@ public final class ProcessVariableReader {
         processVariables
                 .putAll(searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, predecessor));
 
+        // TODO create nodes for that as well!
         // 2) Search variables in Input Parameters
         processVariables.putAll(getVariablesFromInputMapping(javaReaderStatic, element, fileScanner, predecessor));
 
