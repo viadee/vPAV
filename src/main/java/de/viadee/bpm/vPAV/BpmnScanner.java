@@ -135,21 +135,21 @@ public class BpmnScanner {
         Task task = modelInstance.getModelElementById(id);
 
         // Check which implementation it is
-        if (task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS)
-                != null) {
+        if (task.getDomElement()
+                .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS)) {
             return BpmnConstants.CAMUNDA_CLASS;
-        } else if (task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION) != null) {
+        } else if (task.getDomElement().hasAttribute(BpmnModelConstants.CAMUNDA_NS,
+                BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION)) {
             return BpmnConstants.CAMUNDA_DEXPRESSION;
         } else if (
-                task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION)
-                        != null) {
+                task.getDomElement()
+                        .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION)) {
             return BpmnConstants.CAMUNDA_EXPRESSION;
-        } else if (task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF) != null) {
+        } else if (task.getDomElement().hasAttribute(BpmnModelConstants.CAMUNDA_NS,
+                BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF)) {
             return BpmnConstants.CAMUNDA_DMN;
-        } else if (task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_TYPE)
-                != null) {
+        } else if (task.getDomElement()
+                .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_TYPE)) {
             return BpmnConstants.CAMUNDA_EXT;
         }
 
