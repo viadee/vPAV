@@ -72,7 +72,7 @@ public class ProcessVariablesLifecycleOrderTest {
 
     @Test
     public void testProcessVariablesLifecycle() {
-        // Test with Input/Output Parameters and Start/End Listeners
+        // Test with Input/Output Parameters and Start/End Listeners and Expression Implementation
         // TODO add all other things like links, signals, messages, ...
 
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
@@ -97,28 +97,34 @@ public class ProcessVariablesLifecycleOrderTest {
         flowAnalysis.analyze(graphCollection);
 
         LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
-        assertEquals("There should be 9 nodes.", 9, nodes.size());
+        assertEquals("There should be 11 nodes.", 11, nodes.size());
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("MyEndEvent");
         AnalysisElement sequenceFlow1 = endEvent.getPredecessors().get(0);
         // Order is only correct because the listeners are ordered like this in the bpmn file
-        AnalysisElement endListenerDelegate = sequenceFlow1.getPredecessors().get(0);
+        AnalysisElement outputParameter = sequenceFlow1.getPredecessors().get(0);
+        AnalysisElement endListenerDelegate = outputParameter.getPredecessors().get(0);
         AnalysisElement endListenerExpression = endListenerDelegate.getPredecessors().get(0);
         AnalysisElement implementationExpression = endListenerExpression.getPredecessors().get(0);
         AnalysisElement startListenerExpression = implementationExpression.getPredecessors().get(0);
         AnalysisElement startListenerDelegate = startListenerExpression.getPredecessors().get(0);
-        AnalysisElement sequenceFlow0 = startListenerDelegate.getPredecessors().get(0);
+        AnalysisElement inputParameter = startListenerDelegate.getPredecessors().get(0);
+        AnalysisElement sequenceFlow0 = inputParameter.getPredecessors().get(0);
         AnalysisElement startEvent = sequenceFlow0.getPredecessors().get(0);
 
-        assertEquals("Delegate End Listener was not correctly included.", "MyServiceTask__4", endListenerDelegate.getId());
-        assertEquals("Expression End Listener was not correctly included.", "MyServiceTask__3", endListenerExpression.getId());
-        assertEquals("Delegate Start Listener was not correctly included.", "MyServiceTask__0", startListenerDelegate.getId());
+        assertEquals("Output Parameter should define variable {MyOutputParameter}.", 1, outputParameter.getDefined().size());
+        assertEquals("Delegate End Listener should define variable {isExternalProcess}.", 1, endListenerDelegate.getDefined().size());
+        assertEquals("Delegate End Listener should read variable {numberEntities}.", 1, endListenerDelegate.getUsed().size());
+        assertEquals("Expression End Listener should read variable {varEnd}.", 1, endListenerExpression.getUsed().size());
+        assertEquals("Expression Start Listener should read variable {var2}.", 1, startListenerExpression.getUsed().size());
+        assertEquals("Delegate Start Listener should read variable {inputVariable}.", 1, startListenerDelegate.getUsed().size());
+        assertEquals("Input Parameter should define variable {MyInputParameter}.", 1, inputParameter.getDefined().size());
         assertEquals("Start event was not reached.", "MyStartEvent", startEvent.getId());
         assertEquals("Start event should not have any predecessors.", 0, startEvent.getPredecessors().size());
 
         // Check discovery of process variables
-        assertEquals("Second Sequence Flow should have two input parameters because the service task has two output parameters.", 2, sequenceFlow1.getInUnused().size());
-        assertEquals("Delegate Start Listener should have one input parameter.", 1, startListenerDelegate.getDefined().size());
+        assertEquals("Second Sequence Flow should have two input parameters because the service task has one output parameter and one defined variable.", 2, sequenceFlow1.getInUnused().size());
+        assertEquals("Delegate Start Listener should have one passed input parameter.", 1, startListenerDelegate.getInUnused().size());
     }
 
     @Test

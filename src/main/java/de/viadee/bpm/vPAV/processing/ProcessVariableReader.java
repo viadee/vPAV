@@ -112,7 +112,6 @@ public final class ProcessVariableReader {
         processVariables
                 .putAll(searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, predecessor));
 
-        // TODO create nodes for that as well!
         // 2) Search variables in Input Parameters
         processVariables.putAll(getVariablesFromInputMapping(javaReaderStatic, element, fileScanner, predecessor));
 
@@ -1121,7 +1120,6 @@ public final class ProcessVariableReader {
 
         boolean isDelegated = false;
         ExpressionNode expNode = new ExpressionNode(element, expression, chapter);
-        predecessor[0] = expNode;
 
         try {
             // remove object name from method calls, otherwise the method arguments could
@@ -1240,6 +1238,7 @@ public final class ProcessVariableReader {
      * @param scopeId          ScopeId
      * @return variables
      */
+    // TODO this method is wrongly named as it is also used for retrieving write variables in output mappings
     private ListMultimap<String, ProcessVariableOperation> checkExpressionForReadVariable(
             final JavaReaderStatic javaReaderStatic, final String expression, final String name,
             final BpmnElement element, final FileScanner fileScanner, final ElementChapter chapter,
@@ -1250,6 +1249,7 @@ public final class ProcessVariableReader {
 
             final Pattern pattern = Pattern.compile(".*\\$\\{(.*?)}");
             final Matcher matcher = pattern.matcher(expression);
+            ExpressionNode expNode = new ExpressionNode(element, "", chapter);
 
             // if value is in the form of ${expression}, try to resolve a bean and find all
             // subsequent process variables
@@ -1260,15 +1260,22 @@ public final class ProcessVariableReader {
                     variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
                             isBean(matcher.group(1)), element, chapter, fieldType, scopeId, predecessor));
                 } else {
-                    variables.put(name,
-                            new ProcessVariableOperation(name, element, chapter, fieldType,
-                                    element.getProcessDefinition(), VariableOperation.READ, scopeId,
-                                    element.getFlowAnalysis().getOperationCounter()));
+                    ProcessVariableOperation read = new ProcessVariableOperation(name, element, chapter, fieldType,
+                            element.getProcessDefinition(), VariableOperation.READ, scopeId,
+                            element.getFlowAnalysis().getOperationCounter());
+                    expNode.addOperation(read);
+                    variables.put(name, read);
                 }
             } else {
-                variables.put(name,
-                        new ProcessVariableOperation(name, element, chapter, fieldType, element.getProcessDefinition(),
-                                VariableOperation.WRITE, scopeId, element.getFlowAnalysis().getOperationCounter()));
+                // TODO do we still need the extra process variables (variables variable)?
+                ProcessVariableOperation write = new ProcessVariableOperation(name, element, chapter, fieldType, element.getProcessDefinition(),
+                        VariableOperation.WRITE, scopeId, element.getFlowAnalysis().getOperationCounter());
+                expNode.addOperation(write);
+                variables.put(name, write);
+            }
+
+            if(expNode.getOperations().size() > 0) {
+                predecessor[0] = addNodeAndGetNewPredecessor(expNode, element.getControlFlowGraph(), predecessor[0]);
             }
         } catch (final ELException e) {
             throw new ProcessingException("EL expression " + expression + " in " + element.getProcessDefinition()
