@@ -109,19 +109,23 @@ public final class ProcessVariableReader {
         final ExtensionElements extensionElements = baseElement.getExtensionElements();
 
         // 1) Search for variables in multi instance task, if applicable
+        // TODO done
         processVariables
                 .putAll(searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, predecessor));
 
         // 2) Search variables in Input Parameters
+        // TODO done
         processVariables.putAll(getVariablesFromInputMapping(javaReaderStatic, element, fileScanner, predecessor));
 
         // 3) Search variables execution listener (start)
+        // TODO done
         if (extensionElements != null) {
             processVariables.putAll(getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
                     extensionElements, scopeElementId, ElementChapter.ExecutionListenerStart, predecessor));
         }
 
         // 4) Search variables in task
+        // TODO done
         processVariables.putAll(getVariablesFromTask(javaReaderStatic, fileScanner, element, predecessor));
 
         // 5) Search variables in sequence flow
@@ -139,12 +143,14 @@ public final class ProcessVariableReader {
         processVariables.putAll(getVariablesFromLinks(javaReaderStatic, element, fileScanner, predecessor));
 
         // 9) Search variables execution listener (end)
+        // TODO done
         if (extensionElements != null) {
             processVariables.putAll(getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
                     extensionElements, scopeElementId, ElementChapter.ExecutionListenerEnd, predecessor));
         }
 
         // 10) Search variables in Output Parameters
+        // TODO done
         processVariables
                 .putAll(getVariablesFromOutputMapping(javaReaderStatic, element, fileScanner, predecessor));
 
@@ -905,6 +911,7 @@ public final class ProcessVariableReader {
         if (loopCharacteristics != null) {
             ExpressionNode node = new ExpressionNode(element,
                     "", ElementChapter.MultiInstance);
+            // Node is already added since there are at least the default variables
             predecessor[0]= addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
 
             // Add default variables
@@ -983,6 +990,7 @@ public final class ProcessVariableReader {
                                     element.getFlowAnalysis().getOperationCounter()));
                 }
             }
+
 
             for (ProcessVariableOperation operation : processVariables.values()) {
                 node.addOperation(operation);
