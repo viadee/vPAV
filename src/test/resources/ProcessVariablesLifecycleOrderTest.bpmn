@@ -2,7 +2,7 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.2.1">
   <bpmn:process id="Process_1" isExecutable="true">
     <bpmn:endEvent id="MyEndEvent">
-      <bpmn:incoming>SequenceFlow_1f9tqmg</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0ml2hlg</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1qw9mzs" sourceRef="MyServiceTask" targetRef="MySequentialTask" />
     <bpmn:serviceTask id="MyServiceTask" name="Serve Customers" camunda:expression="${expression1}">
@@ -43,14 +43,25 @@
       <bpmn:incoming>SequenceFlow_0zu24g0</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1f9tqmg</bpmn:outgoing>
     </bpmn:receiveTask>
-    <bpmn:sequenceFlow id="SequenceFlow_1f9tqmg" sourceRef="MyReceiveTask" targetRef="MyEndEvent" />
+    <bpmn:sequenceFlow id="SequenceFlow_1f9tqmg" sourceRef="MyReceiveTask" targetRef="ExclusiveGateway_0e1fhcb" />
+    <bpmn:intermediateThrowEvent id="MyIntermediateThrowEvent">
+      <bpmn:incoming>SequenceFlow_1wmm0wz</bpmn:incoming>
+      <bpmn:linkEventDefinition id="LinkEventDefinition_09x70qg" name="link-${linkName}" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:parallelGateway id="ExclusiveGateway_0e1fhcb">
+      <bpmn:incoming>SequenceFlow_1f9tqmg</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1wmm0wz</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0ml2hlg</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_1wmm0wz" sourceRef="ExclusiveGateway_0e1fhcb" targetRef="MyIntermediateThrowEvent" />
+    <bpmn:sequenceFlow id="SequenceFlow_0ml2hlg" sourceRef="ExclusiveGateway_0e1fhcb" targetRef="MyEndEvent" />
   </bpmn:process>
   <bpmn:signal id="MySignal" name="MySignal_${signalName}" />
   <bpmn:message id="MyMessage" name="MyMessage_${messageName}" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
       <bpmndi:BPMNShape id="EndEvent_010c1mv_di" bpmnElement="MyEndEvent">
-        <dc:Bounds x="792" y="102" width="36" height="36" />
+        <dc:Bounds x="902" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="422" y="141" width="0" height="13" />
         </bpmndi:BPMNLabel>
@@ -84,7 +95,21 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1f9tqmg_di" bpmnElement="SequenceFlow_1f9tqmg">
         <di:waypoint x="700" y="120" />
-        <di:waypoint x="792" y="120" />
+        <di:waypoint x="765" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateThrowEvent_1v0vedy_di" bpmnElement="MyIntermediateThrowEvent">
+        <dc:Bounds x="772" y="202" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway_0d3l9rc_di" bpmnElement="ExclusiveGateway_0e1fhcb">
+        <dc:Bounds x="765" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1wmm0wz_di" bpmnElement="SequenceFlow_1wmm0wz">
+        <di:waypoint x="790" y="145" />
+        <di:waypoint x="790" y="202" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ml2hlg_di" bpmnElement="SequenceFlow_0ml2hlg">
+        <di:waypoint x="815" y="120" />
+        <di:waypoint x="902" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

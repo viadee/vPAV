@@ -76,7 +76,8 @@ public class ProcessVariablesLifecycleOrderTest {
         // and 1 Service Task (Input/Output Parameters, Start/End Listeners, Expression Implementation)
         // and with 1 Multi Instance Task (Loop Cardinality & Completion Condition expression)
         // and with 1 Receive Task (Message)
-        // TODO add all other things like links, signals, messages, ...
+        // and with 1 Intermediate Throw Event (Link)
+        // TODO add variables in extension elements and sequence flows
 
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
@@ -100,10 +101,16 @@ public class ProcessVariablesLifecycleOrderTest {
         flowAnalysis.analyze(graphCollection);
 
         LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
-        assertEquals("There should be 18 nodes.", 18, nodes.size());
+        assertEquals("There should be 22 nodes.", 22, nodes.size());
+
+        // Find throw event
+        AnalysisElement throwEvent = nodes.get("MyIntermediateThrowEvent__0");
+
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("MyEndEvent");
-        AnalysisElement sequenceFlow3 = endEvent.getPredecessors().get(0);
+        AnalysisElement sequenceFlow4 = endEvent.getPredecessors().get(0);
+        AnalysisElement gateway = sequenceFlow4.getPredecessors().get(0);
+        AnalysisElement sequenceFlow3 = gateway.getPredecessors().get(0);
         AnalysisElement receiveTask = sequenceFlow3.getPredecessors().get(0);
         AnalysisElement sequenceFlow2 = receiveTask.getPredecessors().get(0);
 
@@ -126,6 +133,9 @@ public class ProcessVariablesLifecycleOrderTest {
 
         AnalysisElement sequenceFlow0 = inputParameter.getPredecessors().get(0);
         AnalysisElement startEvent = sequenceFlow0.getPredecessors().get(0);
+
+        assertEquals("Throw Event should use variable {linkName} in link name.", 1,
+                throwEvent.getUsed().size());
 
         assertEquals("Receive task should use variable {messageName} in message name.", 1,
                 receiveTask.getUsed().size());
@@ -158,7 +168,7 @@ public class ProcessVariablesLifecycleOrderTest {
         // Check discovery of process variables
         assertEquals(
                 "Last Sequence Flow should have two input parameters because the service task has one output parameter and one defined variable.",
-                2, sequenceFlow3.getInUnused().size());
+                2, sequenceFlow4.getInUnused().size());
         assertEquals("Delegate Start Listener should have one passed input parameter.", 1,
                 startListenerDelegate.getInUnused().size());
     }

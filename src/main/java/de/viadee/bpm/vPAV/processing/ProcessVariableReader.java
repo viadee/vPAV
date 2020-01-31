@@ -109,23 +109,19 @@ public final class ProcessVariableReader {
         final ExtensionElements extensionElements = baseElement.getExtensionElements();
 
         // 1) Search for variables in multi instance task, if applicable
-        // TODO done
         processVariables
                 .putAll(searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, predecessor));
 
         // 2) Search variables in Input Parameters
-        // TODO done
         processVariables.putAll(getVariablesFromInputMapping(javaReaderStatic, element, fileScanner, predecessor));
 
         // 3) Search variables execution listener (start)
-        // TODO done
         if (extensionElements != null) {
             processVariables.putAll(getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
                     extensionElements, scopeElementId, ElementChapter.ExecutionListenerStart, predecessor));
         }
 
         // 4) Search variables in task
-        // TODO done
         processVariables.putAll(getVariablesFromTask(javaReaderStatic, fileScanner, element, predecessor));
 
         // 5) Search variables in sequence flow
@@ -136,22 +132,20 @@ public final class ProcessVariableReader {
         processVariables.putAll(searchExtensionsElements(javaReaderStatic, fileScanner, element, predecessor));
 
         // 7) Search variables in Signals and Messages
-        // TODO done
         processVariables
                 .putAll(getVariablesFromSignalsAndMessage(javaReaderStatic, element, fileScanner, predecessor));
 
         // 8) Search variables in Links
+        // TODO can it be joined with signals and messages?
         processVariables.putAll(getVariablesFromLinks(javaReaderStatic, element, fileScanner, predecessor));
 
         // 9) Search variables execution listener (end)
-        // TODO done
         if (extensionElements != null) {
             processVariables.putAll(getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
                     extensionElements, scopeElementId, ElementChapter.ExecutionListenerEnd, predecessor));
         }
 
         // 10) Search variables in Output Parameters
-        // TODO done
         processVariables
                 .putAll(getVariablesFromOutputMapping(javaReaderStatic, element, fileScanner, predecessor));
 
