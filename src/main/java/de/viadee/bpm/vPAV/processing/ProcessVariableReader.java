@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -136,6 +136,7 @@ public final class ProcessVariableReader {
         processVariables.putAll(searchExtensionsElements(javaReaderStatic, fileScanner, element, predecessor));
 
         // 7) Search variables in Signals and Messages
+        // TODO done
         processVariables
                 .putAll(getVariablesFromSignalsAndMessage(javaReaderStatic, element, fileScanner, predecessor));
 
@@ -912,7 +913,7 @@ public final class ProcessVariableReader {
             ExpressionNode node = new ExpressionNode(element,
                     "", ElementChapter.MultiInstance);
             // Node is already added since there are at least the default variables
-            predecessor[0]= addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
+            predecessor[0] = addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
 
             // Add default variables
             processVariables.putAll(addDefaultMultiInstanceTaskVariables(element));
@@ -990,7 +991,6 @@ public final class ProcessVariableReader {
                                     element.getFlowAnalysis().getOperationCounter()));
                 }
             }
-
 
             for (ProcessVariableOperation operation : processVariables.values()) {
                 node.addOperation(operation);
@@ -1111,7 +1111,7 @@ public final class ProcessVariableReader {
             final JavaReaderStatic javaReaderStatic,
             final FileScanner fileScanner, final String expression, final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String scopeId,
-           AnalysisElement[] predecessor) {
+            AnalysisElement[] predecessor) {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
 
@@ -1209,21 +1209,13 @@ public final class ProcessVariableReader {
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
         try {
 
-            final Pattern pattern = Pattern.compile(".*\\$\\{(.*?)}");
+            final Pattern pattern = Pattern.compile(".*(\\$\\{.*?})");
             final Matcher matcher = pattern.matcher(expression);
 
-            // if value is in the form of ${expression}, try to resolve a bean and find all
-            // subsequent process variables
+            // if value is in the form of ${expression}, extract expression and find variables
             if (matcher.matches()) {
-                if (isBean(matcher.group(1)) != null) {
-                    variables.putAll(javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
-                            isBean(matcher.group(1)), element, chapter, fieldType, scopeId, predecessor));
-                } else {
-                    variables.put(expression,
-                            new ProcessVariableOperation(expression, element, chapter, fieldType,
-                                    element.getProcessDefinition(), VariableOperation.READ, scopeId,
-                                    element.getFlowAnalysis().getOperationCounter()));
-                }
+                return findVariablesInExpression(javaReaderStatic, fileScanner, matcher.group(1), element, chapter,
+                        fieldType, scopeId, predecessor);
             }
         } catch (final ELException e) {
             throw new ProcessingException("EL expression " + expression + " in " + element.getProcessDefinition()
@@ -1276,13 +1268,14 @@ public final class ProcessVariableReader {
                 }
             } else {
                 // TODO do we still need the extra process variables (variables variable)?
-                ProcessVariableOperation write = new ProcessVariableOperation(name, element, chapter, fieldType, element.getProcessDefinition(),
+                ProcessVariableOperation write = new ProcessVariableOperation(name, element, chapter, fieldType,
+                        element.getProcessDefinition(),
                         VariableOperation.WRITE, scopeId, element.getFlowAnalysis().getOperationCounter());
                 expNode.addOperation(write);
                 variables.put(name, write);
             }
 
-            if(expNode.getOperations().size() > 0) {
+            if (expNode.getOperations().size() > 0) {
                 predecessor[0] = addNodeAndGetNewPredecessor(expNode, element.getControlFlowGraph(), predecessor[0]);
             }
         } catch (final ELException e) {
@@ -1310,7 +1303,7 @@ public final class ProcessVariableReader {
     private AbstractNode addNodeAndGetNewPredecessor(AbstractNode node, ControlFlowGraph cg,
             AnalysisElement predecessor) {
         cg.addNode(node);
-        if(predecessor != null) {
+        if (predecessor != null) {
             node.addPredecessor(predecessor);
         }
 
