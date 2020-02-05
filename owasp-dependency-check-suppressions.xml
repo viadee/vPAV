@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
     <suppress>
-      <notes>this vulnerability is in slf4j-ext-*.jar (org.slf4j.ext.EventData), which we don't have in classpath</notes>
-      <gav regex="true">^org\.slf4j:slf4j-api:.*$</gav>
-      <cve>CVE-2018-8088</cve>
-    </suppress>
-    <suppress>
-        <notes>this vulnerability is in slf4j-ext-*.jar (org.slf4j.ext.EventData), which we don't have in classpath</notes>
-        <gav regex="true">^org\.slf4j:slf4j-simple:.*$</gav>
-        <cve>CVE-2018-8088</cve>
+        <notes><![CDATA[
+          file name: groovy-sql-2.5.9.jar
+          ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.codehaus\.groovy/groovy\-.*$</packageUrl>
+        <cpe>cpe:/a:apache:groovy</cpe>
     </suppress>
 </suppressions>
