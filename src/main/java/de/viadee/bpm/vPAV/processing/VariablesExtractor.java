@@ -233,29 +233,14 @@ class VariablesExtractor {
             }
             if (unit instanceof InvokeStmt) {
                 try {
-                    boolean passesDelegateExecution = false;
-                    // Split node only if DelegateExecution object (which is used for manipulating variables) is passed
-                    InvokeExpr calledMethod = (InvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
-                    for (Type parameter : calledMethod.getMethodRef().getParameterTypes()) {
-                        try {
-                            if (parameter instanceof RefType) {
-                                // TODO: Check also other types of execution
-                                if (((RefType) parameter).getClassName()
-                                        .equals(CamundaMethodServices.DELEGATE)) {
-                                    passesDelegateExecution = true;
-                                    break;
-                                }
-                            }
-                        } catch (ClassCastException ignored) {
-                        }
-                    }
-                    if (passesDelegateExecution) {
-                        // Node must be splitted
-                        if (!nodeSaved && node.getOperations().size() > 0) {
-                            predecessor[0] = addNodeAndGetNewPredecessor(node, controlFlowGraph, predecessor[0]);
-                        }
-                        // TODO maybe say increase hierachy if we would like to keep it
-                        // Split node
+                    // To improve performance, node splitting should be only done if called method can access delegate
+                    // execution object
+                    // We do not know it the node must be splitted, so we just do it in most cases
+
+                    // Don't split node if variable operation is directly called on DelegateExecution object
+                    if (!((InstanceInvokeExpr) ((JInvokeStmt) unit).getInvokeExpr()).getBase().getType().toString()
+                            .equals(CamundaMethodServices.DELEGATE) && !nodeSaved && node.getOperations().size() > 0) {
+                        predecessor[0] = addNodeAndGetNewPredecessor(node, controlFlowGraph, predecessor[0]);
                         Node newSectionNode = (Node) node.clone();
                         assignmentStmt = processInvokeStmt(classPaths, cg, outSet, element, chapter, fieldType,
                                 filePath, scopeId, variableBlock, assignmentStmt, node, paramName, argsCounter,
@@ -300,7 +285,8 @@ class VariablesExtractor {
                     JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
                     if (expr != null) {
                         parseInterfaceInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath,
-                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor, Statement.ASSIGNMENT);
+                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor,
+                                Statement.ASSIGNMENT);
                     }
                 }
                 // Method call of private method with assignment to a variable
@@ -308,7 +294,8 @@ class VariablesExtractor {
                     JSpecialInvokeExpr expr = (JSpecialInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
                     if (expr != null) {
                         parseSpecialInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath,
-                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor, Statement.ASSIGNMENT);
+                                scopeId, paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor,
+                                Statement.ASSIGNMENT);
                     }
                 }
 
@@ -366,7 +353,7 @@ class VariablesExtractor {
                         }
                     }
                 }
-                if(predecessor[0] != null) {
+                if (predecessor[0] != null) {
                     if (n == null) {
                         // Happens when block has a successor that is not included in the control flow graph because
                         // is does not contain any operations
@@ -594,7 +581,8 @@ class VariablesExtractor {
                             outSet, assignmentStmt, predecessor, Statement.INVOKE);
                 } else {
                     parseInterfaceInvokeExpression(expr, variableBlock, element, chapter, fieldType, filePath, scopeId,
-                            paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor, Statement.INVOKE);
+                            paramName, node, unit, classPaths, cg, outSet, assignmentStmt, predecessor,
+                            Statement.INVOKE);
                 }
             }
         }
@@ -602,7 +590,8 @@ class VariablesExtractor {
         else if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JVirtualInvokeExpr) {
             JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((InvokeStmt) unit).getInvokeExprBox().getValue();
             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId, variableBlock,
-                    unit, assignmentStmt, expr.getArgs(), Statement.INVOKE, predecessor, expr.getMethod().getParameterTypes());
+                    unit, assignmentStmt, expr.getArgs(), Statement.INVOKE, predecessor,
+                    expr.getMethod().getParameterTypes());
         }
         // Constructor call
         else if (((InvokeStmt) unit).getInvokeExprBox().getValue() instanceof JSpecialInvokeExpr) {
@@ -651,7 +640,7 @@ class VariablesExtractor {
             String methodName = src.tgt().getName();
             String className = src.tgt().getDeclaringClass().getName();
             className = ProcessVariablesScanner.cleanString(className, false);
-            if (classPaths.contains(className) && !className.contains("$")) {
+            if (classPaths.contains(className)) {
                 SootMethod sootMethod;
                 if (Statement.INVOKE.equals(statement)) {
                     sootMethod = ((JInvokeStmt) unit).getInvokeExpr().getMethodRef().resolve();

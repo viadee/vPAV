@@ -102,5 +102,4 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 		Assert.assertEquals(3, variables.asMap().size());
 	}
-
 }
