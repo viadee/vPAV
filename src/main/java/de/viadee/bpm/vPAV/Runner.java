@@ -354,7 +354,7 @@ public class Runner {
 		allFiles.add("bootstrap.min.js");
 		allFiles.add("bpmn-navigated-viewer.js");
 		allFiles.add("bpmn.io.viewer.app.js");
-		allFiles.add("jquery-3.2.1.min.js");
+		allFiles.add("jquery-3.4.1.min.js");
 		allFiles.add("popper.min.js");
 		allFiles.add("infoPOM.js");
 		allFiles.add("download.js");
@@ -389,7 +389,7 @@ public class Runner {
 		fMap.put("bootstrap.min.js", ConfigConstants.JS_FOLDER);
 		fMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
 		fMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
-		fMap.put("jquery-3.2.1.min.js", ConfigConstants.JS_FOLDER);
+		fMap.put("jquery-3.4.1.min.js", ConfigConstants.JS_FOLDER);
 		fMap.put("popper.min.js", ConfigConstants.JS_FOLDER);
 		fMap.put("infoPOM.js", ConfigConstants.JS_FOLDER);
 		fMap.put("download.js", ConfigConstants.JS_FOLDER);
