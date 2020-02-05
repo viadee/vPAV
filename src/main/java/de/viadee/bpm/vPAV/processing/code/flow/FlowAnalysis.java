@@ -232,31 +232,6 @@ public class FlowAnalysis {
 					}
 				}
 
-				// TODO überprüfen, ob dieser Teil noch nötig ist
-				boolean del = analysisElement.getControlFlowGraph().hasImplementedDelegate();
-				// Set predecessor relation for blocks across delegates
-				final Iterator<AbstractNode> iterator = analysisElement.getControlFlowGraph().getNodes().values()
-						.iterator();
-				AbstractNode prevNode = null;
-				while (iterator.hasNext()) {
-					AbstractNode currNode = iterator.next();
-					if (prevNode == null) {
-						prevNode = currNode;
-					} else {
-						// Ensure that the pointers wont get set for beginning delegate and ending
-						// delegate
-						if (currNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)
-								&& prevNode.getElementChapter().equals(ElementChapter.ExecutionListenerStart)) {
-							if (del) {
-								prevNode = currNode;
-							}
-						} else {
-							currNode.setPredsInterProcedural(prevNode.getId());
-							prevNode = currNode;
-						}
-					}
-				}
-
 				final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
 
 				analysisElement.getOperations().values().forEach(operation -> {

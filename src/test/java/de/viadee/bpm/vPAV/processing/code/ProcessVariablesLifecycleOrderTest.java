@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -225,7 +225,6 @@ public class ProcessVariablesLifecycleOrderTest {
         AnalysisElement serviceTask = inputParameter.getPredecessors().get(0).getPredecessors().get(0);
         AnalysisElement startEvent = serviceTask.getPredecessors().get(0).getPredecessors().get(0);
 
-        // TODO successor relations are not set correctly
         assertEquals("Output parameter should write variable {MyOutputParameter}.", 1, outputParameter.getDefined().size());
         assertEquals("Input parameter should write variable {MyInputParamter}.", 1, inputParameter.getDefined().size());
         assertEquals("End Listener 2 was not correctly included.", "MyCallActivity__6", endListener2.getId());
@@ -262,8 +261,6 @@ public class ProcessVariablesLifecycleOrderTest {
         assertEquals(
                 "Third Sequence Flow (1qw9mzs) shouldn't have defined variables because the output parameters are already defined in an own node.",
                 0, sequenceFlow1.getDefined().size());
-
-        // TODO relation between output parameter and predecessors is wrong!
 
         assertEquals("End event should have four unused input variables.", 4, endEvent.getInUnused().size());
         assertEquals("End event should have one used input variable.", 1, endEvent.getInUsed().size());
