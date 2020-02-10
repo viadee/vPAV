@@ -1,5 +1,16 @@
 # Release notes
 
+## 3.0.3
+
+### Features
+[**Issue 151**](https://github.com/viadee/vPAV/issues/151) Scanning projects built with Java 9 to 11 are now supported!
+[**Issue 147**](https://github.com/viadee/vPAV/issues/147) Variable names can be resolved when final string objects are used
+
+### Fixes
+[**Issue 155**](https://github.com/viadee/vPAV/issues/155) Data flow graph is correctly built
+
+### Misc
+
 ## 3.0.2
 
 ### Features
