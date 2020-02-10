@@ -316,8 +316,21 @@ public class JavaReaderStatic {
     }
 
     private SootMethod getSootMethod(final SootClass sootClass, final String methodName,
-            final List<Type> parameterTypes, final VoidType returnType) {
+            List<Type> parameterTypes, final VoidType returnType) {
         SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
+        // For execute try DelegateExecution first, then ActivityExecution
+        if(methodName.equals("execute") && method == null) {
+            parameterTypes = new ArrayList<>();
+            parameterTypes.add( RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"));
+            method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
+
+            if(method == null) {
+                parameterTypes = new ArrayList<>();
+                parameterTypes.add( RefType.v("org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution"));
+                method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
+            }
+        }
+
         if (method == null) {
             method = sootClass.getMethodByNameUnsafe(methodName);
             if (method == null) {
