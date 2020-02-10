@@ -88,28 +88,11 @@ public class ControlFlowGraph {
 	 * @return Id of node
 	 */
 	private String createHierarchy(final AbstractNode node) {
-		// TODO renew method
+		// TODO renew method (deleted hierarchy)
 		StringBuilder key = new StringBuilder();
 		key.append(node.getParentElement().getBaseElement().getId()).append("__");
-		if (recursionCounter == 0) {
-			nodeCounter++;
-			key.append(nodeCounter);
-		} else {
-			key.append(nodeCounter);
-			for (int i = 1; i <= recursionCounter; i++) {
-				key.append(".");
-				if (i == recursionCounter) {
-					key.append(internalNodeCounter);
-					String predKey = key.toString();
-					if (internalNodeCounter == 0) {
-				//		node.setPredsInterProcedural(predKey.substring(0, predKey.length() - 2));
-					}
-				} else {
-					key.append(getPriorLevels().get(i));
-				}
-			}
-			internalNodeCounter++;
-		}
+		nodeCounter++;
+		key.append(nodeCounter);
 		priorLevel = internalNodeCounter - 1;
 		return key.toString();
 	}
