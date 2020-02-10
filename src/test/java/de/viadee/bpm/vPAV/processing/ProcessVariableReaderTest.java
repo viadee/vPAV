@@ -35,6 +35,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -43,11 +44,15 @@ import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import de.viadee.bpm.vPAV.processing.model.graph.Graph;
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
@@ -60,168 +65,203 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static de.viadee.bpm.vPAV.processing.BpmnModelDispatcher.getBpmnElements;
 import static de.viadee.bpm.vPAV.processing.BpmnModelDispatcher.getProcessVariables;
 
 public class ProcessVariableReaderTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/";
 
-	private static ClassLoader cl;
+    private static ClassLoader cl;
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		RuntimeConfig.getInstance().setTest(true);
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java/");
-		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-		final URL[] classUrls = { classUrl, resourcesUrl };
-		cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-	}
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        RuntimeConfig.getInstance().setTest(true);
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java/");
+        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+        final URL[] classUrls = { classUrl, resourcesUrl };
+        cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+    }
 
-	@AfterClass
-	public static void tearDown() {
-		RuntimeConfig.getInstance().setTest(false);
-	}
+    @AfterClass
+    public static void tearDown() {
+        RuntimeConfig.getInstance().setTest(false);
+    }
 
-	@Test
-	public void testRecogniseVariablesInClass() {
-		final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+    @Test
+    public void testRecogniseVariablesInClass() {
+        final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
-		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
 
-		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
 
-		Assert.assertEquals(2, variables.size());
-	}
+        Assert.assertEquals(2, variables.size());
+    }
 
-	@Test
-	public void testRecogniseInputOutputAssociations() {
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-		final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
+    @Test
+    public void testRecogniseInputOutputAssociations() {
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+        final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<CallActivity> allServiceTasks = modelInstance.getModelElementsByType(CallActivity.class);
+        final Collection<CallActivity> allServiceTasks = modelInstance.getModelElementsByType(CallActivity.class);
 
-		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
-		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
-		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, null));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, null));
 
-		final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables.get("nameOfVariableInMainProcess");
-		Assert.assertNotNull(nameOfVariableInMainProcess);
-		Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess.get(0).getOperation());
+        final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables.get("nameOfVariableInMainProcess");
+        Assert.assertNotNull(nameOfVariableInMainProcess);
+        Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess.get(0).getOperation());
 
-		final List<ProcessVariableOperation> nameOfVariableInMainProcess2 = variables
-				.get("nameOfVariableInMainProcess2");
-		Assert.assertNotNull(nameOfVariableInMainProcess2);
-		Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess2.get(0).getOperation());
+        final List<ProcessVariableOperation> nameOfVariableInMainProcess2 = variables
+                .get("nameOfVariableInMainProcess2");
+        Assert.assertNotNull(nameOfVariableInMainProcess2);
+        Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess2.get(0).getOperation());
 
-		final List<ProcessVariableOperation> someVariableInMainProcess = variables.get("someVariableInMainProcess");
-		Assert.assertNotNull(someVariableInMainProcess);
-		Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess.get(0).getOperation());
+        final List<ProcessVariableOperation> someVariableInMainProcess = variables.get("someVariableInMainProcess");
+        Assert.assertNotNull(someVariableInMainProcess);
+        Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess.get(0).getOperation());
 
-		final List<ProcessVariableOperation> someVariableInMainProcess2 = variables.get("someVariableInMainProcess2");
-		Assert.assertNotNull(someVariableInMainProcess2);
-		Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.get(0).getOperation());
-	}
+        final List<ProcessVariableOperation> someVariableInMainProcess2 = variables.get("someVariableInMainProcess2");
+        Assert.assertNotNull(someVariableInMainProcess2);
+        Assert.assertEquals(VariableOperation.READ, someVariableInMainProcess2.get(0).getOperation());
+    }
 
-	@Test
-	public void testRecogniseSignals() {
-		final String PATH = BASE_PATH + "ProcessVariablesReader_SignalVariables.bpmn";
-		final File processDefinition = new File(PATH);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
-				fileScanner.getJavaResourcesFileInputStream());
+    @Test
+    public void testRecogniseSignals() {
+        final String PATH = BASE_PATH + "ProcessVariablesReader_SignalVariables.bpmn";
+        final File processDefinition = new File(PATH);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+                fileScanner.getJavaResourcesFileInputStream());
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-		final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
-		// create data flow graphs
-		graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
-				scanner, new FlowAnalysis());
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
+        // create data flow graphs
+        graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
+                scanner, new FlowAnalysis());
 
-		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
-				new FlowAnalysis());
-		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+        final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
+                new FlowAnalysis());
+        final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
-		Assert.assertEquals(2, processVariables.size());
-	}
+        Assert.assertEquals(2, processVariables.size());
+    }
 
-	@Test
-	public void testRecogniseMessages() {
-		final String PATH = BASE_PATH + "ProcessVariablesReader_MessageVariables.bpmn";
-		final File processDefinition = new File(PATH);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
-				fileScanner.getJavaResourcesFileInputStream());
+    @Test
+    public void testRecogniseMessages() {
+        final String PATH = BASE_PATH + "ProcessVariablesReader_MessageVariables.bpmn";
+        final File processDefinition = new File(PATH);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+                fileScanner.getJavaResourcesFileInputStream());
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-		final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
-		// create data flow graphs
-		graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
-				scanner, new FlowAnalysis());
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
+        // create data flow graphs
+        graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
+                scanner, new FlowAnalysis());
 
-		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
-				new FlowAnalysis());
-		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+        final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
+                new FlowAnalysis());
+        final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
-		Assert.assertEquals(1, processVariables.size());
-	}
+        Assert.assertEquals(1, processVariables.size());
+    }
 
-	@Test
-	public void testRecogniseLinks() {
-		final String PATH = BASE_PATH + "ProcessVariablesReader_LinkVariables.bpmn";
-		final File processDefinition = new File(PATH);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
-				fileScanner.getJavaResourcesFileInputStream());
+    @Test
+    public void testRecogniseLinks() {
+        final String PATH = BASE_PATH + "ProcessVariablesReader_LinkVariables.bpmn";
+        final File processDefinition = new File(PATH);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+                fileScanner.getJavaResourcesFileInputStream());
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-		final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
-		// create data flow graphs
-		graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
-				scanner, new FlowAnalysis());
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
+        // create data flow graphs
+        graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
+                scanner, new FlowAnalysis());
 
-		final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
-				new FlowAnalysis());
-		final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+        final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
+                new FlowAnalysis());
+        final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
 
-		Assert.assertEquals(2, processVariables.size());
-	}
+        Assert.assertEquals(2, processVariables.size());
+    }
+
+    @Test
+    public void testOverloadedMethods() {
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
+        final File processDefinition = new File(PATH);
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+                fileScanner.getJavaResourcesFileInputStream());
+
+        // parse bpmn model and set delegate
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
+        serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.OverloadedMethodDelegate");
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+
+        // create data flow graphs
+        graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
+                scanner, new FlowAnalysis());
+
+        // create data flow graphs
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+        // calculate invalid paths based on data flow graphs
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
+        Assert.assertEquals("Model should have two UR anomalies.", 2, invalidPathMap.size());
+        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
+        Assert.assertEquals("myPassedVariable should raise UR anomaly.", "myPassedVariable", iterator.next().getName());
+        Assert.assertEquals("myHardcodedVariable should raise UR anomaly.", "myHardcodedVariable", iterator.next().getName());
+    }
 }
