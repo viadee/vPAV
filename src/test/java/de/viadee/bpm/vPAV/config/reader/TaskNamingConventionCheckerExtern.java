@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -57,8 +57,7 @@ public class TaskNamingConventionCheckerExtern extends AbstractElementChecker {
         super(rule, bpmnScanner);
 
         final Collection<ElementConvention> elementConventions = rule.getElementConventions();
-        if (elementConventions == null || elementConventions.size() < 1
-                || elementConventions.size() > 1) {
+        if (elementConventions == null || elementConventions.size() != 1) {
             throw new ProcessingException(
                     "task naming convention checker must have one element convention!");
         }
@@ -73,7 +72,7 @@ public class TaskNamingConventionCheckerExtern extends AbstractElementChecker {
      */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement baseElement = element.getBaseElement();
         if (baseElement instanceof Task) {
             final String taskName = baseElement.getAttributeValue("name");
@@ -100,7 +99,7 @@ public class TaskNamingConventionCheckerExtern extends AbstractElementChecker {
     }
 
     private CheckerIssue createIssue(final BpmnElement element, final BaseElement baseElement, String message,
-                                     String description, CriticalityEnum error) {
+            String description, CriticalityEnum error) {
         return new CheckerIssue(rule.getName(), rule.getRuleDescription(), error,
                 element.getProcessDefinition(),
                 null, baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,

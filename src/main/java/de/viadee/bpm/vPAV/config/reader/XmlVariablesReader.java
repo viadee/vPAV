@@ -31,22 +31,24 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
+import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
 /**
  * Used to read the variables file (variables.xml) and extract the user defined variables
@@ -61,7 +63,7 @@ public final class XmlVariablesReader {
      *
      * @param file           Location of variables.xml file relative to project resources
      * @param defaultProcess process variables are mapped to if no process is defined in file
-     * @return
+     * @return Map of manually defined variables
      * @throws JAXBException If file can not be found
      */
     public HashMap<String, ListMultimap<String, ProcessVariableOperation>> read(final String file,

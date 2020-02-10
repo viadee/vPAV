@@ -4,6 +4,14 @@ The BoundaryErrorChecker processes BPMN models and checks whether a BoundaryErro
 
 ## Assumptions
 - The **BPMN-models** have to be in the **classpath** at build time
+- The error code is either directly passed as string when throwing the error or a final string object is passed.
+    - E.g. these code snippets can be parsed:
+    
+        `throw new BpmnError("123");` 
+        ```java
+        final String errorCode = "123"; 
+        throw new BpmnError(errorCode);
+        ```
 
 ## Configuration
 The rule should be configured as follows:

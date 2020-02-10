@@ -54,7 +54,7 @@ public class DataFlowChecker implements ModelChecker {
 
     @Override
     public Collection<CheckerIssue> check() {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         for (DataFlowRule dataFlowRule : dataFlowRules) {
             dataFlowRule.evaluate(processVariables).stream()
                     .filter(r-> !r.isFulfilled())

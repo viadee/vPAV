@@ -57,17 +57,17 @@ function addCountOverlay(overlays, elements) {
 function getProcessVariableOverlay(bpmnFile) {
     let filteredVariables = proz_vars
         .filter(p => p.bpmnFile === (properties["basepath"] + bpmnFile))
-        .filter(p => p.elementIid !== "");
+.filter(p => p.elementIid !== "");
 
     return filteredVariables.map(p => {
         let overlayData = {};
-        overlayData.i = p;
-        overlayData.anz = [p.read.length, p.write.length, p.delete.length];
-        overlayData.clickOverlay = createVariableDialog(p);
-        overlayData.classes = "badge-info badge-variable-operations";
-        overlayData.title = "variable operations";
-        return overlayData;
-    });
+    overlayData.i = p;
+    overlayData.anz = [p.read.length, p.write.length, p.delete.length];
+    overlayData.clickOverlay = createVariableDialog(p);
+    overlayData.classes = "badge-info badge-variable-operations";
+    overlayData.title = "variable operations";
+    return overlayData;
+});
 }
 
 function getIssueOverlays(bpmnFile) {
@@ -137,18 +137,18 @@ function getIssueOverlays(bpmnFile) {
     issues.forEach(issue => {
         issueSeverity.forEach(element => {
             if (element.id === issue.i.elementId) {
-                if (element.Criticality === "ERROR") {
-                    issue.classes = "badge-danger";
-                }
-                if (element.Criticality === "WARNING") {
-                    issue.classes = "badge-warning";
-                }
-                if (element.Criticality === "INFO") {
-                    issue.classes = "badge-info";
-                }
-            }
-        });
-    });
+        if (element.Criticality === "ERROR") {
+            issue.classes = "badge-danger";
+        }
+        if (element.Criticality === "WARNING") {
+            issue.classes = "badge-warning";
+        }
+        if (element.Criticality === "INFO") {
+            issue.classes = "badge-info";
+        }
+    }
+});
+});
     return issues;
 }
 
@@ -193,14 +193,24 @@ function createIssueDialog(elements) {
                     var dCardAddIssueButton = document.createElement("button");
                     var dCardRemoveIssueButton = document.createElement("button");
 
+                    var plusIcon = document.createElement("img");
+                    plusIcon.setAttribute("src", "img/plus_icon.png");
+                    plusIcon.setAttribute("class", "button-icon plus");
+
+                    var minusIcon = document.createElement("img");
+                    minusIcon.setAttribute("src", "img/minus_icon.png");
+                    minusIcon.setAttribute("class", "button-icon minus");
+
                     dCardAddIssueButton.setAttribute("class", "btn btn-viadee issue-button");
                     dCardAddIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
                     dCardAddIssueButton.innerHTML = "Add Issue";
+                    dCardAddIssueButton.appendChild(plusIcon);
 
                     dCardRemoveIssueButton.setAttribute("class", "btn btn-viadee issue-button");
                     dCardRemoveIssueButton.disabled = true;
                     dCardRemoveIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
                     dCardRemoveIssueButton.innerHTML = "Remove Issue";
+                    dCardRemoveIssueButton.appendChild(minusIcon);
 
                     dCardIssueButtons.appendChild(dCardAddIssueButton);
                     dCardIssueButtons.appendChild(dCardRemoveIssueButton);
@@ -311,7 +321,7 @@ function createCardForVariableOperations(operations, title) {
 }
 
 // Add single issue to the ignoreIssues list
-function addIssue(issue){        
+function addIssue(issue){
     ignoredIssues[issue[0]] = '#' + issue[1];
     issue[2].disabled = true;
     issue[3].disabled = false;
@@ -331,7 +341,7 @@ function downloadFile(){
     Object.keys(ignoredIssues).forEach(function(key) {
         value = ignoredIssues[key];
         blob = blob + value + "\n"+ key + "\n";
-    });    
+    });
     download(new Blob([blob]),"ignoreIssues.txt", "text/plain");
 }
 
@@ -351,7 +361,7 @@ function createTableHeader(id, content) {
 }
 
 //create issue table
-function createIssueTable(bpmnFile, tableContent, mode) {    
+function createIssueTable(bpmnFile, tableContent, mode) {
     var myTable = document.getElementById("table");
     myTable.setAttribute("class", "table table-issues table-row table-bordered .table-responsive");
     let myTHead = document.createElement("thead");
@@ -366,7 +376,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
     myRow.appendChild(createTableHeader("th_paths", "Invalid Sequenceflow"));
     myTHead.appendChild(myRow);
     myTable.appendChild(myTHead);
-    
+
     //fill table with all issuesof current model
     for (let issue of tableContent) {
         if (issue.bpmnFile === (properties["basepath"] + bpmnFile)) {
@@ -376,7 +386,9 @@ function createIssueTable(bpmnFile, tableContent, mode) {
 
             //ruleName
             var myCell = document.createElement("td");
+            var innerDiv = document.createElement("div");
             var myText = document.createTextNode(issue.ruleName);
+            innerDiv.appendChild(myText);
 
             //buttons to add and remove issue
             var addIssueButton = document.createElement("button");
@@ -389,33 +401,34 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             addIssueButton.innerHTML = "Add Issue";
             var b = document.createElement("a");
             b.appendChild(addIssueButton);
-           
+
             removeIssueButton.setAttribute("disabled", true);
             removeIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
             removeIssueButton.innerHTML = "Remove Issue";
             var c = document.createElement("a");
             c.appendChild(removeIssueButton);
 
-            myCell.setAttribute("id", issue.classification) // mark cell
+            myCell.setAttribute("id", issue.classification); // mark cell
 
             //create link for default checkers
             var a = document.createElement("a");
-            a.appendChild(myText);            
+            a.appendChild(innerDiv);
 
             defaultCheckers.forEach(element => {
                 if (issue.ruleName === element.rulename) {
                     a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
                     a.setAttribute("title", "Checker documentation");
+                    a.style.fontWeight = 'bold';
                 }
             });
 
             myCell.appendChild(a);
-            
+
             //based on selection show button
             if (mode === tableViewModes.ISSUES) {
                 myCell.appendChild(b);
-                myCell.appendChild(c);                
-            }            
+                myCell.appendChild(c);
+            }
 
             //link to docu            
             myRow.appendChild(myCell);
@@ -450,7 +463,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             //add links for process variables contained in message
             let messageText = issue.message;
             processVariables.filter(p => issue.message.includes(`'${p.name}'`))
-                .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
+        .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
             myCell.innerHTML = messageText;
             myRow.appendChild(myCell);
 
@@ -466,10 +479,10 @@ function createIssueTable(bpmnFile, tableContent, mode) {
                             else
                                 path_text += issue.paths[x][y].elementId;
                         else
-                            if (y < issue.paths[x].length - 1)
-                                path_text += issue.paths[x][y].elementName + " -> ";
-                            else
-                                path_text += issue.paths[x][y].elementName
+                        if (y < issue.paths[x].length - 1)
+                            path_text += issue.paths[x][y].elementName + " -> ";
+                        else
+                            path_text += issue.paths[x][y].elementName
                     }
                     myText = document.createTextNode("Mark invalid flow");
 
@@ -647,11 +660,11 @@ function showDialog() {
         var a = document.createElement("a");
         var subName = model.name.substr(0, model.name.length - 5);
         li.appendChild(a);
-        li.setAttribute("class", "nav-item");
+        li.setAttribute("class", "nav-item right-margin");
         if (countIssues(model.name, elementsToMark) === 0)
-            a.innerHTML = subName + " <span class='badge badge-pill badge-success pt-1 pb-1'>" + countIssues(model.name, elementsToMark) + "</span>";
+            a.innerHTML = subName + " <span class='badge badge-pill badge-success badge-result pt-1 pb-1'>" + countIssues(model.name, elementsToMark) + "</span>";
         else
-            a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 viadee-darkblue-text viadee-pill-bg'>" + countIssues(model.name, elementsToMark) + "</span>";
+            a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 badge-result'>" + countIssues(model.name, elementsToMark) + "</span>";
         a.setAttribute("onclick", "controller.switchModel('" + model.name.replace(/\\/g, "\\\\") + "')");
         a.setAttribute("href", "#");
         if (first === true) {
@@ -703,7 +716,7 @@ const tableViewModes = Object.freeze({
 
 const overlayViewModes = Object.freeze({
     ISSUES:   Symbol("issues"),
-    VARIABLES:  Symbol("process variables"),
+    VARIABLES:  Symbol("process variables")
 });
 
 function createViewController() {
@@ -840,8 +853,8 @@ function createViewController() {
         let operations = processVariable.read.concat(processVariable.write, processVariable.delete);
         let elements = operations.map(o => {
             o.classification = "one-element";
-            return o;
-        });
+        return o;
+    });
 
         updateDiagram(this.currentModel, elements, getProcessVariableOverlay(this.currentModel.name));
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
@@ -875,8 +888,8 @@ function showUnlocatedCheckers() {
             </div>
         </div>`;
 
-        document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
-    });
+    document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
+});
 }
 
 // Init
@@ -884,6 +897,5 @@ let bpmnFile = diagramXMLSource[0].name;
 createViewModesNavBar(bpmnFile);
 const controller = createViewController();
 controller.init();
-document.getElementById('vPAV').innerHTML = vPavVersion;
 showUnlocatedCheckers();
 

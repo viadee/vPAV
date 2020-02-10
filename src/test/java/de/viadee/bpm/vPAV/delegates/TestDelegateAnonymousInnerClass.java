@@ -41,17 +41,16 @@ public class TestDelegateAnonymousInnerClass implements org.camunda.bpm.engine.d
 	
 	@Override
 	public void execute(DelegateExecution execution) throws Exception {
-		
-		execution.removeVariable("test");
-		
 		TestAnonymousInnerClass taic = new TestAnonymousInnerClass() {
 			@Override
-			void test() {				
+			void test() {
 				execution.getVariable("test");
 				execution.setVariable("test1", true);
 				execution.removeVariable("test2");
-			}			
+			}
 		};
+
+		execution.removeVariable("test");
 		
 		taic.test();
 		

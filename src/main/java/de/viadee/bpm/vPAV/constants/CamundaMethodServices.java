@@ -31,20 +31,33 @@
  */
 package de.viadee.bpm.vPAV.constants;
 
+import soot.RefType;
+
 public class CamundaMethodServices {
 
     private CamundaMethodServices() {
     }
 
+
+    public static final String ACTIVITY_BEHAVIOR = "org.camunda.bpm.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior";
+
+    public static final String JAVA_DELEGATE = "org.camunda.bpm.engine.delegate.JavaDelegate";
+
+    public static final String TASK_LISTENER = "org.camunda.bpm.engine.delegate.TaskListener";
+
+    public static final String EXECUTION_LISTENER = "org.camunda.bpm.engine.delegate.ExecutionListener";
+
     public static final String DELEGATE = "org.camunda.bpm.engine.delegate.DelegateExecution";
-    
+
+    public static final String ACTIVITY_EXECUTION = "org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution";
+
     public static final String DELEGATE_TASK = "org.camunda.bpm.engine.delegate.DelegateTask";
+
+    public static final String VARIABLE_MAP = "org.camunda.bpm.engine.variable.VariableMap";
 
     public static final String RUNTIME = "org.camunda.bpm.engine.RuntimeService";
 
     public static final String SCOPE = "org.camunda.bpm.engine.delegate.VariableScope";
-    
-    public static final String VARIABLE_MAP = "org.camunda.bpm.engine.variable.VariableMap";
 
     public static final String MAP = "java.util.Map";
     
@@ -57,4 +70,13 @@ public class CamundaMethodServices {
     public static final String START_PROCESS_INSTANCE_BY_KEY = "startProcessInstanceByKey";
     
     public static final String CORRELATE_MESSAGE = "createMessageCorrelation";
+
+    public static final RefType DELEGATE_EXECUTION_TYPE = RefType.v(DELEGATE);
+
+    public static final RefType ACTIVITY_EXECUTION_TYPE = RefType.v(ACTIVITY_EXECUTION);
+
+    public static final RefType DELEGATE_TASK_TYPE = RefType.v(DELEGATE_TASK);
+
+    public static final RefType MAP_VARIABLES_TYPE = RefType.v(VARIABLE_MAP);
+
 }

@@ -31,18 +31,22 @@
  */
 package de.viadee.bpm.vPAV;
 
-import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import org.springframework.context.ApplicationContext;
-
+import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+
+import org.springframework.context.ApplicationContext;
+
+import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class RuntimeConfig {
 
@@ -61,20 +65,20 @@ public class RuntimeConfig {
     private boolean test = false; // TODO: Replace with parameterized method calls, to improve separation of test
     // and production code
 
-    private static Logger logger = Logger.getLogger(RuntimeConfig.class.getName());
+    private static Logger LOGGER = Logger.getLogger(RuntimeConfig.class.getName());
 
-    private final String[] viadeeConfigRules = {"CreateOutputHTML"};
+    private final String[] viadeeConfigRules = { "CreateOutputHTML" };
 
-    private final String[] viadeeElementRules = {
-            "XorConventionChecker", "TimerExpressionChecker", "JavaDelegateChecker",
-            "NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker", "VersioningChecker",
-            "DmnTaskChecker", "ProcessVariablesNameConventionChecker",
+    private final String[] viadeeElementRules = { "XorConventionChecker", "TimerExpressionChecker",
+            "JavaDelegateChecker", "NoScriptChecker", "NoExpressionChecker", "EmbeddedGroovyScriptChecker",
+            "VersioningChecker", "DmnTaskChecker", "ProcessVariablesNameConventionChecker",
             "TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
             "BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
-            "MessageCorrelationChecker"
-    };
+            "MessageCorrelationChecker" };
 
-    private final String[] viadeeModelRules = {"ProcessVariablesModelChecker", "DataFlowChecker"};
+    private final String[] viadeeModelRules = { "ProcessVariablesModelChecker", "DataFlowChecker" };
+
+    private final URL[] urls = setURLs();
 
     private RuntimeConfig() {
     }
@@ -86,7 +90,7 @@ public class RuntimeConfig {
         return RuntimeConfig.instance;
     }
 
-    public String findBeanByName(String string) {
+    String findBeanByName(String string) {
         if (string != null && !string.isEmpty() && beanMap != null && !beanMap.isEmpty()) {
             return beanMap.get(string);
         } else
@@ -118,7 +122,8 @@ public class RuntimeConfig {
     }
 
     public String[] getViadeeRules() {
-        return Stream.of(viadeeConfigRules, viadeeElementRules, viadeeModelRules).flatMap(Stream::of).toArray(String[]::new);
+        return Stream.of(viadeeConfigRules, viadeeElementRules, viadeeModelRules).flatMap(Stream::of)
+                .toArray(String[]::new);
     }
 
     public String[] getViadeeElementRules() {
@@ -126,15 +131,14 @@ public class RuntimeConfig {
     }
 
     public ArrayList<String> getActiveRules() {
-        ArrayList<String> activeRules = new ArrayList<>(ruleSet.getAllActiveRules().keySet());
-        return activeRules;
+        return new ArrayList<>(ruleSet.getAllActiveRules().keySet());
     }
 
     public void setRuleSet(RuleSet ruleSet) {
         this.ruleSet = ruleSet;
     }
 
-    public void setApplicationContext(ApplicationContext ctx) {
+    void setApplicationContext(ApplicationContext ctx) {
         this.ctx = ctx;
     }
 
@@ -143,12 +147,9 @@ public class RuntimeConfig {
     }
 
     /**
-     * Retrieve locale from ruleSet. If locale can not be retrieved, use system
-     * locale
-     *
-     * @param rules RuleSet Rules from ruleset
+     * Retrieve locale. If locale can not be retrieved, use system locale
      */
-    public void retrieveLocale(RuleSet rules) {
+    void retrieveLocale() {
         if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
             getResource("de_DE");
         } else {
@@ -172,28 +173,42 @@ public class RuntimeConfig {
      * @param bundleName Bundle name for localization
      * @return ResourceBundle
      */
-    private static ResourceBundle fromClassLoader(final String bundleName) {
-
-        URL[] urls;
-        URLClassLoader ucl;
-        if (RuntimeConfig.getInstance().getClassLoader() instanceof URLClassLoader) {
-            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader());
-        } else {
-            ucl = ((URLClassLoader) RuntimeConfig.getInstance().getClassLoader().getParent());
-        }
-
-        urls = ucl.getURLs();
-
+    private ResourceBundle fromClassLoader(final String bundleName) {
+        URL[] urls = getURLs();
         ClassLoader loader = new URLClassLoader(urls);
-
         return ResourceBundle.getBundle(bundleName, Locale.getDefault(), loader);
     }
 
-    public ResourceBundle getResourceBundle() {
+    /**
+     * Retrieves URLs from java classpath
+     *
+     * @return Array of URLs
+     */
+    private URL[] setURLs() {
+        String pathSeparator = System.getProperty("path.separator");
+
+        String[] classPathEntries = System.getProperty("java.class.path").split(pathSeparator);
+
+        ArrayList<URL> urlArrayList = new ArrayList<>();
+        Arrays.asList(classPathEntries).forEach(entry -> {
+            try {
+                urlArrayList.add((new File(entry)).toURI().toURL());
+            } catch (MalformedURLException ignored) {
+                LOGGER.warning("Resource " + entry + " could not be loaded");
+            }
+        });
+        return urlArrayList.toArray(new URL[0]);
+    }
+
+    private URL[] getURLs() {
+        return urls;
+    }
+
+    ResourceBundle getResourceBundle() {
         return resourceBundle;
     }
 
-    public void setResourceBundle(ResourceBundle resourceBundle) {
+    private void setResourceBundle(ResourceBundle resourceBundle) {
         this.resourceBundle = resourceBundle;
     }
 

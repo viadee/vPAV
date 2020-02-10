@@ -34,6 +34,10 @@ package de.viadee.bpm.vPAV;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import org.apache.commons.collections4.map.LinkedMap;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import org.camunda.bpm.model.bpmn.instance.Task;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -41,6 +45,7 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +61,8 @@ public class BpmnScanner {
 
     private ModelVersionEnum modelVersion;
 
+    private BpmnModelInstance modelInstance;
+
     private static final Logger LOGGER = Logger.getLogger(BpmnScanner.class.getName());
 
     private enum ModelVersionEnum {
@@ -67,8 +74,8 @@ public class BpmnScanner {
      * Implementation, so the we have to scan the xml of the model for the
      * implementation
      * <p>
-     * @param path
-     * path to model
+     *
+     * @param path path to model
      */
     public BpmnScanner(String path) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -84,9 +91,14 @@ public class BpmnScanner {
         }
         try {
             setModelVersion(path);
-        } catch (SAXException | ParserConfigurationException | IOException e) {
+        } catch (SAXException | IOException | ParserConfigurationException e) {
             throw new ProcessingException("Could not instantiate BpmnScanner. Run aborted");
         }
+        this.modelInstance = Bpmn.readModelFromFile(new File(path));
+    }
+
+    public void setModelInstance(BpmnModelInstance modelInstance) {
+        this.modelInstance = modelInstance;
     }
 
     /**
@@ -98,7 +110,7 @@ public class BpmnScanner {
      * @throws IOException
      * @throws ParserConfigurationException
      */
-    private void setModelVersion(String path) throws SAXException, IOException, ParserConfigurationException {
+    private void setModelVersion(String path) throws IOException, SAXException, ParserConfigurationException {
         // parse the given bpmn model
         doc = builder.parse(path);
 
@@ -120,80 +132,28 @@ public class BpmnScanner {
      * @return return_implementation contains implementation
      */
     public String getImplementation(String id) {
-        // List to hold return values
-        String returnImplementation = null;
+        Task task = modelInstance.getModelElementById(id);
 
-        String nodeName;
-
-        // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-
-        switch (modelVersion) {
-            case V1:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BUSINESS_RULE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.SERVICE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.SEND_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.END_EVENT));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.INTERMEDIATE_THROW_EVENT));
-                break;
-            case V2:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BUSINESS_RULE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_SERVICE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_SEND_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_END_EVENT));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_INTERMEDIATE_THROW_EVENT));
-                break;
-            case V3:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BUSINESS_RULE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_SERVICE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_SEND_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_END_EVENT));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_INTERMEDIATE_THROW_EVENT));
-                break;
-            default:
-                listNodeList = null;
+        // Check which implementation it is
+        if (task.getDomElement()
+                .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS)) {
+            return BpmnConstants.CAMUNDA_CLASS;
+        } else if (task.getDomElement().hasAttribute(BpmnModelConstants.CAMUNDA_NS,
+                BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION)) {
+            return BpmnConstants.CAMUNDA_DEXPRESSION;
+        } else if (
+                task.getDomElement()
+                        .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION)) {
+            return BpmnConstants.CAMUNDA_EXPRESSION;
+        } else if (task.getDomElement().hasAttribute(BpmnModelConstants.CAMUNDA_NS,
+                BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF)) {
+            return BpmnConstants.CAMUNDA_DMN;
+        } else if (task.getDomElement()
+                .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_TYPE)) {
+            return BpmnConstants.CAMUNDA_EXT;
         }
 
-        // iterate over list<NodeList> and check each NodeList (BRTask,
-        // ServiceTask and SendTask)
-        for (final NodeList list : listNodeList) {
-            // iterate over list and check child of each node
-            for (int i = 0; i < list.getLength(); i++) {
-                Element taskElement = (Element) list.item(i);
-                // check if the ids are corresponding
-                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                    NamedNodeMap taskElementAttr = taskElement.getAttributes();
-                    // check if more than 1 inner attribute exists
-                    if (taskElementAttr.getLength() > 1) {
-                        // check all attributes, whether they fit an
-                        // implementation
-                        for (int x = 0; x < taskElementAttr.getLength(); x++) {
-                            Node attr = taskElementAttr.item(x);
-                            // node_name equals an implementation
-                            nodeName = attr.getNodeName();
-                            if (nodeName.equals(BpmnConstants.CAMUNDA_CLASS)
-                                    || nodeName.equals(BpmnConstants.CAMUNDA_EXPRESSION)
-                                    || nodeName.equals(BpmnConstants.CAMUNDA_DEXPRESSION)
-                                    || nodeName.equals(BpmnConstants.CAMUNDA_DMN)
-                                    || nodeName.equals(BpmnConstants.CAMUNDA_EXT)) {
-                                returnImplementation = nodeName;
-                                break;
-                            }
-                        }
-                        // if inner attributes dont consist of implementations
-                    }
-                    if (taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_CLASS) == null
-                            && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_EXPRESSION) == null
-                            && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_DEXPRESSION) == null
-                            && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_DMN) == null
-                            && taskElementAttr.getNamedItem(BpmnConstants.CAMUNDA_EXT) == null) {
-                        returnImplementation = BpmnConstants.IMPLEMENTATION;
-                        break;
-                    }
-                }
-            }
-        }
-        return returnImplementation;
+        return BpmnConstants.IMPLEMENTATION;
     }
 
     /**
@@ -202,51 +162,25 @@ public class BpmnScanner {
      * @return implementationReference
      */
     public String getImplementationReference(String id, String implementation) {
-        String implementationReference = "";
+        Task task = modelInstance.getModelElementById(id);
 
-        // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
-
-        switch (modelVersion) {
-            case V1:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BUSINESS_RULE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.SERVICE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.SEND_TASK));
-                break;
-            case V2:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BUSINESS_RULE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_SERVICE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_SEND_TASK));
-                break;
-            case V3:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BUSINESS_RULE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_SERVICE_TASK));
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_SEND_TASK));
-                break;
-            default:
-                listNodeList = null;
+        if (implementation.equals(BpmnConstants.CAMUNDA_CLASS)) {
+            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS);
+        } else if (implementation.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
+            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION);
+        } else if (implementation.equals(BpmnConstants.CAMUNDA_EXPRESSION)) {
+            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION);
+        } else if (implementation.equals(BpmnConstants.CAMUNDA_DMN)) {
+            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF);
+        } else if (implementation.equals(BpmnConstants.CAMUNDA_EXT)) {
+            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_TYPE);
         }
 
-        // iterate over list<NodeList> and check each NodeList (BRTask,
-        // ServiceTask and SendTask)
-        for (final NodeList list : listNodeList) {
-            // iterate over list and check child of each node
-            for (int i = 0; i < list.getLength(); i++) {
-                Element taskElement = (Element) list.item(i);
-
-                // check if the ids are corresponding
-                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                    // check for implementation reference
-                    if (implementation.equals(BpmnConstants.CAMUNDA_CLASS)) {
-                        implementationReference = taskElement.getAttribute(BpmnConstants.CAMUNDA_CLASS);
-                    } else if (implementation.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
-                        implementationReference = taskElement.getAttribute(BpmnConstants.CAMUNDA_DEXPRESSION);
-                    }
-                }
-            }
-        }
-
-        return implementationReference;
+        return "";
     }
 
     /**
@@ -547,7 +481,8 @@ public class BpmnScanner {
             childNodes = sq.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); i++) {
                 Node childNode = childNodes.item(i);
-                if (childNode.getLocalName() != null && childNode.getLocalName().equals(BpmnConstants.CONDITION_EXPRESSION)) {
+                if (childNode.getLocalName() != null && childNode.getLocalName()
+                        .equals(BpmnConstants.CONDITION_EXPRESSION)) {
                     Element childElement = (Element) childNode;
                     if (childElement.getAttribute(BpmnConstants.LANG).trim().length() > 0)
                         return true;
@@ -848,7 +783,8 @@ public class BpmnScanner {
                                 break;
                             }
                             case BpmnConstants.CAMUNDA_SCRIPT: {
-                                mappingTypes.put(nodeChilds.item(y).getNodeName(), ((Element) nodeChilds.item(y)).getAttribute(BpmnConstants.SCRIPT_FORMAT));
+                                mappingTypes.put(nodeChilds.item(y).getNodeName(),
+                                        ((Element) nodeChilds.item(y)).getAttribute(BpmnConstants.SCRIPT_FORMAT));
                                 break;
                             }
                         }
@@ -860,7 +796,6 @@ public class BpmnScanner {
         }
         return mappingTypes;
     }
-
 
     /**
      * get mapping of inputParameters
@@ -922,7 +857,7 @@ public class BpmnScanner {
      * @param nodeList  list of nodes for current parent BPMN element
      */
     private void retrieveMapping(final String id, final HashMap<String, Map<String, String>> variables,
-                                 final NodeList nodeList) {
+            final NodeList nodeList) {
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
             if (idMatch(node, id)) {
@@ -962,7 +897,8 @@ public class BpmnScanner {
                                 final HashMap<String, String> innerVariables = new HashMap<>();
                                 for (int z = 0; z < listChilds.getLength(); z++) {
                                     innerVariables.put(Integer.toString(z), listChilds.item(z).getTextContent());
-                                    variables.put(((Element) node).getAttribute(BpmnConstants.ATTR_NAME), innerVariables);
+                                    variables.put(((Element) node).getAttribute(BpmnConstants.ATTR_NAME),
+                                            innerVariables);
                                 }
                                 break;
                             }

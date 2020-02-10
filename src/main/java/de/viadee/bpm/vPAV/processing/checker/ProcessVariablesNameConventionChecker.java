@@ -66,9 +66,8 @@ public class ProcessVariablesNameConventionChecker extends AbstractElementChecke
 	public Collection<CheckerIssue> check(final BpmnElement element) {
 
 		// analyse process variables are matching naming conventions
-		final Collection<CheckerIssue> issues = checkNamingConvention(element);
 
-		return issues;
+        return checkNamingConvention(element);
 	}
 
 	/**
@@ -79,7 +78,7 @@ public class ProcessVariablesNameConventionChecker extends AbstractElementChecke
 	 */
 	private Collection<CheckerIssue> checkNamingConvention(final BpmnElement element) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
 		final Collection<ElementConvention> elementConventions = rule.getElementConventions();
 		if (elementConventions != null) {

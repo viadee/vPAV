@@ -107,8 +107,6 @@ public class FlowAnalysis {
 			boolean hasNodesBefore = !(analysisElement.getBaseElement() instanceof CallActivity);
 
 			if (analysisElement.getControlFlowGraph().hasNodes()) {
-				analysisElement.getControlFlowGraph().computePredecessorRelations();
-
 				AnalysisElement firstNode = analysisElement.getControlFlowGraph().firstNode();
 				AnalysisElement lastNode = analysisElement.getControlFlowGraph().lastNode();
 				boolean hasNodesAfter = false;
@@ -133,12 +131,8 @@ public class FlowAnalysis {
 								isFirstHalf = false;
 								lastNodeBefore = predecessor;
 								firstNodeAfter = curNode;
-							} else {
-								// Build connection between nodes
-								curNode.clearPredecessors();
-								predecessor.clearSuccessors();
-								curNode.addPredecessor(predecessor);
-								predecessor.addSuccessor(curNode);
+								// Clear connection between before and after nodes
+								firstNodeAfter.clearPredecessors();
 							}
 						}
 						predecessor = curNode;
@@ -238,57 +232,14 @@ public class FlowAnalysis {
 					}
 				}
 
-				// TODO überprüfen, ob dieser Teil noch nötig ist
-				boolean del = analysisElement.getControlFlowGraph().hasImplementedDelegate();
-				// Set predecessor relation for blocks across delegates
-				final Iterator<AbstractNode> iterator = analysisElement.getControlFlowGraph().getNodes().values()
-						.iterator();
-				AbstractNode prevNode = null;
-				while (iterator.hasNext()) {
-					AbstractNode currNode = iterator.next();
-					if (prevNode == null) {
-						prevNode = currNode;
-					} else {
-						// Ensure that the pointers wont get set for beginning delegate and ending
-						// delegate
-						if (currNode.getElementChapter().equals(ElementChapter.ExecutionListenerEnd)
-								&& prevNode.getElementChapter().equals(ElementChapter.ExecutionListenerStart)) {
-							if (del) {
-								prevNode = currNode;
-							}
-						} else {
-							currNode.setPredsInterProcedural(prevNode.getId());
-							prevNode = currNode;
-						}
-					}
-				}
-
-				final LinkedHashMap<String, ProcessVariableOperation> inputVariables = new LinkedHashMap<>();
-				final LinkedHashMap<String, ProcessVariableOperation> outputVariables = new LinkedHashMap<>();
 				final LinkedHashMap<String, ProcessVariableOperation> initialVariables = new LinkedHashMap<>();
 
 				analysisElement.getOperations().values().forEach(operation -> {
-					if (operation.getFieldType().equals(KnownElementFieldType.InputParameter)) {
-						inputVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.OutputParameter)) {
-						outputVariables.put(operation.getId(), operation);
-					} else if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
+					if (operation.getFieldType().equals(KnownElementFieldType.Initial)) {
 						initialVariables.put(operation.getId(), operation);
 					}
 				});
 
-				// Input variables are passed later to start event of call activity if no nodes
-				// before exist
-				if (!(analysisElement.getBaseElement() instanceof CallActivity && !hasNodesBefore)) {
-					firstNode.addDefined(inputVariables);
-				}
-
-				// Pass output variables to successors
-				if (analysisElement.getBaseElement() instanceof CallActivity && !hasNodesAfter) {
-					lastNode.getSuccessors().forEach((element) -> element.setDefined(outputVariables));
-				} else {
-					lastNode.addDefined(outputVariables);
-				}
 
 				// If we have initial operations, we cant have input mapping (restriction of
 				// start event)

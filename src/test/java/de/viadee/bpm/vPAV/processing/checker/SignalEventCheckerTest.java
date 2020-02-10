@@ -32,27 +32,24 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -81,16 +78,13 @@ public class SignalEventCheckerTest {
 	/**
 	 * Case: Tasks without Expressions
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
 	 */
 	@Test
-	public void testCorrectModel() throws ParserConfigurationException, SAXException, IOException {
+    public void testCorrectModel() {
 		final String PATH = BASE_PATH + "SignalEventChecker_Correct.bpmn";
 		checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
 
-		final Collection<CheckerIssue> issues = new ArrayList<>();
+
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -99,10 +93,10 @@ public class SignalEventCheckerTest {
 
 		for (BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+            checker.check(element);
 		}
 
-		if (issues.size() > 0) {
+        if (IssueService.getInstance().getIssues().size() > 0) {
 			Assert.fail("correct model generates an issue");
 		}
 	}
@@ -110,16 +104,13 @@ public class SignalEventCheckerTest {
 	/**
 	 * Case: Multiple SignalStartEvents with the same signal name
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
 	 */
 	@Test
-	public void testWrongModel() throws ParserConfigurationException, SAXException, IOException {
+    public void testWrongModel() {
 		final String PATH = BASE_PATH + "SignalEventChecker_Wrong.bpmn";
 		checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
 
-		final Collection<CheckerIssue> issues = new ArrayList<>();
+
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -128,12 +119,17 @@ public class SignalEventCheckerTest {
 
 		for (BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+            checker.check(element);
 		}
 
-		if (issues.size() != 1) {
+		if (IssueService.getInstance().getIssues().size() != 1) {
 			Assert.fail("incorrect model should generate an issue");
 		}
 	}
+
+    @After
+    public void clearIssues() {
+        IssueService.getInstance().clear();
+    }
 
 }

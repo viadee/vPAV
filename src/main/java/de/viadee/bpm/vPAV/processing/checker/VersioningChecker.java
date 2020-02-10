@@ -82,7 +82,7 @@ public class VersioningChecker extends AbstractElementChecker {
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement baseElement = element.getBaseElement();
 
         // Service Task, Business Task, Send Task
@@ -117,7 +117,7 @@ public class VersioningChecker extends AbstractElementChecker {
      */
     private Collection<CheckerIssue> checkExecutionListener(final BpmnElement element,
                                                             final ExtensionElements extensionElements) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         List<CamundaExecutionListener> execListenerList = extensionElements.getElementsQuery()
                 .filterByType(CamundaExecutionListener.class).list();
         for (final CamundaExecutionListener listener : execListenerList) {
@@ -153,7 +153,7 @@ public class VersioningChecker extends AbstractElementChecker {
      */
     private Collection<CheckerIssue> checkTaskListener(final BpmnElement element,
                                                        final ExtensionElements extensionElements) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         List<CamundaTaskListener> taskListenerList = extensionElements.getElementsQuery()
                 .filterByType(CamundaTaskListener.class).list();
         for (final CamundaTaskListener listener : taskListenerList) {
@@ -187,7 +187,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @return issues
      */
     private Collection<CheckerIssue> checkCommonTasks(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement baseElement = element.getBaseElement();
         if (baseElement instanceof ServiceTask || baseElement instanceof SendTask
                 || baseElement instanceof BusinessRuleTask) {
@@ -224,7 +224,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @return issues
      */
     private Collection<CheckerIssue> checkScriptTask(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement baseElement = element.getBaseElement();
         if (baseElement instanceof ScriptTask) {
             final ScriptTask scriptTask = (ScriptTask) baseElement;
@@ -245,7 +245,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @return
      */
     private Collection<CheckerIssue> checkMessageEventDefinition(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement baseElement = element.getBaseElement();
 
         if (baseElement instanceof MessageEventDefinition) {
@@ -285,7 +285,7 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * convert package format into groovy file name
      *
-     * @param javaResource
+     * @param resourcePath
      * @return file
      */
     private String getGroovyReference(String resourcePath) {

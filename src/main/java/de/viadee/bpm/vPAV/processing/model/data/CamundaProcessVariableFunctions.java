@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,39 +34,43 @@ package de.viadee.bpm.vPAV.processing.model.data;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 
 /**
- * 
+ *
  * Enum storing Camunda methods of ProcessVariable operations.
- * 
+ *
  * name and numberOfArgBoxes are for identification locationOfBox and operationType are for finding and storing the
  * ProcessVariable
  *
  */
 public enum CamundaProcessVariableFunctions {
 
-    SetVariable("setVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.WRITE), 
+    SetVariable("setVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.WRITE),
     SetVariable2("setVariable", CamundaMethodServices.RUNTIME, 3, 1, VariableOperation.WRITE),
-    GetVariable("getVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.READ), 
-    GetVariable2("getVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.READ), 
-    GetVariable3("getVariable", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ), 
-    RemoveVariable("removeVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.DELETE),
-    RemoveVariable2("removeVariable", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
-    RemoveVariableLocal("removeVariableLocal", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
     SetVariableD("setVariable", CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.WRITE),
     SetVariableS("setVariable", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
-    GetVariableS("getVariable", CamundaMethodServices.SCOPE, 1, 1, VariableOperation.READ),
     SetVariableLocale("setVariableLocal", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
     SetVariableLocale2("setVariableLocal", CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.WRITE),
+    SetVariableA("setVariable", CamundaMethodServices.ACTIVITY_EXECUTION, 2, 1, VariableOperation.WRITE),
+    GetVariable("getVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.READ),
+    GetVariable2("getVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.READ),
+    GetVariable3("getVariable", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
+    GetVariableS("getVariable", CamundaMethodServices.SCOPE, 1, 1, VariableOperation.READ),
     GetVariableLocal("getVariableLocal", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
     GetVariableLocalTyped("getVariableLocalTyped", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
     GetVariableLocalTyped2("getVariableLocalTyped", CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.READ),
+    GetVariableA("getVariable", CamundaMethodServices.ACTIVITY_EXECUTION, 1, 1, VariableOperation.READ),
+    GetVariableA2("getVariable", CamundaMethodServices.ACTIVITY_EXECUTION, 2, 1, VariableOperation.READ),
+    RemoveVariable("removeVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.DELETE),
+    RemoveVariable2("removeVariable", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
+    RemoveVariableLocal("removeVariableLocal", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
+    RemoveVariableA("removeVariable", CamundaMethodServices.ACTIVITY_EXECUTION, 1, 1, VariableOperation.DELETE),
     Put("put", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
     Put2("put", CamundaMethodServices.MAP, 2, 1, VariableOperation.WRITE),
-	PutValue("putValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
-	PutValueTyped("putValueTyped", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
-	GetValue("getValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.READ),
-	GetValueTyped("getValueTyped", CamundaMethodServices.VARIABLE_MAP, 1, 1, VariableOperation.READ),
-	Remove("remove", CamundaMethodServices.VARIABLE_MAP, 1, 1, VariableOperation.DELETE),
-	Remove2("remove", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.DELETE);
+    PutValue("putValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
+    PutValueTyped("putValueTyped", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
+    GetValue("getValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.READ),
+    GetValueTyped("getValueTyped", CamundaMethodServices.VARIABLE_MAP, 1, 1, VariableOperation.READ),
+    Remove("remove", CamundaMethodServices.VARIABLE_MAP, 1, 1, VariableOperation.DELETE),
+    Remove2("remove", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.DELETE);
 
     private String name;
 
@@ -79,7 +83,7 @@ public enum CamundaProcessVariableFunctions {
     private VariableOperation operationType;
 
     /**
-     * 
+     *
      * @param name
      *            - of the Camunda method
      * @param number

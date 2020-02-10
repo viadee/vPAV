@@ -62,7 +62,7 @@ public class ProcessVariablesModelChecker implements ModelChecker {
 	@Override
 	public Collection<CheckerIssue> check() {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final AnomalyContainer anomaly : invalidPathsMap.keySet()) {
 			final List<Path> paths = invalidPathsMap.get(anomaly);
 			final ProcessVariableOperation var = anomaly.getVariable();

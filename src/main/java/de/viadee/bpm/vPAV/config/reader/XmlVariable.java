@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -40,70 +39,70 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder = { "name", "process", "creationPoint", "scope", "operation" })
 public class XmlVariable {
 
-    private String name;
+	private String name;
 
-    private String process;
+	private String process;
 
-    private String creationPoint;
+	private String creationPoint;
 
-    private String scope;
+	private String scope;
 
-    private String operation;
+	private String operation;
 
-    public XmlVariable() {
-    }
+	public XmlVariable() {
+	}
 
-    public XmlVariable(String name, String process, String creationPoint, String scope, String operation) {
-        super();
-        this.name = name;
-        this.process = process;
-        this.creationPoint = creationPoint;
-        this.scope = scope;
-        this.operation = operation;
-    }
+	public XmlVariable(String name, String process, String creationPoint, String scope, String operation) {
+		super();
+		this.name = name;
+		this.process = process;
+		this.creationPoint = creationPoint;
+		this.scope = scope;
+		this.operation = operation;
+	}
 
-    @XmlElement(name = "name", required = true)
-    public String getName() {
-        return name;
-    }
+	@XmlElement(name = "name", required = true)
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    @XmlElement(name = "process", required = true)
-    public String getProcess() {
-        return process;
-    }
+	@XmlElement(name = "process", required = true)
+	public String getProcess() {
+		return process;
+	}
 
-    public void setProcess(String process) {
-        this.process = process;
-    }
+	public void setProcess(String process) {
+		this.process = process;
+	}
 
-    @XmlElement(name = "creationPoint", required = false)
-    public String getCreationPoint() {
-        return creationPoint;
-    }
+	@XmlElement(name = "creationPoint", required = false)
+	public String getCreationPoint() {
+		return creationPoint;
+	}
 
-    public void setCreationPoint(String creationPoint) {
-        this.creationPoint = creationPoint;
-    }
+	public void setCreationPoint(String creationPoint) {
+		this.creationPoint = creationPoint;
+	}
 
-    @XmlElement(name = "scope", required = false)
-    public String getScope() {
-        return scope;
-    }
+	@XmlElement(name = "scope", required = false)
+	public String getScope() {
+		return scope;
+	}
 
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
+	public void setScope(String scope) {
+		this.scope = scope;
+	}
 
-    @XmlElement(name = "operation", required = false)
-    public String getOperation() {
-        return operation;
-    }
+	@XmlElement(name = "operation", required = false)
+	public String getOperation() {
+		return operation;
+	}
 
-    public void setOperation(String operation) {
-        this.operation = operation;
-    }
+	public void setOperation(String operation) {
+		this.operation = operation;
+	}
 }

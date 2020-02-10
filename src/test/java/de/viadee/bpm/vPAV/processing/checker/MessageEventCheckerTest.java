@@ -32,28 +32,24 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class MessageEventCheckerTest {
@@ -80,18 +76,11 @@ public class MessageEventCheckerTest {
 	/**
 	 * Case: StartEvent has been set with correct message
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testStartEvent() throws ParserConfigurationException, SAXException, IOException {
+    public void testStartEvent() {
 		final String PATH = BASE_PATH + "MessageEventChecker_testStartEvent.bpmn";
 		checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
-
-		// parse bpmn model
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -100,10 +89,10 @@ public class MessageEventCheckerTest {
 
 		for (BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+            checker.check(element);
 		}
 
-		if (issues.size() > 0) {
+        if (IssueService.getInstance().getIssues().size() > 0) {
 			Assert.fail("correct model generates an issue");
 		}
 	}
@@ -111,18 +100,11 @@ public class MessageEventCheckerTest {
 	/**
 	 * Case: StartEvent has been set with message and expression
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testStartEventWithExpression() throws ParserConfigurationException, SAXException, IOException {
+    public void testStartEventWithExpression() {
 		final String PATH = BASE_PATH + "MessageEventChecker_testStartEventWithExpression.bpmn";
 		checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
-
-		// parse bpmn model
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -131,10 +113,10 @@ public class MessageEventCheckerTest {
 
 		for (BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+            checker.check(element);
 		}
 
-		if (issues.size() != 1) {
+        if (IssueService.getInstance().getIssues().size() != 1) {
 			Assert.fail("model should generate an issue");
 		}
 	}
@@ -142,18 +124,11 @@ public class MessageEventCheckerTest {
 	/**
 	 * Case: EndEvent has been set with wrong message
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testEndEvent() throws ParserConfigurationException, SAXException, IOException {
+    public void testEndEvent() {
 		final String PATH = BASE_PATH + "MessageEventChecker_testEndEvent.bpmn";
 		checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
-
-		// parse bpmn model
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -162,10 +137,10 @@ public class MessageEventCheckerTest {
 
 		for (BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+            checker.check(element);
 		}
 
-		if (issues.size() != 1) {
+        if (IssueService.getInstance().getIssues().size() != 1) {
 			Assert.fail("collection with the issues is bigger or smaller as expected");
 		}
 	}
@@ -173,18 +148,11 @@ public class MessageEventCheckerTest {
 	/**
 	 * Case: Mixed events with several faults
 	 *
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
 	 */
 	@Test
-	public void testMixedEvents() throws ParserConfigurationException, SAXException, IOException {
+    public void testMixedEvents() {
 		final String PATH = BASE_PATH + "MessageEventChecker_testMixedEvents.bpmn";
 		checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
-
-		// parse bpmn model
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -193,12 +161,17 @@ public class MessageEventCheckerTest {
 
 		for (BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-			issues.addAll(checker.check(element));
+            checker.check(element);
 		}
 
-		if (issues.size() != 1) {
+        if (IssueService.getInstance().getIssues().size() != 1) {
 			Assert.fail("collection with the issues is bigger or smaller as expected");
 		}
 	}
+
+    @After
+    public void clearIssues() {
+        IssueService.getInstance().clear();
+    }
 
 }

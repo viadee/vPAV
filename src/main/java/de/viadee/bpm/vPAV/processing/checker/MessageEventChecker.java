@@ -62,7 +62,7 @@ public class MessageEventChecker extends AbstractElementChecker {
 	@Override
 	public Collection<CheckerIssue> check(BpmnElement element) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BaseElement baseElement = element.getBaseElement();
 
 		if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)

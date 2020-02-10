@@ -212,7 +212,7 @@ public class CallActivityTest {
     public void testEmbeddingCallActivitiesWithListener() {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
-        myProperties.put("scanpath", "src/test/java");
+        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
         ConfigConstants.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "CallActivityTest_SingleCallActivity.bpmn";
@@ -258,8 +258,6 @@ public class CallActivityTest {
             AnalysisElement sequenceFlow2_2 = iterator.next();
             AnalysisElement task1_1 = iterator.next();
             AnalysisElement ca0 = iterator.next();
-            AnalysisElement ca1 = iterator.next();
-            AnalysisElement ca2 = iterator.next();
 
             Assert.assertEquals("", 0, startEvent1.getPredecessors().size());
             Assert.assertEquals("", "StartEvent_1", sequenceFlow1.getPredecessors().get(0).getId());
@@ -268,19 +266,17 @@ public class CallActivityTest {
             Assert.assertEquals("", "_StartEvent_1_1", sequenceFlow1_1.getPredecessors().get(0).getId());
             Assert.assertEquals("", "_Task_1_1", sequenceFlow2_2.getPredecessors().get(0).getId());
             Assert.assertEquals("", "_SequenceFlow_1_1", task1_1.getPredecessors().get(0).getId());
-            Assert.assertEquals("", "CallActivity__0", ca1.getPredecessors().get(0).getId());
-            Assert.assertEquals("", "CallActivity__1", ca2.getPredecessors().get(0).getId());
 
             if (i == 0) {
                 // Start Listener
                 Assert.assertEquals("", "SequenceFlow_1", ca0.getPredecessors().get(0).getId());
                 Assert.assertEquals("", "_EndEvent_1_1", sequenceFlow2.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "CallActivity__2", startEvent1_1.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "CallActivity__0", startEvent1_1.getPredecessors().get(0).getId());
 
             } else {
                 // End Listener
                 Assert.assertEquals("", "_EndEvent_1_1", ca0.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "CallActivity__2", sequenceFlow2.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "CallActivity__0", sequenceFlow2.getPredecessors().get(0).getId());
                 Assert.assertEquals("", "SequenceFlow_1", startEvent1_1.getPredecessors().get(0).getId());
             }
         }

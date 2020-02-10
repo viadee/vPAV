@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -94,12 +95,11 @@ public class ProcessVariableReaderStaticTest {
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
-		final ControlFlowGraph cg = new ControlFlowGraph();
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, cg));
+				"de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, new AnalysisElement[1]));
 
 		assertEquals(3, variables.asMap().size());
 	}
@@ -143,7 +143,6 @@ public class ProcessVariableReaderStaticTest {
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
-		final ControlFlowGraph cg = new ControlFlowGraph();
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
@@ -151,7 +150,7 @@ public class ProcessVariableReaderStaticTest {
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
 				"de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, ElementChapter.Implementation,
-				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), cg));
+				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), new AnalysisElement[1]));
 		assertEquals(3, variables.values().size());
 
 	}
@@ -167,14 +166,13 @@ public class ProcessVariableReaderStaticTest {
 
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
-		final ControlFlowGraph cg = new ControlFlowGraph();
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, cg));
+				"de.viadee.bpm.vPAV.delegates.TechnicalDelegate", element, null, null, null, new AnalysisElement[1]));
 		assertEquals(2, variables.values().size());
 	}
 

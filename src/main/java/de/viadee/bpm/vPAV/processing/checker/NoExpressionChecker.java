@@ -60,7 +60,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
     @Override
     public Collection<CheckerIssue> check(BpmnElement element) {
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement baseElement = element.getBaseElement();     
         
 

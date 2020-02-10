@@ -60,7 +60,7 @@ public class ElementIdConventionChecker extends AbstractElementChecker {
 	 */
 	@Override
 	public Collection<CheckerIssue> check(final BpmnElement element) {
-		final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 		final BaseElement baseElement = element.getBaseElement();
 
 		final Collection<ElementConvention> elementConventions = rule.getElementConventions();

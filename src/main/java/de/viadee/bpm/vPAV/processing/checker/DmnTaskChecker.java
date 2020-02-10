@@ -66,7 +66,7 @@ public class DmnTaskChecker extends AbstractElementChecker {
      */
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement bpmnElement = element.getBaseElement();
         if (bpmnElement instanceof BusinessRuleTask) {
             // read attributes from task
@@ -102,7 +102,7 @@ public class DmnTaskChecker extends AbstractElementChecker {
      */
     private Collection<CheckerIssue> checkDMNFile(final BpmnElement element, final String dmnName) {
 
-        final Collection<CheckerIssue> issues = new ArrayList<CheckerIssue>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement bpmnElement = element.getBaseElement();
         final String dmnPath = dmnName.replaceAll("\\.", "/") + ".dmn"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
