@@ -186,10 +186,8 @@ public class Runner {
 	 * @return Map(String, Rule) finalRules merged ruleSet
 	 */
 	protected RuleSet mergeRuleSet(final RuleSet parentRules, final RuleSet childRules) {
-		final Map<String, Map<String, Rule>> finalModelRules = new HashMap<>();
-
 		final Map<String, Map<String, Rule>> finalElementRules = new HashMap<>(parentRules.getElementRules());
-		finalModelRules.putAll(parentRules.getModelRules());
+		final Map<String, Map<String, Rule>> finalModelRules = new HashMap<>(parentRules.getModelRules());
 
 		// Merge element rules.
 		for (Map.Entry<String, Map<String, Rule>> entry : childRules.getElementRules().entrySet()) {
@@ -208,8 +206,7 @@ public class Runner {
 				finalModelRules.put(entry.getKey(), entry.getValue());
 			}
 		}
-
-		return new RuleSet(finalElementRules, finalModelRules, false);
+		return new RuleSet(finalElementRules, finalModelRules, childRules.hasParentRuleSet());
 	}
 
 	/**
@@ -231,9 +228,11 @@ public class Runner {
 	}
 
 	private boolean oneCheckerIsActive(final Map<String, Map<String, Rule>> rules, String name) {
-		for (Rule r : rules.get(name).values()) {
-			if (r.isActive()) {
-				return true;
+		if (!rules.isEmpty() && Objects.nonNull(rules.get(name))) {
+			for (Rule r : rules.get(name).values()) {
+				if (r.isActive()) {
+					return true;
+				}
 			}
 		}
 		return false;
