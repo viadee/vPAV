@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -57,8 +58,11 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class MessageCorrelationCheckerTest {
+	private static final Logger LOGGER = Logger.getLogger(MessageCorrelationCheckerTest.class.getName());
+
 
 	private static final String BASE_PATH = "src/test/resources/";
 
@@ -185,9 +189,10 @@ public class MessageCorrelationCheckerTest {
 		}
 
 		for(CheckerIssue issue: IssueService.getInstance().getIssues()) {
-			System.out.println(issue.getElementId());
-			System.out.println(issue.getAnomaly().getDescription());
-			System.out.println(issue.getMessage());
+			LOGGER.warning("------Issue Information--------");
+			LOGGER.warning(issue.getElementId());
+			LOGGER.warning(issue.getAnomaly().toString());
+			LOGGER.warning(issue.getMessage());
 		}
         if (IssueService.getInstance().getIssues().size() > 0) {
 			Assert.fail("Correct messages were not identified");
