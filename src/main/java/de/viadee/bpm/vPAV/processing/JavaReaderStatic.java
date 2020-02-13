@@ -71,12 +71,12 @@ public class JavaReaderStatic {
      * analyzed. e.g. execution.setVariable(execution.getActivityId() + "-" +
      * execution.getEventName(), true)
      *
-     * @param fileScanner      FileScanner
-     * @param classFile        Name of the class
-     * @param element          Bpmn element
-     * @param chapter          ElementChapter
-     * @param fieldType        KnownElementFieldType
-     * @param scopeId          Scope of the element
+     * @param fileScanner FileScanner
+     * @param classFile   Name of the class
+     * @param element     Bpmn element
+     * @param chapter     ElementChapter
+     * @param fieldType   KnownElementFieldType
+     * @param scopeId     Scope of the element
      * @return Map of process variables from the referenced delegate
      */
     ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
@@ -100,6 +100,7 @@ public class JavaReaderStatic {
                 // Delegate Variable Mapping
                 variables.putAll(classFetcher(classPaths, classFile, "mapInputVariables", classFile, element,
                         ElementChapter.InputImplementation, fieldType, scopeId, predecessor));
+
                 variables.putAll(classFetcher(classPaths, classFile, "mapOutputVariables", classFile, element,
                         ElementChapter.OutputImplementation, fieldType, scopeId, predecessor));
             } else {
@@ -158,15 +159,15 @@ public class JavaReaderStatic {
      * Starting by the main JavaDelegate, statically analyses the classes
      * implemented for the bpmn element.
      *
-     * @param classPaths       Set of classes that is included in inter-procedural analysis
-     * @param className        Name of currently analysed class
-     * @param methodName       Name of currently analysed method
-     * @param classFile        Location path of class
-     * @param element          Bpmn element
-     * @param chapter          ElementChapter
-     * @param fieldType        KnownElementFieldType
-     * @param scopeId          Scope of the element
-     * @param predecessor      List of predecessors
+     * @param classPaths  Set of classes that is included in inter-procedural analysis
+     * @param className   Name of currently analysed class
+     * @param methodName  Name of currently analysed method
+     * @param classFile   Location path of class
+     * @param element     Bpmn element
+     * @param chapter     ElementChapter
+     * @param fieldType   KnownElementFieldType
+     * @param scopeId     Scope of the element
+     * @param predecessor List of predecessors
      * @return Map of process variables for a given class
      */
     private ListMultimap<String, ProcessVariableOperation> classFetcher(final Set<String> classPaths,
@@ -212,34 +213,21 @@ public class JavaReaderStatic {
 
         // Retrieve the method and its body based on the used interface
         RefType delegateExecutionType = CamundaMethodServices.DELEGATE_EXECUTION_TYPE;
-        RefType activityExecutionType = CamundaMethodServices.ACTIVITY_EXECUTION_TYPE;
-        RefType delegateTaskType = CamundaMethodServices.DELEGATE_TASK_TYPE;
         RefType mapVariablesType = CamundaMethodServices.MAP_VARIABLES_TYPE;
+        RefType variableScopeType = CamundaMethodServices.VARIABLE_SCOPE_TYPE;
 
         switch (methodName) {
             case "execute":
-                for (SootClass clazz : sootClass.getInterfaces()) {
-                    if (clazz.getName()
-                            .equals(CamundaMethodServices.ACTIVITY_BEHAVIOR)) {
-                        parameterTypes.add(activityExecutionType);
-                    } else if (clazz.getName().equals(CamundaMethodServices.JAVA_DELEGATE)) {
-                        parameterTypes.add(delegateExecutionType);
-                    }
-                }
-                break;
             case "notify":
-                for (SootClass clazz : sootClass.getInterfaces()) {
-                    if (clazz.getName().equals(CamundaMethodServices.TASK_LISTENER)) {
-                        parameterTypes.add(delegateTaskType);
-                    } else if (clazz.getName().equals(CamundaMethodServices.EXECUTION_LISTENER)) {
-                        parameterTypes.add(delegateExecutionType);
-                    }
-                }
+                parameterTypes.add(delegateExecutionType);
                 break;
             case "mapInputVariables":
-            case "mapOutputVariables":
                 parameterTypes.add(delegateExecutionType);
                 parameterTypes.add(mapVariablesType);
+                break;
+            case "mapOutputVariables":
+                parameterTypes.add(delegateExecutionType);
+                parameterTypes.add(variableScopeType);
                 break;
             default:
                 parameterTypes.addAll(params);
@@ -251,18 +239,18 @@ public class JavaReaderStatic {
     /**
      * Recursively follow call hierarchy and obtain method bodies
      *
-     * @param classPaths       Set of classes that is included in inter-procedural analysis
-     * @param className        Name of currently analysed class
-     * @param methodName       Name of currently analysed method
-     * @param classFile        Location path of class
-     * @param element          Bpmn element
-     * @param chapter          ElementChapter
-     * @param fieldType        KnownElementFieldType
-     * @param scopeId          Scope of the element
-     * @param outSet           Callgraph information
-     * @param originalBlock    VariableBlock
-     * @param assignmentStmt   Assignment statement (left side)
-     * @param args             List of arguments
+     * @param classPaths     Set of classes that is included in inter-procedural analysis
+     * @param className      Name of currently analysed class
+     * @param methodName     Name of currently analysed method
+     * @param classFile      Location path of class
+     * @param element        Bpmn element
+     * @param chapter        ElementChapter
+     * @param fieldType      KnownElementFieldType
+     * @param scopeId        Scope of the element
+     * @param outSet         Callgraph information
+     * @param originalBlock  VariableBlock
+     * @param assignmentStmt Assignment statement (left side)
+     * @param args           List of arguments
      */
     void classFetcherRecursive(final Set<String> classPaths, String className, final String methodName,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
@@ -275,7 +263,7 @@ public class JavaReaderStatic {
         if (sootClass != null) {
             parameterTypes = prepareSootAndFetchedObjects(methodName, sootClass, parameterTypes);
             List<SootMethod> toFetchedMethods = new ArrayList<>();
-            if (parameterTypes.size() > 0) {
+            if (parameterTypes.size() > 0 && !methodName.equals("execute") && !methodName.equals("notify")) {
                 // Replace retrieveCustomMethod()
                 if (sootMethod == null) {
                     toFetchedMethods = sootClass.getMethods();
@@ -318,20 +306,23 @@ public class JavaReaderStatic {
     private SootMethod getSootMethod(final SootClass sootClass, final String methodName,
             List<Type> parameterTypes, final VoidType returnType) {
         SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
-        // For execute try DelegateExecution first, then ActivityExecution
-        if(methodName.equals("execute") && method == null) {
-            parameterTypes = new ArrayList<>();
-            parameterTypes.add( RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"));
-            method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
-            if(method == null) {
-                parameterTypes = new ArrayList<>();
-                parameterTypes.add( RefType.v("org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution"));
-                method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
-            }
+        if (methodName.equals("execute") && method == null) {
+            parameterTypes.remove(0);
+            parameterTypes.add(CamundaMethodServices.ACTIVITY_EXECUTION_TYPE);
+            method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
+        }
+        if (methodName.equals("notify") && method == null) {
+            parameterTypes.remove(0);
+            parameterTypes.add(CamundaMethodServices.DELEGATE_TASK_TYPE);
+            method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
         }
 
         if (method == null) {
+            LOGGER.warning(
+                    "In class " + sootClass.getName() + " - " + methodName
+                            + " method was not found by Soot with parameters.");
+
             method = sootClass.getMethodByNameUnsafe(methodName);
             if (method == null) {
                 LOGGER.warning(

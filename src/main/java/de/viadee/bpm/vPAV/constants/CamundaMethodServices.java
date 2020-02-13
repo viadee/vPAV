@@ -33,6 +33,8 @@ package de.viadee.bpm.vPAV.constants;
 
 import soot.RefType;
 
+import java.sql.Ref;
+
 public class CamundaMethodServices {
 
     private CamundaMethodServices() {
@@ -78,5 +80,7 @@ public class CamundaMethodServices {
     public static final RefType DELEGATE_TASK_TYPE = RefType.v(DELEGATE_TASK);
 
     public static final RefType MAP_VARIABLES_TYPE = RefType.v(VARIABLE_MAP);
+
+    public static final RefType VARIABLE_SCOPE_TYPE = RefType.v(SCOPE);
 
 }
