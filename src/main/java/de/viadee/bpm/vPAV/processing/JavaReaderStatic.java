@@ -263,6 +263,7 @@ public class JavaReaderStatic {
         if (sootClass != null) {
             parameterTypes = prepareSootAndFetchedObjects(methodName, sootClass, parameterTypes);
             List<SootMethod> toFetchedMethods = new ArrayList<>();
+
             if (parameterTypes.size() > 0 && !methodName.equals("execute") && !methodName.equals("notify")) {
                 // Replace retrieveCustomMethod()
                 if (sootMethod == null) {
@@ -272,9 +273,14 @@ public class JavaReaderStatic {
                 }
             } else {
                 // Replace retrieveMethod()
-                sootMethod = getSootMethod(sootClass, methodName, parameterTypes, VoidType.v());
+                if (sootMethod == null) {
+                    sootMethod = getSootMethod(sootClass, methodName, parameterTypes, VoidType.v());
+                } else {
+                    sootMethod = getSootMethod(sootClass, methodName, parameterTypes, sootMethod.getReturnType());
+                }
                 toFetchedMethods.add(sootMethod);
             }
+
             for (SootMethod method : toFetchedMethods) {
                 if (method != null) {
                     if (method.getName().equals(methodName)) {
@@ -304,7 +310,7 @@ public class JavaReaderStatic {
     }
 
     private SootMethod getSootMethod(final SootClass sootClass, final String methodName,
-            List<Type> parameterTypes, final VoidType returnType) {
+            List<Type> parameterTypes, final Type returnType) {
         SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
         if (methodName.equals("execute") && method == null) {
