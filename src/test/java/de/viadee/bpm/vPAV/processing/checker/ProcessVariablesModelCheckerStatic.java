@@ -47,10 +47,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.io.IOException;
@@ -148,7 +146,7 @@ public class ProcessVariablesModelCheckerStatic {
 		Assert.assertEquals("UU", issue8.getAnomaly().toString());
 	}
 
-	@After
+	@Before
 	public void clearIssues() {
 		IssueService.getInstance().clear();
 	}
