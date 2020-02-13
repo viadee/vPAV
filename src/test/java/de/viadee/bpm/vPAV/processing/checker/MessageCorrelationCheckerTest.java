@@ -50,6 +50,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -164,7 +165,6 @@ public class MessageCorrelationCheckerTest {
 	 */
 	@Test
     public void testAllCorrectMessages() {
-		IssueService.getInstance().clear();
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessages.bpmn";
 
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
@@ -189,12 +189,6 @@ public class MessageCorrelationCheckerTest {
             checker.check(element);
 		}
 
-		for(CheckerIssue issue: IssueService.getInstance().getIssues()) {
-			LOGGER.warning("------Issue Information--------");
-			LOGGER.warning(issue.getElementId());
-			LOGGER.warning(issue.getAnomaly().toString());
-			LOGGER.warning(issue.getMessage());
-		}
         if (IssueService.getInstance().getIssues().size() > 0) {
 			Assert.fail("Correct messages were not identified");
 		}
@@ -239,7 +233,7 @@ public class MessageCorrelationCheckerTest {
 		return new Rule("MessageChecker", true, "Checks for correct resolving of messages", null, null, null);
 	}
 
-    @After
+    @AfterEach
     public void clearIssues() {
         IssueService.getInstance().clear();
     }
