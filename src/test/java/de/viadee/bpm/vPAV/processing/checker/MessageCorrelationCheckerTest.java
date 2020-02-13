@@ -164,6 +164,7 @@ public class MessageCorrelationCheckerTest {
 	 */
 	@Test
     public void testAllCorrectMessages() {
+		IssueService.getInstance().clear();
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessages.bpmn";
 
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
