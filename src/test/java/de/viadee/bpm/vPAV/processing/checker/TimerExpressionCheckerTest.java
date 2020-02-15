@@ -101,6 +101,30 @@ public class TimerExpressionCheckerTest {
 	}
 
 	/**
+	 * Case: TimerExpression with repeating duration in start event is correct
+	 */
+
+	@Test
+	public void testTimerExpressionWithRepeatingDuration_Correct() {
+		final String PATH = BASE_PATH + "TimerExpressionCheckerTest_RepeatingDuration_Correct.bpmn";
+		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+
+		for (BaseElement event : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
+			checker.check(element);
+		}
+
+		if (IssueService.getInstance().getIssues().size() > 0) {
+			Assert.fail("correct cycle timer expression generates an issue");
+		}
+	}
+
+	/**
 	 * Case: TimerExpression in start event is wrong
 	 */
 	@Test
