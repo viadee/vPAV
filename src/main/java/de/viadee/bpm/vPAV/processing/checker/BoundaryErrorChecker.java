@@ -47,6 +47,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
@@ -271,20 +272,18 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     private boolean validateContent(final String classBody, final String errorCode) {
 
         if (classBody != null && !classBody.isEmpty()) {
-            if (classBody.contains("throw new BpmnError")) { //$NON-NLS-1$
-                int exceptionIdx = classBody.indexOf("throw new BpmnError");
-                String temp = classBody.substring(exceptionIdx); //$NON-NLS-1$
-                temp = temp.substring(0, temp.indexOf(";") + 1); //$NON-NLS-1$
+            String remainingClassBody = classBody;
+            while (remainingClassBody.contains("throw new BpmnError")) {
+                String bpmnErrorArguments = StringUtils.substringBetween(remainingClassBody, "throw new BpmnError(", ");");
                 String delErrorCode = null;
 
-                if (temp.contains("\"")) {
+                if (bpmnErrorArguments.startsWith("\"")) {
                     // Let's assume a string is directly passed
-                    delErrorCode = temp
-                            .substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\"")); //$NON-NLS-1$ //$NON-NLS-2$
+
+                    delErrorCode = StringUtils.substringBetween(bpmnErrorArguments, "\"", "\""); //$NON-NLS-1$ //$NON-NLS-2$
                 } else {
                     // Let's assume a object is passed
-                    String objErrorCode = temp
-                            .substring(temp.indexOf("(") + 1, temp.lastIndexOf(")"));
+                    String objErrorCode = StringUtils.substringBefore(bpmnErrorArguments, ",");
                     // Check if string object is somewhere created in the class
                     // Support only final string objects
                     if (classBody.contains("final String " + objErrorCode + " =")) {
@@ -293,9 +292,8 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                                 .matcher(classBody);
                         // Assume that there is only one match
                         if (m.find()) {
-                            temp = m.group();
-                            delErrorCode = temp
-                                    .substring(temp.indexOf("\"") + 1, temp.lastIndexOf("\""));
+                            bpmnErrorArguments = m.group();
+                            delErrorCode = StringUtils.substringBetween(bpmnErrorArguments, "\"", "\"");
                         } else {
                             logger.warning(
                                     "The error code could not be parsed because the string declaration was not found.");
@@ -306,8 +304,11 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                                         + "local string objects (defined in the method) are supported.");
                     }
                 }
-
-                return errorCode.equals(delErrorCode);
+                if (errorCode.equals(delErrorCode)) {
+                    return true;
+                } else {
+                    remainingClassBody = StringUtils.substringAfter(remainingClassBody, "throw new BpmnError");
+                }
             }
         }
         return false;

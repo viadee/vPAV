@@ -38,7 +38,11 @@ public class BoundaryErrorEventDelegateCorrect implements org.camunda.bpm.engine
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        throw new BpmnError("123");
+        if (false) {
+            throw new BpmnError("preceding_error_code", "error message");
+        } else {
+            throw new BpmnError("123", "error message");
+        }
     }
 
 }
