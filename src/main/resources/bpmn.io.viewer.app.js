@@ -779,7 +779,6 @@ function createViewController() {
                 createIssueTable(diagramName, noIssuesElements, tableViewMode);
             }
         } else {
-            document.getElementById("showAllIssues").setAttribute("class", "nav-link table-selector active");
             createIssueTable(diagramName, noIssuesElements, tableViewMode);
         }
         createFooter();
