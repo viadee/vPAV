@@ -314,7 +314,9 @@ class VariablesExtractor {
                             assignmentStmt = argument;
                             if (this.getConstructorArgs() != null && !this.getConstructorArgs().isEmpty()) {
                                 argsCounter++;
-                                paramName = this.getConstructorArgs().get(argsCounter - 1).toString();
+                                if(this.getConstructorArgs().size() > argsCounter) {
+                                    paramName = this.getConstructorArgs().get(argsCounter - 1).toString();
+                                }
                             }
                         } else {
                             assignmentStmt = argument;
