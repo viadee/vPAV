@@ -46,6 +46,7 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import net.time4j.range.IsoRecurrence;
 import net.time4j.range.MomentInterval;
+import org.camunda.bpm.engine.impl.calendar.DurationHelper;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
@@ -125,6 +126,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 						boolean isCron = false;
 						boolean isDur = false;
 						boolean hasRepeatingIntervals = false;
+						boolean isRepeatingDur = false;
 
 						if (!timerDefinition.contains("P") && !timerDefinition.contains("Z") //$NON-NLS-1$ //$NON-NLS-2$
 								&& timerDefinition.contains(" ")) { //$NON-NLS-1$
@@ -138,6 +140,10 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 						if (timerDefinition.startsWith("P") //$NON-NLS-1$
 								&& !(timerDefinition.contains("/") || timerDefinition.contains("--"))) { //$NON-NLS-1$ //$NON-NLS-2$
 							isDur = true;
+						}
+
+						if (timerDefinition.contains("/P")) {
+							isRepeatingDur = true;
 						}
 
 						if (isCron) {
@@ -163,12 +169,22 @@ public class TimerExpressionChecker extends AbstractElementChecker {
 							}
 						}
 
-						if (!isCron && hasRepeatingIntervals && !isDur) {
+						if (!isCron && hasRepeatingIntervals && !isDur && !isRepeatingDur) {
 							try {
 								IsoRecurrence.parseMomentIntervals(timerDefinition);
 							} catch (ParseException ex) {
 								issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
 										String.format(Messages.getString("TimerExpressionChecker.12"), //$NON-NLS-1$
+												CheckName.checkTimer(entry.getKey()))));
+							}
+						}
+
+						if (isRepeatingDur) {
+							try{
+								new DurationHelper(timerDefinition,null).getDateAfter(null);
+							}catch(Exception ex){
+								issues.add(IssueWriter.createIssue(rule,CriticalityEnum.ERROR,element,entry,
+										String.format(Messages.getString("TimerExpressionChecker.12"),//$NON-NLS-1$
 												CheckName.checkTimer(entry.getKey()))));
 							}
 						}

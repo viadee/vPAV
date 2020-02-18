@@ -44,10 +44,8 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -329,7 +327,7 @@ public class ProcessVariableMappingTest {
 		Assert.assertEquals(1, processVariables.size());
 	}
 
-	@After
+	@Before
 	public void clearIssues() {
 		IssueService.getInstance().clear();
 	}
