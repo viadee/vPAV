@@ -149,7 +149,7 @@ public class RuntimeConfig {
     /**
      * Retrieve locale. If locale can not be retrieved, use system locale
      */
-    void retrieveLocale() {
+    public void retrieveLocale() {
         if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
             getResource("de_DE");
         } else {

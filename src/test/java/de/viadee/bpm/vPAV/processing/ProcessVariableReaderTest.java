@@ -86,11 +86,37 @@ public class ProcessVariableReaderTest {
         final URL[] classUrls = { classUrl, resourcesUrl };
         cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().retrieveLocale();
     }
 
     @AfterClass
     public static void tearDown() {
         RuntimeConfig.getInstance().setTest(false);
+    }
+
+    @Test
+    public void testResolveDynamicLocalVariables() {
+        final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
+        serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.TestDelegateDynamicVariables");
+
+        final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
+
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
+
+        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
+
+        Assert.assertEquals(2, variables.size());
+        Assert.assertNotNull(variables.get("newValue"));
+        Assert.assertNotNull(variables.get("changedhere"));
     }
 
     @Test

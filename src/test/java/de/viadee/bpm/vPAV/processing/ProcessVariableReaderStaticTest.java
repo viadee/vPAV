@@ -48,6 +48,7 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.StartEvent;
@@ -153,6 +154,30 @@ public class ProcessVariableReaderStaticTest {
 				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), new AnalysisElement[1]));
 		assertEquals(3, variables.values().size());
 
+	}
+
+	@Test
+	public void followObjectInstantiationWithDynamicVariables() {
+		final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
+		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+		ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
+		serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.DelegateDynamicObjectInstantiation");
+
+		final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
+
+		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
+				new FlowAnalysis());
+
+		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
+
+		Assert.assertEquals(1, variables.size());
+		Assert.assertNotNull(variables.get("myValue"));
 	}
 
 	@Test
