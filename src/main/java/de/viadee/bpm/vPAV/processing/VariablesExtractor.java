@@ -220,20 +220,28 @@ class VariablesExtractor {
                         Matcher matcher = pattern.matcher(argument);
                         if (matcher.matches()) {
                             Value val = args.get(Integer.parseInt(matcher.group(2)));
-                            paramName = val.toString().replace("\"", "");
-                            assignmentStmt = ((JIdentityStmt) unit).getLeftOpBox().getValue().toString();
+                            String paramValue = ((StringConstant) val).value;
+                            String varName = ((JIdentityStmt) unit).getLeftOpBox().getValue().toString();
+                            localStringVariables.put(varName, new StringVariable(paramValue));
                         }
                     }
                 }
-            }
-            if (unit instanceof ReturnStmt) {
+            } else if (unit instanceof ReturnStmt) {
                 // Return statement
-                if (((JReturnStmt) unit).getOpBox().getValue().toString().equals(assignmentStmt)) {
-                    this.setReturnStmt(paramName);
+                // Local string variable is returned
+                if (((JReturnStmt) unit).getOpBox().getValue() instanceof JimpleLocal &&
+                        ((JReturnStmt) unit).getOpBox().getValue().getType().equals(RefType.v("java.lang.String"))) {
+                    String varName = ((JimpleLocal) ((JReturnStmt) unit).getOpBox().getValue()).getName();
+                    StringVariable variable = localStringVariables.get(varName);
+                    if (variable != null) {
+                        this.setReturnStmt(variable.getValue());
+                    }
                 }
+                // String constant is returned
+                // TODO also allow string constants
             }
             // e.g. interfaceinvoke r1. ... (Method call)
-            if (unit instanceof InvokeStmt) {
+            else if (unit instanceof InvokeStmt) {
                 try {
                     // To improve performance, node splitting should be only done if called method can access delegate
                     // execution object
@@ -273,7 +281,7 @@ class VariablesExtractor {
                 }
             }
             // e. g. $r2 = staticinvoke ... (Assignment)
-            if (unit instanceof AssignStmt) {
+            else if (unit instanceof AssignStmt) {
                 // TODO wann können die temporären von soot erstellten $r variablen gelöscht werden?
                 // Local String Variable is updated by directly assigning a new String constant
                 if (((AssignStmt) unit).getLeftOpBox().getValue() instanceof JimpleLocal && ((AssignStmt) unit)
@@ -316,7 +324,7 @@ class VariablesExtractor {
                 else {
                     // Method call with assignment to a variable
                     if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JVirtualInvokeExpr) {
-                        assignmentStmt = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
+                        String varIdentifier = ((AssignStmt) unit).getLeftOpBox().getValue().toString();
                         JVirtualInvokeExpr expr = (JVirtualInvokeExpr) ((AssignStmt) unit).getRightOpBox().getValue();
 
                         try {
@@ -328,8 +336,9 @@ class VariablesExtractor {
                             checkInterProceduralCall(classPaths, cg, outSet, element, chapter, fieldType, scopeId,
                                     variableBlock, unit, assignmentStmt, expr.getArgs(), Statement.ASSIGNMENT,
                                     predecessor,
-                                    expr.getMethod().getParameterTypes(), null);
-                            paramName = returnStmt;
+                                    expr.getMethod().getParameterTypes(), expr.getBase().toString());
+                            // returnStmt is indirectly set during checkInterProceduralCall and contains the returned value
+                            localStringVariables.put(varIdentifier, new StringVariable(returnStmt));
                             node = newSectionNode;
 
                         } catch (CloneNotSupportedException e) {
@@ -383,11 +392,6 @@ class VariablesExtractor {
                                 updateStringVariable(localStringVariables, varIdentifier, stringVar.getValue());
                             }
                         }
-                    }
-                    // Assignment of new object
-                    if (((AssignStmt) unit).getRightOpBox().getValue() instanceof JNewExpr) {
-                        // Here variable is created, constructor is processed in next statement
-                        objectVariables.put(((AssignStmt) unit).getLeftOpBox().getValue().toString(), null);
                     }
                 }
 

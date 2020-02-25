@@ -153,7 +153,6 @@ public class ProcessVariableReaderStaticTest {
 				"de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, ElementChapter.Implementation,
 				KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), new AnalysisElement[1]));
 		assertEquals(3, variables.values().size());
-
 	}
 
 	@Test
