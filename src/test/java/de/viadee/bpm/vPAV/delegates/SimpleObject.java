@@ -42,6 +42,12 @@ public class SimpleObject {
     public SimpleObject(String value, DelegateExecution ex) {
         myVariable = value;
         execution = ex;
+        String test = myVariable;
+        initialize();
+    }
+
+    public void initialize() {
+        myVariable = "anotherMethod_anotherValue";
     }
 
     public void requestVariable() {

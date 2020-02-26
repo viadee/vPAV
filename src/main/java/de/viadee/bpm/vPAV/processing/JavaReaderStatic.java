@@ -301,7 +301,9 @@ public class JavaReaderStatic {
 
                         if (method.getName().equals("<init>")) {
                             // Is constructor, only load variables from first level
-                            return (new ConstructorReader(graphHeads.get(0), args)).createObjectFromConstructorBlock();
+                            // TODO
+                            (new ConstructorReader()).processBlock(graphHeads.get(0), args);
+                            return new ObjectVariable();
                         } else {
                             for (Block block : graphHeads) {
                                 blockIterator(classPaths, Scene.v().getCallGraph(), graph, block, outSet, element,

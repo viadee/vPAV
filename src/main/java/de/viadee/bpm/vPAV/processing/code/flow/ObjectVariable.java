@@ -70,4 +70,8 @@ public class ObjectVariable {
     public HashMap<String, ObjectVariable> getObjectFields() {
         return objectFields;
     }
+
+    public ObjectVariable getObjectField(String name) {
+        return objectFields.get(name);
+    }
 }
