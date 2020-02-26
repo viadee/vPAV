@@ -302,7 +302,7 @@ public class JavaReaderStatic {
                         if (method.getName().equals("<init>")) {
                             // Is constructor, only load variables from first level
                             // TODO
-                            (new ObjectReader()).processBlock(graphHeads.get(0), args);
+                            (new ObjectReader(null)).processBlock(graphHeads.get(0), args);
                             return new ObjectVariable();
                         } else {
                             for (Block block : graphHeads) {

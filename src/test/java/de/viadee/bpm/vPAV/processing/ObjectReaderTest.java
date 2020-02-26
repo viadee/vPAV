@@ -97,7 +97,7 @@ public class ObjectReaderTest {
 
     @Test
     public void testGetThisNameFromUnit() {
-        ObjectReader cr = new ObjectReader();
+        ObjectReader cr = new ObjectReader(null);
         // Test that name of reference to this object is correctly resolved
         Value localVal = new JimpleLocal("this", RefType.v("java.lang.Object"));
         Value identityVal = new ThisRef(RefType.v("java.lang.Object"));
@@ -115,7 +115,7 @@ public class ObjectReaderTest {
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
         args.add(StringConstant.v("myVariableValue"));
-        ObjectReader cr = new ObjectReader();
+        ObjectReader cr = new ObjectReader(null);
         cr.handleIdentityStmt(stmt, args);
         Assert.assertEquals("myVariableValue", cr.getLocalStringVariables().get("r2").getValue());
     }

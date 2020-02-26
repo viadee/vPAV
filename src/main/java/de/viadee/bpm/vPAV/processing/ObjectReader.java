@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.SootResolverSimplified;
+import de.viadee.bpm.vPAV.VariablesReader;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import soot.RefType;
 import soot.Unit;
@@ -40,18 +41,21 @@ import soot.jimple.*;
 import soot.jimple.internal.*;
 import soot.toolkits.graph.Block;
 
+import java.sql.Ref;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 // TODO rekursionen sind möglich
-class ObjectReader {
+public class ObjectReader {
 
     private ObjectVariable thisObject = new ObjectVariable();
 
     private HashMap<String, StringVariable> localStringVariables = new HashMap<>();
 
     private HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
+
+    private VariablesReader variablesReader;
 
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject) {
@@ -60,14 +64,17 @@ class ObjectReader {
         this.thisObject = thisObject;
     }
 
-    ObjectReader() {
+    public ObjectReader(VariablesReader variablesReader) {
+        this.variablesReader = variablesReader;
     }
 
     private ObjectReader(ObjectVariable thisObject) {
         this.thisObject = thisObject;
     }
 
-    Object processBlock(Block block, List<Value> args) {
+    public Object processBlock(Block block, List<Value> args) {
+        // TODO loops etc are currently ignored
+        // TODO recursion is possible, prevent infinite loops
         // Todo Only String variables are currently resolved
         // Eventually add objects, arrays and int
 
@@ -88,7 +95,13 @@ class ObjectReader {
             }
             // e. g. specialinvoke $r3.<de.viadee.bpm ... (Constuctor call of new object)
             else if (unit instanceof InvokeStmt) {
-                handleInvokeExpr(((InvokeStmt) unit).getInvokeExpr(), thisName);
+                if (((InvokeStmt) unit).getInvokeExpr().getUseBoxes().get(0).getValue().getType()
+                        .equals(RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"))) {
+                    // TODO continue here, check if if statement is correct
+                    // It might not only be delegate executions but also variablemaps etc.
+                } else {
+                    handleInvokeExpr(((InvokeStmt) unit).getInvokeExpr(), thisName);
+                }
             }
             // e. g. return temp$3
             else if (unit instanceof ReturnStmt) {
@@ -260,5 +273,10 @@ class ObjectReader {
 
     ObjectVariable getThisObject() {
         return thisObject;
+    }
+
+    // TODO call this method when executiondelegate method is executed
+    public void notifyVariablesReader() {
+        variablesReader.handleProcessVariableManipulation();
     }
 }
