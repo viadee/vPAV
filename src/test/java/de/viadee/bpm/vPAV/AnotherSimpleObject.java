@@ -29,28 +29,16 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV;
 
-import de.viadee.bpm.vPAV.AnotherSimpleObject;
+public class AnotherSimpleObject {
+    private String anotherVariable;
 
-public class SimpleObject {
-
-    private String myStringField;
-    private String parameterString;
-    private String anotherObjectString;
-
-    public SimpleObject(String var) {
-        myStringField = "hello";
-        method();
-        parameterString = var;
-        anotherObjectString = (new AnotherSimpleObject()).getAnotherVariable();
+    public AnotherSimpleObject() {
+        anotherVariable = "it's_snowing";
     }
 
-    private void method() {
-        myStringField = "bye";
-    }
-
-    private String methodWithReturn() {
-        return "it_works";
+    public String getAnotherVariable() {
+        return anotherVariable;
     }
 }

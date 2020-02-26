@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -44,8 +44,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-// TODO give it a better name
-public class ConstructorReader {
+// TODO rekursionen sind möglich
+class ObjectReader {
 
     private ObjectVariable thisObject = new ObjectVariable();
 
@@ -53,14 +53,18 @@ public class ConstructorReader {
 
     private HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
 
-    ConstructorReader(HashMap<String, StringVariable> localStrings,
+    ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject) {
         this.localStringVariables = localStrings;
         this.localObjectVariables = localObjects;
         this.thisObject = thisObject;
     }
 
-    ConstructorReader() {
+    ObjectReader() {
+    }
+
+    private ObjectReader(ObjectVariable thisObject) {
+        this.thisObject = thisObject;
     }
 
     Object processBlock(Block block, List<Value> args) {
@@ -144,14 +148,19 @@ public class ConstructorReader {
     }
 
     Object handleInvokeExpr(InvokeExpr expr, String thisName) {
-        String targetObj = ((JimpleLocal) expr.getUseBoxes().get(0).getValue()).getName();
-        // Only consider this object at the moment
-        if (targetObj.equals(thisName)) {
-            // Call
-            List<Value> args = expr.getArgs();
+        String targetObjName = ((JimpleLocal) expr.getUseBoxes().get(0).getValue()).getName();
+        List<Value> args = expr.getArgs();
+
+        // Method on this object is called
+        if (targetObjName.equals(thisName)) {
             return this.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args);
         }
-        return null;
+        // Method on another object is called
+        else {
+            ObjectVariable targetObj = localObjectVariables.get(targetObjName);
+            ObjectReader or = new ObjectReader(targetObj);
+            return or.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args);
+        }
     }
 
     void handleLocalAssignment(Value leftValue, Value rightValue, String thisName) {
