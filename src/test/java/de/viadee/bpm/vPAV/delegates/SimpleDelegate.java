@@ -29,28 +29,35 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.delegates;
 
-import de.viadee.bpm.vPAV.SootResolverSimplified;
-import org.junit.Assert;
-import org.junit.Test;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.toolkits.graph.Block;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
 
-import java.io.File;
+public class SimpleDelegate implements JavaDelegate {
 
-public class SootResolverSimplifiedTest {
+    // TODO private String var1 = "something" isnt resolved yet
+    private String var1;
 
-    @Test
-    public void testGetBlockFromMethod() {
-        Scene.v().loadBasicClasses();
-        String currentPath = (new File(".")).toURI().getPath();
-        Scene.v().extendSootClassPath(currentPath + "src/test/java");
-        SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.processing.SimpleObject", SootClass.SIGNATURES);
-        SootMethod method =  sc.getMethodByName("method");
-        Block block = SootResolverSimplified.getBlockFromMethod(method);
-        Assert.assertEquals(4,  block.getBody().getUnits().size());
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
+        var1 = "variableOne";
+        String var2 = "variableTwo";
+        execution.getVariable(var1);
+        execution.setVariable(var2, "anotherValue");
+        changeVariable(execution);
+        HelperClass.doSomething(execution);
+        execution.removeVariable(var1);
+    }
+
+    private void changeVariable(DelegateExecution execution) {
+        execution.getVariable("variableThree");
+        var1 = "variableOneChanged";
+    }
+}
+
+class HelperClass {
+    public static void doSomething(DelegateExecution execution) {
+        execution.getVariable("myVariable");
     }
 }

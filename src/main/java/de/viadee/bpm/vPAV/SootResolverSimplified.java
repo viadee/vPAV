@@ -31,14 +31,74 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
+import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import soot.*;
 import soot.toolkits.graph.Block;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.ClassicCompleteBlockGraph;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class SootResolverSimplified {
+
+    private static List<String> defaultMethods = Arrays
+            .asList("execute", "notify", "mapInputVariables", "mapOutputVariables");
+
+    private static final Logger LOGGER = Logger.getLogger(SootResolverSimplified.class.getName());
+
+    // TODO add test case
+    public static Block getBlockFromClass(String className, String methodName, List<Type> parameterTypes,
+            Type returnType) {
+        SootClass sootClass = setupSootClass(className);
+        if (sootClass != null) {
+            if (defaultMethods.contains(methodName)) {
+                // Create parameter types for entry point methods
+                parameterTypes = getParametersForDefaultMethods(methodName);
+                returnType = VoidType.v();
+            }
+
+            SootMethod sootMethod = getSootMethod(sootClass, methodName, parameterTypes, returnType);
+            return getBlockFromMethod(sootMethod);
+        }
+        // TODO handle this case;
+        assert false;
+        return null;
+    }
+
+    // TODO add test case
+    private static SootMethod getSootMethod(final SootClass sootClass, final String methodName,
+            List<Type> parameterTypes, final Type returnType) {
+        SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
+
+        if (methodName.equals("execute") && method == null) {
+            parameterTypes.remove(0);
+            parameterTypes.add(CamundaMethodServices.ACTIVITY_EXECUTION_TYPE);
+            method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
+        }
+        if (methodName.equals("notify") && method == null) {
+            parameterTypes.remove(0);
+            parameterTypes.add(CamundaMethodServices.DELEGATE_TASK_TYPE);
+            method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
+        }
+
+        if (method == null) {
+            LOGGER.warning(
+                    "In class " + sootClass.getName() + " - " + methodName
+                            + " method was not found by Soot with parameters.");
+
+            method = sootClass.getMethodByNameUnsafe(methodName);
+            if (method == null) {
+                LOGGER.warning(
+                        "In class " + sootClass.getName() + " - " + methodName + " method was not found by Soot");
+            }
+        }
+        return method;
+    }
 
     public static Block getBlockFromMethod(SootMethod method) {
         Body body = method.retrieveActiveBody();
@@ -47,5 +107,45 @@ public class SootResolverSimplified {
         assert (graphHeads.size() == 1);
 
         return graphHeads.get(0);
+    }
+
+    private static SootClass setupSootClass(String className) {
+        className = ProcessVariablesScanner.cleanString(className, true);
+        SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
+        if (sootClass != null) {
+            sootClass.setApplicationClass();
+            Scene.v().loadNecessaryClasses();
+            return sootClass;
+        } else {
+            LOGGER.warning("Class " + className + " was not found by Soot");
+            return null;
+        }
+    }
+
+    // TODO add test case
+    private static List<Type> getParametersForDefaultMethods(final String methodName) {
+        List<Type> parameterTypes = new ArrayList<>();
+
+        // Retrieve the method and its body based on the used interface
+        RefType delegateExecutionType = CamundaMethodServices.DELEGATE_EXECUTION_TYPE;
+        RefType mapVariablesType = CamundaMethodServices.MAP_VARIABLES_TYPE;
+        RefType variableScopeType = CamundaMethodServices.VARIABLE_SCOPE_TYPE;
+
+        switch (methodName) {
+            case "execute":
+            case "notify":
+                parameterTypes.add(delegateExecutionType);
+                break;
+            case "mapInputVariables":
+                parameterTypes.add(delegateExecutionType);
+                parameterTypes.add(mapVariablesType);
+                break;
+            case "mapOutputVariables":
+                parameterTypes.add(delegateExecutionType);
+                parameterTypes.add(variableScopeType);
+                break;
+        }
+
+        return parameterTypes;
     }
 }

@@ -186,7 +186,7 @@ public class ProcessVariablesScanner {
      *            Replace dots
      * @return cleaned String
      */
-    static String cleanString(String className, boolean dot) {
+    public static String cleanString(String className, boolean dot) {
         final String replaceDot = ".";
         final String replaceEmpty = "";
         final String replaceSingleBackSlash = "\\";

@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,8 +32,11 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.SootResolverSimplified;
-import de.viadee.bpm.vPAV.VariablesReader;
+import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import soot.RefType;
 import soot.Unit;
 import soot.Value;
@@ -41,7 +44,6 @@ import soot.jimple.*;
 import soot.jimple.internal.*;
 import soot.toolkits.graph.Block;
 
-import java.sql.Ref;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -55,7 +57,7 @@ public class ObjectReader {
 
     private HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
 
-    private VariablesReader variablesReader;
+    private ProcessVariablesCreator processVariablesCreator;
 
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject) {
@@ -64,11 +66,12 @@ public class ObjectReader {
         this.thisObject = thisObject;
     }
 
-    public ObjectReader(VariablesReader variablesReader) {
-        this.variablesReader = variablesReader;
+    public ObjectReader(ProcessVariablesCreator processVariablesCreator) {
+        this.processVariablesCreator = processVariablesCreator;
     }
 
-    private ObjectReader(ObjectVariable thisObject) {
+    private ObjectReader(ProcessVariablesCreator processVariablesCreator, ObjectVariable thisObject) {
+        this.processVariablesCreator = processVariablesCreator;
         this.thisObject = thisObject;
     }
 
@@ -95,10 +98,11 @@ public class ObjectReader {
             }
             // e. g. specialinvoke $r3.<de.viadee.bpm ... (Constuctor call of new object)
             else if (unit instanceof InvokeStmt) {
-                if (((InvokeStmt) unit).getInvokeExpr().getUseBoxes().get(0).getValue().getType()
-                        .equals(RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"))) {
-                    // TODO continue here, check if if statement is correct
-                    // It might not only be delegate executions but also variablemaps etc.
+                if (((InvokeStmt) unit).getInvokeExpr().getMethod().getDeclaringClass().getName()
+                        .equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
+                    notifyVariablesReader(block, ((InvokeStmt) unit).getInvokeExpr());
+                    // TODO there are a lot more classes than only delegate execution (check camunda
+                    //  CamundaProcessVariableFunctions)
                 } else {
                     handleInvokeExpr(((InvokeStmt) unit).getInvokeExpr(), thisName);
                 }
@@ -161,19 +165,29 @@ public class ObjectReader {
     }
 
     Object handleInvokeExpr(InvokeExpr expr, String thisName) {
-        String targetObjName = ((JimpleLocal) expr.getUseBoxes().get(0).getValue()).getName();
         List<Value> args = expr.getArgs();
+        ObjectVariable targetObj;
 
-        // Method on this object is called
-        if (targetObjName.equals(thisName)) {
-            return this.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args);
+        if (expr instanceof AbstractInstanceInvokeExpr) {
+            // Instance method is called
+            String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
+
+            // Method on this object is called
+            if (targetObjName.equals(thisName)) {
+                return this.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args);
+            }
+            else {
+                // Method on another object is called
+                targetObj = localObjectVariables.get(targetObjName);
+            }
+        } else{
+            // Static method is called -> create phantom variable
+            targetObj = new ObjectVariable();
         }
-        // Method on another object is called
-        else {
-            ObjectVariable targetObj = localObjectVariables.get(targetObjName);
-            ObjectReader or = new ObjectReader(targetObj);
-            return or.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args);
-        }
+
+        // Process method from another class/object
+        ObjectReader or = new ObjectReader(processVariablesCreator, targetObj);
+        return or.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args);
     }
 
     void handleLocalAssignment(Value leftValue, Value rightValue, String thisName) {
@@ -275,8 +289,28 @@ public class ObjectReader {
         return thisObject;
     }
 
+    ProcessVariableOperation createProcessVariableOperationFromInvocation(InvokeExpr expr) {
+        String methodName = expr.getMethod().getName();
+        int numberOfArg = expr.getArgCount();
+        String delegatingClass = expr.getMethod().getDeclaringClass().getName();
+        CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
+                .findByNameAndNumberOfBoxes(methodName, delegatingClass, numberOfArg);
+
+        if (foundMethod != null) {
+            int location = foundMethod.getLocation() - 1;
+            VariableOperation type = foundMethod.getOperationType();
+            // TODO variables extractor decides on scope id for variable map
+            // TODO do we need the thisName? is that possible?
+            String variableName = resolveStringValue(expr.getArgBox(location).getValue(), "");
+            return new ProcessVariableOperation(variableName, null, null, type, null);
+        }
+
+        return null;
+    }
+
     // TODO call this method when executiondelegate method is executed
-    public void notifyVariablesReader() {
-        variablesReader.handleProcessVariableManipulation();
+    public void notifyVariablesReader(Block block, InvokeExpr expr) {
+        ProcessVariableOperation pvo = createProcessVariableOperationFromInvocation(expr);
+        processVariablesCreator.handleProcessVariableManipulation(block, pvo);
     }
 }

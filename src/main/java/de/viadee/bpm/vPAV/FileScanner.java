@@ -79,7 +79,7 @@ public class FileScanner {
 
 	private static Set<String> resourcesFileInputStream = new HashSet<>();
 
-	private Set<String> includedFiles = new HashSet<>();
+	private static Set<String> includedFiles = new HashSet<>();
 
 	private Map<String, String> decisionRefToPathMap;
 
@@ -164,11 +164,45 @@ public class FileScanner {
 			LOGGER.log(Level.SEVERE, "RuleSet appears to be null", e);
 		}
 
+		LinkedList<File> dirs = new LinkedList<>();
+		setupSootClassPaths(dirs);
+
+		// get mapping from decision reference to file path
+		scanner.setBasedir(basedir);
+		scanner.setIncludes(new String[] { ConfigConstants.DMN_FILE_PATTERN });
+		scanner.scan();
+		decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<>(Arrays.asList(scanner.getIncludedFiles())));
+
+		if (rules.getElementRules().get(VersioningChecker.class.getSimpleName()) != null) {
+			final Rule rule = rules.getElementRules().get(VersioningChecker.class.getSimpleName())
+					.get(VersioningChecker.class.getSimpleName());
+			if (rule != null && rule.isActive()) {
+				if (versioningScheme != null && !isDirectory) {
+					// also add groovy files to included files
+					scanner.setIncludes(new String[] { ConfigConstants.SCRIPT_FILE_PATTERN });
+					scanner.scan();
+
+					includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
+
+					// filter files by versioningSchema
+					resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
+				} else {
+
+					for (File file : dirs) {
+						includedFiles.add(file.getAbsolutePath());
+					}
+					resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
+				}
+			}
+		}
+	}
+
+	static void setupSootClassPaths(LinkedList<File> dirs) {
 		// get file paths of java files
 		LinkedList<File> files;
-		LinkedList<File> dirs = new LinkedList<>();
 		String pathSeparator = System.getProperty("path.separator");
 		String[] classPathEntries = System.getProperty("java.class.path").split(pathSeparator);
+
 
 		try {
 			URL urlTargetClass;
@@ -203,35 +237,6 @@ public class FileScanner {
 				}
 			}
 		}
-
-		// get mapping from decision reference to file path
-		scanner.setBasedir(basedir);
-		scanner.setIncludes(new String[] { ConfigConstants.DMN_FILE_PATTERN });
-		scanner.scan();
-		decisionRefToPathMap = createDmnKeyToPathMap(new HashSet<>(Arrays.asList(scanner.getIncludedFiles())));
-
-		if (rules.getElementRules().get(VersioningChecker.class.getSimpleName()) != null) {
-			final Rule rule = rules.getElementRules().get(VersioningChecker.class.getSimpleName())
-					.get(VersioningChecker.class.getSimpleName());
-			if (rule != null && rule.isActive()) {
-				if (versioningScheme != null && !isDirectory) {
-					// also add groovy files to included files
-					scanner.setIncludes(new String[] { ConfigConstants.SCRIPT_FILE_PATTERN });
-					scanner.scan();
-
-					includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
-
-					// filter files by versioningSchema
-					resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
-				} else {
-
-					for (File file : dirs) {
-						includedFiles.add(file.getAbsolutePath());
-					}
-					resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
-				}
-			}
-		}
 	}
 
 	/**
@@ -240,7 +245,7 @@ public class FileScanner {
 	 *
 	 * @param sootPathCurrent - one jar's local path
 	 */
-	private void addStringToSootPath(String sootPathCurrent) {
+	private static void addStringToSootPath(String sootPathCurrent) {
 		// Create a long String with every file and jar path for Soot.
 		if (sootPathCurrent != null) {
 			sootPathCurrent = sootPathCurrent.replaceAll("%20", " ");
@@ -261,7 +266,7 @@ public class FileScanner {
 	 * @param list List of starting folders
 	 * @return List of bottom folders
 	 */
-	private LinkedList<File> findLastDir(LinkedList<File> list) {
+	private static LinkedList<File> findLastDir(LinkedList<File> list) {
 
 		LinkedList<File> returnList = new LinkedList<>(list);
 
@@ -285,7 +290,7 @@ public class FileScanner {
 	 *
 	 * @param classes Classes
 	 */
-	private void addResources(LinkedList<File> classes) {
+	private static void addResources(LinkedList<File> classes) {
 		for (File file : classes) {
 			includedFiles.add(file.getName());
 		}
