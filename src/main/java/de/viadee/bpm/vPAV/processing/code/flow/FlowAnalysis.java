@@ -51,13 +51,11 @@ public class FlowAnalysis {
 
 	public static final Logger LOGGER = Logger.getLogger(FlowAnalysis.class.getName());
 	private LinkedHashMap<String, AnalysisElement> nodes;
-	private LinkedHashMap<String, ProcessVariableOperation> scopedOperations;
 
 	private int operationCounter = 0;
 
 	public FlowAnalysis() {
 		this.nodes = new LinkedHashMap<>();
-		this.scopedOperations = new LinkedHashMap<>();
 	}
 
 	/**
@@ -90,13 +88,12 @@ public class FlowAnalysis {
 	private void embedControlFlowGraph(final Graph graph) {
 		// Add all elements on bpmn level
 		graph.getVertexInfo().keySet().forEach(element -> {
-			AnalysisElement analysisElement = new BpmnElementDecorator(element);
-			analysisElement.clearPredecessors();
+			element.clearPredecessors();
 			graph.getAdjacencyListPredecessor(element)
-					.forEach(value -> analysisElement.addPredecessor(new BpmnElementDecorator(value)));
+					.forEach(element::addPredecessor);
 			graph.getAdjacencyListSuccessor(element)
-					.forEach(value -> analysisElement.addSuccessor(new BpmnElementDecorator(value)));
-			this.nodes.put(analysisElement.getId(), analysisElement);
+					.forEach(element::addSuccessor);
+			this.nodes.put(element.getId(), element);
 		});
 
 		// Add all nodes on source code level and correct the pointers
@@ -107,22 +104,22 @@ public class FlowAnalysis {
 			boolean hasNodesBefore = !(analysisElement.getBaseElement() instanceof CallActivity);
 
 			if (analysisElement.getControlFlowGraph().hasNodes()) {
-				AnalysisElement firstNode = analysisElement.getControlFlowGraph().firstNode();
-				AnalysisElement lastNode = analysisElement.getControlFlowGraph().lastNode();
+				BasicNode firstNode = analysisElement.getControlFlowGraph().firstNode();
+				BasicNode lastNode = analysisElement.getControlFlowGraph().lastNode();
 				boolean hasNodesAfter = false;
 
 				if (analysisElement.getBaseElement() instanceof CallActivity) {
 					// Split nodes in "before" and "after" nodes.
-					AnalysisElement lastNodeBefore = null;
-					AnalysisElement firstNodeAfter = null;
-					AnalysisElement predecessor = null;
+					BasicNode lastNodeBefore = null;
+					BasicNode firstNodeAfter = null;
+					BasicNode predecessor = null;
 					ElementChapter chapter;
-					chapter = ((AbstractNode) firstNode).getElementChapter();
+					chapter = ((BasicNode) firstNode).getElementChapter();
 					boolean isFirstHalf = !(chapter.equals(ElementChapter.OutputImplementation)
 							|| chapter.equals(ElementChapter.ExecutionListenerEnd));
 
 					// Set predecessor and successor relationships between nodes
-					for (AbstractNode curNode : analysisElement.getControlFlowGraph().getNodes().values()) {
+					for (BasicNode curNode : analysisElement.getControlFlowGraph().getNodes().values()) {
 						if (predecessor != null) {
 							chapter = curNode.getElementChapter();
 							if (chapter.equals(ElementChapter.OutputImplementation)
@@ -155,7 +152,7 @@ public class FlowAnalysis {
 
 								// Predecessor of child start event is last node before
 								succ.clearPredecessors();
-								succ.addPredecessor(new NodeDecorator(lastNodeBefore));
+								succ.addPredecessor(lastNodeBefore);
 								lastNodeBefore.clearSuccessors();
 								lastNodeBefore.addSuccessor(succ);
 
@@ -163,7 +160,7 @@ public class FlowAnalysis {
 								firstNode.clearPredecessors();
 								for (AnalysisElement preds : analysisElement.getPredecessors()) {
 									preds.removeSuccessor(analysisElement.getId());
-									preds.addSuccessor(new NodeDecorator(firstNode));
+									preds.addSuccessor(firstNode);
 									firstNode.addPredecessor(preds);
 								}
 
@@ -206,9 +203,9 @@ public class FlowAnalysis {
 							endEvent.clearSuccessors();
 
 							if (hasNodesAfter) {
-								endEvent.addSuccessor(new NodeDecorator(firstNodeAfter));
+								endEvent.addSuccessor(firstNodeAfter);
 								firstNodeAfter.addPredecessor(endEvent);
-								succ.addPredecessor(new NodeDecorator(lastNode));
+								succ.addPredecessor(lastNode);
 								lastNode.addSuccessor(succ);
 							} else {
 								succ.addPredecessor(endEvent);
@@ -221,14 +218,14 @@ public class FlowAnalysis {
 					// Replace element with first block
 					for (AnalysisElement pred : analysisElement.getPredecessors()) {
 						pred.removeSuccessor(analysisElement.getId());
-						pred.addSuccessor(new NodeDecorator(firstNode));
+						pred.addSuccessor(firstNode);
 						firstNode.addPredecessor(pred);
 					}
 
 					// Replace element with last block
 					for (AnalysisElement succ : analysisElement.getSuccessors()) {
 						succ.removePredecessor(analysisElement.getId());
-						succ.addPredecessor(new NodeDecorator(lastNode));
+						succ.addPredecessor(lastNode);
 					}
 				}
 

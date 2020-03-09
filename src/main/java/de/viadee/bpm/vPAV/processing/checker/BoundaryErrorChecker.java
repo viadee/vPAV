@@ -322,9 +322,6 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      */
     private boolean checkClassFile(final String className) {
 
-        @SuppressWarnings("unused") final String classPath =
-                className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
         try {
             RuntimeConfig.getInstance().getClassLoader().loadClass(className);
         } catch (final ClassNotFoundException e) {

@@ -40,10 +40,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
-import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -111,8 +108,8 @@ public class ProcessVariableReaderTest {
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
+        variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+        ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
         Assert.assertEquals(2, variables.size());
         Assert.assertNotNull(variables.get("newValue"));
@@ -134,8 +131,8 @@ public class ProcessVariableReaderTest {
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
+        variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+        ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
         Assert.assertEquals(2, variables.size());
     }
@@ -154,8 +151,8 @@ public class ProcessVariableReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-        variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, null));
+        variableReader.getVariablesFromElement(fileScanner, element, null);
+        ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
         final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables.get("nameOfVariableInMainProcess");
         Assert.assertNotNull(nameOfVariableInMainProcess);

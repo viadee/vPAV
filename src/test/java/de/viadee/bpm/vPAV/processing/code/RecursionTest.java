@@ -40,14 +40,10 @@ import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.code.flow.NodeDecorator;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
-import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
-import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -113,7 +109,7 @@ public class RecursionTest {
         assertEquals("Last sequence flow should have exactly one predecessor (else node).", 1,sequenceFlow2.getPredecessors().size());
         assertEquals("Else node should have two predecessors due to recursion",2, taskDelegateElse.getPredecessors().size());
         assertEquals("If node should have two predecessors due to recursion", 2, taskDelegateIf.getPredecessors().size());
-        assertEquals("If node should be a predecessor of itself", ((NodeDecorator)taskDelegateIf).getDecoratedNode(), ((NodeDecorator) taskDelegateIf.getPredecessors().get(1)).getDecoratedNode());
+        assertEquals("If node should be a predecessor of itself", taskDelegateIf, taskDelegateIf.getPredecessors().get(1));
 
         // TODO check anomalies but at the moment we cannot recognize them correctly if the graph includes a loop
     }

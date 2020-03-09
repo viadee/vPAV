@@ -31,7 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.Node;
 
 /**
  * Represents a process variable operation with some meaningful information.
@@ -39,63 +41,71 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
  */
 public class ProcessVariableOperation {
 
+    private static int id_counter;
+
     private String id;
 
     private String name;
+
+    private BasicNode node;
 
     private VariableOperation operation;
 
     private String scopeId;
 
-    /** Detailed Information about the location of the match **/
-    private BpmnElement element;
-
     private String resourceFilePath;
-
-    private ElementChapter chapter;
-
-    private KnownElementFieldType fieldType;
 
     private int index;
 
-    // Guaranteed that the operation takes place or not
-    private boolean operationType;
-
     private int flowOperationIndex;
 
-    public ProcessVariableOperation(final String name, final ElementChapter chapter,
-			final KnownElementFieldType fieldType,
-			final VariableOperation operation,
+    private KnownElementFieldType fieldType;
+
+    public ProcessVariableOperation(final String name,
+            final VariableOperation operation,
             final String scopeId) {
         super();
         this.name = name;
-        this.chapter = chapter;
-        this.fieldType = fieldType;
         this.operation = operation;
         this.scopeId = scopeId;
         this.id = createId();
     }
 
-    public ProcessVariableOperation(final String name, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String resourceFilePath, final VariableOperation operation,
-            final String scopeId, final int index) {
+    public ProcessVariableOperation(final String name,
+            final VariableOperation operation,
+            final KnownElementFieldType fieldType,
+            final String scopeId) {
         super();
         this.name = name;
-        this.element = element;
-        this.resourceFilePath = resourceFilePath;
-        this.chapter = chapter;
+        this.operation = operation;
         this.fieldType = fieldType;
+        this.scopeId = scopeId;
+        this.id = createId();
+    }
+
+    public ProcessVariableOperation(final String name, final BpmnElement element,
+            final String resourceFilePath, final VariableOperation operation,
+            final String scopeId, final int index, final Node node) {
+        super();
+        this.name = name;
+        this.resourceFilePath = resourceFilePath;
         this.operation = operation;
         this.scopeId = scopeId;
         this.index = index;
+        this.node = node;
         this.id = createId();
         element.getFlowAnalysis().incrementOperationCounter();
         this.flowOperationIndex = element.getFlowAnalysis().getOperationCounter();
     }
 
+    public void setNode(BasicNode node) {
+        this.node = node;
+    }
+
     private String createId() {
-        return CheckerIssue.getMD5(name + "_" + chapter + "_" + fieldType + "_" + resourceFilePath + "_" + operation
-                + "_" + scopeId + "_" + System.nanoTime());
+        return CheckerIssue
+                .getMD5(name + "_" + id_counter++ + "_" + operation
+                        + "_" + scopeId);
     }
 
     public String getName() {
@@ -111,15 +121,19 @@ public class ProcessVariableOperation {
     }
 
     public BpmnElement getElement() {
-        return element;
+        return node.getParentElement();
     }
 
     public ElementChapter getChapter() {
-        return chapter;
+        return node.getElementChapter();
     }
 
     public KnownElementFieldType getFieldType() {
-        return fieldType;
+        if (fieldType == null) {
+            return node.getFieldType();
+        } else {
+            return fieldType;
+        }
     }
 
     public VariableOperation getOperation() {
@@ -130,25 +144,15 @@ public class ProcessVariableOperation {
         return scopeId;
     }
 
-    public void setScopeId(String scopeId) {
-        this.scopeId = scopeId;
-    }
-
-    public void setOperationType(boolean type) {
-        this.operationType = type;
-    }
-
-    public boolean getOperationType() {
-        return operationType;
-    }
-
     public int getIndex() {
         return index;
     }
 
     public String toString() {
-        return name + " [" + element.getProcessDefinition() + ", " + element.getBaseElement().getId() + ", Scope: "
-                + scopeId + ", " + chapter.name() + ", " + fieldType.getDescription() + ", " + resourceFilePath + "]";
+        return name + " [" + getElement().getProcessDefinition() + ", " + getElement().getBaseElement().getId()
+                + ", Scope: "
+                + scopeId + ", " + getChapter().name() + ", " + getFieldType().getDescription() + ", "
+                + resourceFilePath + "]";
     }
 
     @Override
@@ -165,7 +169,8 @@ public class ProcessVariableOperation {
     }
 
     public void initializeOperation(final BpmnElement element) {
-        this.element = element;
+        // TODO when and where is this used?
+        //  this.element = element;
         element.getFlowAnalysis().incrementOperationCounter();
         this.flowOperationIndex = element.getFlowAnalysis().getOperationCounter();
     }

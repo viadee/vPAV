@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import org.junit.Assert;
 import org.junit.Test;
+import soot.RefType;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -44,13 +45,55 @@ import java.io.File;
 public class SootResolverSimplifiedTest {
 
     @Test
+    public void testGetBlockFromClass() {
+        // TODO
+    }
+
+    @Test
+    public void testGetSootMethod() {
+        // TODO
+    }
+
+    @Test
     public void testGetBlockFromMethod() {
         Scene.v().loadBasicClasses();
         String currentPath = (new File(".")).toURI().getPath();
         Scene.v().extendSootClassPath(currentPath + "src/test/java");
         SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.processing.SimpleObject", SootClass.SIGNATURES);
-        SootMethod method =  sc.getMethodByName("method");
+        SootMethod method = sc.getMethodByName("method");
         Block block = SootResolverSimplified.getBlockFromMethod(method);
-        Assert.assertEquals(4,  block.getBody().getUnits().size());
+        Assert.assertEquals(4, block.getBody().getUnits().size());
+    }
+
+    @Test
+    public void testSetupSootClass() {
+        // TODO
+    }
+
+    @Test
+    public void testGetParametersForDefaultMethods() {
+        // Test execute
+        Assert.assertEquals(RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"),
+                SootResolverSimplified.getParametersForDefaultMethods("execute").get(0));
+        Assert.assertEquals(1, SootResolverSimplified.getParametersForDefaultMethods("execute").size());
+
+        // Test notify
+        Assert.assertEquals(RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"),
+                SootResolverSimplified.getParametersForDefaultMethods("notify").get(0));
+        Assert.assertEquals(1, SootResolverSimplified.getParametersForDefaultMethods("execute").size());
+
+        // Test mapInputVariables
+        Assert.assertEquals(RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"),
+                SootResolverSimplified.getParametersForDefaultMethods("mapInputVariables").get(0));
+        Assert.assertEquals(RefType.v("org.camunda.bpm.engine.variable.VariableMap"),
+                SootResolverSimplified.getParametersForDefaultMethods("mapInputVariables").get(1));
+        Assert.assertEquals(2, SootResolverSimplified.getParametersForDefaultMethods("mapInputVariables").size());
+
+        // Test mapOutputVariables
+        Assert.assertEquals(RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution"),
+                SootResolverSimplified.getParametersForDefaultMethods("mapOutputVariables").get(0));
+        Assert.assertEquals(RefType.v("org.camunda.bpm.engine.delegate.VariableScope"),
+                SootResolverSimplified.getParametersForDefaultMethods("mapOutputVariables").get(1));
+        Assert.assertEquals(2, SootResolverSimplified.getParametersForDefaultMethods("mapOutputVariables").size());
     }
 }

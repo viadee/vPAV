@@ -302,7 +302,7 @@ public class ObjectReader {
             // TODO variables extractor decides on scope id for variable map
             // TODO do we need the thisName? is that possible?
             String variableName = resolveStringValue(expr.getArgBox(location).getValue(), "");
-            return new ProcessVariableOperation(variableName, null, null, type, null);
+            return new ProcessVariableOperation(variableName, type, null);
         }
 
         return null;

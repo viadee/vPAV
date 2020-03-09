@@ -36,10 +36,7 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
-import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -83,9 +80,10 @@ public class ReachingDefinitionTest {
 		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, new AnalysisElement[1]));
+		new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
+				"de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, new BasicNode[1]);
+		ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
+
 		assertEquals(3, variables.asMap().size());
 	}
 }

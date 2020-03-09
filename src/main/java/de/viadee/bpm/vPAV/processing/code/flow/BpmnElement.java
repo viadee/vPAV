@@ -278,12 +278,12 @@ public class BpmnElement implements AnalysisElement {
 
 	@Override
 	public List<AnalysisElement> getPredecessors() {
-		return this.predecessors.values().stream().map(BpmnElementDecorator::new).collect(Collectors.toList());
+		return new ArrayList<>(this.predecessors.values());
 	}
 
 	@Override
 	public List<AnalysisElement> getSuccessors() {
-		return this.successors.values().stream().map(BpmnElementDecorator::new).collect(Collectors.toList());
+		return new ArrayList<>(this.successors.values());
 	}
 
 	@Override

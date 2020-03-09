@@ -36,48 +36,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import soot.toolkits.graph.Block;
 
-public class Node extends AbstractNode implements Cloneable {
+public class Node extends BasicNode implements Cloneable {
 
 	private Block block;
 
 	public Node(final BpmnElement parentElement, final Block block,
-			final ElementChapter elementChapter) {
-		super(parentElement, elementChapter);
+			final ElementChapter elementChapter, final KnownElementFieldType fieldType) {
+		super(parentElement, elementChapter, fieldType);
 		this.block = block;
 	}
-
-	/**
-	 * Set the predecessor nodes of the current node
-	 */
-	@Override
-	public void setPreds() {
-		final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
-		final Pattern idPattern = Pattern
-				.compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
-
-		for (Block block : this.block.getPreds()) {
-			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
-			createIds(idPattern, blockMatcher, true);
-		}
-	}
-
-	/**
-	 * Set the successor nodes of the current node
-	 */
-	@Override
-	public void setSuccs() {
-		final Pattern blockPattern = Pattern.compile("(Block\\s#)(\\d)");
-		final Pattern idPattern = Pattern
-				.compile(this.getParentElement().getBaseElement().getId() + "__(\\d\\.)*(\\d)");
-
-		for (Block block : this.block.getSuccs()) {
-			Matcher blockMatcher = blockPattern.matcher(block.toShortString());
-			createIds(idPattern, blockMatcher, false);
-		}
-	}
-
 	public Block getBlock() {
 		return block;
 	}
@@ -88,7 +58,6 @@ public class Node extends AbstractNode implements Cloneable {
 	{
 		Node myClone = (Node)super.clone();
 		myClone.block = block;
-		myClone.controlFlowGraph = controlFlowGraph;
 		myClone.parentElement = parentElement;
 		myClone.elementChapter = elementChapter;
 		myClone.operations = new LinkedHashMap<>();

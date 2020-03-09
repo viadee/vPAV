@@ -37,23 +37,16 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
-import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
-import de.viadee.bpm.vPAV.processing.code.flow.ObjectVariable;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.omg.CORBA.Object;
 import soot.*;
-import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
 import soot.toolkits.graph.Block;
-import soot.toolkits.graph.BlockGraph;
-import soot.toolkits.graph.ClassicCompleteBlockGraph;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -81,11 +74,9 @@ public class JavaReaderStatic {
      * @param scopeId     Scope of the element
      * @return Map of process variables from the referenced delegate
      */
-    ListMultimap<String, ProcessVariableOperation> getVariablesFromJavaDelegate(final FileScanner fileScanner,
+    void getVariablesFromJavaDelegate(final FileScanner fileScanner,
             final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String scopeId, AnalysisElement[] predecessor) {
-
-        final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
+            final KnownElementFieldType fieldType, final String scopeId, BasicNode[] predecessor) {
 
         if (classFile != null && classFile.trim().length() > 0) {
 
@@ -100,24 +91,23 @@ public class JavaReaderStatic {
                     || element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
                 // Delegate Variable Mapping
-                variables.putAll(classFetcherNew(classFile, "mapInputVariables", element,
-                        ElementChapter.InputImplementation));
+                classFetcherNew(classFile, "mapInputVariables", element,
+                        ElementChapter.InputImplementation, fieldType);
 
-                variables.putAll(classFetcherNew(classFile, "mapOutputVariables", element,
-                        ElementChapter.OutputImplementation));
+                classFetcherNew(classFile, "mapOutputVariables", element,
+                        ElementChapter.OutputImplementation, fieldType);
             } else {
                 // Java Delegate or Listener
                 SootClass sootClass = Scene.v().forceResolve(cleanString(classFile), SootClass.SIGNATURES);
                 if (sootClass.declaresMethodByName("notify")) {
-                    variables.putAll(classFetcherNew(classFile, "notify", element, chapter));
+                    classFetcherNew(classFile, "notify", element, chapter, fieldType);
                 } else if (sootClass.declaresMethodByName("execute")) {
-                    variables.putAll(classFetcherNew(classFile, "execute", element, chapter));
+                    classFetcherNew(classFile, "execute", element, chapter, fieldType);
                 } else {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
                 }
             }
         }
-        return variables;
     }
 
     /**
@@ -154,15 +144,15 @@ public class JavaReaderStatic {
         return initialOperations;
     }
 
-    private ListMultimap<String, ProcessVariableOperation> classFetcherNew(final String className,
+    private void classFetcherNew(final String className,
             final String methodName, final BpmnElement element,
-            final ElementChapter chapter) {
+            final ElementChapter chapter, final KnownElementFieldType fieldType) {
 
         Block block = SootResolverSimplified.getBlockFromClass(className, methodName, null, null);
-        ProcessVariablesCreator processVariablesCreator = new ProcessVariablesCreator(element, chapter);
-        ArrayList<Node> nodes = processVariablesCreator.blockIterator(block, new ArrayList<>());
+        ProcessVariablesCreator processVariablesCreator = new ProcessVariablesCreator(element, chapter, fieldType);
+        ArrayList<Node> nodes = processVariablesCreator.blockIterator(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName));
 
-        return createProcessVariableList(nodes);
+        createProcessVariableList(nodes);
     }
 
     private ListMultimap<String, ProcessVariableOperation> createProcessVariableList(ArrayList<Node> nodes) {

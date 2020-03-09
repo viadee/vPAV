@@ -63,7 +63,7 @@ public class ProcessVariablesCreatorTest {
         // de.viadee.bpm.vPAV.delegates.SimpleDelegate
         SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.delegates.SimpleDelegate", SootClass.SIGNATURES);
         SootMethod method = sc.getMethodByName("execute");
-        ProcessVariablesCreator vr = new ProcessVariablesCreator(null, null);
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(null, null, null);
         ArrayList<Value> args = new ArrayList<>();
         // TODO check if jimple local is really the correct parameter type
         args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
@@ -85,14 +85,14 @@ public class ProcessVariablesCreatorTest {
         // Test that new nodes are created when the block changes
         Block blockOne = mock(Block.class);
         Block blockTwo = mock(Block.class);
-        ProcessVariableOperation blockOneOpOne = new ProcessVariableOperation("var1", null, null,
+        ProcessVariableOperation blockOneOpOne = new ProcessVariableOperation("var1",
                 VariableOperation.WRITE, null);
-        ProcessVariableOperation blockOneOpTwo = new ProcessVariableOperation("var2", null, null,
+        ProcessVariableOperation blockOneOpTwo = new ProcessVariableOperation("var2",
                 VariableOperation.WRITE, null);
-        ProcessVariableOperation blockTwoOpOne = new ProcessVariableOperation("var3", null, null,
+        ProcessVariableOperation blockTwoOpOne = new ProcessVariableOperation("var3",
                 VariableOperation.WRITE, null);
 
-        ProcessVariablesCreator vr = new ProcessVariablesCreator(null, null);
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(null, null, null);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpOne);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo);
         vr.handleProcessVariableManipulation(blockTwo, blockTwoOpOne);

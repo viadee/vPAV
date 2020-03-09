@@ -31,132 +31,129 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 
 public class ControlFlowGraph {
 
-	private LinkedHashMap<String, AbstractNode> nodes;
+    private LinkedHashMap<String, BasicNode> nodes;
 
-	private LinkedHashMap<String, ProcessVariableOperation> operations;
+    private int internalNodeCounter;
 
-	private int internalNodeCounter;
+    private int recursionCounter;
 
-	private int recursionCounter;
+    private int nodeCounter;
 
-	private int nodeCounter;
+    private int priorLevel;
 
-	private int priorLevel;
+    private List<Integer> priorLevels;
 
-	private List<Integer> priorLevels;
+    public ControlFlowGraph() {
+        nodes = new LinkedHashMap<>();
+        nodeCounter = -1;
+        internalNodeCounter = 0;
+        recursionCounter = 0;
+        priorLevel = 0;
+        priorLevels = new ArrayList<>();
+    }
 
-	public ControlFlowGraph() {
-		nodes = new LinkedHashMap<>();
-		this.operations = new LinkedHashMap<>();
-		nodeCounter = -1;
-		internalNodeCounter = 0;
-		recursionCounter = 0;
-		priorLevel = 0;
-		priorLevels = new ArrayList<>();
-	}
+    /**
+     * Adds a node to the current CFG
+     *
+     * @param node
+     *            Node to be added to the control flow graph
+     */
+    public void addNode(final BasicNode node) {
+        String key = createHierarchy(node);
+        node.setId(key);
+        this.nodes.put(key, node);
+    }
 
-	/**
-	 * Adds a node to the current CFG
-	 *
-	 * @param node
-	 *            Node to be added to the control flow graph
-	 */
-	public void addNode(final AbstractNode node) {
-		String key = createHierarchy(node);
-		node.setId(key);
-		this.nodes.put(key, node);
-	}
+    /**
+     *
+     * Helper method to create ids based on hierarchy, e.g.
+     *
+     * 0 --> 1 --> 2 --> 3 --> 3.0 --> 3.0.0 --> 3.0.1 --> 3.0.2
+     *
+     * @param node
+     *            Current node
+     * @return Id of node
+     */
+    private String createHierarchy(final BasicNode node) {
+        // TODO renew method (deleted hierarchy)
+        StringBuilder key = new StringBuilder();
+        key.append(node.getParentElement().getBaseElement().getId()).append("__");
+        nodeCounter++;
+        key.append(nodeCounter);
+        priorLevel = internalNodeCounter - 1;
+        return key.toString();
+    }
 
-	/**
-	 *
-	 * Helper method to create ids based on hierarchy, e.g.
-	 *
-	 * 0 --> 1 --> 2 --> 3 --> 3.0 --> 3.0.0 --> 3.0.1 --> 3.0.2
-	 * 
-	 * @param node
-	 *            Current node
-	 * @return Id of node
-	 */
-	private String createHierarchy(final AbstractNode node) {
-		// TODO renew method (deleted hierarchy)
-		StringBuilder key = new StringBuilder();
-		key.append(node.getParentElement().getBaseElement().getId()).append("__");
-		nodeCounter++;
-		key.append(nodeCounter);
-		priorLevel = internalNodeCounter - 1;
-		return key.toString();
-	}
+    boolean hasNodes() {
+        return !nodes.isEmpty();
+    }
 
-	boolean hasImplementedDelegate() {
-		for (AbstractNode node : nodes.values()) {
-			if (node.getElementChapter().equals(ElementChapter.Implementation)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public void incrementRecursionCounter() {
+        this.recursionCounter++;
+    }
 
-	boolean hasNodes() {
-		return !nodes.isEmpty();
-	}
+    public void decrementRecursionCounter() {
+        this.recursionCounter--;
+    }
 
-	public void incrementRecursionCounter() {
-		this.recursionCounter++;
-	}
+    public void resetInternalNodeCounter() {
+        this.internalNodeCounter = 0;
+    }
 
-	public void decrementRecursionCounter() {
-		this.recursionCounter--;
-	}
+    public LinkedHashMap<String, BasicNode> getNodes() {
+        return nodes;
+    }
 
-	public void resetInternalNodeCounter() {
-		this.internalNodeCounter = 0;
-	}
+    public int getPriorLevel() {
+        return priorLevel;
+    }
 
-	public LinkedHashMap<String, AbstractNode> getNodes() {
-		return nodes;
-	}
+    public void setInternalNodeCounter(int internalNodeCounter) {
+        this.internalNodeCounter = internalNodeCounter;
+    }
 
-	public int getPriorLevel() {
-		return priorLevel;
-	}
+    BasicNode firstNode() {
+        Iterator<BasicNode> iterator = nodes.values().iterator();
+        return iterator.next();
+    }
 
-	public void setInternalNodeCounter(int internalNodeCounter) {
-		this.internalNodeCounter = internalNodeCounter;
-	}
+    BasicNode lastNode() {
+        Iterator<BasicNode> iterator = nodes.values().iterator();
+        BasicNode node = null;
+        while (iterator.hasNext()) {
+            node = iterator.next();
+        }
+        return node;
+    }
 
-	AbstractNode firstNode() {
-		Iterator<AbstractNode> iterator = nodes.values().iterator();
-		return iterator.next();
-	}
+    private List<Integer> getPriorLevels() {
+        return priorLevels;
+    }
 
-	AbstractNode lastNode() {
-		Iterator<AbstractNode> iterator = nodes.values().iterator();
-		AbstractNode node = null;
-		while (iterator.hasNext()) {
-			node = iterator.next();
-		}
-		return node;
-	}
+    public void addPriorLevel(int i) {
+        this.priorLevels.add(i);
+    }
 
-	private List<Integer> getPriorLevels() {
-		return priorLevels;
-	}
+    public void removePriorLevel() {
+        this.priorLevels.remove(priorLevels.size() - 1);
+    }
 
-	public void addPriorLevel(int i) {
-		this.priorLevels.add(i);
-	}
-
-	public void removePriorLevel() {
-		this.priorLevels.remove(priorLevels.size() - 1);
-	}
+    public ListMultimap<String, ProcessVariableOperation> getOperations() {
+        ListMultimap<String, ProcessVariableOperation> operations = ArrayListMultimap.create();
+        for (BasicNode node : nodes.values()) {
+            for (Map.Entry<String, ProcessVariableOperation> entry : node.getOperations().entrySet()) {
+                operations.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return operations;
+    }
 }

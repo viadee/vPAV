@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import soot.*;
+import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.Block;
 import soot.toolkits.graph.BlockGraph;
 import soot.toolkits.graph.ClassicCompleteBlockGraph;
@@ -51,7 +52,6 @@ public class SootResolverSimplified {
 
     private static final Logger LOGGER = Logger.getLogger(SootResolverSimplified.class.getName());
 
-    // TODO add test case
     public static Block getBlockFromClass(String className, String methodName, List<Type> parameterTypes,
             Type returnType) {
         SootClass sootClass = setupSootClass(className);
@@ -70,7 +70,6 @@ public class SootResolverSimplified {
         return null;
     }
 
-    // TODO add test case
     private static SootMethod getSootMethod(final SootClass sootClass, final String methodName,
             List<Type> parameterTypes, final Type returnType) {
         SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
@@ -122,8 +121,7 @@ public class SootResolverSimplified {
         }
     }
 
-    // TODO add test case
-    private static List<Type> getParametersForDefaultMethods(final String methodName) {
+    public static List<Type> getParametersForDefaultMethods(final String methodName) {
         List<Type> parameterTypes = new ArrayList<>();
 
         // Retrieve the method and its body based on the used interface
@@ -148,4 +146,32 @@ public class SootResolverSimplified {
 
         return parameterTypes;
     }
+
+    // Add test
+    public static List<Value> getParameterValuesForDefaultMethods(final String methodName) {
+        List<Value> parameters = new ArrayList<>();
+
+        // Retrieve the method and its body based on the used interface
+        RefType delegateExecutionType = CamundaMethodServices.DELEGATE_EXECUTION_TYPE;
+        RefType mapVariablesType = CamundaMethodServices.MAP_VARIABLES_TYPE;
+        RefType variableScopeType = CamundaMethodServices.VARIABLE_SCOPE_TYPE;
+
+        switch (methodName) {
+            case "execute":
+            case "notify":
+                parameters.add(new JimpleLocal("del_ex", delegateExecutionType));
+                break;
+            case "mapInputVariables":
+                parameters.add(new JimpleLocal("del_ex", delegateExecutionType));
+                parameters.add(new JimpleLocal("var_map", mapVariablesType));
+                break;
+            case "mapOutputVariables":
+                parameters.add(new JimpleLocal("del_ex", delegateExecutionType));
+                parameters.add(new JimpleLocal("var_scope", variableScopeType));
+                break;
+        }
+
+        return parameters;
+    }
+
 }

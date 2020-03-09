@@ -157,8 +157,7 @@ public final class XmlVariablesReader {
                 op = VariableOperation.WRITE;
         }
 
-        return new ProcessVariableOperation(name, ElementChapter.UserDefined, KnownElementFieldType.UserDefined,
-                op, scope);
+        return new ProcessVariableOperation(name, op, scope);
 
     }
 }

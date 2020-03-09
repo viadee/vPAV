@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -107,6 +108,20 @@ public class UserVariablesTest {
         final Collection<String> calledElementHierarchy = new ArrayList<>();
         final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+        // TODO not analyze but check inclusion since anlyse might differ in future
+
+
+        Graph graph = graphCollection.iterator().next();
+        for(BpmnElement element : graph.getVertices()) {
+            if(element.getId().equals("ServiceTask_108g52x")) {
+                // check if node with user defiend variables is included
+
+            }
+            else if(element.getId().equals("EndEvent_13uioac")) {
+                // TODO
+            }
+        }
 
         flowAnalysis.analyze(graphCollection);
 

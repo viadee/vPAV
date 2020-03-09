@@ -72,7 +72,6 @@ public class BoundaryErrorCheckerTest {
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");

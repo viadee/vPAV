@@ -49,13 +49,15 @@ public class ProcessVariablesCreator {
     private ArrayList<Node> nodes = new ArrayList<>();
     private BpmnElement element;
     private ElementChapter chapter;
+    private KnownElementFieldType fieldType;
 
     // Does it make sense to store the top-level block or are there better ways?
     public ProcessVariablesCreator(final BpmnElement element,
-            final ElementChapter chapter) {
+            final ElementChapter chapter, final KnownElementFieldType fieldType) {
     //    variableBlock = new VariableBlock(block, new ArrayList<>());
         this.element = element;
         this.chapter = chapter;
+        this.fieldType = fieldType;
     }
 
     // Only called for top-level block -> Rename
@@ -73,7 +75,7 @@ public class ProcessVariablesCreator {
             nodes.get(nodes.size() - 1).addOperation(pvo);
         } else {
             // Add new block
-            Node node = new Node(element, block, chapter);
+            Node node = new Node(element, block, chapter, fieldType);
             node.addOperation(pvo);
             if (nodes.size() > 0) {
                 node.addPredecessor(nodes.get(nodes.size() - 1));
@@ -85,4 +87,26 @@ public class ProcessVariablesCreator {
     public ArrayList<Node> getNodes() {
         return nodes;
     }
+
+    public void startIf() {
+
+    }
+
+    public void startElse() {
+
+    }
+
+    public void endIfElse() {
+
+    }
+
+    public void startLoop() {
+
+    }
+
+    public void endLoop() {
+
+    }
+
+    // TODO recursion based on blocks (maybe hashing if already inside?
 }

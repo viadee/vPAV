@@ -43,10 +43,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
-import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
-import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -121,10 +118,7 @@ public class ProcessVariablesNameConventionCheckerTest {
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
-			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
-
-			element.setProcessVariables(variables);
+			variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
 
 			checker.check(element);
 		}
@@ -155,9 +149,7 @@ public class ProcessVariablesNameConventionCheckerTest {
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
 			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
-
-			element.setProcessVariables(variables);
+			variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
 
 			checker.check(element);
 		}
