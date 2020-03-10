@@ -44,22 +44,24 @@ import soot.jimple.*;
 import soot.jimple.internal.*;
 import soot.toolkits.graph.Block;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 // TODO rekursionen sind möglich
 public class ObjectReader {
 
+    private HashSet<Integer> processedBlocks = new HashSet<>();
+
     private ObjectVariable thisObject = new ObjectVariable();
 
     private HashMap<String, StringVariable> localStringVariables = new HashMap<>();
+
     private HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
 
     private ProcessVariablesCreator processVariablesCreator;
 
     ObjectReader(HashMap<String, StringVariable> localStrings,
-            HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject, ProcessVariablesCreator processVariablesCreator) {
+            HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
+            ProcessVariablesCreator processVariablesCreator) {
         this.localStringVariables = localStrings;
         this.localObjectVariables = localObjects;
         this.thisObject = thisObject;
@@ -80,10 +82,15 @@ public class ObjectReader {
         // TODO recursion is possible, prevent infinite loops
         // Todo Only String variables are currently resolved
         // Eventually add objects, arrays and int
+        if (processedBlocks.contains(hashBlock(block))) {
+            processVariablesCreator.visitBlockAgain(block);
+            return null;
+        }
+        processedBlocks.add(hashBlock(block)); // TODO add block here of before return?, what if method / block is called again?
 
         final Iterator<Unit> unitIt = block.iterator();
 
-        if(thisName == null) {
+        if (thisName == null) {
             // Find out variable name of this reference, it's always defined in the first unit
             thisName = getThisNameFromUnit(unitIt.next());
         }
@@ -114,30 +121,21 @@ public class ObjectReader {
             else if (unit instanceof ReturnStmt) {
                 return handleReturnStmt(unit, thisName);
             }
-            // if 
-            else if (unit instanceof IfStmt) {
-                // TODO haselse
-                handleIfStmt(block, args, thisName);
-            }
             // return
             else if (unit instanceof ReturnVoidStmt) {
                 return null;
             }
         }
-        return null;
-    }
-
-    void handleIfStmt(Block block, List<Value> args, String thisName) {
-        processVariablesCreator.startIf();
-        this.processBlock(block.getSuccs().get(0), args, thisName);
-
-        if(block.getSuccs().size() == 2) {
-            processVariablesCreator.startElse();
-            this.processBlock(block.getSuccs().get(1), args, thisName);
+        // Process successors e.g. if or loop
+        if (block.getSuccs().size() > 0) {
+            processVariablesCreator.startSuccessorHandling(block);
+            for (Block succ : block.getSuccs()) {
+                this.processBlock(succ, args, thisName);
+            }
+            processVariablesCreator.endSuccessorHandling();
         }
-        // TODO check if that also works with nested ifs/loops
-        processVariablesCreator.endIfElse();
-        this.processBlock(block.getSuccs().get(0).getSuccs().get(0), args, thisName);
+
+        return null;
     }
 
     String getThisNameFromUnit(Unit unit) {
@@ -334,5 +332,10 @@ public class ObjectReader {
     public void notifyVariablesReader(Block block, InvokeExpr expr) {
         ProcessVariableOperation pvo = createProcessVariableOperationFromInvocation(expr);
         processVariablesCreator.handleProcessVariableManipulation(block, pvo);
+    }
+
+    public static int hashBlock(Block block) {
+        return Objects.hash(block.getHead(), block.getTail(), block.getBody(),
+                block.getIndexInMethod());
     }
 }

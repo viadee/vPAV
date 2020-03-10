@@ -154,4 +154,8 @@ public class ControlFlowGraph {
         }
         return operations;
     }
+
+    public void removeNode(BasicNode node) {
+        nodes.remove(node.getId());
+    }
 }

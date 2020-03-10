@@ -262,6 +262,7 @@ public class BasicNode implements AnalysisElement{
     @Override
     public void addPredecessor(AnalysisElement predecessor) {
         this.predecessors.put(predecessor.getId(), predecessor);
+        predecessor.addSuccessor(this);
     }
 
     @Override

@@ -46,9 +46,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessVariablesCreator {
+
     private static final int CONTROL_NONE = 0;
+
     private static final int CONTROL_IF = 1;
+
     private static final int CONTROL_ELSE = 2;
+
     private static final int CONTROL_COND_END = 3;
 
     private ArrayList<Node> nodes = new ArrayList<>();
@@ -61,13 +65,11 @@ public class ProcessVariablesCreator {
 
     private String defaultScopeId;
 
+    // Stack of successor nodes
     private ArrayList<Node> stack = new ArrayList<>();
 
-    private int control = 0;
-    private boolean hasElse = false;
-
     // Used for testing
-    public ProcessVariablesCreator(final BpmnElement element,
+    ProcessVariablesCreator(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, String scopeId) {
         //    variableBlock = new VariableBlock(block, new ArrayList<>());
         this.element = element;
@@ -91,14 +93,13 @@ public class ProcessVariablesCreator {
     public void blockIterator(final Block block, final List<Value> args) {
         ObjectReader objectReader = new ObjectReader(this);
         objectReader.processBlock(block, args, null);
+        cleanEmptyNodes();
     }
 
     // This method adds process variables one by one
     public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo) {
         // Block hasn't changed since the last operation, add operation to existing block
         if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
-            // TODO add test for skipped control flow
-            handleSkippedControlFlow();
             lastNode().addOperation(pvo);
         } else {
             // Add new block
@@ -106,82 +107,10 @@ public class ProcessVariablesCreator {
             node.addOperation(pvo);
             nodes.add(node);
             element.getControlFlowGraph().addNode(node);
-
-            if (control != CONTROL_NONE) {
-                handleControlFlow(node);
+            if (!stack.isEmpty()) {
+                node.addPredecessor(peekStack());
             }
         }
-    }
-
-    private void handleControlFlow(Node node) {
-        switch (control) {
-            case CONTROL_IF:
-                node.addPredecessor(peekStack());
-                break;
-            case CONTROL_ELSE:
-                node.addPredecessor(popStack());
-                break;
-            case CONTROL_COND_END:
-                if(hasElse) {
-                    node.addPredecessor(popStack());
-                    node.addPredecessor(popStack());
-                    hasElse = false;
-                }
-                else {
-                    popStack();
-                    node.addPredecessor(popStack());
-                }
-                break;
-            default:
-                assert false;
-        }
-        control = CONTROL_NONE;
-    }
-
-    // Reset control flow if no variable manipulations happened
-    private void handleSkippedControlFlow() {
-        switch (control) {
-            case CONTROL_COND_END:
-                if(hasElse) {
-                    popStack();
-                    popStack();
-                }
-                else {
-                    popStack();
-                    popStack();
-                }
-                break;
-            default:
-                assert false;
-        }
-        hasElse = false;
-        control = CONTROL_NONE;
-    }
-
-    public void startIf() {
-        // TODO that must not necessarily hold but assume for the moment for simplicity
-        assert nodes.size() > 0;
-        stack.add(lastNode());
-        control = CONTROL_IF;
-    }
-
-    public void startElse() {
-        stack.add(stack.size()-1, lastNode()); // add if node
-        control = CONTROL_ELSE;
-        hasElse = true;
-    }
-
-    public void endIfElse() {
-        stack.add(stack.size()-1, lastNode()); // either else or if node is added
-        control = CONTROL_COND_END;
-    }
-
-    public void startLoop() {
-
-    }
-
-    public void endLoop() {
-
     }
 
     private void determineScopeId() {
@@ -200,7 +129,7 @@ public class ProcessVariablesCreator {
         return defaultScopeId;
     }
 
-    public Node lastNode() {
+    private Node lastNode() {
         return nodes.get(nodes.size() - 1);
     }
 
@@ -208,10 +137,64 @@ public class ProcessVariablesCreator {
         return stack.get(stack.size() - 1);
     }
 
-    private Node popStack() {
-        Node n = peekStack();
+    private void popStack() {
         stack.remove(stack.size() - 1);
-        return n;
+    }
+
+    private void cleanEmptyNodes() {
+        // Clean up nodes without operations to make analysis faster
+        for(Node node: nodes) {
+            if(node.getOperations().size() == 0) {
+                element.getControlFlowGraph().removeNode(node);
+                // For all predecessors, remove node from successors and add successors of node
+                node.getPredecessors().forEach(pred -> {
+                    pred.removeSuccessor(node.getId());
+                    node.getSuccessors().forEach(pred::addSuccessor);
+                });
+                // For all successors, remove node from predecessors and add predecessors of node
+                node.getSuccessors().forEach(succ -> {
+                    succ.removePredecessor(node.getId());
+                    node.getPredecessors().forEach(succ::addPredecessor);
+                });
+            }
+        }
+    }
+
+    public void startSuccessorHandling(Block block) {
+        // Check if block is already associated with one node, if not create an empty one
+        boolean exists = false;
+        // Start from back as this should be faster
+        for (int i = nodes.size() - 1; i >= 0; i--) {
+            if (nodes.get(i).getBlock().equals(block)) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            Node node = new Node(element, block, chapter, fieldType);
+            nodes.add(node);
+            element.getControlFlowGraph().addNode(node);
+            if(!stack.isEmpty()) {
+                node.addPredecessor(peekStack());
+            }
+        }
+        stack.add(lastNode());
+    }
+
+    public void endSuccessorHandling() {
+        if (!stack.isEmpty()) {
+            popStack();
+        }
+    }
+
+    public void visitBlockAgain(Block block) {
+        // find first node that is associated with block and set successor
+        for (Node node : nodes) {
+            if (ObjectReader.hashBlock(node.getBlock()) == ObjectReader.hashBlock(block)) {
+                node.addPredecessor(peekStack());
+                break;
+            }
+        }
     }
 
     // TODO recursion based on blocks (maybe hashing if already inside?

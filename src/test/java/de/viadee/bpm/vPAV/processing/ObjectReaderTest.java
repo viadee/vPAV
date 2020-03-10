@@ -274,21 +274,6 @@ public class ObjectReaderTest {
     }
 
     @Test
-    public void testHandleIfStmt() {
-        // Test that all units are correctly processed in the right order
-        SootMethod method = thisSootClass.getMethodByName("methodWithIf");
-        List<Value> args = new ArrayList<>();
-        args.add(new JimpleLocal("del_ex", RefType.v(CamundaMethodServices.DELEGATE)));
-        objectReader.handleIfStmt(SootResolverSimplified.getBlockFromMethod(method), args, "r0");
-        // TODO darauf hinweisen, dass variable manipulation in ifs oder loops zufällige ergebnisse liefert (immer abarbeitung von if und else)
-        // Only check that all variables were processed
-        Assert.assertEquals("notAvailableOutsideIf", objectReader.getLocalStringVariables().get("r4").getValue());
-        Assert.assertEquals("notAvailableOutsideElse", objectReader.getLocalStringVariables().get("r5").getValue());
-        Assert.assertEquals("afterIfElse", objectReader.getLocalStringVariables().get("r6").getValue());
-
-    }
-
-    @Test
     public void testProcessBlock() {
         // Test that all units are correctly processed in the right order
         SootMethod method = thisSootClass.getMethodByName("<init>");

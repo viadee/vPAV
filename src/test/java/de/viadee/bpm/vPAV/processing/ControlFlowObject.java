@@ -31,27 +31,50 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import de.viadee.bpm.vPAV.AnotherSimpleObject;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-public class SimpleObject {
+public class ControlFlowObject {
 
-    private String myStringField;
-    private String parameterString;
-    private String anotherObjectString;
-
-    public SimpleObject(String var) {
-        myStringField = "hello";
-        method();
-        parameterString = var;
-        anotherObjectString = (new AnotherSimpleObject()).getAnotherVariable();
+    private void methodWithIfElse(DelegateExecution execution) {
+        int notRandom = 3;
+        execution.getVariable("variableBefore");
+        if (notRandom < 3) {
+            String localIf = "notAvailableOutsideIf";
+            execution.setVariable(localIf, "test");
+        } else {
+            String localElse = "notAvailableOutsideElse";
+            execution.removeVariable(localElse);
+        }
+        String afterVar = "afterIfElse";
+        execution.getVariable(afterVar);
     }
 
-    private void method() {
-        myStringField = "bye";
+    private void methodWithLoop(DelegateExecution execution) {
+        for (int i = 0; i < 5; i++) {
+            execution.getVariable("test");
+        }
+        execution.removeVariable("test");
     }
 
-    private String methodWithReturn() {
-        return "it_works";
+    private void methodWithNestedControls(DelegateExecution execution) {
+        for (int i = 0; i < 5; i++) {
+            if ("value".equals("notvalue")) {
+                execution.setVariable("test", true);
+            } else {
+                execution.removeVariable("test");
+            }
+            execution.getVariable("test");
+        }
+        execution.removeVariable("test");
     }
+
+    private void methodWithRecursion(DelegateExecution execution) {
+        execution.getVariable("variableBefore");
+        int counter = 3;
+        if (counter < 2) {
+            methodWithRecursion(execution);
+        }
+        execution.getVariable("variableAfter");
+    }
+
 }
