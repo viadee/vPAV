@@ -54,6 +54,7 @@ public class ProcessVariablesCreatorTest {
     @BeforeClass
     public static void setupSoot() {
         RuntimeConfig.getInstance().setTest(true);
+        // TODO important as junit test screw up because of some resolving problem
         // TODO rework the whole soot setup + filescanner because static and runtime is mixed up
         FileScanner.setupSootClassPaths(new LinkedList<>());
         new JavaReaderStatic().setupSoot();
