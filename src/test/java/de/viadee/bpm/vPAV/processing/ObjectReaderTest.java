@@ -31,7 +31,11 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.ProcessVariablesCreator;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.ObjectVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.StringVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -48,6 +52,7 @@ import soot.jimple.internal.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -70,7 +75,10 @@ public class ObjectReaderTest {
 
     @BeforeClass
     public static void setupSoot() {
-        Scene.v().loadBasicClasses();
+        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        new JavaReaderStatic().setupSoot();
+        Scene.v().loadNecessaryClasses();
         String currentPath = (new File(".")).toURI().getPath();
         Scene.v().extendSootClassPath(currentPath + "src/test/java");
         Scene.v().defaultClassPath();
@@ -81,6 +89,9 @@ public class ObjectReaderTest {
 
     @Before
     public void setupTestVariables() {
+        ProcessVariablesCreator processVariablesCreator = mock(ProcessVariablesCreator.class);
+        when(processVariablesCreator.getScopeId()).thenReturn("Process_1");
+
         // Create local string variables
         HashMap<String, StringVariable> localStringVariables = new HashMap<>();
         localStringVariables.put("variable1", new StringVariable("value1"));
@@ -90,7 +101,7 @@ public class ObjectReaderTest {
         HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
         localObjectVariables.put("objVariable1", objVariable1);
         localObjectVariables.put("$r2", anotherObject);
-        objectReader = new ObjectReader(localStringVariables, localObjectVariables, new ObjectVariable());
+        objectReader = new ObjectReader(localStringVariables, localObjectVariables, new ObjectVariable(), processVariablesCreator);
 
         // Create string fields
         objectReader.getThisObject().updateStringField("variableField1", "valueField1");
@@ -263,12 +274,27 @@ public class ObjectReaderTest {
     }
 
     @Test
+    public void testHandleIfStmt() {
+        // Test that all units are correctly processed in the right order
+        SootMethod method = thisSootClass.getMethodByName("methodWithIf");
+        List<Value> args = new ArrayList<>();
+        args.add(new JimpleLocal("del_ex", RefType.v(CamundaMethodServices.DELEGATE)));
+        objectReader.handleIfStmt(SootResolverSimplified.getBlockFromMethod(method), args, "r0");
+        // TODO darauf hinweisen, dass variable manipulation in ifs oder loops zufällige ergebnisse liefert (immer abarbeitung von if und else)
+        // Only check that all variables were processed
+        Assert.assertEquals("notAvailableOutsideIf", objectReader.getLocalStringVariables().get("r4").getValue());
+        Assert.assertEquals("notAvailableOutsideElse", objectReader.getLocalStringVariables().get("r5").getValue());
+        Assert.assertEquals("afterIfElse", objectReader.getLocalStringVariables().get("r6").getValue());
+
+    }
+
+    @Test
     public void testProcessBlock() {
         // Test that all units are correctly processed in the right order
         SootMethod method = thisSootClass.getMethodByName("<init>");
         List<Value> args = new ArrayList<>();
         args.add(StringConstant.v("passedValue"));
-        Object returnValue = objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), args);
+        Object returnValue = objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, null);
         Assert.assertNull(returnValue);
         ObjectVariable simpleObject = objectReader.getThisObject();
         Assert.assertEquals("bye", simpleObject.getStringField("myStringField").getValue());

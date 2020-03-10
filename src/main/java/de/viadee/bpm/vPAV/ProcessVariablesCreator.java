@@ -31,10 +31,14 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ObjectReader;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.*;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import soot.Value;
 import soot.toolkits.graph.Block;
 
@@ -42,62 +46,134 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessVariablesCreator {
-
-    // TODO  I'm not sure why we need nodes and variable blocks (maybe change this later)
-    private VariableBlock variableBlock;
+    private static final int CONTROL_NONE = 0;
+    private static final int CONTROL_IF = 1;
+    private static final int CONTROL_ELSE = 2;
+    private static final int CONTROL_COND_END = 3;
 
     private ArrayList<Node> nodes = new ArrayList<>();
+
     private BpmnElement element;
+
     private ElementChapter chapter;
+
     private KnownElementFieldType fieldType;
+
+    private String defaultScopeId;
+
+    private ArrayList<Node> stack = new ArrayList<>();
+
+    private int control = 0;
+    private boolean hasElse = false;
+
+    // Used for testing
+    public ProcessVariablesCreator(final BpmnElement element,
+            final ElementChapter chapter, final KnownElementFieldType fieldType, String scopeId) {
+        //    variableBlock = new VariableBlock(block, new ArrayList<>());
+        this.element = element;
+        this.chapter = chapter;
+        this.fieldType = fieldType;
+        defaultScopeId = scopeId;
+    }
 
     // Does it make sense to store the top-level block or are there better ways?
     public ProcessVariablesCreator(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType) {
-    //    variableBlock = new VariableBlock(block, new ArrayList<>());
+        //    variableBlock = new VariableBlock(block, new ArrayList<>());
         this.element = element;
         this.chapter = chapter;
         this.fieldType = fieldType;
+        determineScopeId();
     }
 
     // Only called for top-level block -> Rename
     // TODO do not return variable block, not needed at the moment
-    public ArrayList<Node> blockIterator(final Block block, final List<Value> args) {
+    public void blockIterator(final Block block, final List<Value> args) {
         ObjectReader objectReader = new ObjectReader(this);
-        objectReader.processBlock(block, args);
-        return nodes;
+        objectReader.processBlock(block, args, null);
     }
 
     // This method adds process variables one by one
     public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo) {
         // Block hasn't changed since the last operation, add operation to existing block
-        if (nodes.size() > 0 && nodes.get(nodes.size() - 1).getBlock().equals(block)) {
-            nodes.get(nodes.size() - 1).addOperation(pvo);
+        if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
+            // TODO add test for skipped control flow
+            handleSkippedControlFlow();
+            lastNode().addOperation(pvo);
         } else {
             // Add new block
             Node node = new Node(element, block, chapter, fieldType);
             node.addOperation(pvo);
-            if (nodes.size() > 0) {
-                node.addPredecessor(nodes.get(nodes.size() - 1));
-            }
             nodes.add(node);
+            element.getControlFlowGraph().addNode(node);
+
+            if (control != CONTROL_NONE) {
+                handleControlFlow(node);
+            }
         }
     }
 
-    public ArrayList<Node> getNodes() {
-        return nodes;
+    private void handleControlFlow(Node node) {
+        switch (control) {
+            case CONTROL_IF:
+                node.addPredecessor(peekStack());
+                break;
+            case CONTROL_ELSE:
+                node.addPredecessor(popStack());
+                break;
+            case CONTROL_COND_END:
+                if(hasElse) {
+                    node.addPredecessor(popStack());
+                    node.addPredecessor(popStack());
+                    hasElse = false;
+                }
+                else {
+                    popStack();
+                    node.addPredecessor(popStack());
+                }
+                break;
+            default:
+                assert false;
+        }
+        control = CONTROL_NONE;
+    }
+
+    // Reset control flow if no variable manipulations happened
+    private void handleSkippedControlFlow() {
+        switch (control) {
+            case CONTROL_COND_END:
+                if(hasElse) {
+                    popStack();
+                    popStack();
+                }
+                else {
+                    popStack();
+                    popStack();
+                }
+                break;
+            default:
+                assert false;
+        }
+        hasElse = false;
+        control = CONTROL_NONE;
     }
 
     public void startIf() {
-
+        // TODO that must not necessarily hold but assume for the moment for simplicity
+        assert nodes.size() > 0;
+        stack.add(lastNode());
+        control = CONTROL_IF;
     }
 
     public void startElse() {
-
+        stack.add(stack.size()-1, lastNode()); // add if node
+        control = CONTROL_ELSE;
+        hasElse = true;
     }
 
     public void endIfElse() {
-
+        stack.add(stack.size()-1, lastNode()); // either else or if node is added
+        control = CONTROL_COND_END;
     }
 
     public void startLoop() {
@@ -106,6 +182,36 @@ public class ProcessVariablesCreator {
 
     public void endLoop() {
 
+    }
+
+    private void determineScopeId() {
+        // TODO there might be another "calculation" for multi instance tasks
+        final BaseElement baseElement = element.getBaseElement();
+        BpmnModelElementInstance scopeElement = baseElement.getScope();
+
+        String scopeId = null;
+        if (scopeElement != null) {
+            scopeId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+        }
+        this.defaultScopeId = scopeId;
+    }
+
+    public String getScopeId() {
+        return defaultScopeId;
+    }
+
+    public Node lastNode() {
+        return nodes.get(nodes.size() - 1);
+    }
+
+    private Node peekStack() {
+        return stack.get(stack.size() - 1);
+    }
+
+    private Node popStack() {
+        Node n = peekStack();
+        stack.remove(stack.size() - 1);
+        return n;
     }
 
     // TODO recursion based on blocks (maybe hashing if already inside?

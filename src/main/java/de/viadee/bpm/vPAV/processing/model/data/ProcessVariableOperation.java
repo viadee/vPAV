@@ -103,9 +103,7 @@ public class ProcessVariableOperation {
     }
 
     private String createId() {
-        return CheckerIssue
-                .getMD5(name + "_" + id_counter++ + "_" + operation
-                        + "_" + scopeId);
+        return name + "_" + id_counter++;
     }
 
     public String getName() {

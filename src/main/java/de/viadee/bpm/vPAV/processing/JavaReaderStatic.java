@@ -150,20 +150,7 @@ public class JavaReaderStatic {
 
         Block block = SootResolverSimplified.getBlockFromClass(className, methodName, null, null);
         ProcessVariablesCreator processVariablesCreator = new ProcessVariablesCreator(element, chapter, fieldType);
-        ArrayList<Node> nodes = processVariablesCreator.blockIterator(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName));
-
-        createProcessVariableList(nodes);
-    }
-
-    private ListMultimap<String, ProcessVariableOperation> createProcessVariableList(ArrayList<Node> nodes) {
-        ListMultimap<String, ProcessVariableOperation> processVariables = ArrayListMultimap.create();
-
-        for (Node node : nodes) {
-            for (ProcessVariableOperation pvo : node.getOperations().values()) {
-                processVariables.put(pvo.getId(), pvo);
-            }
-        }
-        return processVariables;
+        processVariablesCreator.blockIterator(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName));
     }
 
     /**

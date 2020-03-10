@@ -84,12 +84,10 @@ public class ControlFlowGraph {
      * @return Id of node
      */
     private String createHierarchy(final BasicNode node) {
-        // TODO renew method (deleted hierarchy)
         StringBuilder key = new StringBuilder();
         key.append(node.getParentElement().getBaseElement().getId()).append("__");
         nodeCounter++;
         key.append(nodeCounter);
-        priorLevel = internalNodeCounter - 1;
         return key.toString();
     }
 

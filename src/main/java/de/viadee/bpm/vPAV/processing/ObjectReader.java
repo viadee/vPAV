@@ -54,16 +54,16 @@ public class ObjectReader {
     private ObjectVariable thisObject = new ObjectVariable();
 
     private HashMap<String, StringVariable> localStringVariables = new HashMap<>();
-
     private HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
 
     private ProcessVariablesCreator processVariablesCreator;
 
     ObjectReader(HashMap<String, StringVariable> localStrings,
-            HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject) {
+            HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject, ProcessVariablesCreator processVariablesCreator) {
         this.localStringVariables = localStrings;
         this.localObjectVariables = localObjects;
         this.thisObject = thisObject;
+        this.processVariablesCreator = processVariablesCreator;
     }
 
     public ObjectReader(ProcessVariablesCreator processVariablesCreator) {
@@ -75,15 +75,18 @@ public class ObjectReader {
         this.thisObject = thisObject;
     }
 
-    public Object processBlock(Block block, List<Value> args) {
+    public Object processBlock(Block block, List<Value> args, String thisName) {
         // TODO loops etc are currently ignored
         // TODO recursion is possible, prevent infinite loops
         // Todo Only String variables are currently resolved
         // Eventually add objects, arrays and int
 
         final Iterator<Unit> unitIt = block.iterator();
-        // Find out variable name of this reference, it's always defined in the first unit
-        String thisName = getThisNameFromUnit(unitIt.next());
+
+        if(thisName == null) {
+            // Find out variable name of this reference, it's always defined in the first unit
+            thisName = getThisNameFromUnit(unitIt.next());
+        }
 
         Unit unit;
         while (unitIt.hasNext()) {
@@ -111,12 +114,30 @@ public class ObjectReader {
             else if (unit instanceof ReturnStmt) {
                 return handleReturnStmt(unit, thisName);
             }
+            // if 
+            else if (unit instanceof IfStmt) {
+                // TODO haselse
+                handleIfStmt(block, args, thisName);
+            }
             // return
             else if (unit instanceof ReturnVoidStmt) {
                 return null;
             }
         }
         return null;
+    }
+
+    void handleIfStmt(Block block, List<Value> args, String thisName) {
+        processVariablesCreator.startIf();
+        this.processBlock(block.getSuccs().get(0), args, thisName);
+
+        if(block.getSuccs().size() == 2) {
+            processVariablesCreator.startElse();
+            this.processBlock(block.getSuccs().get(1), args, thisName);
+        }
+        // TODO check if that also works with nested ifs/loops
+        processVariablesCreator.endIfElse();
+        this.processBlock(block.getSuccs().get(0).getSuccs().get(0), args, thisName);
     }
 
     String getThisNameFromUnit(Unit unit) {
@@ -174,20 +195,19 @@ public class ObjectReader {
 
             // Method on this object is called
             if (targetObjName.equals(thisName)) {
-                return this.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args);
-            }
-            else {
+                return this.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args, null);
+            } else {
                 // Method on another object is called
                 targetObj = localObjectVariables.get(targetObjName);
             }
-        } else{
+        } else {
             // Static method is called -> create phantom variable
             targetObj = new ObjectVariable();
         }
 
         // Process method from another class/object
         ObjectReader or = new ObjectReader(processVariablesCreator, targetObj);
-        return or.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args);
+        return or.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args, null);
     }
 
     void handleLocalAssignment(Value leftValue, Value rightValue, String thisName) {
@@ -268,6 +288,7 @@ public class ObjectReader {
 
     private String getVarNameFromFieldRef(Value value) {
         int spaceIdx = value.toString().lastIndexOf(" ") + 1;
+        // TODO support static field refs!
         ((JInstanceFieldRef) value).getFieldRef().getSignature();
         int gtsIdx = value.toString().lastIndexOf(">");
         return value.toString().substring(spaceIdx, gtsIdx);
@@ -302,7 +323,8 @@ public class ObjectReader {
             // TODO variables extractor decides on scope id for variable map
             // TODO do we need the thisName? is that possible?
             String variableName = resolveStringValue(expr.getArgBox(location).getValue(), "");
-            return new ProcessVariableOperation(variableName, type, null);
+            // TODO add test for scope id (not yet included)
+            return new ProcessVariableOperation(variableName, type, processVariablesCreator.getScopeId());
         }
 
         return null;

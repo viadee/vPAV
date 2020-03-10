@@ -197,7 +197,7 @@ public class FileScanner {
 		}
 	}
 
-	static void setupSootClassPaths(LinkedList<File> dirs) {
+	public static void setupSootClassPaths(LinkedList<File> dirs) {
 		// get file paths of java files
 		LinkedList<File> files;
 		String pathSeparator = System.getProperty("path.separator");

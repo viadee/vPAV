@@ -31,10 +31,12 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
-import de.viadee.bpm.vPAV.processing.code.flow.Node;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,10 +44,11 @@ import soot.*;
 import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.Block;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ProcessVariablesCreatorTest {
 
@@ -63,25 +66,34 @@ public class ProcessVariablesCreatorTest {
         // de.viadee.bpm.vPAV.delegates.SimpleDelegate
         SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.delegates.SimpleDelegate", SootClass.SIGNATURES);
         SootMethod method = sc.getMethodByName("execute");
-        ProcessVariablesCreator vr = new ProcessVariablesCreator(null, null, null);
+        ControlFlowGraph cfg = new ControlFlowGraph();
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(
+                new BpmnElement("", null, cfg, null),
+                null, null);
         ArrayList<Value> args = new ArrayList<>();
         // TODO check if jimple local is really the correct parameter type
-        args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
+        args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
         vr.blockIterator(SootResolverSimplified.getBlockFromMethod(method), args);
 
-        ArrayList<Node> nodes = vr.getNodes();
         // Three methods, method 1 interrupted by method calls = four nodes
+        Collection<BasicNode> nodes = cfg.getNodes().values();
         Assert.assertEquals(4, nodes.size());
-        Assert.assertEquals(2, nodes.get(0).getOperations().size());
-        Assert.assertEquals(1, nodes.get(1).getOperations().size());
-        Assert.assertEquals(1, nodes.get(2).getOperations().size());
-        Assert.assertEquals(1, nodes.get(3).getOperations().size());
-        Assert.assertSame(nodes.get(0).getBlock(), nodes.get(3).getBlock());
-        Assert.assertEquals("variableOneChanged", nodes.get(3).getKilled().get("0").getName());
+        Iterator<BasicNode> iterator = nodes.iterator();
+        Node node1 = (Node) iterator.next();
+        Node node2 = (Node) iterator.next();
+        Node node3 = (Node) iterator.next();
+        Node node4 = (Node) iterator.next();
+        Assert.assertEquals(2, node1.getOperations().size());
+        Assert.assertEquals(1, node2.getOperations().size());
+        Assert.assertEquals(1, node3.getOperations().size());
+        Assert.assertEquals(1, node4.getOperations().size());
+        Assert.assertSame(node1.getBlock(), node4.getBlock());
+        Assert.assertEquals("variableOneChanged", node4.getKilled().get("0").getName());
     }
 
     @Test
     public void testHandleProcessVariableManipulation() {
+        ControlFlowGraph cfg = new ControlFlowGraph();
         // Test that new nodes are created when the block changes
         Block blockOne = mock(Block.class);
         Block blockTwo = mock(Block.class);
@@ -92,13 +104,44 @@ public class ProcessVariablesCreatorTest {
         ProcessVariableOperation blockTwoOpOne = new ProcessVariableOperation("var3",
                 VariableOperation.WRITE, null);
 
-        ProcessVariablesCreator vr = new ProcessVariablesCreator(null, null, null);
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(new BpmnElement("", null, cfg, null), null, null);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpOne);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo);
         vr.handleProcessVariableManipulation(blockTwo, blockTwoOpOne);
 
-        Assert.assertEquals(2, vr.getNodes().size());
-        Assert.assertEquals(2, vr.getNodes().get(0).getOperations().size());
-        Assert.assertEquals(1, vr.getNodes().get(1).getOperations().size());
+        Collection<BasicNode> nodes = cfg.getNodes().values();
+        Iterator<BasicNode> iterator = nodes.iterator();
+        Assert.assertEquals(2, nodes.size());
+        Assert.assertEquals(2, iterator.next().getOperations().size());
+        Assert.assertEquals(1, iterator.next().getOperations().size());
+    }
+
+    @Test
+    public void testBlockWithIf() {
+        SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.processing.SimpleObject", SootClass.SIGNATURES);
+        SootMethod method = sc.getMethodByName("methodWithIf");
+        ControlFlowGraph cfg = new ControlFlowGraph();
+        BaseElement baseElement = mock(BaseElement.class);
+        when(baseElement.getId()).thenReturn("ServiceTask");
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(
+                new BpmnElement("", baseElement, cfg, null),
+                null, null, "Process_1");
+        ArrayList<Value> args = new ArrayList<>();
+        // TODO check if jimple local is really the correct parameter type
+        args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
+        vr.blockIterator(SootResolverSimplified.getBlockFromMethod(method), args);
+
+        Assert.assertEquals(4, cfg.getNodes().size());
+        Assert.assertEquals(VariableOperation.READ, vr.lastNode().getOperations().values().iterator().next().getOperation());
+        Assert.assertEquals(2, vr.lastNode().getPredecessors().size());
+        AnalysisElement ifNode = vr.lastNode().getPredecessors().get(0);
+        AnalysisElement elseNode = vr.lastNode().getPredecessors().get(1);
+        Assert.assertEquals(VariableOperation.WRITE, ifNode.getOperations().values().iterator().next().getOperation());
+        Assert.assertEquals(VariableOperation.DELETE, elseNode.getOperations().values().iterator().next().getOperation());
+        Assert.assertEquals(1, ifNode.getPredecessors().size());
+        Assert.assertEquals(1, elseNode.getPredecessors().size());
+        Assert.assertSame(ifNode.getPredecessors().get(0), elseNode.getPredecessors().get(0));
+        AnalysisElement startNode = elseNode.getPredecessors().get(0);
+        Assert.assertEquals(VariableOperation.READ, startNode.getOperations().values().iterator().next().getOperation());
     }
 }

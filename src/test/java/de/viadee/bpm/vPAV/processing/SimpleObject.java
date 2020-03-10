@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.AnotherSimpleObject;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
 public class SimpleObject {
 
@@ -52,5 +53,20 @@ public class SimpleObject {
 
     private String methodWithReturn() {
         return "it_works";
+    }
+
+    private void methodWithIf(DelegateExecution execution) {
+        int notRandom = 3;
+        execution.getVariable("variableBefore");
+        if(notRandom < 3) {
+            String localIf = "notAvailableOutsideIf";
+            execution.setVariable(localIf, "test");
+        }
+        else {
+            String localElse = "notAvailableOutsideElse";
+            execution.removeVariable(localElse);
+        }
+        String afterVar = "afterIfElse";
+        execution.getVariable(afterVar);
     }
 }
