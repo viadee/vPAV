@@ -98,6 +98,9 @@ public class ProcessVariablesCreator {
 
     // This method adds process variables one by one
     public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo) {
+        pvo.setIndex(element.getFlowAnalysis().getOperationCounter());
+        element.getFlowAnalysis().incrementOperationCounter();
+
         // Block hasn't changed since the last operation, add operation to existing block
         if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
             lastNode().addOperation(pvo);

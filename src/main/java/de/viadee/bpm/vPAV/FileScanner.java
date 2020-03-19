@@ -266,7 +266,7 @@ public class FileScanner {
 	 * @param list List of starting folders
 	 * @return List of bottom folders
 	 */
-	private static LinkedList<File> findLastDir(LinkedList<File> list) {
+	public static LinkedList<File> findLastDir(LinkedList<File> list) {
 
 		LinkedList<File> returnList = new LinkedList<>(list);
 
@@ -290,7 +290,7 @@ public class FileScanner {
 	 *
 	 * @param classes Classes
 	 */
-	private static void addResources(LinkedList<File> classes) {
+	public static void addResources(LinkedList<File> classes) {
 		for (File file : classes) {
 			includedFiles.add(file.getName());
 		}

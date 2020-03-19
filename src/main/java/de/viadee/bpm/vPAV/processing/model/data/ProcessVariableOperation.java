@@ -172,4 +172,8 @@ public class ProcessVariableOperation {
         element.getFlowAnalysis().incrementOperationCounter();
         this.flowOperationIndex = element.getFlowAnalysis().getOperationCounter();
     }
+
+    public void setIndex(int operationCounter) {
+        index = operationCounter;
+    }
 }
