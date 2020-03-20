@@ -47,6 +47,7 @@ import soot.options.Options;
 import soot.toolkits.graph.Block;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -169,12 +170,8 @@ public class JavaReaderStatic {
         System.setProperty("soot.class.path", sootPath);
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
-        ArrayList<String> excludedClasses = new ArrayList<>();
-        excludedClasses.add("java.*");
-        excludedClasses.add("sun.*");
-        excludedClasses.add("jdk.*");
-        excludedClasses.add("javax.*");
-        Options.v().set_exclude(excludedClasses);
+        String[] exClasses = new String[]{"java.*", "sun.*", "jdk.*", "javax.*"};
+        Options.v().set_exclude(Arrays.asList(exClasses));
         Options.v().set_no_bodies_for_excluded(true);
         Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
     }

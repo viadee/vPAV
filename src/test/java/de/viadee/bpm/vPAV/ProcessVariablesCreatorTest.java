@@ -70,7 +70,7 @@ public class ProcessVariablesCreatorTest {
         SootMethod method = sc.getMethodByName("execute");
         ControlFlowGraph cfg = new ControlFlowGraph();
         ProcessVariablesCreator vr = new ProcessVariablesCreator(
-                new BpmnElement("", baseElement, cfg, null),
+                new BpmnElement("", baseElement, cfg, new FlowAnalysis()),
                 null, null);
         ArrayList<Value> args = new ArrayList<>();
         // TODO check if jimple local is really the correct parameter type
@@ -90,7 +90,7 @@ public class ProcessVariablesCreatorTest {
         Assert.assertEquals(1, node3.getOperations().size());
         Assert.assertEquals(1, node4.getOperations().size());
         Assert.assertSame(node1.getBlock(), node4.getBlock());
-        Assert.assertEquals("variableOneChanged", node4.getKilled().get("0").getName());
+        Assert.assertEquals("variableOneChanged", node4.getKilled().get("4").getName());
     }
 
     @Test
@@ -108,7 +108,8 @@ public class ProcessVariablesCreatorTest {
         ProcessVariableOperation blockTwoOpOne = new ProcessVariableOperation("var3",
                 VariableOperation.WRITE, null);
 
-        ProcessVariablesCreator vr = new ProcessVariablesCreator(new BpmnElement("", baseElement, cfg, null), null, null);
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(new BpmnElement("", baseElement, cfg, new FlowAnalysis()), null,
+                null);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpOne);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo);
         vr.handleProcessVariableManipulation(blockTwo, blockTwoOpOne);
@@ -131,14 +132,16 @@ public class ProcessVariablesCreatorTest {
         BasicNode lastNode = iterator.next();
         BasicNode elseNode = iterator.next();
 
-        Assert.assertEquals(VariableOperation.READ,lastNode.getOperations().values().iterator().next().getOperation());
+        Assert.assertEquals(VariableOperation.READ, lastNode.getOperations().values().iterator().next().getOperation());
         Assert.assertEquals(2, lastNode.getPredecessors().size());
         Assert.assertEquals(VariableOperation.WRITE, ifNode.getOperations().values().iterator().next().getOperation());
-        Assert.assertEquals(VariableOperation.DELETE, elseNode.getOperations().values().iterator().next().getOperation());
+        Assert.assertEquals(VariableOperation.DELETE,
+                elseNode.getOperations().values().iterator().next().getOperation());
         Assert.assertEquals(1, ifNode.getPredecessors().size());
         Assert.assertEquals(1, elseNode.getPredecessors().size());
         Assert.assertSame(ifNode.getPredecessors().get(0), elseNode.getPredecessors().get(0));
-        Assert.assertEquals(VariableOperation.READ, startNode.getOperations().values().iterator().next().getOperation());
+        Assert.assertEquals(VariableOperation.READ,
+                startNode.getOperations().values().iterator().next().getOperation());
     }
 
     @Test
@@ -155,7 +158,8 @@ public class ProcessVariablesCreatorTest {
         Assert.assertEquals(VariableOperation.READ, loopNode.getOperations().values().iterator().next().getOperation());
         Assert.assertEquals(1, afterLoopNode.getPredecessors().size());
         Assert.assertSame(loopNode, afterLoopNode.getPredecessors().get(0));
-        Assert.assertEquals(VariableOperation.DELETE, afterLoopNode.getOperations().values().iterator().next().getOperation());
+        Assert.assertEquals(VariableOperation.DELETE,
+                afterLoopNode.getOperations().values().iterator().next().getOperation());
     }
 
     @Test
@@ -202,7 +206,7 @@ public class ProcessVariablesCreatorTest {
         BaseElement baseElement = mock(BaseElement.class);
         when(baseElement.getId()).thenReturn("ServiceTask");
         ProcessVariablesCreator vr = new ProcessVariablesCreator(
-                new BpmnElement("", baseElement, cfg, null),
+                new BpmnElement("", baseElement, cfg, new FlowAnalysis()),
                 null, null, "Process_1");
         ArrayList<Value> args = new ArrayList<>();
         // TODO check if jimple local is really the correct parameter type

@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -86,7 +86,8 @@ public class ObjectReader {
             processVariablesCreator.visitBlockAgain(block);
             return null;
         }
-        processedBlocks.add(hashBlock(block)); // TODO add block here of before return?, what if method / block is called again?
+        processedBlocks.add(hashBlock(
+                block)); // TODO add block here of before return?, what if method / block is called again?
 
         final Iterator<Unit> unitIt = block.iterator();
 
@@ -108,13 +109,15 @@ public class ObjectReader {
             }
             // e. g. specialinvoke $r3.<de.viadee.bpm ... (Constuctor call of new object)
             else if (unit instanceof InvokeStmt) {
-                if (((InvokeStmt) unit).getInvokeExpr().getMethod().getDeclaringClass().getName()
-                        .equals("org.camunda.bpm.engine.delegate.DelegateExecution")) {
-                    notifyVariablesReader(block, ((InvokeStmt) unit).getInvokeExpr());
-                    // TODO there are a lot more classes than only delegate execution (check camunda
-                    //  CamundaProcessVariableFunctions)
+                InvokeExpr expr = ((InvokeStmt) unit).getInvokeExpr();
+                CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
+                        .findByNameAndNumberOfBoxes(expr.getMethod().getName(),
+                                expr.getMethod().getDeclaringClass().getName(), expr.getArgCount());
+
+                if (foundMethod != null) {
+                    notifyVariablesReader(block, expr, foundMethod);
                 } else {
-                    handleInvokeExpr(((InvokeStmt) unit).getInvokeExpr(), thisName);
+                    handleInvokeExpr(expr, thisName);
                 }
             }
             // e. g. return temp$3
@@ -308,29 +311,16 @@ public class ObjectReader {
         return thisObject;
     }
 
-    ProcessVariableOperation createProcessVariableOperationFromInvocation(InvokeExpr expr) {
-        String methodName = expr.getMethod().getName();
-        int numberOfArg = expr.getArgCount();
-        String delegatingClass = expr.getMethod().getDeclaringClass().getName();
-        CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
-                .findByNameAndNumberOfBoxes(methodName, delegatingClass, numberOfArg);
-
-        if (foundMethod != null) {
-            int location = foundMethod.getLocation() - 1;
-            VariableOperation type = foundMethod.getOperationType();
-            // TODO variables extractor decides on scope id for variable map
-            // TODO do we need the thisName? is that possible?
-            String variableName = resolveStringValue(expr.getArgBox(location).getValue(), "");
-            // TODO add test for scope id (not yet included)
-            return new ProcessVariableOperation(variableName, type, processVariablesCreator.getScopeId());
-        }
-
-        return null;
-    }
-
     // TODO call this method when executiondelegate method is executed
-    public void notifyVariablesReader(Block block, InvokeExpr expr) {
-        ProcessVariableOperation pvo = createProcessVariableOperationFromInvocation(expr);
+    public void notifyVariablesReader(Block block, InvokeExpr expr,  CamundaProcessVariableFunctions camundaMethod) {
+        int location = camundaMethod.getLocation() - 1;
+        VariableOperation type = camundaMethod.getOperationType();
+        // TODO variables extractor decides on scope id for variable map
+        // TODO do we need the thisName? is that possible?
+        String variableName = resolveStringValue(expr.getArgBox(location).getValue(), "");
+        // TODO add test for scope id (not yet included)
+
+        ProcessVariableOperation pvo = new ProcessVariableOperation(variableName, type, processVariablesCreator.getScopeId());
         processVariablesCreator.handleProcessVariableManipulation(block, pvo);
     }
 
