@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -62,10 +62,7 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import javax.el.ELException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -109,7 +106,7 @@ public final class ProcessVariableReader {
         searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, predecessor);
 
         // 2) Search variables in Input Parameters
-        getVariablesFromInputMapping(javaReaderStatic, element, fileScanner, predecessor);
+        getVariablesFromInputMapping(element, predecessor);
 
         // 3) Search variables execution listener (start)
         if (extensionElements != null) {
@@ -269,40 +266,54 @@ public final class ProcessVariableReader {
     /**
      * Analyze Input Parameters for variables
      *
-     * @param javaReaderStatic Static java reader
      * @param element          Current BPMN Element
-     * @param fileScanner      FileScanner
      */
-    private void getVariablesFromInputMapping(
-            final JavaReaderStatic javaReaderStatic, final BpmnElement element, final FileScanner fileScanner,
+    private void getVariablesFromInputMapping(final BpmnElement element,
             BasicNode[] predecessor) {
         final BaseElement baseElement = element.getBaseElement();
+        // TODO
+        // Scope beachten, definierte Variablen nur in Element verfügbar, Read Operationen aber von globalen Variablen
 
-        final Map<String, Map<String, String>> inputVariables = bpmnScanner
-                .getInputMapping(element.getBaseElement().getId());
+        if (baseElement.getExtensionElements() == null) {
+            return;
+        }
+        ExpressionNode expNode = new ExpressionNode(element, "", ElementChapter.InputOutput,
+                KnownElementFieldType.CamundaIn);
 
-        final LinkedMap<String, String> inputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(),
-                BpmnConstants.CAMUNDA_INPUT_PARAMETER);
-
-        for (Map.Entry<String, Map<String, String>> entry : inputVariables.entrySet()) {
-            for (Map.Entry<String, String> innerEntry : entry.getValue().entrySet()) {
-                if (innerEntry.getValue().isEmpty()) {
+        for (ModelElementInstance extension : baseElement.getExtensionElements().getElements()) {
+            if (extension instanceof CamundaInputParameter) {
+                CamundaInputParameter inputParameter = (CamundaInputParameter) extension;
+                // TODO reicht dieser check?
+                if (inputParameter.getTextContent() != null) {
                     IssueWriter.createSingleIssue(this.rule, CriticalityEnum.WARNING, element,
                             element.getProcessDefinition(),
                             Messages.getString("ProcessVariableReader.1")); //$NON-NLS-1$ );
                 } else {
-                    if (!inputMappingType.firstKey().equals(BpmnConstants.CAMUNDA_SCRIPT)) {
+                    ProcessVariableOperation operation = new ProcessVariableOperation(inputParameter.getCamundaName(),
+                            VariableOperation.WRITE, baseElement.getId());
+                    expNode.addOperation(operation);
+
+                    if(inputParameter.getValue() != null) {
+
+                    }
+                    else {
+                        // TODO this method does not really what I want (and is not sophisticated as multiple variables can be accessed)
                         checkExpressionForReadVariable(javaReaderStatic, innerEntry.getValue(),
                                 innerEntry.getKey(), element, fileScanner,
                                 KnownElementFieldType.InputParameter, baseElement.getId(), predecessor);
-                    } else {
-                        IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
-                                element.getProcessDefinition(),
-                                Messages.getString("ProcessVariableReader.2")); //$NON-NLS-1$ );
                     }
+
                 }
+                // TODO check read operations in expression
             }
         }
+        // TODO is this still necessary with predecessor (I don´t think so...)
+        predecessor[0] = addNodeAndGetNewPredecessor(expNode, element.getControlFlowGraph(), predecessor[0]);
+
+        // TODO issue when script
+    /*    IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
+                element.getProcessDefinition(),
+                Messages.getString("ProcessVariableReader.2")); //$NON-NLS-1$ ); */
     }
 
     /**
@@ -924,11 +935,13 @@ public final class ProcessVariableReader {
             final BpmnElement element, final ElementChapter chapter,
             final String scopeId) {
 
-        ResourceFileReader.readResourceFile(groovyFile, element, chapter, KnownElementFieldType.ExternalScript, scopeId);
+        ResourceFileReader
+                .readResourceFile(groovyFile, element, chapter, KnownElementFieldType.ExternalScript, scopeId);
     }
 
     /**
      * Scans a dmn file for process variables
+     *
      * @param decisionId DecisionId
      * @param fileName   File Name
      * @param element    BpmnElement
@@ -1082,7 +1095,8 @@ public final class ProcessVariableReader {
 
     /**
      * Examines an expression for variable read
-     *  @param javaReaderStatic Static java reader
+     *
+     * @param javaReaderStatic Static java reader
      * @param expression       Expression
      * @param name             Variable name
      * @param element          BpmnElement
@@ -1109,7 +1123,8 @@ public final class ProcessVariableReader {
             if (matcher.matches()) {
                 if (isBean(matcher.group(1)) != null) {
                     javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
-                            isBean(matcher.group(1)), element, ElementChapter.InputOutput, fieldType, scopeId, predecessor);
+                            isBean(matcher.group(1)), element, ElementChapter.InputOutput, fieldType, scopeId,
+                            predecessor);
                 } else {
                     ProcessVariableOperation read = new ProcessVariableOperation(name, VariableOperation.READ, scopeId);
                     expNode.addOperation(read);

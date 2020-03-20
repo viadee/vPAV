@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,11 +33,18 @@ package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
+import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.Task;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaInputOutput;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaInputParameter;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaMap;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -800,26 +807,39 @@ public class BpmnScanner {
     /**
      * get mapping of inputParameters
      *
-     * @param id element id
      * @return HashMap with mapped variables and values
      */
-    public HashMap<String, Map<String, String>> getInputMapping(final String id) {
-        return getInputMappingValues(id);
-    }
+    // TODO replace by getVariablesFromInputMapping in ProcessVariableReader
+    public HashMap<String, Map<String, String>> getInputMapping(BaseElement element) {
+        // TODO maybe check if it has extension elements earlier?
+        if (element.getExtensionElements() == null) {
+            return new HashMap<>();
+        }
+        HashMap<String, Map<String, String>> variables = new HashMap<>();
 
-    /**
-     * get input mapping of given element
-     *
-     * @param id id of the element
-     * @return HashMap with mapped variables and values
-     */
-    private HashMap<String, Map<String, String>> getInputMappingValues(final String id) {
-        // Map for all Task elements
-        final HashMap<String, Map<String, String>> variables = new HashMap<>();
+        for (ModelElementInstance extension : element.getExtensionElements().getElements()) {
+            if (extension instanceof CamundaInputParameter) {
+                HashMap<String, String> innerVariables = new HashMap<>();
+                CamundaInputParameter inputParameter = (CamundaInputParameter) extension;
 
-        final NodeList nodeList = doc.getElementsByTagName(BpmnConstants.CAMUNDA_INPUT_PARAMETER);
 
-        retrieveMapping(id, variables, nodeList);
+                if (inputParameter.getValue() != null) {
+                    if (inputParameter.getValue().getElementType().getTypeName().equals("list")) {
+
+                    } else if (inputParameter.getValue().getElementType().getTypeName().equals("map")) {
+
+                    } else if (inputParameter.getValue().getElementType().getTypeName().equals("script")) {
+
+                    }
+
+                } else {
+                    // Type Text
+                    innerVariables.put(inputParameter.getCamundaName(), inputParameter.getTextContent());
+                    variables.put("text", innerVariables);
+                }
+
+            }
+        }
         return variables;
     }
 
@@ -920,7 +940,7 @@ public class BpmnScanner {
      * @return value of expression
      */
     public ArrayList<String> getFieldInjectionExpression(String id) {
-        ArrayList<String> varNames = new ArrayList<String>();
+        ArrayList<String> varNames = new ArrayList<>();
         NodeList nodeList = doc.getElementsByTagName(BpmnConstants.CAMUNDA_FIELD);
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
