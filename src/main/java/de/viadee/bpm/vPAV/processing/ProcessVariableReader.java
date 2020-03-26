@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- * <p>
+ *
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- * <p>
+ *   list of conditions and the following disclaimer.
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * <p>
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
  * * Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- * <p>
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ListMultimap;
+import de.odysseus.el.ExpressionFactoryImpl;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.Messages;
@@ -41,12 +42,11 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.apache.commons.collections4.map.LinkedMap;
-import org.camunda.bpm.engine.impl.juel.Builder;
-import org.camunda.bpm.engine.impl.juel.IdentifierNode;
-import org.camunda.bpm.engine.impl.juel.Tree;
-import org.camunda.bpm.engine.impl.juel.TreeBuilder;
+import org.camunda.bpm.engine.impl.juel.*;
+import org.camunda.bpm.engine.impl.juel.Node;
 import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.impl.instance.LoopDataInputRef;
@@ -137,7 +137,7 @@ public final class ProcessVariableReader {
         }
 
         // 10) Search variables in Output Parameters
-        getVariablesFromOutputMapping(javaReaderStatic, element, fileScanner, predecessor);
+        getVariablesFromOutputMapping(element, predecessor);
 
     }
 
@@ -266,9 +266,9 @@ public final class ProcessVariableReader {
     /**
      * Analyze Input Parameters for variables
      *
-     * @param element          Current BPMN Element
+     * @param element Current BPMN Element
      */
-    private void getVariablesFromInputMapping(final BpmnElement element,
+    public void getVariablesFromInputMapping(final BpmnElement element,
             BasicNode[] predecessor) {
         final BaseElement baseElement = element.getBaseElement();
         // TODO
@@ -280,36 +280,7 @@ public final class ProcessVariableReader {
         ExpressionNode expNode = new ExpressionNode(element, "", ElementChapter.InputOutput,
                 KnownElementFieldType.CamundaIn);
 
-        for (ModelElementInstance extension : baseElement.getExtensionElements().getElements()) {
-            if (extension instanceof CamundaInputParameter) {
-                CamundaInputParameter inputParameter = (CamundaInputParameter) extension;
-                // TODO reicht dieser check?
-                if (inputParameter.getTextContent() != null) {
-                    IssueWriter.createSingleIssue(this.rule, CriticalityEnum.WARNING, element,
-                            element.getProcessDefinition(),
-                            Messages.getString("ProcessVariableReader.1")); //$NON-NLS-1$ );
-                } else {
-                    ProcessVariableOperation operation = new ProcessVariableOperation(inputParameter.getCamundaName(),
-                            VariableOperation.WRITE, baseElement.getId());
-                    expNode.addOperation(operation);
-
-                    if(inputParameter.getValue() != null) {
-
-                    }
-                    else {
-                        // TODO this method does not really what I want (and is not sophisticated as multiple variables can be accessed)
-                        checkExpressionForReadVariable(javaReaderStatic, innerEntry.getValue(),
-                                innerEntry.getKey(), element, fileScanner,
-                                KnownElementFieldType.InputParameter, baseElement.getId(), predecessor);
-                    }
-
-                }
-                // TODO check read operations in expression
-            }
-        }
-        // TODO is this still necessary with predecessor (I don´t think so...)
-        predecessor[0] = addNodeAndGetNewPredecessor(expNode, element.getControlFlowGraph(), predecessor[0]);
-
+        processMapping(baseElement, element, expNode, predecessor, true);
         // TODO issue when script
     /*    IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
                 element.getProcessDefinition(),
@@ -319,14 +290,17 @@ public final class ProcessVariableReader {
     /**
      * Analyze Input Parameters for variables
      *
-     * @param javaReaderStatic Static java reader
-     * @param element          Current BPMN Element
-     * @param fileScanner      FileScanner
+     * @param element Current BPMN Element
      */
-    private void getVariablesFromOutputMapping(
-            final JavaReaderStatic javaReaderStatic, final BpmnElement element, final FileScanner fileScanner,
-            BasicNode[] predecessor) {
+    void getVariablesFromOutputMapping(final BpmnElement element, BasicNode[] predecessor) {
         final BaseElement baseElement = element.getBaseElement();
+
+        if (baseElement.getExtensionElements() == null) {
+            return;
+        }
+        ExpressionNode expNode = new ExpressionNode(element, "", ElementChapter.InputOutput,
+                KnownElementFieldType.CamundaOut);
+
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
 
         String scopeElementId = null;
@@ -334,30 +308,83 @@ public final class ProcessVariableReader {
             scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
 
-        final Map<String, Map<String, String>> outputVariables = bpmnScanner
-                .getOutputMapping(element.getBaseElement().getId());
+        processMapping(baseElement, element, expNode, predecessor, false);
+    }
 
-        final LinkedMap<String, String> outputMappingType = bpmnScanner.getMappingType(element.getBaseElement().getId(),
-                BpmnConstants.CAMUNDA_OUTPUT_PARAMETER);
+    void processMapping(BaseElement baseElement, BpmnElement element, ExpressionNode expNode,
+            BasicNode[] predecessor, boolean input) {
+        // TODO scope ids are different for input and output mappings
+        for (ModelElementInstance extension : baseElement.getExtensionElements().getElements()) {
+            String textContent = null;
+            String name = null;
+            BpmnModelElementInstance value = null;
+            boolean mappingElement = false;
+            KnownElementFieldType fieldType = null;
 
-        for (Map.Entry<String, Map<String, String>> entry : outputVariables.entrySet()) {
-            for (Map.Entry<String, String> innerEntry : entry.getValue().entrySet()) {
-                if (innerEntry.getValue().isEmpty()) {
+            if (extension instanceof CamundaInputParameter && input) {
+                CamundaInputParameter inputParameter = (CamundaInputParameter) extension;
+                textContent = inputParameter.getTextContent();
+                name = inputParameter.getCamundaName();
+                value = inputParameter.getValue();
+                fieldType = KnownElementFieldType.InputParameter;
+                mappingElement = true;
+            } else if (extension instanceof CamundaOutputParameter && !input) {
+                CamundaOutputParameter outputParameter = (CamundaOutputParameter) extension;
+                textContent = outputParameter.getTextContent();
+                name = outputParameter.getCamundaName();
+                value = outputParameter.getValue();
+                fieldType = KnownElementFieldType.OutputParameter;
+                mappingElement = true;
+            }
+            if (mappingElement) {
+                if (textContent.isEmpty()) {
                     IssueWriter.createSingleIssue(this.rule, CriticalityEnum.WARNING, element,
                             element.getProcessDefinition(),
                             Messages.getString("ProcessVariableReader.1")); //$NON-NLS-1$ );
                 } else {
-                    if (!outputMappingType.firstKey().equals(BpmnConstants.CAMUNDA_SCRIPT)) {
-                        checkExpressionForReadVariable(javaReaderStatic, innerEntry.getValue(),
-                                innerEntry.getKey(), element, fileScanner,
-                                KnownElementFieldType.OutputParameter, scopeElementId, predecessor);
+                    expNode.addOperation(
+                            new ProcessVariableOperation(name,
+                                    VariableOperation.WRITE,
+                                    baseElement.getId()));
+
+                    if (value != null) {
+                        if (value instanceof CamundaList) {
+                            CamundaList list = (CamundaList) value;
+                            for (BpmnModelElementInstance listValue : list.getValues()) {
+                                String listText = listValue.getTextContent();
+                                if (listText.startsWith("${")) {
+                                    // Parse expression
+                                    // Not sure about the scope because read is above ?
+                                    parseJuelExpression(element, fieldType, listText,
+                                            baseElement.getId(), predecessor);
+
+                                }
+                            }
+                        } else if (value instanceof CamundaMap) {
+                            for (CamundaEntry entry : ((CamundaMap) value)
+                                    .getCamundaEntries()) {
+                                if (entry.getTextContent().startsWith("${")) {
+                                    // Parse expression
+                                    // Not sure about the scope because read is above ?
+                                    parseJuelExpression(element, fieldType,
+                                            entry.getTextContent(),
+                                            baseElement.getId(), predecessor);
+                                }
+                            }
+                        }
+
                     } else {
-                        IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
-                                element.getProcessDefinition(),
-                                Messages.getString("ProcessVariableReader.2")); //$NON-NLS-1$ );
+                        parseJuelExpression(element, fieldType,
+                                textContent,
+                                baseElement.getId(), predecessor);
                     }
                 }
             }
+        }
+        if (expNode.getOperations().size() > 0) {
+            // TODO is this still necessary with predecessor (I don´t think so...)
+            predecessor[0] = addNodeAndGetNewPredecessor(expNode, element.getControlFlowGraph(), predecessor[0]);
+
         }
     }
 
@@ -1090,6 +1117,52 @@ public final class ProcessVariableReader {
             throw new ProcessingException("EL expression " + expression + " in " + element.getProcessDefinition()
                     + ", element ID: " + element.getBaseElement().getId() + ", Type: "
                     + KnownElementFieldType.Expression + " couldn't be parsed", e);
+        }
+    }
+
+    // TODO add test
+    private void parseJuelExpression(final BpmnElement element, final KnownElementFieldType fieldType,
+            String expression, final String scopeId, BasicNode[] predecessor) {
+        ExpressionNode expNode = new ExpressionNode(element, expression, ElementChapter.InputOutput, fieldType);
+
+        TreeStore store = new TreeStore(new Builder(Builder.Feature.METHOD_INVOCATIONS), null);
+        Tree tree = store.get(expression);
+
+        // Only support simple expressions at the moment (only one method call or only simple reads)
+        if (tree.getRoot().getChild(0) instanceof AstMethod) {
+            AstMethod method = (AstMethod) tree.getRoot().getChild(0);
+            AstProperty property = (AstDot) method.getChild(0);
+            AstParameters parameters = (AstParameters) method.getChild(1);
+            if (((AstIdentifier) property.getChild(0)).getName().equals("execution")) {
+                String varName = ((AstString) parameters.getChild(0)).toString();
+                varName = varName.substring(1, varName.length() - 1);
+
+                switch (property.toString()) {
+                    case ".setVariable":
+                        expNode.addOperation(new ProcessVariableOperation(varName,
+                                VariableOperation.WRITE, scopeId));
+                        break;
+                    case ".getVariable":
+                        expNode.addOperation(new ProcessVariableOperation(varName,
+                                VariableOperation.READ, scopeId));
+                        break;
+                    case ".removeVariable":
+                        expNode.addOperation(new ProcessVariableOperation(varName,
+                                VariableOperation.DELETE, scopeId));
+                        break;
+                }
+            }
+        } else {
+            for (Node n : tree.getIdentifierNodes()) {
+                // Read operation
+                String varName = ((AstIdentifier) n).getName();
+                expNode.addOperation(new ProcessVariableOperation(varName,
+                        VariableOperation.READ, scopeId));
+            }
+        }
+
+        if (expNode.getOperations().size() > 0) {
+            predecessor[0] = addNodeAndGetNewPredecessor(expNode, element.getControlFlowGraph(), predecessor[0]);
         }
     }
 

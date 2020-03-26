@@ -106,6 +106,10 @@ public class ProcessVariableOperation {
         return name + "_" + id_counter++;
     }
 
+    public static void resetIdCounter() {
+        id_counter = 0;
+    }
+
     public String getName() {
         return name;
     }
