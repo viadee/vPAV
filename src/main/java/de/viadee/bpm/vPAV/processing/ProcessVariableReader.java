@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -280,11 +280,14 @@ public final class ProcessVariableReader {
         ExpressionNode expNode = new ExpressionNode(element, "", ElementChapter.InputOutput,
                 KnownElementFieldType.CamundaIn);
 
-        processMapping(baseElement, element, expNode, predecessor, true);
-        // TODO issue when script
-    /*    IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
-                element.getProcessDefinition(),
-                Messages.getString("ProcessVariableReader.2")); //$NON-NLS-1$ ); */
+        final BpmnModelElementInstance scopeElement = baseElement.getScope();
+
+        String scopeElementId = null;
+        if (scopeElement != null) {
+            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+        }
+
+        processMapping(element, expNode, predecessor, scopeElementId, true);
     }
 
     /**
@@ -308,15 +311,17 @@ public final class ProcessVariableReader {
             scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
 
-        processMapping(baseElement, element, expNode, predecessor, false);
+        processMapping(element, expNode, predecessor, scopeElementId, false);
     }
 
-    void processMapping(BaseElement baseElement, BpmnElement element, ExpressionNode expNode,
-            BasicNode[] predecessor, boolean input) {
+    void processMapping(BpmnElement element, ExpressionNode expNode,
+            BasicNode[] predecessor, String parentScope, boolean input) {
+        BaseElement baseElement = element.getBaseElement();
         // TODO scope ids are different for input and output mappings
         for (ModelElementInstance extension : baseElement.getExtensionElements().getElements()) {
             String textContent = null;
             String name = null;
+            String writeScope = baseElement.getId(), readScope = baseElement.getId();
             BpmnModelElementInstance value = null;
             boolean mappingElement = false;
             KnownElementFieldType fieldType = null;
@@ -328,6 +333,8 @@ public final class ProcessVariableReader {
                 value = inputParameter.getValue();
                 fieldType = KnownElementFieldType.InputParameter;
                 mappingElement = true;
+                writeScope = baseElement.getId();
+                readScope = parentScope;
             } else if (extension instanceof CamundaOutputParameter && !input) {
                 CamundaOutputParameter outputParameter = (CamundaOutputParameter) extension;
                 textContent = outputParameter.getTextContent();
@@ -335,6 +342,8 @@ public final class ProcessVariableReader {
                 value = outputParameter.getValue();
                 fieldType = KnownElementFieldType.OutputParameter;
                 mappingElement = true;
+                writeScope = parentScope;
+                readScope = baseElement.getId();
             }
             if (mappingElement) {
                 if (textContent.isEmpty()) {
@@ -345,7 +354,7 @@ public final class ProcessVariableReader {
                     expNode.addOperation(
                             new ProcessVariableOperation(name,
                                     VariableOperation.WRITE,
-                                    baseElement.getId()));
+                                    writeScope));
 
                     if (value != null) {
                         if (value instanceof CamundaList) {
@@ -356,7 +365,7 @@ public final class ProcessVariableReader {
                                     // Parse expression
                                     // Not sure about the scope because read is above ?
                                     parseJuelExpression(element, fieldType, listText,
-                                            baseElement.getId(), predecessor);
+                                            readScope, predecessor);
 
                                 }
                             }
@@ -368,15 +377,19 @@ public final class ProcessVariableReader {
                                     // Not sure about the scope because read is above ?
                                     parseJuelExpression(element, fieldType,
                                             entry.getTextContent(),
-                                            baseElement.getId(), predecessor);
+                                            readScope, predecessor);
                                 }
                             }
+                        } else if (value instanceof CamundaScript) {
+                            IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
+                                    element.getProcessDefinition(),
+                                    Messages.getString("ProcessVariableReader.2")); //$NON-NLS-1$ );
                         }
 
                     } else {
                         parseJuelExpression(element, fieldType,
                                 textContent,
-                                baseElement.getId(), predecessor);
+                                readScope, predecessor);
                     }
                 }
             }

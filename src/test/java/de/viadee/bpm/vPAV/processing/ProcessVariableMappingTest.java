@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,18 +32,17 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.*;
+import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.camunda.*;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaScript;
 import org.junit.*;
 
 import java.io.File;
@@ -51,6 +50,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+
+import static org.mockito.Mockito.mock;
 
 public class ProcessVariableMappingTest {
 
@@ -81,8 +82,9 @@ public class ProcessVariableMappingTest {
     @Test
     public void testTypeText() {
         BpmnModelInstance modelInstance = createModelInstance();
-        LinkedHashMap<String, BasicNode> nodes = analyzeModelInstance(modelInstance, "testInputText", "${myVariable}",
-                null);
+        LinkedHashMap<String, BasicNode> nodes = processMapping(
+                prepareServiceTask(modelInstance, "testInputText", "${myVariable}",
+                        null, true));
         Assert.assertEquals(2, nodes.size());
         Assert.assertEquals("myVariable", nodes.get("Task_0wh7kto__0").getOperations().get("myVariable_1").getName());
         Assert.assertEquals(VariableOperation.READ,
@@ -108,8 +110,8 @@ public class ProcessVariableMappingTest {
         list.getValues().add(firstValue);
         list.getValues().add(secondValue);
 
-        LinkedHashMap<String, BasicNode> nodes = analyzeModelInstance(modelInstance, "testInputList",
-                list.getTextContent(), list);
+        LinkedHashMap<String, BasicNode> nodes = processMapping(prepareServiceTask(modelInstance, "testInputList",
+                list.getTextContent(), list, true));
         Assert.assertEquals(2, nodes.size());
         Assert.assertEquals(VariableOperation.READ,
                 nodes.get("Task_0wh7kto__0").getOperations().get("myVariable_1").getOperation());
@@ -137,8 +139,8 @@ public class ProcessVariableMappingTest {
         map.getCamundaEntries().add(firstEntry);
         map.getCamundaEntries().add(secondEntry);
 
-        LinkedHashMap<String, BasicNode> nodes = analyzeModelInstance(modelInstance, "testInputMap",
-                map.getTextContent(), map);
+        LinkedHashMap<String, BasicNode> nodes = processMapping(prepareServiceTask(modelInstance, "testInputMap",
+                map.getTextContent(), map, true));
         Assert.assertEquals(2, nodes.size());
         Assert.assertEquals(VariableOperation.READ,
                 nodes.get("Task_0wh7kto__0").getOperations().get("myVariable_1").getOperation());
@@ -149,28 +151,46 @@ public class ProcessVariableMappingTest {
                 nodes.get("Task_0wh7kto__1").getOperations().get("testInputMap_0").getName());
     }
 
-    // TODO test with scopes for input/output
-
     /**
      * Case: Test a model with Input Mapping of type text code
      */
     @Test
     public void testInputTypeScript() {
-  /*      final BpmnModelInstance modelInstance = initializeModel();
+        BpmnModelInstance modelInstance = createModelInstance();
 
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
+        CamundaScript script = modelInstance.newInstance(CamundaScript.class);
+        script.setCamundaScriptFormat("groovy");
+        script.setTextContent("§%&&//)()()(");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
-        // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
-                scanner, new FlowAnalysis());
+        LinkedHashMap<String, BasicNode> nodes = processMapping(prepareServiceTask(modelInstance, "testInputScript",
+                script.getTextContent(), script, true));
+        Assert.assertEquals(VariableOperation.WRITE,
+                nodes.get("Task_0wh7kto__0").getOperations().get("testInputScript_0").getOperation());
+        Assert.assertEquals("testInputScript", nodes.get("Task_0wh7kto__0").getOperations().get("testInputScript_0").getName());
 
-        final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
-                new FlowAnalysis());
-        final Collection<ProcessVariable> processVariables = getProcessVariables(bpmnElements);
+        Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
+        Assert.assertEquals(1, issues.size());
 
-        Assert.assertEquals(1, processVariables.size()); */
+    }
+
+    @Test
+    public void testInputScope() {
+        BpmnModelInstance modelInstance = createModelInstance();
+        LinkedHashMap<String, BasicNode> nodes = analyzeInputOutputMapping(prepareServiceTask(modelInstance, "testInputText", "${myVariable}",
+                null, true), true);
+        Assert.assertEquals("Process_1", nodes.get("Task_0wh7kto__0").getOperations().get("myVariable_1").getScopeId());
+        Assert.assertEquals("Task_0wh7kto",
+                nodes.get("Task_0wh7kto__1").getOperations().get("testInputText_0").getScopeId());
+    }
+
+    @Test
+    public void testOutputScope() {
+        BpmnModelInstance modelInstance = createModelInstance();
+        LinkedHashMap<String, BasicNode> nodes = analyzeInputOutputMapping(prepareServiceTask(modelInstance, "testOutputText", "${myVariable}",
+                null, false), false);
+        Assert.assertEquals("Task_0wh7kto", nodes.get("Task_0wh7kto__0").getOperations().get("myVariable_1").getScopeId());
+        Assert.assertEquals("Process_1",
+                nodes.get("Task_0wh7kto__1").getOperations().get("testOutputText_0").getScopeId());
     }
 
     public BpmnModelInstance createModelInstance() {
@@ -187,31 +207,50 @@ public class ProcessVariableMappingTest {
         return Bpmn.readModelFromFile(processDefinition);
     }
 
-    public LinkedHashMap<String, BasicNode> analyzeModelInstance(BpmnModelInstance modelInstance, String name,
-            String textContent,
-            BpmnModelElementInstance value) {
-        ServiceTask task = modelInstance.getModelElementById("Task_0wh7kto");
-
-        CamundaInputParameter inputParameter = modelInstance.newInstance(CamundaInputParameter.class);
-        inputParameter.setCamundaName(name);
-        inputParameter.setTextContent(textContent);
-        if (value != null)
-            inputParameter.setValue(value);
-        task.builder().addExtensionElement(inputParameter);
-
-  /*          CamundaOutputParameter outputParameter = modelInstance.newInstance(CamundaOutputParameter.class);
-            outputParameter.setCamundaName(name);
-            outputParameter.setTextContent(textContent);
-            if (value != null)
-                outputParameter.setValue(value);
-            task.builder().addExtensionElement(outputParameter); */
-
+    public LinkedHashMap<String, BasicNode> processMapping(ServiceTask task) {
         final BpmnElement node = new BpmnElement(processDefinition.getPath(), task, new ControlFlowGraph(),
                 new FlowAnalysis());
         ExpressionNode expNode = new ExpressionNode(node, "", ElementChapter.InputOutput,
                 KnownElementFieldType.CamundaIn);
-        (new ProcessVariableReader(null, null, null)).processMapping(task, node, expNode, new BasicNode[1], true);
+        (new ProcessVariableReader(null, mock(Rule.class), null)).processMapping(node, expNode, new BasicNode[1], "Process_1",true);
 
+        return node.getControlFlowGraph().getNodes();
+    }
+
+    public ServiceTask prepareServiceTask(BpmnModelInstance modelInstance, String name,
+            String textContent,
+            BpmnModelElementInstance value, boolean input) {
+        ServiceTask task = modelInstance.getModelElementById("Task_0wh7kto");
+
+        if (input) {
+            CamundaInputParameter inputParameter = modelInstance.newInstance(CamundaInputParameter.class);
+            inputParameter.setCamundaName(name);
+            inputParameter.setTextContent(textContent);
+            if (value != null)
+                inputParameter.setValue(value);
+            task.builder().addExtensionElement(inputParameter);
+        } else {
+            CamundaOutputParameter outputParameter = modelInstance.newInstance(CamundaOutputParameter.class);
+            outputParameter.setCamundaName(name);
+            outputParameter.setTextContent(textContent);
+            if (value != null)
+                outputParameter.setValue(value);
+            task.builder().addExtensionElement(outputParameter);
+        }
+
+        return task;
+    }
+
+    public LinkedHashMap<String, BasicNode> analyzeInputOutputMapping(ServiceTask task, boolean input) {
+        final BpmnElement node = new BpmnElement(processDefinition.getPath(), task, new ControlFlowGraph(),
+                new FlowAnalysis());
+        if (input) {
+            (new ProcessVariableReader(null, null, null)).getVariablesFromInputMapping(node, new BasicNode[1]);
+
+        } else {
+            (new ProcessVariableReader(null, null, null)).getVariablesFromOutputMapping(node, new BasicNode[1]);
+
+        }
         return node.getControlFlowGraph().getNodes();
     }
 
