@@ -123,6 +123,9 @@ public class ProcessVariableOperation {
     }
 
     public BpmnElement getElement() {
+        if(node == null) {
+            return null;
+        }
         return node.getParentElement();
     }
 

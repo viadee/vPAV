@@ -118,13 +118,15 @@ public class CallActivityTest {
         AnomalyContainer anomaly1 = iterator.next();
         AnomalyContainer anomaly2 = iterator.next();
         AnomalyContainer anomaly3 = iterator.next();
-        // var2
+        // var2 in input mapping for call activity UR?
+
+        // var2 in SequenceFlow_1gfmaoe in called element
         Assert.assertEquals("Expected a DD anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.DD,
                 anomaly1.getAnomaly());
-        // var3
+        // var3 in calledcalledProcess in Task 3b
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
                 anomaly2.getAnomaly());
-        // var4
+        // var4 in sequence flow after task 2
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
                 anomaly3.getAnomaly());
     }

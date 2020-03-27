@@ -106,7 +106,7 @@ public final class ProcessVariableReader {
         searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, predecessor);
 
         // 2) Search variables in Input Parameters
-        getVariablesFromInputMapping(element, predecessor);
+        getVariablesFromInputParameters(element, predecessor);
 
         // 3) Search variables execution listener (start)
         if (extensionElements != null) {
@@ -118,7 +118,7 @@ public final class ProcessVariableReader {
         getVariablesFromTask(javaReaderStatic, fileScanner, element, predecessor);
 
         // 5) Search variables in sequence flow
-        searchVariablesFromSequenceFlow(javaReaderStatic, fileScanner, element, predecessor);
+        searchVariablesFromSequenceFlow(element, predecessor);
 
         // 6) Search variables in ExtensionElements
         searchExtensionsElements(javaReaderStatic, fileScanner, element, predecessor);
@@ -137,7 +137,7 @@ public final class ProcessVariableReader {
         }
 
         // 10) Search variables in Output Parameters
-        getVariablesFromOutputMapping(element, predecessor);
+        getVariablesFromOutputParameters(element, predecessor);
 
     }
 
@@ -268,7 +268,7 @@ public final class ProcessVariableReader {
      *
      * @param element Current BPMN Element
      */
-    public void getVariablesFromInputMapping(final BpmnElement element,
+    public void getVariablesFromInputParameters(final BpmnElement element,
             BasicNode[] predecessor) {
         final BaseElement baseElement = element.getBaseElement();
         // TODO
@@ -278,7 +278,7 @@ public final class ProcessVariableReader {
             return;
         }
         ExpressionNode expNode = new ExpressionNode(element, "", ElementChapter.InputOutput,
-                KnownElementFieldType.CamundaIn);
+                KnownElementFieldType.InputParameter);
 
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
 
@@ -295,14 +295,14 @@ public final class ProcessVariableReader {
      *
      * @param element Current BPMN Element
      */
-    void getVariablesFromOutputMapping(final BpmnElement element, BasicNode[] predecessor) {
+    void getVariablesFromOutputParameters(final BpmnElement element, BasicNode[] predecessor) {
         final BaseElement baseElement = element.getBaseElement();
 
         if (baseElement.getExtensionElements() == null) {
             return;
         }
         ExpressionNode expNode = new ExpressionNode(element, "", ElementChapter.InputOutput,
-                KnownElementFieldType.CamundaOut);
+                KnownElementFieldType.OutputParameter);
 
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
 
@@ -363,8 +363,7 @@ public final class ProcessVariableReader {
                                 String listText = listValue.getTextContent();
                                 if (listText.startsWith("${")) {
                                     // Parse expression
-                                    // Not sure about the scope because read is above ?
-                                    parseJuelExpression(element, fieldType, listText,
+                                    parseJuelExpression(element, ElementChapter.InputOutput, fieldType, listText,
                                             readScope, predecessor);
 
                                 }
@@ -375,7 +374,7 @@ public final class ProcessVariableReader {
                                 if (entry.getTextContent().startsWith("${")) {
                                     // Parse expression
                                     // Not sure about the scope because read is above ?
-                                    parseJuelExpression(element, fieldType,
+                                    parseJuelExpression(element, ElementChapter.InputOutput, fieldType,
                                             entry.getTextContent(),
                                             readScope, predecessor);
                                 }
@@ -387,7 +386,7 @@ public final class ProcessVariableReader {
                         }
 
                     } else {
-                        parseJuelExpression(element, fieldType,
+                        parseJuelExpression(element, ElementChapter.InputOutput, fieldType,
                                 textContent,
                                 readScope, predecessor);
                     }
@@ -593,6 +592,8 @@ public final class ProcessVariableReader {
             BasicNode[] predecessor) {
 
         final BaseElement baseElement = element.getBaseElement();
+        BasicNode expNode = new BasicNode(element, ElementChapter.InputData,
+                KnownElementFieldType.CamundaIn);
 
         if (baseElement instanceof CallActivity) {
             final List<CamundaIn> inputAssociations = extensionElements.getElementsQuery().filterByType(CamundaIn.class)
@@ -610,14 +611,14 @@ public final class ProcessVariableReader {
                     }
 
                 } else {
-                    new ProcessVariableOperation(source, VariableOperation.READ, scopeId);
+                    expNode.addOperation(new ProcessVariableOperation(source, VariableOperation.READ, scopeId));
                 }
 
                 // Add target operation
                 String target = inputAssociation.getCamundaTarget();
 
-                new ProcessVariableOperation(target, VariableOperation.WRITE,
-                        ((CallActivity) baseElement).getCalledElement());
+                expNode.addOperation(new ProcessVariableOperation(target, VariableOperation.WRITE,
+                        ((CallActivity) baseElement).getCalledElement()));
 
             }
             final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
@@ -631,27 +632,27 @@ public final class ProcessVariableReader {
                             ((CallActivity) baseElement).getCalledElement(), predecessor);
                 } else {
 
-                    new ProcessVariableOperation(source, VariableOperation.READ,
-                            ((CallActivity) baseElement).getCalledElement());
+                    expNode.addOperation(new ProcessVariableOperation(source, VariableOperation.READ,
+                            ((CallActivity) baseElement).getCalledElement()));
                 }
 
                 final String target = outputAssociation.getCamundaTarget();
                 if (target != null && !target.isEmpty()) {
-                    new ProcessVariableOperation(target, VariableOperation.WRITE, scopeId);
+                    expNode.addOperation(new ProcessVariableOperation(target, VariableOperation.WRITE, scopeId));
                 }
             }
+        }
+        if(expNode.getOperations().size() > 0) {
+            predecessor[0] = addNodeAndGetNewPredecessor(expNode, element.getControlFlowGraph(), predecessor[0]);
         }
     }
 
     /**
      * Get process variables from sequence flow conditions
      *
-     * @param javaReaderStatic Static java reader
-     * @param fileScanner      FileScanner
-     * @param element          BpmnElement
+     * @param element BpmnElement
      */
-    private void searchVariablesFromSequenceFlow(
-            final JavaReaderStatic javaReaderStatic, final FileScanner fileScanner, final BpmnElement element,
+    private void searchVariablesFromSequenceFlow(final BpmnElement element,
             BasicNode[] predecessor) {
 
         final BaseElement baseElement = element.getBaseElement();
@@ -679,9 +680,8 @@ public final class ProcessVariableReader {
                     }
                 } else {
                     if (expression.getTextContent().trim().length() > 0) {
-                        findVariablesInExpression(javaReaderStatic, fileScanner,
-                                expression.getTextContent(), element, ElementChapter.Details,
-                                KnownElementFieldType.Expression, scopeId, predecessor);
+                        parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.Expression,
+                                expression.getTextContent(), scopeId, predecessor);
                     }
                 }
             }
@@ -1134,9 +1134,10 @@ public final class ProcessVariableReader {
     }
 
     // TODO add test
-    private void parseJuelExpression(final BpmnElement element, final KnownElementFieldType fieldType,
+    private void parseJuelExpression(final BpmnElement element, final ElementChapter elementChapter,
+            final KnownElementFieldType fieldType,
             String expression, final String scopeId, BasicNode[] predecessor) {
-        ExpressionNode expNode = new ExpressionNode(element, expression, ElementChapter.InputOutput, fieldType);
+        ExpressionNode expNode = new ExpressionNode(element, expression, elementChapter, fieldType);
 
         TreeStore store = new TreeStore(new Builder(Builder.Feature.METHOD_INVOCATIONS), null);
         Tree tree = store.get(expression);
@@ -1151,15 +1152,15 @@ public final class ProcessVariableReader {
                 varName = varName.substring(1, varName.length() - 1);
 
                 switch (property.toString()) {
-                    case ".setVariable":
+                    case ". setVariable":
                         expNode.addOperation(new ProcessVariableOperation(varName,
                                 VariableOperation.WRITE, scopeId));
                         break;
-                    case ".getVariable":
+                    case ". getVariable":
                         expNode.addOperation(new ProcessVariableOperation(varName,
                                 VariableOperation.READ, scopeId));
                         break;
-                    case ".removeVariable":
+                    case ". removeVariable":
                         expNode.addOperation(new ProcessVariableOperation(varName,
                                 VariableOperation.DELETE, scopeId));
                         break;

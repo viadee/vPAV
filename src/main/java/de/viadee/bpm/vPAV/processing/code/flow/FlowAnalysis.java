@@ -189,6 +189,8 @@ public class FlowAnalysis {
 								LOGGER.severe("End event in child process was not found.");
 							}
 
+							// TODO this might not be called anymore but is needed
+							// See callActivity Test testEmbedding()
 							for (ProcessVariableOperation operation : analysisElement.getOperations().values()) {
 								if (operation.getFieldType().equals(KnownElementFieldType.CamundaOut)) {
 									if (operation.getOperation().equals(READ)) {
