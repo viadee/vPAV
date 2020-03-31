@@ -101,7 +101,8 @@ public class ObjectReaderTest {
         HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
         localObjectVariables.put("objVariable1", objVariable1);
         localObjectVariables.put("$r2", anotherObject);
-        objectReader = new ObjectReader(localStringVariables, localObjectVariables, new ObjectVariable(), processVariablesCreator);
+        objectReader = new ObjectReader(localStringVariables, localObjectVariables, new ObjectVariable(),
+                processVariablesCreator);
 
         // Create string fields
         objectReader.getThisObject().updateStringField("variableField1", "valueField1");
@@ -130,20 +131,23 @@ public class ObjectReaderTest {
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
         args.add(StringConstant.v("myVariableValue"));
+        ArrayList<Object> argValues = new ArrayList<>();
+        argValues.add(null);
+        argValues.add("myVariableValue");
         ObjectReader cr = new ObjectReader(null);
-        cr.handleIdentityStmt(stmt, args);
+        cr.handleIdentityStmt(stmt, args, argValues,"");
         Assert.assertEquals("myVariableValue", cr.getLocalStringVariables().get("r2").getValue());
     }
 
     @Test
     public void testResolveStringValue() {
         // Test resolving of String Constants
-        Assert.assertEquals("aValue", objectReader.resolveStringValue(StringConstant.v("aValue"), "this"));
+        Assert.assertEquals("aValue", objectReader.resolveStringValue(null, StringConstant.v("aValue"), "this"));
 
         // Test resolving of local string variables
         Assert.assertEquals("value1",
                 objectReader
-                        .resolveStringValue(new JimpleLocal("variable1", RefType.v("java.lang.String")), "this"));
+                        .resolveStringValue(null, new JimpleLocal("variable1", RefType.v("java.lang.String")), "this"));
 
         // Test resolving of string fields
         Value base = new JimpleLocal("r0", RefType.v("java.lang.String"));
@@ -152,18 +156,18 @@ public class ObjectReaderTest {
         AbstractSootFieldRef fieldRef = new AbstractSootFieldRef(sc, "variableField1",
                 RefType.v("java.lang.String"), false);
         Value value = new JInstanceFieldRef(base, fieldRef);
-        Assert.assertEquals("valueField1", objectReader.resolveStringValue(value, "r0"));
+        Assert.assertEquals("valueField1", objectReader.resolveStringValue(null, value, "r0"));
     }
 
     @Test
     public void testResolveObjectVariable() {
         // Test resolving of local object variables
         Value rightValue = new JimpleLocal("objVariable1", RefType.v("java.lang.Object"));
-        Assert.assertSame(objVariable1, objectReader.resolveObjectVariable(rightValue));
+        Assert.assertSame(objVariable1, objectReader.resolveObjectVariable(null, rightValue, ""));
 
         // Test resolving of newly created objects
         rightValue = new JNewExpr(RefType.v("java.lang.Object"));
-        ObjectVariable ob = objectReader.resolveObjectVariable(rightValue);
+        ObjectVariable ob = objectReader.resolveObjectVariable(null, rightValue, "");
         Assert.assertEquals(0, ob.getStringFields().size());
         Assert.assertEquals(0, ob.getObjectFields().size());
 
@@ -174,7 +178,7 @@ public class ObjectReaderTest {
         AbstractSootFieldRef fieldRef = new AbstractSootFieldRef(sc, "objVariableField1",
                 RefType.v("java.lang.Object"), false);
         Value value = new JInstanceFieldRef(base, fieldRef);
-        Assert.assertSame(objVariableField1, objectReader.resolveObjectVariable(value));
+        Assert.assertSame(objVariableField1, objectReader.resolveObjectVariable(null, value, ""));
     }
 
     @Test
@@ -184,13 +188,13 @@ public class ObjectReaderTest {
         // Test string assignment
         rightValue = StringConstant.v("aValue");
         leftValue = new JimpleLocal("variable1", RefType.v("java.lang.String"));
-        objectReader.handleLocalAssignment(leftValue, rightValue, "this");
+        objectReader.handleLocalAssignment(null, leftValue, rightValue, "this");
         Assert.assertEquals("aValue", objectReader.getLocalStringVariables().get("variable1").getValue());
 
         // Test object assignment
         rightValue = new JimpleLocal("objVariable1", RefType.v("java.lang.Object"));
         leftValue = new JimpleLocal("$r3", RefType.v("java.lang.Object"));
-        objectReader.handleLocalAssignment(leftValue, rightValue, "this");
+        objectReader.handleLocalAssignment(null, leftValue, rightValue, "this");
         Assert.assertSame(objVariable1, objectReader.getLocalObjectVariables().get("$r3"));
     }
 
@@ -206,7 +210,7 @@ public class ObjectReaderTest {
         AbstractSootFieldRef fieldRef = new AbstractSootFieldRef(sc, "myStringField",
                 RefType.v("java.lang.String"), false);
         leftValue = new JInstanceFieldRef(base, fieldRef);
-        objectReader.handleFieldAssignment(leftValue, rightValue, "r0");
+        objectReader.handleFieldAssignment(null, leftValue, rightValue, "r0");
         Assert.assertEquals("anotherValue",
                 objectReader.getThisObject().getStringField("myStringField").getValue());
 
@@ -218,7 +222,7 @@ public class ObjectReaderTest {
         fieldRef = new AbstractSootFieldRef(sc, "myObjectField",
                 RefType.v("java.lang.Object"), false);
         leftValue = new JInstanceFieldRef(base, fieldRef);
-        objectReader.handleFieldAssignment(leftValue, rightValue, "r0");
+        objectReader.handleFieldAssignment(null, leftValue, rightValue, "r0");
         Assert.assertSame(objVariable1, objectReader.getThisObject().getObjectField("myObjectField"));
 
         // TODO no difference between static and object attributes -> don't forget, write in readme
@@ -233,7 +237,7 @@ public class ObjectReaderTest {
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
         InvokeExpr invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")),
                 methodRef, new ArrayList<>());
-        Object returnValue = objectReader.handleInvokeExpr(invokeExpr, "this");
+        Object returnValue = objectReader.handleInvokeExpr(null, invokeExpr, "this");
         Assert.assertEquals("it_works", returnValue);
 
         // Test that invoke expr manipulates string fields of object
@@ -243,7 +247,7 @@ public class ObjectReaderTest {
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
         invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")), methodRef,
                 new ArrayList<>());
-        returnValue = objectReader.handleInvokeExpr(invokeExpr, "this");
+        returnValue = objectReader.handleInvokeExpr(null, invokeExpr, "this");
         Assert.assertNull(returnValue);
         Assert.assertEquals("bye", objectReader.getThisObject().getStringField("myStringField").getValue());
 
@@ -255,7 +259,7 @@ public class ObjectReaderTest {
         invokeExpr = new JVirtualInvokeExpr(
                 new JimpleLocal("$r2", RefType.v("de.viadee.bpm.vPAV.AnotherSimpleObject")), methodRef,
                 new ArrayList<>());
-        returnValue = objectReader.handleInvokeExpr(invokeExpr, "this");
+        returnValue = objectReader.handleInvokeExpr(null, invokeExpr, "this");
         Assert.assertNull(returnValue);
         Assert.assertEquals("it's_snowing",
                 objectReader.getLocalObjectVariables().get("$r2").getStringField("anotherVariable").getValue());
@@ -266,11 +270,11 @@ public class ObjectReaderTest {
     public void testHandleReturnStmt() {
         // Test String return
         ReturnStmt stringStmt = new JReturnStmt(new JimpleLocal("variable1", RefType.v("java.lang.String")));
-        Assert.assertEquals("value1", objectReader.handleReturnStmt(stringStmt, "this"));
+        Assert.assertEquals("value1", objectReader.handleReturnStmt(null, stringStmt, "this"));
 
         // Test Object return
         ReturnStmt objectStmt = new JReturnStmt(new JimpleLocal("objVariable1", RefType.v("java.lang.Object")));
-        Assert.assertSame(objVariable1, objectReader.handleReturnStmt(objectStmt, "this"));
+        Assert.assertSame(objVariable1, objectReader.handleReturnStmt(null, objectStmt, "this"));
     }
 
     @Test
@@ -279,7 +283,9 @@ public class ObjectReaderTest {
         SootMethod method = thisSootClass.getMethodByName("<init>");
         List<Value> args = new ArrayList<>();
         args.add(StringConstant.v("passedValue"));
-        Object returnValue = objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, null);
+        List<Object> argValues = new ArrayList<>();
+        argValues.add("passedValue");
+        Object returnValue = objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues,null, null);
         Assert.assertNull(returnValue);
         ObjectVariable simpleObject = objectReader.getThisObject();
         Assert.assertEquals("bye", simpleObject.getStringField("myStringField").getValue());

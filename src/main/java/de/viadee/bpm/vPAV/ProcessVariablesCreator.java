@@ -47,14 +47,6 @@ import java.util.List;
 
 public class ProcessVariablesCreator {
 
-    private static final int CONTROL_NONE = 0;
-
-    private static final int CONTROL_IF = 1;
-
-    private static final int CONTROL_ELSE = 2;
-
-    private static final int CONTROL_COND_END = 3;
-
     private ArrayList<Node> nodes = new ArrayList<>();
 
     private BpmnElement element;
@@ -92,7 +84,7 @@ public class ProcessVariablesCreator {
     // TODO do not return variable block, not needed at the moment
     public void blockIterator(final Block block, final List<Value> args) {
         ObjectReader objectReader = new ObjectReader(this);
-        objectReader.processBlock(block, args, null);
+        objectReader.processBlock(block, args, null,null, null);
         cleanEmptyNodes();
     }
 
@@ -112,6 +104,9 @@ public class ProcessVariablesCreator {
             element.getControlFlowGraph().addNode(node);
             if (!stack.isEmpty()) {
                 node.addPredecessor(peekStack());
+            } else if (nodes.size() > 1) {
+                node.addPredecessor(nodes.get(nodes.size() - 2));
+
             }
         }
     }
@@ -146,8 +141,8 @@ public class ProcessVariablesCreator {
 
     private void cleanEmptyNodes() {
         // Clean up nodes without operations to make analysis faster
-        for(Node node: nodes) {
-            if(node.getOperations().size() == 0) {
+        for (Node node : nodes) {
+            if (node.getOperations().size() == 0) {
                 element.getControlFlowGraph().removeNode(node);
                 // For all predecessors, remove node from successors and add successors of node
                 node.getPredecessors().forEach(pred -> {
@@ -177,7 +172,7 @@ public class ProcessVariablesCreator {
             Node node = new Node(element, block, chapter, fieldType);
             nodes.add(node);
             element.getControlFlowGraph().addNode(node);
-            if(!stack.isEmpty()) {
+            if (!stack.isEmpty()) {
                 node.addPredecessor(peekStack());
             }
         }

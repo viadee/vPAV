@@ -33,11 +33,13 @@ package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.ProcessVariablesCreator;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import soot.RefType;
+import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.*;
@@ -77,7 +79,8 @@ public class ObjectReader {
         this.thisObject = thisObject;
     }
 
-    public Object processBlock(Block block, List<Value> args, String thisName) {
+    public Object processBlock(Block block, List<Value> args, List<Object> argValues, String thisName,
+            String parentName) {
         // TODO loops etc are currently ignored
         // TODO recursion is possible, prevent infinite loops
         // Todo Only String variables are currently resolved
@@ -101,28 +104,20 @@ public class ObjectReader {
             unit = unitIt.next();
             // e. g. r2 := @parameter1: org.camunda.bpm.engine.delegate.DelegateExecution
             if (unit instanceof IdentityStmt) {
-                handleIdentityStmt(unit, args);
+                handleIdentityStmt(unit, args, argValues, parentName);
             }
             // e. g. $r2 = staticinvoke ... (Assignment)
             else if (unit instanceof AssignStmt) {
-                handleAssignStmt(unit, thisName);
+                handleAssignStmt(block, unit, thisName);
             }
             // e. g. specialinvoke $r3.<de.viadee.bpm ... (Constuctor call of new object)
             else if (unit instanceof InvokeStmt) {
                 InvokeExpr expr = ((InvokeStmt) unit).getInvokeExpr();
-                CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
-                        .findByNameAndNumberOfBoxes(expr.getMethod().getName(),
-                                expr.getMethod().getDeclaringClass().getName(), expr.getArgCount());
-
-                if (foundMethod != null) {
-                    notifyVariablesReader(block, expr, foundMethod);
-                } else {
-                    handleInvokeExpr(expr, thisName);
-                }
+                handleInvokeExpr(block, expr, thisName);
             }
             // e. g. return temp$3
             else if (unit instanceof ReturnStmt) {
-                return handleReturnStmt(unit, thisName);
+                return handleReturnStmt(block, unit, thisName);
             }
             // return
             else if (unit instanceof ReturnVoidStmt) {
@@ -133,7 +128,7 @@ public class ObjectReader {
         if (block.getSuccs().size() > 0) {
             processVariablesCreator.startSuccessorHandling(block);
             for (Block succ : block.getSuccs()) {
-                this.processBlock(succ, args, thisName);
+                this.processBlock(succ, args, argValues, thisName, parentName);
             }
             processVariablesCreator.endSuccessorHandling();
         }
@@ -150,88 +145,110 @@ public class ObjectReader {
         }
     }
 
-    Object handleReturnStmt(Unit unit, String thisName) {
+    Object handleReturnStmt(Block block, Unit unit, String thisName) {
         ReturnStmt returnStmt = (ReturnStmt) unit;
         if (returnStmt.getOp().getType().equals(RefType.v("java.lang.String"))) {
-            return resolveStringValue(returnStmt.getOp(), thisName);
+            return resolveStringValue(block, returnStmt.getOp(), thisName);
         } else {
-            return resolveObjectVariable(returnStmt.getOp());
+            return resolveObjectVariable(block, returnStmt.getOp(), thisName);
         }
     }
 
-    void handleIdentityStmt(Unit unit, List<Value> args) {
+    void handleIdentityStmt(Unit unit, List<Value> args, List<Object> argValues, String parentName) {
         IdentityStmt identityStmt = (IdentityStmt) unit;
         // Resolve method parameters
         if (identityStmt.getRightOp() instanceof ParameterRef) {
             int idx = ((ParameterRef) identityStmt.getRightOp()).getIndex();
-            if (args.get(idx).getType().toString().equals("java.lang.String")) {
-                StringVariable var = new StringVariable(((StringConstant) args.get(idx)).value);
+            if (args.get(idx).getType().equals(RefType.v("java.lang.String"))) {
+                StringVariable var = new StringVariable((String) argValues.get(idx));
                 localStringVariables.put(((JimpleLocal) identityStmt.getLeftOp()).getName(), var);
+            } else if (!args.get(idx).getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE)) {
+                localObjectVariables
+                        .put(((JimpleLocal) identityStmt.getLeftOp()).getName(), (ObjectVariable) argValues.get(idx));
             }
         }
     }
 
-    private void handleAssignStmt(Unit unit, String thisName) {
+    private void handleAssignStmt(Block block, Unit unit, String thisName) {
         AssignStmt assignUnit = (AssignStmt) unit;
         Value leftValue = assignUnit.getLeftOpBox().getValue();
         Value rightValue = assignUnit.getRightOpBox().getValue();
 
         if (leftValue instanceof JimpleLocal) {
-            handleLocalAssignment(leftValue, rightValue, thisName);
+            handleLocalAssignment(block, leftValue, rightValue, thisName);
         } else if (leftValue instanceof JInstanceFieldRef) {
-            handleFieldAssignment(leftValue, rightValue, thisName);
+            handleFieldAssignment(block, leftValue, rightValue, thisName);
         } else {
             // TODO when does that happen, does that happen at all?
             assert (false);
         }
     }
 
-    Object handleInvokeExpr(InvokeExpr expr, String thisName) {
-        List<Value> args = expr.getArgs();
-        ObjectVariable targetObj;
+    Object handleInvokeExpr(Block block, InvokeExpr expr, String thisName) {
+        CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
+                .findByNameAndNumberOfBoxes(expr.getMethod().getName(),
+                        expr.getMethod().getDeclaringClass().getName(), expr.getArgCount());
 
-        if (expr instanceof AbstractInstanceInvokeExpr) {
-            // Instance method is called
-            String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
-
-            // Method on this object is called
-            if (targetObjName.equals(thisName)) {
-                return this.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args, null);
-            } else {
-                // Method on another object is called
-                targetObj = localObjectVariables.get(targetObjName);
-            }
+        if (foundMethod != null) {
+            notifyVariablesReader(block, expr, foundMethod);
+            return null;
         } else {
-            // Static method is called -> create phantom variable
-            targetObj = new ObjectVariable();
-        }
+            List<Value> args = expr.getArgs();
+            List<Object> argValues = resolveArgs(args, thisName);
+            ObjectVariable targetObj;
 
-        // Process method from another class/object
-        ObjectReader or = new ObjectReader(processVariablesCreator, targetObj);
-        return or.processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args, null);
+            if (expr instanceof AbstractInstanceInvokeExpr) {
+                // Instance method is called
+                String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
+
+                // Method on this object is called
+                if (targetObjName.equals(thisName)) {
+                    return this
+                            .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args, argValues,
+                                    null,
+                                    thisName);
+                } else {
+                    // Method on another object is called
+                    targetObj = localObjectVariables.get(targetObjName);
+                }
+            } else {
+                // Static method is called -> create phantom variable
+                targetObj = new ObjectVariable();
+            }
+
+            // Process method from another class/object
+            ObjectReader or = new ObjectReader(processVariablesCreator, targetObj);
+            SootMethod method = expr.getMethod();
+
+            if (method.getDeclaringClass().getPackageName().startsWith("java.")) {
+                // Skip native java classes
+                return null;
+            }
+            return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null, thisName);
+        }
     }
 
-    void handleLocalAssignment(Value leftValue, Value rightValue, String thisName) {
+    void handleLocalAssignment(Block block, Value leftValue, Value rightValue, String thisName) {
         // TODO int and other basic types are handled as objects
         // Local string variable is updated
         if (leftValue.getType().equals(RefType.v("java.lang.String"))) {
-            String newValue = resolveStringValue(rightValue, thisName);
+            String newValue = resolveStringValue(block, rightValue, thisName);
             localStringVariables.put(leftValue.toString(), new StringVariable(newValue));
         }
         // Object variable is updated/created
         else {
-            ObjectVariable ob = resolveObjectVariable(rightValue);
+            ObjectVariable ob = resolveObjectVariable(block, rightValue, thisName);
             if (ob != null) {
-                localObjectVariables.put(leftValue.toString(), resolveObjectVariable(rightValue));
+                localObjectVariables.put(leftValue.toString(), ob);
             }
         }
     }
 
-    void handleFieldAssignment(Value leftValue, Value rightValue, String thisName) {
+    void handleFieldAssignment(Block block, Value leftValue, Value rightValue, String thisName) {
         // TODO int and other basic types are handled as objects
         // String field of object is updated
         if (leftValue.getType().equals(RefType.v("java.lang.String"))) {
-            String newValue = resolveStringValue(rightValue, thisName);
+            String newValue = resolveStringValue(block, rightValue, thisName);
             String objIdentifier = getObjIdentifierFromFieldRef(leftValue);
             String varName = getVarNameFromFieldRef(leftValue);
 
@@ -244,7 +261,7 @@ public class ObjectReader {
         else {
             String objIdentifier = getObjIdentifierFromFieldRef(leftValue);
             String varName = getVarNameFromFieldRef(leftValue);
-            ObjectVariable objectVar = resolveObjectVariable(rightValue);
+            ObjectVariable objectVar = resolveObjectVariable(block, rightValue, thisName);
             // Only consider this object at the moment
             if (objIdentifier.equals(thisName) && objectVar != null) {
                 thisObject.putObjectField(varName, objectVar);
@@ -252,15 +269,19 @@ public class ObjectReader {
         }
     }
 
-    String resolveStringValue(Value rightValue, String thisName) {
+    String resolveStringValue(Block block, Value rightValue, String thisName) {
         if (rightValue instanceof StringConstant) {
             return getValueFromStringConstant(rightValue);
         } else if (rightValue instanceof JimpleLocal) {
-            return localStringVariables.get(rightValue.toString()).getValue();
+            return localStringVariables.containsKey(rightValue.toString()) ?
+                    localStringVariables.get(rightValue.toString()).getValue() :
+                    null;
         } else if (rightValue instanceof FieldRef) {
             return thisObject.getStringField(getVarNameFromFieldRef(rightValue)).getValue();
         } else if (rightValue instanceof InvokeExpr) {
-            return (String) handleInvokeExpr((InvokeExpr) rightValue, thisName);
+            return (String) handleInvokeExpr(block, (InvokeExpr) rightValue, thisName);
+        } else if (rightValue instanceof CastExpr) {
+            return resolveStringValue(block, ((CastExpr) rightValue).getOp(), thisName);
         } else {
             // TODO When does that happen?
             assert (false);
@@ -268,7 +289,7 @@ public class ObjectReader {
         }
     }
 
-    ObjectVariable resolveObjectVariable(Value rightValue) {
+    ObjectVariable resolveObjectVariable(Block block, Value rightValue, String thisName) {
         if (rightValue instanceof JimpleLocal) {
             String localVar = rightValue.toString();
             return localObjectVariables.get(localVar);
@@ -278,6 +299,10 @@ public class ObjectReader {
         } else if (rightValue instanceof NewExpr) {
             // New object is instantiated, we add an empty object as constructors are not resolved yet
             return new ObjectVariable();
+        } else if (rightValue instanceof InvokeExpr) {
+            // TODO not sure what to return
+            // TODO add test for this branch
+            return (ObjectVariable) handleInvokeExpr(block, (InvokeExpr) rightValue, thisName);
         } else {
             return null;
         }
@@ -289,10 +314,19 @@ public class ObjectReader {
 
     private String getVarNameFromFieldRef(Value value) {
         int spaceIdx = value.toString().lastIndexOf(" ") + 1;
-        // TODO support static field refs!
-        ((JInstanceFieldRef) value).getFieldRef().getSignature();
-        int gtsIdx = value.toString().lastIndexOf(">");
-        return value.toString().substring(spaceIdx, gtsIdx);
+        if (value instanceof JInstanceFieldRef) {
+            // TODO why do i call getSignature?
+            ((JInstanceFieldRef) value).getFieldRef().getSignature();
+            int gtsIdx = value.toString().lastIndexOf(">");
+            return value.toString().substring(spaceIdx, gtsIdx);
+        } else if (value instanceof StaticFieldRef) {
+            int gtsIdx = value.toString().lastIndexOf(">");
+            return value.toString().substring(spaceIdx, gtsIdx);
+        } else {
+            assert (false);
+            return "";
+        }
+
     }
 
     private String getValueFromStringConstant(Value value) {
@@ -312,20 +346,36 @@ public class ObjectReader {
     }
 
     // TODO call this method when executiondelegate method is executed
-    public void notifyVariablesReader(Block block, InvokeExpr expr,  CamundaProcessVariableFunctions camundaMethod) {
+    public void notifyVariablesReader(Block block, InvokeExpr expr, CamundaProcessVariableFunctions camundaMethod) {
         int location = camundaMethod.getLocation() - 1;
         VariableOperation type = camundaMethod.getOperationType();
         // TODO variables extractor decides on scope id for variable map
         // TODO do we need the thisName? is that possible?
-        String variableName = resolveStringValue(expr.getArgBox(location).getValue(), "");
+        String variableName = resolveStringValue(block, expr.getArgBox(location).getValue(), "");
         // TODO add test for scope id (not yet included)
 
-        ProcessVariableOperation pvo = new ProcessVariableOperation(variableName, type, processVariablesCreator.getScopeId());
+        ProcessVariableOperation pvo = new ProcessVariableOperation(variableName, type,
+                processVariablesCreator.getScopeId());
         processVariablesCreator.handleProcessVariableManipulation(block, pvo);
     }
 
     public static int hashBlock(Block block) {
         return Objects.hash(block.getHead(), block.getTail(), block.getBody(),
                 block.getIndexInMethod());
+    }
+
+    public List<Object> resolveArgs(List<Value> args, String thisName) {
+        ArrayList<Object> list = new ArrayList<>();
+        for (Value arg : args) {
+            if (arg.getType().equals(RefType.v("java.lang.String"))) {
+                list.add(resolveStringValue(null, arg, thisName));
+            } else if (arg.getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE)) {
+                list.add(null);
+            } else {
+                list.add(resolveObjectVariable(null, arg, thisName));
+            }
+        }
+        return list;
+
     }
 }

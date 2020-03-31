@@ -31,15 +31,14 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.*;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -48,6 +47,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import soot.JastAddJ.AnonymousDecl;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -81,63 +81,15 @@ public class GraphCreationTest {
     }
 
     @Test
-    public void testBlockSplitOrder() {
-        final Map<String, String> beanMapping = new HashMap<>();
-        beanMapping.put("blockSplitDelegate", "de/viadee/bpm/vPAV/delegates/BlockSplitDelegate.class");
-        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
-
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final String PATH = BASE_PATH + "ProcessVariablesReader_BlockSplit.bpmn";
-        final File processDefinition = new File(PATH);
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-        // create data flow graphs
-
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
-
-        flowAnalysis.analyze(graphCollection);
-
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-
-        // no anomaly expected
-        Assert.assertEquals(0, invalidPathMap.size());
-    }
-
-    @Test
     public void testMethodInvocationOrder() {
-        final Map<String, String> beanMapping = new HashMap<>();
-        beanMapping.put("methodDelegate", "de/viadee/bpm/vPAV/delegates/MethodInvocationDelegate.class");
-        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+        final Map<AnomalyContainer, List<Path>> invalidPathMap = Helper
+                .getModelWithBeanDelegate("de/viadee/bpm/vPAV/delegates/MethodInvocationDelegate.class");
 
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final String PATH = BASE_PATH + "ProcessVariablesReader_MethodInvocation.bpmn";
-        final File processDefinition = new File(PATH);
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
-        // create data flow graphs
-
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
-
-        flowAnalysis.analyze(graphCollection);
-
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-
-        // DU + DR anomaly
+        // DU + UR anomaly
         Assert.assertEquals(2, invalidPathMap.size());
+        Iterator<AnomalyContainer> iter =  invalidPathMap.keySet().iterator();
+        Assert.assertEquals(Anomaly.DU, iter.next().getAnomaly());
+        Assert.assertEquals(Anomaly.UR, iter.next().getAnomaly());
     }
 
     /**
@@ -166,6 +118,7 @@ public class GraphCreationTest {
         final List<Path> geloeschteVarTest = entry1.getValue();
         ProcessVariableOperation geloeschteVarOperation = Mockito.mock(ProcessVariableOperation.class);
         Mockito.when(geloeschteVarOperation.getIndex()).thenReturn(4);
+
         Assert.assertEquals("AnomalyContainer geloeschteVariable does not equal actual container",
                 new AnomalyContainer("geloeschteVariable", Anomaly.DU, "SequenceFlow_0bi6kaa__0",
                         "SequenceFlow_0bi6kaa", "", geloeschteVarOperation), anomalyContainer1);
@@ -201,7 +154,8 @@ public class GraphCreationTest {
         final List<Path> validVarTest = entry4.getValue();
         ProcessVariableOperation intHalloOperation = Mockito.mock(ProcessVariableOperation.class);
         Assert.assertEquals("AnomalyContainer validVar does not equal actual container",
-                new AnomalyContainer("intHallo", Anomaly.UR, "ServiceTask_05g4a96", "Service Task2", intHalloOperation), anomalyContainer4);
+                new AnomalyContainer("intHallo", Anomaly.UR, "ServiceTask_05g4a96", "Service Task2", intHalloOperation),
+                anomalyContainer4);
         Assert.assertEquals("[[ServiceTask_05g4a96]]", validVarTest.toString());
     }
 }

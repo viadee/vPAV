@@ -36,14 +36,15 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 public class Helper {
 
@@ -70,6 +71,32 @@ public class Helper {
 
         return graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+    }
+
+    public static Map<AnomalyContainer, List<Path>> getModelWithBeanDelegate(String delegateClass) {
+        final Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("methodDelegate", delegateClass);
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final File processDefinition = new File(MODEL_DELEGATE_PATH);
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
+        serviceTask.setCamundaDelegateExpression("${methodDelegate}");
+        serviceTask.setCamundaClass(null);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null,
+                new BpmnScanner(MODEL_DELEGATE_PATH));
+
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        Collection<Graph> graphCollection= graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+
+        return graphBuilder.createInvalidPaths(graphCollection);
+
     }
 
 }

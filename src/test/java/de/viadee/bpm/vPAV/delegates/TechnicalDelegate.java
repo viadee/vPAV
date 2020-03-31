@@ -39,11 +39,8 @@ public class TechnicalDelegate implements JavaDelegate {
 
     @Override
     public void execute(final DelegateExecution execution) throws Exception {
-
         ProcessContext processContext = new ProcessContext(execution, "var");
         String name = processContext.getTechnicalProcessContext().manipulateVariables();
         String var = (String) execution.getVariable(name);
-
     }
-
 }

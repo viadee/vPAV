@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.dataflow;
 
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -296,8 +297,11 @@ public class DataFlowRuleBuilderTest {
 		}
 
 		ProcessVariableOperation build() {
-			return new ProcessVariableOperation(name,
+			ProcessVariableOperation pvo = new ProcessVariableOperation(name,
 					operation, "");
+			BasicNode node = new BasicNode(element, ElementChapter.General, KnownElementFieldType.FollowUpDate);
+			pvo.setNode(node);
+			return pvo;
 		}
 	}
 }
