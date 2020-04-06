@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.model.data;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
@@ -46,6 +47,7 @@ import org.camunda.bpm.model.bpmn.impl.instance.LoopCardinalityImpl;
 import org.camunda.bpm.model.bpmn.instance.LoopCardinality;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -94,7 +96,7 @@ public class MultiInstanceActivityTest {
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
         Assert.assertEquals("Collection read operation was not recognized.", "myCollection",
-                flowAnalysis.getNodes().get("Sequential_ServiceTask__0").getUsed().get("5").getName());
+                flowAnalysis.getNodes().get("Sequential_ServiceTask__1").getUsed().get("myCollection_4").getName());
 
         Assert.assertEquals("There should  be one issue because 'element' is not available in non-multi instance tasks.",
                 1, invalidPathMap.size());
@@ -137,12 +139,13 @@ public class MultiInstanceActivityTest {
 
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
         AnomalyContainer anomaly1 = iterator.next();
-        // UR because 'element' is not available in non-multi instance tasks
+        // UR because 'myUnkownCollection' is read in multi instance task but never defined
+        Assert.assertEquals("Expected another variable to raise an issue.", "myUnkownCollection", anomaly1.getName());
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                 anomaly1.getAnomaly());
-        // UR because 'myUnkownCollection' is read in multi instance task but never defined
+        // UR because 'element' is not available in non-multi instance tasks
         AnomalyContainer anomaly2 = iterator.next();
-        Assert.assertEquals("Expected another variable to raise an issue.", "myUnkownCollection", anomaly2.getName());
+        Assert.assertEquals("Expected another variable to raise an issue.", "element", anomaly2.getName());
         Assert.assertEquals("Expected a UR anomaly.", Anomaly.UR, anomaly2.getAnomaly());
 
     }
@@ -219,15 +222,23 @@ public class MultiInstanceActivityTest {
 
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
         AnomalyContainer anomaly1 = iterator.next();
-        Assert.assertEquals("The 'element' variable in Sequential_ServiceTask should raise an issue.",
-                "element", anomaly1.getVariable().getName());
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                anomaly1.getAnomaly());
+        Assert.assertEquals("The variable in the loop cardinality expression should raise an issue.",
+                "notExistingVariable", anomaly1.getVariable().getName());
+
         AnomalyContainer anomaly2 = iterator.next();
         Assert.assertEquals("The 'loopCounter' variable in Sequential_ServiceTask should raise an issue.",
                 "loopCounter", anomaly2.getVariable().getName());
+
         AnomalyContainer anomaly3 = iterator.next();
-        Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
-                anomaly3.getAnomaly());
-        Assert.assertEquals("The variable in the loop cardinality expression should raise an issue.",
-                "notExistingVariable", anomaly3.getVariable().getName());
+        Assert.assertEquals("The 'element' variable in Sequential_ServiceTask should raise an issue.",
+                "element", anomaly3.getVariable().getName());
+    }
+
+    @Before
+    public void clearIssues() {
+        IssueService.getInstance().clear();
+        ProcessVariableOperation.resetIdCounter();
     }
 }

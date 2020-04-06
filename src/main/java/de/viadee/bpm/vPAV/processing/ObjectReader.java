@@ -84,6 +84,10 @@ public class ObjectReader {
         // TODO loops etc are currently ignored
         // TODO recursion is possible, prevent infinite loops
         // Todo Only String variables are currently resolved
+        if (block == null) {
+            return null;
+        }
+
         // Eventually add objects, arrays and int
         if (processedBlocks.contains(hashBlock(block))) {
             processVariablesCreator.visitBlockAgain(block);
@@ -162,7 +166,10 @@ public class ObjectReader {
             if (args.get(idx).getType().equals(RefType.v("java.lang.String"))) {
                 StringVariable var = new StringVariable((String) argValues.get(idx));
                 localStringVariables.put(((JimpleLocal) identityStmt.getLeftOp()).getName(), var);
-            } else if (!args.get(idx).getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE)) {
+            } else if (!args.get(idx).getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE) &&
+                    !args.get(idx).getType().equals(CamundaMethodServices.MAP_VARIABLES_TYPE) &&
+                    !args.get(idx).getType().equals(CamundaMethodServices.VARIABLE_SCOPE_TYPE)
+            ) {
                 localObjectVariables
                         .put(((JimpleLocal) identityStmt.getLeftOp()).getName(), (ObjectVariable) argValues.get(idx));
             }
@@ -220,6 +227,7 @@ public class ObjectReader {
             ObjectReader or = new ObjectReader(processVariablesCreator, targetObj);
             SootMethod method = expr.getMethod();
 
+            // TODO skip also methods that are not in target folder
             if (method.getDeclaringClass().getPackageName().startsWith("java.")) {
                 // Skip native java classes
                 return null;
@@ -354,8 +362,16 @@ public class ObjectReader {
         String variableName = resolveStringValue(block, expr.getArgBox(location).getValue(), "");
         // TODO add test for scope id (not yet included)
 
-        ProcessVariableOperation pvo = new ProcessVariableOperation(variableName, type,
-                processVariablesCreator.getScopeId());
+        ProcessVariableOperation pvo;
+        // Variable map maps variables to child of call activity
+        if (camundaMethod.getService().equals(CamundaMethodServices.VARIABLE_MAP)) {
+            pvo = new ProcessVariableOperation(variableName, type,
+                    processVariablesCreator.getScopeIdOfChild());
+        } else {
+            pvo = new ProcessVariableOperation(variableName, type,
+                    processVariablesCreator.getScopeId());
+        }
+
         processVariablesCreator.handleProcessVariableManipulation(block, pvo);
     }
 

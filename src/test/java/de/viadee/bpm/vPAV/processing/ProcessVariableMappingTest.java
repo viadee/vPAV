@@ -57,8 +57,6 @@ public class ProcessVariableMappingTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
-    private static final String MODEL_PATH = BASE_PATH + "ModelWithMappingDelegate.bpmn";
-
     private File processDefinition;
 
     @BeforeClass
@@ -166,7 +164,8 @@ public class ProcessVariableMappingTest {
                 script.getTextContent(), script, true));
         Assert.assertEquals(VariableOperation.WRITE,
                 nodes.get("Task_0wh7kto__0").getOperations().get("testInputScript_0").getOperation());
-        Assert.assertEquals("testInputScript", nodes.get("Task_0wh7kto__0").getOperations().get("testInputScript_0").getName());
+        Assert.assertEquals("testInputScript",
+                nodes.get("Task_0wh7kto__0").getOperations().get("testInputScript_0").getName());
 
         Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
         Assert.assertEquals(1, issues.size());
@@ -176,8 +175,9 @@ public class ProcessVariableMappingTest {
     @Test
     public void testInputScope() {
         BpmnModelInstance modelInstance = createModelInstance();
-        LinkedHashMap<String, BasicNode> nodes = analyzeInputOutputMapping(prepareServiceTask(modelInstance, "testInputText", "${myVariable}",
-                null, true), true);
+        LinkedHashMap<String, BasicNode> nodes = analyzeInputOutputMapping(
+                prepareServiceTask(modelInstance, "testInputText", "${myVariable}",
+                        null, true), true);
         Assert.assertEquals("Process_1", nodes.get("Task_0wh7kto__0").getOperations().get("myVariable_1").getScopeId());
         Assert.assertEquals("Task_0wh7kto",
                 nodes.get("Task_0wh7kto__1").getOperations().get("testInputText_0").getScopeId());
@@ -186,9 +186,11 @@ public class ProcessVariableMappingTest {
     @Test
     public void testOutputScope() {
         BpmnModelInstance modelInstance = createModelInstance();
-        LinkedHashMap<String, BasicNode> nodes = analyzeInputOutputMapping(prepareServiceTask(modelInstance, "testOutputText", "${myVariable}",
-                null, false), false);
-        Assert.assertEquals("Task_0wh7kto", nodes.get("Task_0wh7kto__0").getOperations().get("myVariable_1").getScopeId());
+        LinkedHashMap<String, BasicNode> nodes = analyzeInputOutputMapping(
+                prepareServiceTask(modelInstance, "testOutputText", "${myVariable}",
+                        null, false), false);
+        Assert.assertEquals("Task_0wh7kto",
+                nodes.get("Task_0wh7kto__0").getOperations().get("myVariable_1").getScopeId());
         Assert.assertEquals("Process_1",
                 nodes.get("Task_0wh7kto__1").getOperations().get("testOutputText_0").getScopeId());
     }
@@ -212,7 +214,8 @@ public class ProcessVariableMappingTest {
                 new FlowAnalysis());
         ExpressionNode expNode = new ExpressionNode(node, "", ElementChapter.InputOutput,
                 KnownElementFieldType.CamundaIn);
-        (new ProcessVariableReader(null, mock(Rule.class), null)).processMapping(node, expNode, new BasicNode[1], "Process_1",true);
+        (new ProcessVariableReader(null, mock(Rule.class), null))
+                .processMapping(node, expNode, new BasicNode[1], "Process_1", true);
 
         return node.getControlFlowGraph().getNodes();
     }
@@ -221,6 +224,7 @@ public class ProcessVariableMappingTest {
             String textContent,
             BpmnModelElementInstance value, boolean input) {
         ServiceTask task = modelInstance.getModelElementById("Task_0wh7kto");
+        CamundaInputOutput ioExtension = modelInstance.newInstance(CamundaInputOutput.class);
 
         if (input) {
             CamundaInputParameter inputParameter = modelInstance.newInstance(CamundaInputParameter.class);
@@ -228,16 +232,16 @@ public class ProcessVariableMappingTest {
             inputParameter.setTextContent(textContent);
             if (value != null)
                 inputParameter.setValue(value);
-            task.builder().addExtensionElement(inputParameter);
+            ioExtension.addChildElement(inputParameter);
         } else {
             CamundaOutputParameter outputParameter = modelInstance.newInstance(CamundaOutputParameter.class);
             outputParameter.setCamundaName(name);
             outputParameter.setTextContent(textContent);
             if (value != null)
                 outputParameter.setValue(value);
-            task.builder().addExtensionElement(outputParameter);
+            ioExtension.addChildElement(outputParameter);
         }
-
+        task.builder().addExtensionElement(ioExtension);
         return task;
     }
 
@@ -259,5 +263,4 @@ public class ProcessVariableMappingTest {
         IssueService.getInstance().clear();
         ProcessVariableOperation.resetIdCounter();
     }
-
 }

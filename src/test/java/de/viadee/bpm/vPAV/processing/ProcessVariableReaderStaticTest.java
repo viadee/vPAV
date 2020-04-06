@@ -123,11 +123,10 @@ public class ProcessVariableReaderStaticTest {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
-        variables.putAll(new JavaReaderStatic().getVariablesFromClass(
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables", element, null, entry));
+        new JavaReaderStatic().getVariablesFromClass(
+                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables", element, null, entry, new BasicNode[1]);
 
-        assertEquals(3, variables.size());
-
+        assertEquals(3, element.getControlFlowGraph().getOperations().size());
     }
 
     @Test

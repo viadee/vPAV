@@ -148,7 +148,6 @@ public class ProcessVariablesNameConventionCheckerTest {
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
-			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 			variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
 
 			checker.check(element);

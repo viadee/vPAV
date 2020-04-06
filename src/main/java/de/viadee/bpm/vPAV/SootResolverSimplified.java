@@ -107,12 +107,15 @@ public class SootResolverSimplified {
     }
 
     public static Block getBlockFromMethod(SootMethod method) {
-        Body body = method.retrieveActiveBody();
-        BlockGraph graph = new ClassicCompleteBlockGraph(body);
-        List<Block> graphHeads = graph.getHeads();
-        assert (graphHeads.size() == 1);
+        if (!method.isPhantom()) {
+            Body body = method.retrieveActiveBody();
+            BlockGraph graph = new ClassicCompleteBlockGraph(body);
+            List<Block> graphHeads = graph.getHeads();
+            assert (graphHeads.size() == 1);
 
-        return graphHeads.get(0);
+            return graphHeads.get(0);
+        }
+        return null;
     }
 
     private static SootClass setupSootClass(String className) {

@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
@@ -52,6 +53,7 @@ import groovy.lang.DelegatesTo;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testng.Assert;
@@ -112,7 +114,7 @@ public class UserVariablesTest {
 
         Graph graph = graphCollection.iterator().next();
         ProcessVariableOperation pvo;
-        for(BpmnElement element : graph.getVertices()) {
+        for (BpmnElement element : graph.getVertices()) {
             switch (element.getId()) {
                 case "StartEvent_1":
                     // Variable 'anotherVariable' should be included as the scope is not restricted
@@ -167,5 +169,11 @@ public class UserVariablesTest {
                 .read("UserVariablesTest/variables_incorrect.xml", "testProcess");
 
         Assert.assertEquals(0, userVariables.size(), "Ill-defined user variable should not be included.");
+    }
+
+    @Before
+    public void clear() {
+        IssueService.getInstance().clear();
+        ProcessVariableOperation.resetIdCounter();
     }
 }

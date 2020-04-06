@@ -101,8 +101,8 @@ public class BasicNode implements AnalysisElement{
      */
     public void addOperation(final ProcessVariableOperation processVariableOperation) {
         processVariableOperation.setNode(this);
-        final String id = String.valueOf(processVariableOperation.getIndex());
-        this.operations.put(processVariableOperation.getId(), processVariableOperation);
+        final String id = processVariableOperation.getId();
+        this.operations.put(id, processVariableOperation);
         switch (processVariableOperation.getOperation()) {
             case WRITE:
                 defined.put(id, processVariableOperation);

@@ -33,16 +33,21 @@ package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.gson.internal.$Gson$Preconditions;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.*;
+import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import soot.*;
+import soot.jimple.AssignStmt;
+import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.options.Options;
 import soot.toolkits.graph.Block;
 
@@ -93,17 +98,17 @@ public class JavaReaderStatic {
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
                 // Delegate Variable Mapping
                 classFetcherNew(classFile, "mapInputVariables", element,
-                        ElementChapter.InputImplementation, fieldType);
+                        ElementChapter.InputImplementation, fieldType, predecessor);
 
                 classFetcherNew(classFile, "mapOutputVariables", element,
-                        ElementChapter.OutputImplementation, fieldType);
+                        ElementChapter.OutputImplementation, fieldType, predecessor);
             } else {
                 // Java Delegate or Listener
                 SootClass sootClass = Scene.v().forceResolve(cleanString(classFile), SootClass.SIGNATURES);
                 if (sootClass.declaresMethodByName("notify")) {
-                    classFetcherNew(classFile, "notify", element, chapter, fieldType);
+                    classFetcherNew(classFile, "notify", element, chapter, fieldType, predecessor);
                 } else if (sootClass.declaresMethodByName("execute")) {
-                    classFetcherNew(classFile, "execute", element, chapter, fieldType);
+                    classFetcherNew(classFile, "execute", element, chapter, fieldType, predecessor);
                 } else {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
                 }
@@ -121,7 +126,7 @@ public class JavaReaderStatic {
      * @return Map of process variable operations
      */
     ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className, final BpmnElement element,
-            final String resourceFilePath, final EntryPoint entryPoint) {
+            final String resourceFilePath, final EntryPoint entryPoint, BasicNode[] predecessor) {
 
         final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
@@ -134,10 +139,12 @@ public class JavaReaderStatic {
                 Scene.v().loadNecessaryClasses();
                 for (SootMethod method : sootClass.getMethods()) {
                     if (method.getName().equals(entryPoint.getMethodName())) {
-                        final Body body = method.retrieveActiveBody();
-                        // TODO
-                        //   initialOperations.putAll(variablesExtractor
-                        //         .checkWriteAccess(body, element, resourceFilePath, entryPoint));
+                        Block block = SootResolverSimplified.getBlockFromMethod(method);
+                        // TODO unsure about chapter and field type
+                        ProcessVariablesCreator pvc = new ProcessVariablesCreator(element,
+                                ElementChapter.Implementation, KnownElementFieldType.Class,
+                                predecessor);
+                        pvc.blockIterator(block, new ArrayList<>());
                     }
                 }
             }
@@ -147,11 +154,16 @@ public class JavaReaderStatic {
 
     private void classFetcherNew(final String className,
             final String methodName, final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType) {
+            final ElementChapter chapter, final KnownElementFieldType fieldType, BasicNode[] predecessor) {
 
         Block block = SootResolverSimplified.getBlockFromClass(className, methodName, null, null);
-        ProcessVariablesCreator processVariablesCreator = new ProcessVariablesCreator(element, chapter, fieldType);
-        processVariablesCreator.blockIterator(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName));
+        ProcessVariablesCreator processVariablesCreator = new ProcessVariablesCreator(element, chapter, fieldType,
+                predecessor);
+        BasicNode lastNode = processVariablesCreator
+                .blockIterator(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName));
+        if (lastNode != null) {
+            predecessor[0] = lastNode;
+        }
     }
 
     /**
@@ -170,7 +182,7 @@ public class JavaReaderStatic {
         System.setProperty("soot.class.path", sootPath);
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
-        String[] exClasses = new String[]{"java.*", "sun.*", "jdk.*", "javax.*"};
+        String[] exClasses = new String[] { "java.*", "sun.*", "jdk.*", "javax.*" };
         Options.v().set_exclude(Arrays.asList(exClasses));
         Options.v().set_no_bodies_for_excluded(true);
         Scene.v().extendSootClassPath(Scene.v().defaultClassPath());

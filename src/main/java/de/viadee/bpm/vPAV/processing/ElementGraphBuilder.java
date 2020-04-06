@@ -260,7 +260,7 @@ public class ElementGraphBuilder {
 
             for (EntryPoint ep : scanner.getEntryPoints()) {
                 if (ep.getMessageName().equals(messageName)) {
-                    checkInitialVariableOperations(ep, bpmnElement, bpmnElement.getProcessDefinition());
+                    checkInitialVariableOperations(ep, bpmnElement, bpmnElement.getProcessDefinition(), predecessor);
                 }
             }
             graph.addStartNode(bpmnElement);
@@ -275,7 +275,7 @@ public class ElementGraphBuilder {
 
             for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {
                 if (ep.getMessageName().equals(messageName)) {
-                    checkInitialVariableOperations(ep, bpmnElement, bpmnElement.getProcessDefinition());
+                    checkInitialVariableOperations(ep, bpmnElement, bpmnElement.getProcessDefinition(), predecessor);
                 }
             }
         }
@@ -295,9 +295,9 @@ public class ElementGraphBuilder {
      * @return initial operations
      */
     private ListMultimap<String, ProcessVariableOperation> checkInitialVariableOperations(final EntryPoint entryPoint,
-            final BpmnElement element, final String resourceFilePath) {
+            final BpmnElement element, final String resourceFilePath, BasicNode[] predecessor) {
         return new JavaReaderStatic().getVariablesFromClass(entryPoint.getClassName(), element, resourceFilePath,
-                entryPoint);
+                entryPoint, predecessor);
     }
 
     public BpmnElement getElement(final String id) {

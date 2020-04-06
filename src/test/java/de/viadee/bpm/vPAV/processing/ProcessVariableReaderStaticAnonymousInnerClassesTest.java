@@ -47,13 +47,13 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collection;
-import java.util.Properties;
+import java.util.*;
 
 public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
@@ -80,10 +80,8 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 	@Test
 	public void testRecogniseVariablesInInnerAnonymousClass() {
-		Properties myProperties = new Properties();
-		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
-		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
 
 		// parse bpmn model
@@ -94,7 +92,6 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
 		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
-		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 		variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
 
 		Assert.assertEquals(3, element.getControlFlowGraph().getOperations().size());

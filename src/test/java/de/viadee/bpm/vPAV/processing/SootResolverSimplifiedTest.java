@@ -31,8 +31,11 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import soot.RefType;
 import soot.Scene;
@@ -41,8 +44,20 @@ import soot.SootMethod;
 import soot.toolkits.graph.Block;
 
 import java.io.File;
+import java.util.LinkedList;
 
 public class SootResolverSimplifiedTest {
+
+    @BeforeClass
+    public static void setupSoot() {
+        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        new JavaReaderStatic().setupSoot();
+        Scene.v().loadNecessaryClasses();
+        String currentPath = (new File(".")).toURI().getPath();
+        Scene.v().extendSootClassPath(currentPath + "src/test/java");
+        Scene.v().defaultClassPath();
+    }
 
     @Test
     public void testGetBlockFromClass() {
@@ -56,13 +71,10 @@ public class SootResolverSimplifiedTest {
 
     @Test
     public void testGetBlockFromMethod() {
-        Scene.v().loadBasicClasses();
-        String currentPath = (new File(".")).toURI().getPath();
-        Scene.v().extendSootClassPath(currentPath + "src/test/java");
         SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.processing.SimpleObject", SootClass.SIGNATURES);
         SootMethod method = sc.getMethodByName("method");
         Block block = SootResolverSimplified.getBlockFromMethod(method);
-        Assert.assertEquals(4, block.getBody().getUnits().size());
+        Assert.assertEquals(3, block.getBody().getUnits().size());
     }
 
     @Test

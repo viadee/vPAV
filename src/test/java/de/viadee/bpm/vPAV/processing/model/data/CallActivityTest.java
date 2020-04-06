@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.model.data;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -48,10 +49,7 @@ import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -114,21 +112,24 @@ public class CallActivityTest {
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
-        Assert.assertEquals("There are exactly three anomalies", 3, invalidPathMap.size());
+        Assert.assertEquals("There are exactly four anomalies", 4, invalidPathMap.size());
         AnomalyContainer anomaly1 = iterator.next();
         AnomalyContainer anomaly2 = iterator.next();
         AnomalyContainer anomaly3 = iterator.next();
-        // var2 in input mapping for call activity UR?
+        AnomalyContainer anomaly4 = iterator.next();
 
-        // var2 in SequenceFlow_1gfmaoe in called element
-        Assert.assertEquals("Expected a DD anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.DD,
-                anomaly1.getAnomaly());
-        // var3 in calledcalledProcess in Task 3b
-        Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
-                anomaly2.getAnomaly());
         // var4 in sequence flow after task 2
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
+                anomaly1.getAnomaly());
+        // var2 in SequenceFlow_1gfmaoe in called element
+        Assert.assertEquals("Expected a DD anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.DD,
+                anomaly2.getAnomaly());
+        // variable2 in CallActivity_0vlq6qr in In Mapping
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
                 anomaly3.getAnomaly());
+        // variable3 in CallActivity_0vlq6qr in Out Mapping
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly4.getAnomaly().toString(), Anomaly.UR,
+                anomaly4.getAnomaly());
     }
 
     @Test
@@ -149,7 +150,7 @@ public class CallActivityTest {
         processIdToPathMap.put("calledcalledProcess", "CallActivityTest/CallActivityTest_calledcalledProcess.bpmn");
 
         callActivity.builder().camundaIn("varIn", "inMapping");
-        callActivity.builder().camundaOut("z", "outMapping");
+        callActivity.builder().camundaOut("inMapping", "outMapping");
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
                 new BpmnScanner(PATH));
@@ -163,7 +164,7 @@ public class CallActivityTest {
                 inVariable.removeAttribute("source");
                 CamundaOut outVariable = callActivity.getExtensionElements().
                         getElementsQuery().filterByType(CamundaOut.class).singleResult();
-                outVariable.setCamundaSourceExpression("${z}");
+                outVariable.setCamundaSourceExpression("${inMapping}");
                 outVariable.removeAttribute("source");
             }
 
@@ -273,12 +274,12 @@ public class CallActivityTest {
                 // Start Listener
                 Assert.assertEquals("", "SequenceFlow_1", ca0.getPredecessors().get(0).getId());
                 Assert.assertEquals("", "_EndEvent_1_1", sequenceFlow2.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "CallActivity__0", startEvent1_1.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "CallActivity__2", startEvent1_1.getPredecessors().get(0).getId());
 
             } else {
                 // End Listener
                 Assert.assertEquals("", "_EndEvent_1_1", ca0.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "CallActivity__0", sequenceFlow2.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "CallActivity__2", sequenceFlow2.getPredecessors().get(0).getId());
                 Assert.assertEquals("", "SequenceFlow_1", startEvent1_1.getPredecessors().get(0).getId());
             }
         }
@@ -321,5 +322,11 @@ public class CallActivityTest {
                     anomaly4.getAnomaly());
             Assert.assertEquals("There should be two input variables.", 2, flowAnalysis.getNodes().get("_StartEvent_1").getInUnused().size());
         }
+    }
+
+    @Before
+    public void clear() {
+        IssueService.getInstance().clear();
+        ProcessVariableOperation.resetIdCounter();
     }
 }

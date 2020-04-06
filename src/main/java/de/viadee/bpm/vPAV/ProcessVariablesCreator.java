@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
+import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import soot.Value;
 import soot.toolkits.graph.Block;
 
@@ -58,12 +59,11 @@ public class ProcessVariablesCreator {
     private String defaultScopeId;
 
     // Stack of successor nodes
-    private ArrayList<Node> stack = new ArrayList<>();
+    private ArrayList<BasicNode> stack = new ArrayList<>();
 
     // Used for testing
     ProcessVariablesCreator(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, String scopeId) {
-        //    variableBlock = new VariableBlock(block, new ArrayList<>());
         this.element = element;
         this.chapter = chapter;
         this.fieldType = fieldType;
@@ -72,20 +72,29 @@ public class ProcessVariablesCreator {
 
     // Does it make sense to store the top-level block or are there better ways?
     public ProcessVariablesCreator(final BpmnElement element,
-            final ElementChapter chapter, final KnownElementFieldType fieldType) {
-        //    variableBlock = new VariableBlock(block, new ArrayList<>());
+            final ElementChapter chapter, final KnownElementFieldType fieldType, final BasicNode[] predecessor) {
         this.element = element;
         this.chapter = chapter;
         this.fieldType = fieldType;
         determineScopeId();
+        if (predecessor[0] != null) {
+            stack.add(predecessor[0]);
+        }
     }
 
     // Only called for top-level block -> Rename
-    // TODO do not return variable block, not needed at the moment
-    public void blockIterator(final Block block, final List<Value> args) {
+    public BasicNode blockIterator(final Block block, final List<Value> args) {
         ObjectReader objectReader = new ObjectReader(this);
-        objectReader.processBlock(block, args, null,null, null);
+        objectReader.processBlock(block, args, null, null, null);
         cleanEmptyNodes();
+
+        // find last node
+        for (int i = nodes.size() - 1; i >= 0; i--) {
+            if (element.getControlFlowGraph().getNodes().get(nodes.get(i).getId()) != null) {
+                return nodes.get(i);
+            }
+        }
+        return null;
     }
 
     // This method adds process variables one by one
@@ -127,11 +136,19 @@ public class ProcessVariablesCreator {
         return defaultScopeId;
     }
 
+    public String getScopeIdOfChild() {
+        if (element.getBaseElement() instanceof CallActivity) {
+            return ((CallActivity) element.getBaseElement()).getCalledElement();
+        } else {
+            return defaultScopeId;
+        }
+    }
+
     private Node lastNode() {
         return nodes.get(nodes.size() - 1);
     }
 
-    private Node peekStack() {
+    private BasicNode peekStack() {
         return stack.get(stack.size() - 1);
     }
 

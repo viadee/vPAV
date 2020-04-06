@@ -38,6 +38,7 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import soot.*;
@@ -65,13 +66,12 @@ public class ProcessVariablesCreatorTest {
     public void testBlockIterator() {
         BaseElement baseElement = mock(BaseElement.class);
         when(baseElement.getId()).thenReturn("ServiceTask");
-        // de.viadee.bpm.vPAV.delegates.SimpleDelegate
         SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.delegates.SimpleDelegate", SootClass.SIGNATURES);
         SootMethod method = sc.getMethodByName("execute");
         ControlFlowGraph cfg = new ControlFlowGraph();
         ProcessVariablesCreator vr = new ProcessVariablesCreator(
                 new BpmnElement("", baseElement, cfg, new FlowAnalysis()),
-                null, null);
+                null, null, new BasicNode[1]);
         ArrayList<Value> args = new ArrayList<>();
         // TODO check if jimple local is really the correct parameter type
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
@@ -90,7 +90,7 @@ public class ProcessVariablesCreatorTest {
         Assert.assertEquals(1, node3.getOperations().size());
         Assert.assertEquals(1, node4.getOperations().size());
         Assert.assertSame(node1.getBlock(), node4.getBlock());
-        Assert.assertEquals("variableOneChanged", node4.getKilled().get("4").getName());
+        Assert.assertEquals("variableOneChanged", node4.getKilled().get("variableOneChanged_4").getName());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ProcessVariablesCreatorTest {
                 VariableOperation.WRITE, null);
 
         ProcessVariablesCreator vr = new ProcessVariablesCreator(new BpmnElement("", baseElement, cfg, new FlowAnalysis()), null,
-                null);
+                null, new BasicNode[1]);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpOne);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo);
         vr.handleProcessVariableManipulation(blockTwo, blockTwoOpOne);
@@ -213,5 +213,11 @@ public class ProcessVariablesCreatorTest {
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
         vr.blockIterator(SootResolverSimplified.getBlockFromMethod(method), args);
         return cfg;
+    }
+
+    @Before
+    public void clear() {
+        IssueService.getInstance().clear();
+        ProcessVariableOperation.resetIdCounter();
     }
 }
