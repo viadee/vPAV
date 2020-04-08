@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -68,7 +68,7 @@ public class ResourceFileReader {
      */
     public static void readResourceFile(final String fileName,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String scopeId) {
+            final String scopeId, BasicNode[] predecessor) {
         if (fileName != null && fileName.trim().length() > 0) {
             try {
                 final DirectoryScanner directoryScanner = new DirectoryScanner();
@@ -93,7 +93,7 @@ public class ResourceFileReader {
 
                     final String methodBody = IOUtils.toString(resource);
                     searchProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId,
-                            methodBody);
+                            methodBody, predecessor);
                 } else {
                     LOGGER.warning("Class " + fileName + " does not exist");
                 }
@@ -117,7 +117,7 @@ public class ResourceFileReader {
      */
     static void searchProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
-            final String scopeId, final String code) {
+            final String scopeId, final String code, BasicNode[] predecessor) {
 
         BasicNode node = new BasicNode(element, chapter, fieldType);
 
@@ -130,6 +130,10 @@ public class ResourceFileReader {
 
         if (node.getOperations().size() > 0) {
             element.getControlFlowGraph().addNode(node);
+            if (predecessor[0] != null) {
+                node.addPredecessor(predecessor[0]);
+            }
+            predecessor[0] = node;
         }
     }
 

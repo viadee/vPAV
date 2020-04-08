@@ -112,22 +112,21 @@ public class GraphCreationTest {
         // calculate invalid paths based on data flow graphs
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
         Iterator<Map.Entry<AnomalyContainer, List<Path>>> iterator = invalidPathMap.entrySet().iterator();
+
         // get invalid paths
         Map.Entry<AnomalyContainer, List<Path>> entry1 = iterator.next();
-        AnomalyContainer anomalyContainer1 = entry1.getKey();
-        final List<Path> geloeschteVarTest = entry1.getValue();
+        Map.Entry<AnomalyContainer, List<Path>> entry2 = iterator.next();
+        Map.Entry<AnomalyContainer, List<Path>> entry3 = iterator.next();
+        Map.Entry<AnomalyContainer, List<Path>> entry4 = iterator.next();
+
+        AnomalyContainer anomalyContainerGeloeschteVar = entry4.getKey();
         ProcessVariableOperation geloeschteVarOperation = Mockito.mock(ProcessVariableOperation.class);
         Mockito.when(geloeschteVarOperation.getIndex()).thenReturn(4);
-
         Assert.assertEquals("AnomalyContainer geloeschteVariable does not equal actual container",
                 new AnomalyContainer("geloeschteVariable", Anomaly.DU, "SequenceFlow_0bi6kaa__0",
-                        "SequenceFlow_0bi6kaa", "", geloeschteVarOperation), anomalyContainer1);
-        Assert.assertEquals(
-                "[[SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, BoundaryEvent_11udorz, SequenceFlow_0bi6kaa]]",
-                geloeschteVarTest.toString());
-        Map.Entry<AnomalyContainer, List<Path>> entry2 = iterator.next();
-        AnomalyContainer anomalyContainer2 = entry2.getKey();
-        final List<Path> jepppaTest = entry2.getValue();
+                        "SequenceFlow_0bi6kaa", "", geloeschteVarOperation), anomalyContainerGeloeschteVar);
+
+        AnomalyContainer anomalyContainerJepppa = entry1.getKey();
         ProcessVariableOperation jepppaOperation = Mockito.mock(ProcessVariableOperation.class);
         Mockito.when(jepppaOperation.getIndex()).thenReturn(11);
         Assert.assertEquals("AnomalyContainer jepppa does not equal actual container",
@@ -135,27 +134,20 @@ public class GraphCreationTest {
                         "SequenceFlow_0btqo3y__0",
                         "SequenceFlow_0btqo3y",
                         null,
-                        jepppaOperation), anomalyContainer2);
-        Assert.assertEquals(
-                "[[SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_0t7iwpj, Task_0546a8y, SequenceFlow_1m6lt2o, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y], [SequenceFlow_1aapyv6, ServiceTask_108g52x, SequenceFlow_0yhv5j2, ServiceTask_05g4a96, SequenceFlow_09j6ilt, ExclusiveGateway_0su45e1, SequenceFlow_1mggduw, Task_11t5rso, SequenceFlow_06ehu4z, ExclusiveGateway_0fsjxd1, SequenceFlow_0btqo3y]]",
-                jepppaTest.toString());
-        Map.Entry<AnomalyContainer, List<Path>> entry3 = iterator.next();
-        AnomalyContainer anomalyContainer3 = entry3.getKey();
-        final List<Path> testHallo2 = entry3.getValue();
+                        jepppaOperation), anomalyContainerJepppa);
+
+        AnomalyContainer anomalyContainerHallo2 = entry3.getKey();
         ProcessVariableOperation hallo2Operation = Mockito.mock(ProcessVariableOperation.class);
         Mockito.when(hallo2Operation.getIndex()).thenReturn(2);
         Assert.assertEquals("AnomalyContainer hallo2 does not equal actual container",
                 new AnomalyContainer("hallo2", Anomaly.UR,
                         "BusinessRuleTask_119jb6t__0",
-                        "BusinessRuleTask_119jb6t", "", hallo2Operation), anomalyContainer3);
-        Assert.assertEquals("[[BusinessRuleTask_119jb6t]]", testHallo2.toString());
-        Map.Entry<AnomalyContainer, List<Path>> entry4 = iterator.next();
-        AnomalyContainer anomalyContainer4 = entry4.getKey();
-        final List<Path> validVarTest = entry4.getValue();
+                        "BusinessRuleTask_119jb6t", "", hallo2Operation), anomalyContainerHallo2);
+
+        AnomalyContainer anomalyContainerIntHallo = entry2.getKey();
         ProcessVariableOperation intHalloOperation = Mockito.mock(ProcessVariableOperation.class);
-        Assert.assertEquals("AnomalyContainer validVar does not equal actual container",
+        Assert.assertEquals("AnomalyContainer intHallo does not equal actual container",
                 new AnomalyContainer("intHallo", Anomaly.UR, "ServiceTask_05g4a96", "Service Task2", intHalloOperation),
-                anomalyContainer4);
-        Assert.assertEquals("[[ServiceTask_05g4a96]]", validVarTest.toString());
+                anomalyContainerIntHallo);
     }
 }

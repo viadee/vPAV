@@ -491,13 +491,13 @@ public final class ProcessVariableReader {
                     if (inlineScript != null && inlineScript.trim().length() > 0) {
                         ResourceFileReader.searchProcessVariablesInCode(element,
                                 listenerChapter, KnownElementFieldType.InlineScript, null,
-                                scopeId, inlineScript);
+                                scopeId, inlineScript, predecessor);
                     } else {
                         final String resourcePath = script.getCamundaResource();
                         if (resourcePath != null) {
                             getVariablesFromGroovyScript(resourcePath, element,
                                     listenerChapter,
-                                    scopeId);
+                                    scopeId, predecessor);
                         }
                     }
                 }
@@ -541,7 +541,7 @@ public final class ProcessVariableReader {
             }
 
             ResourceFileReader.readResourceFile(filePath, element, ElementChapter.TaskListener,
-                    KnownElementFieldType.Class, scopeId);
+                    KnownElementFieldType.Class, scopeId, predecessor);
 
             final CamundaScript script = listener.getCamundaScript();
             if (script != null && script.getCamundaScriptFormat() != null
@@ -550,12 +550,12 @@ public final class ProcessVariableReader {
                 final String inlineScript = script.getTextContent();
                 if (inlineScript != null && inlineScript.trim().length() > 0) {
                     ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.TaskListener,
-                            KnownElementFieldType.InlineScript, null, scopeId, inlineScript);
+                            KnownElementFieldType.InlineScript, null, scopeId, inlineScript, predecessor);
                 } else {
                     final String resourcePath = script.getCamundaResource();
                     if (resourcePath != null) {
                         getVariablesFromGroovyScript(resourcePath, element,
-                                ElementChapter.TaskListener, scopeId);
+                                ElementChapter.TaskListener, scopeId, predecessor);
                     }
                 }
             }
@@ -702,12 +702,12 @@ public final class ProcessVariableReader {
                     final String inlineScript = expression.getTextContent();
                     if (inlineScript != null && inlineScript.trim().length() > 0) {
                         ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.Details,
-                                KnownElementFieldType.InlineScript, scopeId, null, inlineScript);
+                                KnownElementFieldType.InlineScript, scopeId, null, inlineScript, predecessor);
                     } else {
                         final String resourcePath = expression.getCamundaResource();
                         if (resourcePath != null) {
                             getVariablesFromGroovyScript(resourcePath, element, ElementChapter.Details,
-                                    scopeId);
+                                    scopeId, predecessor);
                         }
                     }
                 } else {
@@ -829,12 +829,12 @@ public final class ProcessVariableReader {
                 final Script script = scriptTask.getScript();
                 if (script != null && script.getTextContent() != null && script.getTextContent().trim().length() > 0) {
                     ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.Details,
-                            KnownElementFieldType.InlineScript, null, scopeId, script.getTextContent());
+                            KnownElementFieldType.InlineScript, null, scopeId, script.getTextContent(), predecessor);
                 } else {
                     final String resourcePath = scriptTask.getCamundaResource();
                     if (resourcePath != null) {
                         getVariablesFromGroovyScript(resourcePath, element,
-                                ElementChapter.Details, scopeId);
+                                ElementChapter.Details, scopeId, predecessor);
                     }
                 }
             }
@@ -1003,10 +1003,10 @@ public final class ProcessVariableReader {
      */
     private void getVariablesFromGroovyScript(final String groovyFile,
             final BpmnElement element, final ElementChapter chapter,
-            final String scopeId) {
+            final String scopeId, BasicNode[] predecessor) {
 
         ResourceFileReader
-                .readResourceFile(groovyFile, element, chapter, KnownElementFieldType.ExternalScript, scopeId);
+                .readResourceFile(groovyFile, element, chapter, KnownElementFieldType.ExternalScript, scopeId, predecessor);
     }
 
     /**

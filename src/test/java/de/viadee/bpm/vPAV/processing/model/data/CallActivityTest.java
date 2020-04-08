@@ -274,12 +274,12 @@ public class CallActivityTest {
                 // Start Listener
                 Assert.assertEquals("", "SequenceFlow_1", ca0.getPredecessors().get(0).getId());
                 Assert.assertEquals("", "_EndEvent_1_1", sequenceFlow2.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "CallActivity__2", startEvent1_1.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "CallActivity__3", startEvent1_1.getPredecessors().get(0).getId());
 
             } else {
                 // End Listener
                 Assert.assertEquals("", "_EndEvent_1_1", ca0.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "CallActivity__2", sequenceFlow2.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "CallActivity__3", sequenceFlow2.getPredecessors().get(0).getId());
                 Assert.assertEquals("", "SequenceFlow_1", startEvent1_1.getPredecessors().get(0).getId());
             }
         }
