@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -58,8 +58,7 @@ public class ProcessVariablesCreator {
 
     private String defaultScopeId;
 
-    // Stack of successor nodes
-    private ArrayList<BasicNode> stack = new ArrayList<>();
+    private BasicNode predecessor;
 
     // Used for testing
     ProcessVariablesCreator(final BpmnElement element,
@@ -78,7 +77,7 @@ public class ProcessVariablesCreator {
         this.fieldType = fieldType;
         determineScopeId();
         if (predecessor[0] != null) {
-            stack.add(predecessor[0]);
+            this.predecessor = predecessor[0];
         }
     }
 
@@ -111,12 +110,20 @@ public class ProcessVariablesCreator {
             node.addOperation(pvo);
             nodes.add(node);
             element.getControlFlowGraph().addNode(node);
-            if (!stack.isEmpty()) {
-                node.addPredecessor(peekStack());
-            } else if (nodes.size() > 1) {
-                node.addPredecessor(nodes.get(nodes.size() - 2));
+            updatePredecessor(node);
+        }
+    }
 
-            }
+    public BasicNode addNodeIfNotExisting(Block block) {
+        if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
+            return lastNode();
+        } else {
+            // Add new block
+            Node node = new Node(element, block, chapter, fieldType);
+            nodes.add(node);
+            element.getControlFlowGraph().addNode(node);
+            updatePredecessor(node);
+            return node;
         }
     }
 
@@ -148,14 +155,6 @@ public class ProcessVariablesCreator {
         return nodes.get(nodes.size() - 1);
     }
 
-    private BasicNode peekStack() {
-        return stack.get(stack.size() - 1);
-    }
-
-    private void popStack() {
-        stack.remove(stack.size() - 1);
-    }
-
     private void cleanEmptyNodes() {
         // Clean up nodes without operations to make analysis faster
         for (Node node : nodes) {
@@ -175,41 +174,40 @@ public class ProcessVariablesCreator {
         }
     }
 
-    public void startSuccessorHandling(Block block) {
-        // Check if block is already associated with one node, if not create an empty one
-        boolean exists = false;
-        // Start from back as this should be faster
-        for (int i = nodes.size() - 1; i >= 0; i--) {
-            if (nodes.get(i).getBlock().equals(block)) {
-                exists = true;
-                break;
-            }
-        }
-        if (!exists) {
-            Node node = new Node(element, block, chapter, fieldType);
-            nodes.add(node);
-            element.getControlFlowGraph().addNode(node);
-            if (!stack.isEmpty()) {
-                node.addPredecessor(peekStack());
-            }
-        }
-        stack.add(lastNode());
-    }
-
-    public void endSuccessorHandling() {
-        if (!stack.isEmpty()) {
-            popStack();
-        }
-    }
-
     public void visitBlockAgain(Block block) {
         // find first node that is associated with block and set successor
         for (Node node : nodes) {
             if (ObjectReader.hashBlock(node.getBlock()) == ObjectReader.hashBlock(block)) {
-                node.addPredecessor(peekStack());
+                // TODO not sure about this
+                node.addPredecessor(predecessor);
                 break;
             }
         }
+    }
+
+    private void updatePredecessor(BasicNode node) {
+        if (predecessor != null) {
+            node.addPredecessor(predecessor);
+        }
+        predecessor = node;
+    }
+
+    public Node getNodeOfBlock(Block block) {
+        if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
+            return lastNode();
+        } else {
+            Node node = new Node(element, block, chapter, fieldType);
+            nodes.add(node);
+            element.getControlFlowGraph().addNode(node);
+            if (predecessor != null) {
+                node.addPredecessor(predecessor);
+            }
+            return node;
+        }
+    }
+
+    public void pushNodeToStack(BasicNode blockNode) {
+        predecessor = blockNode;
     }
 
     // TODO recursion based on blocks (maybe hashing if already inside?

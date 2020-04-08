@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -60,6 +60,8 @@ public class ObjectReader {
     private HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
 
     private ProcessVariablesCreator processVariablesCreator;
+
+    public BasicNode returnNode;
 
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
@@ -121,20 +123,30 @@ public class ObjectReader {
             }
             // e. g. return temp$3
             else if (unit instanceof ReturnStmt) {
-                return handleReturnStmt(block, unit, thisName);
+                Object returnValue = handleReturnStmt(block, unit, thisName);
+                returnNode = processVariablesCreator.addNodeIfNotExisting(block);
+                return returnValue;
             }
             // return
             else if (unit instanceof ReturnVoidStmt) {
+                returnNode = processVariablesCreator.addNodeIfNotExisting(block);
                 return null;
             }
         }
         // Process successors e.g. if or loop
         if (block.getSuccs().size() > 0) {
-            processVariablesCreator.startSuccessorHandling(block);
+            Node blockNode = null;
             for (Block succ : block.getSuccs()) {
+                if (blockNode == null) {
+                    blockNode = processVariablesCreator.getNodeOfBlock(block);
+                }
+
+                processVariablesCreator.pushNodeToStack(blockNode);
                 this.processBlock(succ, args, argValues, thisName, parentName);
             }
-            processVariablesCreator.endSuccessorHandling();
+            if(returnNode != null) {
+                processVariablesCreator.pushNodeToStack(returnNode);
+            }
         }
 
         return null;

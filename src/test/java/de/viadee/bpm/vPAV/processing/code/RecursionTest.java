@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.code;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Helper;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -70,30 +71,15 @@ public class RecursionTest {
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
         RuntimeConfig.getInstance().setTest(true);
+        Properties myProperties = new Properties();
+        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+        ConfigConstants.getInstance().setProperties(myProperties);
     }
 
     @Test
     public void recursionTest() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        Properties myProperties = new Properties();
-        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
-        final File processDefinition = new File(PATH);
-
-        // parse bpmn model and set delegate
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-        ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
-        serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.RecursiveDelegate");
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
-
-        // create data flow graphs
-        final Collection<String> calledElementHierarchy = new ArrayList<>();
         FlowAnalysis flowAnalysis = new FlowAnalysis();
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+        final Collection<Graph> graphCollection = Helper.getModelWithDelegate("de.viadee.bpm.vPAV.delegates.RecursiveDelegate", flowAnalysis);
 
         flowAnalysis.analyze(graphCollection);
         LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
@@ -101,8 +87,8 @@ public class RecursionTest {
         AnalysisElement endEvent = nodes.get("EndEvent_13uioac");
         AnalysisElement sequenceFlow2 = endEvent.getPredecessors().get(0);
         AnalysisElement taskDelegateElse = sequenceFlow2.getPredecessors().get(0);
-        AnalysisElement taskDelegateIf = taskDelegateElse.getPredecessors().get(0);
-        AnalysisElement taskDelegateExecute = taskDelegateElse.getPredecessors().get(1);
+        AnalysisElement taskDelegateExecute = taskDelegateElse.getPredecessors().get(0);
+        AnalysisElement taskDelegateIf = taskDelegateElse.getPredecessors().get(1);
         AnalysisElement sequenceFlow1 = taskDelegateExecute.getPredecessors().get(0);
         AnalysisElement startEvent = sequenceFlow1.getPredecessors().get(0);
 
