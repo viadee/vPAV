@@ -132,19 +132,19 @@ public final class ProcessVariableReader {
         // TODO can it be joined with signals and messages?
         getVariablesFromLinks(javaReaderStatic, element, fileScanner, predecessor);
 
-        // 9) Search variables execution listener (end)
-        if (extensionElements != null) {
-            getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
-                    extensionElements, scopeElementId, ElementChapter.ExecutionListenerEnd, predecessor);
-        }
-
-        // 10) Search variables in Output Parameters
-        getVariablesFromOutputParameters(element, predecessor);
-
-        // 11) Search in Input/Output-Associations (Call Activities)
+        // TODO not 100% sure whether this is the right position or not
+        // 9) Search in Input/Output-Associations (Call Activities)
         searchVariablesInInputOutputExtensions(javaReaderStatic, fileScanner, element,
                 extensionElements, scopeElementId, predecessor);
 
+        // 10) Search variables execution listener (end)
+        if (extensionElements != null) {
+            getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
+                    extensionElements, scopeElementId, ElementChapter.ExecutionListenerEnd, predecessor);
+        };
+
+        // 11) Search variables in Output Parameters
+        getVariablesFromOutputParameters(element, predecessor);
     }
 
     /**
