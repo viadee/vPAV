@@ -250,7 +250,7 @@ public class ProcessVariablesLifecycleOrderTest {
         assertEquals("Start Listener should have one own defined variable.", 1,
                 startListener1.getDefined().size());
         assertEquals("Start Listener 2 should have three input variables.", 3, startListener2.getInUnused().size());
-       // TODO 4 or 5? Check if input parameters are accessible in child call activity
+       // TODO 4 or 5? Check if input parameters are accessible in child call activity (they are not, make this correct)
         assertEquals("Child start event should have four input variables.", 5,
                 startEventCalledProcess.getInUnused().size());
         assertEquals("End Listener with Expression should have five input variables", 5,

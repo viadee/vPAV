@@ -94,6 +94,6 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
 		variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
 
-		Assert.assertEquals(3, element.getControlFlowGraph().getOperations().size());
+		Assert.assertEquals(5, element.getControlFlowGraph().getOperations().size());
 	}
 }
