@@ -472,16 +472,19 @@ public class FlowAnalysis {
         if (!scopeElement.equals(scopePredecessor)) {
             // TODO was ist mit end event listenern des subprocesses
             if (predecessor.getBaseElement() instanceof EndEvent) {
-                predecessor.getOutUnused().forEach((key, value) -> {
-                    if (value.getScopeId().equals(scopePredecessor)) {
-                        tempInUnused.remove(key);
-                    }
-                });
-                predecessor.getOutUsed().forEach((key, value) -> {
-                    if (value.getScopeId().equals(scopePredecessor)) {
-                        tempInUsed.remove(key);
-                    }
-                });
+                if (!(analysisElement instanceof BasicNode && ((BasicNode) analysisElement).getElementChapter()
+                        .equals(ElementChapter.OutputData))) {
+                    predecessor.getOutUnused().forEach((key, value) -> {
+                        if (value.getScopeId().equals(scopePredecessor)) {
+                            tempInUnused.remove(key);
+                        }
+                    });
+                    predecessor.getOutUsed().forEach((key, value) -> {
+                        if (value.getScopeId().equals(scopePredecessor)) {
+                            tempInUsed.remove(key);
+                        }
+                    });
+                }
             }
         } else if (!predecessor.getParentElement().getId().equals(analysisElement.getParentElement().getId())) {
             // Check for local variables in element like input parameters
