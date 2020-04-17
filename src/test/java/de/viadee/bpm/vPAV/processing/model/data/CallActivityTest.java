@@ -63,9 +63,6 @@ import java.util.*;
 public class CallActivityTest {
 
     // TODO tests überprüfen, weil scope mitunter nicht richtig berücksichtig wird (glaube ich)
-    // input parameters are not availabe in called processes
-    // output mappings könnten nicht richtig gelöscht werden
-    // TODO !!
     private static final String BASE_PATH = "src/test/resources/CallActivityTest/";
 
     @BeforeClass
@@ -116,28 +113,41 @@ public class CallActivityTest {
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
-        Assert.assertEquals("There are exactly five anomalies", 5, invalidPathMap.size());
+        Assert.assertEquals("There should be eight anomalies", 8, invalidPathMap.size());
         AnomalyContainer anomaly1 = iterator.next();
         AnomalyContainer anomaly2 = iterator.next();
         AnomalyContainer anomaly3 = iterator.next();
         AnomalyContainer anomaly4 = iterator.next();
         AnomalyContainer anomaly5 = iterator.next();
+        AnomalyContainer anomaly6 = iterator.next();
+        AnomalyContainer anomaly7 = iterator.next();
+        AnomalyContainer anomaly8 = iterator.next();
 
-        // var4 in sequence flow after task 2
+        // var4 in sequence flow 1xq2ktt after task 2
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                 anomaly1.getAnomaly());
         // var3 in ServiceTask_0edbu4z in calledcalledProcess
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
                 anomaly2.getAnomaly());
-        // var2 in SequenceFlow_1gfmaoe in called element
-        Assert.assertEquals("Expected a DD anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.DD,
+        // var1 in ServiceTask_1gq1azp in called Process
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
                 anomaly3.getAnomaly());
-        // variable2 in CallActivity_0vlq6qr in In Mapping
-        Assert.assertEquals("Expected a UR anomaly but got " + anomaly4.getAnomaly().toString(), Anomaly.UR,
+        // var2 in SequenceFlow_1gfmaoe in called element
+        Assert.assertEquals("Expected a DD anomaly but got " + anomaly4.getAnomaly().toString(), Anomaly.DD,
                 anomaly4.getAnomaly());
-        // variable3 in CallActivity_0vlq6qr in Out Mapping
+        // variable2 in CallActivity_0vlq6qr in In Mapping
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly5.getAnomaly().toString(), Anomaly.UR,
                 anomaly5.getAnomaly());
+        // var1 in ServiceTask_101owrcj in called Process
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly6.getAnomaly().toString(), Anomaly.UR,
+                anomaly6.getAnomaly());
+        // var1 in ServiceTask_0mfcclv
+        // var1 in ServiceTask_1gq1azp in called Process
+        Assert.assertEquals("Expected a DD anomaly but got " + anomaly7.getAnomaly().toString(), Anomaly.DD,
+                anomaly7.getAnomaly());
+        // variable3 in CallActivity_0vlq6qr in Out Mapping
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly8.getAnomaly().toString(), Anomaly.UR,
+                anomaly8.getAnomaly());
     }
 
     @Test
@@ -329,7 +339,7 @@ public class CallActivityTest {
             // inMapping CallActivity
             Assert.assertEquals("Expected a UR anomaly but got " + anomaly4.getAnomaly().toString(), Anomaly.UR,
                     anomaly4.getAnomaly());
-            Assert.assertEquals("There should be two input variables.", 2, flowAnalysis.getNodes().get("_StartEvent_1").getInUnused().size());
+            Assert.assertEquals("There should be one input variable.", 1, flowAnalysis.getNodes().get("_StartEvent_1").getInUnused().size());
         }
     }
 

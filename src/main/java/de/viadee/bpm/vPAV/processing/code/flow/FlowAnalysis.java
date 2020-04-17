@@ -59,6 +59,8 @@ public class FlowAnalysis {
         this.nodes = new LinkedHashMap<>();
     }
 
+    private HashMap<String, AnalysisElement> nodesBeforeCallActivities = new HashMap<>();
+
     /**
      * Given a collection of graphs, this method is the sole entrance to the
      * analysis of the graphs. First process model and control flow graph of
@@ -68,8 +70,7 @@ public class FlowAnalysis {
      * unit basis is performed. Lastly, anomalies are extracted and appended to the
      * parent element (for visualization)
      *
-     * @param graphCollection
-     *            Collection of graphs
+     * @param graphCollection Collection of graphs
      */
     public void analyze(final Collection<Graph> graphCollection) {
         for (Graph graph : graphCollection) {
@@ -83,8 +84,7 @@ public class FlowAnalysis {
     /**
      * Embeds the control flow graphs of bpmn elements into the process model
      *
-     * @param graph
-     *            Given Graph
+     * @param graph Given Graph
      */
     private void embedControlFlowGraph(final Graph graph) {
         // Add all elements on bpmn level
@@ -143,9 +143,17 @@ public class FlowAnalysis {
 
                     if (hasNodesBefore && !hasNodesAfter) {
                         lastNodeBefore = lastNode;
-                    }
-                    if (!hasNodesBefore && hasNodesAfter) {
+                        for (AnalysisElement succ : analysisElement.getSuccessors()) {
+                            if (succ.getBaseElement() instanceof SequenceFlow) {
+                                nodesBeforeCallActivities.put(succ.getId(), lastNodeBefore);
+                                break;
+                            }
+                        }
+                    } else if (!hasNodesBefore && hasNodesAfter) {
                         firstNodeAfter = firstNode;
+                        nodesBeforeCallActivities.put(firstNodeAfter.getId(), analysisElement.getPredecessors().get(0));
+                    } else {
+                        nodesBeforeCallActivities.put(firstNodeAfter.getId(), lastNodeBefore);
                     }
 
                     for (AnalysisElement succ : analysisElement.getSuccessors()) {
@@ -178,7 +186,7 @@ public class FlowAnalysis {
                                 });
                             }
 
-                        } else if ((succ.getBaseElement() instanceof SequenceFlow)) {
+                        } else if (succ.getBaseElement() instanceof SequenceFlow) {
                             AnalysisElement endEvent = succ;
                             // Find end event of subprocess
                             for (AnalysisElement nestedPreds : succ.getPredecessors()) {
@@ -206,7 +214,9 @@ public class FlowAnalysis {
                             }
 
                         }
+
                     }
+
                 } else {
                     // Replace element with first block
                     for (AnalysisElement pred : analysisElement.getPredecessors()) {
@@ -282,6 +292,7 @@ public class FlowAnalysis {
                                     succ.removePredecessor(pred.getId());
                                 }
                             });
+                            nodesBeforeCallActivities.put(succ.getId(), analysisElement.getPredecessors().get(0));
                         }
                     });
                     ids.add(analysisElement.getId());
@@ -306,8 +317,7 @@ public class FlowAnalysis {
     /**
      * Embeds call activities
      *
-     * @param analysisElement
-     *            Current element
+     * @param analysisElement Current element
      */
     private void embedCallActivities(AnalysisElement analysisElement, boolean hasNodesBefore) {
         final LinkedHashMap<String, ProcessVariableOperation> camundaIn = new LinkedHashMap<>();
@@ -471,19 +481,44 @@ public class FlowAnalysis {
 
         if (!scopeElement.equals(scopePredecessor)) {
             // TODO was ist mit end event listenern des subprocesses
+
+            // Check for local variables in element like input parameters
+            predecessor.getOutUnused().forEach((key, value) -> {
+                if (value.getScopeId().equals(scopePredecessor) || value.getScopeId()
+                        .equals(predecessor.getParentElement().getId())) {
+                    tempInUnused.remove(key);
+                }
+            });
+            predecessor.getOutUsed().forEach((key, value) -> {
+                if (value.getScopeId().equals(scopePredecessor) || value.getScopeId()
+                        .equals(predecessor.getParentElement().getId())) {
+                    tempInUsed.remove(key);
+                }
+            });
+
+            if (nodesBeforeCallActivities.containsKey(analysisElement.getId())) {
+                AnalysisElement predecessorCallActivity = nodesBeforeCallActivities.get(analysisElement.getId());
+                // Pass Input parameters forward
+                predecessorCallActivity.getOutUnused().forEach((key, value) -> {
+                    if (value.getScopeId().equals(analysisElement.getParentElement().getId()) || value.getScopeId()
+                            .equals(scopeElement)) {
+                        tempInUnused.put(key, value);
+                    }
+                });
+                predecessorCallActivity.getOutUsed().forEach((key, value) -> {
+                    if (value.getScopeId().equals(analysisElement.getParentElement().getId()) || value.getScopeId()
+                            .equals(scopeElement)) {
+                        tempInUnused.put(key, value);
+                    }
+                });
+            }
+
             if (predecessor.getBaseElement() instanceof EndEvent) {
-                if (!(analysisElement instanceof BasicNode && ((BasicNode) analysisElement).getElementChapter()
-                        .equals(ElementChapter.OutputData))) {
-                    predecessor.getOutUnused().forEach((key, value) -> {
-                        if (value.getScopeId().equals(scopePredecessor)) {
-                            tempInUnused.remove(key);
-                        }
-                    });
-                    predecessor.getOutUsed().forEach((key, value) -> {
-                        if (value.getScopeId().equals(scopePredecessor)) {
-                            tempInUsed.remove(key);
-                        }
-                    });
+                // Call Activity
+                if (analysisElement instanceof BasicNode && ((BasicNode) analysisElement).getElementChapter()
+                        .equals(ElementChapter.OutputData)) {
+                    predecessor.getOutUnused().forEach(tempInUnused::put);
+                    predecessor.getOutUsed().forEach(tempInUsed::put);
                 }
             }
         } else if (!predecessor.getParentElement().getId().equals(analysisElement.getParentElement().getId())) {
@@ -495,6 +530,20 @@ public class FlowAnalysis {
             });
             predecessor.getOutUsed().forEach((key, value) -> {
                 if (value.getScopeId().equals(predecessor.getParentElement().getId())) {
+                    tempInUsed.remove(key);
+                }
+            });
+        } else if (predecessor instanceof BasicNode && ((BasicNode) predecessor).getElementChapter()
+                .equals(ElementChapter.OutputData)) {
+            predecessor.getOutUnused().forEach((key, value) -> {
+                if (!(value.getScopeId().equals(scopeElement) || value.getScopeId()
+                        .equals(analysisElement.getParentElement().getId()))) {
+                    tempInUnused.remove(key);
+                }
+            });
+            predecessor.getOutUsed().forEach((key, value) -> {
+                if (!(value.getScopeId().equals(scopeElement) || value.getScopeId()
+                        .equals(analysisElement.getParentElement().getId()))) {
                     tempInUsed.remove(key);
                 }
             });
@@ -614,8 +663,7 @@ public class FlowAnalysis {
     /**
      * Extract DD anomalies
      *
-     * @param node
-     *            Current node
+     * @param node Current node
      */
     private void ddAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> ddAnomalies = new LinkedHashMap<>(
@@ -631,8 +679,7 @@ public class FlowAnalysis {
     /**
      * Extract DU anomalies
      *
-     * @param node
-     *            Current node
+     * @param node Current node
      */
     private void duAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> duAnomalies = new LinkedHashMap<>(
@@ -648,8 +695,7 @@ public class FlowAnalysis {
     /**
      * Extract UR anomalies
      *
-     * @param node
-     *            Current node
+     * @param node Current node
      */
     private void urAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> urAnomaliesTemp = new LinkedHashMap<>(node.getUsed());
@@ -686,8 +732,7 @@ public class FlowAnalysis {
     /**
      * Extract UU anomalies
      *
-     * @param node
-     *            Current node
+     * @param node Current node
      */
     private void uuAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> uuAnomaliesTemp = new LinkedHashMap<>(node.getKilled());
@@ -724,12 +769,9 @@ public class FlowAnalysis {
     /**
      * Check for data-flow anomaly between current and previous variable operation
      *
-     * @param element
-     *            Current BpmnElement
-     * @param curr
-     *            current operation
-     * @param prev
-     *            previous operation
+     * @param element Current BpmnElement
+     * @param curr    current operation
+     * @param prev    previous operation
      */
     private void checkAnomaly(final BpmnElement element, final ProcessVariableOperation curr,
             final ProcessVariableOperation prev, final String nodeId) {
@@ -758,10 +800,8 @@ public class FlowAnalysis {
     /**
      * UU anomaly: second last operation of PV is DELETE, last operation is DELETE
      *
-     * @param prev
-     *            Previous ProcessVariable
-     * @param curr
-     *            Current ProcessVariable
+     * @param prev Previous ProcessVariable
+     * @param curr Current ProcessVariable
      * @return true/false
      */
     private boolean uuSourceCode(ProcessVariableOperation prev, ProcessVariableOperation curr) {
@@ -771,10 +811,8 @@ public class FlowAnalysis {
     /**
      * UR anomaly: second last operation of PV is DELETE, last operation is READ
      *
-     * @param prev
-     *            Previous ProcessVariable
-     * @param curr
-     *            Current ProcessVariable
+     * @param prev Previous ProcessVariable
+     * @param curr Current ProcessVariable
      * @return true/false
      */
     private boolean urSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
@@ -784,10 +822,8 @@ public class FlowAnalysis {
     /**
      * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
      *
-     * @param prev
-     *            Previous ProcessVariable
-     * @param curr
-     *            Current ProcessVariable
+     * @param prev Previous ProcessVariable
+     * @param curr Current ProcessVariable
      * @return true/false
      */
     private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
@@ -798,10 +834,8 @@ public class FlowAnalysis {
     /**
      * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
      *
-     * @param prev
-     *            Previous ProcessVariable
-     * @param curr
-     *            Current ProcessVariable
+     * @param prev Previous ProcessVariable
+     * @param curr Current ProcessVariable
      * @return true/false
      */
     private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
@@ -812,10 +846,8 @@ public class FlowAnalysis {
      * Helper method to create the set difference of two given maps (based on
      * variable names)
      *
-     * @param mapOne
-     *            First map
-     * @param mapTwo
-     *            Second map
+     * @param mapOne First map
+     * @param mapTwo Second map
      * @return Set difference of given maps
      */
     private LinkedHashMap<String, ProcessVariableOperation> getSetDifference(
@@ -834,10 +866,8 @@ public class FlowAnalysis {
     /**
      * Helper method to create the intersection of two given maps
      *
-     * @param mapOne
-     *            First map
-     * @param mapTwo
-     *            Second map
+     * @param mapOne First map
+     * @param mapTwo Second map
      * @return Intersection of given maps
      */
     private LinkedHashMap<String, ProcessVariableOperation> getIntersection(

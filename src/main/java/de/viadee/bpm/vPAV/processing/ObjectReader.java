@@ -210,9 +210,9 @@ public class ObjectReader {
             return null;
         } else {
             List<Value> args = expr.getArgs();
-            List<Type> argTypes = argsToTypes(args);
             List<Object> argValues = resolveArgs(args, thisName);
             ObjectVariable targetObj;
+            SootMethod method = expr.getMethod();
 
             if (expr instanceof AbstractInstanceInvokeExpr) {
                 // Instance method is called
@@ -227,6 +227,9 @@ public class ObjectReader {
                 } else {
                     // Method on another object is called
                     targetObj = localObjectVariables.get(targetObjName);
+
+                    SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr);
+                    method = (resolvedMethod != null) ? resolvedMethod : method;
                 }
             } else {
                 // Static method is called -> create phantom variable
@@ -235,24 +238,6 @@ public class ObjectReader {
 
             // Process method from another class/object
             ObjectReader or = new ObjectReader(processVariablesCreator, targetObj);
-            SootMethod method = expr.getMethod();
-
-            // Resolving for inner classes does not work with above call
-            // TODO works for the test but should check what happens if not jimple local
-            if (expr.getUseBoxes().get(0).getValue() instanceof JimpleLocal) {
-                if (expr.getUseBoxes().get(0).getValue().getType() instanceof RefType) {
-                    if (((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass().hasOuterClass()) {
-                        try {
-                            // Use that for init method
-                            method = ((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass()
-                                    .getMethodByName(expr.getMethod().getName());
-                        } catch (AmbiguousMethodException e) {
-                            method = ((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass()
-                                    .getMethod(expr.getMethod().getName(), argTypes);
-                        }
-                    }
-                }
-            }
 
             // TODO skip also methods that are not in target folder
             if (method.getDeclaringClass().getPackageName().startsWith("java.")) {
@@ -261,6 +246,29 @@ public class ObjectReader {
             }
             return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null, thisName);
         }
+    }
+
+    private SootMethod resolveAnonymousInnerClasses(InvokeExpr expr) {
+        List<Value> args = expr.getArgs();
+        List<Type> argTypes = argsToTypes(args);
+
+        // Resolving for inner classes does not work with above call
+        // TODO works for the test but should check what happens if not jimple local
+        if (expr.getUseBoxes().get(0).getValue() instanceof JimpleLocal) {
+            if (expr.getUseBoxes().get(0).getValue().getType() instanceof RefType) {
+                if (((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass().hasOuterClass()) {
+                    try {
+                        // Use that for init method
+                        return ((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass()
+                                .getMethodByName(expr.getMethod().getName());
+                    } catch (AmbiguousMethodException e) {
+                        return ((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass()
+                                .getMethod(expr.getMethod().getName(), argTypes);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private List<Type> argsToTypes(List<Value> args) {
