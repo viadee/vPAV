@@ -37,7 +37,9 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 public class SimpleObject {
 
     private String myStringField;
+
     private String parameterString;
+
     private String anotherObjectString;
 
     public SimpleObject(String var) {
@@ -53,5 +55,9 @@ public class SimpleObject {
 
     private String methodWithReturn() {
         return "it_works";
+    }
+
+    private void methodWithParameter(String var) {
+        parameterString = var;
     }
 }

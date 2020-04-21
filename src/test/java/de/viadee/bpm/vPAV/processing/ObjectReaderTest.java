@@ -35,21 +35,21 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.ObjectVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.StringVariable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import soot.*;
 import soot.jimple.*;
 import soot.jimple.internal.*;
+import soot.toolkits.graph.Block;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
@@ -62,9 +62,15 @@ public class ObjectReaderTest {
 
     private static SootClass anotherSootClass;
 
+    private static SootClass anonymousInnerSootClass;
+
+    private static String testClassName = "de.viadee.package.TestObject";
+
     private ObjectVariable objVariable1 = new ObjectVariable();
 
     private ObjectVariable objVariableField1 = new ObjectVariable();
+
+    private ObjectVariable staticObjField = new ObjectVariable();
 
     private ObjectVariable anotherObject = new ObjectVariable();
 
@@ -80,6 +86,8 @@ public class ObjectReaderTest {
         thisSootClass = Scene.v().forceResolve("de.viadee.bpm.vPAV.processing.SimpleObject", SootClass.SIGNATURES);
         anotherSootClass = Scene.v()
                 .forceResolve("de.viadee.bpm.vPAV.AnotherSimpleObject", SootClass.SIGNATURES);
+        anonymousInnerSootClass = Scene.v()
+                .forceResolve("de.viadee.bpm.vPAV.delegates.TestDelegateAnonymousInnerClass", SootClass.SIGNATURES);
     }
 
     @Before
@@ -104,6 +112,12 @@ public class ObjectReaderTest {
 
         // Create object fields
         objectReader.getThisObject().putObjectField("objVariableField1", objVariableField1);
+
+        // Create static fields
+        ObjectVariable staticTestClass = new ObjectVariable();
+        staticTestClass.updateStringField("staticStringField", "valueStaticStringField");
+        staticTestClass.putObjectField("staticObjectField", staticObjField);
+        objectReader.getStaticObjectVariables().put(testClassName, staticTestClass);
     }
 
     @Test
@@ -126,9 +140,7 @@ public class ObjectReaderTest {
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
         args.add(StringConstant.v("myVariableValue"));
-        ArrayList<Object> argValues = new ArrayList<>();
-        argValues.add(null);
-        argValues.add("myVariableValue");
+        ArrayList<Object> argValues = objectReader.resolveArgs(args, null);
         ObjectReader cr = new ObjectReader(null);
         cr.handleIdentityStmt(stmt, args, argValues);
         Assert.assertEquals("myVariableValue", cr.getLocalStringVariables().get("r2").getValue());
@@ -147,11 +159,19 @@ public class ObjectReaderTest {
         // Test resolving of string fields
         Value base = new JimpleLocal("r0", RefType.v("java.lang.String"));
         SootClass sc = mock(SootClass.class);
-        when(sc.getName()).thenReturn("<de.viadee.package.TestObject: java.lang.String myStringField>");
+        when(sc.getName()).thenReturn(testClassName);
         AbstractSootFieldRef fieldRef = new AbstractSootFieldRef(sc, "variableField1",
                 RefType.v("java.lang.String"), false);
         Value value = new JInstanceFieldRef(base, fieldRef);
         Assert.assertEquals("valueField1", objectReader.resolveStringValue(null, value, "r0"));
+
+        // Test resolving of static fields
+        when(sc.getName()).thenReturn(testClassName);
+        fieldRef = new AbstractSootFieldRef(sc, "staticStringField",
+                RefType.v("java.lang.String"), true);
+        StaticFieldRef valueStatic = mock(StaticFieldRef.class, CALLS_REAL_METHODS);
+        valueStatic.setFieldRef(fieldRef);
+        Assert.assertEquals("valueStaticStringField", objectReader.resolveStringValue(null, valueStatic, null));
     }
 
     @Test
@@ -169,11 +189,19 @@ public class ObjectReaderTest {
         // Test resolving of object fields
         Value base = new JimpleLocal("r0", RefType.v("java.lang.String"));
         SootClass sc = mock(SootClass.class);
-        when(sc.getName()).thenReturn("<de.viadee.package.TestObject: java.lang.Object objVariableField1>");
+        when(sc.getName()).thenReturn(testClassName);
         AbstractSootFieldRef fieldRef = new AbstractSootFieldRef(sc, "objVariableField1",
                 RefType.v("java.lang.Object"), false);
         Value value = new JInstanceFieldRef(base, fieldRef);
-        Assert.assertSame(objVariableField1, objectReader.resolveObjectVariable(null, value, ""));
+        Assert.assertSame(objVariableField1, objectReader.resolveObjectVariable(null, value, "r0"));
+
+        // Test resolving of static fields
+        when(sc.getName()).thenReturn(testClassName);
+        fieldRef = new AbstractSootFieldRef(sc, "staticObjectField",
+                RefType.v("java.lang.String"), true);
+        StaticFieldRef valueStatic = mock(StaticFieldRef.class, CALLS_REAL_METHODS);
+        valueStatic.setFieldRef(fieldRef);
+        Assert.assertSame(staticObjField, objectReader.resolveObjectVariable(null, valueStatic, null));
     }
 
     @Test
@@ -201,7 +229,7 @@ public class ObjectReaderTest {
         rightValue = StringConstant.v("anotherValue");
         Value base = new JimpleLocal("r0", RefType.v("java.lang.Object"));
         SootClass sc = mock(SootClass.class);
-        when(sc.getName()).thenReturn("<de.viadee.package.TestObject: java.lang.String myStringField>");
+        when(sc.getName()).thenReturn(testClassName);
         AbstractSootFieldRef fieldRef = new AbstractSootFieldRef(sc, "myStringField",
                 RefType.v("java.lang.String"), false);
         leftValue = new JInstanceFieldRef(base, fieldRef);
@@ -213,14 +241,41 @@ public class ObjectReaderTest {
         rightValue = new JimpleLocal("objVariable1", RefType.v("java.lang.Object"));
         base = new JimpleLocal("r0", RefType.v("java.lang.Object"));
         sc = mock(SootClass.class);
-        when(sc.getName()).thenReturn("<de.viadee.package.TestObject: java.lang.Object myObjectField>");
+        when(sc.getName()).thenReturn(testClassName);
         fieldRef = new AbstractSootFieldRef(sc, "myObjectField",
                 RefType.v("java.lang.Object"), false);
         leftValue = new JInstanceFieldRef(base, fieldRef);
         objectReader.handleFieldAssignment(null, leftValue, rightValue, "r0");
         Assert.assertSame(objVariable1, objectReader.getThisObject().getObjectField("myObjectField"));
+    }
 
-        // TODO no difference between static and object attributes -> don't forget, write in readme
+    @Test
+    public void testHandleStaticFieldAssignment() {
+        Value rightValue;
+
+        // Test string assignment
+        rightValue = StringConstant.v("anotherValue");
+
+        SootClass sc = mock(SootClass.class);
+        when(sc.getName()).thenReturn(testClassName);
+        AbstractSootFieldRef fieldRef = new AbstractSootFieldRef(sc, "myStaticStringField",
+                RefType.v("java.lang.String"), true);
+        StaticFieldRef leftValue = mock(StaticFieldRef.class, CALLS_REAL_METHODS);
+        leftValue.setFieldRef(fieldRef);
+        objectReader.handleStaticFieldAssigment(null, leftValue, rightValue, null);
+        Assert.assertEquals("anotherValue",
+                objectReader.getStaticObjectVariables().get(testClassName).getStringField("myStaticStringField")
+                        .getValue());
+
+        // Test object assignment
+        rightValue = new JimpleLocal("objVariable1", RefType.v("java.lang.Object"));
+        fieldRef = new AbstractSootFieldRef(sc, "myStaticObjectField",
+                RefType.v("java.lang.Object"), true);
+        leftValue = mock(StaticFieldRef.class, CALLS_REAL_METHODS);
+        leftValue.setFieldRef(fieldRef);
+        objectReader.handleStaticFieldAssigment(null, leftValue, rightValue, null);
+        Assert.assertSame(objVariable1,
+                objectReader.getStaticObjectVariables().get(testClassName).getObjectField("myStaticObjectField"));
     }
 
     @Test
@@ -258,7 +313,20 @@ public class ObjectReaderTest {
         Assert.assertNull(returnValue);
         Assert.assertEquals("it's_snowing",
                 objectReader.getLocalObjectVariables().get("$r2").getStringField("anotherVariable").getValue());
-        // TODO did I checked invoke expressions with parameters?
+
+        // Test that invoke expr manipulates string fields of object when passing a value
+        method = thisSootClass.getMethodByName("methodWithParameter");
+        methodRef = mock(SootMethodRef.class);
+        when(methodRef.resolve()).thenReturn(method);
+        when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        ArrayList<Value> args = new ArrayList<>();
+        args.add(new JimpleLocal("localString", RefType.v("java.lang.String")));
+        invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")), methodRef,
+                args);
+        objectReader.getLocalStringVariables().put("localString", new StringVariable("stringValue"));
+        returnValue = objectReader.handleInvokeExpr(null, invokeExpr, "this");
+        Assert.assertNull(returnValue);
+        Assert.assertEquals("stringValue", objectReader.getThisObject().getStringField("parameterString").getValue());
     }
 
     @Test
@@ -280,7 +348,8 @@ public class ObjectReaderTest {
         args.add(StringConstant.v("passedValue"));
         List<Object> argValues = new ArrayList<>();
         argValues.add("passedValue");
-        Object returnValue = objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues,null);
+        Object returnValue = objectReader
+                .processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
         Assert.assertNull(returnValue);
         ObjectVariable simpleObject = objectReader.getThisObject();
         Assert.assertEquals("bye", simpleObject.getStringField("myStringField").getValue());
@@ -290,7 +359,42 @@ public class ObjectReaderTest {
 
     @Test
     public void testProcessBlockWithSuccessors() {
+        // TODO
+    }
 
+    @Test
+    public void testResolveAnonymousInnerClasses() {
+        // Test that the anonymous inner class is correctly resolved
+        SootMethod method = anonymousInnerSootClass.getMethodByName("execute");
+        Block block = SootResolverSimplified.getBlockFromMethod(method);
+
+        // Load invoke expression
+        Iterator<Unit> iter = block.getBody().getUnits().iterator();
+        iter.next();
+        iter.next();
+        iter.next();
+        iter.next();
+        iter.next();
+        iter.next();
+        JInvokeStmt invokeStmt = (JInvokeStmt) iter.next();
+        SootMethod anonymousMethod = objectReader.resolveAnonymousInnerClasses(invokeStmt.getInvokeExpr());
+
+        Assert.assertNotNull("Method should not be null.", anonymousMethod);
+        Block anonymousBlock = SootResolverSimplified.getBlockFromMethod(anonymousMethod);
+        Assert.assertEquals("Block should have 9 units.", 9, anonymousBlock.getBody().getUnits().size());
+    }
+
+    @Test
+    public void testResolveArgs() {
+        ArrayList<Value> args = new ArrayList<>();
+        args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
+        args.add(StringConstant.v("myVariableValue"));
+        args.add(new JimpleLocal("objVariable1", RefType.v("java.lang.Object")));
+        ArrayList<Object> argValues = objectReader.resolveArgs(args, "this");
+
+        Assert.assertNull(argValues.get(0));
+        Assert.assertEquals("myVariableValue", argValues.get(1));
+        Assert.assertSame(objVariable1, argValues.get(2));
     }
 
     /* TODO rewrite
