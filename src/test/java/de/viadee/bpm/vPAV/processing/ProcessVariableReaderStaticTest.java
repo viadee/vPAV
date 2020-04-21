@@ -97,8 +97,9 @@ public class ProcessVariableReaderStaticTest {
                 new FlowAnalysis());
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-        new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null, null, new BasicNode[1]);
+        new JavaReaderStatic()
+                .getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStatic", element, null, null,
+                        null, new BasicNode[1]);
 
         assertEquals(4, element.getControlFlowGraph().getOperations().size());
     }
@@ -123,8 +124,9 @@ public class ProcessVariableReaderStaticTest {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
-        new JavaReaderStatic().getVariablesFromClass(
-                "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables", element, null, entry, new BasicNode[1]);
+        new JavaReaderStatic()
+                .getVariablesFromClass("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables",
+                        element, entry, new BasicNode[1]);
 
         assertEquals(3, element.getControlFlowGraph().getOperations().size());
     }
@@ -144,9 +146,11 @@ public class ProcessVariableReaderStaticTest {
         myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
         ConfigConstants.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
-        new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-                "de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element, ElementChapter.Implementation,
-                KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(), new BasicNode[1]);
+        new JavaReaderStatic()
+                .getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.MethodInvocationDelegate", element,
+                        ElementChapter.Implementation,
+                        KnownElementFieldType.CalledElement, element.getBaseElement().getScope().toString(),
+                        new BasicNode[1]);
         assertEquals(3, element.getControlFlowGraph().getOperations().size());
     }
 

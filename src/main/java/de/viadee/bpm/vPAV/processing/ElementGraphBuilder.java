@@ -296,7 +296,7 @@ public class ElementGraphBuilder {
      */
     private ListMultimap<String, ProcessVariableOperation> checkInitialVariableOperations(final EntryPoint entryPoint,
             final BpmnElement element, final String resourceFilePath, BasicNode[] predecessor) {
-        return new JavaReaderStatic().getVariablesFromClass(entryPoint.getClassName(), element, resourceFilePath,
+        return new JavaReaderStatic().getVariablesFromClass(entryPoint.getClassName(), element,
                 entryPoint, predecessor);
     }
 

@@ -80,8 +80,7 @@ public class ReachingDefinitionTest {
 		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		new JavaReaderStatic().getVariablesFromJavaDelegate(fileScanner,
-				"de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, new BasicNode[1]);
+		new JavaReaderStatic().getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null, null, new BasicNode[1]);
 		ListMultimap<String, ProcessVariableOperation> operations = element.getControlFlowGraph().getOperations();
 
 		assertEquals(5, operations.size());

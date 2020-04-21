@@ -33,27 +33,20 @@ package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.gson.internal.$Gson$Preconditions;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.*;
-import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import soot.*;
-import soot.jimple.AssignStmt;
-import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.options.Options;
 import soot.toolkits.graph.Block;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.logging.Logger;
 
 public class JavaReaderStatic {
@@ -72,25 +65,19 @@ public class JavaReaderStatic {
      * analyzed. e.g. execution.setVariable(execution.getActivityId() + "-" +
      * execution.getEventName(), true)
      *
-     * @param fileScanner FileScanner
      * @param classFile   Name of the class
      * @param element     Bpmn element
      * @param chapter     ElementChapter
      * @param fieldType   KnownElementFieldType
-     * @param scopeId     Scope of the element
      * @return Map of process variables from the referenced delegate
      */
-    void getVariablesFromJavaDelegate(final FileScanner fileScanner,
-            final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, final String scopeId, BasicNode[] predecessor) {
+    void getVariablesFromJavaDelegate(final String classFile, final BpmnElement element, final ElementChapter chapter,
+            final KnownElementFieldType fieldType, String scopeId, BasicNode[] predecessor) {
 
         if (classFile != null && classFile.trim().length() > 0) {
 
             final String sootPath = FileScanner.getSootPath();
-
             System.setProperty("soot.class.path", sootPath);
-
-            final Set<String> classPaths = fileScanner.getJavaResourcesFileInputStream();
 
             if (element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null
@@ -121,12 +108,11 @@ public class JavaReaderStatic {
      *
      * @param className        Name of the class that potentially declares process variables
      * @param element          BpmnElement
-     * @param resourceFilePath Path of the BPMN model
      * @param entryPoint       Current entry point
      * @return Map of process variable operations
      */
     ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className, final BpmnElement element,
-            final String resourceFilePath, final EntryPoint entryPoint, BasicNode[] predecessor) {
+            final EntryPoint entryPoint, BasicNode[] predecessor) {
 
         final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
@@ -140,7 +126,6 @@ public class JavaReaderStatic {
                 for (SootMethod method : sootClass.getMethods()) {
                     if (method.getName().equals(entryPoint.getMethodName())) {
                         Block block = SootResolverSimplified.getBlockFromMethod(method);
-                        // TODO unsure about chapter and field type
                         ProcessVariablesCreator pvc = new ProcessVariablesCreator(element,
                                 ElementChapter.Implementation, KnownElementFieldType.Class,
                                 predecessor);

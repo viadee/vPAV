@@ -479,8 +479,7 @@ public final class ProcessVariableReader {
                 }
                 final String l_class = listener.getCamundaClass();
                 if (l_class != null) {
-                    javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
-                            listener.getCamundaClass(), element, listenerChapter,
+                    javaReaderStatic.getVariablesFromJavaDelegate(listener.getCamundaClass(), element, listenerChapter,
                             KnownElementFieldType.Class, scopeId, predecessor);
                 }
                 final CamundaScript script = listener.getCamundaScript();
@@ -774,8 +773,7 @@ public final class ProcessVariableReader {
             }
 
             if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS) != null) {
-                javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
-                        baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                javaReaderStatic.getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                 BpmnConstants.ATTR_CLASS),
                         element, ElementChapter.Implementation, KnownElementFieldType.Class, scopeId,
                         predecessor);
@@ -862,8 +860,7 @@ public final class ProcessVariableReader {
             // Check DelegateVariableMapping
             if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
-                javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
-                        baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                javaReaderStatic.getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                 BpmnConstants.ATTR_VAR_MAPPING_CLASS),
                         element, null, KnownElementFieldType.Class, scopeId, predecessor);
             } else if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
@@ -1097,7 +1094,7 @@ public final class ProcessVariableReader {
                 final String className = isBean(node.getName());
                 if (className != null) {
                     // read variables in class file (bean)
-                    javaReaderStatic.getVariablesFromJavaDelegate(fileScanner, className, element,
+                    javaReaderStatic.getVariablesFromJavaDelegate(className, element,
                             chapter, fieldType, scopeId, predecessor);
                     isDelegated = true;
                 } else {
@@ -1239,8 +1236,7 @@ public final class ProcessVariableReader {
             // create READ operation
             if (matcher.matches()) {
                 if (isBean(matcher.group(1)) != null) {
-                    javaReaderStatic.getVariablesFromJavaDelegate(fileScanner,
-                            isBean(matcher.group(1)), element, ElementChapter.InputOutput, fieldType, scopeId,
+                    javaReaderStatic.getVariablesFromJavaDelegate(isBean(matcher.group(1)), element, ElementChapter.InputOutput, fieldType, scopeId,
                             predecessor);
                 } else {
                     ProcessVariableOperation read = new ProcessVariableOperation(name, VariableOperation.READ, scopeId);
