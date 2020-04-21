@@ -1,23 +1,23 @@
 /**
  * BSD 3-Clause License
- *
+ * <p>
  * Copyright © 2019, viadee Unternehmensberatung AG
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -45,7 +45,6 @@ import soot.toolkits.graph.Block;
 
 import java.util.*;
 
-// TODO rekursionen sind möglich
 public class ObjectReader {
 
     private HashSet<Integer> processedBlocks = new HashSet<>();
@@ -60,6 +59,7 @@ public class ObjectReader {
 
     public BasicNode returnNode;
 
+    // Only used for testing purposes
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
             ProcessVariablesCreator processVariablesCreator) {
@@ -69,20 +69,37 @@ public class ObjectReader {
         this.processVariablesCreator = processVariablesCreator;
     }
 
+    /**
+     * Constructor that is called the first time when starting an analysis.
+     *
+     * @param processVariablesCreator that is used for creating the data flow graph
+     */
     public ObjectReader(ProcessVariablesCreator processVariablesCreator) {
         this.processVariablesCreator = processVariablesCreator;
     }
 
+    /**
+     * Constructor that is called when another block is entered during the analysis.
+     *
+     * @param processVariablesCreator that is used for creating the data flow graph
+     * @param thisObject              ObjectVariable that refers to the object that contains the block
+     */
     private ObjectReader(ProcessVariablesCreator processVariablesCreator, ObjectVariable thisObject) {
         this.processVariablesCreator = processVariablesCreator;
         this.thisObject = thisObject;
     }
 
-    public Object processBlock(Block block, List<Value> args, List<Object> argValues, String thisName,
-            String parentName) {
-        // TODO loops etc are currently ignored
-        // TODO recursion is possible, prevent infinite loops
-        // Todo Only String variables are currently resolved
+    /**
+     * Loops through the units of a block and notifies the ProcessVariablesCreator of used process variables.
+     *
+     * @param block     the block that is processed
+     * @param args      the types of arguments that were passed to the method and are available in the block
+     * @param argValues the argument values (or in case of objects, references to the variable)
+     * @param thisName  the local name of the current object
+     * @return ObjectVariable / StringVariable that is returned by the method
+     */
+    public Object processBlock(Block block, List<Value> args, List<Object> argValues, String thisName) {
+
         if (block == null) {
             return null;
         }
@@ -93,7 +110,7 @@ public class ObjectReader {
             return null;
         }
         processedBlocks.add(hashBlock(
-                block)); // TODO add block here of before return?, what if method / block is called again?
+                block));
 
         final Iterator<Unit> unitIt = block.iterator();
 
@@ -107,7 +124,7 @@ public class ObjectReader {
             unit = unitIt.next();
             // e. g. r2 := @parameter1: org.camunda.bpm.engine.delegate.DelegateExecution
             if (unit instanceof IdentityStmt) {
-                handleIdentityStmt(unit, args, argValues, parentName);
+                handleIdentityStmt(unit, args, argValues);
             }
             // e. g. $r2 = staticinvoke ... (Assignment)
             else if (unit instanceof AssignStmt) {
@@ -139,7 +156,7 @@ public class ObjectReader {
                 }
 
                 processVariablesCreator.pushNodeToStack(blockNode);
-                this.processBlock(succ, args, argValues, thisName, parentName);
+                this.processBlock(succ, args, argValues, thisName);
             }
             if (returnNode != null) {
                 processVariablesCreator.pushNodeToStack(returnNode);
@@ -149,6 +166,12 @@ public class ObjectReader {
         return null;
     }
 
+    /**
+     * The first identity statement assigns the current object to a variable which name is extracted.
+     *
+     * @param unit Identitfy statement (e.g. this := @this:java.lang.Object)
+     * @return name of current object or null if the unit didn´t referred to a this reference
+     */
     String getThisNameFromUnit(Unit unit) {
         IdentityStmt identityStmt = (IdentityStmt) unit;
         if (identityStmt.getRightOp() instanceof ThisRef) {
@@ -158,6 +181,14 @@ public class ObjectReader {
         }
     }
 
+    /**
+     * Resolves the return value.
+     *
+     * @param block    Current block
+     * @param unit     Current unit (return statement)
+     * @param thisName Name of current object
+     * @return String or ObjectVariable depending on return value
+     */
     Object handleReturnStmt(Block block, Unit unit, String thisName) {
         ReturnStmt returnStmt = (ReturnStmt) unit;
         if (returnStmt.getOp().getType().equals(RefType.v("java.lang.String"))) {
@@ -167,7 +198,14 @@ public class ObjectReader {
         }
     }
 
-    void handleIdentityStmt(Unit unit, List<Value> args, List<Object> argValues, String parentName) {
+    /**
+     * Handles identity statements like r2 := @parameter1:java.lang.String and translates them into local variables
+     *
+     * @param unit      Identity statement
+     * @param args      Argument soot values passed to the method
+     * @param argValues "real" argument values i.e. variables that represent the argument
+     */
+    void handleIdentityStmt(Unit unit, List<Value> args, List<Object> argValues) {
         IdentityStmt identityStmt = (IdentityStmt) unit;
         // Resolve method parameters
         if (identityStmt.getRightOp() instanceof ParameterRef) {
@@ -175,7 +213,9 @@ public class ObjectReader {
             if (args.get(idx).getType().equals(RefType.v("java.lang.String"))) {
                 StringVariable var = new StringVariable((String) argValues.get(idx));
                 localStringVariables.put(((JimpleLocal) identityStmt.getLeftOp()).getName(), var);
-            } else if (!args.get(idx).getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE) &&
+            }
+            // Camunda objects which access process variables are not resolved
+            else if (!args.get(idx).getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE) &&
                     !args.get(idx).getType().equals(CamundaMethodServices.MAP_VARIABLES_TYPE) &&
                     !args.get(idx).getType().equals(CamundaMethodServices.VARIABLE_SCOPE_TYPE)
             ) {
@@ -194,10 +234,8 @@ public class ObjectReader {
             handleLocalAssignment(block, leftValue, rightValue, thisName);
         } else if (leftValue instanceof JInstanceFieldRef) {
             handleFieldAssignment(block, leftValue, rightValue, thisName);
-        } else {
-            // TODO when does that happen, does that happen at all?
-            assert (false);
         }
+        // TODO is there an else case?
     }
 
     Object handleInvokeExpr(Block block, InvokeExpr expr, String thisName) {
@@ -222,8 +260,7 @@ public class ObjectReader {
                 if (targetObjName.equals(thisName)) {
                     return this
                             .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args, argValues,
-                                    null,
-                                    thisName);
+                                    null);
                 } else {
                     // Method on another object is called
                     targetObj = localObjectVariables.get(targetObjName);
@@ -244,7 +281,7 @@ public class ObjectReader {
                 // Skip native java classes
                 return null;
             }
-            return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null, thisName);
+            return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
         }
     }
 

@@ -84,7 +84,7 @@ public class ProcessVariablesCreator {
     // Only called for top-level block -> Rename
     public BasicNode blockIterator(final Block block, final List<Value> args) {
         ObjectReader objectReader = new ObjectReader(this);
-        objectReader.processBlock(block, args, null, null, null);
+        objectReader.processBlock(block, args, null, null);
         cleanEmptyNodes();
 
         // find last node

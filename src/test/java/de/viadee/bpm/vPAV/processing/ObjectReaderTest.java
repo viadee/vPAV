@@ -35,12 +35,8 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
-import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.ObjectVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.StringVariable;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
-import org.camunda.bpm.engine.RuntimeService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -57,7 +53,6 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-// vPAV reworked
 // TODO test exception handling e.g. variable does not exist
 public class ObjectReaderTest {
 
@@ -135,7 +130,7 @@ public class ObjectReaderTest {
         argValues.add(null);
         argValues.add("myVariableValue");
         ObjectReader cr = new ObjectReader(null);
-        cr.handleIdentityStmt(stmt, args, argValues,"");
+        cr.handleIdentityStmt(stmt, args, argValues);
         Assert.assertEquals("myVariableValue", cr.getLocalStringVariables().get("r2").getValue());
     }
 
@@ -285,12 +280,17 @@ public class ObjectReaderTest {
         args.add(StringConstant.v("passedValue"));
         List<Object> argValues = new ArrayList<>();
         argValues.add("passedValue");
-        Object returnValue = objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues,null, null);
+        Object returnValue = objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues,null);
         Assert.assertNull(returnValue);
         ObjectVariable simpleObject = objectReader.getThisObject();
         Assert.assertEquals("bye", simpleObject.getStringField("myStringField").getValue());
         Assert.assertEquals("passedValue", simpleObject.getStringField("parameterString").getValue());
         Assert.assertEquals("it's_snowing", simpleObject.getStringField("anotherObjectString").getValue());
+    }
+
+    @Test
+    public void testProcessBlockWithSuccessors() {
+
     }
 
     /* TODO rewrite
