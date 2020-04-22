@@ -55,7 +55,6 @@ public class ProcessVariablesCreatorTest {
     @BeforeClass
     public static void setupSoot() {
         RuntimeConfig.getInstance().setTest(true);
-        // TODO important as junit test screw up because of some resolving problem
         // TODO rework the whole soot setup + filescanner because static and runtime is mixed up
         FileScanner.setupSootClassPaths(new LinkedList<>());
         new JavaReaderStatic().setupSoot();
@@ -63,7 +62,7 @@ public class ProcessVariablesCreatorTest {
     }
 
     @Test
-    public void testBlockIterator() {
+    public void testStartBlockProcessing() {
         BaseElement baseElement = mock(BaseElement.class);
         when(baseElement.getId()).thenReturn("ServiceTask");
         SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.delegates.SimpleDelegate", SootClass.SIGNATURES);
@@ -73,9 +72,8 @@ public class ProcessVariablesCreatorTest {
                 new BpmnElement("", baseElement, cfg, new FlowAnalysis()),
                 null, null, new BasicNode[1]);
         ArrayList<Value> args = new ArrayList<>();
-        // TODO check if jimple local is really the correct parameter type
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
-        vr.blockIterator(SootResolverSimplified.getBlockFromMethod(method), args);
+        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args);
 
         // Three methods, method 1 interrupted by method calls = four nodes
         Collection<BasicNode> nodes = cfg.getNodes().values();
@@ -108,7 +106,8 @@ public class ProcessVariablesCreatorTest {
         ProcessVariableOperation blockTwoOpOne = new ProcessVariableOperation("var3",
                 VariableOperation.WRITE, null);
 
-        ProcessVariablesCreator vr = new ProcessVariablesCreator(new BpmnElement("", baseElement, cfg, new FlowAnalysis()), null,
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(
+                new BpmnElement("", baseElement, cfg, new FlowAnalysis()), null,
                 null, new BasicNode[1]);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpOne);
         vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo);
@@ -123,7 +122,7 @@ public class ProcessVariablesCreatorTest {
 
     @Test
     public void testBlockWithIf() {
-        ControlFlowGraph cfg = runBlockIteratorOnControlFlowObject("methodWithIfElse");
+        ControlFlowGraph cfg = runBlockProcessingOnControlFlowObject("methodWithIfElse");
 
         Assert.assertEquals(4, cfg.getNodes().size());
         Iterator<BasicNode> iterator = cfg.getNodes().values().iterator();
@@ -146,7 +145,7 @@ public class ProcessVariablesCreatorTest {
 
     @Test
     public void testBlockWithLoop() {
-        ControlFlowGraph cfg = runBlockIteratorOnControlFlowObject("methodWithLoop");
+        ControlFlowGraph cfg = runBlockProcessingOnControlFlowObject("methodWithLoop");
 
         Assert.assertEquals(2, cfg.getNodes().size());
         Iterator<BasicNode> iterator = cfg.getNodes().values().iterator();
@@ -164,7 +163,7 @@ public class ProcessVariablesCreatorTest {
 
     @Test
     public void testBlockWithNestedControls() {
-        ControlFlowGraph cfg = runBlockIteratorOnControlFlowObject("methodWithNestedControls");
+        ControlFlowGraph cfg = runBlockProcessingOnControlFlowObject("methodWithNestedControls");
 
         Assert.assertEquals(4, cfg.getNodes().size());
         Iterator<BasicNode> iterator = cfg.getNodes().values().iterator();
@@ -186,7 +185,7 @@ public class ProcessVariablesCreatorTest {
 
     @Test
     public void testBlockWithRecursion() {
-        ControlFlowGraph cfg = runBlockIteratorOnControlFlowObject("methodWithRecursion");
+        ControlFlowGraph cfg = runBlockProcessingOnControlFlowObject("methodWithRecursion");
 
         Assert.assertEquals(2, cfg.getNodes().size());
         Iterator<BasicNode> iterator = cfg.getNodes().values().iterator();
@@ -199,7 +198,102 @@ public class ProcessVariablesCreatorTest {
         Assert.assertSame(beforeNode, afterNode.getPredecessors().iterator().next());
     }
 
-    private ControlFlowGraph runBlockIteratorOnControlFlowObject(String methodName) {
+    @Test
+    public void testAddNodeIfNotExisting() {
+        ControlFlowGraph cfg = new ControlFlowGraph();
+        BaseElement baseElement = mock(BaseElement.class);
+        when(baseElement.getId()).thenReturn("ServiceTask");
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(
+                new BpmnElement("", baseElement, cfg, new FlowAnalysis()),
+                null, null, "Process_1");
+        Block block = mock(Block.class);
+        Block anotherBlock = mock(Block.class);
+
+        // Add first block
+        vr.addNodeIfNotExisting(block);
+        Assert.assertEquals(1, vr.getNodes().size());
+
+        // Adding block again shouldn´t create new node
+        vr.addNodeIfNotExisting(block);
+        Assert.assertEquals(1, vr.getNodes().size());
+
+        // Add another block
+        vr.addNodeIfNotExisting(anotherBlock);
+        Assert.assertEquals(2, vr.getNodes().size());
+
+        // Adding first block again should now create new node
+        vr.addNodeIfNotExisting(block);
+        Assert.assertEquals(3, vr.getNodes().size());
+    }
+
+    @Test
+    public void testCleanEmptyNodes() {
+        ControlFlowGraph cfg = new ControlFlowGraph();
+        BaseElement baseElement = mock(BaseElement.class);
+        when(baseElement.getId()).thenReturn("ServiceTask");
+        BpmnElement element = new BpmnElement("", baseElement, cfg, new FlowAnalysis());
+        ProcessVariablesCreator vr = new ProcessVariablesCreator(element,
+                null, null, "Process_1");
+
+        // Create block and nodes
+        ProcessVariableOperation pvo = mock(ProcessVariableOperation.class);
+        when(pvo.getOperation()).thenReturn(VariableOperation.WRITE);
+        Block block = mock(Block.class);
+
+        Node firstNode = new Node(element, block, null, null);
+        firstNode.addOperation(pvo);
+        Node secondNode = new Node(element, block, null, null);
+        secondNode.addOperation(pvo);
+        Node thirdNode = new Node(element, block, null, null);
+        Node fourthNode = new Node(element, block, null, null);
+        fourthNode.addOperation(pvo);
+        Node fifthNode = new Node(element, block, null, null);
+        fifthNode.addOperation(pvo);
+        Node sixthNode = new Node(element, block, null, null);
+        sixthNode.addOperation(pvo);
+
+        vr.getNodes().add(firstNode);
+        cfg.addNode(firstNode);
+        vr.getNodes().add(secondNode);
+        cfg.addNode(secondNode);
+        vr.getNodes().add(thirdNode);
+        cfg.addNode(thirdNode);
+        vr.getNodes().add(fourthNode);
+        cfg.addNode(fourthNode);
+        vr.getNodes().add(fifthNode);
+        cfg.addNode(fifthNode);
+        vr.getNodes().add(sixthNode);
+        cfg.addNode(sixthNode);
+
+        // Create relationships between nodes
+        thirdNode.addPredecessor(firstNode);
+        thirdNode.addPredecessor(secondNode);
+        fourthNode.addPredecessor(thirdNode);
+        fifthNode.addPredecessor(thirdNode);
+        sixthNode.addPredecessor(fourthNode);
+        sixthNode.addPredecessor(fifthNode);
+
+        // Clean empty nodes (only node three is empty)
+        Assert.assertEquals(6, vr.getNodes().size());
+        vr.cleanEmptyNodes();
+
+        Assert.assertEquals(5, cfg.getNodes().size());
+        Assert.assertEquals(2, firstNode.getSuccessors().size());
+        Assert.assertEquals(2, secondNode.getSuccessors().size());
+        Assert.assertEquals(2, sixthNode.getPredecessors().size());
+
+        Assert.assertSame(fourthNode, firstNode.getSuccessors().get(0));
+        Assert.assertSame(fifthNode, firstNode.getSuccessors().get(1));
+        Assert.assertSame(fourthNode, secondNode.getSuccessors().get(0));
+        Assert.assertSame(fifthNode, secondNode.getSuccessors().get(1));
+
+        Assert.assertSame(firstNode, fourthNode.getPredecessors().get(0));
+        Assert.assertSame(secondNode, fourthNode.getPredecessors().get(1));
+        Assert.assertSame(firstNode, fifthNode.getPredecessors().get(0));
+        Assert.assertSame(secondNode, fifthNode.getPredecessors().get(1));
+    }
+
+    private ControlFlowGraph runBlockProcessingOnControlFlowObject(String methodName) {
         SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.processing.ControlFlowObject", SootClass.SIGNATURES);
         SootMethod method = sc.getMethodByName(methodName);
         ControlFlowGraph cfg = new ControlFlowGraph();
@@ -209,9 +303,8 @@ public class ProcessVariablesCreatorTest {
                 new BpmnElement("", baseElement, cfg, new FlowAnalysis()),
                 null, null, "Process_1");
         ArrayList<Value> args = new ArrayList<>();
-        // TODO check if jimple local is really the correct parameter type
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
-        vr.blockIterator(SootResolverSimplified.getBlockFromMethod(method), args);
+        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args);
         return cfg;
     }
 

@@ -31,58 +31,33 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 
-import static org.junit.Assert.assertEquals;
+public class ElementGraphBuilderTest {
 
-public class ReachingDefinitionTest {
+    @Test
+    public void testCreateProcessGraph() {
 
-	private static ClassLoader cl;
+    }
 
-	private static final String BASE_PATH = "src/test/resources/";
+    @Test
+    public void testCreateVariablesOfFlowElement() {
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().setTest(true);
-	}
+    }
 
-	@Test
-	public void testSootReachingMethod() {
-		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_InitialProcessVariables.bpmn";
+    @Test
+    public void testCreateSubDataFlowsFromCallActivity() {
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
-		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		new JavaReaderStatic().getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null,  new BasicNode[1]);
-		ListMultimap<String, ProcessVariableOperation> operations = element.getControlFlowGraph().getOperations();
-
-		assertEquals(5, operations.size());
-	}
+    }
 }

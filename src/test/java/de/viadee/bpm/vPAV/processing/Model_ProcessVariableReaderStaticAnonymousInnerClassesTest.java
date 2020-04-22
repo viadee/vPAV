@@ -55,7 +55,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
-public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
+public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
 

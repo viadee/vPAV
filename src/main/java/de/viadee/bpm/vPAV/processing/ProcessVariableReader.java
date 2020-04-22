@@ -32,7 +32,6 @@
 package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ListMultimap;
-import de.odysseus.el.ExpressionFactoryImpl;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.Messages;
@@ -44,7 +43,6 @@ import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
 import de.viadee.bpm.vPAV.processing.model.data.*;
-import org.apache.commons.collections4.map.LinkedMap;
 import org.camunda.bpm.engine.impl.juel.*;
 import org.camunda.bpm.engine.impl.juel.Node;
 import org.camunda.bpm.model.bpmn.Query;
@@ -59,7 +57,6 @@ import org.camunda.bpm.model.dmn.instance.InputExpression;
 import org.camunda.bpm.model.dmn.instance.Output;
 import org.camunda.bpm.model.dmn.instance.Text;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
-import soot.jimple.StringConstant;
 
 import javax.el.ELException;
 import java.io.InputStream;
@@ -108,7 +105,7 @@ public final class ProcessVariableReader {
         searchVariablesInMultiInstanceTask(javaReaderStatic, fileScanner, element, predecessor);
 
         // 2) Search variables in Input Parameters
-        getVariablesFromInputParameters(element, predecessor);
+        processInputOutputParameters(element, predecessor, true);
 
         // 3) Search variables execution listener (start)
         if (extensionElements != null) {
@@ -141,10 +138,11 @@ public final class ProcessVariableReader {
         if (extensionElements != null) {
             getVariablesFromExecutionListener(javaReaderStatic, fileScanner, element,
                     extensionElements, scopeElementId, ElementChapter.ExecutionListenerEnd, predecessor);
-        };
+        }
+        ;
 
         // 11) Search variables in Output Parameters
-        getVariablesFromOutputParameters(element, predecessor);
+        processInputOutputParameters(element, predecessor, false);
     }
 
     /**
@@ -269,61 +267,27 @@ public final class ProcessVariableReader {
 
     }
 
-    /**
-     * Analyze Input Parameters for variables
-     *
-     * @param element Current BPMN Element
-     */
-    public void getVariablesFromInputParameters(final BpmnElement element,
-            BasicNode[] predecessor) {
-        final BaseElement baseElement = element.getBaseElement();
-        // TODO
-        // Scope beachten, definierte Variablen nur in Element verfügbar, Read Operationen aber von globalen Variablen
-
-        if (baseElement.getExtensionElements() == null) {
-            return;
-        }
-        BasicNode node = new BasicNode(element, ElementChapter.InputOutput,
-                KnownElementFieldType.InputParameter);
-
-        final BpmnModelElementInstance scopeElement = baseElement.getScope();
-
-        String scopeElementId = null;
-        if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
-        }
-
-        processMapping(element, node, predecessor, scopeElementId, true);
-    }
-
-    /**
-     * Analyze Input Parameters for variables
-     *
-     * @param element Current BPMN Element
-     */
-    public void getVariablesFromOutputParameters(final BpmnElement element, BasicNode[] predecessor) {
+    void processInputOutputParameters(BpmnElement element, BasicNode[] predecessor, boolean input) {
         final BaseElement baseElement = element.getBaseElement();
 
         if (baseElement.getExtensionElements() == null) {
             return;
         }
-        BasicNode node = new BasicNode(element, ElementChapter.InputOutput,
-                KnownElementFieldType.OutputParameter);
 
-        final BpmnModelElementInstance scopeElement = baseElement.getScope();
-
-        String scopeElementId = null;
-        if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+        BasicNode node;
+        if (input) {
+            node = new BasicNode(element, ElementChapter.InputOutput,
+                    KnownElementFieldType.InputParameter);
+        } else {
+            node = new BasicNode(element, ElementChapter.InputOutput,
+                    KnownElementFieldType.OutputParameter);
         }
 
-        processMapping(element, node, predecessor, scopeElementId, false);
-    }
-
-    // also used for input/output parameter!!
-    void processMapping(BpmnElement element, BasicNode node,
-            BasicNode[] predecessor, String parentScope, boolean input) {
-        BaseElement baseElement = element.getBaseElement();
+        String parentScope = null;
+        final BpmnModelElementInstance scopeElement = baseElement.getScope();
+        if (scopeElement != null) {
+            parentScope = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+        }
 
         for (ModelElementInstance extension : baseElement.getExtensionElements().getElements()) {
             String textContent, name, writeScope, readScope;
@@ -365,6 +329,18 @@ public final class ProcessVariableReader {
         }
     }
 
+    /**
+     * Processes input / output parameters.
+     * @param element BpmnElement with I/O extension
+     * @param node BasicNode that will contain the process variables
+     * @param fieldType InputParameter or OutputParameter
+     * @param textContent Text content of parameter
+     * @param name Name of parameter
+     * @param writeScope Scope if a write access is detected
+     * @param readScope Scope if a read access is detected
+     * @param value Value of parameter
+     * @param predecessor BasicNode Predecessor if exists
+     */
     private void handleIOParameter(BpmnElement element, BasicNode node, KnownElementFieldType fieldType,
             String textContent, String name,
             String writeScope, String readScope, BpmnModelElementInstance value, BasicNode[] predecessor) {
@@ -480,7 +456,7 @@ public final class ProcessVariableReader {
                 final String l_class = listener.getCamundaClass();
                 if (l_class != null) {
                     javaReaderStatic.getVariablesFromJavaDelegate(listener.getCamundaClass(), element, listenerChapter,
-                            KnownElementFieldType.Class, scopeId, predecessor);
+                            KnownElementFieldType.Class, predecessor);
                 }
                 final CamundaScript script = listener.getCamundaScript();
                 if (script != null && script.getCamundaScriptFormat() != null
@@ -773,10 +749,11 @@ public final class ProcessVariableReader {
             }
 
             if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnConstants.ATTR_CLASS) != null) {
-                javaReaderStatic.getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                javaReaderStatic
+                        .getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                 BpmnConstants.ATTR_CLASS),
-                        element, ElementChapter.Implementation, KnownElementFieldType.Class, scopeId,
-                        predecessor);
+                                element, ElementChapter.Implementation, KnownElementFieldType.Class,
+                                predecessor);
             }
 
             if (baseElement instanceof BusinessRuleTask) {
@@ -860,9 +837,10 @@ public final class ProcessVariableReader {
             // Check DelegateVariableMapping
             if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
-                javaReaderStatic.getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                javaReaderStatic
+                        .getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                 BpmnConstants.ATTR_VAR_MAPPING_CLASS),
-                        element, null, KnownElementFieldType.Class, scopeId, predecessor);
+                                element, null, KnownElementFieldType.Class, predecessor);
             } else if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
                 findVariablesInExpression(javaReaderStatic, fileScanner,
@@ -1003,7 +981,8 @@ public final class ProcessVariableReader {
             final String scopeId, BasicNode[] predecessor) {
 
         ResourceFileReader
-                .readResourceFile(groovyFile, element, chapter, KnownElementFieldType.ExternalScript, scopeId, predecessor);
+                .readResourceFile(groovyFile, element, chapter, KnownElementFieldType.ExternalScript, scopeId,
+                        predecessor);
     }
 
     /**
@@ -1095,7 +1074,7 @@ public final class ProcessVariableReader {
                 if (className != null) {
                     // read variables in class file (bean)
                     javaReaderStatic.getVariablesFromJavaDelegate(className, element,
-                            chapter, fieldType, scopeId, predecessor);
+                            chapter, fieldType, predecessor);
                     isDelegated = true;
                 } else {
                     // save variable
@@ -1236,8 +1215,10 @@ public final class ProcessVariableReader {
             // create READ operation
             if (matcher.matches()) {
                 if (isBean(matcher.group(1)) != null) {
-                    javaReaderStatic.getVariablesFromJavaDelegate(isBean(matcher.group(1)), element, ElementChapter.InputOutput, fieldType, scopeId,
-                            predecessor);
+                    javaReaderStatic
+                            .getVariablesFromJavaDelegate(isBean(matcher.group(1)), element, ElementChapter.InputOutput,
+                                    fieldType,
+                                    predecessor);
                 } else {
                     ProcessVariableOperation read = new ProcessVariableOperation(name, VariableOperation.READ, scopeId);
                     expNode.addOperation(read);

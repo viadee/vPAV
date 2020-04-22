@@ -37,28 +37,17 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import fj.Hash;
 
 public class ControlFlowGraph {
 
     private LinkedHashMap<String, BasicNode> nodes;
 
-    private int internalNodeCounter;
-
-    private int recursionCounter;
-
     private int nodeCounter;
-
-    private int priorLevel;
-
-    private List<Integer> priorLevels;
 
     public ControlFlowGraph() {
         nodes = new LinkedHashMap<>();
         nodeCounter = -1;
-        internalNodeCounter = 0;
-        recursionCounter = 0;
-        priorLevel = 0;
-        priorLevels = new ArrayList<>();
     }
 
     /**
@@ -95,28 +84,8 @@ public class ControlFlowGraph {
         return !nodes.isEmpty();
     }
 
-    public void incrementRecursionCounter() {
-        this.recursionCounter++;
-    }
-
-    public void decrementRecursionCounter() {
-        this.recursionCounter--;
-    }
-
-    public void resetInternalNodeCounter() {
-        this.internalNodeCounter = 0;
-    }
-
     public LinkedHashMap<String, BasicNode> getNodes() {
         return nodes;
-    }
-
-    public int getPriorLevel() {
-        return priorLevel;
-    }
-
-    public void setInternalNodeCounter(int internalNodeCounter) {
-        this.internalNodeCounter = internalNodeCounter;
     }
 
     BasicNode firstNode() {
@@ -133,18 +102,6 @@ public class ControlFlowGraph {
         return node;
     }
 
-    private List<Integer> getPriorLevels() {
-        return priorLevels;
-    }
-
-    public void addPriorLevel(int i) {
-        this.priorLevels.add(i);
-    }
-
-    public void removePriorLevel() {
-        this.priorLevels.remove(priorLevels.size() - 1);
-    }
-
     public ListMultimap<String, ProcessVariableOperation> getOperations() {
         ListMultimap<String, ProcessVariableOperation> operations = ArrayListMultimap.create();
         for (BasicNode node : nodes.values()) {
@@ -153,6 +110,16 @@ public class ControlFlowGraph {
             }
         }
         return operations;
+    }
+
+    // Only used for tests
+    public HashSet<String> getVariablesOfOperations() {
+        HashSet<String> variableNames = new HashSet<>();
+        ListMultimap<String, ProcessVariableOperation> operations = getOperations();
+        for (ProcessVariableOperation pvo : operations.values()) {
+            variableNames.add(pvo.getName());
+        }
+        return variableNames;
     }
 
     public void removeNode(BasicNode node) {

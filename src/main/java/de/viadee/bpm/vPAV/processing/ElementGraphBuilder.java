@@ -260,7 +260,9 @@ public class ElementGraphBuilder {
 
             for (EntryPoint ep : scanner.getEntryPoints()) {
                 if (ep.getMessageName().equals(messageName)) {
-                    checkInitialVariableOperations(ep, bpmnElement, bpmnElement.getProcessDefinition(), predecessor);
+                    // Check InitialVariableOperations
+                    new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
+                            ep, predecessor);
                 }
             }
             graph.addStartNode(bpmnElement);
@@ -275,7 +277,9 @@ public class ElementGraphBuilder {
 
             for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {
                 if (ep.getMessageName().equals(messageName)) {
-                    checkInitialVariableOperations(ep, bpmnElement, bpmnElement.getProcessDefinition(), predecessor);
+                    // Check InitialVariableOperations
+                    new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
+                            ep, predecessor);
                 }
             }
         }
@@ -283,21 +287,6 @@ public class ElementGraphBuilder {
         // examine process variables and save it with access operation
         final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner);
         reader.getVariablesFromElement(fileScanner, bpmnElement, predecessor);
-    }
-
-    /**
-     * Checks for initial variable operations (esp. initializations of variables)
-     *
-     * @param entryPoint       Current entryPoint (most likely rest controller
-     *                         classes)
-     * @param element          Current BPMN element
-     * @param resourceFilePath Current BPMN location
-     * @return initial operations
-     */
-    private ListMultimap<String, ProcessVariableOperation> checkInitialVariableOperations(final EntryPoint entryPoint,
-            final BpmnElement element, final String resourceFilePath, BasicNode[] predecessor) {
-        return new JavaReaderStatic().getVariablesFromClass(entryPoint.getClassName(), element,
-                entryPoint, predecessor);
     }
 
     public BpmnElement getElement(final String id) {

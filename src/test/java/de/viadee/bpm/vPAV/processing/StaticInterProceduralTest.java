@@ -79,7 +79,7 @@ public class StaticInterProceduralTest {
 		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		new JavaReaderStatic().getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null, null, null, new BasicNode[1]);
+		new JavaReaderStatic().getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element,  null, null, new BasicNode[1]);
 		ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
 		// Then

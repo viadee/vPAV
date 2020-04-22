@@ -60,19 +60,14 @@ public class JavaReaderStatic {
     /**
      * Checks a java delegate for process variable references with static code
      * analysis (read/write/delete).
-     * <p>
-     * Constraints: names, which only could be determined at runtime, can't be
-     * analyzed. e.g. execution.setVariable(execution.getActivityId() + "-" +
-     * execution.getEventName(), true)
      *
      * @param classFile   Name of the class
      * @param element     Bpmn element
      * @param chapter     ElementChapter
      * @param fieldType   KnownElementFieldType
-     * @return Map of process variables from the referenced delegate
      */
     void getVariablesFromJavaDelegate(final String classFile, final BpmnElement element, final ElementChapter chapter,
-            final KnownElementFieldType fieldType, String scopeId, BasicNode[] predecessor) {
+            final KnownElementFieldType fieldType, BasicNode[] predecessor) {
 
         if (classFile != null && classFile.trim().length() > 0) {
 
@@ -91,7 +86,8 @@ public class JavaReaderStatic {
                         ElementChapter.OutputImplementation, fieldType, predecessor);
             } else {
                 // Java Delegate or Listener
-                SootClass sootClass = Scene.v().forceResolve(cleanString(classFile), SootClass.SIGNATURES);
+                SootClass sootClass = Scene.v()
+                        .forceResolve(ProcessVariablesScanner.cleanString(classFile, true), SootClass.SIGNATURES);
                 if (sootClass.declaresMethodByName("notify")) {
                     classFetcherNew(classFile, "notify", element, chapter, fieldType, predecessor);
                 } else if (sootClass.declaresMethodByName("execute")) {
@@ -117,7 +113,7 @@ public class JavaReaderStatic {
         final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
         if (className != null && className.trim().length() > 0) {
-            className = cleanString(className);
+            className = ProcessVariablesScanner.cleanString(className, true);
             SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
             if (sootClass != null) {
@@ -129,7 +125,7 @@ public class JavaReaderStatic {
                         ProcessVariablesCreator pvc = new ProcessVariablesCreator(element,
                                 ElementChapter.Implementation, KnownElementFieldType.Class,
                                 predecessor);
-                        pvc.blockIterator(block, new ArrayList<>());
+                        pvc.startBlockProcessing(block, new ArrayList<>());
                     }
                 }
             }
@@ -145,21 +141,10 @@ public class JavaReaderStatic {
         ProcessVariablesCreator processVariablesCreator = new ProcessVariablesCreator(element, chapter, fieldType,
                 predecessor);
         BasicNode lastNode = processVariablesCreator
-                .blockIterator(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName));
+                .startBlockProcessing(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName));
         if (lastNode != null) {
             predecessor[0] = lastNode;
         }
-    }
-
-    /**
-     * Strips unnecessary characters and returns cleaned name
-     *
-     * @param className Classname to be stripped of unused chars
-     * @return cleaned String
-     */
-    private String cleanString(String className) {
-        className = ProcessVariablesScanner.cleanString(className, true);
-        return className;
     }
 
     public void setupSoot() {

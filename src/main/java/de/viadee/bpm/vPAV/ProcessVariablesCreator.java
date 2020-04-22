@@ -69,7 +69,6 @@ public class ProcessVariablesCreator {
         defaultScopeId = scopeId;
     }
 
-    // Does it make sense to store the top-level block or are there better ways?
     public ProcessVariablesCreator(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final BasicNode[] predecessor) {
         this.element = element;
@@ -81,8 +80,14 @@ public class ProcessVariablesCreator {
         }
     }
 
-    // Only called for top-level block -> Rename
-    public BasicNode blockIterator(final Block block, final List<Value> args) {
+    /**
+     * Start the processing of a block and all its successors. Extracts the process variables manipulations.
+     *
+     * @param block To processed block
+     * @param args  Arguments passed to block
+     * @return last created BasicNode or null if no were created
+     */
+    public BasicNode startBlockProcessing(final Block block, final List<Value> args) {
         ObjectReader objectReader = new ObjectReader(this);
         objectReader.processBlock(block, args, null, null);
         cleanEmptyNodes();
@@ -96,7 +101,10 @@ public class ProcessVariablesCreator {
         return null;
     }
 
-    // This method adds process variables one by one
+    /**
+     * @param block Block in which the process variable manipulation was found
+     * @param pvo   ProcessVariableOperation that was found
+     */
     public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo) {
         pvo.setIndex(element.getFlowAnalysis().getOperationCounter());
         element.getFlowAnalysis().incrementOperationCounter();
@@ -114,6 +122,12 @@ public class ProcessVariablesCreator {
         }
     }
 
+    /**
+     * Adds a new node to the ControlFlowGraph if no nodes exist yet or the last node isn´t associated with the block.
+     *
+     * @param block Block for that a node is created
+     * @return Newly created block or last block if it is associated with the passed block
+     */
     public BasicNode addNodeIfNotExisting(Block block) {
         if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
             return lastNode();
@@ -155,7 +169,10 @@ public class ProcessVariablesCreator {
         return nodes.get(nodes.size() - 1);
     }
 
-    private void cleanEmptyNodes() {
+    /**
+     * Removes nodes from ControlFlowGraph which don´t contain any process variable operations
+     */
+    public void cleanEmptyNodes() {
         // Clean up nodes without operations to make analysis faster
         for (Node node : nodes) {
             if (node.getOperations().size() == 0) {
@@ -210,5 +227,7 @@ public class ProcessVariablesCreator {
         predecessor = blockNode;
     }
 
-    // TODO recursion based on blocks (maybe hashing if already inside?
+    public ArrayList<Node> getNodes() {
+        return nodes;
+    }
 }
