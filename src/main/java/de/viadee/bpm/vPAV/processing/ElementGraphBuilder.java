@@ -286,7 +286,7 @@ public class ElementGraphBuilder {
 
         // examine process variables and save it with access operation
         final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner);
-        reader.getVariablesFromElement(fileScanner, bpmnElement, predecessor);
+        reader.getVariablesFromElement(bpmnElement, predecessor);
     }
 
     public BpmnElement getElement(final String id) {
@@ -423,7 +423,7 @@ public class ElementGraphBuilder {
             // add elements of the sub process as nodes
             final BpmnElement node = new BpmnElement(processDefinition, subElement, controlFlowGraph, flowAnalysis);
             new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner)
-                    .getVariablesFromElement(fileScanner, node, new BasicNode[1]);
+                    .getVariablesFromElement(node, new BasicNode[1]);
             // mention the element
             elementMap.put(subElement.getId(), node);
             // add element as node

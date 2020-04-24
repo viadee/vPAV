@@ -42,6 +42,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
+import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
+import org.camunda.bpm.model.xml.ModelInstance;
 
 import java.io.File;
 import java.util.*;
@@ -53,6 +55,8 @@ public class Helper {
     private static final String MODEL_DELEGATE_PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
 
     private static final FileScanner fileScanner = new FileScanner(new RuleSet());
+
+    public static ModelInstance emptyModel = Bpmn.createEmptyModel();
 
     static {
         fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
@@ -90,13 +94,20 @@ public class Helper {
                 new BpmnScanner(MODEL_DELEGATE_PATH));
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
-        Collection<Graph> graphCollection= graphBuilder.createProcessGraph(fileScanner, modelInstance,
+        Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
         flowAnalysis.analyze(graphCollection);
 
         return graphBuilder.createInvalidPaths(graphCollection);
 
+    }
+
+    public static <T extends BpmnModelElementInstance> T createElement(String id,
+            Class<T> elementClass) {
+        T element = emptyModel.newInstance(elementClass);
+        element.setAttributeValue("id", id, true);
+        return element;
     }
 
 }

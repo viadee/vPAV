@@ -31,15 +31,12 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
@@ -47,7 +44,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -92,7 +88,7 @@ public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
 		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
-		variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+		variableReader.getVariablesFromElement(element, new BasicNode[1]);
 
 		Assert.assertEquals(5, element.getControlFlowGraph().getOperations().size());
 	}

@@ -34,13 +34,13 @@ package de.viadee.bpm.vPAV.processing;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Helper;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -48,9 +48,8 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.camunda.bpm.model.bpmn.instance.*;
+import org.camunda.bpm.model.xml.ModelInstance;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -69,6 +68,8 @@ public class ProcessVariableReaderTest {
     private static final String BASE_PATH = "src/test/resources/";
 
     private static ClassLoader cl;
+
+    private ModelInstance emptyModel = Bpmn.createEmptyModel();
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -105,7 +106,7 @@ public class ProcessVariableReaderTest {
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+        variableReader.getVariablesFromElement(element, new BasicNode[1]);
         ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
         Assert.assertEquals(2, variables.size());
@@ -128,7 +129,7 @@ public class ProcessVariableReaderTest {
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+        variableReader.getVariablesFromElement(element, new BasicNode[1]);
         ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
         Assert.assertEquals(2, variables.size());
@@ -149,10 +150,11 @@ public class ProcessVariableReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
-        variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+        variableReader.getVariablesFromElement(element, new BasicNode[1]);
         ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
-        final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables.get("nameOfVariableInMainProcess_5");
+        final List<ProcessVariableOperation> nameOfVariableInMainProcess = variables
+                .get("nameOfVariableInMainProcess_5");
         Assert.assertNotNull(nameOfVariableInMainProcess);
         Assert.assertEquals(VariableOperation.WRITE, nameOfVariableInMainProcess.get(0).getOperation());
 
@@ -172,54 +174,55 @@ public class ProcessVariableReaderTest {
 
     @Test
     public void testRecogniseSignals() {
-        final String PATH = BASE_PATH + "ProcessVariablesReader_SignalVariables.bpmn";
-        final File processDefinition = new File(PATH);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
-                fileScanner.getJavaResourcesFileInputStream());
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, null);
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
-        // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
-                scanner, new FlowAnalysis());
-
-        final ArrayList<BpmnElement> bpmnElements = (ArrayList<BpmnElement>) getBpmnElements(processDefinition, baseElements, graphBuilder,
+        // Test if signal is recognized in catch event
+        BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent("MyStartEvent").signal("Signal-${test}")
+                .done();
+        StartEvent startEvent = modelInstance.getModelElementById("MyStartEvent");
+        BpmnElement element = new BpmnElement("", startEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        Assert.assertEquals(1, bpmnElements.get(12).getControlFlowGraph().getOperations().size());
-        Assert.assertEquals(1, bpmnElements.get(13).getControlFlowGraph().getOperations().size());
+        reader.getVariablesFromSignalsAndMessage(null, element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
+        Assert.assertEquals("test", element.getControlFlowGraph().getOperations().values().iterator().next().getName());
+
+        // Test if signal is recognized in throw event
+        modelInstance = Bpmn.createProcess().startEvent().intermediateThrowEvent("MyEndEvent").signal("Signal-${test1}")
+                .done();
+        IntermediateThrowEvent endEvent = modelInstance.getModelElementById("MyEndEvent");
+        element = new BpmnElement("", endEvent, new ControlFlowGraph(),
+                new FlowAnalysis());
+        reader.getVariablesFromSignalsAndMessage(null, element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
+        Assert.assertEquals("test1",
+                element.getControlFlowGraph().getOperations().values().iterator().next().getName());
     }
 
     @Test
     public void testRecogniseMessages() {
-        final String PATH = BASE_PATH + "ProcessVariablesReader_MessageVariables.bpmn";
-        final File processDefinition = new File(PATH);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
-                fileScanner.getJavaResourcesFileInputStream());
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, null);
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
-        // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
-                scanner, new FlowAnalysis());
-
-        final Collection<BpmnElement> bpmnElements = getBpmnElements(processDefinition, baseElements, graphBuilder,
+        // Test if message is recognized in catch event
+        BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent("MyStartEvent").message("Message-${test}")
+                .done();
+        StartEvent startEvent = modelInstance.getModelElementById("MyStartEvent");
+        BpmnElement element = new BpmnElement("", startEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
+        reader.getVariablesFromSignalsAndMessage(null, element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
+        Assert.assertEquals("test", element.getControlFlowGraph().getOperations().values().iterator().next().getName());
 
-        Assert.assertEquals(1, ((BpmnElement)bpmnElements.toArray()[12]).getControlFlowGraph().getOperations().size());
+        // Test if message is recognized in throw event
+        modelInstance = Bpmn.createProcess().startEvent().intermediateThrowEvent("MyEndEvent")
+                .message("Message-${test1}")
+                .done();
+        IntermediateThrowEvent endEvent = modelInstance.getModelElementById("MyEndEvent");
+        element = new BpmnElement("", endEvent, new ControlFlowGraph(),
+                new FlowAnalysis());
+        reader.getVariablesFromSignalsAndMessage(null, element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
+        Assert.assertEquals("test1",
+                element.getControlFlowGraph().getOperations().values().iterator().next().getName());
     }
 
     @Test
@@ -242,7 +245,8 @@ public class ProcessVariableReaderTest {
         graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
                 scanner, new FlowAnalysis());
 
-        final ArrayList<BpmnElement> bpmnElements = (ArrayList<BpmnElement>) getBpmnElements(processDefinition, baseElements, graphBuilder,
+        final ArrayList<BpmnElement> bpmnElements = (ArrayList<BpmnElement>) getBpmnElements(processDefinition,
+                baseElements, graphBuilder,
                 new FlowAnalysis());
         Assert.assertEquals(1, bpmnElements.get(0).getControlFlowGraph().getOperations().size());
         Assert.assertEquals(1, bpmnElements.get(11).getControlFlowGraph().getOperations().size());
@@ -280,6 +284,7 @@ public class ProcessVariableReaderTest {
         Assert.assertEquals("Model should have two UR anomalies.", 2, invalidPathMap.size());
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
         Assert.assertEquals("myPassedVariable should raise UR anomaly.", "myPassedVariable", iterator.next().getName());
-        Assert.assertEquals("myHardcodedVariable should raise UR anomaly.", "myHardcodedVariable", iterator.next().getName());
+        Assert.assertEquals("myHardcodedVariable should raise UR anomaly.", "myHardcodedVariable",
+                iterator.next().getName());
     }
 }

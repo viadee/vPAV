@@ -51,12 +51,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
+import static de.viadee.bpm.vPAV.Helper.createElement;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ProcessVariableReader_IOParametersTest {
-
-    private static ModelInstance emptyModel = Bpmn.createEmptyModel();
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -92,11 +91,11 @@ public class ProcessVariableReader_IOParametersTest {
      */
     @Test
     public void testTypeList() {
-        CamundaValue firstValue = emptyModel.newInstance(CamundaValue.class);
+        CamundaValue firstValue = Helper.emptyModel.newInstance(CamundaValue.class);
         firstValue.setTextContent("first");
-        CamundaValue secondValue = emptyModel.newInstance(CamundaValue.class);
+        CamundaValue secondValue = Helper.emptyModel.newInstance(CamundaValue.class);
         secondValue.setTextContent("${myVariable}");
-        CamundaList list = emptyModel.newInstance(CamundaList.class);
+        CamundaList list = Helper.emptyModel.newInstance(CamundaList.class);
         list.getValues().add(firstValue);
         list.getValues().add(secondValue);
 
@@ -117,13 +116,13 @@ public class ProcessVariableReader_IOParametersTest {
      */
     @Test
     public void testTypeMap() {
-        CamundaEntry firstEntry = emptyModel.newInstance(CamundaEntry.class);
+        CamundaEntry firstEntry = Helper.emptyModel.newInstance(CamundaEntry.class);
         firstEntry.setCamundaKey("first");
         firstEntry.setTextContent("1");
-        CamundaEntry secondEntry = emptyModel.newInstance(CamundaEntry.class);
+        CamundaEntry secondEntry = Helper.emptyModel.newInstance(CamundaEntry.class);
         secondEntry.setCamundaKey("second");
         secondEntry.setTextContent("${myVariable}");
-        CamundaMap map = emptyModel.newInstance(CamundaMap.class);
+        CamundaMap map = Helper.emptyModel.newInstance(CamundaMap.class);
         map.getCamundaEntries().add(firstEntry);
         map.getCamundaEntries().add(secondEntry);
 
@@ -144,7 +143,7 @@ public class ProcessVariableReader_IOParametersTest {
      */
     @Test
     public void testInputTypeScript() {
-        CamundaScript script = emptyModel.newInstance(CamundaScript.class);
+        CamundaScript script = Helper.emptyModel.newInstance(CamundaScript.class);
         script.setCamundaScriptFormat("groovy");
         script.setTextContent("§%&&//)()()(");
 
@@ -187,7 +186,8 @@ public class ProcessVariableReader_IOParametersTest {
         final BpmnElement element = new BpmnElement("", task, new ControlFlowGraph(),
                 new FlowAnalysis());
         (new ProcessVariableReader(null, mock(Rule.class), null))
-                .processInputOutputParameters(element, new BasicNode[1], true);
+                .processInputOutputParameters(element, element.getBaseElement().getExtensionElements(),
+                        new BasicNode[1], true);
 
         return element.getControlFlowGraph().getNodes();
     }
@@ -228,16 +228,11 @@ public class ProcessVariableReader_IOParametersTest {
                 new FlowAnalysis());
 
         // TODO check predecessor
-        (new ProcessVariableReader(null, null, null)).processInputOutputParameters(element, new BasicNode[1], input);
+        (new ProcessVariableReader(null, null, null))
+                .processInputOutputParameters(element, element.getBaseElement().getExtensionElements(),
+                        new BasicNode[1], input);
 
         return element.getControlFlowGraph().getNodes();
-    }
-
-    protected <T extends BpmnModelElementInstance> T createElement(String id,
-            Class<T> elementClass) {
-        T element = emptyModel.newInstance(elementClass);
-        element.setAttributeValue("id", id, true);
-        return element;
     }
 
     @Before

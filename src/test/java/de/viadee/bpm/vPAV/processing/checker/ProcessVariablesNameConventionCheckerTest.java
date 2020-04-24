@@ -31,8 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
@@ -45,12 +43,10 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -118,7 +114,7 @@ public class ProcessVariablesNameConventionCheckerTest {
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
-			variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+			variableReader.getVariablesFromElement(element, new BasicNode[1]);
 
 			checker.check(element);
 		}
@@ -148,7 +144,7 @@ public class ProcessVariablesNameConventionCheckerTest {
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
 					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
 
-			variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+			variableReader.getVariablesFromElement(element, new BasicNode[1]);
 
 			checker.check(element);
 		}

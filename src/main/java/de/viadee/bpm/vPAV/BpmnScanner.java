@@ -704,7 +704,7 @@ public class BpmnScanner {
     public Map<Element, Element> getTimerImplementation(final String id) {
 
         // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+        ArrayList<NodeList> listNodeList = new ArrayList<>();
 
         switch (modelVersion) {
             case V1:
@@ -764,176 +764,6 @@ public class BpmnScanner {
     }
 
     /**
-     * get mapping type for input/output parameters for given element by id
-     *
-     * @param id      id of current element
-     * @param mapping input or output mapping
-     * @return mapping type
-     */
-    public LinkedMap<String, String> getMappingType(final String id, final String mapping) {
-        final LinkedMap<String, String> mappingTypes = new LinkedMap<>();
-        final NodeList nodeList = doc.getElementsByTagName(mapping);
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final Node node = nodeList.item(i);
-            if (idMatch(node, id)) {
-                // if more than one child, check on list and value
-                if (node.hasChildNodes() && node.getChildNodes().getLength() > 1) {
-                    final NodeList nodeChilds = node.getChildNodes();
-                    for (int y = 0; y < nodeChilds.getLength(); y++) {
-                        switch (nodeChilds.item(y).getNodeName()) {
-                            case BpmnConstants.CAMUNDA_LIST: {
-                                mappingTypes.put(nodeChilds.item(y).getNodeName(), null);
-                                break;
-                            }
-                            case BpmnConstants.CAMUNDA_MAP: {
-                                mappingTypes.put(nodeChilds.item(y).getNodeName(), null);
-                                break;
-                            }
-                            case BpmnConstants.CAMUNDA_SCRIPT: {
-                                mappingTypes.put(nodeChilds.item(y).getNodeName(),
-                                        ((Element) nodeChilds.item(y)).getAttribute(BpmnConstants.SCRIPT_FORMAT));
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    mappingTypes.put(mapping, null);
-                }
-            }
-        }
-        return mappingTypes;
-    }
-
-    /**
-     * get mapping of inputParameters
-     *
-     * @return HashMap with mapped variables and values
-     */
-    // TODO replace by getVariablesFromInputMapping in ProcessVariableReader
-    public HashMap<String, Map<String, String>> getInputMapping(BaseElement element) {
-        // TODO maybe check if it has extension elements earlier?
-        if (element.getExtensionElements() == null) {
-            return new HashMap<>();
-        }
-        HashMap<String, Map<String, String>> variables = new HashMap<>();
-
-        for (ModelElementInstance extension : element.getExtensionElements().getElements()) {
-            if (extension instanceof CamundaInputParameter) {
-                HashMap<String, String> innerVariables = new HashMap<>();
-                CamundaInputParameter inputParameter = (CamundaInputParameter) extension;
-
-
-                if (inputParameter.getValue() != null) {
-                    if (inputParameter.getValue().getElementType().getTypeName().equals("list")) {
-
-                    } else if (inputParameter.getValue().getElementType().getTypeName().equals("map")) {
-
-                    } else if (inputParameter.getValue().getElementType().getTypeName().equals("script")) {
-
-                    }
-
-                } else {
-                    // Type Text
-                    innerVariables.put(inputParameter.getCamundaName(), inputParameter.getTextContent());
-                    variables.put("text", innerVariables);
-                }
-
-            }
-        }
-        return variables;
-    }
-
-    /**
-     * get mapping of outputParameters
-     *
-     * @param id element id
-     * @return HashMap with mapped variables and values
-     */
-    public HashMap<String, Map<String, String>> getOutputMapping(final String id) {
-        return getOutputMappingValues(id);
-    }
-
-    /**
-     * get output mapping of given element
-     *
-     * @param id id of the element
-     * @return HashMap with mapped variables and values
-     */
-    private HashMap<String, Map<String, String>> getOutputMappingValues(final String id) {
-        // Map for all Task elements
-        final HashMap<String, Map<String, String>> variables = new HashMap<>();
-
-        final NodeList nodeList = doc.getElementsByTagName(BpmnConstants.CAMUNDA_OUTPUT_PARAMETER);
-
-        retrieveMapping(id, variables, nodeList);
-        return variables;
-    }
-
-    /**
-     * Retrieves the input/output mapping for a given Element by Id
-     *
-     * @param id        Id of current element
-     * @param variables Map holding variable mapping
-     * @param nodeList  list of nodes for current parent BPMN element
-     */
-    private void retrieveMapping(final String id, final HashMap<String, Map<String, String>> variables,
-            final NodeList nodeList) {
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final Node node = nodeList.item(i);
-            if (idMatch(node, id)) {
-                // if more than one child, check on list and value
-                if (node.hasChildNodes() && node.getChildNodes().getLength() > 1) {
-                    final NodeList nodeChilds = node.getChildNodes();
-                    for (int y = 0; y < nodeChilds.getLength(); y++) {
-                        switch (nodeChilds.item(y).getNodeName()) {
-                            case BpmnConstants.CAMUNDA_LIST: {
-                                final NodeList listChilds = nodeChilds.item(y).getChildNodes();
-                                final HashMap<String, String> innerVariables = new HashMap<>();
-                                for (int z = 0; z < listChilds.getLength(); z++) {
-                                    if (listChilds.item(z).getNodeName().equals(BpmnConstants.CAMUNDA_VALUE)) {
-                                        innerVariables.put(Integer.toString(z), listChilds.item(z).getTextContent());
-                                        variables.put(((Element) node).getAttribute(BpmnConstants.ATTR_NAME),
-                                                innerVariables);
-                                    }
-                                }
-                                break;
-                            }
-                            case BpmnConstants.CAMUNDA_MAP: {
-                                final NodeList mapChilds = nodeChilds.item(y).getChildNodes();
-                                final HashMap<String, String> innerVariables = new HashMap<>();
-                                for (int x = 0; x < mapChilds.getLength(); x++) {
-                                    if (mapChilds.item(x).getNodeName().equals(BpmnConstants.CAMUNDA_ENTRY)) {
-                                        innerVariables.put(
-                                                ((Element) mapChilds.item(x)).getAttribute(BpmnConstants.ATTR_KEY),
-                                                mapChilds.item(x).getTextContent());
-                                        variables.put(((Element) node).getAttribute(BpmnConstants.ATTR_NAME),
-                                                innerVariables);
-                                    }
-                                }
-                                break;
-                            }
-                            case BpmnConstants.CAMUNDA_SCRIPT: {
-                                final NodeList listChilds = nodeChilds.item(y).getChildNodes();
-                                final HashMap<String, String> innerVariables = new HashMap<>();
-                                for (int z = 0; z < listChilds.getLength(); z++) {
-                                    innerVariables.put(Integer.toString(z), listChilds.item(z).getTextContent());
-                                    variables.put(((Element) node).getAttribute(BpmnConstants.ATTR_NAME),
-                                            innerVariables);
-                                }
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    final HashMap<String, String> innerVariables = new HashMap<>();
-                    innerVariables.put(((Element) node).getAttribute(BpmnConstants.ATTR_NAME), node.getTextContent());
-                    variables.put(((Element) node).getAttribute(BpmnConstants.ATTR_NAME), innerVariables);
-                }
-            }
-        }
-    }
-
-    /**
      * get value of expression
      *
      * @param id id from element
@@ -962,7 +792,7 @@ public class BpmnScanner {
      * @return names of variable
      */
     public ArrayList<String> getFieldInjectionVarName(String id) {
-        ArrayList<String> varNames = new ArrayList<String>();
+        ArrayList<String> varNames = new ArrayList<>();
         NodeList nodeList = doc.getElementsByTagName(BpmnConstants.CAMUNDA_FIELD);
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
@@ -984,7 +814,7 @@ public class BpmnScanner {
     public Map<String, String> getErrorEvent(String id) {
 
         // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+        ArrayList<NodeList> listNodeList = new ArrayList<>();
 
         switch (modelVersion) {
             case V1:
@@ -1079,7 +909,7 @@ public class BpmnScanner {
      */
     public String getErrorCodeVar(String id) {
         // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+        ArrayList<NodeList> listNodeList = new ArrayList<>();
 
         switch (modelVersion) {
             case V1:
@@ -1166,7 +996,7 @@ public class BpmnScanner {
      */
     public Map<String, String> getKeyPairs(final String id) {
 
-        final Map<String, String> keyPairs = new HashMap<String, String>();
+        final Map<String, String> keyPairs = new HashMap<>();
 
         final NodeList nodeList = doc.getElementsByTagName(BpmnConstants.CAMUNDA_PROPERTY);
 
@@ -1187,10 +1017,6 @@ public class BpmnScanner {
 
     public ArrayList<String> getLinkRefs(String id) {
         return getModelRefs(id, BpmnConstants.LINK_EVENT_DEFINITION, BpmnConstants.ATTR_NAME);
-    }
-
-    public ArrayList<String> getSignalRefs(String id) {
-        return getModelRefs(id, BpmnConstants.SIGNAL_EVENT_DEFINITION, BpmnConstants.ATTR_SIGNAL_REF);
     }
 
     public ArrayList<String> getMessageRefs(String id) {
@@ -1231,7 +1057,7 @@ public class BpmnScanner {
     }
 
     private ArrayList<String> getModelRefs(String id, String eventDefinition, String attrRef) {
-        ArrayList<String> refs = new ArrayList<String>();
+        ArrayList<String> refs = new ArrayList<>();
 
         switch (modelVersion) {
             case V1:
@@ -1308,30 +1134,6 @@ public class BpmnScanner {
                 break;
         }
         return getName(nodeList, messageRef);
-    }
-
-    /**
-     * Retrieve the signal name
-     *
-     * @param signalRef id of signal
-     * @return signalName
-     */
-    public String getSignalName(String signalRef) {
-        NodeList nodeList = null;
-        switch (modelVersion) {
-            case V1:
-                nodeList = doc.getElementsByTagName(BpmnConstants.SIGNAL);
-                break;
-            case V2:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_SIGNAL);
-                break;
-            case V3:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_SIGNAL);
-                break;
-            default:
-                break;
-        }
-        return getName(nodeList, signalRef);
     }
 
     /**

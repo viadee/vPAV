@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
@@ -91,7 +90,7 @@ public class ProcessVariableOperationReaderTest {
         final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
 
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
-        variableReader.getVariablesFromElement(fileScanner, element, new BasicNode[1]);
+        variableReader.getVariablesFromElement(element, new BasicNode[1]);
         ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
         Assert.assertEquals(2, variables.size());
