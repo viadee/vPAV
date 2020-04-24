@@ -121,24 +121,20 @@ public final class ProcessVariableReader {
             searchExtensionsElements(javaReaderStatic, element, extensionElements, predecessor);
         }
 
-        // 7) Search variables in Signals and Messages
-        getVariablesFromSignalsAndMessage(javaReaderStatic, element, predecessor);
-
-        // 8) Search variables in Links
-        // TODO can it be joined with signals and messages?
-        getVariablesFromLinks(javaReaderStatic, element, predecessor);
+        // 7) Search variables in Signals and Messages and Links
+        getVariablesFromSignalsAndMessagesAndLinks(javaReaderStatic, element, predecessor);
 
         if (extensionElements != null) {
             // TODO not 100% sure whether this is the right position or not
-            // 9) Search in Input/Output-Associations (Call Activities)
+            // 8) Search in Input/Output-Associations (Call Activities)
             searchVariablesInInputOutputExtensions(javaReaderStatic, element,
                     extensionElements, scopeElementId, predecessor);
 
-            // 10) Search variables execution listener (end)
+            // 9) Search variables execution listener (end)
             getVariablesFromExecutionListener(javaReaderStatic, element,
                     extensionElements, scopeElementId, ElementChapter.ExecutionListenerEnd, predecessor);
 
-            // 11) Search variables in Output Parameters
+            // 10) Search variables in Output Parameters
             processInputOutputParameters(element, extensionElements, predecessor, false);
         }
     }
@@ -149,7 +145,7 @@ public final class ProcessVariableReader {
      * @param javaReaderStatic Static java reader
      * @param element          BpmnElement
      */
-    public void getVariablesFromSignalsAndMessage(
+    public void getVariablesFromSignalsAndMessagesAndLinks(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
             BasicNode[] predecessor) {
         final BaseElement baseElement = element.getBaseElement();
@@ -162,9 +158,9 @@ public final class ProcessVariableReader {
 
         final ArrayList<String> signals = new ArrayList<>();
         final ArrayList<String> messages = new ArrayList<>();
+        final ArrayList<String> links = new ArrayList<>();
         Collection<EventDefinition> eventDefinitions = new HashSet<>();
 
-        // TODO are there more things than catchevent / throwevent /receivtask?
         if (element.getBaseElement() instanceof CatchEvent) {
             eventDefinitions = ((CatchEvent) element.getBaseElement()).getEventDefinitions();
         } else if (element.getBaseElement() instanceof ThrowEvent) {
@@ -181,6 +177,8 @@ public final class ProcessVariableReader {
                 signals.add(((SignalEventDefinition) eventDefinition).getSignal().getName());
             } else if (eventDefinition instanceof MessageEventDefinition) {
                 messages.add(((MessageEventDefinition) eventDefinition).getMessage().getName());
+            } else if (eventDefinition instanceof LinkEventDefinition) {
+                links.add(((LinkEventDefinition) eventDefinition).getName());
             }
         }
 
@@ -192,43 +190,19 @@ public final class ProcessVariableReader {
             checkMessageAndSignalForExpression(javaReaderStatic, messageName, element,
                     ElementChapter.Message, KnownElementFieldType.Message, scopeElementId, predecessor);
         }
+        for (String linkName : links) {
+            checkMessageAndSignalForExpression(javaReaderStatic, linkName, element,
+                    ElementChapter.Link, KnownElementFieldType.Link, scopeElementId, predecessor);
+        }
     }
 
     /**
-     * @param javaReaderStatic Static java reader
-     * @param element          Current BPMN Element
+     * Retrieves process variables from input / output parameters.
+     * @param element BpmnElement
+     * @param extensionElements Extension elements
+     * @param predecessor Current predecessor
+     * @param input true if input parameters are processed, false for output parameters
      */
-    private void getVariablesFromLinks(
-            final JavaReaderStatic javaReaderStatic, final BpmnElement element,
-            BasicNode[] predecessor) {
-
-        final ArrayList<String> links = bpmnScanner.getLinkRefs(element.getBaseElement().getId());
-        getLinkVariables(javaReaderStatic, links, element, predecessor);
-    }
-
-    /**
-     * @param javaReaderStatic Static java reader
-     * @param links            List of links for current element
-     * @param element          Current BPMN Element
-     */
-    private void getLinkVariables(final JavaReaderStatic javaReaderStatic,
-            final ArrayList<String> links, final BpmnElement element,
-            BasicNode[] predecessor) {
-        final BaseElement baseElement = element.getBaseElement();
-        final BpmnModelElementInstance scopeElement = baseElement.getScope();
-
-        String scopeElementId = null;
-        if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
-        }
-
-        for (String link : links) {
-            checkMessageAndSignalForExpression(javaReaderStatic, link, element,
-                    ElementChapter.Signal, KnownElementFieldType.Signal, scopeElementId, predecessor);
-        }
-
-    }
-
     void processInputOutputParameters(BpmnElement element, ExtensionElements extensionElements, BasicNode[] predecessor,
             boolean input) {
         final BaseElement baseElement = element.getBaseElement();

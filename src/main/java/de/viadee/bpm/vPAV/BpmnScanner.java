@@ -33,18 +33,10 @@ package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
-import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
-import org.apache.commons.collections4.map.LinkedMap;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.Task;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaInputOutput;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaInputParameter;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaMap;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -202,7 +194,7 @@ public class BpmnScanner {
         String returnImplementation = null;
 
         // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<NodeList>();
+        ArrayList<NodeList> listNodeList = new ArrayList<>();
 
         switch (modelVersion) {
             case V1:
@@ -1013,103 +1005,6 @@ public class BpmnScanner {
         }
 
         return keyPairs;
-    }
-
-    public ArrayList<String> getLinkRefs(String id) {
-        return getModelRefs(id, BpmnConstants.LINK_EVENT_DEFINITION, BpmnConstants.ATTR_NAME);
-    }
-
-    public ArrayList<String> getMessageRefs(String id) {
-        ArrayList<String> messageRefs = getModelRefs(id, BpmnConstants.MESSAGE_EVENT_DEFINITION,
-                BpmnConstants.ATTR_MESSAGE_REF);
-        messageRefs.addAll(getMessageRefFromReceiveTask(id));
-        return messageRefs;
-    }
-
-    private ArrayList<String> getMessageRefFromReceiveTask(String id) {
-        ArrayList<String> messageRefs = new ArrayList<>();
-        NodeList nodeList = null;
-
-        switch (modelVersion) {
-            case V1:
-                nodeList = doc.getElementsByTagName(BpmnConstants.RECEIVE_TASK);
-                break;
-            case V2:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_RECEIVE_TASK);
-                break;
-            case V3:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_RECEIVE_TASK);
-                break;
-            default:
-                break;
-        }
-
-        if (nodeList != null) {
-            // iterate over list and check each item
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Element taskElement = (Element) nodeList.item(i);
-                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID)))
-                    messageRefs.add(taskElement.getAttribute(BpmnConstants.ATTR_MESSAGE_REF));
-            }
-        }
-
-        return messageRefs;
-    }
-
-    private ArrayList<String> getModelRefs(String id, String eventDefinition, String attrRef) {
-        ArrayList<String> refs = new ArrayList<>();
-
-        switch (modelVersion) {
-            case V1:
-                refs.addAll(getRefs(id, BpmnConstants.BOUNDARY_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.INTERMEDIATE_CATCH_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.INTERMEDIATE_THROW_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.START_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.END_EVENT, eventDefinition, attrRef));
-                break;
-            case V2:
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_BOUNDARY_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_INTERMEDIATE_CATCH_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_INTERMEDIATE_THROW_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_START_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_END_EVENT, eventDefinition, attrRef));
-                break;
-            case V3:
-                refs.addAll(getRefs(id, BpmnConstants.BPMN2_BOUNDARY_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_INTERMEDIATE_CATCH_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_INTERMEDIATE_THROW_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_START_EVENT, eventDefinition, attrRef));
-                refs.addAll(getRefs(id, BpmnConstants.BPMN_END_EVENT, eventDefinition, attrRef));
-                break;
-            default:
-                break;
-        }
-
-        return refs;
-    }
-
-    private ArrayList<String> getRefs(String id, String tag, String eventDefinition, String attrRef) {
-        ArrayList<String> signalRefs = new ArrayList<>();
-        NodeList nodeList;
-
-        nodeList = doc.getElementsByTagName(tag);
-
-        // iterate over list and check each item
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Element taskElement = (Element) nodeList.item(i);
-
-            if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID)) && nodeList.item(i).hasChildNodes()) {
-                NodeList boundaryChilds = nodeList.item(i).getChildNodes();
-                for (int x = 0; x < boundaryChilds.getLength(); x++) {
-                    if (boundaryChilds.item(x).getLocalName() != null
-                            && boundaryChilds.item(x).getLocalName().equals(eventDefinition)) {
-                        Element boundaryChild = (Element) boundaryChilds.item(x);
-                        signalRefs.add(boundaryChild.getAttribute(attrRef));
-                    }
-                }
-            }
-        }
-        return signalRefs;
     }
 
     /**

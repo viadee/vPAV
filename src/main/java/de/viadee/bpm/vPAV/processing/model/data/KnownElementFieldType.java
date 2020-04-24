@@ -59,6 +59,7 @@ public enum KnownElementFieldType {
     OutputParameter("Output Parameters"),
     InputParameter("Input Parameters"),
     Signal("Signal Name"),
+    Link("Link Name"),
     Message("Message Name"), Initial("Initial"),
     UserDefined("User Defined"),
     CamundaStandardVariables("Camunda Standard Process Variables");

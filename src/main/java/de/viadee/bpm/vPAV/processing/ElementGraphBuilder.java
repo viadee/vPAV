@@ -45,16 +45,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.Activity;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
-import org.camunda.bpm.model.bpmn.instance.EndEvent;
-import org.camunda.bpm.model.bpmn.instance.FlowElement;
-import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
-import org.camunda.bpm.model.bpmn.instance.StartEvent;
-import org.camunda.bpm.model.bpmn.instance.SubProcess;
+import org.camunda.bpm.model.bpmn.instance.*;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -71,6 +62,8 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.camunda.bpm.model.bpmn.instance.Process;
+import sun.reflect.generics.visitor.Reifier;
 
 /**
  * Creates data flow graph based on a bpmn model
@@ -249,11 +242,16 @@ public class ElementGraphBuilder {
         }
 
         // retrieve initial variable operation (should be WRITE)
-        if (element.getElementType().getTypeName().equals(BpmnConstants.START_EVENT)) {
-            final ArrayList<String> messageRefs = bpmnScanner.getMessageRefs(element.getId());
+        if (element instanceof StartEvent) {
+            ArrayList<String> messageNames = new ArrayList<>();
+            for (EventDefinition ed : ((StartEvent) element).getEventDefinitions()) {
+                if (ed instanceof MessageEventDefinition) {
+                    messageNames.add(((MessageEventDefinition) ed).getMessage().getName());
+                }
+            }
             String messageName = "";
-            if (messageRefs.size() == 1) {
-                messageName = bpmnScanner.getMessageName(messageRefs.get(0));
+            if (messageNames.size() == 1) {
+                messageName = messageNames.get(0);
             }
             // add process variables for start event, which set by call
             // startProcessInstanceByKey
@@ -266,12 +264,12 @@ public class ElementGraphBuilder {
                 }
             }
             graph.addStartNode(bpmnElement);
-        } else if (element.getElementType().getTypeName().equals(BpmnConstants.RECEIVE_TASK)) {
-            final ArrayList<String> messageRefs = bpmnScanner.getMessageRefs(element.getId());
+        } else if (element instanceof ReceiveTask) {
             String messageName = "";
-            if (messageRefs.size() == 1) {
-                messageName = bpmnScanner.getMessageName(messageRefs.get(0));
+            if (((ReceiveTask) element).getMessage() != null) {
+                messageName = ((ReceiveTask) element).getMessage().getName();
             }
+
             // add process variables for receive task, which set by call
             // startProcessInstanceByKey
 

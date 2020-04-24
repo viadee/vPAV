@@ -182,7 +182,7 @@ public class ProcessVariableReaderTest {
         StartEvent startEvent = modelInstance.getModelElementById("MyStartEvent");
         BpmnElement element = new BpmnElement("", startEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessage(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test", element.getControlFlowGraph().getOperations().values().iterator().next().getName());
 
@@ -192,7 +192,7 @@ public class ProcessVariableReaderTest {
         IntermediateThrowEvent endEvent = modelInstance.getModelElementById("MyEndEvent");
         element = new BpmnElement("", endEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessage(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test1",
                 element.getControlFlowGraph().getOperations().values().iterator().next().getName());
@@ -208,7 +208,7 @@ public class ProcessVariableReaderTest {
         StartEvent startEvent = modelInstance.getModelElementById("MyStartEvent");
         BpmnElement element = new BpmnElement("", startEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessage(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test", element.getControlFlowGraph().getOperations().values().iterator().next().getName());
 
@@ -219,7 +219,7 @@ public class ProcessVariableReaderTest {
         IntermediateThrowEvent endEvent = modelInstance.getModelElementById("MyEndEvent");
         element = new BpmnElement("", endEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessage(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test1",
                 element.getControlFlowGraph().getOperations().values().iterator().next().getName());
@@ -227,29 +227,36 @@ public class ProcessVariableReaderTest {
 
     @Test
     public void testRecogniseLinks() {
-        final String PATH = BASE_PATH + "ProcessVariablesReader_LinkVariables.bpmn";
-        final File processDefinition = new File(PATH);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
-                fileScanner.getJavaResourcesFileInputStream());
+        ProcessVariableReader reader = new ProcessVariableReader(null, null, null);
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
+        // Test if message is recognized in throw event
+        BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent("MyStartEvent")
+                .intermediateThrowEvent("MyThrowEvent")
+                .done();
+        IntermediateThrowEvent throwEvent = modelInstance.getModelElementById("MyThrowEvent");
+        LinkEventDefinition linkEventDefinition = modelInstance.newInstance(LinkEventDefinition.class);
+        linkEventDefinition.setName("link-${test}");
+        throwEvent.getEventDefinitions().add(linkEventDefinition);
 
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-        final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH), rule);
-        // create data flow graphs
-        graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),
-                scanner, new FlowAnalysis());
-
-        final ArrayList<BpmnElement> bpmnElements = (ArrayList<BpmnElement>) getBpmnElements(processDefinition,
-                baseElements, graphBuilder,
+        BpmnElement element = new BpmnElement("", throwEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        Assert.assertEquals(1, bpmnElements.get(0).getControlFlowGraph().getOperations().size());
-        Assert.assertEquals(1, bpmnElements.get(11).getControlFlowGraph().getOperations().size());
+        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
+        Assert.assertEquals("test", element.getControlFlowGraph().getOperations().values().iterator().next().getName());
+
+        // Test if message is recognized in catch event
+        modelInstance = Bpmn.createProcess().startEvent("MyStartEvent").intermediateCatchEvent("MyCatchEvent").done();
+        IntermediateCatchEvent catchEvent = modelInstance.getModelElementById("MyCatchEvent");
+        linkEventDefinition = modelInstance.newInstance(LinkEventDefinition.class);
+        linkEventDefinition.setName("link-${test1}");
+        catchEvent.getEventDefinitions().add(linkEventDefinition);
+
+        element = new BpmnElement("", catchEvent, new ControlFlowGraph(),
+                new FlowAnalysis());
+        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
+        Assert.assertEquals("test1",
+                element.getControlFlowGraph().getOperations().values().iterator().next().getName());
     }
 
     @Test
