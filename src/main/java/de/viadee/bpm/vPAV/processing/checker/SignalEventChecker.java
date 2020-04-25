@@ -40,10 +40,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.Event;
-import org.camunda.bpm.model.bpmn.instance.Signal;
-import org.camunda.bpm.model.bpmn.instance.SignalEventDefinition;
+import org.camunda.bpm.model.bpmn.instance.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,91 +49,84 @@ import java.util.Map;
 
 public class SignalEventChecker extends AbstractElementChecker {
 
-	private Map<String, BaseElement> signalNames = new HashMap<>();
+    private Map<String, BaseElement> signalNames = new HashMap<>();
 
-	public SignalEventChecker(Rule rule, BpmnScanner bpmnScanner) {
-		super(rule, bpmnScanner);
-	}
+    public SignalEventChecker(Rule rule, BpmnScanner bpmnScanner) {
+        super(rule, bpmnScanner);
+    }
 
-	@Override
-	public Collection<CheckerIssue> check(BpmnElement element) {
-		final Collection<CheckerIssue> issues = new ArrayList<>();
-		final BaseElement baseElement = element.getBaseElement();
+    @Override
+    public Collection<CheckerIssue> check(BpmnElement element) {
+        final Collection<CheckerIssue> issues = new ArrayList<>();
+        final BaseElement baseElement = element.getBaseElement();
 
-		if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)
-				|| baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)
-				|| baseElement.getElementType().getTypeName()
-						.equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_CATCH_EVENT)
-				|| baseElement.getElementType().getTypeName()
-						.equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT)
-				|| baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_BOUNDARY_EVENT)) {
+        if (baseElement instanceof StartEvent
+                || baseElement instanceof EndEvent
+                || baseElement instanceof IntermediateCatchEvent
+                || baseElement instanceof IntermediateThrowEvent
+                || baseElement instanceof BoundaryEvent) {
 
-			final Event event = (Event) baseElement;
-			final Collection<SignalEventDefinition> signalEventDefinitions = event
-					.getChildElementsByType(SignalEventDefinition.class);
-			if (signalEventDefinitions != null) {
-				for (SignalEventDefinition eventDef : signalEventDefinitions) {
-					if (eventDef != null) {
-						final Signal signal = eventDef.getSignal();
-						if (signal == null) {
-							issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-									String.format(Messages.getString("SignalEventChecker.0"), //$NON-NLS-1$
-											CheckName.checkName(baseElement))));
-						} else {
-							if (signal.getName() == null || signal.getName().isEmpty()) {
-								issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-										String.format(Messages.getString("SignalEventChecker.1"), //$NON-NLS-1$
-												CheckName.checkName(baseElement))));
-							} else if (baseElement.getElementType().getTypeName()
-									.equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)) {
-								issues.addAll(checkDoubleUsage(element, baseElement, signal));
-							}
-						}
-					}
-				}
-			}
+            final Event event = (Event) baseElement;
+            final Collection<SignalEventDefinition> signalEventDefinitions = event
+                    .getChildElementsByType(SignalEventDefinition.class);
+            if (signalEventDefinitions != null) {
+                for (SignalEventDefinition eventDef : signalEventDefinitions) {
+                    if (eventDef != null) {
+                        final Signal signal = eventDef.getSignal();
+                        if (signal == null) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    String.format(Messages.getString("SignalEventChecker.0"), //$NON-NLS-1$
+                                            CheckName.checkName(baseElement))));
+                        } else {
+                            if (signal.getName() == null || signal.getName().isEmpty()) {
+                                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                        String.format(Messages.getString("SignalEventChecker.1"), //$NON-NLS-1$
+                                                CheckName.checkName(baseElement))));
+                            } else if (baseElement.getElementType().getTypeName()
+                                    .equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)) {
+                                issues.addAll(checkDoubleUsage(element, baseElement, signal));
+                            }
+                        }
+                    }
+                }
+            }
 
-		}
+        }
 
-		return issues;
-	}
+        return issues;
+    }
 
-	/**
-	 * Check for multiple usage of the same signal name
-	 * 
-	 * @param element Current BpmnElement
-	 * @param baseElement BaseElement of BpmnElement
-	 * @param signal Signal
-	 * @return Issues
-	 */
-	private Collection<CheckerIssue> checkDoubleUsage(final BpmnElement element, final BaseElement baseElement,
-			final Signal signal) {
+    /**
+     * Check for multiple usage of the same signal name
+     *
+     * @param element     Current BpmnElement
+     * @param baseElement BaseElement of BpmnElement
+     * @param signal      Signal
+     * @return Issues
+     */
+    private Collection<CheckerIssue> checkDoubleUsage(final BpmnElement element, final BaseElement baseElement,
+            final Signal signal) {
 
-		final Collection<CheckerIssue> issues = new ArrayList<>();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		if (!addSignal(baseElement, signal.getName())) {
-			issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-					String.format(Messages.getString("SignalEventChecker.2"), //$NON-NLS-1$
-							CheckName.checkName(baseElement), CheckName.checkName(getSignal(signal.getName())))));
-		}
-		return issues;
-	}
+        if (!addSignal(baseElement, signal.getName())) {
+            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                    String.format(Messages.getString("SignalEventChecker.2"), //$NON-NLS-1$
+                            CheckName.checkName(baseElement), CheckName.checkName(getSignal(signal.getName())))));
+        }
+        return issues;
+    }
 
-	public boolean addSignal(final BaseElement baseElement, final String name) {
-		if (!signalNames.containsKey(name)) {
-			signalNames.put(name, baseElement);
-			return true;
-		} else {
-			return false;
-		}
-	}
+    public boolean addSignal(final BaseElement baseElement, final String name) {
+        if (!signalNames.containsKey(name)) {
+            signalNames.put(name, baseElement);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	public BaseElement getSignal(final String name) {
-		return signalNames.get(name);
-	}
-
-	public void removeElement(final String name) {
-		signalNames.remove(name);
-	}
-
+    public BaseElement getSignal(final String name) {
+        return signalNames.get(name);
+    }
 }

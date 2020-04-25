@@ -145,12 +145,6 @@ public class BpmnConstants {
 
 	public static final String BPMN2_MESSAGE = "bpmn2:message";
 
-	public static final String BPMN2_ERROR = "bpmn2:error";
-
-	public static final String BPMN2_SIGNAL = "bpmn2:signal";
-
-	public static final String BPMN2_RECEIVE_TASK = "bpmn2:receiveTask";
-
 	// -----------------------
 
 	public static final String SCRIPT_TAG = "camunda:script";
@@ -165,10 +159,6 @@ public class BpmnConstants {
 
 	public static final String CAMUNDA_EXT = "camunda:type";
 
-	public static final String CAMUNDA_OUTPUT_PARAMETER = "camunda:outputParameter";
-
-	public static final String CAMUNDA_INPUT_PARAMETER = "camunda:inputParameter";
-
 	public static final String CAMUNDA_FIELD = "camunda:field";
 
 	public static final String CAMUNDA_PROPERTY = "camunda:property";
@@ -180,18 +170,6 @@ public class BpmnConstants {
 	public static final String CAMUNDA_EXECUTION_LISTENER = "camunda:executionListener";
 
 	public static final String CAMUNDA_TASK_LISTENER = "camunda:taskListener";
-
-	public static final String CAMUNDA_LIST = "camunda:list";
-
-	public static final String CAMUNDA_VALUE = "camunda:value";
-
-	public static final String CAMUNDA_MAP = "camunda:map";
-
-	public static final String CAMUNDA_ENTRY = "camunda:entry";
-
-	public static final String CAMUNDA_SCRIPT = "camunda:script";
-
-	public static final String SCRIPT_FORMAT = "scriptFormat";
 
 	public static final String RESULT_VARIABLE = "resultVariable";
 
@@ -219,8 +197,6 @@ public class BpmnConstants {
 
 	public static final String INTERN_LOCATION = "de.viadee.bpm.vPAV.processing.checker.";
 
-	public static final String ATTR_KEY = "key";
-
 	public static final String ATTR_CLASS = "class";
 
 	public static final String ATTR_DEL = "delegateExpression";
@@ -234,12 +210,6 @@ public class BpmnConstants {
 	public static final String ATTR_VALUE = "value";
 
 	public static final String ATTR_ERROR_REF = "errorRef";
-
-	public static final String ATTR_ERROR_CODE = "errorCode";
-
-	public static final String ATTR_SIGNAL_REF = "signalRef";
-
-	public static final String ATTR_MESSAGE_REF = "messageRef";
 
 	public static final String ATTR_VAR_MAPPING_CLASS = "variableMappingClass";
 
@@ -276,8 +246,6 @@ public class BpmnConstants {
 	public static final String INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR = "SignallableActivityBehavior";
 
 	public static final String INTERFACE_ACTIVITY_BEHAVIOUR = "ActivityBehavior";
-
-	public static final String INTERFACE_DEL_VARIABLE_MAPPING = "DelegateVariableMapping";
 
 	public static final String SUPERCLASS_ABSTRACT_BPMN_ACTIVITY_BEHAVIOR = "AbstractBpmnActivityBehavior";
 

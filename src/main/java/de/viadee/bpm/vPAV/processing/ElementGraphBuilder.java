@@ -63,7 +63,6 @@ import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import sun.reflect.generics.visitor.Reifier;
 
 /**
  * Creates data flow graph based on a bpmn model

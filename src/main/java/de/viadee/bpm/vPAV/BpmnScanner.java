@@ -36,7 +36,7 @@ import de.viadee.bpm.vPAV.processing.ProcessingException;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.Task;
+import org.camunda.bpm.model.bpmn.instance.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -96,6 +96,10 @@ public class BpmnScanner {
         this.modelInstance = Bpmn.readModelFromFile(new File(path));
     }
 
+    public BpmnScanner() {
+
+    }
+
     public void setModelInstance(BpmnModelInstance modelInstance) {
         this.modelInstance = modelInstance;
     }
@@ -131,6 +135,7 @@ public class BpmnScanner {
      * @return return_implementation contains implementation
      */
     public String getImplementation(String id) {
+        // TODO rewrite to use camunda api and also change in boundaryeventchecker
         Task task = modelInstance.getModelElementById(id);
 
         // Check which implementation it is
@@ -800,186 +805,16 @@ public class BpmnScanner {
     /**
      * get errorEventDefinition
      *
-     * @param id id from element
-     * @return errorEvent
+     * @param event
+     * @return ErrorEventDefinition
      */
-    public Map<String, String> getErrorEvent(String id) {
-
-        // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<>();
-
-        switch (modelVersion) {
-            case V1:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BOUNDARY_EVENT));
-                break;
-            case V2:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BOUNDARY_EVENT));
-                break;
-            case V3:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BOUNDARY_EVENT));
-                break;
-            default:
-                listNodeList = null;
-
-        }
-
-        final Map<String, String> boundaryEventList = new HashMap<>();
-
-        // iterate over list<NodeList>
-        for (final NodeList list : listNodeList) {
-            for (int i = 0; i < list.getLength(); i++) {
-                final Element taskElement = (Element) list.item(i);
-
-                // check whether a node matches with the provided id
-                if (taskElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
-
-                    final NodeList childNodes = taskElement.getChildNodes();
-                    for (int x = 0; x < childNodes.getLength(); x++) {
-
-                        // check if an event consists of a errorEventDefinition tag
-                        if (childNodes.item(x).getLocalName() != null
-                                && childNodes.item(x).getLocalName().equals(BpmnConstants.ERROR_EVENT_DEFINITION)) {
-                            final Element taskElement2 = (Element) childNodes.item(x);
-                            boundaryEventList.put(taskElement2.getAttribute(BpmnConstants.ATTR_ERROR_REF),
-                                    taskElement2.getAttribute(BpmnConstants.CAMUNDA_ERROR_MESSAGE_VARIABLE));
-
-                        }
-                    }
-                }
+    public ErrorEventDefinition getErrorEventDefinition(BoundaryEvent event) {
+        for (EventDefinition ed : event.getEventDefinitions()) {
+            if (ed instanceof ErrorEventDefinition) {
+                return (ErrorEventDefinition) ed;
             }
         }
-        return boundaryEventList;
-    }
-
-    /**
-     * get errorDefinition
-     *
-     * @param id id from element
-     * @return Map with errorName and errorCode
-     */
-    public Map<String, String> getErrorDef(String id) {
-
-        NodeList nodeList = null;
-
-        switch (modelVersion) {
-            case V1:
-                nodeList = doc.getElementsByTagName(BpmnConstants.ERROR);
-                break;
-            case V2:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_ERROR);
-                break;
-            case V3:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_ERROR);
-                break;
-            default:
-                break;
-        }
-
-        final Map<String, String> errorDef = new HashMap<>();
-
-        if (nodeList != null) {
-            // iterate over list and check each item
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Element taskElement = (Element) nodeList.item(i);
-
-                // check if the ids are corresponding
-                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                    errorDef.put(taskElement.getAttribute(BpmnConstants.ATTR_NAME),
-                            taskElement.getAttribute(BpmnConstants.ATTR_ERROR_CODE));
-                }
-            }
-        }
-
-        return errorDef;
-    }
-
-    /**
-     * get errorCodeVariable
-     *
-     * @param id id from element
-     * @return String with errorCodeVariable
-     */
-    public String getErrorCodeVar(String id) {
-        // List for all Task elements
-        ArrayList<NodeList> listNodeList = new ArrayList<>();
-
-        switch (modelVersion) {
-            case V1:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BOUNDARY_EVENT));
-                break;
-            case V2:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN_BOUNDARY_EVENT));
-                break;
-            case V3:
-                listNodeList.add(doc.getElementsByTagName(BpmnConstants.BPMN2_BOUNDARY_EVENT));
-                break;
-            default:
-                listNodeList = null;
-
-        }
-
-        String getErrorCodeVar = "";
-
-        // iterate over list<NodeList>
-        for (final NodeList list : listNodeList) {
-            for (int i = 0; i < list.getLength(); i++) {
-                final Element taskElement = (Element) list.item(i);
-
-                // check whether a node matches with the provided id
-                if (taskElement.getAttribute(BpmnConstants.ATTR_ID).equals(id)) {
-
-                    final NodeList childNodes = taskElement.getChildNodes();
-                    for (int x = 0; x < childNodes.getLength(); x++) {
-
-                        // check if an event consists of a errorEventDefinition tag
-                        if (childNodes.item(x).getLocalName() != null
-                                && childNodes.item(x).getLocalName().equals(BpmnConstants.ERROR_EVENT_DEFINITION)) {
-                            final Element taskElement2 = (Element) childNodes.item(x);
-                            getErrorCodeVar = taskElement2.getAttribute(BpmnConstants.CAMUNDA_ERROR_CODE_VARIABLE);
-                        }
-                    }
-                }
-            }
-        }
-        return getErrorCodeVar;
-    }
-
-    /**
-     * @param id id of boundaryErrorEvent
-     * @return attachedToTask
-     */
-    public String getErrorEventMapping(String id) {
-
-        String attachedToTask = "";
-        NodeList nodeList = null;
-
-        switch (modelVersion) {
-            case V1:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BOUNDARY_EVENT);
-                break;
-            case V2:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN_BOUNDARY_EVENT);
-                break;
-            case V3:
-                nodeList = doc.getElementsByTagName(BpmnConstants.BPMN2_BOUNDARY_EVENT);
-                break;
-            default:
-                break;
-        }
-
-        if (nodeList != null) {
-            // iterate over list and check each item
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Element taskElement = (Element) nodeList.item(i);
-
-                // check if the ids are corresponding
-                if (id.equals(taskElement.getAttribute(BpmnConstants.ATTR_ID))) {
-                    attachedToTask = taskElement.getAttribute(BpmnConstants.ATTACHED_TO_REF);
-                }
-            }
-        }
-
-        return attachedToTask;
+        return null;
     }
 
     /**

@@ -42,7 +42,6 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -56,78 +55,73 @@ import java.util.Collection;
  */
 public class SignalEventCheckerTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/processing/checker/";
 
-	private static SignalEventChecker checker;
+    private static SignalEventChecker checker;
 
-	private final Rule rule = new Rule("SignalEventChecker", true, null, null, null, null);
+    private final Rule rule = new Rule("SignalEventChecker", true, null, null, null, null);
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		ClassLoader cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
-	}
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        ClassLoader cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().getResource("en_US");
+    }
 
-	/**
-	 * Case: Tasks without Expressions
-	 *
-	 */
-	@Test
+    /**
+     * Case: Tasks without Expressions
+     *
+     */
+    @Test
     public void testCorrectModel() {
-		final String PATH = BASE_PATH + "SignalEventChecker_Correct.bpmn";
-		checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "SignalEventChecker_Correct.bpmn";
+        checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
 
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-
-		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
             checker.check(element);
-		}
+        }
 
         if (IssueService.getInstance().getIssues().size() > 0) {
-			Assert.fail("correct model generates an issue");
-		}
-	}
+            Assert.fail("correct model generates an issue");
+        }
+    }
 
-	/**
-	 * Case: Multiple SignalStartEvents with the same signal name
-	 *
-	 */
-	@Test
+    /**
+     * Case: Multiple SignalStartEvents with the same signal name
+     *
+     */
+    @Test
     public void testWrongModel() {
-		final String PATH = BASE_PATH + "SignalEventChecker_Wrong.bpmn";
-		checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "SignalEventChecker_Wrong.bpmn";
+        checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
 
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
-
-		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
             checker.check(element);
-		}
+        }
 
-		if (IssueService.getInstance().getIssues().size() != 1) {
-			Assert.fail("incorrect model should generate an issue");
-		}
-	}
+        if (IssueService.getInstance().getIssues().size() != 1) {
+            Assert.fail("incorrect model should generate an issue");
+        }
+    }
 
-	@Before
+    @Before
     public void clearIssues() {
         IssueService.getInstance().clear();
     }
-
 }

@@ -42,8 +42,11 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
+import org.camunda.bpm.model.bpmn.instance.ErrorEventDefinition;
+import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.camunda.bpm.model.xml.ModelInstance;
 import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -59,8 +62,6 @@ import java.util.Map;
 public class BoundaryErrorCheckerTest {
 
     private static final String BASE_PATH = "src/test/resources/";
-
-    private static final String PATH = BASE_PATH + "Model_With_Boundary_Event.bpmn";
 
     private static final String DELEGATE_PACKAGE = "de.viadee.bpm.vPAV.delegates.BoundaryError.";
 
@@ -89,31 +90,29 @@ public class BoundaryErrorCheckerTest {
     }
 
     private void setupAndRunChecker(String delegate, boolean delegateExpression) {
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        checker = new BoundaryErrorChecker(rule, scanner);
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        // Set delegate
-        ServiceTaskImpl task = modelInstance.getModelElementById("Task_0759yva");
+        BpmnModelInstance modelInstance;
         if (delegateExpression) {
-            // Use delegate expression
-            task.setAttributeValueNs("http://camunda.org/schema/1.0/bpmn", "delegateExpression", delegate);
+            modelInstance = Bpmn.createProcess().startEvent().serviceTask("MyServiceTask")
+                    .camundaDelegateExpression(delegate)
+                    .boundaryEvent("MyBoundaryEvent")
+                    .errorEventDefinition("ErrorEventDef").errorCodeVariable("Test").errorMessageVariable("Test")
+                    .error("123")
+                    .errorEventDefinitionDone().endEvent().done();
         } else {
-            // Use class
-            task.setCamundaClass(DELEGATE_PACKAGE + delegate);
-
+            modelInstance = Bpmn.createProcess().startEvent().serviceTask("MyServiceTask")
+                    .camundaClass(DELEGATE_PACKAGE + delegate).boundaryEvent("MyBoundaryEvent")
+                    .errorEventDefinition("ErrorEventDef").errorCodeVariable("Test").errorMessageVariable("Test")
+                    .error("123")
+                    .errorEventDefinitionDone().endEvent().done();
         }
-        scanner.setModelInstance(modelInstance);
 
-        // Run checker
-        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        ((ErrorEventDefinition) modelInstance.getModelElementById("ErrorEventDef")).getError().setName("Error_1");
 
-        for (BaseElement baseElement : baseElements) {
-            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
-            checker.check(element);
-        }
+        BoundaryEvent boundaryEvent = modelInstance.getModelElementById("MyBoundaryEvent");
+        BpmnElement element = new BpmnElement(null, boundaryEvent, new ControlFlowGraph(), new FlowAnalysis());
+        BpmnScanner scanner = new BpmnScanner();
+        checker = new BoundaryErrorChecker(rule, scanner);
+        checker.check(element);
     }
 
     /**
@@ -176,6 +175,24 @@ public class BoundaryErrorCheckerTest {
     @Test
     public void testBoundaryErrorEventBean_Wrong() {
         setupAndRunChecker("${wrongBoundaryErrorEvent}", true);
+
+        if (IssueService.getInstance().getIssues().size() != 1) {
+            Assert.fail("Incorrect model should generate an issue");
+        }
+    }
+
+    @Test
+    public void testBoundaryErrorNoReferencedError() {
+        ModelInstance modelInstance = Bpmn.createProcess().startEvent().serviceTask("MyServiceTask")
+                .boundaryEvent("MyBoundaryEvent")
+                .errorEventDefinition("ErrorEventDef").errorCodeVariable("Test").errorMessageVariable("Test")
+                .errorEventDefinitionDone().endEvent().done();
+
+        BoundaryEvent boundaryEvent = modelInstance.getModelElementById("MyBoundaryEvent");
+        BpmnElement element = new BpmnElement(null, boundaryEvent, new ControlFlowGraph(), new FlowAnalysis());
+        BpmnScanner scanner = new BpmnScanner();
+        checker = new BoundaryErrorChecker(rule, scanner);
+        checker.check(element);
 
         if (IssueService.getInstance().getIssues().size() != 1) {
             Assert.fail("Incorrect model should generate an issue");
