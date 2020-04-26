@@ -48,12 +48,16 @@ import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.engine.impl.el.FixedValue;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.*;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -78,61 +82,55 @@ public class FieldInjectionChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement bpmnElement = element.getBaseElement();
-        String implementationAttr = null;
-        ArrayList<String> executionDelegate = new ArrayList<String>();
-        ArrayList<String> executionClass = new ArrayList<String>();
-        ArrayList<String> executionExpression = new ArrayList<String>();
-        ArrayList<String> taskDelegate = new ArrayList<String>();
-        ArrayList<String> taskClass = new ArrayList<String>();
-        ArrayList<String> taskExpression = new ArrayList<String>();
+        Map.Entry<String, String> implementationAttr = null;
+        final ArrayList<String> executionDelegate = new ArrayList<>();
+        final ArrayList<String> executionClass = new ArrayList<>();
+        final ArrayList<String> taskDelegate = new ArrayList<>();
+        final ArrayList<String> taskClass = new ArrayList<>();
 
         // read attributes from task
         if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
-                || bpmnElement instanceof SendTask))
-            implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
-
-        if (bpmnElement instanceof UserTask) {
-            taskDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_DEL,
-                    BpmnConstants.CAMUNDA_TASK_LISTENER);
-            taskClass = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_CLASS,
-                    BpmnConstants.CAMUNDA_TASK_LISTENER);
-            taskExpression = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_EX,
-                    BpmnConstants.CAMUNDA_TASK_LISTENER);
+                || bpmnElement instanceof SendTask)) {
+            implementationAttr = bpmnScanner.getImplementation(bpmnElement);
         }
 
-        executionDelegate = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.CAMUNDA_EXECUTION_LISTENER,
-                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
-        executionClass = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_CLASS,
-                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
-        executionExpression = bpmnScanner.getListener(bpmnElement.getId(), BpmnConstants.ATTR_EX,
-                BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
+        if (bpmnElement instanceof UserTask) {
+            ArrayList<ModelElementInstance> taskListener = bpmnScanner
+                    .getListener(bpmnElement,
+                            BpmnConstants.CAMUNDA_TASK_LISTENER);
+            taskListener.forEach(listener -> {
+                taskDelegate.add(((CamundaTaskListener) listener).getCamundaDelegateExpression());
+                taskClass.add(((CamundaTaskListener) listener).getCamundaClass());
+            });
+        }
+        ArrayList<ModelElementInstance> executionListener = bpmnScanner
+                .getListener(bpmnElement,
+                        BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
+        executionListener.forEach(listener -> {
+            executionDelegate.add(((CamundaExecutionListener) listener).getCamundaDelegateExpression());
+            executionClass.add(((CamundaExecutionListener) listener).getCamundaClass());
+        });
 
         final ArrayList<String> fieldInjectionVarNames = bpmnScanner.getFieldInjectionVarName(bpmnElement.getId());
-        final String classAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                BpmnConstants.ATTR_CLASS);
-        final String delegateExprAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                BpmnConstants.ATTR_DEL);
 
         if (implementationAttr != null && !fieldInjectionVarNames.isEmpty() && (bpmnElement instanceof ServiceTask ||
                 bpmnElement instanceof BusinessRuleTask || bpmnElement instanceof SendTask)) {
             // check if class is correct
-            if (implementationAttr.equals(BpmnConstants.CAMUNDA_CLASS)) {
-                if (classAttr == null || classAttr.trim().length() == 0) {
-                } else {
+            if (implementationAttr.getKey().equals(BpmnConstants.CAMUNDA_CLASS)) {
+                if (implementationAttr.getValue() != null && implementationAttr.getValue().trim().length() != 0) {
                     for (String fieldInjectionVarName : fieldInjectionVarNames)
-                        issues.addAll(checkClassFileForVar(element, classAttr, fieldInjectionVarName));
+                        issues.addAll(
+                                checkClassFileForVar(element, implementationAttr.getValue(), fieldInjectionVarName));
                 }
             }
 
             // check if delegateExpression is correct
-            else if (implementationAttr.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
-                if (delegateExprAttr == null || delegateExprAttr.trim().length() == 0) {
-                    // no delegateExpression has been configured
-                } else {
+            else if (implementationAttr.getKey().equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
+                if (implementationAttr.getValue() != null && implementationAttr.getValue().trim().length() != 0) {
                     // check validity of a bean
                     if (RuntimeConfig.getInstance().getBeanMapping() != null) {
                         final TreeBuilder treeBuilder = new Builder();
-                        final Tree tree = treeBuilder.build(delegateExprAttr);
+                        final Tree tree = treeBuilder.build(implementationAttr.getValue());
                         final Iterable<IdentifierNode> identifierNodes = tree.getIdentifierNodes();
                         // if beanMapping ${...} reference
                         if (identifierNodes.iterator().hasNext()) {
@@ -143,58 +141,51 @@ public class FieldInjectionChecker extends AbstractElementChecker {
                                 if (classFile != null && classFile.trim().length() > 0) {
                                     for (String fieldInjectionVarName : fieldInjectionVarNames)
                                         issues.addAll(checkClassFileForVar(element, classFile, fieldInjectionVarName));
-                                } else {
-                                    // incorrect beanmapping
                                 }
+
                             }
                         } else {
                             for (String fieldInjectionVarName : fieldInjectionVarNames)
-                                issues.addAll(checkClassFileForVar(element, delegateExprAttr, fieldInjectionVarName));
+                                issues.addAll(checkClassFileForVar(element, implementationAttr.getValue(),
+                                        fieldInjectionVarName));
                         }
                     } else {
                         // check if class exists
                         for (String fieldInjectionVarName : fieldInjectionVarNames)
-                            issues.addAll(checkClassFileForVar(element, delegateExprAttr, fieldInjectionVarName));
+                            issues.addAll(checkClassFileForVar(element, implementationAttr.getValue(),
+                                    fieldInjectionVarName));
                     }
                 }
             }
         }
 
         // checkListener
-        if (executionClass != null || executionDelegate != null || executionExpression != null
-                && (!fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null)) {
+        if (!fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null) {
             for (String fieldInjectionVarName : fieldInjectionVarNames)
-                issues.addAll(checkListener(element, executionClass, executionDelegate, executionExpression,
+                issues.addAll(checkListener(element, executionClass, executionDelegate,
                         fieldInjectionVarName));
         }
-        if (taskClass != null || taskDelegate != null
-                || taskExpression != null && (!fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null)) {
+        if (!fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null) {
             for (String fieldInjectionVarName : fieldInjectionVarNames)
                 issues.addAll(
-                        checkListener(element, taskClass, taskDelegate, taskExpression, fieldInjectionVarName));
+                        checkListener(element, taskClass, taskDelegate, fieldInjectionVarName));
         }
 
         return issues;
     }
 
     /**
-     *
      * Check listener for Classes, DelegateExpressions and Expressions
      *
-     * @param element
-     *            BpmnElement
-     * @param aClass
-     *            Class, can be null
-     * @param aDelegate
-     *            DelegateExpression, can be null
-     * @param aExpression
-     *            Expression, can be null
-     * @param varName
-     *            name of the variable
+     * @param element     BpmnElement
+     * @param aClass      Class, can be null
+     * @param aDelegate   DelegateExpression, can be null
+     * @param aExpression Expression, can be null
+     * @param varName     name of the variable
      * @return Collection of CheckerIssues
      */
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
-            ArrayList<String> aDelegate, ArrayList<String> aExpression, String varName) {
+            ArrayList<String> aDelegate, String varName) {
         final Collection<CheckerIssue> issues = new ArrayList<>();
 
         // classes
@@ -245,12 +236,9 @@ public class FieldInjectionChecker extends AbstractElementChecker {
     /**
      * check class for correct variable
      *
-     * @param element
-     *            the bpmn element
-     * @param className
-     *            name of the class
-     * @param varName
-     *            name of the variable
+     * @param element   the bpmn element
+     * @param className name of the class
+     * @param varName   name of the variable
      * @return collection if issues
      */
     private Collection<CheckerIssue> checkClassFileForVar(final BpmnElement element, final String className,
@@ -289,7 +277,8 @@ public class FieldInjectionChecker extends AbstractElementChecker {
 
             } catch (NoSuchFieldException | SecurityException e) {
                 issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.WARNING, classPath, element,
-                        String.format(Messages.getString("FieldInjectionChecker.7"), clazz.getSimpleName(), //$NON-NLS-1$
+                        String.format(Messages.getString("FieldInjectionChecker.7"), clazz.getSimpleName(),
+                                //$NON-NLS-1$
                                 varName)));
             }
 

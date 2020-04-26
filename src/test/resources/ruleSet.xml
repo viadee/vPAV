@@ -30,6 +30,10 @@
         <state>true</state>
     </rule>
     <rule>
+        <name>EmptyAttributesChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
         <name>EmbeddedGroovyScriptChecker</name>
         <state>true</state>
     </rule>

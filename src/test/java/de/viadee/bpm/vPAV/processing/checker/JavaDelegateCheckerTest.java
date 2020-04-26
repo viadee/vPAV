@@ -180,34 +180,6 @@ public class JavaDelegateCheckerTest {
     }
 
     /**
-     * Case: There are no technical attributes
-     */
-    @Test
-    public void testNoTechnicalAttributes() {
-        final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoTechnicalAttributes.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
-
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-                new FlowAnalysis());
-
-        checker.check(element);
-
-        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
-
-        if (issues.size() != 1) {
-            Assert.fail("collection with the issues is bigger or smaller as expected");
-        } else {
-            Assert.assertEquals("Task 'Service Task 1' with no java class name. (compare model: Details, Java Class)",
-                    issues.iterator().next().getMessage());
-        }
-    }
-
-    /**
      * Case: java delegate has not been set
      */
     @Test

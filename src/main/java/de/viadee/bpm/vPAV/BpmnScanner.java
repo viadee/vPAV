@@ -35,8 +35,10 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.*;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -131,60 +133,46 @@ public class BpmnScanner {
      * Return the Implementation of an specific element (sendTask, ServiceTask or
      * BusinessRuleTask)
      *
-     * @param id id of bpmn element
+     * @param element Bpmn element
      * @return return_implementation contains implementation
      */
-    public String getImplementation(String id) {
-        // TODO rewrite to use camunda api and also change in boundaryeventchecker
-        Task task = modelInstance.getModelElementById(id);
-
-        // Check which implementation it is
-        if (task.getDomElement()
-                .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS)) {
-            return BpmnConstants.CAMUNDA_CLASS;
-        } else if (task.getDomElement().hasAttribute(BpmnModelConstants.CAMUNDA_NS,
-                BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION)) {
-            return BpmnConstants.CAMUNDA_DEXPRESSION;
-        } else if (
-                task.getDomElement()
-                        .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION)) {
-            return BpmnConstants.CAMUNDA_EXPRESSION;
-        } else if (task.getDomElement().hasAttribute(BpmnModelConstants.CAMUNDA_NS,
-                BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF)) {
-            return BpmnConstants.CAMUNDA_DMN;
-        } else if (task.getDomElement()
-                .hasAttribute(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_TYPE)) {
-            return BpmnConstants.CAMUNDA_EXT;
+    public Map.Entry<String, String> getImplementation(BaseElement element) {
+        String camundaClass = null, delegateExpression = null,
+                expression = null, decisionRef = null, type = null;
+        if (element instanceof ServiceTask) {
+            camundaClass = ((ServiceTask) element).getCamundaClass();
+            delegateExpression = ((ServiceTask) element).getCamundaDelegateExpression();
+            expression = ((ServiceTask) element).getCamundaExpression();
+            type = ((ServiceTask) element).getCamundaType();
+        } else if (element instanceof BusinessRuleTask) {
+            camundaClass = ((BusinessRuleTask) element).getCamundaClass();
+            delegateExpression = ((BusinessRuleTask) element).getCamundaDelegateExpression();
+            expression = ((BusinessRuleTask) element).getCamundaExpression();
+            decisionRef = ((BusinessRuleTask) element).getCamundaDecisionRef();
+            type = ((BusinessRuleTask) element).getCamundaType();
+        } else if (element instanceof SendTask) {
+            camundaClass = ((SendTask) element).getCamundaClass();
+            delegateExpression = ((SendTask) element).getCamundaDelegateExpression();
+            expression = ((SendTask) element).getCamundaExpression();
+            type = ((SendTask) element).getCamundaType();
         }
 
-        return BpmnConstants.IMPLEMENTATION;
-    }
-
-    /**
-     * @param id             id of bpmnElement
-     * @param implementation DelegateExpression/Java Class
-     * @return implementationReference
-     */
-    public String getImplementationReference(String id, String implementation) {
-        Task task = modelInstance.getModelElementById(id);
-
-        if (implementation.equals(BpmnConstants.CAMUNDA_CLASS)) {
-            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS, BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS);
-        } else if (implementation.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
-            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION);
-        } else if (implementation.equals(BpmnConstants.CAMUNDA_EXPRESSION)) {
-            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION);
-        } else if (implementation.equals(BpmnConstants.CAMUNDA_DMN)) {
-            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF);
-        } else if (implementation.equals(BpmnConstants.CAMUNDA_EXT)) {
-            return task.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_TYPE);
+        HashMap<String, String> values = new HashMap<>();
+        if (camundaClass != null) {
+            values.put(BpmnConstants.CAMUNDA_CLASS, camundaClass);
+        } else if (delegateExpression != null) {
+            values.put(BpmnConstants.CAMUNDA_DEXPRESSION, delegateExpression);
+        } else if (expression != null) {
+            values.put(BpmnConstants.CAMUNDA_EXPRESSION, expression);
+        } else if (decisionRef != null) {
+            values.put(BpmnConstants.CAMUNDA_DMN, decisionRef);
+        } else if (type != null) {
+            values.put(BpmnConstants.CAMUNDA_EXT, type);
+        } else {
+            values.put(BpmnConstants.IMPLEMENTATION, "");
         }
 
-        return "";
+        return values.entrySet().iterator().next();
     }
 
     /**
@@ -264,50 +252,26 @@ public class BpmnScanner {
     }
 
     /**
-     * @param id       id of bpmn element
-     * @param listType Type of Attribute
-     * @param extType  Type of Listener
+     * @param extType Type of Listener
      * @return value of Listener
      */
-    public ArrayList<String> getListener(String id, String listType, String extType) {
+    public ArrayList<ModelElementInstance> getListener(BaseElement element, String extType) {
+        ExtensionElements extensions = element.getExtensionElements();
+        ArrayList<ModelElementInstance> listener = new ArrayList<>();
 
-        // list to hold return values
-        ArrayList<String> returnAttrList = new ArrayList<>();
+        if (extensions != null) {
+            for (ModelElementInstance el : extensions.getElements()) {
+                if (extType.equals(BpmnConstants.CAMUNDA_EXECUTION_LISTENER) &&
+                        el instanceof CamundaExecutionListener) {
+                    listener.add(el);
 
-        // List for all Task elements
-        NodeList nodeListExtensionElements;
-
-        // search for script tag
-
-        switch (modelVersion) {
-            case V1:
-                nodeListExtensionElements = doc.getElementsByTagName(BpmnConstants.EXTENSION_ELEMENTS);
-                break;
-            case V2:
-                nodeListExtensionElements = doc.getElementsByTagName(BpmnConstants.BPMN_EXTENSION_ELEMENTS);
-                break;
-            case V3:
-                nodeListExtensionElements = doc.getElementsByTagName(BpmnConstants.BPMN2_EXTENSION_ELEMENTS);
-                break;
-            default:
-                nodeListExtensionElements = null;
-        }
-
-        // search for parent with id
-        for (int i = 0; i < nodeListExtensionElements.getLength(); i++) {
-            if (((Element) nodeListExtensionElements.item(i).getParentNode()).getAttribute(BpmnConstants.ATTR_ID)
-                    .equals(id)) {
-                NodeList childNodes = nodeListExtensionElements.item(i).getChildNodes();
-                for (int x = 0; x < childNodes.getLength(); x++) {
-                    if (childNodes.item(x).getNodeName().equals(extType)) {
-                        String attName = checkAttributesOfNode(childNodes.item(x), listType);
-                        if (attName != null)
-                            returnAttrList.add(attName);
-                    }
+                } else if (extType.equals(BpmnConstants.CAMUNDA_TASK_LISTENER) && el instanceof CamundaTaskListener) {
+                    listener.add(el);
                 }
             }
         }
-        return returnAttrList;
+
+        return listener;
     }
 
     /**

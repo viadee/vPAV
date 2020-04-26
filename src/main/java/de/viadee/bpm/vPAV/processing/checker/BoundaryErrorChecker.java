@@ -87,13 +87,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
             // Check if boundaryEvent consists of an errorEventDefinition
             if (errorEventDefinition != null) {
                 Activity activity = boundaryEvent.getAttachedTo();
-                String implementationClass = null;
-                String delegateExpression = null;
-
-                if (activity instanceof ServiceTask) {
-                    implementationClass = ((ServiceTask) activity).getCamundaClass();
-                    delegateExpression = ((ServiceTask) activity).getCamundaDelegateExpression();
-                }
+                Map.Entry<String, String> implementation = bpmnScanner.getImplementation(activity);
 
                 // TODO add test case for this path
                 // No error has been referenced
@@ -119,22 +113,20 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                                         CheckName.checkName(bpmnElement))));
 
                     } else {
-                        if (implementationClass != null || delegateExpression != null) {
-                            // Check the BeanMapping to resolve delegate expression
-                            if (delegateExpression != null && !delegateExpression.isEmpty()) {
-                                checkBeanMapping(element, issues, bpmnElement,
-                                        errorDef.getErrorCode(), delegateExpression);
+                        // Check the BeanMapping to resolve delegate expression
+                        if (implementation.getKey().equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
+                            checkBeanMapping(element, issues, bpmnElement,
+                                    errorDef.getErrorCode(), implementation.getValue());
 
-                                // Check the directly referenced class
-                            } else if (implementationClass != null && !implementationClass.isEmpty()) {
-                                if (!readResourceFile(implementationClass,
-                                        errorDef.getErrorCode())) {
-                                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                            String.format(
-                                                    Messages.getString("BoundaryErrorChecker.3"), //$NON-NLS-1$
-                                                    CheckName.checkName(bpmnElement), implementationClass)));
+                            // Check the directly referenced class
+                        } else if (implementation.getKey().equals(BpmnConstants.CAMUNDA_CLASS)) {
+                            if (!readResourceFile(implementation.getValue(),
+                                    errorDef.getErrorCode())) {
+                                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                        String.format(
+                                                Messages.getString("BoundaryErrorChecker.3"), //$NON-NLS-1$
+                                                CheckName.checkName(bpmnElement), implementation.getValue())));
 
-                                }
                             }
                         }
                     }

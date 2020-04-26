@@ -41,6 +41,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import org.camunda.bpm.model.bpmn.instance.*;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,8 +62,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
     public Collection<CheckerIssue> check(BpmnElement element) {
 
         final Collection<CheckerIssue> issues = new ArrayList<>();
-        final BaseElement baseElement = element.getBaseElement();     
-        
+        final BaseElement baseElement = element.getBaseElement();
 
         final Map<String, Setting> settings = rule.getSettings();
 
@@ -70,9 +70,10 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 || baseElement instanceof SendTask || baseElement instanceof ScriptTask) {
 
             // read attributes from task
-            final String implementationAttr = bpmnScanner.getImplementation(baseElement.getId());
+            final Map.Entry<String, String> implementationAttr = bpmnScanner.getImplementation((Task) baseElement);
 
-            if (implementationAttr != null && implementationAttr.equals(BpmnConstants.CAMUNDA_EXPRESSION)
+            if (implementationAttr.getKey() != null && implementationAttr.getKey()
+                    .equals(BpmnConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                         String.format("Usage of expressions in '%s' is against best practices.",
@@ -80,10 +81,10 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
-            if (!listener.isEmpty() && listener.size() > 0
+            if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
             }
@@ -102,10 +103,10 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
-            if (!listener.isEmpty() && listener.size() > 0
+            if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
             }
@@ -113,7 +114,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
         } else if (baseElement instanceof SequenceFlow) {
 
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -122,7 +123,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         } else if (baseElement instanceof ExclusiveGateway) {
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -130,7 +131,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
         } else if (baseElement instanceof UserTask) {
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -138,7 +139,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the task listener
-            final ArrayList<String> taskListener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+            final ArrayList<ModelElementInstance> taskListener = bpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!taskListener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -147,7 +148,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         } else if (baseElement instanceof ManualTask) {
             // get the execution listener
-            final ArrayList<String> listener = bpmnScanner.getListener(baseElement.getId(), BpmnConstants.ATTR_EX,
+            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
