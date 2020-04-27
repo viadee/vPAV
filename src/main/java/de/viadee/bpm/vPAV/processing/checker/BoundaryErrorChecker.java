@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -68,8 +68,8 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
     private static Logger logger = Logger.getLogger(BoundaryErrorChecker.class.getName());
 
-    public BoundaryErrorChecker(final Rule rule, BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public BoundaryErrorChecker(final Rule rule) {
+        super(rule);
     }
 
     @Override
@@ -82,12 +82,12 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
             BoundaryEvent boundaryEvent = (BoundaryEvent) bpmnElement;
 
             // Map<String, String> errorEventDef -> "errorRef" , "camunda:errorMessageVariable"
-            ErrorEventDefinition errorEventDefinition = bpmnScanner.getErrorEventDefinition(boundaryEvent);
+            ErrorEventDefinition errorEventDefinition = BpmnScanner.getErrorEventDefinition(boundaryEvent);
 
             // Check if boundaryEvent consists of an errorEventDefinition
             if (errorEventDefinition != null) {
                 Activity activity = boundaryEvent.getAttachedTo();
-                Map.Entry<String, String> implementation = bpmnScanner.getImplementation(activity);
+                Map.Entry<String, String> implementation = BpmnScanner.getImplementation(activity);
 
                 // TODO add test case for this path
                 // No error has been referenced

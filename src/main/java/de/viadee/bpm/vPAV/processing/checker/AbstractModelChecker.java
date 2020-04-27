@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -38,11 +38,8 @@ public abstract class AbstractModelChecker implements ModelChecker {
 
     final protected Rule rule;
 
-    final protected BpmnScanner bpmnScanner;
-
-    public AbstractModelChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+    public AbstractModelChecker(final Rule rule) {
         // TODO what elements should be passed?
         this.rule = rule;
-        this.bpmnScanner = bpmnScanner;
     }
 }

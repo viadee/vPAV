@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -41,11 +41,9 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -63,16 +61,14 @@ public class TaskNamingConventionCheckerTest {
 
 	private static ElementChecker checker;
 
-	private static ClassLoader cl;
-
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
-		checker = new TaskNamingConventionChecker(createRule(), null);
+		checker = new TaskNamingConventionChecker(createRule());
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java/");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 	}
@@ -96,7 +92,7 @@ public class TaskNamingConventionCheckerTest {
 		}
 
         if (IssueService.getInstance().getIssues().size() > 0) {
-			fail("There are issues, altough the convention is correct.");
+			fail("There are issues, although the convention is correct.");
 		}
 	}
 
@@ -128,7 +124,7 @@ public class TaskNamingConventionCheckerTest {
 	 */
 	private static Rule createRule() {
 
-		final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+		final Collection<ElementConvention> elementConventions = new ArrayList<>();
 
 		final ElementConvention elementConvention = new ElementConvention("convention", null, null,
 				"[A-ZÄÖÜ][a-zäöü\\-\\s]+");

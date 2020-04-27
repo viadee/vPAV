@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -32,24 +32,17 @@
 package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
-import de.viadee.bpm.vPAV.processing.model.graph.Path;
-import fj.Hash;
-import groovy.lang.DelegatesTo;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.AfterClass;
@@ -63,13 +56,14 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Properties;
 
 public class UserVariablesTest {
 
     private static final String BASE_PATH = "src/test/resources/";
-
-    private static ClassLoader cl;
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -79,7 +73,7 @@ public class UserVariablesTest {
         final URL classUrl = new URL(currentPath + "src/test/java/");
         final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
         final URL[] classUrls = { classUrl, resourcesUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
     }
 
@@ -103,7 +97,7 @@ public class UserVariablesTest {
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 

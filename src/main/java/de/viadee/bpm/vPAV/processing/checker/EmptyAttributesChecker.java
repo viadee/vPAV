@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -54,8 +54,8 @@ import java.util.Map;
  */
 public class EmptyAttributesChecker extends AbstractElementChecker {
 
-    public EmptyAttributesChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public EmptyAttributesChecker(final Rule rule) {
+        super(rule);
     }
 
     /**
@@ -75,32 +75,76 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
             HashMap<String, String> attributes = getImplementationAttribute(bpmnElement);
             for (Map.Entry<String, String> entry : attributes.entrySet()) {
                 if (entry.getValue() == null || entry.getValue().isEmpty()) {
-                    String message = "";
-                    switch (entry.getKey()) {
-                        case BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF:
-                            message = Messages.getString("DmnTaskChecker.0");
-                            break;
-                        case BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS:
-                            message = Messages.getString("JavaDelegateChecker.5");
-                            break;
-                        case BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION:
-                            message = Messages.getString("JavaDelegateChecker.6");
-                            break;
-                        case BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION:
-                            message = Messages.getString("JavaDelegateChecker.8");
-                            break;
-                        case BpmnModelConstants.BPMN_ATTRIBUTE_IMPLEMENTATION:
-                            message = Messages.getString("JavaDelegateChecker.9");
-                            break;
-                    }
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                            String.format(message, //$NON-NLS-1$
-                                    CheckName.checkName(bpmnElement))));
+                    issues.addAll(generateIssue(rule, element, bpmnElement, entry));
                 }
             }
         }
 
+        // Check event definitions
+        Collection<EventDefinition> eventDefinitions = BpmnScanner.getEventDefinitions(bpmnElement);
+        if (eventDefinitions != null) {
+            for (EventDefinition ed : eventDefinitions) {
+                HashMap<String, String> attributes = getImplementationAttribute(ed);
+                for (Map.Entry<String, String> entry : attributes.entrySet()) {
+                    if (entry.getValue() == null || entry.getValue().isEmpty()) {
+                        issues.addAll(generateIssue(rule, element, ed, entry));
+                    }
+                }
+            }
+        }
+
+        if (bpmnElement instanceof TimerEventDefinition) {
+            TimerEventDefinition timer = (TimerEventDefinition) bpmnElement;
+            if (timer.getTimeDate() != null) {
+                if (timer.getTimeDate().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                        == null) {
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                            Messages.getString("TimerExpressionChecker.14")));
+                }
+            }
+            if (timer.getTimeDuration() != null) {
+                if (timer.getTimeDuration().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                        == null) {
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                            Messages.getString("TimerExpressionChecker.14")));
+                }
+            }
+            if (timer.getTimeCycle() != null) {
+                if (timer.getTimeCycle().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                        == null) {
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                            Messages.getString("TimerExpressionChecker.14")));
+                }
+            }
+
+        }
         return issues;
+    }
+
+    private Collection<CheckerIssue> generateIssue(Rule rule, BpmnElement element, BaseElement bpmnElement,
+            Map.Entry<String, String> entry) {
+
+        String message = "";
+        switch (entry.getKey()) {
+            case BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF:
+                message = Messages.getString("DmnTaskChecker.0");
+                break;
+            case BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS:
+                message = Messages.getString("JavaDelegateChecker.5");
+                break;
+            case BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION:
+                message = Messages.getString("JavaDelegateChecker.6");
+                break;
+            case BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION:
+                message = Messages.getString("JavaDelegateChecker.8");
+                break;
+            case BpmnModelConstants.BPMN_ATTRIBUTE_IMPLEMENTATION:
+                message = Messages.getString("JavaDelegateChecker.9");
+                break;
+        }
+        return IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                String.format(message, //$NON-NLS-1$
+                        CheckName.checkName(bpmnElement)));
     }
 
     /**

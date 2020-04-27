@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -97,8 +96,7 @@ public class CallActivityTest {
         processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_calledProcess.bpmn");
         processIdToPathMap.put("calledcalledProcess", "CallActivityTest/CallActivityTest_calledcalledProcess.bpmn");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 
@@ -170,8 +168,7 @@ public class CallActivityTest {
         callActivity.builder().camundaIn("varIn", "inMapping");
         callActivity.builder().camundaOut("inMapping", "outMapping");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         for (int i = 0; i < 2; i++) {
             if (i == 1) {
@@ -210,8 +207,7 @@ public class CallActivityTest {
 
         callActivity.builder().camundaVariableMappingClass("de.viadee.bpm.vPAV.delegates.DelegatedVarMapping");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         checkTwoLevelsAnomalies(graphBuilder, fileScanner, modelInstance, processDefinition, scanner, true);
 
@@ -247,8 +243,7 @@ public class CallActivityTest {
         final Map<String, String> processIdToPathMap = new HashMap<>();
         processIdToPathMap.put("calledElement", "CallActivityTest/CallActivityTest_calledElement.bpmn");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         // Test 1: Add Start Listener
         callActivity.builder().camundaExecutionListenerClass("start",

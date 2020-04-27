@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -59,8 +59,8 @@ import java.util.List;
  */
 public class EmbeddedGroovyScriptChecker extends AbstractElementChecker {
 
-    public EmbeddedGroovyScriptChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public EmbeddedGroovyScriptChecker(final Rule rule) {
+        super(rule);
     }
 
     /**

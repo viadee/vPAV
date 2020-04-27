@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -32,14 +32,14 @@
 package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.Helper;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
@@ -49,7 +49,6 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
 import org.camunda.bpm.model.bpmn.instance.*;
-import org.camunda.bpm.model.xml.ModelInstance;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -61,15 +60,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
-import static de.viadee.bpm.vPAV.processing.BpmnModelDispatcher.getBpmnElements;
-
 public class ProcessVariableReaderTest {
 
     private static final String BASE_PATH = "src/test/resources/";
-
-    private static ClassLoader cl;
-
-    private ModelInstance emptyModel = Bpmn.createEmptyModel();
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -79,7 +72,7 @@ public class ProcessVariableReaderTest {
         final URL classUrl = new URL(currentPath + "src/test/java/");
         final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
         final URL[] classUrls = { classUrl, resourcesUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().retrieveLocale();
     }
@@ -102,7 +95,7 @@ public class ProcessVariableReaderTest {
 
         final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null);
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
@@ -125,7 +118,7 @@ public class ProcessVariableReaderTest {
 
         final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null);
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
@@ -147,7 +140,7 @@ public class ProcessVariableReaderTest {
 
         final Collection<CallActivity> allServiceTasks = modelInstance.getModelElementsByType(CallActivity.class);
 
-        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+        final ProcessVariableReader variableReader = new ProcessVariableReader(null, null);
         final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
         variableReader.getVariablesFromElement(element, new BasicNode[1]);
@@ -174,7 +167,7 @@ public class ProcessVariableReaderTest {
 
     @Test
     public void testRecogniseSignals() {
-        ProcessVariableReader reader = new ProcessVariableReader(null, null, null);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
 
         // Test if signal is recognized in catch event
         BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent("MyStartEvent").signal("Signal-${test}")
@@ -200,7 +193,7 @@ public class ProcessVariableReaderTest {
 
     @Test
     public void testRecogniseMessages() {
-        ProcessVariableReader reader = new ProcessVariableReader(null, null, null);
+        ProcessVariableReader reader = new ProcessVariableReader( null, null);
 
         // Test if message is recognized in catch event
         BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent("MyStartEvent").message("Message-${test}")
@@ -227,7 +220,7 @@ public class ProcessVariableReaderTest {
 
     @Test
     public void testRecogniseLinks() {
-        ProcessVariableReader reader = new ProcessVariableReader(null, null, null);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
 
         // Test if message is recognized in throw event
         BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent("MyStartEvent")
@@ -273,7 +266,7 @@ public class ProcessVariableReaderTest {
         ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
         serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.OverloadedMethodDelegate");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
 
         // create data flow graphs
         graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),

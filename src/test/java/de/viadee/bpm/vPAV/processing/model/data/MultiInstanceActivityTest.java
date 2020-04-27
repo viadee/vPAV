@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -81,7 +80,7 @@ public class MultiInstanceActivityTest {
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 
@@ -120,7 +119,7 @@ public class MultiInstanceActivityTest {
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 
@@ -160,7 +159,7 @@ public class MultiInstanceActivityTest {
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 
@@ -203,7 +202,7 @@ public class MultiInstanceActivityTest {
         LoopCardinalityImpl loopCardinality = (LoopCardinalityImpl) serviceTask.getLoopCharacteristics().getChildElementsByType(LoopCardinality.class).iterator().next();
         loopCardinality.setTextContent("${notExistingVariable}");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 

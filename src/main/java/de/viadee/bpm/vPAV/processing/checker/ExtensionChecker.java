@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -57,8 +57,8 @@ public class ExtensionChecker extends AbstractElementChecker {
 
 	private boolean isMisconfigured = false;
 
-	public ExtensionChecker(Rule rule, BpmnScanner bpmnScanner) {
-		super(rule, bpmnScanner);
+	public ExtensionChecker(Rule rule) {
+		super(rule);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class ExtensionChecker extends AbstractElementChecker {
 		final ArrayList<Setting> mandatorySettings = new ArrayList<Setting>();
 
 		// Retrieve extension key pair from bpmn model
-        final Map<String, String> keyPairs = new HashMap<>(bpmnScanner.getKeyPairs(bpmnElement.getId()));
+        final Map<String, String> keyPairs = new HashMap<>(BpmnScanner.getProperties(bpmnElement));
 
 		// Create ArrayList for easier manipulation
 		for (Map.Entry<String, Setting> settingsEntry : settings.entrySet()) {

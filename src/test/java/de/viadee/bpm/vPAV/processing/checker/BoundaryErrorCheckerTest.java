@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -40,19 +39,18 @@ import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
 import org.camunda.bpm.model.bpmn.instance.ErrorEventDefinition;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.xml.ModelInstance;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,13 +59,9 @@ import java.util.Map;
  */
 public class BoundaryErrorCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
-
     private static final String DELEGATE_PACKAGE = "de.viadee.bpm.vPAV.delegates.BoundaryError.";
 
     private static BoundaryErrorChecker checker;
-
-    private static ClassLoader cl;
 
     private final Rule rule = new Rule("BoundaryErrorChecker", true, null, null, null, null);
 
@@ -77,7 +71,7 @@ public class BoundaryErrorCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().setTest(true);
         RuntimeConfig.getInstance().getResource("en_US");
@@ -110,8 +104,7 @@ public class BoundaryErrorCheckerTest {
 
         BoundaryEvent boundaryEvent = modelInstance.getModelElementById("MyBoundaryEvent");
         BpmnElement element = new BpmnElement(null, boundaryEvent, new ControlFlowGraph(), new FlowAnalysis());
-        BpmnScanner scanner = new BpmnScanner();
-        checker = new BoundaryErrorChecker(rule, scanner);
+        checker = new BoundaryErrorChecker(rule);
         checker.check(element);
     }
 
@@ -190,8 +183,7 @@ public class BoundaryErrorCheckerTest {
 
         BoundaryEvent boundaryEvent = modelInstance.getModelElementById("MyBoundaryEvent");
         BpmnElement element = new BpmnElement(null, boundaryEvent, new ControlFlowGraph(), new FlowAnalysis());
-        BpmnScanner scanner = new BpmnScanner();
-        checker = new BoundaryErrorChecker(rule, scanner);
+        checker = new BoundaryErrorChecker(rule);
         checker.check(element);
 
         if (IssueService.getInstance().getIssues().size() != 1) {

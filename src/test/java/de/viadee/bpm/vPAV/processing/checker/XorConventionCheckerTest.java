@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
@@ -43,8 +42,10 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ExclusiveGateway;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -64,8 +65,6 @@ public class XorConventionCheckerTest {
 
     private static XorConventionChecker checker;
 
-    private static ClassLoader cl;
-
     private final Rule rule = createRule();
 
     private final Rule ruleDefault = createRuleDefault();
@@ -76,7 +75,7 @@ public class XorConventionCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -89,7 +88,7 @@ public class XorConventionCheckerTest {
     @Test
     public void testOutgoingXor() {
         final String PATH = BASE_PATH + "XorConventionChecker_outgoingXor.bpmn";
-        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
+        checker = new XorConventionChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -113,7 +112,7 @@ public class XorConventionCheckerTest {
     @Test
     public void testCorrectXor() {
         final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
-        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
+        checker = new XorConventionChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -137,7 +136,7 @@ public class XorConventionCheckerTest {
     @Test
     public void testFalseXor() {
         final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
-        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
+        checker = new XorConventionChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -163,7 +162,7 @@ public class XorConventionCheckerTest {
     @Test
     public void testOutgoingEdgesCorrect() {
         final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
-        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
+        checker = new XorConventionChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -186,7 +185,7 @@ public class XorConventionCheckerTest {
     @Test
     public void testOutgoingEdgesFalse() {
         final String PATH = BASE_PATH + "XorConventionChecker_outgoingEdgesFalse.bpmn";
-        checker = new XorConventionChecker(rule, new BpmnScanner(PATH));
+        checker = new XorConventionChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -253,7 +252,7 @@ public class XorConventionCheckerTest {
     @Test
     public void testDefaultPath() {
         final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
-        checker = new XorConventionChecker(ruleDefault, new BpmnScanner(PATH));
+        checker = new XorConventionChecker(ruleDefault);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -276,7 +275,7 @@ public class XorConventionCheckerTest {
     @Test
     public void testCorrectDefaultPath() {
         final String PATH = BASE_PATH + "XorConventionChecker.bpmn";
-        checker = new XorConventionChecker(ruleDefault, new BpmnScanner(PATH));
+        checker = new XorConventionChecker(ruleDefault);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

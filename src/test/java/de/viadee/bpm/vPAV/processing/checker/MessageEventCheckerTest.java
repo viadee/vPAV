@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -41,8 +40,10 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -52,122 +53,150 @@ import java.util.Collection;
 
 public class MessageEventCheckerTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/";
 
-	private static MessageEventChecker checker;
+    private static MessageEventChecker checker;
 
-	private static ClassLoader cl;
+    private final Rule rule = new Rule("MessageEventChecker", true, null, null, null, null);
 
-	private final Rule rule = new Rule("MessageEventChecker", true, null, null, null, null);
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        ClassLoader cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().getResource("en_US");
+    }
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
-	}
-
-	/**
-	 * Case: StartEvent has been set with correct message
-	 *
-	 */
-	@Test
+    /**
+     * Case: StartEvent has been set with correct message
+     */
+    @Test
     public void testStartEvent() {
-		final String PATH = BASE_PATH + "MessageEventChecker_testStartEvent.bpmn";
-		checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "MessageEventChecker_testStartEvent.bpmn";
+        checker = new MessageEventChecker(rule);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
             checker.check(element);
-		}
+        }
 
         if (IssueService.getInstance().getIssues().size() > 0) {
-			Assert.fail("correct model generates an issue");
-		}
-	}
+            Assert.fail("correct model generates an issue");
+        }
+    }
 
-	/**
-	 * Case: StartEvent has been set with message and expression
-	 *
-	 */
-	@Test
+    /**
+     * Case: StartEvent has been set with message and expression
+     */
+    @Test
     public void testStartEventWithExpression() {
-		final String PATH = BASE_PATH + "MessageEventChecker_testStartEventWithExpression.bpmn";
-		checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "MessageEventChecker_testStartEventWithExpression.bpmn";
+        checker = new MessageEventChecker(rule);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
             checker.check(element);
-		}
+        }
 
         if (IssueService.getInstance().getIssues().size() != 1) {
-			Assert.fail("model should generate an issue");
-		}
-	}
+            Assert.fail("model should generate an issue");
+        }
+    }
 
-	/**
-	 * Case: EndEvent has been set with wrong message
-	 *
-	 */
-	@Test
+    /**
+     * Case: EndEvent has been set with wrong message
+     */
+    @Test
     public void testEndEvent() {
-		final String PATH = BASE_PATH + "MessageEventChecker_testEndEvent.bpmn";
-		checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "MessageEventChecker_testEndEvent.bpmn";
+        checker = new MessageEventChecker(rule);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
             checker.check(element);
-		}
+        }
 
         if (IssueService.getInstance().getIssues().size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		}
-	}
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        }
+    }
 
-	/**
-	 * Case: Mixed events with several faults
-	 *
-	 */
-	@Test
+    /**
+     * Case: Mixed events with several faults
+     */
+    @Test
     public void testMixedEvents() {
-		final String PATH = BASE_PATH + "MessageEventChecker_testMixedEvents.bpmn";
-		checker = new MessageEventChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "MessageEventChecker_testMixedEvents.bpmn";
+        checker = new MessageEventChecker(rule);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		for (BaseElement baseElement : baseElements) {
-			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
             checker.check(element);
-		}
+        }
 
         if (IssueService.getInstance().getIssues().size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		}
-	}
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        }
+    }
 
-	@Before
+    /**
+     * Case: EndEvent has been set with wrong message
+     */
+    @Test
+    public void testReceiveTask() {
+        BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent().receiveTask("MyReceiveTask")
+                .message("").endEvent()
+                .done();
+        checker = new MessageEventChecker(rule);
+
+        BaseElement receiveTask = modelInstance.getModelElementById("MyReceiveTask");
+        final BpmnElement element = new BpmnElement(null, receiveTask, new ControlFlowGraph(), new FlowAnalysis());
+        checker.check(element);
+
+        if (IssueService.getInstance().getIssues().size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        }
+    }
+
+    @Test
+    public void testSubprocess() {
+        BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent().subProcess().embeddedSubProcess()
+                .startEvent("MyStartEventSubprocess").message("MessageName").done();
+        checker = new MessageEventChecker(rule);
+
+        BaseElement startEventSub = modelInstance.getModelElementById("MyStartEventSubprocess");
+        final BpmnElement element = new BpmnElement(null, startEventSub, new ControlFlowGraph(), new FlowAnalysis());
+        checker.check(element);
+
+        if (IssueService.getInstance().getIssues().size() > 0) {
+            Assert.fail("Message in start events in subprocesses should not generate an issue");
+        }
+    }
+
+    @Before
     public void clearIssues() {
         IssueService.getInstance().clear();
     }

@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -41,7 +40,10 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -79,7 +81,7 @@ public class SignalEventCheckerTest {
     @Test
     public void testCorrectModel() {
         final String PATH = BASE_PATH + "SignalEventChecker_Correct.bpmn";
-        checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
+        checker = new SignalEventChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -103,7 +105,7 @@ public class SignalEventCheckerTest {
     @Test
     public void testWrongModel() {
         final String PATH = BASE_PATH + "SignalEventChecker_Wrong.bpmn";
-        checker = new SignalEventChecker(rule, new BpmnScanner(PATH));
+        checker = new SignalEventChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

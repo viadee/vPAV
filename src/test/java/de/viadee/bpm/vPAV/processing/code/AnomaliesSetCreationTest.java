@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.code;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.Helper;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -48,7 +47,6 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +89,7 @@ public class AnomaliesSetCreationTest {
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
 
         // create data flow graphs
         final Collection<String> calledElementHierarchy = new ArrayList<>();

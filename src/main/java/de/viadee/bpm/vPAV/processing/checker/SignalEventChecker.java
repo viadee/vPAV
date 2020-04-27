@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -51,8 +50,8 @@ public class SignalEventChecker extends AbstractElementChecker {
 
     private Map<String, BaseElement> signalNames = new HashMap<>();
 
-    public SignalEventChecker(Rule rule, BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public SignalEventChecker(Rule rule) {
+        super(rule);
     }
 
     @Override

@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -81,7 +81,6 @@ public class BpmnModelDispatcher {
 		final Map<String, String> processIdToPathMap = fileScanner.getProcessIdToPathMap();
 		final Collection<String> resourcesNewestVersions = fileScanner.getResourcesNewestVersions();
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
-		final BpmnScanner bpmnScanner = createScanner(processDefinition);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -93,7 +92,7 @@ public class BpmnModelDispatcher {
 				.get(BpmnConstants.PROCESS_VARIABLE_MODEL_CHECKER);
 
 		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
-				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), rule, bpmnScanner);
+				scanner.getMessageIdToVariableMap(), scanner.getProcessIdToVariableMap(), rule);
 
 		// create data flow graphs for bpmn model
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
@@ -111,7 +110,7 @@ public class BpmnModelDispatcher {
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner, scanner,
+		final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, scanner,
 				dataFlowRules, processVariables, invalidPathMap);
 
 		// Execute model checkers.
@@ -143,7 +142,6 @@ public class BpmnModelDispatcher {
 			final Collection<String> resourcesNewestVersions, final RuleSet conf) {
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		// TODO check how relevant this method still is
-		BpmnScanner bpmnScanner = createScanner(processDefinition);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -151,12 +149,11 @@ public class BpmnModelDispatcher {
 		// hold bpmn elements
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
-				bpmnScanner);
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap);
 
 		final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, bpmnScanner, null, null,
+		final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, null, null,
 				null, null);
 
 		// Execute element checkers.
@@ -251,19 +248,9 @@ public class BpmnModelDispatcher {
 	}
 
 	/**
-	 * @param processDefinition Holds the path to the BPMN model
-	 * @return BpmnScanner
-	 */
-	private BpmnScanner createScanner(final File processDefinition) {
-		// create BPMNScanner
-		return new BpmnScanner(processDefinition.getPath());
-	}
-
-	/**
 	 * @param resourcesNewestVersions Resources with their newest version as found
 	 *                                on classpath during runtime
 	 * @param conf                    ruleSet
-	 * @param bpmnScanner             BPMNScanner
 	 * @param scanner                 ProcessVariablesScanner
 	 * @param dataFlowRules           Collection of data flow rules
 	 * @param processVariables        collection of variables
@@ -271,13 +258,13 @@ public class BpmnModelDispatcher {
 	 * @return CheckerCollection
 	 */
 	Collection[] createCheckerInstances(final Collection<String> resourcesNewestVersions, final RuleSet conf,
-			final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner,
+			final ProcessVariablesScanner scanner,
 			final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
 			final Map<AnomalyContainer, List<Path>> invalidPathMap) {
 		CheckerFactory checkerFactory = new CheckerFactory();
 
 		final Collection[] checkerCollection = checkerFactory.createCheckerInstances(conf, resourcesNewestVersions,
-				bpmnScanner, scanner, dataFlowRules, processVariables, invalidPathMap);
+				scanner, dataFlowRules, processVariables, invalidPathMap);
 
 		setIncorrectCheckers(checkerFactory.getIncorrectCheckers());
 

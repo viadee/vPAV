@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -62,8 +61,6 @@ public class ProcessVariablesModelCheckerTest {
 
 	private static ModelChecker checker;
 
-	private static ClassLoader cl;
-
 	@BeforeClass
     public static void setup() throws MalformedURLException {
 		RuntimeConfig.getInstance().setTest(true);
@@ -71,7 +68,7 @@ public class ProcessVariablesModelCheckerTest {
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 
@@ -83,7 +80,7 @@ public class ProcessVariablesModelCheckerTest {
 		// parse bpmn model
         BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
 		// create data flow graphs
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 processDefinition.getPath(), new ArrayList<>(), scanner, new FlowAnalysis());
@@ -120,7 +117,7 @@ public class ProcessVariablesModelCheckerTest {
 		Assert.assertEquals("DD", issue2.getAnomaly().toString());
 		final CheckerIssue issue3 = iterator.next();
 		Assert.assertEquals("ServiceTask_05g4a96", issue3.getElementId());
-		Assert.assertEquals("intHallo", issue3.getVariable().toString());
+		Assert.assertEquals("intHallo", issue3.getVariable());
 		Assert.assertEquals("UR", issue3.getAnomaly().toString());
 		final CheckerIssue issue4 = iterator.next();
 		Assert.assertEquals("BusinessRuleTask_119jb6t", issue4.getElementId());

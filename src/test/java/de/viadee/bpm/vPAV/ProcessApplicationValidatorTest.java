@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -56,8 +56,6 @@ import java.util.*;
 
 public class ProcessApplicationValidatorTest {
 
-    private static ClassLoader cl;
-
     @BeforeClass
     public static void setup() throws MalformedURLException {
         // Set custom basepath.
@@ -74,7 +72,7 @@ public class ProcessApplicationValidatorTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().setTest(true);
 
@@ -113,7 +111,7 @@ public class ProcessApplicationValidatorTest {
         ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
         serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.OverloadedExecuteDelegate");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
 
         // create data flow graphs
         graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),

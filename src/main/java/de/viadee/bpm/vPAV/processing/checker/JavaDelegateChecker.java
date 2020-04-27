@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -64,8 +64,8 @@ import java.util.Map;
  */
 public class JavaDelegateChecker extends AbstractElementChecker {
 
-    public JavaDelegateChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public JavaDelegateChecker(final Rule rule) {
+        super(rule);
     }
 
     /**
@@ -80,7 +80,6 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement bpmnElement = element.getBaseElement();
         Map.Entry<String, String> implementationAttr = null;
-        String implementation = null;
         final ArrayList<String> executionDelegate = new ArrayList<>();
         final ArrayList<String> executionClass = new ArrayList<>();
         final ArrayList<String> executionExpression = new ArrayList<>();
@@ -91,11 +90,11 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         // read attributes from task
         if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
                 || bpmnElement instanceof SendTask)) {
-            implementationAttr = bpmnScanner.getImplementation(bpmnElement);
+            implementationAttr = BpmnScanner.getImplementation(bpmnElement);
         }
 
         if (bpmnElement instanceof UserTask) {
-            ArrayList<ModelElementInstance> taskListener = bpmnScanner
+            ArrayList<ModelElementInstance> taskListener = BpmnScanner
                     .getListener(bpmnElement,
                             BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskListener.forEach(listener -> {
@@ -107,18 +106,16 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         if (bpmnElement instanceof IntermediateThrowEvent
                 || bpmnElement instanceof EndEvent) {
-            final String tempImp = bpmnScanner.getEventImplementation(bpmnElement.getId());
-            if (tempImp != null && tempImp.contains("=")) { //$NON-NLS-1$
+            // TODO test this path
+            final Map.Entry<String, String> tempImp = BpmnScanner.getEventImplementation(bpmnElement);
+            if (tempImp != null) { //$NON-NLS-1$
                 HashMap<String, String> tempMap = new HashMap<>();
-                implementation = tempImp.substring(tempImp.indexOf("=") + 1, tempImp.length())
-                        .replace("\"", "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                        .trim();
-                tempMap.put(tempImp.substring(0, tempImp.indexOf("=")).trim(), implementation);
+                tempMap.put(tempImp.getKey(), tempImp.getValue());
                 implementationAttr = tempMap.entrySet().iterator().next();
             }
         }
 
-        ArrayList<ModelElementInstance> executionListener = bpmnScanner
+        ArrayList<ModelElementInstance> executionListener = BpmnScanner
                 .getListener(bpmnElement,
                         BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionListener.forEach(listener -> {
@@ -216,7 +213,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 // check validity of a bean
                 if (RuntimeConfig.getInstance().getBeanMapping() != null) {
                     final TreeBuilder treeBuilder = new Builder();
-                    final Tree tree = treeBuilder.build(implementation);
+                    final Tree tree = treeBuilder.build(implementationAttr.getValue());
                     final Iterable<IdentifierNode> identifierNodes = tree.getIdentifierNodes();
                     // if beanMapping ${...} reference
                     if (identifierNodes.iterator().hasNext()) {
@@ -229,11 +226,11 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                 // incorrect beanmapping
                                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                         String.format(Messages.getString("JavaDelegateChecker.11"), //$NON-NLS-1$
-                                                implementation)));
+                                                implementationAttr.getValue())));
                             }
                         }
                     } else {
-                        issues.addAll(checkClassFile(element, implementation, false, false));
+                        issues.addAll(checkClassFile(element, implementationAttr.getValue(), false, false));
                     }
                 } else {
                     // check if class exists
@@ -248,10 +245,10 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         // checkListener
         if (!executionClass.isEmpty() || !executionDelegate.isEmpty() || !executionExpression.isEmpty()) {
-            issues.addAll(checkListener(element, executionClass, executionDelegate, executionExpression, false));
+            issues.addAll(checkListener(element, executionClass, executionDelegate, false));
         }
         if (!taskClass.isEmpty() || !taskDelegate.isEmpty() || !taskExpression.isEmpty()) {
-            issues.addAll(checkListener(element, taskClass, taskDelegate, taskExpression, true));
+            issues.addAll(checkListener(element, taskClass, taskDelegate,true));
         }
         return issues;
     }
@@ -262,12 +259,11 @@ public class JavaDelegateChecker extends AbstractElementChecker {
      * @param element
      * @param aClass
      * @param aDelegate
-     * @param aExpression
      * @param taskListener
      * @return issues
      */
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
-            ArrayList<String> aDelegate, ArrayList<String> aExpression, boolean taskListener) {
+            ArrayList<String> aDelegate, boolean taskListener) {
         final Collection<CheckerIssue> issues = new ArrayList<>();
         String location = ""; //$NON-NLS-1$
         if (taskListener)
@@ -295,7 +291,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     // Error, because no delegateExpression has been configured
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                             String.format(Messages.getString("JavaDelegateChecker.14"), location))); //$NON-NLS-1$
-                } else if (eDel != null) {
+                } else {
                     // check validity of a bean
                     if (RuntimeConfig.getInstance().getBeanMapping() != null) {
                         final TreeBuilder treeBuilder = new Builder();
@@ -355,7 +351,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         }
 
         if (tempMap.isEmpty()) {
-            location = bpmnScanner.getImplementation(bpmnElement.getModelInstance()
+            location = BpmnScanner.getImplementation(bpmnElement.getModelInstance()
                     .getModelElementById(bpmnElement.getAttributeValue(BpmnConstants.ATTR_ID)));
         } else {
             location = tempMap.entrySet().iterator().next();

@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -49,8 +49,8 @@ import java.util.Map;
 
 public class NoExpressionChecker extends AbstractElementChecker {
 
-    public NoExpressionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public NoExpressionChecker(final Rule rule) {
+        super(rule);
     }
 
     /**
@@ -70,7 +70,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 || baseElement instanceof SendTask || baseElement instanceof ScriptTask) {
 
             // read attributes from task
-            final Map.Entry<String, String> implementationAttr = bpmnScanner.getImplementation((Task) baseElement);
+            final Map.Entry<String, String> implementationAttr = BpmnScanner.getImplementation(baseElement);
 
             if (implementationAttr.getKey() != null && implementationAttr.getKey()
                     .equals(BpmnConstants.CAMUNDA_EXPRESSION)
@@ -81,7 +81,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
+            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
             if (!listener.isEmpty()
@@ -93,9 +93,9 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 || baseElement instanceof EndEvent || baseElement instanceof StartEvent) {
 
             // read attributes from event
-            final String implementationAttrEvent = bpmnScanner.getEventImplementation(baseElement.getId());
+            final Map.Entry<String, String> implementationAttrEvent = BpmnScanner.getEventImplementation(baseElement);
 
-            if (implementationAttrEvent != null && implementationAttrEvent.contains(BpmnConstants.CAMUNDA_EXPRESSION)
+            if (implementationAttrEvent != null && implementationAttrEvent.getKey().equals(BpmnConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                         String.format("Usage of expression in event '%s' is against best practices.",
@@ -103,7 +103,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
+            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
             if (!listener.isEmpty()
@@ -114,7 +114,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
         } else if (baseElement instanceof SequenceFlow) {
 
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
+            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -123,7 +123,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         } else if (baseElement instanceof ExclusiveGateway) {
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
+            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -131,7 +131,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
         } else if (baseElement instanceof UserTask) {
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
+            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -139,7 +139,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the task listener
-            final ArrayList<ModelElementInstance> taskListener = bpmnScanner.getListener(baseElement,
+            final ArrayList<ModelElementInstance> taskListener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!taskListener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -148,7 +148,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         } else if (baseElement instanceof ManualTask) {
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = bpmnScanner.getListener(baseElement,
+            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {

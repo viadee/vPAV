@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -58,8 +57,8 @@ public class MessageCorrelationChecker extends AbstractElementChecker {
 
     private ProcessVariablesScanner scanner;
 
-    MessageCorrelationChecker(final Rule rule, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
-        super(rule, bpmnScanner);
+    MessageCorrelationChecker(final Rule rule, final ProcessVariablesScanner scanner) {
+        super(rule);
         this.scanner = scanner;
     }
 

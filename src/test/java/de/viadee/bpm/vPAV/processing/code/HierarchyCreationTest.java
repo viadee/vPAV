@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.code;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -84,7 +83,7 @@ public class HierarchyCreationTest {
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
 
         // create data flow graphs
         final Collection<String> calledElementHierarchy = new ArrayList<>();
@@ -95,7 +94,7 @@ public class HierarchyCreationTest {
         flowAnalysis.analyze(graphCollection);
         flowAnalysis.getNodes().values().forEach(element -> {
             if (!(element.getBaseElement() instanceof StartEvent)) {
-                Assert.assertTrue("Element without predecessor found", !element.getPredecessors().isEmpty());
+                Assert.assertFalse("Element without predecessor found", element.getPredecessors().isEmpty());
             }
         });
     }

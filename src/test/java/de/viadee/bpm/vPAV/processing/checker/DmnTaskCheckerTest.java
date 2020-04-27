@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -44,8 +43,10 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -63,8 +64,6 @@ public class DmnTaskCheckerTest {
 
     private static DmnTaskChecker checker;
 
-    private static ClassLoader cl;
-
     private final Rule rule = new Rule("DmnTaskChecker", true, null, null, null, null);
 
     @BeforeClass
@@ -73,7 +72,7 @@ public class DmnTaskCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -86,7 +85,7 @@ public class DmnTaskCheckerTest {
     @Test
     public void testCorrectDMN() {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_CorrectDMN.bpmn";
-        checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
+        checker = new DmnTaskChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -111,7 +110,7 @@ public class DmnTaskCheckerTest {
     @Test
     public void testDMNTaskWithWrongDMN() {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_wrongDMNReference.bpmn";
-        checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
+        checker = new DmnTaskChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -142,7 +141,7 @@ public class DmnTaskCheckerTest {
     @Test
     public void testReadReferencedDMNFile() {
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_ReadReferencedDMN.bpmn";
-        checker = new DmnTaskChecker(rule, new BpmnScanner(PATH));
+        checker = new DmnTaskChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

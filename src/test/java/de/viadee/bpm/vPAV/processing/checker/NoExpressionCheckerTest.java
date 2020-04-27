@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -42,8 +41,10 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -63,9 +64,7 @@ public class NoExpressionCheckerTest {
 
 	private static NoExpressionChecker checker;
 
-	private static ClassLoader cl;
-
-    private static Map<String, Setting> setting = new HashMap<>();
+	private static Map<String, Setting> setting = new HashMap<>();
 
 	private final Rule rule = new Rule("NoExpressionChecker", true, null, setting, null, null);
 
@@ -75,7 +74,7 @@ public class NoExpressionCheckerTest {
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 	}
@@ -86,7 +85,7 @@ public class NoExpressionCheckerTest {
 	@Test
     public void testTaskWithoutExpression() {
 		final String PATH = BASE_PATH + "NoExpressionChecker_WithoutExpressions.bpmn";
-		checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+		checker = new NoExpressionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -109,7 +108,7 @@ public class NoExpressionCheckerTest {
 	@Test
     public void testTaskWithExpression() {
 		final String PATH = BASE_PATH + "NoExpressionChecker_WithExpressions.bpmn";
-		checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+		checker = new NoExpressionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -132,7 +131,7 @@ public class NoExpressionCheckerTest {
 	@Test
     public void testEventsWithExpression() {
 		final String PATH = BASE_PATH + "NoExpressionChecker_EventsWithExpressions.bpmn";
-		checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+		checker = new NoExpressionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -144,8 +143,8 @@ public class NoExpressionCheckerTest {
             checker.check(element);
 		}
 
-        if (IssueService.getInstance().getIssues().size() != 3) {
-			Assert.fail("model should generate 3 issues");
+        if (IssueService.getInstance().getIssues().size() != 2) {
+			Assert.fail("model should generate 2 issues");
 		}
 	}
 
@@ -155,7 +154,7 @@ public class NoExpressionCheckerTest {
 	@Test
     public void testSequenceFlowWithExpression() {
 		final String PATH = BASE_PATH + "NoExpressionChecker_SequenceFlowWithExpression.bpmn";
-		checker = new NoExpressionChecker(rule, new BpmnScanner(PATH));
+		checker = new NoExpressionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -42,68 +41,61 @@ import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class OverlapChecker extends AbstractElementChecker {
 
-	public OverlapChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-		super(rule, bpmnScanner);
-	}
+    public OverlapChecker(final Rule rule) {
+        super(rule);
+    }
 
-	private Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
+    private Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
 
-	/**
-	 * Check for redundant edges between common elements (double or more flows
-	 * instead of one)
-	 *
-	 * @return issues
-	 */
+    /**
+     * Check for redundant edges between common elements (double or more flows
+     * instead of one)
+     *
+     * @return issues
+     */
 
-	@Override
-	public Collection<CheckerIssue> check(BpmnElement element) {
+    @Override
+    public Collection<CheckerIssue> check(BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<>();
-		final BaseElement bpmnElement = element.getBaseElement();
+        final BaseElement bpmnElement = element.getBaseElement();
 
-		if (bpmnElement instanceof SequenceFlow) {
+        if (bpmnElement instanceof SequenceFlow) {
+            String source = ((SequenceFlow) bpmnElement).getSource().getId();
+            String target = ((SequenceFlow) bpmnElement).getTarget().getId();
+            ArrayList<String> sequenceFlowDef = new ArrayList<>(Arrays.asList(source, target));
 
-			final ArrayList<String> sequenceFlowDef = bpmnScanner.getSequenceFlowDef(bpmnElement.getId());
+            if (getSequenceFlowList().isEmpty()) {
+                addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            }
 
-			if (getSequenceFlowList().isEmpty()) {
-				addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
-			}
+            for (Map.Entry<String, ArrayList<String>> entry : getSequenceFlowList().entrySet()) {
+                // Check whether targetRef & sourceRef of current item exist in global list
+                if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            String.format(Messages.getString("OverlapChecker.0"), //$NON-NLS-1$
+                                    CheckName.checkName(bpmnElement))));
+                    return issues;
+                }
+            }
 
-			for (Map.Entry<String, ArrayList<String>> entry : getSequenceFlowList().entrySet()) {
-				// Check whether targetRef & sourceRef of current item exist in global list
-				if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
-					issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-							String.format(Messages.getString("OverlapChecker.0"), //$NON-NLS-1$
-									CheckName.checkName(bpmnElement))));
-					return issues;
-				}
-			}
+            if (!getSequenceFlowList().containsKey(bpmnElement.getId())) {
+                addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
+            }
 
-			if (!getSequenceFlowList().containsKey(bpmnElement.getId())) {
-				addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
-			}
+        }
 
-		}
+        return issues;
+    }
 
-		return issues;
-	}
+    public Map<String, ArrayList<String>> getSequenceFlowList() {
+        return sequenceFlowList;
+    }
 
-	public Map<String, ArrayList<String>> getSequenceFlowList() {
-		return sequenceFlowList;
-	}
-
-	public void addToSequenceFlowList(String id, ArrayList<String> sequenceFlowList) {
-		this.sequenceFlowList.put(id, sequenceFlowList);
-	}
-
-	public void resetSequenceFlowList() {
-		this.sequenceFlowList.clear();
-	}
-
+    public void addToSequenceFlowList(String id, ArrayList<String> sequenceFlowList) {
+        this.sequenceFlowList.put(id, sequenceFlowList);
+    }
 }

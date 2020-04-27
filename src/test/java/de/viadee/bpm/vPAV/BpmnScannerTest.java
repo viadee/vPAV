@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -36,7 +36,6 @@ import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.Gateway;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.Test;
 
@@ -69,7 +68,7 @@ public class BpmnScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
+        BpmnScanner scanner = new BpmnScanner();
         Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
 
         assertEquals("Get unexpected implementation", imp.getKey(), impClass);
@@ -91,7 +90,7 @@ public class BpmnScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
+        BpmnScanner scanner = new BpmnScanner();
         Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
 
         assertEquals("Get unexpected implementation", imp.getKey(), impEx);
@@ -113,7 +112,7 @@ public class BpmnScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
+        BpmnScanner scanner = new BpmnScanner();
         Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
 
         assertEquals("Get unexpected implementation", imp.getKey(), impDel);
@@ -137,53 +136,9 @@ public class BpmnScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        ArrayList<String> scripts = scanner.getScriptTypes(element.getBaseElement().getId());
+        BpmnScanner scanner = new BpmnScanner();
+        ArrayList<String> scripts = scanner.getScriptTypes( element.getBaseElement());
 
         assertTrue("Get unexpected implementation", scripts.contains(scriptType));
-    }
-
-    /**
-     * Case: Test getXorGateWays
-     */
-    @Test
-    public void testGetXorGateWays() {
-        final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
-        final String gatewayId = "ExclusiveGateway_Id";
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<Gateway> baseElements = modelInstance.getModelElementsByType(Gateway.class);
-
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-                new FlowAnalysis());
-
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        String gwId = scanner.getXorGateWays(element.getBaseElement().getId());
-
-        assertEquals("Get unexpected Element", gwId, gatewayId);
-    }
-
-    /**
-     * Case: Test getOutgoing
-     */
-    @Test
-    public void testGetOutgoing() {
-        final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
-        final int anzOut = 2;
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        final Collection<Gateway> baseElements = modelInstance.getModelElementsByType(Gateway.class);
-
-        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-                new FlowAnalysis());
-
-        BpmnScanner scanner = new BpmnScanner(PATH);
-        int out = scanner.getOutgoing(element.getBaseElement().getId());
-
-        assertEquals("More or less outgoing sequentflows as expected", out, anzOut);
     }
 }

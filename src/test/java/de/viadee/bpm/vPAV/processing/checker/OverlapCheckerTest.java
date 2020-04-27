@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -41,8 +40,10 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -56,8 +57,6 @@ public class OverlapCheckerTest {
 
     private static OverlapChecker checker;
 
-    private static ClassLoader cl;
-
     private final Rule rule = new Rule("OverlapChecker", true, null, null, null, null);
 
     @BeforeClass
@@ -66,7 +65,7 @@ public class OverlapCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -77,7 +76,7 @@ public class OverlapCheckerTest {
     @Test
     public void testModelWithNoOverlap() {
         final String PATH = BASE_PATH + "OverlapChecker_Correct.bpmn";
-        checker = new OverlapChecker(rule, new BpmnScanner(PATH));
+        checker = new OverlapChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -100,7 +99,7 @@ public class OverlapCheckerTest {
     @Test
     public void testModelWithOverlap() {
         final String PATH = BASE_PATH + "OverlapChecker_Wrong.bpmn";
-        checker = new OverlapChecker(rule, new BpmnScanner(PATH));
+        checker = new OverlapChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

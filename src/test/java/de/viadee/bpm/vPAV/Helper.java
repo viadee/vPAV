@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -70,8 +70,7 @@ public class Helper {
         ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
         serviceTask.setCamundaClass(delegateClass);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null,
-                new BpmnScanner(MODEL_DELEGATE_PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
 
         return graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
@@ -90,8 +89,7 @@ public class Helper {
         serviceTask.setCamundaDelegateExpression("${methodDelegate}");
         serviceTask.setCamundaClass(null);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null,
-                new BpmnScanner(MODEL_DELEGATE_PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,

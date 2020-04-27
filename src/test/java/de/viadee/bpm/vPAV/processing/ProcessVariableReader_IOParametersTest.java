@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,25 +31,33 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import de.viadee.bpm.vPAV.*;
+import de.viadee.bpm.vPAV.Helper;
+import de.viadee.bpm.vPAV.IssueService;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.*;
-import org.camunda.bpm.model.bpmn.Bpmn;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.camunda.*;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaScript;
-import org.camunda.bpm.model.xml.ModelInstance;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 
 import static de.viadee.bpm.vPAV.Helper.createElement;
 import static org.mockito.Mockito.mock;
@@ -185,7 +193,7 @@ public class ProcessVariableReader_IOParametersTest {
     public LinkedHashMap<String, BasicNode> processIOParameters(ServiceTask task) {
         final BpmnElement element = new BpmnElement("", task, new ControlFlowGraph(),
                 new FlowAnalysis());
-        (new ProcessVariableReader(null, mock(Rule.class), null))
+        (new ProcessVariableReader(null, mock(Rule.class)))
                 .processInputOutputParameters(element, element.getBaseElement().getExtensionElements(),
                         new BasicNode[1], true);
 
@@ -228,7 +236,7 @@ public class ProcessVariableReader_IOParametersTest {
                 new FlowAnalysis());
 
         // TODO check predecessor
-        (new ProcessVariableReader(null, null, null))
+        (new ProcessVariableReader(null, null))
                 .processInputOutputParameters(element, element.getBaseElement().getExtensionElements(),
                         new BasicNode[1], input);
 

@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -62,85 +61,126 @@ import java.util.Collection;
  */
 public class EmptyAttributesCheckerTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/";
 
-	private static EmptyAttributesChecker checker;
+    private static EmptyAttributesChecker checker;
 
-	private static ClassLoader cl;
+    private final Rule rule = new Rule("EmptyAttributesChecker", true, null, null, null, null);
 
-	private final Rule rule = new Rule("EmptyAttributesChecker", true, null, null, null, null);
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        ClassLoader cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().getResource("en_US");
+    }
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
-	}
-
-	/**
-	 * Case: DMN task without a reference should produce an error
-	 *
-	 */
-	@Test
+    /**
+     * Case: DMN task without a reference should produce an error
+     *
+     */
+    @Test
     public void testDMNTaskWithoutReference() {
-		final String PATH = BASE_PATH + "DmnTaskCheckerTest_WrongDmnTask.bpmn";
-		checker = new EmptyAttributesChecker(rule, new BpmnScanner(PATH));
+        final String PATH = BASE_PATH + "DmnTaskCheckerTest_WrongDmnTask.bpmn";
+        checker = new EmptyAttributesChecker(rule);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<BusinessRuleTask> baseElements = modelInstance.getModelElementsByType(BusinessRuleTask.class);
+        final Collection<BusinessRuleTask> baseElements = modelInstance.getModelElementsByType(BusinessRuleTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
-		final BaseElement baseElement = element.getBaseElement();
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
+        final BaseElement baseElement = element.getBaseElement();
 
         checker.check(element);
 
         final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
-		if (issues.size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		} else {
-			Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with no dmn reference.",
-					issues.iterator().next().getMessage());
-		}
-	}
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        } else {
+            Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with no dmn reference.",
+                    issues.iterator().next().getMessage());
+        }
+    }
 
-	/**
-	 * Case: There are no technical attributes
-	 */
-	@Test
-	public void testNoTechnicalAttributes() {
-		final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoTechnicalAttributes.bpmn";
-		checker = new EmptyAttributesChecker(rule, new BpmnScanner(PATH));
+    /**
+     * Case: There are no technical attributes
+     */
+    @Test
+    public void testNoTechnicalAttributes() {
+        final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoTechnicalAttributes.bpmn";
+        checker = new EmptyAttributesChecker(rule);
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
 
-		checker.check(element);
+        checker.check(element);
 
-		final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
 
-		if (issues.size() != 1) {
-			Assert.fail("collection with the issues is bigger or smaller as expected");
-		} else {
-			Assert.assertEquals("Task 'Service Task 1' with no java class name. (compare model: Details, Java Class)",
-					issues.iterator().next().getMessage());
-		}
-	}
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
+        } else {
+            Assert.assertEquals("Task 'Service Task 1' with no java class name. (compare model: Details, Java Class)",
+                    issues.iterator().next().getMessage());
+        }
+    }
 
+    @Test
+    public void testEventsWithExpression() {
+        final String PATH = BASE_PATH + "NoExpressionChecker_EventsWithExpressions.bpmn";
+        checker = new EmptyAttributesChecker(rule);
 
-	@Before
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+
+        for (BaseElement baseElement : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+            checker.check(element);
+        }
+
+        // TODO update error message text
+        if (IssueService.getInstance().getIssues().size() != 1) {
+            Assert.fail("model should generate one issue");
+        }
+    }
+
+    /**
+     * Case: TimerExpression in start event is wrong
+     */
+    @Test
+    public void testTimerExpression_Wrong() {
+        final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong_NoType.bpmn";
+        checker = new EmptyAttributesChecker(rule);
+
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+        final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+
+        for (BaseElement event : baseElements) {
+            final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
+            checker.check(element);
+        }
+
+        if (IssueService.getInstance().getIssues().size() != 1) {
+            Assert.fail("wrong timer expression should generate an issue");
+        }
+    }
+
+    @Before
     public void clearIssues() {
         IssueService.getInstance().clear();
     }

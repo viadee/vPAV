@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,12 +31,14 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
@@ -49,13 +51,11 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Collection;
 
 public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
-
-	private static ClassLoader cl;
 
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
@@ -65,7 +65,7 @@ public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 		final URL classUrl = new URL(currentPath + "src/test/java/");
 		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
 		final URL[] classUrls = { classUrl, resourcesUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 	}
 
@@ -85,7 +85,7 @@ public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 		final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null);
 
 		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
 		variableReader.getVariablesFromElement(element, new BasicNode[1]);

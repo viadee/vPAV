@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,14 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-import de.viadee.bpm.vPAV.*;
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Helper;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -47,7 +48,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
-import soot.JastAddJ.AnonymousDecl;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -62,8 +62,6 @@ public class GraphCreationTest {
 
     private static final String BASE_PATH = "src/test/resources/";
 
-    private static ClassLoader cl;
-
     @BeforeClass
     public static void setup() throws MalformedURLException {
         RuntimeConfig.getInstance().setTest(true);
@@ -71,7 +69,7 @@ public class GraphCreationTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
     }
 
@@ -103,7 +101,7 @@ public class GraphCreationTest {
         final File processDefinition = new File(PATH);
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
         // create data flow graphs
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,

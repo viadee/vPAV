@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -79,45 +79,39 @@ public class ElementGraphBuilder {
 
     private Map<String, Collection<String>> processIdToVariables;
 
-    private BpmnScanner bpmnScanner;
-
     private Rule rule;
 
-    public ElementGraphBuilder(BpmnScanner bpmnScanner) {
-        this.bpmnScanner = bpmnScanner;
+    public ElementGraphBuilder() {
+
     }
 
-    public ElementGraphBuilder(BpmnScanner bpmnScanner, final Rule rule) {
-        this.bpmnScanner = bpmnScanner;
+    public ElementGraphBuilder(final Rule rule) {
         this.rule = rule;
     }
 
     public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
             final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
-            final Map<String, Collection<String>> processIdToVariables, final Rule rule, BpmnScanner bpmnScanner) {
+            final Map<String, Collection<String>> processIdToVariables, final Rule rule) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.processIdToPathMap = processIdToPathMap;
         this.messageIdToVariables = messageIdToVariables;
         this.processIdToVariables = processIdToVariables;
-        this.bpmnScanner = bpmnScanner;
         this.rule = rule;
     }
 
     public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
             final Map<String, String> processIdToPathMap, final Map<String, Collection<String>> messageIdToVariables,
-            final Map<String, Collection<String>> processIdToVariables, BpmnScanner bpmnScanner) {
+            final Map<String, Collection<String>> processIdToVariables) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.processIdToPathMap = processIdToPathMap;
         this.messageIdToVariables = messageIdToVariables;
         this.processIdToVariables = processIdToVariables;
-        this.bpmnScanner = bpmnScanner;
     }
 
     public ElementGraphBuilder(final Map<String, String> decisionRefToPathMap,
-            final Map<String, String> processIdToPathMap, BpmnScanner bpmnScanner) {
+            final Map<String, String> processIdToPathMap) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.processIdToPathMap = processIdToPathMap;
-        this.bpmnScanner = bpmnScanner;
     }
 
     /**
@@ -282,7 +276,7 @@ public class ElementGraphBuilder {
         }
 
         // examine process variables and save it with access operation
-        final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner);
+        final ProcessVariableReader reader = new ProcessVariableReader(decisionRefToPathMap, rule);
         reader.getVariablesFromElement(bpmnElement, predecessor);
     }
 
@@ -419,7 +413,7 @@ public class ElementGraphBuilder {
             }
             // add elements of the sub process as nodes
             final BpmnElement node = new BpmnElement(processDefinition, subElement, controlFlowGraph, flowAnalysis);
-            new ProcessVariableReader(decisionRefToPathMap, rule, bpmnScanner)
+            new ProcessVariableReader(decisionRefToPathMap, rule)
                     .getVariablesFromElement(node, new BasicNode[1]);
             // mention the element
             elementMap.put(subElement.getId(), node);
@@ -537,7 +531,7 @@ public class ElementGraphBuilder {
 
         // transform process into data flow
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
-                messageIdToVariables, processIdToVariables, rule, bpmnScanner);
+                messageIdToVariables, processIdToVariables, rule);
         return graphBuilder.createProcessGraph(fileScanner, subModel, callActivityPath, calledElementHierarchy, scanner,
                 flowAnalysis);
     }

@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -44,8 +43,10 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.*;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -57,7 +58,6 @@ import java.util.Map;
 
 /**
  * unit tests for class NoScriptTasks
- *
  */
 public class NoScriptCheckerTest {
 
@@ -65,9 +65,7 @@ public class NoScriptCheckerTest {
 
     private static NoScriptChecker checker;
 
-    private static ClassLoader cl;
-
-    private static Map<String, Setting> setting = new HashMap<String, Setting>();
+    private static Map<String, Setting> setting = new HashMap<>();
 
     private final Rule rule = new Rule("NoScriptChecker", true, null, setting, null, null);
 
@@ -77,7 +75,7 @@ public class NoScriptCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -88,7 +86,7 @@ public class NoScriptCheckerTest {
     @Test
     public void testModelWithNoScript() {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithoutScript.bpmn";
-        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        checker = new NoScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -109,7 +107,7 @@ public class NoScriptCheckerTest {
     @Test
     public void testModelWithInputScript() {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithInputScript.bpmn";
-        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        checker = new NoScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -138,7 +136,7 @@ public class NoScriptCheckerTest {
     @Test
     public void testModelWithOutputScript() {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithOutputScript.bpmn";
-        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        checker = new NoScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -167,7 +165,7 @@ public class NoScriptCheckerTest {
     @Test
     public void testModelWithExecutionlistenerScript() {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithExecutionlistenerScript.bpmn";
-        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        checker = new NoScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -181,8 +179,8 @@ public class NoScriptCheckerTest {
         checker.check(elementGate);
 
         Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
-
-        if (issues.size() != 1) {
+        // TODO aussagekraetigere namen (task mit id) in message (hier zwei gleiche messages obwohl unterschiedliche tasks)
+        if (issues.size() != 2) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals("Task '" + CheckName.checkName(baseElementGate) + "' with 'executionListener' script",
@@ -196,7 +194,7 @@ public class NoScriptCheckerTest {
     @Test
     public void testModelWithTasklistenerScript() {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithTasklistenerScript.bpmn";
-        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        checker = new NoScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -225,7 +223,7 @@ public class NoScriptCheckerTest {
     @Test
     public void testModelWithScriptTask() {
         final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithScriptTask.bpmn";
-        checker = new NoScriptChecker(rule, new BpmnScanner(PATH));
+        checker = new NoScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -245,6 +243,28 @@ public class NoScriptCheckerTest {
         } else {
             Assert.assertEquals("ScriptTask '" + CheckName.checkName(baseElement) + "' not allowed",
                     issues.iterator().next().getMessage());
+        }
+    }
+
+    @Test
+    public void testScriptInSequenceFlow() {
+        checker = new NoScriptChecker(rule);
+        BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent().sequenceFlowId("MySequenceFlow").endEvent()
+                .done();
+        SequenceFlow sequenceFlow = modelInstance.getModelElementById("MySequenceFlow");
+        ConditionExpression cond = modelInstance.newInstance(ConditionExpression.class);
+        cond.setType("tFormalExpression");
+        cond.setLanguage("groovy");
+        cond.setTextContent(" status == 'closed'");
+        sequenceFlow.setConditionExpression(cond);
+
+        final BpmnElement element = new BpmnElement(null, sequenceFlow, new ControlFlowGraph(),
+                new FlowAnalysis());
+        checker.check(element);
+        final Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
+
+        if (issues.size() != 1) {
+            Assert.fail("collection with the issues is bigger or smaller as expected");
         }
     }
 

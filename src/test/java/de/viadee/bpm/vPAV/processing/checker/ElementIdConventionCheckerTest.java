@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -38,15 +38,12 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -64,16 +61,14 @@ public class ElementIdConventionCheckerTest {
 
 	private static ElementChecker checker;
 
-	private static ClassLoader cl;
-
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
-		checker = new ElementIdConventionChecker(createRule(), null);
+		checker = new ElementIdConventionChecker(createRule());
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java/");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 	}
@@ -90,14 +85,13 @@ public class ElementIdConventionCheckerTest {
 
 		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
 
-        final Collection<CheckerIssue> issues = new ArrayList<>();
 		for (final BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
             checker.check(element);
 		}
 
         if (IssueService.getInstance().getIssues().size() > 0) {
-			fail("There are issues, altough the convention is correct.");
+			fail("There are issues, although the convention is correct.");
 		}
 	}
 
@@ -146,7 +140,7 @@ public class ElementIdConventionCheckerTest {
 	 */
 	private static Rule createRule() {
 
-		final Collection<ElementConvention> elementConventions = new ArrayList<ElementConvention>();
+		final Collection<ElementConvention> elementConventions = new ArrayList<>();
 
 		final ElementConvention elementConventionService = new ElementConvention("ServiceTask", null, null,
 				"serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*");
@@ -156,9 +150,7 @@ public class ElementIdConventionCheckerTest {
 		elementConventions.add(elementConventionService);
 		elementConventions.add(elementConventionUser);
 
-		final Rule rule = new Rule("ElementIdConventionChecker", true, null, null, elementConventions, null);
-
-		return rule;
+		return new Rule("ElementIdConventionChecker", true, null, null, elementConventions, null);
 	}
 
 	@Before

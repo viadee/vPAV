@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -42,8 +41,10 @@ import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -62,8 +63,6 @@ public class JavaDelegateCheckerTest {
 
     private static JavaDelegateChecker checker;
 
-    private static ClassLoader cl;
-
     private final Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
 
     @BeforeClass
@@ -80,7 +79,7 @@ public class JavaDelegateCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -92,7 +91,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testJavaDelegateTransitiveInterface() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_TransitiveInterface.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
@@ -114,7 +113,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testCorrectJavaDelegateReference() {
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -138,7 +137,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testCorrectJavaDelegateReferenceSignal() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReferenceSignal.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -162,7 +161,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testCorrectJavaDelegateReferenceAbstract() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_CorrectJavaDelegateReferenceAbstract.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -185,7 +184,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testNoJavaDelegateEntered() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_NoJavaDelegateEntered.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -213,7 +212,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testWrongJavaDelegatePath() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegatePath.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -241,7 +240,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testWrongJavaDelegateInterface() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateInterface.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -270,7 +269,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testWrongJavaDelegateEntered() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateEntered.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -298,7 +297,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testWrongJavaDelegateExpression() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongJavaDelegateExpression.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -326,7 +325,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testWrongClassReference() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_WrongClassReference.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -354,7 +353,7 @@ public class JavaDelegateCheckerTest {
     @Test
     public void testInterfaceActivityBehavior() {
         final String PATH = BASE_PATH + "JavaDelegateCheckerTest_InterfaceActivityBehavior.bpmn";
-        checker = new JavaDelegateChecker(rule, new BpmnScanner(PATH));
+        checker = new JavaDelegateChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

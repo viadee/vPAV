@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -70,14 +70,11 @@ public final class ProcessVariableReader {
 
     private final Map<String, String> decisionRefToPathMap;
 
-    private final BpmnScanner bpmnScanner;
-
     private final Rule rule;
 
-    public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, final Rule rule, BpmnScanner scanner) {
+    public ProcessVariableReader(final Map<String, String> decisionRefToPathMap, final Rule rule) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.rule = rule;
-        this.bpmnScanner = scanner;
     }
 
     /**
@@ -198,10 +195,11 @@ public final class ProcessVariableReader {
 
     /**
      * Retrieves process variables from input / output parameters.
-     * @param element BpmnElement
+     *
+     * @param element           BpmnElement
      * @param extensionElements Extension elements
-     * @param predecessor Current predecessor
-     * @param input true if input parameters are processed, false for output parameters
+     * @param predecessor       Current predecessor
+     * @param input             true if input parameters are processed, false for output parameters
      */
     void processInputOutputParameters(BpmnElement element, ExtensionElements extensionElements, BasicNode[] predecessor,
             boolean input) {
@@ -661,9 +659,9 @@ public final class ProcessVariableReader {
                         KnownElementFieldType.DelegateExpression, scopeId, predecessor);
             }
 
-            final ArrayList<String> t_fieldInjectionExpressions = bpmnScanner
-                    .getFieldInjectionExpression(baseElement.getId());
-            if (t_fieldInjectionExpressions != null && !t_fieldInjectionExpressions.isEmpty()) {
+            final ArrayList<String> t_fieldInjectionExpressions = BpmnScanner
+                    .getFieldInjectionExpression(baseElement);
+            if (!t_fieldInjectionExpressions.isEmpty()) {
                 for (String t_fieldInjectionExpression : t_fieldInjectionExpressions)
                     findVariablesInExpression(javaReaderStatic,
                             t_fieldInjectionExpression, element, ElementChapter.FieldInjections,
@@ -815,7 +813,7 @@ public final class ProcessVariableReader {
             if (collectionName != null && collectionName.trim().length() > 0) {
 
                 // Check if collection name includes expression
-                final Pattern pattern = Pattern.compile("\\$\\{.*\\}");
+                final Pattern pattern = Pattern.compile("\\$\\{.*}");
                 Matcher matcher = pattern.matcher(collectionName);
                 if (matcher.matches()) {
                     findVariablesInExpression(javaReaderStatic,
@@ -975,7 +973,7 @@ public final class ProcessVariableReader {
 
         // HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
         // ${dateTime().plusWeeks(1).toDate()}
-        final Pattern pattern = Pattern.compile("\\$\\{(\\w)*\\(.*\\)\\}");
+        final Pattern pattern = Pattern.compile("\\$\\{(\\w)*\\(.*\\)}");
         // final Pattern pattern = Pattern.compile("\\$\\{(\\w*)\\.(\\w*\\(.*\\))*\\}|\\$\\{(\\w*\\(.*\\))*\\}");
 
         Matcher matcher = pattern.matcher(expression);

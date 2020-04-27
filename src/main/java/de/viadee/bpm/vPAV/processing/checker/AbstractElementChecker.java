@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -38,10 +38,7 @@ public abstract class AbstractElementChecker implements ElementChecker {
 
     final protected Rule rule;
 
-    final protected BpmnScanner bpmnScanner;
-
-    public AbstractElementChecker(final Rule rule, final BpmnScanner bpmnScanner) {
+    public AbstractElementChecker(final Rule rule) {
         this.rule = rule;
-        this.bpmnScanner = bpmnScanner;
     }
 }

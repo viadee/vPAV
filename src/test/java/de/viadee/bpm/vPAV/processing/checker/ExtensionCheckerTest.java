@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ModelConvention;
@@ -43,8 +42,10 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -65,8 +66,6 @@ public class ExtensionCheckerTest {
 
     private static ExtensionChecker checker;
 
-    private static ClassLoader cl;
-
     @BeforeClass
     public static void setup() throws MalformedURLException {
 
@@ -74,7 +73,7 @@ public class ExtensionCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -86,7 +85,7 @@ public class ExtensionCheckerTest {
     @Test
     public void testExtensionChecker_Correct() {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_Correct.bpmn";
-        checker = new ExtensionChecker(createRule(), new BpmnScanner(PATH));
+        checker = new ExtensionChecker(createRule());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -110,7 +109,7 @@ public class ExtensionCheckerTest {
     @Test
     public void testExtensionChecker_Wrong() {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_Wrong.bpmn";
-        checker = new ExtensionChecker(createRule(), new BpmnScanner(PATH));
+        checker = new ExtensionChecker(createRule());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -134,7 +133,7 @@ public class ExtensionCheckerTest {
     @Test
     public void testExtensionChecker_NoValue() {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_NoValue.bpmn";
-        checker = new ExtensionChecker(createRule(), new BpmnScanner(PATH));
+        checker = new ExtensionChecker(createRule());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -158,7 +157,7 @@ public class ExtensionCheckerTest {
     @Test
     public void testExtensionChecker_NoKey() {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_NoKey.bpmn";
-        checker = new ExtensionChecker(createRule(), new BpmnScanner(PATH));
+        checker = new ExtensionChecker(createRule());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -182,7 +181,7 @@ public class ExtensionCheckerTest {
     @Test
     public void testExtensionChecker_WithId() {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_WithId.bpmn";
-        checker = new ExtensionChecker(createRule2(), new BpmnScanner(PATH));
+        checker = new ExtensionChecker(createRule2());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -206,7 +205,7 @@ public class ExtensionCheckerTest {
     @Test
     public void testExtensionChecker_NoRequiredAttribute() {
         final String PATH = BASE_PATH + "ExtensionCheckerTest_NoRequiredAttribute.bpmn";
-        checker = new ExtensionChecker(createRule3(), new BpmnScanner(PATH));
+        checker = new ExtensionChecker(createRule3());
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -232,7 +231,7 @@ public class ExtensionCheckerTest {
 
         final ArrayList<ModelConvention> modelConventions = createModelConventions();
 
-        final Map<String, Setting> settings = new HashMap<String, Setting>();
+        final Map<String, Setting> settings = new HashMap<>();
         final Setting setting = new Setting("SETTING1", null, "ServiceTask", null, true, "\\d+");
         final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, true, "\\d+");
 
@@ -251,7 +250,7 @@ public class ExtensionCheckerTest {
 
         final ArrayList<ModelConvention> modelConventions = createModelConventions();
 
-        final Map<String, Setting> settings = new HashMap<String, Setting>();
+        final Map<String, Setting> settings = new HashMap<>();
         final Setting setting = new Setting("SETTING1", null, null, "Task_26x8g8d", false, "\\d+");
         final Setting setting1 = new Setting("SETTING2", null, null, null, false, "\\d+");
 
@@ -270,7 +269,7 @@ public class ExtensionCheckerTest {
 
         final ArrayList<ModelConvention> modelConventions = createModelConventions();
 
-        final Map<String, Setting> settings = new HashMap<String, Setting>();
+        final Map<String, Setting> settings = new HashMap<>();
         final Setting setting = new Setting("SETTING1", null, "ServiceTask", null, false, "\\d+");
         final Setting setting1 = new Setting("SETTING2", null, "ServiceTask", null, true, "\\d+");
 
@@ -286,7 +285,7 @@ public class ExtensionCheckerTest {
      * @return modelConventions
      */
     private static ArrayList<ModelConvention> createModelConventions() {
-        final ArrayList<ModelConvention> modelConventions = new ArrayList<ModelConvention>();
+        final ArrayList<ModelConvention> modelConventions = new ArrayList<>();
         final ModelConvention modelConvention1 = new ModelConvention("ServiceTask");
         final ModelConvention modelConvention2 = new ModelConvention("BusinessRuleTask");
         final ModelConvention modelConvention3 = new ModelConvention("SkriptTask");

@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -41,7 +41,6 @@ import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
 
@@ -56,8 +55,8 @@ import java.util.Map;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
-    public DmnTaskChecker(final Rule rule, BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public DmnTaskChecker(final Rule rule) {
+        super(rule);
     }
 
     /**
@@ -71,8 +70,8 @@ public class DmnTaskChecker extends AbstractElementChecker {
         final BaseElement bpmnElement = element.getBaseElement();
         if (bpmnElement instanceof BusinessRuleTask) {
             // read attributes from task
-            final Map.Entry<String, String> implementation = bpmnScanner
-                    .getImplementation((BusinessRuleTask) bpmnElement);
+            final Map.Entry<String, String> implementation = BpmnScanner
+                    .getImplementation(bpmnElement);
 
             if (implementation != null) {
                 // check if DMN reference is not empty

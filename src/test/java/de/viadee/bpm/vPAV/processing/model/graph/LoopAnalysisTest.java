@@ -1,4 +1,4 @@
-/**
+/*
  * BSD 3-Clause License
  *
  * Copyright © 2019, viadee Unternehmensberatung AG
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -57,15 +56,13 @@ public class LoopAnalysisTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
 
-	private static ClassLoader cl;
-
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
 	}
@@ -85,7 +82,7 @@ public class LoopAnalysisTest {
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
 		// create data flow graphs
 
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
