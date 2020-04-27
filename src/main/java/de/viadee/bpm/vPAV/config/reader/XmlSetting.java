@@ -71,7 +71,7 @@ public class XmlSetting {
         return name;
     }
 
-    @XmlAttribute(name = "script", required = false)
+    @XmlAttribute(name = "script")
     public String getScript() {
         return script;
     }
@@ -81,12 +81,12 @@ public class XmlSetting {
         return type;
     }
 
-    @XmlAttribute(name = "id", required = false)
+    @XmlAttribute(name = "id")
     public String getId() {
         return id;
     }
 
-    @XmlAttribute(name = "required", required = false)
+    @XmlAttribute(name = "required")
     public boolean getRequired() {
         return required;
     }

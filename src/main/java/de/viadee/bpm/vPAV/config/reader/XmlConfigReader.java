@@ -124,7 +124,7 @@ public final class XmlConfigReader implements ConfigReader {
         }
 
         // Has-Parent-RuleSet rule is only allowed once. Check this.
-        checkSingletonRule(rules, ConfigConstants.HASPARENTRULESET);
+        checkSingletonRule(rules);
 
         return splitRules(rules);
     }
@@ -161,9 +161,7 @@ public final class XmlConfigReader implements ConfigReader {
         final Collection<XmlModelConvention> xmlModelConventions = rule.getModelConventions();
         final ArrayList<ModelConvention> modelConventions = new ArrayList<>();
         if (xmlModelConventions != null) {
-            xmlModelConventions.forEach(xmlModelConvention -> {
-                modelConventions.add(new ModelConvention(xmlModelConvention.getType()));
-            });
+            xmlModelConventions.forEach(xmlModelConvention -> modelConventions.add(new ModelConvention(xmlModelConvention.getType())));
         }
 
         final Collection<XmlSetting> xmlSettings = rule.getSettings();
@@ -231,7 +229,7 @@ public final class XmlConfigReader implements ConfigReader {
     private static void resolveExternalChecker(Map.Entry<String, Map<String, Rule>> checkerRules,
                                                HashMap<String, Map<String, Rule>> elementRules,
                                                HashMap<String, Map<String, Rule>> modelRules) {
-        String className = "";
+        String className;
         Rule firstRule = (Rule) checkerRules.getValue().values().toArray()[0];
         if (firstRule.getSettings() != null
                 && firstRule.getSettings().containsKey(BpmnConstants.EXTERN_LOCATION)) {
@@ -265,10 +263,10 @@ public final class XmlConfigReader implements ConfigReader {
         }
     }
 
-    private static void checkSingletonRule(Map<String, Map<String, Rule>> rules, String rulename) {
-        Map<String, Rule> rulesSubset = rules.get(rulename);
-        if (rulesSubset != null && (rulesSubset.size() > 1 || rulesSubset.get(rulename) == null)) {
-            LOGGER.severe("Rule '" + rulename + "' is only allowed once and without defining an ID.");
+    private static void checkSingletonRule(Map<String, Map<String, Rule>> rules) {
+        Map<String, Rule> rulesSubset = rules.get(ConfigConstants.HASPARENTRULESET);
+        if (rulesSubset != null && (rulesSubset.size() > 1 || rulesSubset.get(ConfigConstants.HASPARENTRULESET) == null)) {
+            LOGGER.severe("Rule '" + ConfigConstants.HASPARENTRULESET + "' is only allowed once and without defining an ID.");
         }
     }
 

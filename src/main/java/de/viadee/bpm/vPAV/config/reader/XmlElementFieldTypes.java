@@ -54,12 +54,12 @@ public class XmlElementFieldTypes {
     this.excluded = excluded;
   }
 
-  @XmlElement(name = "elementFieldType", required = false)
+  @XmlElement(name = "elementFieldType")
   public Collection<String> getElementFieldTypes() {
     return elementFieldTypes;
   }
 
-  @XmlAttribute(name = "excluded", required = false)
+  @XmlAttribute(name = "excluded")
   public boolean isExcluded() {
     return excluded;
   }
@@ -68,7 +68,4 @@ public class XmlElementFieldTypes {
     this.elementFieldTypes = elementFieldTypes;
   }
 
-  public void setExcluded(boolean excluded) {
-    this.excluded = excluded;
-  }
 }

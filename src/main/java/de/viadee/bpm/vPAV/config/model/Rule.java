@@ -114,7 +114,4 @@ public class Rule {
         isActive = false;
     }
 
-    public boolean isElementRule() {
-        return true;
-    }
 }

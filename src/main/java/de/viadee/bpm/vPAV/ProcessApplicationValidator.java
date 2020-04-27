@@ -31,11 +31,9 @@
  */
 package de.viadee.bpm.vPAV;
 
-import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,57 +42,6 @@ import java.util.HashMap;
 public class ProcessApplicationValidator {
 
 	private static Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
-
-	public static void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {
-		ProcessApplicationValidator.dataFlowRules = dataFlowRules;
-	}
-
-	/**
-	 * Find issues with given ApplicationContext (Spring)
-	 *
-	 * @param ctx
-	 *            - Spring context
-	 * @return all issues
-	 */
-	public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
-		RuntimeConfig.getInstance().setApplicationContext(ctx);
-		RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
-		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-		Runner runner = createRunner();
-		return runner.getFilteredIssues();
-	}
-
-	/**
-	 * Find issues with given ApplicationContext (Spring)
-	 *
-	 * @param ctx
-	 *            - Spring context
-	 * @return issues with status error
-	 */
-	public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {
-		return filterErrors(findModelInconsistencies(ctx), CriticalityEnum.ERROR);
-	}
-
-	/**
-	 * Find model errors without spring context
-	 *
-	 * @return all issues
-	 */
-	public static Collection<CheckerIssue> findModelInconsistencies() {
-		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-		Runner runner = createRunner();
-
-		return runner.getFilteredIssues();
-	}
-
-	/**
-	 * Find model errors without spring context
-	 *
-	 * @return issues with status error
-	 */
-	public static Collection<CheckerIssue> findModelErrors() {
-		return filterErrors(findModelInconsistencies(), CriticalityEnum.ERROR);
-	}
 
 	/**
 	 * Find model errors without spring context but manual bean map
@@ -119,35 +66,7 @@ public class ProcessApplicationValidator {
 	 * @return issues with status error
 	 */
 	public static Collection<CheckerIssue> findModelErrors(final HashMap<String, String> beanMap) {
-		return filterErrors(findModelInconsistencies(beanMap), CriticalityEnum.ERROR);
-	}
-
-	/**
-	 * Find model errors without spring context. Alternative method for testing
-	 * purposes, to allow using a classloader that includes example delegates in
-	 * /src/test/java etc.
-	 *
-	 * @param classloader
-	 *            - ClassLoader that holds delegates etc.
-	 * @return issues with status error
-	 */
-	public static Collection<CheckerIssue> findModelErrorsFromClassloader(ClassLoader classloader) {
-		return filterErrors(findModelInconsistenciesFromClassloader(classloader), CriticalityEnum.ERROR);
-	}
-
-	/**
-	 * Find model errors without spring context. Alternative method for testing
-	 * purposes, to allow using a classloader that includes example delegates in
-	 * /src/test/java etc.
-	 *
-	 * @param classloader - ClassLoader that holds delegates etc.
-	 * @return all issues
-	 */
-	public static Collection<CheckerIssue> findModelInconsistenciesFromClassloader(ClassLoader classloader) {
-		RuntimeConfig.getInstance().setClassLoader(classloader);
-		Runner runner = createRunner();
-
-		return runner.getFilteredIssues();
+		return filterErrors(findModelInconsistencies(beanMap));
 	}
 
 	/**
@@ -155,16 +74,13 @@ public class ProcessApplicationValidator {
 	 *
 	 * @param filteredIssues
 	 *            - Filtered issues
-	 * @param status
-	 *            - Criticality to be sorted with
 	 * @return issues with status
 	 */
-	private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues,
-														 CriticalityEnum status) {
+	private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues) {
 		Collection<CheckerIssue> filteredErrors = new ArrayList<>();
 
 		for (CheckerIssue issue : filteredIssues) {
-			if (issue.getClassification().equals(status)) {
+			if (issue.getClassification().equals(CriticalityEnum.ERROR)) {
 				filteredErrors.add(issue);
 			}
 		}

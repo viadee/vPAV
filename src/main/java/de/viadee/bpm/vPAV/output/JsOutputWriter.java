@@ -267,7 +267,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			obj.addProperty("elementId", element.getBaseElement().getId());
 			// bpmnFile
 			obj.addProperty(BpmnConstants.VPAV_BPMN_FILE,
-					replace(File.separator, "\\", element.getProcessDefinition()));
+					replace("\\", element.getProcessDefinition()));
 			// element Name
 			if (element.getBaseElement().getAttributeValue("name") != null)
 				obj.addProperty("elementName", element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME));
@@ -307,7 +307,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		obj.addProperty("name", processVariable.getName());
 		if (processVariable.getOperations().size() > 0) {
 			String bpmnFile = processVariable.getOperations().get(0).getElement().getProcessDefinition();
-			obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace(File.separator, "\\", bpmnFile));
+			obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace("\\", bpmnFile));
 		}
 		Function<ProcessVariableOperation, JsonObject> processVariableToJson = o -> {
 			final JsonObject jsonOperation = new JsonObject();
@@ -340,7 +340,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			Collection<CheckerIssue> modelIssues = new ArrayList<>(issues);
 
 			for (CheckerIssue issue : issues) {
-				String prettyBpmnFilename = replace(File.separator, "\\", issue.getBpmnFile());
+				String prettyBpmnFilename = replace("\\", issue.getBpmnFile());
 				if (!prettyBpmnFilename.equals(ConfigConstants.JS_BASEPATH + bpmnFilename))
 					modelIssues.remove(issue);
 			}
@@ -373,7 +373,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 		try {
 			for (final String bpmnFilename : getModelPaths()) {
-				String prettyBpmnFileName = replace(File.separator, "\\\\", bpmnFilename);
+				String prettyBpmnFileName = replace("\\\\", bpmnFilename);
 				output.append("{\"name\":\"").append(prettyBpmnFileName).append("\",\n \"xml\": \"");
 				output.append(convertBpmnFile(ConfigConstants.getInstance().getBasepath() + bpmnFilename));
 				output.append("\"},\n");
@@ -387,20 +387,18 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Replaces FileSeparator with given char sequence
 	 *
-	 * @param search
-	 *            FileSeparator
 	 * @param replace
 	 *            Chars to replace searched string
 	 * @param str
 	 *            String to be cleaned
 	 * @return str Cleaned String
 	 */
-	private static String replace(String search, String replace, String str) {
-		int start = str.indexOf(search);
+	private static String replace(String replace, String str) {
+		int start = str.indexOf(File.separator);
 
 		while (start != -1) {
-			str = str.substring(0, start) + replace + str.substring(start + search.length(), str.length());
-			start = str.indexOf(search, start + replace.length());
+			str = str.substring(0, start) + replace + str.substring(start + File.separator.length());
+			start = str.indexOf(File.separator, start + replace.length());
 		}
 		return (str);
 	}
@@ -451,7 +449,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			for (final CheckerIssue issue : issues) {
 				final JsonObject obj = new JsonObject();
 				obj.addProperty(BpmnConstants.VPAV_ID, issue.getId());
-				obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace(File.separator, "\\", issue.getBpmnFile()));
+				obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace("\\", issue.getBpmnFile()));
 				obj.addProperty(BpmnConstants.VPAV_RULE_NAME, issue.getRuleName());
 				obj.addProperty(BpmnConstants.VPAV_RULE_DESCRIPTION, issue.getRuleDescription());
 				obj.addProperty(BpmnConstants.VPAV_ELEMENT_ID, issue.getElementId());

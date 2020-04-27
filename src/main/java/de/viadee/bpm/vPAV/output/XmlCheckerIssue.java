@@ -103,28 +103,28 @@ public class XmlCheckerIssue {
         return ruleName;
     }
 
-    @XmlElement(name = "ruleDescription", required = false)
+    @XmlElement(name = "ruleDescription")
     public String getRuleDescription() {
         return ruleDescription;
     }
 
-    @XmlElement(name = "resourceFile", required = false)
+    @XmlElement(name = "resourceFile")
     public String getResourceFile() {
         return resourceFile;
     }
 
-    @XmlElement(name = "variable", required = false)
+    @XmlElement(name = "variable")
     public String getVariable() {
         return variable;
     }
 
-    @XmlElement(name = "anomaly", required = false)
+    @XmlElement(name = "anomaly")
     public String getAnomaly() {
         return anomaly;
     }
 
     @XmlElementWrapper(name = "paths")
-    @XmlElement(name = "path", required = false)
+    @XmlElement(name = "path")
     public List<XmlPath> getPaths() {
         return paths;
     }
@@ -144,7 +144,7 @@ public class XmlCheckerIssue {
         return elementId;
     }
 
-    @XmlElement(name = "elementName", required = false)
+    @XmlElement(name = "elementName")
     public String getElementName() {
         return elementName;
     }
@@ -154,7 +154,7 @@ public class XmlCheckerIssue {
         return message;
     }
 
-    @XmlElement(name = "elementDescription", required = false)
+    @XmlElement(name = "elementDescription")
     public String getElementDescription() {
         return elementDescription;
     }
@@ -179,20 +179,12 @@ public class XmlCheckerIssue {
         this.message = message;
     }
 
-    public void setElementDescription(String elementDescription) {
-        this.elementDescription = elementDescription;
-    }
-
     public void setId(String id) {
         this.id = id;
     }
 
     public void setRuleName(String ruleName) {
         this.ruleName = ruleName;
-    }
-
-    public void setRuleDescription(String ruleDescription) {
-        this.ruleDescription = ruleDescription;
     }
 
     public void setResourceFile(String resourceFile) {

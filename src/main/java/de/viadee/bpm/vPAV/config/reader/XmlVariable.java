@@ -79,7 +79,7 @@ public class XmlVariable {
 		this.process = process;
 	}
 
-	@XmlElement(name = "creationPoint", required = false)
+	@XmlElement(name = "creationPoint")
 	public String getCreationPoint() {
 		return creationPoint;
 	}
@@ -88,7 +88,7 @@ public class XmlVariable {
 		this.creationPoint = creationPoint;
 	}
 
-	@XmlElement(name = "scope", required = false)
+	@XmlElement(name = "scope")
 	public String getScope() {
 		return scope;
 	}
@@ -97,7 +97,7 @@ public class XmlVariable {
 		this.scope = scope;
 	}
 
-	@XmlElement(name = "operation", required = false)
+	@XmlElement(name = "operation")
 	public String getOperation() {
 		return operation;
 	}

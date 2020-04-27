@@ -138,10 +138,6 @@ public class RuntimeConfig {
         this.ruleSet = ruleSet;
     }
 
-    void setApplicationContext(ApplicationContext ctx) {
-        this.ctx = ctx;
-    }
-
     public ApplicationContext getApplicationContext() {
         return ctx;
     }

@@ -102,7 +102,4 @@ public class Setting {
         scriptPlaces.add(place);
     }
 
-    public void setScriptPlace(ArrayList<String> scriptPlaces) {
-        this.scriptPlaces = scriptPlaces;
-    }
 }

@@ -41,23 +41,21 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * Ergebnisse aus dem Checker in ein definiertes XML-Format schreiben
- *
  */
 public class XmlOutputWriter implements IssueOutputWriter {
 
     /**
      * Writes the result as XML to the vPAV output folder
      *
-     * @param issues
-     *            Contains the list of found issues
-     * @throws OutputWriterException
-     *             Occurs if output can not be written
+     * @param issues Contains the list of found issues
+     * @throws OutputWriterException Occurs if output can not be written
      */
     @Override
     public void write(final Collection<CheckerIssue> issues) throws OutputWriterException {
@@ -65,41 +63,41 @@ public class XmlOutputWriter implements IssueOutputWriter {
         Writer writer = null;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(ConfigConstants.VALIDATION_XML_OUTPUT), "utf-8"));
+                    new FileOutputStream(ConfigConstants.VALIDATION_XML_OUTPUT), StandardCharsets.UTF_8));
             final JAXBContext context = JAXBContext.newInstance(XmlCheckerIssues.class);
             final Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             m.marshal(transformToXmlDatastructure(issues), writer);
-        } catch (final UnsupportedEncodingException e) {
-            throw new OutputWriterException("unsupported encoding");
         } catch (final FileNotFoundException e) {
             throw new OutputWriterException("output file couldn't be generated");
         } catch (final JAXBException e) {
             throw new OutputWriterException("xml output couldn't be generated (jaxb-error)");
         } finally {
             try {
-                writer.close();
+                if (writer != null)
+                    writer.close();
             } catch (Exception ex) {
-                /* ignore */}
+                /* ignore */
+            }
         }
     }
 
     /**
      * Transforms the given issues into XML datastructure
      *
-     * @param issues
-     * @return
+     * @param issues Checker issues
+     * @return XmlCheckerIssues
      */
     private static XmlCheckerIssues transformToXmlDatastructure(
             final Collection<CheckerIssue> issues) {
         XmlCheckerIssues xmlIssues = new XmlCheckerIssues();
         for (final CheckerIssue issue : issues) {
-            final List<XmlPath> xmlPaths = new ArrayList<XmlPath>();
+            final List<XmlPath> xmlPaths = new ArrayList<>();
             final List<Path> invalidPaths = issue.getInvalidPaths();
             if (invalidPaths != null) {
                 for (final Path path : invalidPaths) {
                     List<BpmnElement> elements = path.getElements();
-                    List<XmlPathElement> pathElements = new ArrayList<XmlPathElement>();
+                    List<XmlPathElement> pathElements = new ArrayList<>();
                     for (final BpmnElement element : elements) {
                         String elementName = element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
                         if (elementName != null) {

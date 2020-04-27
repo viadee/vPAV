@@ -47,7 +47,7 @@ public class XmlPath {
     this.elements = elements;
   }
 
-  @XmlElement(name = "element", required = false)
+  @XmlElement(name = "element")
   public Collection<XmlPathElement> getElements() {
     return elements;
   }

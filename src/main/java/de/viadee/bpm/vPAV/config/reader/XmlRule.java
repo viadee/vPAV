@@ -68,7 +68,7 @@ public class XmlRule {
         this.modelConventions = modelConventions;
     }
 
-    @XmlAttribute(name = "id", required = false)
+    @XmlAttribute(name = "id")
     public String getId() {
         return id;
     }
@@ -95,7 +95,7 @@ public class XmlRule {
         this.state = state;
     }
 
-    @XmlElement(name = "description", required = false)
+    @XmlElement(name = "description")
     public String getDescription() {
         return description;
     }
@@ -105,7 +105,7 @@ public class XmlRule {
     }
 
     @XmlElementWrapper(name = "settings")
-    @XmlElement(name = "setting", required = false)
+    @XmlElement(name = "setting")
     public Collection<XmlSetting> getSettings() {
         return settings;
     }
@@ -115,7 +115,7 @@ public class XmlRule {
     }
 
     @XmlElementWrapper(name = "elementConventions")
-    @XmlElement(name = "elementConvention", required = false)
+    @XmlElement(name = "elementConvention")
     public Collection<XmlElementConvention> getElementConventions() {
         return elementConventions;
     }
@@ -125,7 +125,7 @@ public class XmlRule {
     }
 
     @XmlElementWrapper(name = "modelConventions")
-    @XmlElement(name = "modelConvention", required = false)
+    @XmlElement(name = "modelConvention")
     public Collection<XmlModelConvention> getModelConventions() {
         return modelConventions;
     }

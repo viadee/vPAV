@@ -93,7 +93,7 @@ public class BpmnScanner {
     /**
      * Return the Implementation of an specific element (endEvent and/or
      * intermediateThrowEvent)
-     *
+     * @param element Element
      * @return return_implementation contains implementation
      */
     public static Map.Entry<String, String> getEventImplementation(BaseElement element) {
@@ -141,6 +141,8 @@ public class BpmnScanner {
     }
 
     /**
+     *
+     * @param element Element
      * @param extType Type of Listener
      * @return value of Listener
      */
@@ -165,7 +167,7 @@ public class BpmnScanner {
 
     /**
      * Check if model has an scriptTag
-     *
+     * @param element Element
      * @return scriptPlaces contains script type
      */
     public static ArrayList<String> getScriptTypes(BaseElement element) {

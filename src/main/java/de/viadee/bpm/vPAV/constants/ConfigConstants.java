@@ -64,8 +64,6 @@ public class ConfigConstants {
 
 	public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
 
-	public static final String JAVA_FILE_PATTERN = "**/*.java";
-
 	public static final String EFFECTIVE_RULESET = "target/vPAV/effectiveRuleSet.xml";
 
 	public static final String VALIDATION_XML_OUTPUT = "target/vPAV/bpmn_validation.xml";
@@ -125,8 +123,6 @@ public class ConfigConstants {
 	public static final String MESSAGE = "message";
 
 	public static final String CRITICALITY = "Criticality";
-
-	public static final String CREATE_OUTPUT_RULE = "CreateOutputHTML";
 
 	private static Logger logger = Logger.getLogger(ConfigConstants.class.getName());
 

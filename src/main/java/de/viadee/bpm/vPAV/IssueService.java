@@ -69,8 +69,4 @@ public class IssueService {
         this.issues = new ArrayList<>();
     }
 
-    public void addIssues(Collection<CheckerIssue> issues) {
-        this.issues.addAll(issues);
-    }
-
 }

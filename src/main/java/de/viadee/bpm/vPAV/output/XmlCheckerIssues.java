@@ -40,7 +40,7 @@ import java.util.List;
 @XmlRootElement(name = "issues")
 public class XmlCheckerIssues {
 
-  private List<XmlCheckerIssue> issues = new ArrayList<XmlCheckerIssue>();
+  private List<XmlCheckerIssue> issues = new ArrayList<>();
 
   public XmlCheckerIssues() {
   }
@@ -62,7 +62,4 @@ public class XmlCheckerIssues {
     this.issues.add(issue);
   }
 
-  public void addIssues(final Collection<XmlCheckerIssue> issues) {
-    this.issues.addAll(issues);
-  }
 }

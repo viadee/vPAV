@@ -33,21 +33,10 @@ package de.viadee.bpm.vPAV.constants;
 
 import soot.RefType;
 
-import java.sql.Ref;
-
 public class CamundaMethodServices {
 
     private CamundaMethodServices() {
     }
-
-
-    public static final String ACTIVITY_BEHAVIOR = "org.camunda.bpm.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior";
-
-    public static final String JAVA_DELEGATE = "org.camunda.bpm.engine.delegate.JavaDelegate";
-
-    public static final String TASK_LISTENER = "org.camunda.bpm.engine.delegate.TaskListener";
-
-    public static final String EXECUTION_LISTENER = "org.camunda.bpm.engine.delegate.ExecutionListener";
 
     public static final String DELEGATE = "org.camunda.bpm.engine.delegate.DelegateExecution";
 

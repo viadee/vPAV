@@ -82,8 +82,6 @@ public class Runner {
 
 	private Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
 
-	private boolean checkProcessVariables = false;
-
 	/**
 	 * Main method which represents lifecycle of the validation process. Calls main
 	 * functions
@@ -221,9 +219,9 @@ public class Runner {
 				|| oneCheckerIsActive(rules.getModelRules(), "DataFlowChecker")) {
 			variableScanner = new ProcessVariablesScanner(getFileScanner().getJavaResourcesFileInputStream());
 			readOuterProcessVariables(variableScanner);
-			setCheckProcessVariables(true);
+			setCheckProcessVariables();
 		} else {
-			setCheckProcessVariables(false);
+			setCheckProcessVariables();
 		}
 	}
 
@@ -332,10 +330,6 @@ public class Runner {
 	 * Copies all necessary files and deletes outputFiles
 	 */
 	private void copyFiles() {
-		ArrayList<Path> outputFiles = new ArrayList<>();
-		for (String file : allOutputFilesArray)
-			outputFiles.add(Paths.get(fileMapping.get(file), file));
-
 		if (ConfigConstants.getInstance().isHtmlOutputEnabled()) {
 			for (String file : allOutputFilesArray)
 				copyFileToVPAVFolder(file);
@@ -459,7 +453,7 @@ public class Runner {
 			}
 		}
 		// all issues to be ignored
-		final Collection<String> ignoredIssues = collectIgnoredIssues(ConfigConstants.IGNORE_FILE);
+		final Collection<String> ignoredIssues = collectIgnoredIssues();
 
 		final HashMap<String, CheckerIssue> filteredIssues = new HashMap<>(issuesMap);
 
@@ -484,10 +478,9 @@ public class Runner {
 	 * <p>
 	 * Assumption: Each row is an issue id
 	 *
-	 * @param filePath Path of ignoredIssues-file
 	 * @return issue ids
 	 */
-	private Collection<String> collectIgnoredIssues(final String filePath) {
+	private Collection<String> collectIgnoredIssues() {
 
 		final Map<String, String> ignoredIssuesMap = getIgnoredIssuesMap();
 		final Collection<String> ignoredIssues = new ArrayList<>();
@@ -499,7 +492,7 @@ public class Runner {
 			logger.info(ex.getMessage());
 		}
 
-		try (FileReader fileReader = new FileReader(filePath)) {
+		try (FileReader fileReader = new FileReader(ConfigConstants.IGNORE_FILE)) {
 			readIssues(ignoredIssuesMap, ignoredIssues, fileReader);
 		} catch (IOException ex) {
 			logger.info("Ignored issues couldn't be read successfully");
@@ -624,16 +617,7 @@ public class Runner {
 		return ignoredIssuesMap;
 	}
 
-	public void setIgnoredIssuesMap(Map<String, String> ignoredIssuesMap) {
-		this.ignoredIssuesMap = ignoredIssuesMap;
-	}
-
-	public boolean isCheckProcessVariables() {
-		return checkProcessVariables;
-	}
-
-	public void setCheckProcessVariables(boolean checkProcessVariables) {
-		this.checkProcessVariables = checkProcessVariables;
+	public void setCheckProcessVariables() {
 	}
 
 	public void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {

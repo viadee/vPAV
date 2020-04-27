@@ -33,121 +33,19 @@ package de.viadee.bpm.vPAV.constants;
 
 public class BpmnConstants {
 
-	public static final String DEFINITIONS = "definitions";
-
-	public static final String BUSINESS_RULE_TASK = "businessRuleTask";
-
-	public static final String SERVICE_TASK = "serviceTask";
-
-	public static final String SEND_TASK = "sendTask";
-
-	public static final String GATEWAY = "exclusiveGateway";
-
 	public static final String OUT = "outgoing";
 
 	public static final String IN = "incoming";
 
-	public static final String SEQUENCE = "sequenceFlow";
-
-	public static final String INTERMEDIATE_CATCH_EVENT = "intermediateCatchEvent";
-
-	public static final String INTERMEDIATE_THROW_EVENT = "intermediateThrowEvent";
-
 	public static final String START_EVENT = "startEvent";
 
-	public static final String BOUNDARY_EVENT = "boundaryEvent";
-
 	public static final String END_EVENT = "endEvent";
-
-	public static final String EXTENSION_ELEMENTS = "extensionElements";
-
-	public static final String MESSAGE = "message";
 
 	public static final String ERROR = "error";
 
 	public static final String PROCESS = "process";
 
-	public static final String SUBPROCESS = "subProcess";
-
-	public static final String MESSAGE_EVENT_DEFINITION = "messageEventDefinition";
-
-	public static final String SIGNAL_EVENT_DEFINITION = "signalEventDefinition";
-
-	public static final String LINK_EVENT_DEFINITION = "linkEventDefinition";
-
-	public static final String SIGNAL = "signal";
-
-	public static final String RECEIVE_TASK = "receiveTask";
-
 	// ------------------------
-
-	public static final String BPMN_DEFINITIONS = "bpmn:definitions";
-
-	public static final String BPMN_BUSINESS_RULE_TASK = "bpmn:businessRuleTask";
-
-	public static final String BPMN_SERVICE_TASK = "bpmn:serviceTask";
-
-	public static final String BPMN_SEND_TASK = "bpmn:sendTask";
-
-	public static final String BPMN_GATEWAY = "bpmn:exclusiveGateway";
-
-	public static final String BPMN_OUT = "bpmn:outgoing";
-
-	public static final String BPMN_SEQUENCE = "bpmn:sequenceFlow";
-
-	public static final String BPMN_INTERMEDIATE_CATCH_EVENT = "bpmn:intermediateCatchEvent";
-
-	public static final String BPMN_INTERMEDIATE_THROW_EVENT = "bpmn:intermediateThrowEvent";
-
-	public static final String BPMN_START_EVENT = "bpmn:startEvent";
-
-	public static final String BPMN_BOUNDARY_EVENT = "bpmn:boundaryEvent";
-
-	public static final String BPMN_END_EVENT = "bpmn:endEvent";
-
-	public static final String BPMN_EXTENSION_ELEMENTS = "bpmn:extensionElements";
-
-	public static final String BPMN_MESSAGE = "bpmn:message";
-
-	public static final String BPMN_ERROR = "bpmn:error";
-
-	public static final String BPMN_SIGNAL = "bpmn:signal";
-
-	public static final String BPMN_RECEIVE_TASK = "bpmn:receiveTask";
-
-	// -----------------------
-
-	public static final String BPMN2_DEFINITIONS = "bpmn2:definitions";
-
-	public static final String BPMN2_BUSINESS_RULE_TASK = "bpmn2:businessRuleTask";
-
-	public static final String BPMN2_SERVICE_TASK = "bpmn2:serviceTask";
-
-	public static final String BPMN2_SEND_TASK = "bpmn2:sendTask";
-
-	public static final String BPMN2_GATEWAY = "bpmn2:exclusiveGateway";
-
-	public static final String BPMN2_OUT = "bpmn2:outgoing";
-
-	public static final String BPMN2_SEQUENCE = "bpmn2:sequenceFlow";
-
-	public static final String BPMN2_INTERMEDIATE_CATCH_EVENT = "bpmn2:intermediateCatchEvent";
-
-	public static final String BPMN2_INTERMEDIATE_THROW_EVENT = "bpmn2:intermediateThrowEvent";
-
-	public static final String BPMN2_START_EVENT = "bpmn2:startEvent";
-
-	public static final String BPMN2_BOUNDARY_EVENT = "bpmn2:boundaryEvent";
-
-	public static final String BPMN2_END_EVENT = "bpmn2:endEvent";
-
-	public static final String BPMN2_EXTENSION_ELEMENTS = "bpmn2:extensionElements";
-
-	public static final String BPMN2_MESSAGE = "bpmn2:message";
-
-	// -----------------------
-
-	public static final String SCRIPT_TAG = "camunda:script";
 
 	public static final String CAMUNDA_CLASS = "camunda:class";
 
@@ -159,39 +57,17 @@ public class BpmnConstants {
 
 	public static final String CAMUNDA_EXT = "camunda:type";
 
-	public static final String CAMUNDA_FIELD = "camunda:field";
-
-	public static final String CAMUNDA_PROPERTY = "camunda:property";
-
-	public static final String CAMUNDA_ERROR_CODE_VARIABLE = "camunda:errorCodeVariable";
-
-	public static final String CAMUNDA_ERROR_MESSAGE_VARIABLE = "camunda:errorMessageVariable";
-
 	public static final String CAMUNDA_EXECUTION_LISTENER = "camunda:executionListener";
 
 	public static final String CAMUNDA_TASK_LISTENER = "camunda:taskListener";
 
 	public static final String RESULT_VARIABLE = "resultVariable";
 
-	public static final String ATTACHED_TO_REF = "attachedToRef";
-
 	public static final String IMPLEMENTATION = "implementation";
-
-	public static final String TIMER_EVENT_DEFINITION = "timerEventDefinition";
-
-	public static final String ERROR_EVENT_DEFINITION = "errorEventDefinition";
-
-	public static final String CONDITION_EXPRESSION = "conditionExpression";
-
-	public static final String SOURCE_REF = "sourceRef";
-
-	public static final String TARGET_REF = "targetRef";
 
 	public static final String DECISION_REF = "decisionRef";
 
 	public static final String CASE_REF = "caseRef";
-
-	public static final String LANG = "language";
 
 	public static final String EXTERN_LOCATION = "external_Location";
 
@@ -206,10 +82,6 @@ public class BpmnConstants {
 	public static final String ATTR_ID = "id";
 
 	public static final String ATTR_NAME = "name";
-
-	public static final String ATTR_VALUE = "value";
-
-	public static final String ATTR_ERROR_REF = "errorRef";
 
 	public static final String ATTR_VAR_MAPPING_CLASS = "variableMappingClass";
 

@@ -35,10 +35,6 @@ public class VariablesReaderException extends Exception {
 
   private static final long serialVersionUID = 7310325755339964000L;
 
-  public VariablesReaderException(final Throwable e) {
-    super(e);
-  }
-
   public VariablesReaderException(final String message) {
     super(message);
   }
