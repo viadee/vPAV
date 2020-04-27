@@ -773,11 +773,11 @@ public final class ProcessVariableReader {
                 javaReaderStatic
                         .getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                 BpmnConstants.ATTR_VAR_MAPPING_CLASS),
-                                element, null, KnownElementFieldType.Class, predecessor);
+                                element, ElementChapter.General, KnownElementFieldType.Class, predecessor);
             } else if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
                 findVariablesInExpression(javaReaderStatic,
-                        callActivity.getCamundaVariableMappingDelegateExpression(), element, null,
+                        callActivity.getCamundaVariableMappingDelegateExpression(), element, ElementChapter.General,
                         KnownElementFieldType.Class, scopeId, predecessor);
 
             }

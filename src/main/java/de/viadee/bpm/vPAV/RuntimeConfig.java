@@ -113,6 +113,10 @@ public class RuntimeConfig {
         return classLoader;
     }
 
+    void setApplicationContext(ApplicationContext ctx) {
+        this.ctx = ctx;
+    }
+
     public boolean isTest() {
         return test;
     }

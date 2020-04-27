@@ -31,9 +31,11 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
+import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,6 +57,33 @@ public class ProcessApplicationValidator {
 		RuntimeConfig.getInstance().setBeanMapping(beanMap);
 		Runner runner = createRunner();
 
+		return runner.getFilteredIssues();
+	}
+
+	/**
+	 * Find model errors without spring context
+	 *
+	 * @return all issues
+	 */
+	public static Collection<CheckerIssue> findModelInconsistencies() {
+		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+		Runner runner = createRunner();
+
+		return runner.getFilteredIssues();
+	}
+
+	/**
+	 * Find issues with given ApplicationContext (Spring)
+	 *
+	 * @param ctx
+	 *            - Spring context
+	 * @return all issues
+	 */
+	public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
+		RuntimeConfig.getInstance().setApplicationContext(ctx);
+		RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
+		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+		Runner runner = createRunner();
 		return runner.getFilteredIssues();
 	}
 
