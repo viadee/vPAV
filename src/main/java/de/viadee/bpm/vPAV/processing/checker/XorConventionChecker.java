@@ -71,69 +71,65 @@ public class XorConventionChecker extends AbstractElementChecker {
         final BaseElement bpmnElement = element.getBaseElement();
         final Map<String, Setting> settings = rule.getSettings();
 
-        if (bpmnElement instanceof ExclusiveGateway) {
+        if (bpmnElement instanceof ExclusiveGateway && ((ExclusiveGateway) bpmnElement).getOutgoing().size() > 1) {
+            // check default path
+            if (settings != null && settings.containsKey(BpmnConstants.REQUIRED_DEFAULT)
+                    && settings.get(BpmnConstants.REQUIRED_DEFAULT).getValue().equals("true") //$NON-NLS-1$
+                    && bpmnElement.getAttributeValue(BpmnConstants.DEFAULT) == null) {
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                        String.format(Messages.getString("XorConventionChecker.1"), //$NON-NLS-1$
+                                CheckName.checkName(bpmnElement))));
+            }
 
-            if (((ExclusiveGateway) bpmnElement).getOutgoing().size() > 1) {
+            final ArrayList<ElementConvention> elementConventions = (ArrayList<ElementConvention>) rule
+                    .getElementConventions();
 
-                // check default path
-                if (settings != null && settings.containsKey(BpmnConstants.REQUIRED_DEFAULT)
-                        && settings.get(BpmnConstants.REQUIRED_DEFAULT).getValue().equals("true") //$NON-NLS-1$
-                        && bpmnElement.getAttributeValue(BpmnConstants.DEFAULT) == null) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                            String.format(Messages.getString("XorConventionChecker.1"), //$NON-NLS-1$
-                                    CheckName.checkName(bpmnElement))));
+            if (elementConventions == null) {
+                throw new ProcessingException(
+                        "xor naming convention checker must have one element convention!"); //$NON-NLS-1$
+            }
+
+            // TODO: dont use indices
+            final String patternString = elementConventions.get(0).getPattern().trim();
+            final String taskName = bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
+            if (taskName != null && taskName.trim().length() > 0) {
+                final Pattern pattern = Pattern.compile(patternString);
+                final String taskNameClean = taskName.replaceAll("\n", "")
+                        .replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+                Matcher matcher = pattern.matcher(taskNameClean);
+
+                if (!matcher.matches()) {
+                    issues.addAll(
+                            IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                    String.format(Messages.getString("XorConventionChecker.7"), //$NON-NLS-1$
+                                            CheckName.checkName(bpmnElement)),
+                                    elementConventions.get(0).getDescription()));
                 }
+            } else {
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                        Messages.getString("XorConventionChecker.8"))); //$NON-NLS-1$
+            }
 
-                final ArrayList<ElementConvention> elementConventions = (ArrayList<ElementConvention>) rule
-                        .getElementConventions();
+            // TODO: dont use indices
+            final Collection<SequenceFlow> edges = ((ExclusiveGateway) bpmnElement).getOutgoing();
+            final String patternStringEdge = elementConventions.get(1).getPattern().trim();
 
-                if (elementConventions == null) {
-                    throw new ProcessingException(
-                            "xor naming convention checker must have one element convention!"); //$NON-NLS-1$
-                }
-
-                // TODO: dont use indices
-                final String patternString = elementConventions.get(0).getPattern().trim();
-                final String taskName = bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
-                if (taskName != null && taskName.trim().length() > 0) {
-                    final Pattern pattern = Pattern.compile(patternString);
-                    final String taskNameClean = taskName.replaceAll("\n", "")
+            for (SequenceFlow flow : edges) {
+                final String edgeName = flow.getName();
+                if (edgeName != null && edgeName.trim().length() > 0) {
+                    final Pattern pattern = Pattern.compile(patternStringEdge);
+                    final String edgeNameClean = edgeName.replaceAll("\n", "")
                             .replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-                    Matcher matcher = pattern.matcher(taskNameClean);
-
+                    Matcher matcher = pattern.matcher(edgeNameClean);
                     if (!matcher.matches()) {
-                        issues.addAll(
-                                IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                        String.format(Messages.getString("XorConventionChecker.7"), //$NON-NLS-1$
-                                                CheckName.checkName(bpmnElement)),
-                                        elementConventions.get(0).getDescription()));
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
+                                String.format(Messages.getString("XorConventionChecker.13"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement)),
+                                elementConventions.get(1).getDescription()));
                     }
                 } else {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                            Messages.getString("XorConventionChecker.8"))); //$NON-NLS-1$
-                }
-
-                // TODO: dont use indices
-                final Collection<SequenceFlow> edges = ((ExclusiveGateway) bpmnElement).getOutgoing();
-                final String patternStringEdge = elementConventions.get(1).getPattern().trim();
-
-                for (SequenceFlow flow : edges) {
-                    final String edgeName = flow.getName();
-                    if (edgeName != null && edgeName.trim().length() > 0) {
-                        final Pattern pattern = Pattern.compile(patternStringEdge);
-                        final String edgeNameClean = edgeName.replaceAll("\n", "")
-                                .replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-                        Matcher matcher = pattern.matcher(edgeNameClean);
-                        if (!matcher.matches()) {
-                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                    String.format(Messages.getString("XorConventionChecker.13"), //$NON-NLS-1$
-                                            CheckName.checkName(bpmnElement)),
-                                    elementConventions.get(1).getDescription()));
-                        }
-                    } else {
-                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
-                                Messages.getString("XorConventionChecker.14"))); //$NON-NLS-1$
-                    }
+                            Messages.getString("XorConventionChecker.14"))); //$NON-NLS-1$
                 }
             }
         }

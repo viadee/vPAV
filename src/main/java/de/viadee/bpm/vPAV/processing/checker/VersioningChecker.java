@@ -35,7 +35,6 @@ import de.odysseus.el.tree.IdentifierNode;
 import de.odysseus.el.tree.Tree;
 import de.odysseus.el.tree.TreeBuilder;
 import de.odysseus.el.tree.impl.Builder;
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -69,6 +68,7 @@ public class VersioningChecker extends AbstractElementChecker {
         this.resourcesNewestVersions = resourcesNewestVersions;
     }
 
+    @Override
     public boolean isSingletonChecker() {
         return true;
     }
@@ -303,8 +303,7 @@ public class VersioningChecker extends AbstractElementChecker {
      * @param expression
      * @return file path
      */
-    private String findBeanReferenceInExpression(final String expression, final BpmnElement element,
-            final Collection<CheckerIssue> issues) {
+    private String findBeanReferenceInExpression(final String expression, final BpmnElement element) {
 
         try {
             final String filteredExpression = expression.replaceAll("[\\w]+\\.", ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -312,7 +311,7 @@ public class VersioningChecker extends AbstractElementChecker {
             final Tree tree = treeBuilder.build(filteredExpression);
 
             final Iterable<IdentifierNode> identifierNodes = tree.getIdentifierNodes();
-            final Set<String> paths = new HashSet<String>();
+            final Set<String> paths = new HashSet<>();
             for (final IdentifierNode node : identifierNodes) {
                 if (RuntimeConfig.getInstance().getBeanMapping() != null) {
                     final String packagePath = RuntimeConfig.getInstance().getBeanMapping().get(node.getName());
@@ -343,11 +342,9 @@ public class VersioningChecker extends AbstractElementChecker {
      */
     private void prepareScriptWarning(final String resourcePath, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
-        if (resourcePath != null) {
-            if (!resourcesNewestVersions.contains(resourcePath)) {
-                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, resourcePath, element,
-                        Messages.getString("VersioningChecker.8"))); //$NON-NLS-1$
-            }
+        if (resourcePath != null && !resourcesNewestVersions.contains(resourcePath)) {
+            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, resourcePath, element,
+                    Messages.getString("VersioningChecker.8"))); //$NON-NLS-1$
         }
     }
 
@@ -360,7 +357,7 @@ public class VersioningChecker extends AbstractElementChecker {
      */
     private void prepareBeanWarning(final String expression, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
-        final String beanReference = findBeanReferenceInExpression(expression, element, issues);
+        final String beanReference = findBeanReferenceInExpression(expression, element);
         if (beanReference != null && !resourcesNewestVersions.contains(beanReference)) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, beanReference, element,
                     String.format(Messages.getString("VersioningChecker.9"), //$NON-NLS-1$
@@ -377,11 +374,11 @@ public class VersioningChecker extends AbstractElementChecker {
      */
     private void prepareDirBasedBeanWarning(final String expression, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
-        String beanReference = findBeanReferenceInExpression(expression, element, issues);
+        String beanReference = findBeanReferenceInExpression(expression, element);
 
         if (beanReference != null) {
             beanReference = beanReference.replace(".", "\\"); //$NON-NLS-1$ //$NON-NLS-2$
-            beanReference = beanReference.substring(0, beanReference.lastIndexOf("\\")); //$NON-NLS-1$
+            beanReference = beanReference.substring(0, beanReference.lastIndexOf('\\')); //$NON-NLS-1$
             beanReference = beanReference.replace("\\", "/");
 
             if (!resourcesNewestVersions.contains(beanReference)) {
@@ -401,14 +398,8 @@ public class VersioningChecker extends AbstractElementChecker {
     private void prepareClassWarning(final String javaReference, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
         if (javaReference != null && !resourcesNewestVersions.contains(javaReference)) {
-            if (element.getBaseElement().getId() == null) {
-                issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
-                        String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
-
-            } else {
-                issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
-                        String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
-            }
+            issues.add(IssueWriter.createIssueWithJavaRef(rule, CriticalityEnum.WARNING, element, javaReference,
+                    String.format(Messages.getString("VersioningChecker.14"), javaReference))); //$NON-NLS-1$
         }
     }
 
@@ -423,7 +414,7 @@ public class VersioningChecker extends AbstractElementChecker {
             final Collection<CheckerIssue> issues) {
         if (javaReference != null) {
             javaReference = javaReference.replace(".", "\\"); //$NON-NLS-1$ //$NON-NLS-2$
-            javaReference = javaReference.substring(0, javaReference.lastIndexOf("\\")); //$NON-NLS-1$
+            javaReference = javaReference.substring(0, javaReference.lastIndexOf('\\')); //$NON-NLS-1$
 
             if (!resourcesNewestVersions.contains(javaReference)) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, javaReference, element,

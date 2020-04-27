@@ -50,9 +50,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.Error;
+import org.camunda.bpm.model.bpmn.instance.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -119,15 +118,15 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                                     errorDef.getErrorCode(), implementation.getValue());
 
                             // Check the directly referenced class
-                        } else if (implementation.getKey().equals(BpmnConstants.CAMUNDA_CLASS)) {
-                            if (!readResourceFile(implementation.getValue(),
-                                    errorDef.getErrorCode())) {
-                                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                        String.format(
-                                                Messages.getString("BoundaryErrorChecker.3"), //$NON-NLS-1$
-                                                CheckName.checkName(bpmnElement), implementation.getValue())));
+                        } else if (implementation.getKey().equals(BpmnConstants.CAMUNDA_CLASS) && !readResourceFile(
+                                implementation.getValue(),
+                                errorDef.getErrorCode())) {
 
-                            }
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    String.format(
+                                            Messages.getString("BoundaryErrorChecker.3"), //$NON-NLS-1$
+                                            CheckName.checkName(bpmnElement), implementation.getValue())));
+
                         }
                     }
 
@@ -217,7 +216,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
         boolean matchingErrorCode = false;
 
-        if (fileName != null && fileName.trim().length() > 0) {
+        if (fileName.trim().length() > 0) {
             try {
                 final DirectoryScanner scanner = new DirectoryScanner();
 

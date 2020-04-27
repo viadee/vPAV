@@ -35,7 +35,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 
 public abstract class AbstractElementChecker implements ElementChecker {
 
-    final protected Rule rule;
+    protected final Rule rule;
 
     public AbstractElementChecker(final Rule rule) {
         this.rule = rule;

@@ -101,17 +101,17 @@ public class BasicNode implements AnalysisElement{
      */
     public void addOperation(final ProcessVariableOperation processVariableOperation) {
         processVariableOperation.setNode(this);
-        final String id = processVariableOperation.getId();
-        this.operations.put(id, processVariableOperation);
+        final String variableOperationId = processVariableOperation.getId();
+        this.operations.put(variableOperationId, processVariableOperation);
         switch (processVariableOperation.getOperation()) {
             case WRITE:
-                defined.put(id, processVariableOperation);
+                defined.put(variableOperationId, processVariableOperation);
                 break;
             case READ:
-                used.put(id, processVariableOperation);
+                used.put(variableOperationId, processVariableOperation);
                 break;
             case DELETE:
-                killed.put(id, processVariableOperation);
+                killed.put(variableOperationId, processVariableOperation);
                 break;
         }
     }
@@ -198,10 +198,6 @@ public class BasicNode implements AnalysisElement{
     @Override
     public LinkedHashMap<String, ProcessVariableOperation> getKilled() {
         return killed;
-    }
-
-    public void setKilled(LinkedHashMap<String, ProcessVariableOperation> killed) {
-        this.killed = killed;
     }
 
     @Override

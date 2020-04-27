@@ -35,7 +35,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 
 public abstract class AbstractModelChecker implements ModelChecker {
 
-    final protected Rule rule;
+    protected final Rule rule;
 
     public AbstractModelChecker(final Rule rule) {
         // TODO what elements should be passed?
