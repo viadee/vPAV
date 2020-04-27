@@ -64,7 +64,7 @@ public class ResourceFileReader {
      * @param chapter   ElementChapter
      * @param fieldType KnownElementFieldType
      * @param scopeId   Scope
-     * @return variables
+     * @param predecessor Predecessor
      */
     public static void readResourceFile(final String fileName,
             final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
@@ -113,7 +113,7 @@ public class ResourceFileReader {
      * @param fileName  class name
      * @param scopeId   Scope
      * @param code      cleaned source code
-     * @return found Process Variables
+     * @param predecessor  Predecessor
      */
     static void searchProcessVariablesInCode(final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, final String fileName,
@@ -121,11 +121,11 @@ public class ResourceFileReader {
 
         BasicNode node = new BasicNode(element, chapter, fieldType);
 
-        searchReadProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code).asMap()
+        searchReadProcessVariablesInCode(scopeId, code).asMap()
                 .forEach((key, value) -> value.forEach(node::addOperation));
-        searchWrittenProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code).asMap()
+        searchWrittenProcessVariablesInCode(scopeId, code).asMap()
                 .forEach((key, value) -> value.forEach(node::addOperation));
-        searchRemovedProcessVariablesInCode(element, chapter, fieldType, fileName, scopeId, code).asMap()
+        searchRemovedProcessVariablesInCode(scopeId, code).asMap()
                 .forEach((key, value) -> value.forEach(node::addOperation));
 
         if (node.getOperations().size() > 0) {
@@ -140,17 +140,12 @@ public class ResourceFileReader {
     /**
      * Search read process variables
      *
-     * @param element   Bpmn element
-     * @param chapter   ElementChapter
-     * @param fieldType KnownElementFieldType
-     * @param fileName  class name
      * @param scopeId   Scope
      * @param code      cleaned source code
      * @return found Process Variables
      */
     public static ListMultimap<String, ProcessVariableOperation> searchReadProcessVariablesInCode(
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String fileName, final String scopeId, final String code) {
+            final String scopeId, final String code) {
 
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -187,17 +182,12 @@ public class ResourceFileReader {
     /**
      * Search written process variables
      *
-     * @param element   Bpmn element
-     * @param chapter   ElementChapter
-     * @param fieldType KnownElementFieldType
-     * @param fileName  Name of file
      * @param scopeId   Scope
      * @param code      cleaned code
      * @return Map of process variable operations
      */
     public static ListMultimap<String, ProcessVariableOperation> searchWrittenProcessVariablesInCode(
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String fileName, final String scopeId, final String code) {
+            final String scopeId, final String code) {
 
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -232,17 +222,12 @@ public class ResourceFileReader {
     /**
      * Search removed process variables
      *
-     * @param element   BpmnElement
-     * @param chapter   ElementChapter
-     * @param fieldType KnownElementFieldType
-     * @param fileName  Name of file
      * @param scopeId   Scope
      * @param code      cleaned source code
      * @return found Process Variables
      */
     public static ListMultimap<String, ProcessVariableOperation> searchRemovedProcessVariablesInCode(
-            final BpmnElement element, final ElementChapter chapter, final KnownElementFieldType fieldType,
-            final String fileName, final String scopeId, final String code) {
+            final String scopeId, final String code) {
 
         final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
 
@@ -275,5 +260,4 @@ public class ResourceFileReader {
 
         return variables;
     }
-
 }

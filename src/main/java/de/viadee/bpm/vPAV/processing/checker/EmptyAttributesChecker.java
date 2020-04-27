@@ -58,12 +58,6 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
         super(rule);
     }
 
-    /**
-     * Check for JavaDelegates in Tasks
-     *
-     * @return issues
-     */
-
     @Override
     public Collection<CheckerIssue> check(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<>();
@@ -151,6 +145,7 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
      * Return the Implementation of an specific element (sendTask, ServiceTask or
      * BusinessRuleTask)
      *
+     * @param element Element
      * @return return_implementation contains implementation
      */
     public HashMap<String, String> getImplementationAttribute(BaseElement element) {

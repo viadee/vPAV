@@ -137,10 +137,10 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * Retrieve process variables from signals and messages
-     *
+     *  Retrieve process variables from signals and messages
      * @param javaReaderStatic Static java reader
-     * @param element          BpmnElement
+     * @param element BpmnElement
+     * @param predecessor Predecessor
      */
     public void getVariablesFromSignalsAndMessagesAndLinks(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -324,10 +324,11 @@ public final class ProcessVariableReader {
     }
 
     /**
-     * Analyze bpmn extension elements for variables
      *
      * @param javaReaderStatic Static java reader
-     * @param element          BpmnElement
+     * @param element  BpmnElement
+     * @param extensionElements Extension elements
+     * @param predecessor Predecessor
      */
     private void searchExtensionsElements(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -351,11 +352,12 @@ public final class ProcessVariableReader {
 
     /**
      * Get process variables from execution listeners
-     *
-     * @param javaReaderStatic  Static java reader
-     * @param element           Current BPMN Element
+     * @param javaReaderStatic Static java reader
+     * @param element Current BPMN Element
      * @param extensionElements Extension elements (e.g. Listeners)
-     * @param scopeId           Scope ID
+     * @param scopeId Scope ID
+     * @param listenerChapter Listener chapter
+     * @param predecessor Predecessor
      */
     private void getVariablesFromExecutionListener(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -416,6 +418,7 @@ public final class ProcessVariableReader {
      * @param element           BpmnElement
      * @param extensionElements ExtensionElements
      * @param scopeId           ScopeId
+     * @param predecessor Predecessor
      */
     private void getVariablesFromTaskListener(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -471,6 +474,7 @@ public final class ProcessVariableReader {
      * @param element           BpmnElement
      * @param extensionElements ExtensionElements
      * @param scopeElementId    ScopeElementId
+     * @param predecessor Predecessor
      */
     private void getVariablesFromFormData(final BpmnElement element,
             final ExtensionElements extensionElements, final String scopeElementId, BasicNode[] predecessor) {
@@ -496,10 +500,11 @@ public final class ProcessVariableReader {
     /**
      * Get process variables from camunda input/output associations (call
      * activities)
-     *
-     * @param element           BpmnElement
-     * @param extensionElements ExtensionElements
-     * @param scopeId           ScopeId
+     * @param javaReaderStatic JavaReaderStatic
+     * @param element  BpmnElement
+     * @param extensionElements  ExtensionElements
+     * @param scopeId ScopeId
+     * @param predecessor Predecessor
      */
     private void searchVariablesInInputOutputExtensions(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -584,8 +589,8 @@ public final class ProcessVariableReader {
 
     /**
      * Get process variables from sequence flow conditions
-     *
      * @param element BpmnElement
+     * @param predecessor Predecessor
      */
     private void searchVariablesFromSequenceFlow(final BpmnElement element,
             BasicNode[] predecessor) {
@@ -628,6 +633,7 @@ public final class ProcessVariableReader {
      *
      * @param javaReaderStatic Static java reader
      * @param element          BpmnElement
+     * @param predecessor Predecessor
      */
     private void getVariablesFromTask(
             final JavaReaderStatic javaReaderStatic,
@@ -784,6 +790,7 @@ public final class ProcessVariableReader {
      *
      * @param javaReaderStatic Static java reader
      * @param element          BpmnElement
+     * @param predecessor  Predecessor
      */
     private void searchVariablesInMultiInstanceTask(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -901,6 +908,7 @@ public final class ProcessVariableReader {
      * @param element    BpmnElement
      * @param chapter    ElementChapter
      * @param scopeId    ScopeId
+     * @param predecessor  Predecessor
      */
     private void getVariablesFromGroovyScript(final String groovyFile,
             final BpmnElement element, final ElementChapter chapter,
@@ -963,6 +971,7 @@ public final class ProcessVariableReader {
      * @param chapter          ElementChapter
      * @param fieldType        KnownElementFieldType
      * @param scopeId          ScopeId
+     * @param predecessor  Predecessor
      */
     private void findVariablesInExpression(
             final JavaReaderStatic javaReaderStatic,
@@ -1008,13 +1017,13 @@ public final class ProcessVariableReader {
             }
             // extract written variables
             ListMultimap<String, ProcessVariableOperation> writeOperations = ResourceFileReader
-                    .searchWrittenProcessVariablesInCode(element, chapter, fieldType, element.getProcessDefinition(),
+                    .searchWrittenProcessVariablesInCode(
                             scopeId, expression);
             writeOperations.asMap().forEach((key, value) -> value.forEach(expNode::addOperation));
 
             // extract deleted variables
             ListMultimap<String, ProcessVariableOperation> deleteOperations = ResourceFileReader
-                    .searchRemovedProcessVariablesInCode(element, chapter, fieldType, element.getProcessDefinition(),
+                    .searchRemovedProcessVariablesInCode(
                             scopeId, expression);
             deleteOperations.asMap().forEach((key, value) -> value.forEach(expNode::addOperation));
         } catch (final ELException e) {
@@ -1041,6 +1050,7 @@ public final class ProcessVariableReader {
      * @param chapter          ElementChapter
      * @param fieldType        KnownElementFieldType
      * @param scopeId          ScopeId
+     * @param predecessor Predecessor
      */
     private void checkMessageAndSignalForExpression(
             final JavaReaderStatic javaReaderStatic, final String expression, final BpmnElement element,
