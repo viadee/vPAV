@@ -124,7 +124,7 @@ public class Runner {
 	 *
 	 * @return Map(String, Map ( String, Rule)) ruleSet
 	 */
-	private RuleSet readConfig() {
+	public RuleSet readConfig() {
 
 		prepareOutputFolder();
 
@@ -132,16 +132,12 @@ public class Runner {
 
 		final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
 		try {
-			if (new File(ConfigConstants.TEST_BASEPATH + ConfigConstants.RULESET).exists()) {
-				RuleSet localRule = new XmlConfigReader().read(ConfigConstants.RULESET);
+			String ruleSetPath = ConfigConstants.getInstance().getBasepath() + ConfigConstants.getInstance().getRuleSetFileName();
+			if (new File(ruleSetPath).exists()) {
+				RuleSet localRule = new XmlConfigReader().read(ConfigConstants.getInstance().getRuleSetFileName());
 
-				if (localRule.getElementRules().containsKey(ConfigConstants.HASPARENTRULESET)
-						&& localRule.getElementRules().get(ConfigConstants.HASPARENTRULESET)
-								.get(ConfigConstants.HASPARENTRULESET).isActive()) {
-					rules = mergeRuleSet(rules, new XmlConfigReader().read(ConfigConstants.RULESETPARENT));
-					rules = mergeRuleSet(rules, localRule);
-				} else {
-					rules = mergeRuleSet(rules, localRule);
+				if (localRule.hasParentRuleSet()) {
+					rules = mergeRuleSet(localRule, new XmlConfigReader().read(ConfigConstants.getInstance().getParentRuleSetFileName()));
 				}
 			} else {
 				rules = new XmlConfigReader().read(ConfigConstants.RULESETDEFAULT);

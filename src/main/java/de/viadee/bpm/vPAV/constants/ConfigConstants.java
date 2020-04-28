@@ -168,6 +168,14 @@ public class ConfigConstants {
 		return properties.getProperty("userVariablesFilePath", ConfigConstants.USER_VARIABLES_FILE);
 	}
 
+	public String getRuleSetFileName() {
+		return properties.getProperty("ruleSet", ConfigConstants.RULESET);
+	}
+
+	public String getParentRuleSetFileName() {
+		return properties.getProperty("parentRuleSet", ConfigConstants.RULESETPARENT);
+	}
+
 	public String getFilePattern() {
 		return properties.getProperty("filepattern", ConfigConstants.CLASS_FILE_PATTERN);
 	}

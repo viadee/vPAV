@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 
 /**
  * Represents an BPMN element
- *
  */
 public class BpmnElement implements AnalysisElement {
 
@@ -102,8 +101,7 @@ public class BpmnElement implements AnalysisElement {
     /**
      * Sets the process variables of this element
      *
-     * @param variables
-     *            Collection of variables
+     * @param variables Collection of variables
      */
     public void setProcessVariables(final ListMultimap<String, ProcessVariableOperation> variables) {
         variables.entries().forEach(e -> addOperation(e.getValue()));
@@ -113,8 +111,7 @@ public class BpmnElement implements AnalysisElement {
     /**
      * Puts process variable operations into correct sets
      *
-     * @param processVariableOperation
-     *            Current operation
+     * @param processVariableOperation Current operation
      */
     private void addOperation(final ProcessVariableOperation processVariableOperation) {
         this.operations.put(processVariableOperation.getId(), processVariableOperation);
@@ -134,8 +131,7 @@ public class BpmnElement implements AnalysisElement {
     /**
      * Removes process variable operations from sets
      *
-     * @param processVariableOperation
-     *            Current operation
+     * @param processVariableOperation Current operation
      */
     private void removeOperationFromSet(final ProcessVariableOperation processVariableOperation) {
         this.operations.remove(processVariableOperation.getId());
@@ -206,6 +202,10 @@ public class BpmnElement implements AnalysisElement {
 
     public ControlFlowGraph getControlFlowGraph() {
         return controlFlowGraph;
+    }
+
+    public void setControlFlowGraph(ControlFlowGraph cfg) {
+        this.controlFlowGraph = cfg;
     }
 
     public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {

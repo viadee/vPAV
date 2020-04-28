@@ -35,14 +35,17 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.testng.Assert;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 
@@ -62,14 +65,15 @@ public class RunnerTest {
 
     /**
      * Test if parent and child ruleset are merged correctly.
+     *
      * @throws ConfigReaderException
      */
     @Test
     public void testMergeRuleSet() throws ConfigReaderException {
         XmlConfigReader reader = new XmlConfigReader();
 
-        RuleSet childRuleSet = reader.read("ruleSetChild.xml");
-        RuleSet parentRuleSet = reader.read("parentRuleSet.xml");
+        RuleSet childRuleSet = reader.read("ruleSets/ruleSetChild.xml");
+        RuleSet parentRuleSet = reader.read("ruleSets/parentRuleSet.xml");
 
         Runner runner = new Runner();
         RuleSet rules = runner.mergeRuleSet(parentRuleSet, childRuleSet);
@@ -79,18 +83,48 @@ public class RunnerTest {
 
         // Check if inheritance worked correctly.
         assertEquals("Number of total element rules is wrong.", 6, elementRules.size());
-        assertEquals("Merging of MessageEventChecker rules did not work.", 2, elementRules.get("MessageEventChecker").size());
-        assertFalse("Child rule of MessageEventChecker was not loaded correctly.", elementRules.get("MessageEventChecker").get("messageFalse").isActive());
-        assertTrue("Parent rule of MessageEventChecker was not loaded correctly.", elementRules.get("MessageEventChecker").get("messageTrue").isActive());
-        assertFalse("OverlapChecker rule was not overridden.", elementRules.get("OverlapChecker").get("OverlapChecker").isActive());
+        assertEquals("Merging of MessageEventChecker rules did not work.", 2,
+                elementRules.get("MessageEventChecker").size());
+        assertFalse("Child rule of MessageEventChecker was not loaded correctly.",
+                elementRules.get("MessageEventChecker").get("messageFalse").isActive());
+        assertTrue("Parent rule of MessageEventChecker was not loaded correctly.",
+                elementRules.get("MessageEventChecker").get("messageTrue").isActive());
+        assertFalse("OverlapChecker rule was not overridden.",
+                elementRules.get("OverlapChecker").get("OverlapChecker").isActive());
         assertEquals("Merging of ExtensionChecker rules did not work.", 2, elementRules.get("ExtensionChecker").size());
-        assertTrue("Child rule of ExtensionChecker was not loaded.", elementRules.get("ExtensionChecker").containsKey("extensionChild"));
-        assertTrue("Parent rule of ExtensionChecker was not loaded.", elementRules.get("ExtensionChecker").containsKey("ExtensionChecker"));
-        assertEquals("TimerExpressionChecker was not correctly merged.", 1, elementRules.get("TimerExpressionChecker").size());
+        assertTrue("Child rule of ExtensionChecker was not loaded.",
+                elementRules.get("ExtensionChecker").containsKey("extensionChild"));
+        assertTrue("Parent rule of ExtensionChecker was not loaded.",
+                elementRules.get("ExtensionChecker").containsKey("ExtensionChecker"));
+        assertEquals("TimerExpressionChecker was not correctly merged.", 1,
+                elementRules.get("TimerExpressionChecker").size());
         assertEquals("NoScriptChecker rule was not loaded from parent.", 1, elementRules.get("NoScriptChecker").size());
-        assertEquals("The two XorConventionCheckers defined in the child were not loaded.", 2, elementRules.get("XorConventionChecker").size());
+        assertEquals("The two XorConventionCheckers defined in the child were not loaded.", 2,
+                elementRules.get("XorConventionChecker").size());
         assertEquals("Number of total model rules is wrong.", 2, modelRules.size());
         assertEquals("Merging of DataFlowChecker rules did not work.", 1, modelRules.get("DataFlowChecker").size());
-        assertEquals("Merging of ProcessVariablesModelChecker rules did not work.", 1, modelRules.get("ProcessVariablesModelChecker").size());
+        assertEquals("Merging of ProcessVariablesModelChecker rules did not work.", 1,
+                modelRules.get("ProcessVariablesModelChecker").size());
+    }
+
+    @Test
+    public void testReadConfig() {
+        RuntimeConfig.getInstance().setTest(true);
+        Properties properties = new Properties();
+        properties.put("ruleSet", "ruleSets/ruleSetChild.xml");
+        properties.put("parentRuleSet", "ruleSets/parentRuleSet.xml");
+        ConfigConstants.getInstance().setProperties(properties);
+
+        Runner runner = new Runner();
+        RuleSet rules = runner.readConfig();
+
+        Map<String, Map<String, Rule>> elementRules = rules.getElementRules();
+        assertFalse("No rules could be read", elementRules.isEmpty());
+        assertEquals("Number of total element rules is wrong.", 6, elementRules.size());
+        assertEquals("Merging of MessageEventChecker rules did not work.", 2,
+                elementRules.get("MessageEventChecker").size());
+        assertTrue("Parent rule of ExtensionChecker was not loaded.",
+                elementRules.get("ExtensionChecker").containsKey("ExtensionChecker"));
+        assertEquals("NoScriptChecker rule was not loaded from parent.", 1, elementRules.get("NoScriptChecker").size());
     }
 }

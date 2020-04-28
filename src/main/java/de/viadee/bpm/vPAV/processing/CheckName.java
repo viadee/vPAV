@@ -33,50 +33,30 @@ package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.w3c.dom.Element;
 
 /**
- *
  * Utility class to check names and return names/ids
- *
  */
 public class CheckName {
 
-	/**
-	 * Checks the name of a BaseElement and returns the identifier if no name is
-	 * specified
-	 *
-	 * @param baseElement
-	 *            Holds the BaseElement of a given BPMN element
-	 * @return identifier
-	 */
-	public static String checkName(final BaseElement baseElement) {
+    private CheckName() {
+    }
 
-		String identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_NAME);
+    /**
+     * Checks the name of a BaseElement and returns the identifier if no name is
+     * specified
+     *
+     * @param baseElement Holds the BaseElement of a given BPMN element
+     * @return identifier
+     */
+    public static String checkName(final BaseElement baseElement) {
 
-		if (identifier == null || identifier.equals("")) {
-			identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_ID);
-		}
+        String identifier = baseElement.getAttributeValue(BpmnConstants.ATTR_NAME);
 
-		return identifier;
-	}
+        if (identifier == null || identifier.equals("")) {
+            identifier = baseElement.getId();
+        }
 
-	/**
-	 * Checks the name of a Timer and returns the identifier if no name is specified
-	 *
-	 * @param element
-	 *            Holds the element of a given timerEvent
-	 * @return identifier
-	 */
-	public static String checkTimer(final Element element) {
-
-		String identifier = element.getAttribute(BpmnConstants.ATTR_NAME);
-
-		if (identifier == null || identifier.equals("")) {
-			identifier = element.getAttribute(BpmnConstants.ATTR_ID);
-		}
-
-		return identifier;
-	}
-
+        return identifier;
+    }
 }

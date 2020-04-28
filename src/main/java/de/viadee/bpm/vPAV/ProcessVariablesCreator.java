@@ -195,7 +195,6 @@ public class ProcessVariablesCreator {
         // find first node that is associated with block and set successor
         for (Node node : nodes) {
             if (ObjectReader.hashBlock(node.getBlock()) == ObjectReader.hashBlock(block)) {
-                // TODO not sure about this
                 node.addPredecessor(predecessor);
                 break;
             }

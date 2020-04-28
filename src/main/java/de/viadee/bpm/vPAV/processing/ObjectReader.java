@@ -149,6 +149,7 @@ public class ObjectReader {
                 return null;
             }
         }
+
         // Process successors e.g. if or loop
         if (block.getSuccs().size() > 0) {
             Node blockNode = null;
@@ -284,6 +285,10 @@ public class ObjectReader {
                 } else {
                     // Method on another object is called
                     targetObj = localObjectVariables.get(targetObjName);
+
+                    if (targetObj == null) {
+                        targetObj = new ObjectVariable();
+                    }
 
                     SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr);
                     method = (resolvedMethod != null) ? resolvedMethod : method;

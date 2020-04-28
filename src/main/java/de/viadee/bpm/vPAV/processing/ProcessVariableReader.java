@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
+import de.viadee.bpm.vPAV.processing.checker.CheckerFactory;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
 import de.viadee.bpm.vPAV.processing.model.data.*;
@@ -60,6 +61,7 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import javax.el.ELException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,6 +69,8 @@ import java.util.regex.Pattern;
  * search process variables for an bpmn element
  */
 public final class ProcessVariableReader {
+
+    private static final Logger LOGGER = Logger.getLogger(ProcessVariableReader.class.getName());
 
     private final Map<String, String> decisionRefToPathMap;
 
@@ -137,10 +141,11 @@ public final class ProcessVariableReader {
     }
 
     /**
-     *  Retrieve process variables from signals and messages
+     * Retrieve process variables from signals and messages
+     *
      * @param javaReaderStatic Static java reader
-     * @param element BpmnElement
-     * @param predecessor Predecessor
+     * @param element          BpmnElement
+     * @param predecessor      Predecessor
      */
     public void getVariablesFromSignalsAndMessagesAndLinks(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -221,7 +226,10 @@ public final class ProcessVariableReader {
         }
 
         for (ModelElementInstance extension : extensionElements.getElements()) {
-            String textContent, name, writeScope, readScope;
+            String textContent;
+            String name;
+            String writeScope;
+            String readScope;
             BpmnModelElementInstance value;
             KnownElementFieldType fieldType;
 
@@ -280,7 +288,7 @@ public final class ProcessVariableReader {
         if (textContent.isEmpty()) {
             IssueWriter.createSingleIssue(this.rule, CriticalityEnum.WARNING, element,
                     element.getProcessDefinition(),
-                    Messages.getString("ProcessVariableReader.1")); //$NON-NLS-1$ );
+                    Messages.getString("ProcessVariableReader.1"));
         } else {
             node.addOperation(
                     new ProcessVariableOperation(name,
@@ -312,7 +320,7 @@ public final class ProcessVariableReader {
                 } else if (value instanceof CamundaScript) {
                     IssueWriter.createSingleIssue(this.rule, CriticalityEnum.ERROR, element,
                             element.getProcessDefinition(),
-                            Messages.getString("ProcessVariableReader.2")); //$NON-NLS-1$ );
+                            Messages.getString("ProcessVariableReader.2"));
                 }
 
             } else {
@@ -324,11 +332,10 @@ public final class ProcessVariableReader {
     }
 
     /**
-     *
-     * @param javaReaderStatic Static java reader
-     * @param element  BpmnElement
+     * @param javaReaderStatic  Static java reader
+     * @param element           BpmnElement
      * @param extensionElements Extension elements
-     * @param predecessor Predecessor
+     * @param predecessor       Predecessor
      */
     private void searchExtensionsElements(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -352,12 +359,13 @@ public final class ProcessVariableReader {
 
     /**
      * Get process variables from execution listeners
-     * @param javaReaderStatic Static java reader
-     * @param element Current BPMN Element
+     *
+     * @param javaReaderStatic  Static java reader
+     * @param element           Current BPMN Element
      * @param extensionElements Extension elements (e.g. Listeners)
-     * @param scopeId Scope ID
-     * @param listenerChapter Listener chapter
-     * @param predecessor Predecessor
+     * @param scopeId           Scope ID
+     * @param listenerChapter   Listener chapter
+     * @param predecessor       Predecessor
      */
     private void getVariablesFromExecutionListener(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -418,7 +426,7 @@ public final class ProcessVariableReader {
      * @param element           BpmnElement
      * @param extensionElements ExtensionElements
      * @param scopeId           ScopeId
-     * @param predecessor Predecessor
+     * @param predecessor       Predecessor
      */
     private void getVariablesFromTaskListener(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -474,7 +482,7 @@ public final class ProcessVariableReader {
      * @param element           BpmnElement
      * @param extensionElements ExtensionElements
      * @param scopeElementId    ScopeElementId
-     * @param predecessor Predecessor
+     * @param predecessor       Predecessor
      */
     private void getVariablesFromFormData(final BpmnElement element,
             final ExtensionElements extensionElements, final String scopeElementId, BasicNode[] predecessor) {
@@ -500,11 +508,12 @@ public final class ProcessVariableReader {
     /**
      * Get process variables from camunda input/output associations (call
      * activities)
-     * @param javaReaderStatic JavaReaderStatic
-     * @param element  BpmnElement
-     * @param extensionElements  ExtensionElements
-     * @param scopeId ScopeId
-     * @param predecessor Predecessor
+     *
+     * @param javaReaderStatic  JavaReaderStatic
+     * @param element           BpmnElement
+     * @param extensionElements ExtensionElements
+     * @param scopeId           ScopeId
+     * @param predecessor       Predecessor
      */
     private void searchVariablesInInputOutputExtensions(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -589,7 +598,8 @@ public final class ProcessVariableReader {
 
     /**
      * Get process variables from sequence flow conditions
-     * @param element BpmnElement
+     *
+     * @param element     BpmnElement
      * @param predecessor Predecessor
      */
     private void searchVariablesFromSequenceFlow(final BpmnElement element,
@@ -633,7 +643,7 @@ public final class ProcessVariableReader {
      *
      * @param javaReaderStatic Static java reader
      * @param element          BpmnElement
-     * @param predecessor Predecessor
+     * @param predecessor      Predecessor
      */
     private void getVariablesFromTask(
             final JavaReaderStatic javaReaderStatic,
@@ -790,7 +800,7 @@ public final class ProcessVariableReader {
      *
      * @param javaReaderStatic Static java reader
      * @param element          BpmnElement
-     * @param predecessor  Predecessor
+     * @param predecessor      Predecessor
      */
     private void searchVariablesInMultiInstanceTask(
             final JavaReaderStatic javaReaderStatic, final BpmnElement element,
@@ -904,11 +914,11 @@ public final class ProcessVariableReader {
     /**
      * Checks an external groovy script for process variables (read/write).
      *
-     * @param groovyFile Groovy File
-     * @param element    BpmnElement
-     * @param chapter    ElementChapter
-     * @param scopeId    ScopeId
-     * @param predecessor  Predecessor
+     * @param groovyFile  Groovy File
+     * @param element     BpmnElement
+     * @param chapter     ElementChapter
+     * @param scopeId     ScopeId
+     * @param predecessor Predecessor
      */
     private void getVariablesFromGroovyScript(final String groovyFile,
             final BpmnElement element, final ElementChapter chapter,
@@ -971,7 +981,7 @@ public final class ProcessVariableReader {
      * @param chapter          ElementChapter
      * @param fieldType        KnownElementFieldType
      * @param scopeId          ScopeId
-     * @param predecessor  Predecessor
+     * @param predecessor      Predecessor
      */
     private void findVariablesInExpression(
             final JavaReaderStatic javaReaderStatic,
@@ -981,10 +991,7 @@ public final class ProcessVariableReader {
         final ControlFlowGraph controlFlowGraph = element.getControlFlowGraph();
 
         // HOTFIX: Catch pattern like below to avoid crash of TreeBuilder
-        // ${dateTime().plusWeeks(1).toDate()}
         final Pattern pattern = Pattern.compile("\\$\\{(\\w)*\\(.*\\)}");
-        // final Pattern pattern = Pattern.compile("\\$\\{(\\w*)\\.(\\w*\\(.*\\))*\\}|\\$\\{(\\w*\\(.*\\))*\\}");
-
         Matcher matcher = pattern.matcher(expression);
 
         if (matcher.matches()) {
@@ -1050,7 +1057,7 @@ public final class ProcessVariableReader {
      * @param chapter          ElementChapter
      * @param fieldType        KnownElementFieldType
      * @param scopeId          ScopeId
-     * @param predecessor Predecessor
+     * @param predecessor      Predecessor
      */
     private void checkMessageAndSignalForExpression(
             final JavaReaderStatic javaReaderStatic, final String expression, final BpmnElement element,
@@ -1073,8 +1080,7 @@ public final class ProcessVariableReader {
         }
     }
 
-    // TODO add test
-    private void parseJuelExpression(final BpmnElement element, final ElementChapter elementChapter,
+    public void parseJuelExpression(final BpmnElement element, final ElementChapter elementChapter,
             final KnownElementFieldType fieldType,
             String expression, final String scopeId, BasicNode[] predecessor) {
         ExpressionNode expNode = new ExpressionNode(element, expression, elementChapter, fieldType);
@@ -1104,6 +1110,8 @@ public final class ProcessVariableReader {
                         expNode.addOperation(new ProcessVariableOperation(varName,
                                 VariableOperation.DELETE, scopeId));
                         break;
+                    default:
+                        LOGGER.warning(String.format("Method %s of execution is not supported.", property.toString()));
                 }
             }
         } else {

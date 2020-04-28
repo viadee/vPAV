@@ -68,7 +68,7 @@ public class BpmnModelDispatcherTest {
 	public void testCreateCheckerInstances() throws ConfigReaderException {
 		// Load rule set.
 		XmlConfigReader reader = new XmlConfigReader();
-		RuleSet rules = reader.read("ruleSetChild.xml");
+		RuleSet rules = reader.read("ruleSets/ruleSetChild.xml");
 
 		FileScanner fileScanner = new FileScanner(rules);
 		BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();

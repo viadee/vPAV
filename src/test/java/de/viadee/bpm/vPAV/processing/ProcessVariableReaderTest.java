@@ -40,9 +40,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -59,6 +57,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ProcessVariableReaderTest {
 
@@ -193,7 +194,7 @@ public class ProcessVariableReaderTest {
 
     @Test
     public void testRecogniseMessages() {
-        ProcessVariableReader reader = new ProcessVariableReader( null, null);
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
 
         // Test if message is recognized in catch event
         BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent("MyStartEvent").message("Message-${test}")
@@ -287,4 +288,26 @@ public class ProcessVariableReaderTest {
         Assert.assertEquals("myHardcodedVariable should raise UR anomaly.", "myHardcodedVariable",
                 iterator.next().getName());
     }
+
+    @Test
+    public void testParseJuelExpression() {
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
+        BaseElement baseElement = mock(BaseElement.class);
+        when(baseElement.getId()).thenReturn("ServiceTask");
+        BpmnElement element = new BpmnElement(null, baseElement, new ControlFlowGraph(), new FlowAnalysis());
+
+        // Test read
+        String expression = "${readVariable}";
+        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+                "ScopeId",
+                new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
+        Assert.assertEquals(VariableOperation.READ,
+                element.getControlFlowGraph().getOperations().values().iterator().next().getOperation());
+
+        // Test write
+        element.setControlFlowGraph(new ControlFlowGraph());
+        expression = "${}";
+    }
+
 }
