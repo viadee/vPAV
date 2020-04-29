@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -49,6 +50,7 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
 import org.junit.*;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -73,6 +75,9 @@ public class CallActivityTest {
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     @AfterClass
@@ -189,7 +194,6 @@ public class CallActivityTest {
 
     @Test
     public void testEmbeddedWithDelegateVariableMapping() {
-        //TODO test also delegate expression und zwar so, dass gleiches ergebnis, damit vereinfachung
         // Usage of camunda:in and camunda:out
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
@@ -215,9 +219,9 @@ public class CallActivityTest {
             if (i == 1) {
                 // Test 2: Use expression instead of class
                 callActivity.setCamundaVariableMappingClass(null);
-                callActivity.setCamundaVariableMappingDelegateExpression("${de.viadee.bpm.vPAV.delegates.DelegatedVarMapping}");
+                callActivity.setCamundaVariableMappingDelegateExpression("${delegatedVarMapping}");
                 final Map<String, String> beanMapping = new HashMap<>();
-                beanMapping.put("DelegatedVarMapping", "de/viadee/bpm/vPAV/delegates/DelegatedVarMapping.class");
+                beanMapping.put("delegatedVarMapping", "de/viadee/bpm/vPAV/delegates/DelegatedVarMapping.class");
                 RuntimeConfig.getInstance().setBeanMapping(beanMapping);
             }
 

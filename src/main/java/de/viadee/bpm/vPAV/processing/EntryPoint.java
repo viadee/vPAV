@@ -31,6 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EntryPoint {
 
 	private String className;

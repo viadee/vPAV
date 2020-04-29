@@ -62,6 +62,8 @@ public class CamundaMethodServices {
     
     public static final String CORRELATE_MESSAGE = "createMessageCorrelation";
 
+    public static final String EXECUTION_OBJECT = "execution";
+
     public static final RefType DELEGATE_EXECUTION_TYPE = RefType.v(DELEGATE);
 
     public static final RefType ACTIVITY_EXECUTION_TYPE = RefType.v(ACTIVITY_EXECUTION);

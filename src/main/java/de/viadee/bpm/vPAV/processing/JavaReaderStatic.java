@@ -53,10 +53,6 @@ public class JavaReaderStatic {
 
     private static final Logger LOGGER = Logger.getLogger(JavaReaderStatic.class.getName());
 
-    public JavaReaderStatic() {
-        this.setupSoot();
-    }
-
     /**
      * Checks a java delegate for process variable references with static code
      * analysis (read/write/delete).
@@ -66,7 +62,7 @@ public class JavaReaderStatic {
      * @param chapter     ElementChapter
      * @param fieldType   KnownElementFieldType
      */
-    void getVariablesFromJavaDelegate(final String classFile, final BpmnElement element, final ElementChapter chapter,
+    static void getVariablesFromJavaDelegate(final String classFile, final BpmnElement element, final ElementChapter chapter,
             final KnownElementFieldType fieldType, BasicNode[] predecessor) {
 
         if (classFile != null && classFile.trim().length() > 0) {
@@ -100,17 +96,17 @@ public class JavaReaderStatic {
     }
 
     /**
-     * Retrieves variables from a class
-     *
-     * @param className        Name of the class that potentially declares process variables
-     * @param element          BpmnElement
-     * @param entryPoint       Current entry point
-     * @return Map of process variable operations
+     *  Retrieves variables from a class
+     * @param className Name of the class that potentially declares process variables
+     * @param element  BpmnElement
+     * @param chapter Element chapter
+     * @param fieldType Known element field type
+     * @param entryPoint  Current entry point
+     * @param predecessor Predecessor
      */
-    ListMultimap<String, ProcessVariableOperation> getVariablesFromClass(String className, final BpmnElement element,
+    static void getVariablesFromClass(String className, final BpmnElement element,
+            ElementChapter chapter, KnownElementFieldType fieldType,
             final EntryPoint entryPoint, BasicNode[] predecessor) {
-
-        final ListMultimap<String, ProcessVariableOperation> initialOperations = ArrayListMultimap.create();
 
         if (className != null && className.trim().length() > 0) {
             className = ProcessVariablesScanner.cleanString(className, true);
@@ -123,17 +119,16 @@ public class JavaReaderStatic {
                     if (method.getName().equals(entryPoint.getMethodName())) {
                         Block block = SootResolverSimplified.getBlockFromMethod(method);
                         ProcessVariablesCreator pvc = new ProcessVariablesCreator(element,
-                                ElementChapter.Implementation, KnownElementFieldType.Class,
+                                chapter, fieldType,
                                 predecessor);
                         pvc.startBlockProcessing(block, new ArrayList<>());
                     }
                 }
             }
         }
-        return initialOperations;
     }
 
-    private void classFetcherNew(final String className,
+    private static void classFetcherNew(final String className,
             final String methodName, final BpmnElement element,
             final ElementChapter chapter, final KnownElementFieldType fieldType, BasicNode[] predecessor) {
 
@@ -147,7 +142,7 @@ public class JavaReaderStatic {
         }
     }
 
-    public void setupSoot() {
+    public static void setupSoot() {
         final String sootPath = FileScanner.getSootPath();
         System.setProperty("soot.class.path", sootPath);
         Options.v().set_whole_program(true);

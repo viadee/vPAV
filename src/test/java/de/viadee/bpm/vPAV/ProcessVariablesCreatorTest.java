@@ -57,7 +57,7 @@ public class ProcessVariablesCreatorTest {
         RuntimeConfig.getInstance().setTest(true);
         // TODO rework the whole soot setup + filescanner because static and runtime is mixed up
         FileScanner.setupSootClassPaths(new LinkedList<>());
-        new JavaReaderStatic().setupSoot();
+        JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
     }
 

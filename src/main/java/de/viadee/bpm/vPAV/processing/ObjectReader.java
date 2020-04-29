@@ -213,17 +213,29 @@ public class ObjectReader {
         // Resolve method parameters
         if (identityStmt.getRightOp() instanceof ParameterRef) {
             int idx = ((ParameterRef) identityStmt.getRightOp()).getIndex();
-            if (args.get(idx).getType().equals(RefType.v("java.lang.String"))) {
-                StringVariable var = new StringVariable((String) argValues.get(idx));
+            Type type = identityStmt.getRightOp().getType();
+            if (type.equals(RefType.v("java.lang.String"))) {
+                StringVariable var;
+                if (argValues == null || argValues.size() < idx + 1) {
+                    var = new StringVariable("(unknown)");
+                } else {
+                    var = new StringVariable((String) argValues.get(idx));
+                }
                 localStringVariables.put(((JimpleLocal) identityStmt.getLeftOp()).getName(), var);
             }
             // Camunda objects which access process variables are not resolved
-            else if (!args.get(idx).getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE) &&
-                    !args.get(idx).getType().equals(CamundaMethodServices.MAP_VARIABLES_TYPE) &&
-                    !args.get(idx).getType().equals(CamundaMethodServices.VARIABLE_SCOPE_TYPE)
+            else if (!type.equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE) &&
+                    !type.equals(CamundaMethodServices.MAP_VARIABLES_TYPE) &&
+                    !type.equals(CamundaMethodServices.VARIABLE_SCOPE_TYPE)
             ) {
+                ObjectVariable var;
+                if (argValues == null || argValues.size() < idx + 1) {
+                    var = new ObjectVariable();
+                } else {
+                    var = (ObjectVariable) argValues.get(idx);
+                }
                 localObjectVariables
-                        .put(((JimpleLocal) identityStmt.getLeftOp()).getName(), (ObjectVariable) argValues.get(idx));
+                        .put(((JimpleLocal) identityStmt.getLeftOp()).getName(), var);
             }
         }
     }

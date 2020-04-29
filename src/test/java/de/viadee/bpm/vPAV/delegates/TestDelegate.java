@@ -40,4 +40,9 @@ public class TestDelegate implements org.camunda.bpm.engine.delegate.JavaDelegat
         execution.setVariable("isExternalProcess", true);
         execution.getVariable("numberEntities");
     }
+
+    public void myMethod(DelegateExecution execution, String variable) {
+        execution.getVariable(variable);
+        execution.setVariable("writeVariable", true);
+    }
 }

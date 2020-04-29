@@ -51,6 +51,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -76,6 +77,12 @@ public class ProcessVariableReaderTest {
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().retrieveLocale();
+        Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("myBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     @AfterClass
@@ -176,7 +183,7 @@ public class ProcessVariableReaderTest {
         StartEvent startEvent = modelInstance.getModelElementById("MyStartEvent");
         BpmnElement element = new BpmnElement("", startEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test", element.getControlFlowGraph().getOperations().values().iterator().next().getName());
 
@@ -186,7 +193,7 @@ public class ProcessVariableReaderTest {
         IntermediateThrowEvent endEvent = modelInstance.getModelElementById("MyEndEvent");
         element = new BpmnElement("", endEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test1",
                 element.getControlFlowGraph().getOperations().values().iterator().next().getName());
@@ -202,7 +209,7 @@ public class ProcessVariableReaderTest {
         StartEvent startEvent = modelInstance.getModelElementById("MyStartEvent");
         BpmnElement element = new BpmnElement("", startEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test", element.getControlFlowGraph().getOperations().values().iterator().next().getName());
 
@@ -213,7 +220,7 @@ public class ProcessVariableReaderTest {
         IntermediateThrowEvent endEvent = modelInstance.getModelElementById("MyEndEvent");
         element = new BpmnElement("", endEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test1",
                 element.getControlFlowGraph().getOperations().values().iterator().next().getName());
@@ -234,7 +241,7 @@ public class ProcessVariableReaderTest {
 
         BpmnElement element = new BpmnElement("", throwEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test", element.getControlFlowGraph().getOperations().values().iterator().next().getName());
 
@@ -247,7 +254,7 @@ public class ProcessVariableReaderTest {
 
         element = new BpmnElement("", catchEvent, new ControlFlowGraph(),
                 new FlowAnalysis());
-        reader.getVariablesFromSignalsAndMessagesAndLinks(null, element, new BasicNode[1]);
+        reader.getVariablesFromSignalsAndMessagesAndLinks(element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
         Assert.assertEquals("test1",
                 element.getControlFlowGraph().getOperations().values().iterator().next().getName());
@@ -302,12 +309,73 @@ public class ProcessVariableReaderTest {
                 "ScopeId",
                 new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
-        Assert.assertEquals(VariableOperation.READ,
-                element.getControlFlowGraph().getOperations().values().iterator().next().getOperation());
+        assertProcessVariableOperation(element.getControlFlowGraph().getOperations().values().iterator().next(),
+                "readVariable", VariableOperation.READ);
 
         // Test write
         element.setControlFlowGraph(new ControlFlowGraph());
-        expression = "${}";
+        expression = "${execution.setVariable('writeVariable', 'newValue')}";
+        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+                "ScopeId",
+                new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
+        assertProcessVariableOperation(element.getControlFlowGraph().getOperations().values().iterator().next(),
+                "writeVariable", VariableOperation.WRITE);
+
+        // Test calculation
+        element.setControlFlowGraph(new ControlFlowGraph());
+        expression = "${(varOne + arr[idx] + arr[2] + varTwo) / 3}";
+        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+                "ScopeId",
+                new BasicNode[1]);
+        Assert.assertEquals(5, element.getControlFlowGraph().getOperations().size());
+        Iterator<ProcessVariableOperation> operations = element.getControlFlowGraph().getOperations().values()
+                .iterator();
+        assertProcessVariableOperation(operations.next(), "idx", VariableOperation.READ);
+        assertProcessVariableOperation(operations.next(), "arr", VariableOperation.READ);
+        assertProcessVariableOperation(operations.next(), "arr", VariableOperation.READ);
+        assertProcessVariableOperation(operations.next(), "varTwo", VariableOperation.READ);
+        assertProcessVariableOperation(operations.next(), "varOne", VariableOperation.READ);
+
+        // Test bean method
+        element.setControlFlowGraph(new ControlFlowGraph());
+        expression = "${myBean.myMethod(execution, myVariable)}";
+        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+                "ScopeId",
+                new BasicNode[1]);
+        Assert.assertEquals(3, element.getControlFlowGraph().getOperations().size());
+        operations = element.getControlFlowGraph().getOperations().values()
+                .iterator();
+        assertProcessVariableOperation(operations.next(), "writeVariable", VariableOperation.WRITE);
+        assertProcessVariableOperation(operations.next(), "myVariable", VariableOperation.READ);
+        assertProcessVariableOperation(operations.next(), "(unknown)", VariableOperation.READ);
+
+        // Test bean execute
+        element.setControlFlowGraph(new ControlFlowGraph());
+        expression = "${myBean}";
+        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+                "ScopeId",
+                new BasicNode[1]);
+        Assert.assertEquals(2, element.getControlFlowGraph().getOperations().size());
+        operations = element.getControlFlowGraph().getOperations().values()
+                .iterator();
+        assertProcessVariableOperation(operations.next(), "numberEntities", VariableOperation.READ);
+        assertProcessVariableOperation(operations.next(), "isExternalProcess", VariableOperation.WRITE);
+
+        // Test camunda spin function
+        // REMEMBER multiple method calls are not (yet) supported
+        element.setControlFlowGraph(new ControlFlowGraph());
+        expression = "${XML(xml).attr('test').value()}";
+        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+                "ScopeId",
+                new BasicNode[1]);
+        Assert.assertEquals(0, element.getControlFlowGraph().getOperations().size());
+    }
+
+    private void assertProcessVariableOperation(ProcessVariableOperation pvo, String varName,
+            VariableOperation operation) {
+        Assert.assertEquals(operation, pvo.getOperation());
+        Assert.assertEquals(varName, pvo.getName());
     }
 
 }

@@ -253,6 +253,7 @@ public class ElementGraphBuilder {
                 if (ep.getMessageName().equals(messageName)) {
                     // Check InitialVariableOperations
                     new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
+                            ElementChapter.Implementation, KnownElementFieldType.Class,
                             ep, predecessor);
                 }
             }
@@ -270,6 +271,7 @@ public class ElementGraphBuilder {
                 if (ep.getMessageName().equals(messageName)) {
                     // Check InitialVariableOperations
                     new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
+                            ElementChapter.Implementation, KnownElementFieldType.Class,
                             ep, predecessor);
                 }
             }

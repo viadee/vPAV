@@ -124,7 +124,7 @@ public class JavaReaderStaticTest {
 
         new JavaReaderStatic()
                 .getVariablesFromClass("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables",
-                        element, entry, new BasicNode[1]);
+                        element, ElementChapter.Implementation, KnownElementFieldType.Class, entry, new BasicNode[1]);
 
         assertEquals(3, element.getControlFlowGraph().getOperations().size());
         HashSet<String> variables = element.getControlFlowGraph().getVariablesOfOperations();
