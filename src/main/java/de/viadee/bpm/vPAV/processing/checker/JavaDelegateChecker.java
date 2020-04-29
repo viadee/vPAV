@@ -106,7 +106,6 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         if (bpmnElement instanceof IntermediateThrowEvent
                 || bpmnElement instanceof EndEvent) {
-            // TODO test this path
             final Map.Entry<String, String> tempImp = BpmnScanner.getEventImplementation(bpmnElement);
             if (tempImp != null) { //$NON-NLS-1$
                 HashMap<String, String> tempMap = new HashMap<>();
@@ -199,8 +198,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         // check implementations of BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT and
         // BPMN_ELEMENT_END_EVENT
-        if (bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT)
-                || bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)) {
+        if (bpmnElement instanceof  IntermediateThrowEvent
+                || bpmnElement instanceof EndEvent) {
 
             if (implementationAttr != null && implementationAttr.getKey().equals(BpmnConstants.IMPLEMENTATION)) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,

@@ -179,8 +179,7 @@ public class NoScriptCheckerTest {
         checker.check(elementGate);
 
         Collection<CheckerIssue> issues = IssueService.getInstance().getIssues();
-        // TODO aussagekraetigere namen (task mit id) in message (hier zwei gleiche messages obwohl unterschiedliche tasks)
-        if (issues.size() != 2) {
+        if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
             Assert.assertEquals("Task '" + CheckName.checkName(baseElementGate) + "' with 'executionListener' script",

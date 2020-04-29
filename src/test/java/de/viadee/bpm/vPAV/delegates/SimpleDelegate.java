@@ -36,7 +36,6 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 
 public class SimpleDelegate implements JavaDelegate {
 
-    // TODO private String var1 = "something" isnt resolved yet
     private String var1;
 
     @Override

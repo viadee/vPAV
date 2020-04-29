@@ -174,8 +174,6 @@ public class ProcessVariableOperation {
     }
 
     public void initializeOperation(final BpmnElement element) {
-        // TODO when and where is this used?
-        //  this.element = element;
         element.getFlowAnalysis().incrementOperationCounter();
         this.flowOperationIndex = element.getFlowAnalysis().getOperationCounter();
     }

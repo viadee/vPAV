@@ -70,7 +70,6 @@ public class ProcessVariablesScanner {
     public void scanProcessVariables() {
         for (final String filePath : javaResources) {
             if (!filePath.startsWith("javax")) {
-                // TODO: Use ids properly to resolve process variable manipulation
                 final Set<String> messageIds = new HashSet<>();
                 final Set<String> processIds = new HashSet<>();
                 retrieveMethod(filePath, messageIds, processIds);

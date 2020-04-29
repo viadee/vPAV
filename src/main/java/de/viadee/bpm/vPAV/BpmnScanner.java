@@ -93,6 +93,7 @@ public class BpmnScanner {
     /**
      * Return the Implementation of an specific element (endEvent and/or
      * intermediateThrowEvent)
+     *
      * @param element Element
      * @return return_implementation contains implementation
      */
@@ -141,7 +142,6 @@ public class BpmnScanner {
     }
 
     /**
-     *
      * @param element Element
      * @param extType Type of Listener
      * @return value of Listener
@@ -167,6 +167,7 @@ public class BpmnScanner {
 
     /**
      * Check if model has an scriptTag
+     *
      * @param element Element
      * @return scriptPlaces contains script type
      */
@@ -177,10 +178,22 @@ public class BpmnScanner {
         Collection<CamundaScript> scripts = element.getModelInstance().getModelElementsByType(CamundaScript.class);
 
         for (CamundaScript script : scripts) {
-            returnScriptType.add(script.getParentElement().getElementType().getTypeName());
+            if (isChildOf(element, script)) {
+                returnScriptType.add(script.getParentElement().getElementType().getTypeName());
+            }
         }
 
         return returnScriptType;
+    }
+
+    private static boolean isChildOf(BaseElement element, ModelElementInstance child) {
+        if (child == null || child.getParentElement() == null) {
+            return false;
+        }
+        if (child.getParentElement().equals(element)) {
+            return true;
+        }
+        return isChildOf(element, child.getParentElement());
     }
 
     /**

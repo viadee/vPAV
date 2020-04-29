@@ -88,7 +88,6 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                 Activity activity = boundaryEvent.getAttachedTo();
                 Map.Entry<String, String> implementation = BpmnScanner.getImplementation(activity);
 
-                // TODO add test case for this path
                 // No error has been referenced
                 if (errorEventDefinition.getError() == null) {
                     final String errorCode = errorEventDefinition.getCamundaErrorCodeVariable();

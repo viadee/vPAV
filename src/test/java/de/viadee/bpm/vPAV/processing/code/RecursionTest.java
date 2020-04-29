@@ -96,7 +96,5 @@ public class RecursionTest {
         assertEquals("Else node should have two predecessors due to recursion",2, taskDelegateElse.getPredecessors().size());
         assertEquals("If node should have two predecessors due to recursion", 2, taskDelegateIf.getPredecessors().size());
         assertEquals("If node should be a predecessor of itself", taskDelegateIf, taskDelegateIf.getPredecessors().get(1));
-
-        // TODO check anomalies but at the moment we cannot recognize them correctly if the graph includes a loop
     }
 }

@@ -60,26 +60,11 @@ public class SootResolverSimplifiedTest {
     }
 
     @Test
-    public void testGetBlockFromClass() {
-        // TODO
-    }
-
-    @Test
-    public void testGetSootMethod() {
-        // TODO
-    }
-
-    @Test
     public void testGetBlockFromMethod() {
         SootClass sc = Scene.v().forceResolve("de.viadee.bpm.vPAV.processing.SimpleObject", SootClass.SIGNATURES);
         SootMethod method = sc.getMethodByName("method");
         Block block = SootResolverSimplified.getBlockFromMethod(method);
         Assert.assertEquals(3, block.getBody().getUnits().size());
-    }
-
-    @Test
-    public void testSetupSootClass() {
-        // TODO
     }
 
     @Test

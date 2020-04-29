@@ -50,7 +50,6 @@ import org.camunda.bpm.model.bpmn.instance.*;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
@@ -181,7 +180,7 @@ public class ElementGraphBuilder {
                     }
                 }
 
-                createVariablesOfFlowElement(scanner, graph, node, fileScanner, userVariables.get(element.getId()));
+                createVariablesOfFlowElement(scanner, graph, node, userVariables.get(element.getId()));
 
                 // mention element
                 elementMap.put(element.getId(), node);
@@ -212,10 +211,9 @@ public class ElementGraphBuilder {
      *
      * @param scanner     OuterProcessVariablesScanner
      * @param graph       Graph
-     * @param fileScanner FileScanner
      */
     private void createVariablesOfFlowElement(final ProcessVariablesScanner scanner, final Graph graph,
-            final BpmnElement bpmnElement, final FileScanner fileScanner,
+            final BpmnElement bpmnElement,
             final ListMultimap<String, ProcessVariableOperation> userVariables) {
         final FlowElement element = (FlowElement) bpmnElement.getBaseElement();
         BasicNode[] predecessor = new BasicNode[1];

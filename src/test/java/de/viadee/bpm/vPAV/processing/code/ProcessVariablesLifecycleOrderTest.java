@@ -78,7 +78,6 @@ public class ProcessVariablesLifecycleOrderTest {
         // and with 1 Multi Instance Task (Loop Cardinality & Completion Condition expression)
         // and with 1 Receive Task (Message)
         // and with 1 Intermediate Throw Event (Link)
-        // TODO add variables in extension elements and sequence flows
 
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
@@ -177,9 +176,6 @@ public class ProcessVariablesLifecycleOrderTest {
     @Test
     public void testProcessVariablesLifecycleWithCallActivity() {
         // Test with In/Out Variable Injection, Input/Output Parameters and Start/End Listeners
-        // TODO add all other things like Delegate Variable Mapping
-        // TODO Add delegate
-
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);

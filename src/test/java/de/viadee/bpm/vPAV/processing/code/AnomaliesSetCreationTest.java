@@ -178,7 +178,6 @@ public class AnomaliesSetCreationTest {
         Anomaly anomaly1 = anomalies.iterator().next().getAnomaly();
         Anomaly anomaly2 = anomalies.iterator().next().getAnomaly();
         Anomaly anomaly3 = anomalies.iterator().next().getAnomaly();
-        // TODO change this test to two anomalies as soon as EU is realized
         assertEquals("Expected 3 anomalies but found " + anomalies.size(), 3, anomalies.size());
         assertEquals("Expected a UU anomaly but found " + anomaly1, Anomaly.UU, anomaly1);
         assertEquals("Expected a UU anomaly but found " + anomaly2, Anomaly.UU, anomaly2);

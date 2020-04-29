@@ -40,6 +40,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.Assert;
 import org.junit.Before;
@@ -373,6 +374,25 @@ public class JavaDelegateCheckerTest {
             Assert.assertEquals(
                     "Class 'DelegateWithInterfaceActivityBehavior' in 'camunda:class' implements the interface ActivityBehavior, which is not a very good practice and should be avoided as much as possible",
                     issues.iterator().next().getMessage());
+        }
+    }
+
+    @Test
+    public void testImplementationInMessageEvent() {
+        BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent().intermediateThrowEvent("MyThrowEvent")
+                .messageEventDefinition("MyMessageEventDefinition").messageEventDefinitionDone().endEvent().done();
+        MessageEventDefinition eventDefinition = modelInstance.getModelElementById("MyMessageEventDefinition");
+        eventDefinition.setCamundaClass("de.viadee.bpm.vPAV.delegates.TestDelegate");
+
+        final BpmnElement element = new BpmnElement(null, modelInstance.getModelElementById("MyThrowEvent"),
+                new ControlFlowGraph(),
+                new FlowAnalysis());
+
+        checker = new JavaDelegateChecker(rule);
+        checker.check(element);
+
+        if (IssueService.getInstance().getIssues().size() > 0) {
+            Assert.fail("correct java delegate generates an issue");
         }
     }
 

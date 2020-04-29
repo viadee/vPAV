@@ -89,7 +89,6 @@ public class XorConventionChecker extends AbstractElementChecker {
                         "xor naming convention checker must have one element convention!"); //$NON-NLS-1$
             }
 
-            // TODO: dont use indices
             final String patternString = elementConventions.get(0).getPattern().trim();
             final String taskName = bpmnElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME);
             if (taskName != null && taskName.trim().length() > 0) {
@@ -110,7 +109,6 @@ public class XorConventionChecker extends AbstractElementChecker {
                         Messages.getString("XorConventionChecker.8"))); //$NON-NLS-1$
             }
 
-            // TODO: dont use indices
             final Collection<SequenceFlow> edges = ((ExclusiveGateway) bpmnElement).getOutgoing();
             final String patternStringEdge = elementConventions.get(1).getPattern().trim();
 

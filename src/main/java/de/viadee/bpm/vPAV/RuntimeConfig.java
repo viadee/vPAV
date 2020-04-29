@@ -62,8 +62,7 @@ public class RuntimeConfig {
 
     private ResourceBundle resourceBundle;
 
-    private boolean test = false; // TODO: Replace with parameterized method calls, to improve separation of test
-    // and production code
+    private boolean test = false;
 
     private static Logger LOGGER = Logger.getLogger(RuntimeConfig.class.getName());
 

@@ -260,7 +260,6 @@ public final class ProcessVariableReader {
             }
         }
         if (node.getOperations().size() > 0) {
-            // TODO is this still necessary with predecessor (I don´t think so...)
             predecessor[0] = addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
         }
     }
@@ -785,7 +784,6 @@ public final class ProcessVariableReader {
         final ModelElementInstance loopCharacteristics = baseElement
                 .getUniqueChildElementByType(LoopCharacteristics.class);
         if (loopCharacteristics != null) {
-            // TODO I dont know if the known element field type does really fit
             BasicNode node = new BasicNode(element,
                     ElementChapter.MultiInstance, KnownElementFieldType.CollectionElement);
 
