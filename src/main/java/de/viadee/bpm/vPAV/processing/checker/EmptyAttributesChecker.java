@@ -89,30 +89,32 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
 
         if (bpmnElement instanceof TimerEventDefinition) {
             TimerEventDefinition timer = (TimerEventDefinition) bpmnElement;
-            if (timer.getTimeDate() != null) {
-                if (timer.getTimeDate().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
-                        == null) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
-                            Messages.getString("TimerExpressionChecker.14")));
-                }
-            }
-            if (timer.getTimeDuration() != null) {
-                if (timer.getTimeDuration().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
-                        == null) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
-                            Messages.getString("TimerExpressionChecker.14")));
-                }
-            }
-            if (timer.getTimeCycle() != null) {
-                if (timer.getTimeCycle().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
-                        == null) {
-                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
-                            Messages.getString("TimerExpressionChecker.14")));
-                }
-            }
-
+            checkTimeEventDefinition(timer, element, issues);
         }
         return issues;
+    }
+
+    private void checkTimeEventDefinition(TimerEventDefinition timer, BpmnElement element,
+            Collection<CheckerIssue> issues) {
+        if (timer.getTimeDate() != null
+                && timer.getTimeDate().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                == null) {
+            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                    Messages.getString("EmptyAttributesChecker.5")));
+        }
+        if (timer.getTimeDuration() != null &&
+                timer.getTimeDuration().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                        == null) {
+            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                    Messages.getString("EmptyAttributesChecker.6")));
+
+        }
+        if (timer.getTimeCycle() != null
+                && timer.getTimeCycle().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                == null) {
+            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                    Messages.getString("EmptyAttributesChecker.7")));
+        }
     }
 
     private Collection<CheckerIssue> generateIssue(Rule rule, BpmnElement element, BaseElement bpmnElement,
@@ -121,19 +123,19 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
         String message = "";
         switch (entry.getKey()) {
             case BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF:
-                message = Messages.getString("DmnTaskChecker.0");
+                message = Messages.getString("EmptyAttributesChecker.0");
                 break;
             case BpmnModelConstants.CAMUNDA_ATTRIBUTE_CLASS:
-                message = Messages.getString("JavaDelegateChecker.5");
+                message = Messages.getString("EmptyAttributesChecker.1");
                 break;
             case BpmnModelConstants.CAMUNDA_ATTRIBUTE_DELEGATE_EXPRESSION:
-                message = Messages.getString("JavaDelegateChecker.6");
+                message = Messages.getString("EmptyAttributesChecker.2");
                 break;
             case BpmnModelConstants.CAMUNDA_ATTRIBUTE_EXPRESSION:
-                message = Messages.getString("JavaDelegateChecker.8");
+                message = Messages.getString("EmptyAttributesChecker.3");
                 break;
             case BpmnModelConstants.BPMN_ATTRIBUTE_IMPLEMENTATION:
-                message = Messages.getString("JavaDelegateChecker.9");
+                message = Messages.getString("EmptyAttributesChecker.4");
                 break;
         }
         return IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,

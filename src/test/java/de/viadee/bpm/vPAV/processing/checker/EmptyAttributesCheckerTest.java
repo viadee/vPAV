@@ -151,7 +151,6 @@ public class EmptyAttributesCheckerTest {
             checker.check(element);
         }
 
-        // TODO update error message text
         if (IssueService.getInstance().getIssues().size() != 1) {
             Assert.fail("model should generate one issue");
         }
