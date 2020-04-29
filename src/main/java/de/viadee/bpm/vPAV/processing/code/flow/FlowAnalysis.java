@@ -35,10 +35,7 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
-import org.camunda.bpm.model.bpmn.instance.EndEvent;
-import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
-import org.camunda.bpm.model.bpmn.instance.StartEvent;
+import org.camunda.bpm.model.bpmn.instance.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -424,7 +421,6 @@ public class FlowAnalysis {
                 final LinkedHashMap<String, ProcessVariableOperation> inUsedTemp = new LinkedHashMap<>(
                         analysisElement.getInUsed());
                 final LinkedHashMap<String, ProcessVariableOperation> internalUnion = new LinkedHashMap<>();
-                // TODO hier nach external gucken
                 internalUnion.putAll(analysisElement.getInUnused());
                 final LinkedHashMap<String, ProcessVariableOperation> tempUsed = new LinkedHashMap<>();
                 tempUsed.putAll(analysisElement.getUsed());
@@ -479,9 +475,8 @@ public class FlowAnalysis {
         LinkedHashMap<String, ProcessVariableOperation> tempInUsed = new LinkedHashMap<>(predecessor.getOutUsed());
         LinkedHashMap<String, ProcessVariableOperation> tempInUnused = new LinkedHashMap<>(predecessor.getOutUnused());
 
-        if (!scopeElement.equals(scopePredecessor)) {
+        if (!isChildOrSiblingOfScope(analysisElement.getBaseElement(), scopePredecessor)) {
             // TODO was ist mit end event listenern des subprocesses
-
             // Check for local variables in element like input parameters
             predecessor.getOutUnused().forEach((key, value) -> {
                 if (value.getScopeId().equals(scopePredecessor) || value.getScopeId()
@@ -550,6 +545,19 @@ public class FlowAnalysis {
         }
 
         return new LinkedHashMap[] { tempInUsed, tempInUnused };
+    }
+
+    private boolean isChildOrSiblingOfScope(BaseElement element, String scopeId) {
+        if (element == null) {
+            return false;
+        }
+        if (element.getId().equals(scopeId)) {
+            return true;
+        }
+        if (!(element.getParentElement() instanceof BaseElement)) {
+            return false;
+        }
+        return isChildOrSiblingOfScope((BaseElement) element.getParentElement(), scopeId);
     }
 
     /**

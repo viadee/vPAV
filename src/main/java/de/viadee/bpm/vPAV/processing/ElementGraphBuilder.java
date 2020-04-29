@@ -168,8 +168,8 @@ public class ElementGraphBuilder {
                     callActivities.put(node, element);
                 } else if (element instanceof SubProcess) {
                     final SubProcess subprocess = (SubProcess) element;
-                    addElementsSubprocess(fileScanner, subProcesses, flows, boundaryEvents, graph, subprocess,
-                            processDefinition, controlFlowGraph, flowAnalysis);
+                    addElementsSubprocess(subProcesses, flows, boundaryEvents, graph, subprocess,
+                            processDefinition, flowAnalysis);
                 } else if (element instanceof StartEvent) {
                     if (userVariables.containsKey("StartEvent")) {
                         // Join with variables without a defined creation Point
@@ -383,27 +383,25 @@ public class ElementGraphBuilder {
     /**
      * Add elements from subprocess to data flow graph
      *
-     * @param fileScanner       FileScanner
      * @param subProcesses      Collection of SubProcesses
      * @param flows             Collection of SequenceFlows
      * @param events            Collection of BoundaryEvents
      * @param graph             Current Graph
      * @param process           Current Process
      * @param processDefinition Current Path to process
-     * @param controlFlowGraph  ControlFlowGraph
      * @param flowAnalysis      FlowAnalysis
      */
-    private void addElementsSubprocess(final FileScanner fileScanner, final Collection<SubProcess> subProcesses,
+    private void addElementsSubprocess(final Collection<SubProcess> subProcesses,
             final Collection<SequenceFlow> flows, final Collection<BoundaryEvent> events, final Graph graph,
-            final SubProcess process, final String processDefinition, final ControlFlowGraph controlFlowGraph,
+            final SubProcess process, final String processDefinition,
             final FlowAnalysis flowAnalysis) {
         subProcesses.add(process);
         final Collection<FlowElement> subElements = process.getFlowElements();
         for (final FlowElement subElement : subElements) {
             if (subElement instanceof SubProcess) {
                 final SubProcess subProcess = (SubProcess) subElement;
-                addElementsSubprocess(fileScanner, subProcesses, flows, events, graph, subProcess, processDefinition,
-                        controlFlowGraph, flowAnalysis);
+                addElementsSubprocess(subProcesses, flows, events, graph, subProcess, processDefinition,
+                        flowAnalysis);
             } else if (subElement instanceof SequenceFlow) {
                 final SequenceFlow flow = (SequenceFlow) subElement;
                 flows.add(flow);
@@ -412,7 +410,7 @@ public class ElementGraphBuilder {
                 events.add(boundaryEvent);
             }
             // add elements of the sub process as nodes
-            final BpmnElement node = new BpmnElement(processDefinition, subElement, controlFlowGraph, flowAnalysis);
+            final BpmnElement node = new BpmnElement(processDefinition, subElement, new ControlFlowGraph(), flowAnalysis);
             new ProcessVariableReader(decisionRefToPathMap, rule)
                     .getVariablesFromElement(node, new BasicNode[1]);
             // mention the element

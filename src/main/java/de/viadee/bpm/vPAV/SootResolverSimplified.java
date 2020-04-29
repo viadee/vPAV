@@ -99,13 +99,18 @@ public class SootResolverSimplified {
     }
 
     public static Block getBlockFromMethod(SootMethod method) {
-        if (!method.isPhantom()) {
-            Body body = method.retrieveActiveBody();
-            BlockGraph graph = new ClassicCompleteBlockGraph(body);
-            List<Block> graphHeads = graph.getHeads();
-            assert (graphHeads.size() == 1);
+        try {
+            if (!method.isPhantom()) {
+                Body body = method.retrieveActiveBody();
+                BlockGraph graph = new ClassicCompleteBlockGraph(body);
+                List<Block> graphHeads = graph.getHeads();
+                assert (graphHeads.size() == 1);
 
-            return graphHeads.get(0);
+                return graphHeads.get(0);
+            }
+        }catch (Exception e) {
+            LOGGER.warning(method.getName() + " could not be resolved and was skipped.");
+            return null;
         }
         return null;
     }

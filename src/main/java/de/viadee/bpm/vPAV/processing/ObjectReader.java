@@ -313,9 +313,12 @@ public class ObjectReader {
             // Process method from another class/object
             ObjectReader or = new ObjectReader(processVariablesCreator, targetObj);
 
-            // TODO skip also methods that are not in target folder
             if (method.getDeclaringClass().getPackageName().startsWith("java.")) {
                 // Skip native java classes
+                return null;
+            }
+            Block nextBlock = SootResolverSimplified.getBlockFromMethod(method);
+            if (nextBlock == null) {
                 return null;
             }
             return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);

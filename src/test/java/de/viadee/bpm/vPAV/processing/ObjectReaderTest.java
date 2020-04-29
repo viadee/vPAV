@@ -53,7 +53,6 @@ import java.util.*;
 
 import static org.mockito.Mockito.*;
 
-// TODO test exception handling e.g. variable does not exist
 public class ObjectReaderTest {
 
     private ObjectReader objectReader;

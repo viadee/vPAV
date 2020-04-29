@@ -103,7 +103,7 @@ public class EmptyAttributesCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("Task '" + CheckName.checkName(baseElement) + "' with no dmn reference.",
+            Assert.assertEquals("Element '" + CheckName.checkName(baseElement) + "' without dmn reference.",
                     issues.iterator().next().getMessage());
         }
     }
@@ -131,7 +131,7 @@ public class EmptyAttributesCheckerTest {
         if (issues.size() != 1) {
             Assert.fail("collection with the issues is bigger or smaller as expected");
         } else {
-            Assert.assertEquals("Task 'Service Task 1' with no java class name. (compare model: Details, Java Class)",
+            Assert.assertEquals("Element 'Service Task 1' without java class name. (compare model: Details, Java Class)",
                     issues.iterator().next().getMessage());
         }
     }

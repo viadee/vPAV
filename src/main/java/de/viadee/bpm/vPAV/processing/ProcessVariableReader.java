@@ -45,10 +45,12 @@ import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.engine.impl.juel.*;
 import org.camunda.bpm.engine.impl.juel.Node;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.impl.instance.LoopDataInputRef;
 import org.camunda.bpm.model.bpmn.instance.*;
+import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.camunda.*;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
@@ -594,7 +596,7 @@ public final class ProcessVariableReader {
             BpmnModelElementInstance scopeElement = flow.getScope();
             String scopeId = null;
             if (scopeElement != null) {
-                scopeId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+                scopeId = getProcessScope(scopeElement);
             }
             final ConditionExpression expression = flow.getConditionExpression();
             if (expression != null) {
@@ -636,7 +638,7 @@ public final class ProcessVariableReader {
 
         String scopeId = null;
         if (scopeElement != null) {
-            scopeId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+            scopeId = getProcessScope(scopeElement);
         }
         if (baseElement instanceof ServiceTask || baseElement instanceof SendTask
                 || baseElement instanceof BusinessRuleTask) {
@@ -763,6 +765,15 @@ public final class ProcessVariableReader {
             }
         }
 
+    }
+
+    public String getProcessScope(BpmnModelElementInstance scopeElement) {
+        if(scopeElement instanceof SubProcess) {
+            return ((SubProcess) scopeElement).getParentElement().getAttributeValue(BpmnConstants.ATTR_ID);
+        }
+        else {
+            return scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+        }
     }
 
     /**
