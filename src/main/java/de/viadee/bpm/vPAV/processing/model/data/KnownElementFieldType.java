@@ -42,6 +42,7 @@ public enum KnownElementFieldType {
     ResultVariable("Result Variable"),
     CalledElement("Called Element"),
     CaseRef("Case Ref"),
+    LoopCharacteristics("Loop Characteristics"),
     CollectionElement("Collection"),
     ElementVariable("Element Variable"),
     LoopCardinality("Loop Cardinality"),

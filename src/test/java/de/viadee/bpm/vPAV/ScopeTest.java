@@ -61,6 +61,7 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 public class ScopeTest {
+    // TODO add messages/signals and form data
 
     @BeforeClass
     public static void setupSoot() throws MalformedURLException {
@@ -85,7 +86,27 @@ public class ScopeTest {
     }
 
     @Test
-    public void testScopeListener() {
+    public void testScopeMultiInstanceTasks() {
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().
+                serviceTask("MyServiceTask").multiInstance().camundaCollection("collection")
+                .camundaElementVariable("loopElement").multiInstanceDone()
+                .endEvent().done();
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
+        BpmnElement element = getBpmnElement(modelInstance.getModelElementById("MyServiceTask"));
+
+        reader.getVariablesFromElement(element, new BasicNode[1]);
+        Assert.assertEquals(2, element.getControlFlowGraph().getNodes().size());
+        Iterator<BasicNode> nodes = element.getControlFlowGraph().getNodes().values().iterator();
+        BasicNode defaultVariables = nodes.next();
+        BasicNode collection = nodes.next();
+        // Multi instance variables are only available within the task
+        Assert.assertEquals("MyServiceTask", defaultVariables.getDefined().values().iterator().next().getScopeId());
+        Assert.assertEquals("loopElement", collection.getDefined().values().iterator().next().getName());
+        Assert.assertEquals("MyServiceTask", collection.getDefined().values().iterator().next().getScopeId());
+    }
+
+    @Test
+    public void testScopeExecutionListener() {
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().serviceTask("MyServiceTask")
                 .camundaExecutionListenerExpression("start", "${execution.setVariable('var',true)}").endEvent().done();
         ProcessVariableReader reader = new ProcessVariableReader(null, null);
@@ -94,6 +115,29 @@ public class ScopeTest {
         reader.getVariablesFromElement(element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getNodes().size());
         // Variables are normally set globally
+        Assert.assertEquals("MyProcess",
+                element.getControlFlowGraph().getNodes().values().iterator().next().getDefined().values().iterator()
+                        .next()
+                        .getScopeId());
+    }
+
+    @Test
+    public void testScopeTaskListener() {
+        // TODO test resolving of task in java classes
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent()
+                .userTask("MyUserTask").camundaTaskListenerExpression("create", "${task.setVariable('var', true)}")
+                .endEvent()
+                .done();
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
+        BpmnElement element = getBpmnElement(modelInstance.getModelElementById("MyUserTask"));
+
+        reader.getVariablesFromElement(element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getNodes().size());
+        // Variables are normally set globally
+        Assert.assertEquals("var",
+                element.getControlFlowGraph().getNodes().values().iterator().next().getDefined().values().iterator()
+                        .next()
+                        .getName());
         Assert.assertEquals("MyProcess",
                 element.getControlFlowGraph().getNodes().values().iterator().next().getDefined().values().iterator()
                         .next()
@@ -169,17 +213,26 @@ public class ScopeTest {
 
     @Test
     public void testScopeSubprocess() {
+        // Tested: delegate, input parameter, output parameter, listener, multi instance, task listener
+        // TODO add more elements which are tested
         // Variables in Subprocesses are globally available if  execution.setVariableLocal is not used (not supported yet)
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().subProcess()
                 .embeddedSubProcess().startEvent()
-                .serviceTask("MyServiceTask").camundaExpression("${execution.setVariable('test', true)}").endEvent()
+                .serviceTask("MyFirstTask").camundaExpression("${execution.setVariable('test', true)}")
+                .serviceTask("MySecondTask").camundaInputParameter("aNewValue", "myValue")
+                .camundaOutputParameter("outputVar", "1234")
+                .camundaExecutionListenerExpression("start", "${execution.setVariable('var', true)}").endEvent()
+                .userTask("MyMultiInstanceTask").multiInstance().cardinality("5").sequential().multiInstanceDone()
+                .userTask("MyTaskListener")
+                .camundaTaskListenerExpression("create", "${task.setVariable('varTaskListener', true)}").endEvent()
                 .subProcessDone()
                 .endEvent()
                 .done();
 
         ProcessVariableReader reader = new ProcessVariableReader(null, null);
-        BpmnElement element = getBpmnElement(modelInstance.getModelElementById("MyServiceTask"));
 
+        // Expression (Implementation)
+        BpmnElement element = getBpmnElement(modelInstance.getModelElementById("MyFirstTask"));
         reader.getVariablesFromElement(element, new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getNodes().size());
         Assert.assertEquals("test",
@@ -188,7 +241,50 @@ public class ScopeTest {
         Assert.assertEquals("MyProcess",
                 element.getControlFlowGraph().getNodes().values().iterator().next().getDefined().values().iterator()
                         .next().getScopeId());
-        // TODO check more than only delegates in service tasks
+
+        // Input/Output Parameter, Execution Listener
+        BpmnElement element2 = getBpmnElement(modelInstance.getModelElementById("MySecondTask"));
+        reader.getVariablesFromElement(element2, new BasicNode[1]);
+        Iterator<ProcessVariableOperation> defined = element2.getControlFlowGraph().getOperations().values().iterator();
+        ProcessVariableOperation listener = defined.next();
+        ProcessVariableOperation inputParameter = defined.next();
+        ProcessVariableOperation outputParameter = defined.next();
+        Assert.assertEquals(3, element2.getControlFlowGraph().getNodes().size());
+        Assert.assertEquals("aNewValue", inputParameter.getName());
+        Assert.assertEquals("MySecondTask", inputParameter.getScopeId());
+        Assert.assertEquals("outputVar", outputParameter.getName());
+        Assert.assertEquals("MyProcess", outputParameter.getScopeId());
+        Assert.assertEquals("var", listener.getName());
+        Assert.assertEquals("MyProcess", listener.getScopeId());
+
+        // Multi-instance tasks
+        BpmnElement multiInstanceTask = getBpmnElement(modelInstance.getModelElementById("MyMultiInstanceTask"));
+        reader.getVariablesFromElement(multiInstanceTask, new BasicNode[1]);
+        Assert.assertEquals(1, multiInstanceTask.getControlFlowGraph().getNodes().size());
+        Assert.assertEquals("nrOfInstances",
+                multiInstanceTask.getControlFlowGraph().getNodes().values().iterator().next().getDefined().values()
+                        .iterator()
+                        .next().getName());
+        Assert.assertEquals("MyMultiInstanceTask",
+                multiInstanceTask.getControlFlowGraph().getNodes().values().iterator().next().getDefined().values()
+                        .iterator()
+                        .next().getScopeId());
+
+        // Task Listener
+        BpmnElement taskListener = getBpmnElement(modelInstance.getModelElementById("MyTaskListener"));
+
+        reader.getVariablesFromElement(taskListener, new BasicNode[1]);
+        Assert.assertEquals(1, taskListener.getControlFlowGraph().getNodes().size());
+        Assert.assertEquals("varTaskListener",
+                taskListener.getControlFlowGraph().getNodes().values().iterator().next().getDefined().values()
+                        .iterator()
+                        .next()
+                        .getName());
+        Assert.assertEquals("MyProcess",
+                taskListener.getControlFlowGraph().getNodes().values().iterator().next().getDefined().values()
+                        .iterator()
+                        .next()
+                        .getScopeId());
     }
 
     @Test

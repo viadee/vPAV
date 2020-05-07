@@ -95,8 +95,10 @@ public final class ProcessVariableReader {
         final BaseElement baseElement = element.getBaseElement();
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
         String scopeElementId = null;
+        String scopeId = null;
         if (scopeElement != null) {
             scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+            scopeId = getProcessScope(scopeElement);
         }
         final ExtensionElements extensionElements = baseElement.getExtensionElements();
 
@@ -109,7 +111,7 @@ public final class ProcessVariableReader {
 
             // 3) Search variables execution listener (start)
             getVariablesFromExecutionListener(element,
-                    extensionElements, scopeElementId, ElementChapter.ExecutionListenerStart, predecessor);
+                    extensionElements, scopeId, ElementChapter.ExecutionListenerStart, predecessor);
         }
 
         // 4) Search variables in task
@@ -134,7 +136,7 @@ public final class ProcessVariableReader {
 
             // 9) Search variables execution listener (end)
             getVariablesFromExecutionListener(element,
-                    extensionElements, scopeElementId, ElementChapter.ExecutionListenerEnd, predecessor);
+                    extensionElements, scopeId, ElementChapter.ExecutionListenerEnd, predecessor);
 
             // 10) Search variables in Output Parameters
             processInputOutputParameters(element, extensionElements, predecessor, false);
@@ -154,7 +156,7 @@ public final class ProcessVariableReader {
 
         String scopeElementId = null;
         if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+            scopeElementId = getProcessScope(scopeElement);
         }
 
         final ArrayList<String> signals = new ArrayList<>();
@@ -221,7 +223,7 @@ public final class ProcessVariableReader {
         String parentScope = null;
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
         if (scopeElement != null) {
-            parentScope = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+            parentScope = getProcessScope(scopeElement);
         }
 
         for (ModelElementInstance extension : extensionElements.getElements()) {
@@ -340,18 +342,17 @@ public final class ProcessVariableReader {
 
         final BaseElement baseElement = element.getBaseElement();
         final BpmnModelElementInstance scopeElement = baseElement.getScope();
-        String scopeElementId = null;
+        String scopeId = null;
         if (scopeElement != null) {
-            scopeElementId = scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
+            scopeId = getProcessScope(scopeElement);
         }
 
         // 1) Search in Task Listeners
         getVariablesFromTaskListener(element,
-                extensionElements, scopeElementId, predecessor);
+                extensionElements, scopeId, predecessor);
 
         // 2) Search in Form Data
-        getVariablesFromFormData(element, extensionElements, scopeElementId, predecessor);
-
+        getVariablesFromFormData(element, extensionElements, scopeId, predecessor);
     }
 
     /**
@@ -769,7 +770,7 @@ public final class ProcessVariableReader {
 
     public String getProcessScope(BpmnModelElementInstance scopeElement) {
         if(scopeElement instanceof SubProcess) {
-            return ((SubProcess) scopeElement).getParentElement().getAttributeValue(BpmnConstants.ATTR_ID);
+            return scopeElement.getParentElement().getAttributeValue(BpmnConstants.ATTR_ID);
         }
         else {
             return scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
@@ -795,19 +796,20 @@ public final class ProcessVariableReader {
         final ModelElementInstance loopCharacteristics = baseElement
                 .getUniqueChildElementByType(LoopCharacteristics.class);
         if (loopCharacteristics != null) {
-            BasicNode node = new BasicNode(element,
-                    ElementChapter.MultiInstance, KnownElementFieldType.CollectionElement);
 
-            // Node is already added since there are at least the default variables
-            predecessor[0] = addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
+            BasicNode node = new BasicNode(element,
+                    ElementChapter.MultiInstance, KnownElementFieldType.CamundaStandardVariables);
 
             // Add default variables
             addDefaultMultiInstanceTaskVariables(node, scopeId);
+            predecessor[0] = addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
+
+            node = new BasicNode(element,
+                    ElementChapter.MultiInstance, KnownElementFieldType.LoopCharacteristics);
 
             final String collectionName = loopCharacteristics.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.COLLECTION);
             if (collectionName != null && collectionName.trim().length() > 0) {
-
                 // Check if collection name includes expression
                 final Pattern pattern = Pattern.compile("\\$\\{.*}");
                 Matcher matcher = pattern.matcher(collectionName);
@@ -965,7 +967,7 @@ public final class ProcessVariableReader {
             AstParameters parameters = (AstParameters) method.getChild(1);
             if (property.getChild(0) instanceof AstIdentifier) {
                 String objectName = ((AstIdentifier) property.getChild(0)).getName();
-                if (objectName.equals(CamundaMethodServices.EXECUTION_OBJECT)) {
+                if (objectName.equals(CamundaMethodServices.EXECUTION_OBJECT) || objectName.equals(CamundaMethodServices.TASK_OBJECT)) {
                     handleExecutionInExpression(parameters, property, scopeId, expNode);
                 } else {
                     handleMethodCallInExpression(parameters, property, objectName, scopeId, expNode, element,
