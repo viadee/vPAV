@@ -78,6 +78,8 @@ public class ElementGraphBuilder {
 
     private Map<String, Collection<String>> processIdToVariables;
 
+    private Map<BpmnElement, BpmnElement> splittedSubprocesses = new HashMap<>();
+
     private Rule rule;
 
     public ElementGraphBuilder() {
@@ -166,10 +168,6 @@ public class ElementGraphBuilder {
                 } else if (element instanceof CallActivity) {
                     // mention call activities
                     callActivities.put(node, element);
-                } else if (element instanceof SubProcess) {
-                    final SubProcess subprocess = (SubProcess) element;
-                    addElementsSubprocess(subProcesses, flows, boundaryEvents, graph, subprocess,
-                            processDefinition, flowAnalysis);
                 } else if (element instanceof StartEvent) {
                     if (userVariables.containsKey("StartEvent")) {
                         // Join with variables without a defined creation Point
@@ -190,6 +188,12 @@ public class ElementGraphBuilder {
                 }
                 // save process elements as a node
                 graph.addVertex(node);
+
+                if (element instanceof SubProcess) {
+                    final SubProcess subprocess = (SubProcess) element;
+                    addElementsSubprocess(subProcesses, flows, boundaryEvents, graph, subprocess, node,
+                            processDefinition, flowAnalysis);
+                }
             }
             // add edges into the graph
             addEdges(graph, flows, boundaryEvents, subProcesses);
@@ -209,8 +213,8 @@ public class ElementGraphBuilder {
     /**
      * Creates the variables map of a flow element
      *
-     * @param scanner     OuterProcessVariablesScanner
-     * @param graph       Graph
+     * @param scanner OuterProcessVariablesScanner
+     * @param graph   Graph
      */
     private void createVariablesOfFlowElement(final ProcessVariablesScanner scanner, final Graph graph,
             final BpmnElement bpmnElement,
@@ -326,8 +330,13 @@ public class ElementGraphBuilder {
             final Collection<BoundaryEvent> boundaryEvents, final Collection<SubProcess> subProcesses) {
         for (final SequenceFlow flow : flows) {
             final BpmnElement flowElement = elementMap.get(flow.getId());
-            final BpmnElement srcElement = elementMap.get(flow.getSource().getId());
+            BpmnElement srcElement = elementMap.get(flow.getSource().getId());
             final BpmnElement destElement = elementMap.get(flow.getTarget().getId());
+
+            // Check if src element is part of a splitted subprocess in order to use after element instead
+            if (splittedSubprocesses.get(srcElement) != null) {
+                srcElement = splittedSubprocesses.get(srcElement);
+            }
 
             flowElement.addPredecessor(srcElement);
             flowElement.addSuccessor(destElement);
@@ -358,23 +367,52 @@ public class ElementGraphBuilder {
         // inner elements will be directly connected into the graph
         final Collection<StartEvent> startEvents = subProcess.getChildElementsByType(StartEvent.class);
         final Collection<EndEvent> endEvents = subProcess.getChildElementsByType(EndEvent.class);
+
+        // Check if subprocess itself has nodes
+        boolean useElementItself = false;
+        boolean isBefore = false;
+        boolean bothSides = splittedSubprocesses.containsKey(subprocessElement);
+        if (subprocessElement.getControlFlowGraph().getNodes().size() > 0) {
+            useElementItself = true;
+            ElementChapter chapter = subprocessElement.getControlFlowGraph().firstNode().getElementChapter();
+            isBefore = !(chapter.equals(ElementChapter.OutputImplementation)
+                    || chapter.equals(ElementChapter.ExecutionListenerEnd) || chapter
+                    .equals(ElementChapter.OutputData));
+        }
+
         if (startEvents != null && !startEvents.isEmpty() && endEvents != null && !endEvents.isEmpty()) {
-            final Collection<SequenceFlow> incomingFlows = subProcess.getIncoming();
-            for (final SequenceFlow incomingFlow : incomingFlows) {
-                final BpmnElement srcElement = elementMap.get(incomingFlow.getId());
+            if (useElementItself && (bothSides || isBefore)) {
                 for (final StartEvent startEvent : startEvents) {
                     final BpmnElement dstElement = elementMap.get(startEvent.getId());
-                    graph.addEdge(srcElement, dstElement, 100);
-                    graph.removeEdge(srcElement, subprocessElement);
+                    graph.addEdge(subprocessElement, dstElement, 100);
+                    graph.removeEdge(subprocessElement, splittedSubprocesses.get(subprocessElement));
+                }
+            } else {
+                final Collection<SequenceFlow> incomingFlows = subProcess.getIncoming();
+                for (final SequenceFlow incomingFlow : incomingFlows) {
+                    final BpmnElement srcElement = elementMap.get(incomingFlow.getId());
+                    for (final StartEvent startEvent : startEvents) {
+                        final BpmnElement dstElement = elementMap.get(startEvent.getId());
+                        graph.addEdge(srcElement, dstElement, 100);
+                        graph.removeEdge(srcElement, subprocessElement);
+                    }
                 }
             }
-            final Collection<SequenceFlow> outgoingFlows = subProcess.getOutgoing();
-            for (final EndEvent endEvent : endEvents) {
-                final BpmnElement srcElement = elementMap.get(endEvent.getId());
-                for (final SequenceFlow outgoingFlow : outgoingFlows) {
-                    final BpmnElement dstElement = elementMap.get(outgoingFlow.getId());
-                    graph.addEdge(srcElement, dstElement, 100);
-                    graph.removeEdge(subprocessElement, dstElement);
+
+            if (useElementItself && (bothSides || !isBefore)) {
+                for (final EndEvent endEvent : endEvents) {
+                    final BpmnElement srcElement = elementMap.get(endEvent.getId());
+                    graph.addEdge(srcElement, splittedSubprocesses.get(subprocessElement), 100);
+                }
+            } else {
+                final Collection<SequenceFlow> outgoingFlows = subProcess.getOutgoing();
+                for (final EndEvent endEvent : endEvents) {
+                    final BpmnElement srcElement = elementMap.get(endEvent.getId());
+                    for (final SequenceFlow outgoingFlow : outgoingFlows) {
+                        final BpmnElement dstElement = elementMap.get(outgoingFlow.getId());
+                        graph.addEdge(srcElement, dstElement, 100);
+                        graph.removeEdge(subprocessElement, dstElement);
+                    }
                 }
             }
         }
@@ -393,14 +431,28 @@ public class ElementGraphBuilder {
      */
     private void addElementsSubprocess(final Collection<SubProcess> subProcesses,
             final Collection<SequenceFlow> flows, final Collection<BoundaryEvent> events, final Graph graph,
-            final SubProcess process, final String processDefinition,
+            final SubProcess process, final BpmnElement element, final String processDefinition,
             final FlowAnalysis flowAnalysis) {
         subProcesses.add(process);
+        BpmnElement secondElement = null;
+
+        if (splitSubprocessElement(element)) {
+            secondElement = (BpmnElement) element.getSuccessors().iterator().next();
+            element.removeSuccessor(secondElement.getId());
+            elementMap.put(secondElement.getGraphId(), secondElement);
+            graph.addVertex(secondElement);
+            graph.addEdge(element, secondElement, 100);
+            splittedSubprocesses.put(element, secondElement);
+        }
+
         final Collection<FlowElement> subElements = process.getFlowElements();
         for (final FlowElement subElement : subElements) {
+            // add elements of the sub process as nodes
+            final BpmnElement node = new BpmnElement(processDefinition, subElement, new ControlFlowGraph(),
+                    flowAnalysis);
             if (subElement instanceof SubProcess) {
                 final SubProcess subProcess = (SubProcess) subElement;
-                addElementsSubprocess(subProcesses, flows, events, graph, subProcess, processDefinition,
+                addElementsSubprocess(subProcesses, flows, events, graph, subProcess, node, processDefinition,
                         flowAnalysis);
             } else if (subElement instanceof SequenceFlow) {
                 final SequenceFlow flow = (SequenceFlow) subElement;
@@ -409,8 +461,7 @@ public class ElementGraphBuilder {
                 final BoundaryEvent boundaryEvent = (BoundaryEvent) subElement;
                 events.add(boundaryEvent);
             }
-            // add elements of the sub process as nodes
-            final BpmnElement node = new BpmnElement(processDefinition, subElement, new ControlFlowGraph(), flowAnalysis);
+
             new ProcessVariableReader(decisionRefToPathMap, rule)
                     .getVariablesFromElement(node, new BasicNode[1]);
             // mention the element
@@ -418,6 +469,57 @@ public class ElementGraphBuilder {
             // add element as node
             graph.addVertex(node);
         }
+    }
+
+    private boolean splitSubprocessElement(final BpmnElement element) {
+        BasicNode lastNodeBefore = null;
+        BasicNode firstNodeAfter = null;
+        ElementChapter firstNodeChapter = element.getControlFlowGraph().firstNode().getElementChapter();
+        ElementChapter lastNodeChapter = element.getControlFlowGraph().lastNode().getElementChapter();
+        boolean hasFirstHalf = !(firstNodeChapter.equals(ElementChapter.OutputImplementation)
+                || firstNodeChapter.equals(ElementChapter.ExecutionListenerEnd) || firstNodeChapter
+                .equals(ElementChapter.OutputData));
+        boolean hasSecondHalf = lastNodeChapter.equals(ElementChapter.OutputImplementation)
+                || lastNodeChapter.equals(ElementChapter.ExecutionListenerEnd)
+                || lastNodeChapter.equals(ElementChapter.OutputData);
+
+        if (!(hasFirstHalf && !hasSecondHalf)) {
+            return false;
+        }
+
+        // Should have only one predecessor
+        ArrayList<BasicNode> nodesAfter = new ArrayList<>();
+        BasicNode curSuccessor = element.getControlFlowGraph().lastNode();
+        nodesAfter.add(curSuccessor);
+        AnalysisElement predecessor = element.getControlFlowGraph().lastNode().getPredecessors().iterator().next();
+        while (predecessor != null) {
+            ElementChapter chapter = ((BasicNode) predecessor).getElementChapter();
+            if (!(chapter.equals(ElementChapter.OutputImplementation)
+                    || chapter.equals(ElementChapter.ExecutionListenerEnd) || chapter
+                    .equals(ElementChapter.OutputData))) {
+                lastNodeBefore = (BasicNode) predecessor;
+                firstNodeAfter = curSuccessor;
+                break;
+            }
+            curSuccessor = (BasicNode) predecessor;
+            nodesAfter.add(curSuccessor);
+            predecessor = curSuccessor.getPredecessors().iterator().next();
+        }
+        if (lastNodeBefore != null && firstNodeAfter != null) {
+            BpmnElement secondElement = new BpmnElement(element.getProcessDefinition(), element.getBaseElement(),
+                    new ControlFlowGraph(), element.getFlowAnalysis(), element.getId() + "_after");
+            // Change edges
+            element.addSuccessor(secondElement);
+
+            // Split nodes
+            nodesAfter.forEach(secondElement.getControlFlowGraph()::addNode);
+            nodesAfter.forEach(element.getControlFlowGraph()::removeNode);
+            firstNodeAfter.clearPredecessors();
+            lastNodeBefore.clearSuccessors();
+
+            return true;
+        }
+        return false;
     }
 
     /**

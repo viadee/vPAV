@@ -88,12 +88,12 @@ public class ControlFlowGraph {
         return nodes;
     }
 
-    BasicNode firstNode() {
+    public BasicNode firstNode() {
         Iterator<BasicNode> iterator = nodes.values().iterator();
         return iterator.next();
     }
 
-    BasicNode lastNode() {
+    public BasicNode lastNode() {
         Iterator<BasicNode> iterator = nodes.values().iterator();
         BasicNode node = null;
         while (iterator.hasNext()) {

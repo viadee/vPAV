@@ -45,6 +45,8 @@ import java.util.stream.Collectors;
  */
 public class BpmnElement implements AnalysisElement {
 
+    private String graphId;
+
     private String processDefinition;
 
     private BaseElement baseElement;
@@ -77,6 +79,11 @@ public class BpmnElement implements AnalysisElement {
 
     public BpmnElement(final String processDefinition, final BaseElement element,
             final ControlFlowGraph controlFlowGraph, final FlowAnalysis flowAnalysis) {
+        this(processDefinition, element, controlFlowGraph, flowAnalysis, element.getId());
+    }
+
+    public BpmnElement(final String processDefinition, final BaseElement element,
+            final ControlFlowGraph controlFlowGraph, final FlowAnalysis flowAnalysis, final String graphId) {
         this.processDefinition = processDefinition;
         this.baseElement = element;
         this.controlFlowGraph = controlFlowGraph;
@@ -96,6 +103,7 @@ public class BpmnElement implements AnalysisElement {
         this.outUnused = new LinkedHashMap<>();
 
         this.sourceCodeAnomalies = new ArrayList<>();
+        this.graphId = graphId;
     }
 
     /**
@@ -156,6 +164,10 @@ public class BpmnElement implements AnalysisElement {
 
     public String getProcessDefinition() {
         return processDefinition;
+    }
+
+    public String getGraphId() {
+        return this.graphId;
     }
 
     public ListMultimap<String, ProcessVariableOperation> getProcessVariables() {
@@ -334,7 +346,7 @@ public class BpmnElement implements AnalysisElement {
 
     @Override
     public int hashCode() {
-        return baseElement.getId().hashCode();
+        return graphId.hashCode();
     }
 
     @Override
@@ -344,6 +356,6 @@ public class BpmnElement implements AnalysisElement {
 
     @Override
     public String toString() {
-        return baseElement.getId();
+        return graphId;
     }
 }

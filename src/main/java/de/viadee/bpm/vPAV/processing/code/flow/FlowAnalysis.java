@@ -91,7 +91,7 @@ public class FlowAnalysis {
                     .forEach(element::addPredecessor);
             graph.getAdjacencyListSuccessor(element)
                     .forEach(element::addSuccessor);
-            this.nodes.put(element.getId(), element);
+            this.nodes.put(element.getGraphId(), element);
         });
 
         // Add all nodes on source code level and correct the pointers
