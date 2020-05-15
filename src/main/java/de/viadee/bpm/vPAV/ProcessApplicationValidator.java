@@ -88,6 +88,17 @@ public class ProcessApplicationValidator {
 	}
 
 	/**
+	 * Find model errors with given ApplicationContext (Spring)
+	 *
+	 * @param ctx
+	 *            - Spring context
+	 * @return all issues
+	 */
+	public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {
+		return filterErrors(findModelInconsistencies(ctx));
+	}
+
+	/**
 	 * Find model errors without spring context but manual bean map
 	 *
 	 * @param beanMap

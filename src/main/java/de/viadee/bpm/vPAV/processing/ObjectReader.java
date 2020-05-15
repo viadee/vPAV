@@ -473,13 +473,25 @@ public class ObjectReader {
         } else if (rightValue instanceof InstanceFieldRef) {
             // FieldRefs other than the current object are currently not resolved
             if (((InstanceFieldRef) rightValue).getBase().toString().equals(thisName)) {
-                return thisObject.getStringField(getVarNameFromFieldRef(rightValue)).getValue();
+                StringVariable field = thisObject.getStringField(getVarNameFromFieldRef(rightValue));
+                if (field != null) {
+                    return field.getValue();
+                }
+                return null;
             }
             return null;
         } else if (rightValue instanceof StaticFieldRef) {
             String className = ((StaticFieldRef) rightValue).getFieldRef().declaringClass().getName();
             String varName = ((StaticFieldRef) rightValue).getFieldRef().name();
-            return staticObjectVariables.get(className).getStringField(varName).getValue();
+            ObjectVariable staticClass = staticObjectVariables.get(className);
+            if (staticClass == null) {
+                return null;
+            }
+            StringVariable field = staticClass.getStringField(varName);
+            if (field != null) {
+                return field.getValue();
+            }
+            return null;
         } else if (rightValue instanceof InvokeExpr) {
             return (String) handleInvokeExpr(block, (InvokeExpr) rightValue, thisName);
         } else if (rightValue instanceof CastExpr) {
