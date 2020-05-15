@@ -531,8 +531,6 @@ public class ObjectReader {
     public void notifyVariablesReader(Block block, InvokeExpr expr, CamundaProcessVariableFunctions camundaMethod) {
         int location = camundaMethod.getLocation() - 1;
         VariableOperation type = camundaMethod.getOperationType();
-        // TODO variables extractor decides on scope id for variable map
-        // TODO add test for scope id (not yet included)
         String variableName = resolveStringValue(block, expr.getArgBox(location).getValue(), null);
 
         ProcessVariableOperation pvo;

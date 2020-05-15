@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 
 public abstract class AbstractElementChecker implements ElementChecker {
@@ -38,6 +39,17 @@ public abstract class AbstractElementChecker implements ElementChecker {
     protected final Rule rule;
 
     public AbstractElementChecker(final Rule rule) {
+        this.rule = rule;
+    }
+
+    /**
+     * Creates a new Abstract Element checker.
+     * @param rule Corresponding rule
+     * @param bpmnScanner Unused bpmnScanner
+     * @deprecated since v3.0.5
+     */
+    @Deprecated
+    public AbstractElementChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         this.rule = rule;
     }
 }

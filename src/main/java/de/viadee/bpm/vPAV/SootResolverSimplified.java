@@ -64,8 +64,8 @@ public class SootResolverSimplified {
             SootMethod sootMethod = getSootMethod(sootClass, methodName, parameterTypes, returnType);
             return getBlockFromMethod(sootMethod);
         }
-        // TODO handle this case;
-        assert false;
+
+        LOGGER.warning("Class " + className + " could not be loaded.");
         return null;
     }
 
@@ -108,7 +108,7 @@ public class SootResolverSimplified {
 
                 return graphHeads.get(0);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.warning(method.getName() + " could not be resolved and was skipped.");
             return null;
         }

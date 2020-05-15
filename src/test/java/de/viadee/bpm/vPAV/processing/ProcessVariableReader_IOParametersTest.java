@@ -235,7 +235,6 @@ public class ProcessVariableReader_IOParametersTest {
         final BpmnElement element = new BpmnElement("", task, new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        // TODO check predecessor
         (new ProcessVariableReader(null, null))
                 .processInputOutputParameters(element, element.getBaseElement().getExtensionElements(),
                         new BasicNode[1], input);
