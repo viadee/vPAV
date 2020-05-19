@@ -250,6 +250,10 @@ public class BasicNode implements AnalysisElement{
         this.operations.remove(op.getId());
     }
 
+    @Override public String getGraphId() {
+        return id;
+    }
+
     @Override
     public void setPredecessors(LinkedHashMap<String, AnalysisElement> predecessors) {
         this.predecessors = predecessors;

@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.Helper;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
@@ -48,6 +49,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -67,10 +69,14 @@ public class GraphCreationTest {
         RuntimeConfig.getInstance().setTest(true);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
+        final URL classUrl = new URL(currentPath + "src/test/java/");
+        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+        final URL[] classUrls = { classUrl, resourcesUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     @AfterClass
@@ -85,7 +91,7 @@ public class GraphCreationTest {
 
         // DU + UR anomaly
         Assert.assertEquals(2, invalidPathMap.size());
-        Iterator<AnomalyContainer> iter =  invalidPathMap.keySet().iterator();
+        Iterator<AnomalyContainer> iter = invalidPathMap.keySet().iterator();
         Assert.assertEquals(Anomaly.DU, iter.next().getAnomaly());
         Assert.assertEquals(Anomaly.UR, iter.next().getAnomaly());
     }

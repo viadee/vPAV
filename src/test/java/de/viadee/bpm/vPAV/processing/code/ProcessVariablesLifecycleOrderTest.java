@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
@@ -46,6 +47,7 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,14 +63,17 @@ public class ProcessVariablesLifecycleOrderTest {
 
     @BeforeClass
     public static void setup() throws IOException {
+        RuntimeConfig.getInstance().setTest(true);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
+        final URL classUrl = new URL(currentPath + "src/test/java/");
+        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+        final URL[] classUrls = { classUrl, resourcesUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
-        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     @Test
@@ -231,9 +236,9 @@ public class ProcessVariablesLifecycleOrderTest {
         assertEquals("Start Listener 1 was not correctly included.", "MyCallActivity__1", startListener1.getId());
         assertEquals("Expression Start Listener was not correctly included.", "MyCallActivity__3",
                 startListenerExpression.getId());
-        assertEquals("_EndEvent_SUCC", endEventCalledProcess.getId());
-        assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getId());
-        assertEquals("_StartEvent_1", startEventCalledProcess.getId());
+        assertEquals("_EndEvent_SUCC", endEventCalledProcess.getGraphId());
+        assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getGraphId());
+        assertEquals("_StartEvent_1", startEventCalledProcess.getGraphId());
         assertEquals("Start event was not reached.", "MyStartEvent", startEvent.getId());
         assertEquals("Start event should not have any predecessors.", 0, startEvent.getPredecessors().size());
 

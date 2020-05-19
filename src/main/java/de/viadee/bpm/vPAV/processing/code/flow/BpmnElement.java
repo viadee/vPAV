@@ -170,6 +170,10 @@ public class BpmnElement implements AnalysisElement {
         return this.graphId;
     }
 
+    public void setGraphId(String graphId) {
+        this.graphId = graphId;
+    }
+
     public ListMultimap<String, ProcessVariableOperation> getProcessVariables() {
         if (processVariables.size() == 0) {
             // Collect process variables from cfg and element itself

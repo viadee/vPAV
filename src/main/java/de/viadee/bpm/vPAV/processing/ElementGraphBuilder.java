@@ -472,6 +472,10 @@ public class ElementGraphBuilder {
     }
 
     private boolean splitSubprocessElement(final BpmnElement element) {
+        if(element.getControlFlowGraph().getNodes().isEmpty()) {
+            return false;
+        }
+
         BasicNode lastNodeBefore = null;
         BasicNode firstNodeAfter = null;
         ElementChapter firstNodeChapter = element.getControlFlowGraph().firstNode().getElementChapter();
@@ -580,8 +584,7 @@ public class ElementGraphBuilder {
         final Collection<BpmnElement> vertices = subGraph.getVertices();
         for (final BpmnElement vertex : vertices) {
             // add _ before the element id to avoid name clashes
-            final BaseElement baseElement = vertex.getBaseElement();
-            baseElement.setId("_" + baseElement.getId());
+            vertex.setGraphId("_" + vertex.getGraphId());
             // add node to the main data flow
             graph.addVertex(vertex);
         }

@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -49,6 +50,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -62,13 +64,17 @@ public class MultiInstanceActivityTest {
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
+        RuntimeConfig.getInstance().setTest(true);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = {classUrl};
+        final URL classUrl = new URL(currentPath + "src/test/java/");
+        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+        final URL[] classUrls = { classUrl, resourcesUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     @Test
@@ -97,7 +103,8 @@ public class MultiInstanceActivityTest {
         Assert.assertEquals("Collection read operation was not recognized.", "myCollection",
                 flowAnalysis.getNodes().get("Sequential_ServiceTask__1").getUsed().get("myCollection_4").getName());
 
-        Assert.assertEquals("There should  be one issue because 'element' is not available in non-multi instance tasks.",
+        Assert.assertEquals(
+                "There should  be one issue because 'element' is not available in non-multi instance tasks.",
                 1, invalidPathMap.size());
 
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
@@ -105,7 +112,6 @@ public class MultiInstanceActivityTest {
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                 anomaly1.getAnomaly());
     }
-
 
     /**
      * Test multi instance activity with collection that is defined with child elements instead of attributes
@@ -199,7 +205,8 @@ public class MultiInstanceActivityTest {
 
         // Use undefined variable in loop cardinality expression
         ServiceTask serviceTask = modelInstance.getModelElementById("Sequential_ServiceTask");
-        LoopCardinalityImpl loopCardinality = (LoopCardinalityImpl) serviceTask.getLoopCharacteristics().getChildElementsByType(LoopCardinality.class).iterator().next();
+        LoopCardinalityImpl loopCardinality = (LoopCardinalityImpl) serviceTask.getLoopCharacteristics()
+                .getChildElementsByType(LoopCardinality.class).iterator().next();
         loopCardinality.setTextContent("${notExistingVariable}");
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
@@ -227,12 +234,12 @@ public class MultiInstanceActivityTest {
                 "notExistingVariable", anomaly1.getVariable().getName());
 
         AnomalyContainer anomaly2 = iterator.next();
-        Assert.assertEquals("The 'loopCounter' variable in Sequential_ServiceTask should raise an issue.",
-                "loopCounter", anomaly2.getVariable().getName());
+        Assert.assertEquals("The 'element' variable in Sequential_ServiceTask should raise an issue.",
+                "element", anomaly2.getVariable().getName());
 
         AnomalyContainer anomaly3 = iterator.next();
-        Assert.assertEquals("The 'element' variable in Sequential_ServiceTask should raise an issue.",
-                "element", anomaly3.getVariable().getName());
+        Assert.assertEquals("The 'loopCounter' variable in Sequential_ServiceTask should raise an issue.",
+                "loopCounter", anomaly3.getVariable().getName());
     }
 
     @Before

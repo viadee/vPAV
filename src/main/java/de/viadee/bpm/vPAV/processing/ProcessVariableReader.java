@@ -871,7 +871,7 @@ public final class ProcessVariableReader {
                 }
             }
             if (node.getOperations().size() > 0) {
-                element.getControlFlowGraph().addNode(node);
+                predecessor[0] = addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
             }
         }
     }
