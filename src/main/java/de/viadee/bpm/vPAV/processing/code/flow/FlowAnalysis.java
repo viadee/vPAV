@@ -36,6 +36,10 @@ import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.*;
+import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import java.util.*;
 import java.util.function.Function;
@@ -57,6 +61,10 @@ public class FlowAnalysis {
     }
 
     private HashMap<String, AnalysisElement> nodesBeforeCallActivities = new HashMap<>();
+
+    private HashSet<String> callActivitiesInMapping = new HashSet<>();
+
+    private HashSet<String> callActivitiesOutMapping = new HashSet<>();
 
     /**
      * Given a collection of graphs, this method is the sole entrance to the
@@ -142,15 +150,16 @@ public class FlowAnalysis {
                         lastNodeBefore = lastNode;
                         for (AnalysisElement succ : analysisElement.getSuccessors()) {
                             if (succ.getBaseElement() instanceof SequenceFlow) {
-                                nodesBeforeCallActivities.put(succ.getId(), lastNodeBefore);
+                                nodesBeforeCallActivities.put(succ.getGraphId(), lastNodeBefore);
                                 break;
                             }
                         }
                     } else if (!hasNodesBefore && hasNodesAfter) {
                         firstNodeAfter = firstNode;
-                        nodesBeforeCallActivities.put(firstNodeAfter.getId(), analysisElement.getPredecessors().get(0));
+                        nodesBeforeCallActivities
+                                .put(firstNodeAfter.getGraphId(), analysisElement.getPredecessors().get(0));
                     } else {
-                        nodesBeforeCallActivities.put(firstNodeAfter.getId(), lastNodeBefore);
+                        nodesBeforeCallActivities.put(firstNodeAfter.getGraphId(), lastNodeBefore);
                     }
 
                     for (AnalysisElement succ : analysisElement.getSuccessors()) {
@@ -167,7 +176,7 @@ public class FlowAnalysis {
                                 // Replace incoming element connections with first node
                                 firstNode.clearPredecessors();
                                 for (AnalysisElement preds : analysisElement.getPredecessors()) {
-                                    preds.removeSuccessor(analysisElement.getId());
+                                    preds.removeSuccessor(analysisElement.getGraphId());
                                     preds.addSuccessor(firstNode);
                                     firstNode.addPredecessor(preds);
                                 }
@@ -177,7 +186,7 @@ public class FlowAnalysis {
                                 // start event
                                 succ.clearPredecessors();
                                 analysisElement.getPredecessors().forEach(preds -> {
-                                    preds.removeSuccessor(analysisElement.getId());
+                                    preds.removeSuccessor(analysisElement.getGraphId());
                                     preds.addSuccessor(succ);
                                     succ.addPredecessor(preds);
                                 });
@@ -226,6 +235,7 @@ public class FlowAnalysis {
                     for (AnalysisElement succ : analysisElement.getSuccessors()) {
                         succ.removePredecessor(analysisElement.getId());
                         succ.addPredecessor(lastNode);
+                        lastNode.addSuccessor(succ);
                     }
                 }
 
@@ -247,8 +257,8 @@ public class FlowAnalysis {
 
                 // Remember id of elements to be removed
                 analysisElement.getControlFlowGraph().getNodes().values()
-                        .forEach(node -> cfgNodes.put(node.getId(), node));
-                ids.add(firstNode.getParentElement().getBaseElement().getId());
+                        .forEach(node -> cfgNodes.put(node.getGraphId(), node));
+                ids.add(analysisElement.getGraphId());
             } else {
                 if (analysisElement.getBaseElement() instanceof CallActivity) {
                     analysisElement.getSuccessors().forEach(succ -> {
@@ -256,7 +266,8 @@ public class FlowAnalysis {
                             succ.clearPredecessors();
                             LinkedHashMap<String, AnalysisElement> preds = new LinkedHashMap<>(
                                     analysisElement.getPredecessors().stream()
-                                            .collect(Collectors.toMap(AnalysisElement::getId, Function.identity())));
+                                            .collect(Collectors
+                                                    .toMap(AnalysisElement::getGraphId, Function.identity())));
                             succ.setPredecessors(preds);
                         } else if (succ.getBaseElement() instanceof SequenceFlow) {
                             // Find end event
@@ -286,13 +297,13 @@ public class FlowAnalysis {
                             succ.addDefined(camundaOutput);
                             succ.getPredecessors().forEach(pred -> {
                                 if (pred.getBaseElement() instanceof CallActivity) {
-                                    succ.removePredecessor(pred.getId());
+                                    succ.removePredecessor(pred.getGraphId());
                                 }
                             });
-                            nodesBeforeCallActivities.put(succ.getId(), analysisElement.getPredecessors().get(0));
+                            nodesBeforeCallActivities.put(succ.getGraphId(), analysisElement.getPredecessors().get(0));
                         }
                     });
-                    ids.add(analysisElement.getId());
+                    ids.add(analysisElement.getGraphId());
                 }
                 // In case we have start event that maps a message to a method
                 final LinkedHashMap<String, ProcessVariableOperation> initialOperations = new LinkedHashMap<>();
@@ -341,10 +352,10 @@ public class FlowAnalysis {
                         succ.addDefined(camundaIn);
                     }
                 } else if (succ.getBaseElement() instanceof SequenceFlow) {
-                    analysisElement.removeSuccessor(succ.getId());
+                    analysisElement.removeSuccessor(succ.getGraphId());
                 } else {
-                    analysisElement.removeSuccessor(succ.getId());
-                    succ.removePredecessor(analysisElement.getId());
+                    analysisElement.removeSuccessor(succ.getGraphId());
+                    succ.removePredecessor(analysisElement.getGraphId());
                 }
             });
         }
@@ -356,7 +367,7 @@ public class FlowAnalysis {
         if (analysisElement.getBaseElement() instanceof StartEvent) {
             analysisElement.getPredecessors().forEach(pred -> {
                 if (pred.getBaseElement() instanceof EndEvent) {
-                    analysisElement.removePredecessor(pred.getId());
+                    analysisElement.removePredecessor(pred.getGraphId());
                 }
             });
         }
@@ -365,7 +376,7 @@ public class FlowAnalysis {
         if (analysisElement.getBaseElement() instanceof EndEvent) {
             analysisElement.getSuccessors().forEach(succ -> {
                 if (succ.getBaseElement() instanceof StartEvent) {
-                    analysisElement.removeSuccessor(succ.getId());
+                    analysisElement.removeSuccessor(succ.getGraphId());
                 }
             });
         }
@@ -475,76 +486,132 @@ public class FlowAnalysis {
         LinkedHashMap<String, ProcessVariableOperation> tempInUsed = new LinkedHashMap<>(predecessor.getOutUsed());
         LinkedHashMap<String, ProcessVariableOperation> tempInUnused = new LinkedHashMap<>(predecessor.getOutUnused());
 
+        // Subprocess or call activity
         if (!isChildOrSiblingOfScope(analysisElement.getBaseElement(), scopePredecessor)) {
-            // TODO was ist mit end event listenern des subprocesses
             // Check for local variables in element like input parameters
-            predecessor.getOutUnused().forEach((key, value) -> {
-                if (value.getScopeId().equals(scopePredecessor) || value.getScopeId()
-                        .equals(predecessor.getParentElement().getId())) {
-                    tempInUnused.remove(key);
-                }
-            });
-            predecessor.getOutUsed().forEach((key, value) -> {
-                if (value.getScopeId().equals(scopePredecessor) || value.getScopeId()
-                        .equals(predecessor.getParentElement().getId())) {
-                    tempInUsed.remove(key);
-                }
-            });
+            filterLocalVariables(predecessor, tempInUnused, tempInUsed);
 
-            if (nodesBeforeCallActivities.containsKey(analysisElement.getId())) {
-                AnalysisElement predecessorCallActivity = nodesBeforeCallActivities.get(analysisElement.getId());
-                // Pass Input parameters forward
-                predecessorCallActivity.getOutUnused().forEach((key, value) -> {
-                    if (value.getScopeId().equals(analysisElement.getParentElement().getId()) || value.getScopeId()
-                            .equals(scopeElement)) {
-                        tempInUnused.put(key, value);
+            // Change scope of variables so that they are continued to be passed
+            if (isCallActivityMappingInAll(analysisElement)) {
+                copyOperationsWithCallActivityScope(tempInUnused, tempInUsed,
+                        ((Process) analysisElement.getBaseElement().getParentElement()).getId());
+
+            } else if (isCallActivityMappingOutAll(predecessor)) {
+                copyOperationsWithCallActivityScope(tempInUnused, tempInUsed,
+                        ((Process) analysisElement.getBaseElement().getParentElement()).getId());
+            } else {
+                if (nodesBeforeCallActivities.containsKey(analysisElement.getGraphId())) {
+                    AnalysisElement predecessorCallActivity = nodesBeforeCallActivities
+                            .get(analysisElement.getGraphId());
+                    // Pass Input parameters forward
+                    predecessorCallActivity.getOutUnused().forEach((key, value) -> {
+                        if (value.getScopeId().equals(analysisElement.getParentElement().getGraphId()) || value
+                                .getScopeId()
+                                .equals(scopeElement)) {
+                            tempInUnused.put(key, value);
+                        }
+                    });
+                    predecessorCallActivity.getOutUsed().forEach((key, value) -> {
+                        if (value.getScopeId().equals(analysisElement.getParentElement().getGraphId()) || value
+                                .getScopeId()
+                                .equals(scopeElement)) {
+                            tempInUnused.put(key, value);
+                        }
+                    });
+                }
+
+                if (predecessor.getBaseElement() instanceof EndEvent) {
+                    // Call Activity
+                    if (analysisElement instanceof BasicNode && ((BasicNode) analysisElement).getElementChapter()
+                            .equals(ElementChapter.OutputData)) {
+                        predecessor.getOutUnused().forEach(tempInUnused::put);
+                        predecessor.getOutUsed().forEach(tempInUsed::put);
                     }
-                });
-                predecessorCallActivity.getOutUsed().forEach((key, value) -> {
-                    if (value.getScopeId().equals(analysisElement.getParentElement().getId()) || value.getScopeId()
-                            .equals(scopeElement)) {
-                        tempInUnused.put(key, value);
-                    }
-                });
+                }
             }
 
-            if (predecessor.getBaseElement() instanceof EndEvent) {
-                // Call Activity
-                if (analysisElement instanceof BasicNode && ((BasicNode) analysisElement).getElementChapter()
-                        .equals(ElementChapter.OutputData)) {
-                    predecessor.getOutUnused().forEach(tempInUnused::put);
-                    predecessor.getOutUsed().forEach(tempInUsed::put);
-                }
-            }
-        } else if (!predecessor.getParentElement().getId().equals(analysisElement.getParentElement().getId())) {
+        } else if (!predecessor.getParentElement().getGraphId()
+                .equals(analysisElement.getParentElement().getGraphId())) {
             // Check for local variables in element like input parameters
-            predecessor.getOutUnused().forEach((key, value) -> {
-                if (value.getScopeId().equals(predecessor.getParentElement().getId())) {
-                    tempInUnused.remove(key);
-                }
-            });
-            predecessor.getOutUsed().forEach((key, value) -> {
-                if (value.getScopeId().equals(predecessor.getParentElement().getId())) {
-                    tempInUsed.remove(key);
-                }
-            });
+            filterLocalVariables(predecessor, tempInUnused, tempInUsed);
+
         } else if (predecessor instanceof BasicNode && ((BasicNode) predecessor).getElementChapter()
                 .equals(ElementChapter.OutputData)) {
-            predecessor.getOutUnused().forEach((key, value) -> {
-                if (!(value.getScopeId().equals(scopeElement) || value.getScopeId()
-                        .equals(analysisElement.getParentElement().getId()))) {
-                    tempInUnused.remove(key);
-                }
-            });
-            predecessor.getOutUsed().forEach((key, value) -> {
-                if (!(value.getScopeId().equals(scopeElement) || value.getScopeId()
-                        .equals(analysisElement.getParentElement().getId()))) {
-                    tempInUsed.remove(key);
-                }
-            });
+            filterVariablesWithScope(predecessor.getOutUnused(), tempInUnused, Arrays.asList(scopeElement,
+                    analysisElement.getParentElement().getGraphId()));
+            filterVariablesWithScope(predecessor.getOutUsed(), tempInUsed, Arrays.asList(scopeElement,
+                    analysisElement.getParentElement().getGraphId()));
         }
 
         return new LinkedHashMap[] { tempInUsed, tempInUnused };
+    }
+
+    private void copyOperationsWithCallActivityScope(LinkedHashMap<String, ProcessVariableOperation> tempInUnused,
+            LinkedHashMap<String, ProcessVariableOperation> tempInUsed,
+            String newScope) {
+        LinkedHashMap<String, ProcessVariableOperation> tempInUsedNew = new LinkedHashMap<>();
+        LinkedHashMap<String, ProcessVariableOperation> tempInUnusedNew = new LinkedHashMap<>();
+
+        // Copy variables so that they keep the scope of the process
+        tempInUnused.forEach((key, value) -> {
+            try {
+                ProcessVariableOperation operation = (ProcessVariableOperation) value.clone();
+                operation.setScopeId(newScope);
+                tempInUnusedNew.put(key, operation);
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        });
+        tempInUsed.forEach((key, value) -> {
+            try {
+                ProcessVariableOperation operation = (ProcessVariableOperation) value.clone();
+                operation.setScopeId(newScope);
+                tempInUsedNew.put(key, operation);
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        // Update input hash maps
+        tempInUnused.clear();
+        tempInUsed.clear();
+        tempInUnusedNew.forEach(tempInUnused::put);
+        tempInUsedNew.forEach(tempInUsed::put);
+    }
+
+    private boolean isCallActivityMappingInAll(AnalysisElement element) {
+        ModelElementInstance parentElement = element.getBaseElement().getParentElement();
+        return (parentElement instanceof Process) && callActivitiesInMapping
+                .contains(((Process) parentElement).getId());
+    }
+
+    private boolean isCallActivityMappingOutAll(AnalysisElement predecessor) {
+        // Check if call activity has a variable mapping of all
+        ModelElementInstance parentElement = predecessor.getBaseElement().getParentElement();
+        return (parentElement instanceof Process) && callActivitiesOutMapping
+                .contains(((Process) parentElement).getId());
+    }
+
+    private void filterLocalVariables(AnalysisElement predecessor,
+            LinkedHashMap<String, ProcessVariableOperation> tempInUnused,
+            LinkedHashMap<String, ProcessVariableOperation> tempInUsed) {
+        String scopePredecessor = predecessor.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
+
+        // Check for local variables in element like input parameters
+        filterVariablesWithScope(predecessor.getOutUnused(), tempInUnused,
+                Arrays.asList(predecessor.getParentElement().getGraphId()));
+        filterVariablesWithScope(predecessor.getOutUsed(), tempInUsed,
+                Arrays.asList(predecessor.getParentElement().getGraphId()));
+    }
+
+    private void filterVariablesWithScope(LinkedHashMap<String, ProcessVariableOperation> sourceList,
+            LinkedHashMap<String, ProcessVariableOperation> targetList,
+            List<String> scopes) {
+        sourceList.forEach((key, value) -> {
+            if (scopes.contains(value.getScopeId())) {
+                targetList.remove(key);
+            }
+        });
     }
 
     private boolean isChildOrSiblingOfScope(BaseElement element, String scopeId) {
@@ -594,7 +661,7 @@ public class FlowAnalysis {
                         prev = operation;
                         continue;
                     }
-                    checkAnomaly(operation.getElement(), operation, prev, analysisElement.getId());
+                    checkAnomaly(operation.getElement(), operation, prev, analysisElement.getGraphId());
                     prev = operation;
                 }
             }
@@ -678,7 +745,7 @@ public class FlowAnalysis {
                 getIntersection(node.getInUnused(), node.getDefined()));
         if (!ddAnomalies.isEmpty()) {
             ddAnomalies.forEach((k,
-                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getId(),
+                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getGraphId(),
                     node.getBaseElement().getId(),
                     node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
         }
@@ -694,7 +761,7 @@ public class FlowAnalysis {
                 getIntersection(node.getInUnused(), node.getKilled()));
         if (!duAnomalies.isEmpty()) {
             duAnomalies.forEach((k,
-                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getId(),
+                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getGraphId(),
                     node.getBaseElement().getId(),
                     node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
         }
@@ -731,7 +798,7 @@ public class FlowAnalysis {
 
         if (!urAnomalies.isEmpty()) {
             urAnomalies.forEach((k,
-                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getId(),
+                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UR, node.getGraphId(),
                     node.getBaseElement().getId(),
                     node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
         }
@@ -768,7 +835,7 @@ public class FlowAnalysis {
 
         if (!uuAnomalies.isEmpty()) {
             uuAnomalies.forEach((k,
-                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getId(),
+                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.UU, node.getGraphId(),
                     node.getBaseElement().getId(),
                     node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
         }
@@ -891,8 +958,16 @@ public class FlowAnalysis {
         return intersection;
     }
 
-    public LinkedHashMap<String, AnalysisElement> getNodes() {
+    public Map<String, AnalysisElement> getNodes() {
         return nodes;
+    }
+
+    public Set<String> getCallActivitiesInMapping() {
+        return callActivitiesInMapping;
+    }
+
+    public Set<String> getCallActivitiesOutMapping() {
+        return callActivitiesOutMapping;
     }
 
     public int getOperationCounter() {
@@ -907,5 +982,13 @@ public class FlowAnalysis {
         return (value.getChapter().equals(ElementChapter.InputImplementation)
                 || value.getChapter().equals(ElementChapter.OutputImplementation))
                 && value.getScopeId().equals(((CallActivity) value.getElement().getBaseElement()).getCalledElement());
+    }
+
+    public void addCallActivityAllInMapping(String id) {
+        this.callActivitiesInMapping.add(id);
+    }
+
+    public void addCallActivityAllOutMapping(String id) {
+        this.callActivitiesOutMapping.add(id);
     }
 }

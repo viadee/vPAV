@@ -527,7 +527,7 @@ public final class ProcessVariableReader {
                 .list();
         for (final CamundaIn inputAssociation : inputAssociations) {
             String source = inputAssociation.getCamundaSource();
-            if (source == null || source.isEmpty()) {
+            if (!(source == null || source.isEmpty())) {
                 source = inputAssociation.getCamundaSourceExpression();
                 if (source != null && !source.isEmpty()) {
                     parseJuelExpression(element, ElementChapter.InputData,
@@ -537,6 +537,10 @@ public final class ProcessVariableReader {
                     continue;
                 }
 
+            } else if (inputAssociation.getCamundaVariables().equals("all")) {
+                // Handle all mapping in flow analysis
+                element.getFlowAnalysis().addCallActivityAllInMapping(((CallActivity)element.getBaseElement()).getCalledElement());
+                return;
             } else {
                 node.addOperation(new ProcessVariableOperation(source, VariableOperation.READ, scopeId));
             }
@@ -546,7 +550,6 @@ public final class ProcessVariableReader {
 
             node.addOperation(new ProcessVariableOperation(target, VariableOperation.WRITE,
                     ((CallActivity) baseElement).getCalledElement()));
-
         }
         if (node.getOperations().size() > 0) {
             predecessor[0] = addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
@@ -563,10 +566,14 @@ public final class ProcessVariableReader {
                 .filterByType(CamundaOut.class).list();
         for (final CamundaOut outputAssociation : outputAssociations) {
             String source = outputAssociation.getCamundaSource();
-            if (source == null || source.isEmpty()) {
+            if (!(source == null || source.isEmpty())) {
                 source = outputAssociation.getCamundaSourceExpression();
                 parseJuelExpression(element, ElementChapter.OutputData, KnownElementFieldType.CamundaOut,
                         source, ((CallActivity) baseElement).getCalledElement(), predecessor);
+            } else if (outputAssociation.getCamundaVariables().equals("all")) {
+                // Handle all mapping in flow analysis
+                element.getFlowAnalysis().addCallActivityAllOutMapping(((CallActivity)element.getBaseElement()).getCalledElement());
+                return;
             } else {
                 node.addOperation(new ProcessVariableOperation(source, VariableOperation.READ,
                         ((CallActivity) baseElement).getCalledElement()));
@@ -769,10 +776,9 @@ public final class ProcessVariableReader {
     }
 
     public String getProcessScope(BpmnModelElementInstance scopeElement) {
-        if(scopeElement instanceof SubProcess) {
+        if (scopeElement instanceof SubProcess) {
             return scopeElement.getParentElement().getAttributeValue(BpmnConstants.ATTR_ID);
-        }
-        else {
+        } else {
             return scopeElement.getAttributeValue(BpmnConstants.ATTR_ID);
         }
     }
@@ -967,7 +973,8 @@ public final class ProcessVariableReader {
             AstParameters parameters = (AstParameters) method.getChild(1);
             if (property.getChild(0) instanceof AstIdentifier) {
                 String objectName = ((AstIdentifier) property.getChild(0)).getName();
-                if (objectName.equals(CamundaMethodServices.EXECUTION_OBJECT) || objectName.equals(CamundaMethodServices.TASK_OBJECT)) {
+                if (objectName.equals(CamundaMethodServices.EXECUTION_OBJECT) || objectName
+                        .equals(CamundaMethodServices.TASK_OBJECT)) {
                     handleExecutionInExpression(parameters, property, scopeId, expNode);
                 } else {
                     handleMethodCallInExpression(parameters, property, objectName, scopeId, expNode, element,

@@ -62,6 +62,7 @@ import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.xml.ModelInstance;
 
 /**
  * Creates data flow graph based on a bpmn model
@@ -70,7 +71,9 @@ public class ElementGraphBuilder {
 
     private Map<String, BpmnElement> elementMap = new HashMap<>();
 
-    private Map<String, String> processIdToPathMap;
+    private Map<String, String> processIdToPathMap = new HashMap<>();
+
+    private Map<String, BpmnModelInstance> processIdToModelInstance = new HashMap<>();
 
     private Map<String, String> decisionRefToPathMap;
 
@@ -113,6 +116,10 @@ public class ElementGraphBuilder {
             final Map<String, String> processIdToPathMap) {
         this.decisionRefToPathMap = decisionRefToPathMap;
         this.processIdToPathMap = processIdToPathMap;
+    }
+
+    public ElementGraphBuilder(Map<String, BpmnModelInstance> processIdToModelInstance) {
+        this.processIdToModelInstance = processIdToModelInstance;
     }
 
     /**
@@ -472,7 +479,7 @@ public class ElementGraphBuilder {
     }
 
     private boolean splitSubprocessElement(final BpmnElement element) {
-        if(element.getControlFlowGraph().getNodes().isEmpty()) {
+        if (element.getControlFlowGraph().getNodes().isEmpty()) {
             return false;
         }
 
@@ -542,6 +549,7 @@ public class ElementGraphBuilder {
             final Collection<String> calledElementHierarchy, final ProcessVariablesScanner scanner,
             final FlowAnalysis flowAnalysis) {
 
+        Collection<Graph> subGraphs = null;
         final CallActivity callActivity = (CallActivity) activity;
         final String calledElement = callActivity.getCalledElement();
 
@@ -557,17 +565,26 @@ public class ElementGraphBuilder {
 
             // get file path of the called process
             final String callActivityPath = processIdToPathMap.get(calledElement);
+
             if (callActivityPath != null) {
                 // load process and transform it into a data flow graph
-                final Collection<Graph> subGraphs = createSubDataFlowsFromCallActivity(fileScanner,
+                subGraphs = createSubDataFlowsFromCallActivity(fileScanner,
                         calledElementHierarchy, callActivityPath, scanner, flowAnalysis);
+            }
+        } else if (processIdToModelInstance.containsKey(calledElement)) {
+            // get model of the called process
+            BpmnModelInstance calledProcessModel = processIdToModelInstance.get(calledElement);
+            // load process and transform it into a data flow graph
+            subGraphs = createSubDataFlowsFromCallActivity(fileScanner,
+                    calledElementHierarchy, calledProcessModel, scanner, flowAnalysis);
+        }
 
-                for (final Graph subGraph : subGraphs) {
-                    // look only on the called process!
-                    if (subGraph.getProcessId().equals(calledElement)) {
-                        // connect sub data flow with the main data flow
-                        connectGraphs(graph, subGraph, element);
-                    }
+        if (subGraphs != null) {
+            for (final Graph subGraph : subGraphs) {
+                // look only on the called process!
+                if (subGraph.getProcessId().equals(calledElement)) {
+                    // connect sub data flow with the main data flow
+                    connectGraphs(graph, subGraph, element);
                 }
             }
         }
@@ -637,5 +654,18 @@ public class ElementGraphBuilder {
                 messageIdToVariables, processIdToVariables, rule);
         return graphBuilder.createProcessGraph(fileScanner, subModel, callActivityPath, calledElementHierarchy, scanner,
                 flowAnalysis);
+    }
+
+    // Used for testing
+    private Collection<Graph> createSubDataFlowsFromCallActivity(final FileScanner fileScanner,
+            final Collection<String> calledElementHierarchy, final BpmnModelInstance subModel,
+            final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
+        // transform process into data flow
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
+                messageIdToVariables, processIdToVariables, rule);
+        return graphBuilder
+                .createProcessGraph(fileScanner, subModel, subModel.getModel().getModelName(), calledElementHierarchy,
+                        scanner,
+                        flowAnalysis);
     }
 }

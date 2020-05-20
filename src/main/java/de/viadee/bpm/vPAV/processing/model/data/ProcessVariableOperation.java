@@ -149,6 +149,10 @@ public class ProcessVariableOperation {
         return scopeId;
     }
 
+    public void setScopeId(String scope) {
+        this.scopeId = scope;
+    }
+
     public int getIndex() {
         return index;
     }
@@ -180,5 +184,44 @@ public class ProcessVariableOperation {
 
     public void setIndex(int operationCounter) {
         index = operationCounter;
+    }
+
+    public Object clone() throws
+            CloneNotSupportedException {
+        ProcessVariableOperation myClone = (ProcessVariableOperation) super.clone();
+        myClone.setId(id);
+        myClone.setName(name);
+        myClone.setNode(node);
+        myClone.setOperation(operation);
+        myClone.setScopeId(scopeId);
+        myClone.setResourceFilePath(resourceFilePath);
+        myClone.setIndex(index);
+        myClone.setFlowOperationIndex(flowOperationIndex);
+        myClone.setFieldType(fieldType);
+        return myClone;
+    }
+
+    private void setFieldType(KnownElementFieldType fieldType) {
+        this.fieldType = fieldType;
+    }
+
+    private void setFlowOperationIndex(int flowOperationIndex) {
+        this.flowOperationIndex = flowOperationIndex;
+    }
+
+    private void setResourceFilePath(String resourceFilePath) {
+        this.resourceFilePath = resourceFilePath;
+    }
+
+    private void setOperation(VariableOperation operation) {
+        this.operation = operation;
+    }
+
+    private void setName(String name) {
+        this.name = name;
+    }
+
+    private void setId(String id) {
+        this.id = id;
     }
 }

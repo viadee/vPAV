@@ -82,7 +82,7 @@ public class RecursionTest {
         final Collection<Graph> graphCollection = Helper.getModelWithDelegate("de.viadee.bpm.vPAV.delegates.RecursiveDelegate", flowAnalysis);
 
         flowAnalysis.analyze(graphCollection);
-        LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        Map<String, AnalysisElement> nodes = flowAnalysis.getNodes();
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("EndEvent_13uioac");
         AnalysisElement sequenceFlow2 = endEvent.getPredecessors().get(0);

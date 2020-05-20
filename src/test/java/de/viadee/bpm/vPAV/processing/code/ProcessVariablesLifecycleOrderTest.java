@@ -105,7 +105,7 @@ public class ProcessVariablesLifecycleOrderTest {
 
         flowAnalysis.analyze(graphCollection);
 
-        LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        Map<String, AnalysisElement> nodes = flowAnalysis.getNodes();
         assertEquals("There should be 22 nodes.", 22, nodes.size());
 
         // Find throw event
@@ -206,7 +206,7 @@ public class ProcessVariablesLifecycleOrderTest {
 
         flowAnalysis.analyze(graphCollection);
 
-        LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        Map<String, AnalysisElement> nodes = flowAnalysis.getNodes();
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("MyEndEvent");
         AnalysisElement sequenceFlow_1qw9mzs = endEvent.getPredecessors().get(0);
