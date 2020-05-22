@@ -61,6 +61,18 @@ public class ProcessVariableOperation {
 
     private KnownElementFieldType fieldType;
 
+    public ProcessVariableOperation(ProcessVariableOperation copy, String scopeId) {
+        this.setId(copy.id);
+        this.setName(copy.name);
+        this.setNode(copy.node);
+        this.setOperation(copy.operation);
+        this.setScopeId(scopeId);
+        this.setResourceFilePath(copy.resourceFilePath);
+        this.setIndex(copy.index);
+        this.setFlowOperationIndex(copy.flowOperationIndex);
+        this.setFieldType(copy.fieldType);
+    }
+
     public ProcessVariableOperation(final String name,
             final VariableOperation operation,
             final String scopeId) {
@@ -184,21 +196,6 @@ public class ProcessVariableOperation {
 
     public void setIndex(int operationCounter) {
         index = operationCounter;
-    }
-
-    public Object clone() throws
-            CloneNotSupportedException {
-        ProcessVariableOperation myClone = (ProcessVariableOperation) super.clone();
-        myClone.setId(id);
-        myClone.setName(name);
-        myClone.setNode(node);
-        myClone.setOperation(operation);
-        myClone.setScopeId(scopeId);
-        myClone.setResourceFilePath(resourceFilePath);
-        myClone.setIndex(index);
-        myClone.setFlowOperationIndex(flowOperationIndex);
-        myClone.setFieldType(fieldType);
-        return myClone;
     }
 
     private void setFieldType(KnownElementFieldType fieldType) {

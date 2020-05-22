@@ -269,6 +269,10 @@ public class FlowAnalysis {
                                             .collect(Collectors
                                                     .toMap(AnalysisElement::getGraphId, Function.identity())));
                             succ.setPredecessors(preds);
+                            preds.forEach((key, value) -> {
+                                value.removeSuccessor(analysisElement.getId());
+                                value.addSuccessor(succ);
+                            });
                         } else if (succ.getBaseElement() instanceof SequenceFlow) {
                             // Find end event
                             AnalysisElement endEvent = null;
@@ -297,7 +301,7 @@ public class FlowAnalysis {
                             succ.addDefined(camundaOutput);
                             succ.getPredecessors().forEach(pred -> {
                                 if (pred.getBaseElement() instanceof CallActivity) {
-                                    succ.removePredecessor(pred.getGraphId());
+                                    succ.removePredecessor(pred.getId());
                                 }
                             });
                             nodesBeforeCallActivities.put(succ.getGraphId(), analysisElement.getPredecessors().get(0));
@@ -500,10 +504,15 @@ public class FlowAnalysis {
                 copyOperationsWithCallActivityScope(tempInUnused, tempInUsed,
                         ((Process) analysisElement.getBaseElement().getParentElement()).getId());
             } else {
+                filterVariablesWithoutScope(predecessor.getOutUnused(), tempInUnused, Arrays.asList(scopeElement,
+                        analysisElement.getParentElement().getGraphId()));
+                filterVariablesWithoutScope(predecessor.getOutUsed(), tempInUsed, Arrays.asList(scopeElement,
+                        analysisElement.getParentElement().getGraphId()));
+
                 if (nodesBeforeCallActivities.containsKey(analysisElement.getGraphId())) {
                     AnalysisElement predecessorCallActivity = nodesBeforeCallActivities
                             .get(analysisElement.getGraphId());
-                    // Pass Input parameters forward
+                    // Pass Input parameters forward that are present before and after the call activity
                     predecessorCallActivity.getOutUnused().forEach((key, value) -> {
                         if (value.getScopeId().equals(analysisElement.getParentElement().getGraphId()) || value
                                 .getScopeId()
@@ -537,9 +546,9 @@ public class FlowAnalysis {
 
         } else if (predecessor instanceof BasicNode && ((BasicNode) predecessor).getElementChapter()
                 .equals(ElementChapter.OutputData)) {
-            filterVariablesWithScope(predecessor.getOutUnused(), tempInUnused, Arrays.asList(scopeElement,
+            filterVariablesWithoutScope(predecessor.getOutUnused(), tempInUnused, Arrays.asList(scopeElement,
                     analysisElement.getParentElement().getGraphId()));
-            filterVariablesWithScope(predecessor.getOutUsed(), tempInUsed, Arrays.asList(scopeElement,
+            filterVariablesWithoutScope(predecessor.getOutUsed(), tempInUsed, Arrays.asList(scopeElement,
                     analysisElement.getParentElement().getGraphId()));
         }
 
@@ -554,22 +563,10 @@ public class FlowAnalysis {
 
         // Copy variables so that they keep the scope of the process
         tempInUnused.forEach((key, value) -> {
-            try {
-                ProcessVariableOperation operation = (ProcessVariableOperation) value.clone();
-                operation.setScopeId(newScope);
-                tempInUnusedNew.put(key, operation);
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
+            tempInUnusedNew.put(key, new ProcessVariableOperation(value, newScope));
         });
         tempInUsed.forEach((key, value) -> {
-            try {
-                ProcessVariableOperation operation = (ProcessVariableOperation) value.clone();
-                operation.setScopeId(newScope);
-                tempInUsedNew.put(key, operation);
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
+            tempInUsedNew.put(key, new ProcessVariableOperation(value, newScope));
         });
 
         // Update input hash maps
@@ -595,7 +592,6 @@ public class FlowAnalysis {
     private void filterLocalVariables(AnalysisElement predecessor,
             LinkedHashMap<String, ProcessVariableOperation> tempInUnused,
             LinkedHashMap<String, ProcessVariableOperation> tempInUsed) {
-        String scopePredecessor = predecessor.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
 
         // Check for local variables in element like input parameters
         filterVariablesWithScope(predecessor.getOutUnused(), tempInUnused,
@@ -609,6 +605,16 @@ public class FlowAnalysis {
             List<String> scopes) {
         sourceList.forEach((key, value) -> {
             if (scopes.contains(value.getScopeId())) {
+                targetList.remove(key);
+            }
+        });
+    }
+
+    private void filterVariablesWithoutScope(LinkedHashMap<String, ProcessVariableOperation> sourceList,
+            LinkedHashMap<String, ProcessVariableOperation> targetList,
+            List<String> scopes) {
+        sourceList.forEach((key, value) -> {
+            if (!scopes.contains(value.getScopeId())) {
                 targetList.remove(key);
             }
         });

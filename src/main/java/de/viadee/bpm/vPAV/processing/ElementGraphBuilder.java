@@ -617,18 +617,19 @@ public class ElementGraphBuilder {
             }
         }
 
-        // get start nodes of the sub data flow and connect
-        final Collection<BpmnElement> startNodes = subGraph.getStartNodes();
-        for (final BpmnElement startNode : startNodes) {
-            // set variables from in interface of the call activity
-            graph.addEdge(callActivity, startNode, 100);
-        }
-
+        // connect end node of sub graph
         final Collection<BpmnElement> endNodes = subGraph.getEndNodes();
         for (final BpmnElement endNode : endNodes) {
             for (final BpmnElement succ : graph.getAdjacencyListSuccessor(callActivity)) {
                 graph.addEdge(endNode, succ, 100);
             }
+        }
+
+        // get start nodes of the sub data flow and connect
+        final Collection<BpmnElement> startNodes = subGraph.getStartNodes();
+        for (final BpmnElement startNode : startNodes) {
+            // set variables from in interface of the call activity
+            graph.addEdge(callActivity, startNode, 100);
         }
     }
 

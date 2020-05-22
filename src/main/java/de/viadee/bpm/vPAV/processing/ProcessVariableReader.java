@@ -526,23 +526,21 @@ public final class ProcessVariableReader {
         final List<CamundaIn> inputAssociations = extensionElements.getElementsQuery().filterByType(CamundaIn.class)
                 .list();
         for (final CamundaIn inputAssociation : inputAssociations) {
-            String source = inputAssociation.getCamundaSource();
-            if (!(source == null || source.isEmpty())) {
-                source = inputAssociation.getCamundaSourceExpression();
-                if (source != null && !source.isEmpty()) {
-                    parseJuelExpression(element, ElementChapter.InputData,
-                            KnownElementFieldType.CamundaIn,
-                            source, scopeId, predecessor);
-                } else {
-                    continue;
-                }
-
-            } else if (inputAssociation.getCamundaVariables().equals("all")) {
+            String sourceExpr = inputAssociation.getCamundaSourceExpression();
+            if (sourceExpr != null && !sourceExpr.isEmpty()) {
+                parseJuelExpression(element, ElementChapter.InputData,
+                        KnownElementFieldType.CamundaIn,
+                        sourceExpr, scopeId, predecessor);
+            } else if (inputAssociation.getCamundaVariables() != null && inputAssociation.getCamundaVariables()
+                    .equals("all")) {
                 // Handle all mapping in flow analysis
-                element.getFlowAnalysis().addCallActivityAllInMapping(((CallActivity)element.getBaseElement()).getCalledElement());
+                element.getFlowAnalysis()
+                        .addCallActivityAllInMapping(((CallActivity) element.getBaseElement()).getCalledElement());
                 return;
             } else {
-                node.addOperation(new ProcessVariableOperation(source, VariableOperation.READ, scopeId));
+                node.addOperation(
+                        new ProcessVariableOperation(inputAssociation.getCamundaSource(), VariableOperation.READ,
+                                scopeId));
             }
 
             // Add target operation
@@ -565,18 +563,20 @@ public final class ProcessVariableReader {
         final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
                 .filterByType(CamundaOut.class).list();
         for (final CamundaOut outputAssociation : outputAssociations) {
-            String source = outputAssociation.getCamundaSource();
-            if (!(source == null || source.isEmpty())) {
-                source = outputAssociation.getCamundaSourceExpression();
+            String sourceExp = outputAssociation.getCamundaSourceExpression();
+            if (!(sourceExp == null || sourceExp.isEmpty())) {
                 parseJuelExpression(element, ElementChapter.OutputData, KnownElementFieldType.CamundaOut,
-                        source, ((CallActivity) baseElement).getCalledElement(), predecessor);
-            } else if (outputAssociation.getCamundaVariables().equals("all")) {
+                        sourceExp, ((CallActivity) baseElement).getCalledElement(), predecessor);
+            } else if (outputAssociation.getCamundaVariables() != null && outputAssociation.getCamundaVariables()
+                    .equals("all")) {
                 // Handle all mapping in flow analysis
-                element.getFlowAnalysis().addCallActivityAllOutMapping(((CallActivity)element.getBaseElement()).getCalledElement());
+                element.getFlowAnalysis()
+                        .addCallActivityAllOutMapping(((CallActivity) element.getBaseElement()).getCalledElement());
                 return;
             } else {
-                node.addOperation(new ProcessVariableOperation(source, VariableOperation.READ,
-                        ((CallActivity) baseElement).getCalledElement()));
+                node.addOperation(
+                        new ProcessVariableOperation(outputAssociation.getCamundaSource(), VariableOperation.READ,
+                                ((CallActivity) baseElement).getCalledElement()));
             }
 
             final String target = outputAssociation.getCamundaTarget();
