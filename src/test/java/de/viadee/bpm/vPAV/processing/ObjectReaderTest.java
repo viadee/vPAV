@@ -357,11 +357,6 @@ public class ObjectReaderTest {
     }
 
     @Test
-    public void testProcessBlockWithSuccessors() {
-        // TODO
-    }
-
-    @Test
     public void testResolveAnonymousInnerClasses() {
         // Test that the anonymous inner class is correctly resolved
         SootMethod method = anonymousInnerSootClass.getMethodByName("execute");
@@ -395,41 +390,4 @@ public class ObjectReaderTest {
         Assert.assertEquals("myVariableValue", argValues.get(1));
         Assert.assertSame(objVariable1, argValues.get(2));
     }
-
-    /* TODO rewrite
-    @Test
-    public void testCreateProcessVariableOperationFromInvocation() {
-        // TODO how to write this better without mocking so much?
-        // Test that getVariable() method is correctly translated to a ProcessVariableOperation
-        SootClass delegateExecutionClass = Scene.v().makeSootClass("org.camunda.bpm.engine.delegate.DelegateExecution");
-        SootMethod method = mock(SootMethod.class);
-        when(method.getName()).thenReturn("getVariable");
-        when(method.getDeclaringClass()).thenReturn(delegateExecutionClass);
-        InvokeExpr invokeExpr = mock(JInterfaceInvokeExpr.class);
-        when(invokeExpr.getArgCount()).thenReturn(1);
-        when(invokeExpr.getArgBox(0)).thenReturn(Jimple.v().newImmediateBox(StringConstant.v("processVariable")));
-        when(invokeExpr.getMethod()).thenReturn(method);
-
-        ProcessVariableOperation pvo = objectReader.createProcessVariableOperationFromInvocation(invokeExpr);
-        Assert.assertEquals("processVariable", pvo.getName());
-        Assert.assertEquals(VariableOperation.READ, pvo.getOperation());
-
-        // Test setVariable()
-        when(invokeExpr.getArgCount()).thenReturn(2);
-        when(invokeExpr.getArgBox(0)).thenReturn(Jimple.v().newImmediateBox(StringConstant.v("processVariable")));
-        when(method.getName()).thenReturn("setVariable");
-
-        pvo = objectReader.createProcessVariableOperationFromInvocation(invokeExpr);
-        Assert.assertEquals("processVariable", pvo.getName());
-        Assert.assertEquals(VariableOperation.WRITE, pvo.getOperation());
-
-        // Test removeVariable()
-        when(invokeExpr.getArgCount()).thenReturn(1);
-        when(invokeExpr.getArgBox(0)).thenReturn(Jimple.v().newImmediateBox(StringConstant.v("processVariable")));
-        when(method.getName()).thenReturn("removeVariable");
-
-        pvo = objectReader.createProcessVariableOperationFromInvocation(invokeExpr);
-        Assert.assertEquals("processVariable", pvo.getName());
-        Assert.assertEquals(VariableOperation.DELETE, pvo.getOperation());
-    } */
 }

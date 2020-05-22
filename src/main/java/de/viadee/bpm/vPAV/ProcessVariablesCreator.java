@@ -142,7 +142,6 @@ public class ProcessVariablesCreator {
     }
 
     private void determineScopeId() {
-        // TODO there might be another "calculation" for multi instance tasks
         final BaseElement baseElement = element.getBaseElement();
         BpmnModelElementInstance scopeElement = baseElement.getScope();
 

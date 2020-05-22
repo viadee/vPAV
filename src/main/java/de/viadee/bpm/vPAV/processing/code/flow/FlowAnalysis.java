@@ -641,7 +641,6 @@ public class FlowAnalysis {
             final LinkedHashMap<String, ProcessVariableOperation> operations = new LinkedHashMap<>(
                     analysisElement.getOperations());
 
-            // TODO operations on mapped variables are not recognized inside variable
             // mapping delegate method/class
             // If element is delegate variable mapping node, ignore mapped variables because
             // they are only active inside child
