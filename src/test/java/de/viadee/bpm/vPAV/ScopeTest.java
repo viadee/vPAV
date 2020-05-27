@@ -47,7 +47,6 @@ import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;

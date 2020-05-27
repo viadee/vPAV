@@ -62,6 +62,10 @@ public class ControlFlowGraph {
         this.nodes.put(key, node);
     }
 
+    public void addNodeWithoutNewId(final BasicNode node) {
+        this.nodes.put(node.getId(), node);
+    }
+
     /**
      *
      * Helper method to create ids based on hierarchy, e.g.
