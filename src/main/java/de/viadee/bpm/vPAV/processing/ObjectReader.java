@@ -118,7 +118,10 @@ public class ObjectReader {
 
         if (thisName == null) {
             // Find out variable name of this reference, it's always defined in the first unit
-            thisName = getThisNameFromUnit(unitIt.next());
+            // If not, it´s a static method
+            if(block.iterator().next() instanceof IdentityStmt) {
+                thisName = getThisNameFromUnit(unitIt.next());
+            }
         }
 
         Unit unit;
