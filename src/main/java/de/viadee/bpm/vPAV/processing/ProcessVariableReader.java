@@ -525,6 +525,13 @@ public final class ProcessVariableReader {
                 KnownElementFieldType.CamundaIn);
         final List<CamundaIn> inputAssociations = extensionElements.getElementsQuery().filterByType(CamundaIn.class)
                 .list();
+
+        // Skip processing if delegate variable mapping is defined
+        if (element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
+            return;
+        }
+
         for (final CamundaIn inputAssociation : inputAssociations) {
             String sourceExpr = inputAssociation.getCamundaSourceExpression();
             if (sourceExpr != null && !sourceExpr.isEmpty()) {
@@ -562,6 +569,13 @@ public final class ProcessVariableReader {
                 KnownElementFieldType.CamundaOut);
         final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
                 .filterByType(CamundaOut.class).list();
+
+        // Skip processing if delegate variable mapping is defined
+        if (element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
+                BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
+            return;
+        }
+
         for (final CamundaOut outputAssociation : outputAssociations) {
             String sourceExp = outputAssociation.getCamundaSourceExpression();
             if (!(sourceExp == null || sourceExp.isEmpty())) {
