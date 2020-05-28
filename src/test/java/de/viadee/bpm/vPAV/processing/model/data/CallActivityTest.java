@@ -389,32 +389,6 @@ public class CallActivityTest {
         }
     }
 
-    @Test
-    public void testSubprocessTemp() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final String PATH = BASE_PATH + "SubprocessTemp.bpmn";
-        final File processDefinition = new File(PATH);
-
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
-
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
-
-        // create data flow graphs
-        final Collection<String> calledElementHierarchy = new ArrayList<>();
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
-
-        flowAnalysis.analyze(graphCollection);
-
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-        System.out.println("test");
-    }
-
     @Before
     public void clear() {
         IssueService.getInstance().clear();
