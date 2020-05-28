@@ -48,12 +48,14 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.LinkedList;
 
 public class ProcessVariableOperationReaderTest {
 
@@ -61,14 +63,16 @@ public class ProcessVariableOperationReaderTest {
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        RuntimeConfig.getInstance().setTest(true);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-        final URL[] classUrls = {classUrl, resourcesUrl};
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     @AfterClass
