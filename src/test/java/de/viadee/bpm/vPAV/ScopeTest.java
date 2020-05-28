@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import com.cronutils.model.Cron;
+import com.google.errorprone.annotations.Var;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
@@ -43,6 +44,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -184,7 +186,6 @@ public class ScopeTest {
         // Output parameter is globally accessible
         Assert.assertEquals("myOutputParameter", outputNode.getDefined().values().iterator().next().getName());
         Assert.assertEquals("MyProcess", outputNode.getDefined().values().iterator().next().getScopeId());
-
     }
 
     @Test
@@ -306,6 +307,30 @@ public class ScopeTest {
                 flowAnalysis.getNodes().get("MyServiceTask__0").getDefined().values().iterator().next().getName());
         Assert.assertEquals("calledProcess",
                 flowAnalysis.getNodes().get("MyServiceTask__0").getDefined().values().iterator().next().getScopeId());
+    }
+
+    @Test
+    public void testScopeMessages() {
+        // Setup bean mapping because variables cannot be directly modified in the message name
+        // expression as it must return a string
+        final Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("msgNameDelegate", "de.viadee.bpm.vPAV.delegates.MessageNameDelegate");
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().serviceTask()
+                .intermediateThrowEvent("MyThrowEvent").message("${msgNameDelegate.giveMeTheName(execution)}")
+                .endEvent().done();
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
+        BpmnElement element = getBpmnElement(modelInstance.getModelElementById("MyThrowEvent"));
+
+        reader.getVariablesFromElement(element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getNodes().size());
+
+        Iterator<BasicNode> iterator = element.getControlFlowGraph().getNodes().values().iterator();
+        BasicNode node = iterator.next();
+        Assert.assertEquals("variable", node.getDefined().get("variable_0").getName());
+        Assert.assertEquals(VariableOperation.WRITE, node.getDefined().get("variable_0").getOperation());
+        Assert.assertEquals("MyProcess", node.getDefined().get("variable_0").getScopeId());
     }
 
     @Test
