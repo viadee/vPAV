@@ -526,12 +526,6 @@ public final class ProcessVariableReader {
         final List<CamundaIn> inputAssociations = extensionElements.getElementsQuery().filterByType(CamundaIn.class)
                 .list();
 
-        // Skip processing if delegate variable mapping is defined
-        if (element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
-            return;
-        }
-
         for (final CamundaIn inputAssociation : inputAssociations) {
             String sourceExpr = inputAssociation.getCamundaSourceExpression();
             if (sourceExpr != null && !sourceExpr.isEmpty()) {
@@ -544,7 +538,7 @@ public final class ProcessVariableReader {
                 element.getFlowAnalysis()
                         .addCallActivityAllInMapping(((CallActivity) element.getBaseElement()).getCalledElement());
                 return;
-            } else {
+            } else if (inputAssociation.getCamundaSource() != null) {
                 node.addOperation(
                         new ProcessVariableOperation(inputAssociation.getCamundaSource(), VariableOperation.READ,
                                 scopeId));
@@ -570,12 +564,6 @@ public final class ProcessVariableReader {
         final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
                 .filterByType(CamundaOut.class).list();
 
-        // Skip processing if delegate variable mapping is defined
-        if (element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null) {
-            return;
-        }
-
         for (final CamundaOut outputAssociation : outputAssociations) {
             String sourceExp = outputAssociation.getCamundaSourceExpression();
             if (!(sourceExp == null || sourceExp.isEmpty())) {
@@ -587,7 +575,7 @@ public final class ProcessVariableReader {
                 element.getFlowAnalysis()
                         .addCallActivityAllOutMapping(((CallActivity) element.getBaseElement()).getCalledElement());
                 return;
-            } else {
+            } else if (outputAssociation.getCamundaSource() != null) {
                 node.addOperation(
                         new ProcessVariableOperation(outputAssociation.getCamundaSource(), VariableOperation.READ,
                                 ((CallActivity) baseElement).getCalledElement()));
