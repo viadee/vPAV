@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ObjectVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.StringVariable;
 import org.junit.Assert;
@@ -366,16 +367,8 @@ public class ObjectReaderTest {
         Iterator<Unit> iter = block.getBody().getUnits().iterator();
         iter.next();
         iter.next();
-        iter.next();
-        iter.next();
-        iter.next();
-        iter.next();
-        JInvokeStmt invokeStmt = (JInvokeStmt) iter.next();
-        SootMethod anonymousMethod = objectReader.resolveAnonymousInnerClasses(invokeStmt.getInvokeExpr());
-
-        Assert.assertNotNull("Method should not be null.", anonymousMethod);
-        Block anonymousBlock = SootResolverSimplified.getBlockFromMethod(anonymousMethod);
-        Assert.assertEquals("Block should have 9 units.", 9, anonymousBlock.getBody().getUnits().size());
+        objectReader.handleAssignStmt(block, iter.next(), "this");
+        Assert.assertNotNull(objectReader.getLocalObjectVariables().get("$r0").getImplementation());
     }
 
     @Test

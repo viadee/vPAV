@@ -29,36 +29,35 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.delegates;
 
-import org.junit.BeforeClass;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+abstract class TestAnonymousInnerClassField {
 
-/**
- * unit test checks, whether outer variables on data flow graph will be set
- *
- * a) startProcessInstanceByKey, b) startProcessInstanceByMessage and correlateMessage
- *
- * assumption: examining process variables in source code is done before
- */
-public class OuterProcessVariablesTestOperation {
+    abstract void test();
+}
 
-    private static ClassLoader cl;
+public class TestDelegateAnonymousInnerClassField implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+    static TestAnonymousInnerClassField taic;
+
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
+        taic = new TestAnonymousInnerClassField() {
+
+            @Override
+            void test() {
+                execution.getVariable("test");
+                execution.setVariable("test1", true);
+                execution.removeVariable("test2");
+            }
+        };
+
+        execution.removeVariable("test");
+
+        taic.test();
+
+        execution.getVariable("test1");
     }
-    
-    // create new tests after refactoring
-
 }

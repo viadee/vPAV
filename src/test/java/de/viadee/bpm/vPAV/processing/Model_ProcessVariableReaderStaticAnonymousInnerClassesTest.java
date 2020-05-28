@@ -46,12 +46,16 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
@@ -67,6 +71,9 @@ public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 		final URL[] classUrls = { classUrl, resourcesUrl };
 		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
+		FileScanner.setupSootClassPaths(new LinkedList<>());
+		JavaReaderStatic.setupSoot();
+		Scene.v().loadNecessaryClasses();
 	}
 
 	@AfterClass

@@ -247,7 +247,7 @@ public class ObjectReader {
      * @param unit     Current unit
      * @param thisName Name of the current object
      */
-    private void handleAssignStmt(Block block, Unit unit, String thisName) {
+    public void handleAssignStmt(Block block, Unit unit, String thisName) {
         AssignStmt assignUnit = (AssignStmt) unit;
         Value leftValue = assignUnit.getLeftOpBox().getValue();
         Value rightValue = assignUnit.getRightOpBox().getValue();
@@ -302,7 +302,7 @@ public class ObjectReader {
                         targetObj = new ObjectVariable();
                     }
 
-                    SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr);
+                    SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr, targetObj);
                     method = (resolvedMethod != null) ? resolvedMethod : method;
                 }
             } else {
@@ -331,24 +331,20 @@ public class ObjectReader {
      * @param expr Invoke expression
      * @return SootMethod or null if resolving was not possible or necessary
      */
-    SootMethod resolveAnonymousInnerClasses(InvokeExpr expr) {
+    SootMethod resolveAnonymousInnerClasses(InvokeExpr expr, ObjectVariable objectVariable) {
         List<Value> args = expr.getArgs();
         List<Type> argTypes = argsToTypes(args);
 
         // Resolving for inner classes does not work with above call
-        // TODO works for the test but should check what happens if not jimple local
-        if (expr.getUseBoxes().get(0).getValue() instanceof JimpleLocal) {
-            if (expr.getUseBoxes().get(0).getValue().getType() instanceof RefType) {
-                if (((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass().hasOuterClass()) {
-                    try {
-                        // Use that for init method
-                        return ((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass()
-                                .getMethodByName(expr.getMethod().getName());
-                    } catch (AmbiguousMethodException e) {
-                        return ((RefType) expr.getUseBoxes().get(0).getValue().getType()).getSootClass()
-                                .getMethod(expr.getMethod().getName(), argTypes);
-                    }
-                }
+        // Use saved implementation
+        if (objectVariable.getImplementation() != null) {
+            try {
+                // Use that for init method
+                return objectVariable.getImplementation()
+                        .getMethodByName(expr.getMethod().getName());
+            } catch (AmbiguousMethodException e) {
+                return objectVariable.getImplementation()
+                        .getMethod(expr.getMethod().getName(), argTypes);
             }
         }
         return null;
@@ -529,7 +525,12 @@ public class ObjectReader {
             }
         } else if (rightValue instanceof NewExpr) {
             // New object is instantiated, we add an empty object as constructors are not resolved yet
-            return new ObjectVariable();
+            ObjectVariable ob = new ObjectVariable();
+            // If it is an inner class we also add the reference to it
+            if (((NewExpr) rightValue).getBaseType().getSootClass().hasOuterClass()) {
+                ob.setImplementation(((NewExpr) rightValue).getBaseType().getSootClass());
+            }
+            return ob;
         } else if (rightValue instanceof InvokeExpr) {
             return (ObjectVariable) handleInvokeExpr(block, (InvokeExpr) rightValue, thisName);
         } else if (rightValue instanceof CastExpr) {

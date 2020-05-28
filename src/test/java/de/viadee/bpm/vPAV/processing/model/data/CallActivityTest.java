@@ -64,7 +64,6 @@ import java.util.*;
  */
 public class CallActivityTest {
 
-    // TODO tests überprüfen, weil scope mitunter nicht richtig berücksichtig wird (glaube ich)
     private static final String BASE_PATH = "src/test/resources/CallActivityTest/";
 
     @BeforeClass
