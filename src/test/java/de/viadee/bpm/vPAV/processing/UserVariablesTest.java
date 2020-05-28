@@ -45,11 +45,7 @@ import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.testng.Assert;
+import org.junit.*;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -162,7 +158,7 @@ public class UserVariablesTest {
         HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = xmlVariablesReader
                 .read("UserVariablesTest/variables_incorrect.xml", "testProcess");
 
-        Assert.assertEquals(0, userVariables.size(), "Ill-defined user variable should not be included.");
+        Assert.assertEquals("Ill-defined user variable should not be included.", 0, userVariables.size());
     }
 
     @Before

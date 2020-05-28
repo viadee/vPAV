@@ -228,9 +228,8 @@
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <artifactId>groovy</artifactId>
             <version>3.0.4</version>
-            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

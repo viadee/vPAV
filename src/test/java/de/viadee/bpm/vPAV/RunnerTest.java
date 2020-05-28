@@ -38,7 +38,6 @@ import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.testng.Assert;
 
 import java.io.File;
 import java.net.MalformedURLException;
