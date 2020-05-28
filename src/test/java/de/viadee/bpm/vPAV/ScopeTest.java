@@ -31,8 +31,6 @@
  */
 package de.viadee.bpm.vPAV;
 
-import com.cronutils.model.Cron;
-import com.google.errorprone.annotations.Var;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
@@ -62,7 +60,6 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 public class ScopeTest {
-    // TODO add messages/signals and form data
 
     @BeforeClass
     public static void setupSoot() throws MalformedURLException {
@@ -314,7 +311,7 @@ public class ScopeTest {
         // Setup bean mapping because variables cannot be directly modified in the message name
         // expression as it must return a string
         final Map<String, String> beanMapping = new HashMap<>();
-        beanMapping.put("msgNameDelegate", "de.viadee.bpm.vPAV.delegates.MessageNameDelegate");
+        beanMapping.put("msgNameDelegate", "de.viadee.bpm.vPAV.delegates.SignalMessageNameDelegate");
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().serviceTask()
@@ -331,6 +328,55 @@ public class ScopeTest {
         Assert.assertEquals("variable", node.getDefined().get("variable_0").getName());
         Assert.assertEquals(VariableOperation.WRITE, node.getDefined().get("variable_0").getOperation());
         Assert.assertEquals("MyProcess", node.getDefined().get("variable_0").getScopeId());
+    }
+
+    @Test
+    public void testScopeSignals() {
+        // Setup bean mapping because variables cannot be directly modified in the message name
+        // expression as it must return a string
+        final Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("signalNameDelegate", "de.viadee.bpm.vPAV.delegates.SignalMessageNameDelegate");
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().serviceTask()
+                .intermediateThrowEvent("MyThrowEvent").signal("${signalNameDelegate.giveMeTheName(execution)}")
+                .endEvent().done();
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
+        BpmnElement element = getBpmnElement(modelInstance.getModelElementById("MyThrowEvent"));
+
+        reader.getVariablesFromElement(element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getNodes().size());
+
+        Iterator<BasicNode> iterator = element.getControlFlowGraph().getNodes().values().iterator();
+        BasicNode node = iterator.next();
+        Assert.assertEquals("variable", node.getDefined().get("variable_0").getName());
+        Assert.assertEquals(VariableOperation.WRITE, node.getDefined().get("variable_0").getOperation());
+        Assert.assertEquals("MyProcess", node.getDefined().get("variable_0").getScopeId());
+    }
+
+    @Test
+    public void testScopeFormData() {
+        // Setup bean mapping because variables cannot be directly modified in the message name
+        // expression as it must return a string
+        final Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("signalNameDelegate", "de.viadee.bpm.vPAV.delegates.SignalMessageNameDelegate");
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent()
+                .userTask("MyUserTask").camundaFormField().camundaId("firstname")
+                .camundaFormFieldDone()
+                .endEvent().done();
+        ProcessVariableReader reader = new ProcessVariableReader(null, null);
+        BpmnElement element = getBpmnElement(modelInstance.getModelElementById("MyUserTask"));
+
+        reader.getVariablesFromElement(element, new BasicNode[1]);
+        Assert.assertEquals(1, element.getControlFlowGraph().getNodes().size());
+
+        Iterator<BasicNode> iterator = element.getControlFlowGraph().getNodes().values().iterator();
+        BasicNode formField = iterator.next();
+        Assert.assertEquals("firstname", formField.getDefined().get("firstname_0").getName());
+        Assert.assertEquals(VariableOperation.WRITE, formField.getDefined().get("firstname_0").getOperation());
+        Assert.assertEquals("MyProcess", formField.getDefined().get("firstname_0").getScopeId());
     }
 
     @Test

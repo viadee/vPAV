@@ -33,10 +33,10 @@ package de.viadee.bpm.vPAV.delegates;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-public class MessageNameDelegate {
+public class SignalMessageNameDelegate {
 
     public String giveMeTheName(DelegateExecution execution) {
         execution.setVariable("variable", true);
-        return "messageName";
+        return "myName";
     }
 }
