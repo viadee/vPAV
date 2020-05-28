@@ -204,7 +204,7 @@ public class FlowAnalysis {
                             if (endEvent.equals(succ)) {
                                 // End event was not found
                                 LOGGER.severe("End event in child process was not found.");
-                            }
+                                return;                            }
 
                             succ.clearPredecessors();
                             endEvent.clearSuccessors();

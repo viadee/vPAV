@@ -538,7 +538,10 @@ public final class ProcessVariableReader {
                 element.getFlowAnalysis()
                         .addCallActivityAllInMapping(((CallActivity) element.getBaseElement()).getCalledElement());
                 return;
-            } else if (inputAssociation.getCamundaSource() != null) {
+            } else if (inputAssociation.getCamundaSource() == null) {
+                // Delegate variable mapping is probably defined
+                return;
+            } else {
                 node.addOperation(
                         new ProcessVariableOperation(inputAssociation.getCamundaSource(), VariableOperation.READ,
                                 scopeId));
@@ -575,7 +578,10 @@ public final class ProcessVariableReader {
                 element.getFlowAnalysis()
                         .addCallActivityAllOutMapping(((CallActivity) element.getBaseElement()).getCalledElement());
                 return;
-            } else if (outputAssociation.getCamundaSource() != null) {
+            } else if (outputAssociation.getCamundaSource() == null) {
+                // Delegate variable mapping is probably defined
+                return;
+            } else {
                 node.addOperation(
                         new ProcessVariableOperation(outputAssociation.getCamundaSource(), VariableOperation.READ,
                                 ((CallActivity) baseElement).getCalledElement()));
@@ -586,9 +592,12 @@ public final class ProcessVariableReader {
                 node.addOperation(new ProcessVariableOperation(target, VariableOperation.WRITE, scopeId));
             }
         }
-        if (node.getOperations().size() > 0) {
+        if (node.getOperations().
+
+                size() > 0) {
             predecessor[0] = addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
         }
+
     }
 
     /**
