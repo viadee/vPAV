@@ -469,6 +469,13 @@ public class ElementGraphBuilder {
             // add elements of the sub process as nodes
             final BpmnElement node = new BpmnElement(processDefinition, subElement, new ControlFlowGraph(),
                     flowAnalysis);
+            new ProcessVariableReader(decisionRefToPathMap, rule)
+                    .getVariablesFromElement(node, new BasicNode[1]);
+            // mention the element
+            elementMap.put(subElement.getId(), node);
+            // add element as node
+            graph.addVertex(node);
+
             if (subElement instanceof SubProcess) {
                 final SubProcess subProcess = (SubProcess) subElement;
                 addElementsSubprocess(subProcesses, flows, events, graph, subProcess, node, processDefinition,
@@ -480,13 +487,6 @@ public class ElementGraphBuilder {
                 final BoundaryEvent boundaryEvent = (BoundaryEvent) subElement;
                 events.add(boundaryEvent);
             }
-
-            new ProcessVariableReader(decisionRefToPathMap, rule)
-                    .getVariablesFromElement(node, new BasicNode[1]);
-            // mention the element
-            elementMap.put(subElement.getId(), node);
-            // add element as node
-            graph.addVertex(node);
         }
     }
 

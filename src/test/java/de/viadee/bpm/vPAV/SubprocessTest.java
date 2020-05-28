@@ -9,7 +9,6 @@ import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -185,11 +184,320 @@ public class SubprocessTest {
                 flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().size());
         Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getSuccessors().get(0)).getElementChapter());
-
     }
 
+    @Test
     public void testSubprocessInSubprocess() {
-// TODO
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent("MyStartEvent").subProcess()
+                .embeddedSubProcess().startEvent("MyStartEventSub")
+                .subProcess()
+                .embeddedSubProcess().startEvent("MyStartEventSubSub").endEvent("MyEndEventSubSub").subProcessDone()
+                .endEvent("MyEndEventSub")
+                .subProcessDone()
+                .endEvent("MyEndEvent")
+                .done();
+
+        Map<String, BpmnModelInstance> processIdToModelInstance = new HashMap<>();
+        processIdToModelInstance.put("MyProcess", modelInstance);
+        ElementGraphBuilder graphBuilder = new ElementGraphBuilder(processIdToModelInstance);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        Collection<Graph> graphCollection = graphBuilder
+                .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
+                        new ProcessVariablesScanner(null), flowAnalysis);
+        flowAnalysis.analyze(graphCollection);
+
+        // Connection Start Event Main Process - Subprocess
+        Assert.assertEquals("MyStartEvent",
+                flowAnalysis.getNodes().get("MyStartEventSub").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().size());
+        Assert.assertEquals("MyStartEventSub",
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0).getGraphId());
+
+        // Connection Start Event Subprocess - Sub Subprocess
+        Assert.assertEquals("MyStartEventSub",
+                flowAnalysis.getNodes().get("MyStartEventSubSub").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().size());
+        Assert.assertEquals("MyStartEventSubSub",
+                flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().get(0)
+                        .getGraphId());
+
+        // Connection End Event Subprocess - Sub Subprocess
+        Assert.assertEquals("MyEndEventSubSub",
+                flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals("MyEndEventSub",
+                flowAnalysis.getNodes().get("MyEndEventSubSub").getSuccessors().get(0).getSuccessors().get(0)
+                        .getGraphId());
+
+        // Connection End Event Main Process - Subprocess
+        Assert.assertEquals("MyEndEventSub",
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals("MyEndEvent",
+                flowAnalysis.getNodes().get("MyEndEventSub").getSuccessors().get(0).getSuccessors().get(0)
+                        .getGraphId());
     }
 
+    @Test
+    public void testSubprocessInSubprocessBothListener() {
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent("MyStartEvent")
+                .subProcess("MySubProcess")
+                .embeddedSubProcess().startEvent("MyStartEventSub")
+                .subProcess("MySubSubProcess")
+                .camundaExecutionListenerExpression("start", "${variable2}")
+                .camundaExecutionListenerExpression("end", "${variable}")
+                .embeddedSubProcess().startEvent("MyStartEventSubSub").endEvent("MyEndEventSubSub").subProcessDone()
+                .endEvent("MyEndEventSub")
+                .subProcessDone()
+                .endEvent("MyEndEvent")
+                .done();
+
+        Map<String, BpmnModelInstance> processIdToModelInstance = new HashMap<>();
+        processIdToModelInstance.put("MyProcess", modelInstance);
+        ElementGraphBuilder graphBuilder = new ElementGraphBuilder(processIdToModelInstance);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        Collection<Graph> graphCollection = graphBuilder
+                .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
+                        new ProcessVariablesScanner(null), flowAnalysis);
+        flowAnalysis.analyze(graphCollection);
+
+        // Connection Start Event Main Process - Subprocess
+        Assert.assertEquals("MyStartEvent",
+                flowAnalysis.getNodes().get("MyStartEventSub").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().size());
+        Assert.assertEquals("MyStartEventSub",
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0).getGraphId());
+
+        // Connection Start Event Subprocess - Sub Subprocess
+        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+                ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSubSub").getPredecessors().get(0))
+                        .getElementChapter());
+        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+                ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors()
+                        .get(0))
+                        .getElementChapter());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().size());
+
+        // Connection End Event Subprocess - Sub Subprocess
+        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+                ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors()
+                        .get(0)).getElementChapter());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+                ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSubSub").getSuccessors().get(0))
+                        .getElementChapter());
+
+        // Connection End Event Main Process - Subprocess
+        Assert.assertEquals("MyEndEventSub",
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals("MyEndEvent",
+                flowAnalysis.getNodes().get("MyEndEventSub").getSuccessors().get(0).getSuccessors().get(0)
+                        .getGraphId());
+    }
+
+    @Test
+    public void testSubprocessInSubprocessStartListener() {
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent("MyStartEvent")
+                .subProcess("MySubProcess")
+                .embeddedSubProcess().startEvent("MyStartEventSub")
+                .subProcess("MySubSubProcess")
+                .camundaExecutionListenerExpression("start", "${variable}")
+                .embeddedSubProcess().startEvent("MyStartEventSubSub").endEvent("MyEndEventSubSub").subProcessDone()
+                .endEvent("MyEndEventSub")
+                .subProcessDone()
+                .endEvent("MyEndEvent")
+                .done();
+
+        Map<String, BpmnModelInstance> processIdToModelInstance = new HashMap<>();
+        processIdToModelInstance.put("MyProcess", modelInstance);
+        ElementGraphBuilder graphBuilder = new ElementGraphBuilder(processIdToModelInstance);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        Collection<Graph> graphCollection = graphBuilder
+                .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
+                        new ProcessVariablesScanner(null), flowAnalysis);
+        flowAnalysis.analyze(graphCollection);
+
+        // Connection Start Event Main Process - Subprocess
+        Assert.assertEquals("MyStartEvent",
+                flowAnalysis.getNodes().get("MyStartEventSub").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().size());
+        Assert.assertEquals("MyStartEventSub",
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0).getGraphId());
+
+        // Connection Start Event Subprocess - Sub Subprocess
+        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+                ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSubSub").getPredecessors().get(0))
+                        .getElementChapter());
+        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+                ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors()
+                        .get(0))
+                        .getElementChapter());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().size());
+
+        // Connection End Event Subprocess - Sub Subprocess
+        Assert.assertEquals("MyEndEventSubSub",
+                flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals("MyEndEventSub",
+                flowAnalysis.getNodes().get("MyEndEventSubSub").getSuccessors().get(0).getSuccessors().get(0)
+                        .getGraphId());
+
+        // Connection End Event Main Process - Subprocess
+        Assert.assertEquals("MyEndEventSub",
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals("MyEndEvent",
+                flowAnalysis.getNodes().get("MyEndEventSub").getSuccessors().get(0).getSuccessors().get(0)
+                        .getGraphId());
+    }
+
+    @Test
+    public void testSubprocessInSubprocessEndListener() {
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent("MyStartEvent")
+                .subProcess("MySubProcess")
+                .embeddedSubProcess().startEvent("MyStartEventSub")
+                .subProcess("MySubSubProcess")
+                .camundaExecutionListenerExpression("end", "${variable}")
+                .embeddedSubProcess().startEvent("MyStartEventSubSub").endEvent("MyEndEventSubSub").subProcessDone()
+                .endEvent("MyEndEventSub")
+                .subProcessDone()
+                .endEvent("MyEndEvent")
+                .done();
+
+        Map<String, BpmnModelInstance> processIdToModelInstance = new HashMap<>();
+        processIdToModelInstance.put("MyProcess", modelInstance);
+        ElementGraphBuilder graphBuilder = new ElementGraphBuilder(processIdToModelInstance);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        Collection<Graph> graphCollection = graphBuilder
+                .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
+                        new ProcessVariablesScanner(null), flowAnalysis);
+        flowAnalysis.analyze(graphCollection);
+
+        // Connection Start Event Main Process - Subprocess
+        Assert.assertEquals("MyStartEvent",
+                flowAnalysis.getNodes().get("MyStartEventSub").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().size());
+        Assert.assertEquals("MyStartEventSub",
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0).getGraphId());
+
+        // Connection Start Event Subprocess - Sub Subprocess
+        Assert.assertEquals("MyStartEventSub",
+                flowAnalysis.getNodes().get("MyStartEventSubSub").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().size());
+        Assert.assertEquals("MyStartEventSubSub",
+                flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().get(0)
+                        .getGraphId());
+
+        // Connection End Event Subprocess - Sub Subprocess
+        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+                ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors()
+                        .get(0)).getElementChapter());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+                ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSubSub").getSuccessors().get(0))
+                        .getElementChapter());
+
+        // Connection End Event Main Process - Subprocess
+        Assert.assertEquals("MyEndEventSub",
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().get(0)
+                        .getGraphId());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals("MyEndEvent",
+                flowAnalysis.getNodes().get("MyEndEventSub").getSuccessors().get(0).getSuccessors().get(0)
+                        .getGraphId());
+    }
+
+    @Test
+    public void testSubprocessInSubprocessBothBothListener() {
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent("MyStartEvent")
+                .subProcess("MySubProcess")
+                .camundaExecutionListenerExpression("start", "${variable2}")
+                .camundaExecutionListenerExpression("end", "${variable}")
+                .embeddedSubProcess().startEvent("MyStartEventSub")
+                .subProcess("MySubSubProcess")
+                .camundaExecutionListenerExpression("start", "${variable2Sub}")
+                .camundaExecutionListenerExpression("end", "${variableSub}")
+                .embeddedSubProcess().startEvent("MyStartEventSubSub").endEvent("MyEndEventSubSub").subProcessDone()
+                .endEvent("MyEndEventSub")
+                .subProcessDone()
+                .endEvent("MyEndEvent")
+                .done();
+
+        Map<String, BpmnModelInstance> processIdToModelInstance = new HashMap<>();
+        processIdToModelInstance.put("MyProcess", modelInstance);
+        ElementGraphBuilder graphBuilder = new ElementGraphBuilder(processIdToModelInstance);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        Collection<Graph> graphCollection = graphBuilder
+                .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
+                        new ProcessVariablesScanner(null), flowAnalysis);
+        flowAnalysis.analyze(graphCollection);
+
+        // Connection Start Event Main Process - Subprocess
+        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+                ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getPredecessors().get(0))
+                        .getElementChapter());
+        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+                ((BasicNode) flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0))
+                        .getElementChapter());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().size());
+
+        // Connection Start Event Subprocess - Sub Subprocess
+        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+                ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSubSub").getPredecessors().get(0))
+                        .getElementChapter());
+        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+                ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors()
+                        .get(0))
+                        .getElementChapter());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().size());
+
+        // Connection End Event Subprocess - Sub Subprocess
+        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+                ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors()
+                        .get(0)).getElementChapter());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+                ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSubSub").getSuccessors().get(0))
+                        .getElementChapter());
+
+        // Connection End Event Main Process - Subprocess
+        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+                ((BasicNode) flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors()
+                        .get(0)).getElementChapter());
+        Assert.assertEquals(1,
+                flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().size());
+        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+                ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getSuccessors().get(0)).getElementChapter());
+    }
 }
