@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,36 +29,17 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV;
+package de.viadee.bpm.vPAV.delegates;
 
-import org.junit.BeforeClass;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+public class DelegateDynamicObjectInstantiation implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
-/**
- * unit test checks, whether outer variables on data flow graph will be set
- *
- * a) startProcessInstanceByKey, b) startProcessInstanceByMessage and correlateMessage
- *
- * assumption: examining process variables in source code is done before
- */
-public class OuterProcessVariablesTestOperation {
-
-    private static ClassLoader cl;
-
-    @BeforeClass
-    public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
+        String local = "myValue";
+        SimpleObject obj = new SimpleObject(local, execution);
+        SimpleObject anotherObj = new SimpleObject("here", execution);
+        obj.requestVariable();
     }
-    
-    // create new tests after refactoring
-
 }

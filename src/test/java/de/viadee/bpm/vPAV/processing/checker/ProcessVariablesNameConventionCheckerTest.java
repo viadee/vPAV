@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
@@ -43,17 +40,18 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
-import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -76,20 +74,18 @@ public class ProcessVariablesNameConventionCheckerTest {
 
 	private static ElementChecker checker;
 
-	private static ClassLoader cl;
-
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 		RuntimeConfig.getInstance().setTest(true);
 		Map<String, String> beanMapping = new HashMap<>();
 		beanMapping.put("myBean", "de.viadee.bpm.vPAV.delegates.TestDelegate");
 		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
-		checker = new ProcessVariablesNameConventionChecker(createRule(), null);
+		checker = new ProcessVariablesNameConventionChecker(createRule());
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java/");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 	}
@@ -119,12 +115,9 @@ public class ProcessVariablesNameConventionCheckerTest {
 		for (final BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
-					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
+					new Rule("ProcessVariableReader", true, null, null, null, null));
 
-			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
-
-			element.setProcessVariables(variables);
+			variableReader.getVariablesFromElement(element, new BasicNode[1]);
 
 			checker.check(element);
 		}
@@ -152,12 +145,9 @@ public class ProcessVariablesNameConventionCheckerTest {
 		for (final BaseElement baseElement : baseElements) {
 			final BpmnElement element = new BpmnElement(PATH, baseElement, new ControlFlowGraph(), new FlowAnalysis());
 			ProcessVariableReader variableReader = new ProcessVariableReader(null,
-					new Rule("ProcessVariableReader", true, null, null, null, null), new BpmnScanner(PATH));
+					new Rule("ProcessVariableReader", true, null, null, null, null));
 
-			final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-			variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
-
-			element.setProcessVariables(variables);
+			variableReader.getVariablesFromElement(element, new BasicNode[1]);
 
 			checker.check(element);
 		}

@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,13 +41,13 @@ import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BusinessRuleTask;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Checks, whether a business rule task with dmn implementation is valid
@@ -55,8 +55,8 @@ import java.util.Collection;
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
-    public DmnTaskChecker(final Rule rule, BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public DmnTaskChecker(final Rule rule) {
+        super(rule);
     }
 
     /**
@@ -70,20 +70,19 @@ public class DmnTaskChecker extends AbstractElementChecker {
         final BaseElement bpmnElement = element.getBaseElement();
         if (bpmnElement instanceof BusinessRuleTask) {
             // read attributes from task
-            final String implementationAttr = bpmnScanner.getImplementation(bpmnElement.getId());
-        
-            final String dmnAttr = bpmnElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
-                    BpmnModelConstants.CAMUNDA_ATTRIBUTE_DECISION_REF);
-            if (implementationAttr != null) {
+            final Map.Entry<String, String> implementation = BpmnScanner
+                    .getImplementation(bpmnElement);
+
+            if (implementation != null) {
                 // check if DMN reference is not empty
-                if (implementationAttr.equals(BpmnConstants.CAMUNDA_DMN)) {
-                    if (dmnAttr == null || dmnAttr.trim().length() == 0) {
+                if (implementation.getKey().equals(BpmnConstants.CAMUNDA_DMN)) {
+                    if (implementation.getValue() == null || implementation.getValue().trim().length() == 0) {
                         // Error, because no delegateExpression has been configured
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                 String.format(Messages.getString("DmnTaskChecker.0"), //$NON-NLS-1$
                                         CheckName.checkName(bpmnElement))));
                     } else {
-                        issues.addAll(checkDMNFile(element, dmnAttr));
+                        issues.addAll(checkDMNFile(element, implementation.getValue()));
                     }
                 }
             }
@@ -112,7 +111,8 @@ public class DmnTaskChecker extends AbstractElementChecker {
         if (urlDMN == null) {
             // Throws an error, if the class was not found
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                    String.format(Messages.getString("DmnTaskChecker.4"), CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
+                    String.format(Messages.getString("DmnTaskChecker.4"),
+                            CheckName.checkName(bpmnElement)))); //$NON-NLS-1$
         }
         return issues;
     }

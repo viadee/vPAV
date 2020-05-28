@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,8 @@ public class TechnicalDelegate implements JavaDelegate {
 
     @Override
     public void execute(final DelegateExecution execution) throws Exception {
-
         ProcessContext processContext = new ProcessContext(execution, "var");
         String name = processContext.getTechnicalProcessContext().manipulateVariables();
         String var = (String) execution.getVariable(name);
-
     }
-
 }

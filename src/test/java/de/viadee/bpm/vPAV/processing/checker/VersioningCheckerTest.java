@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,10 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -61,15 +63,13 @@ public class VersioningCheckerTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
 
-	private static ClassLoader cl;
-
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 		final File file = new File(".");
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 	}
@@ -84,7 +84,7 @@ public class VersioningCheckerTest {
 		final Rule rule = new Rule("VersioningChecker", true, null, null, null, null);
 
 		// Versions
-		final Collection<String> resourcesNewestVersions = new ArrayList<String>();
+		final Collection<String> resourcesNewestVersions = new ArrayList<>();
 		resourcesNewestVersions.add("de/test/TestDelegate_1_2.class");
 
 		// parse bpmn model
@@ -95,7 +95,7 @@ public class VersioningCheckerTest {
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
-		final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
+		final ElementChecker checker = new VersioningChecker(rule, resourcesNewestVersions);
 		checker.check(element);
 		assertEquals(1, IssueService.getInstance().getIssues().size());
 	}
@@ -112,7 +112,7 @@ public class VersioningCheckerTest {
 		FileScanner.setIsDirectory(true);
 
 		// Versions
-		final Collection<String> resourcesNewestVersions = new ArrayList<String>();
+		final Collection<String> resourcesNewestVersions = new ArrayList<>();
 
 		resourcesNewestVersions.add("de\\viadee\\bpm\\v18_300\\test");
 
@@ -121,7 +121,7 @@ public class VersioningCheckerTest {
 
 		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
+		final ElementChecker checker = new VersioningChecker(rule, resourcesNewestVersions);
 
 		// parse bpmn model
 
@@ -144,18 +144,18 @@ public class VersioningCheckerTest {
 	public void testBeanVersioningWithOutdatedClass() {
 		final String PATH = BASE_PATH + "VersioningCheckerTest_BeanVersioningOutdatedClass.bpmn";
 
-		final Map<String, Setting> settings = new HashMap<String, Setting>();
+		final Map<String, Setting> settings = new HashMap<>();
 		settings.put("versioningSchemaClass", new Setting("versioningSchemaClass", null, null, null, false,
 				"([^_]*)_{1}([0-9][_][0-9]{1})\\.(java|groovy)"));
 
 		final Rule rule = new Rule("VersioningChecker", true, null, settings, null, null);
 
 		// Versions
-		final Collection<String> resourcesNewestVersions = new ArrayList<String>();
+		final Collection<String> resourcesNewestVersions = new ArrayList<>();
 		resourcesNewestVersions.add("de/test/TestDelegate_1_2.java");
 
 		// Bean-Mapping
-		final Map<String, String> beanMapping = new HashMap<String, String>();
+		final Map<String, String> beanMapping = new HashMap<>();
 		beanMapping.put("myBean_1_1", "de.test.TestDelegate_1_1");
 		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
@@ -167,7 +167,7 @@ public class VersioningCheckerTest {
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
-		final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
+		final ElementChecker checker = new VersioningChecker(rule,  resourcesNewestVersions);
 
 		checker.check(element);
 
@@ -184,7 +184,7 @@ public class VersioningCheckerTest {
 		final Rule rule = new Rule("VersioningChecker", true, null, null, null, null);
 
 		// Versions
-		final Collection<String> resourcesNewestVersions = new ArrayList<String>();
+		final Collection<String> resourcesNewestVersions = new ArrayList<>();
 		resourcesNewestVersions.add("de/test/testScript_1_2.groovy");
 
 		// parse bpmn model
@@ -195,7 +195,7 @@ public class VersioningCheckerTest {
 		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
 				new FlowAnalysis());
 
-		final ElementChecker checker = new VersioningChecker(rule, null, resourcesNewestVersions);
+		final ElementChecker checker = new VersioningChecker(rule, resourcesNewestVersions);
 		checker.check(element);
 		assertEquals(1, IssueService.getInstance().getIssues().size());
 	}

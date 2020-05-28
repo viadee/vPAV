@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,153 +36,108 @@ import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.Gateway;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-// TODO still relevant since I changed the getimplementation method to be independent of version?
 public class BpmnScannerTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
+    private static final String BASE_PATH = "src/test/resources/";
 
-	/**
-	 * Case: BPMN-Model in Version 1
-	 */
-	@Test
-	public void testModelVersionV1() {
-		final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
-		final String impClass = "camunda:delegateExpression";
+    /**
+     * Case: BPMN-Model in Version 1
+     */
+    @Test
+    public void testModelVersionV1() {
+        final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
+        final String impClass = "camunda:delegateExpression";
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
 
-		BpmnScanner scanner = new BpmnScanner(PATH);
-		String imp = scanner.getImplementation(element.getBaseElement().getId());
+        BpmnScanner scanner = new BpmnScanner();
+        Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
 
-		assertEquals("Get unexpected implementation", imp, impClass);
-	}
+        assertEquals("Get unexpected implementation", imp.getKey(), impClass);
+    }
 
-	/**
-	 * Case: BPMN-Model in Version 2
-	 */
-	@Test
-	public void testModelVersionV2() {
-		final String PATH = BASE_PATH + "BPMN_Model_Version_V2.bpmn";
-		final String impEx = "camunda:class";
+    /**
+     * Case: BPMN-Model in Version 2
+     */
+    @Test
+    public void testModelVersionV2() {
+        final String PATH = BASE_PATH + "BPMN_Model_Version_V2.bpmn";
+        final String impEx = "camunda:class";
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
 
-		BpmnScanner scanner = new BpmnScanner(PATH);
-		String imp = scanner.getImplementation(element.getBaseElement().getId());
+        BpmnScanner scanner = new BpmnScanner();
+        Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
 
-		assertEquals("Get unexpected implementation", imp, impEx);
-	}
+        assertEquals("Get unexpected implementation", imp.getKey(), impEx);
+    }
 
-	/**
-	 * Case: BPMN-Model in Version 3
-	 */
-	@Test
-	public void testModelVersionV3() {
-		final String PATH = BASE_PATH + "BPMN_Model_Version_V3.bpmn";
-		final String impDel = "camunda:expression";
+    /**
+     * Case: BPMN-Model in Version 3
+     */
+    @Test
+    public void testModelVersionV3() {
+        final String PATH = BASE_PATH + "BPMN_Model_Version_V3.bpmn";
+        final String impDel = "camunda:expression";
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
 
-		BpmnScanner scanner = new BpmnScanner(PATH);
-		String imp = scanner.getImplementation(element.getBaseElement().getId());
-		String reference = scanner.getImplementationReference(element.getBaseElement().getId(), imp);
+        BpmnScanner scanner = new BpmnScanner();
+        Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
 
-		assertEquals("Get unexpected implementation", imp, impDel);
-		assertEquals("Get unexpected implementation reference", reference, "org.camunda.bpm.platform.example.servlet.ExampleServiceTask");
-	}
+        assertEquals("Get unexpected implementation", imp.getKey(), impDel);
+        assertEquals("Get unexpected implementation reference", imp.getValue(),
+                "org.camunda.bpm.platform.example.servlet.ExampleServiceTask");
+    }
 
-	/**
-	 * Case: Test getScriptType
-	 */
-	@Test
-	public void testGetScriptType() {
-		final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
-		final String scriptType = "inputParameter";
+    /**
+     * Case: Test getScriptType
+     */
+    @Test
+    public void testGetScriptType() {
+        final String PATH = BASE_PATH + "BPMN_Model_Version_V1.bpmn";
+        final String scriptType = "inputParameter";
 
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        // parse bpmn model
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> baseElements = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
+        final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
 
-		BpmnScanner scanner = new BpmnScanner(PATH);
-		ArrayList<String> scripts = scanner.getScriptTypes(element.getBaseElement().getId());
+        BpmnScanner scanner = new BpmnScanner();
+        ArrayList<String> scripts = scanner.getScriptTypes( element.getBaseElement());
 
-		assertTrue("Get unexpected implementation", scripts.contains(scriptType));
-	}
-
-	/**
-	 * Case: Test getXorGateWays
-	 */
-	@Test
-	public void testGetXorGateWays() {
-		final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
-		final String gatewayId = "ExclusiveGateway_Id";
-
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-		final Collection<Gateway> baseElements = modelInstance.getModelElementsByType(Gateway.class);
-
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
-
-		BpmnScanner scanner = new BpmnScanner(PATH);
-		String gwId = scanner.getXorGateWays(element.getBaseElement().getId());
-
-		assertEquals("Get unexpected Element", gwId, gatewayId);
-	}
-
-	/**
-	 * Case: Test getOutgoing
-	 */
-	@Test
-	public void testGetOutgoing() {
-		final String PATH = BASE_PATH + "BPMNScannerXorGateway.bpmn";
-		final int anzOut = 2;
-
-		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-		final Collection<Gateway> baseElements = modelInstance.getModelElementsByType(Gateway.class);
-
-		final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
-
-		BpmnScanner scanner = new BpmnScanner(PATH);
-		int out = scanner.getOutgoing(element.getBaseElement().getId());
-
-		assertEquals("More or less outgoing sequentflows as expected", out, anzOut);
-	}
+        assertTrue("Get unexpected implementation", scripts.contains(scriptType));
+    }
 }

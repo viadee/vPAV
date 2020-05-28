@@ -6,8 +6,8 @@
   <bpmn:process id="Process_1" isExecutable="false">
     <bpmn:callActivity id="CallActivity_0vlq6qr" name="Call Activty" calledElement="calledProcess">
       <bpmn:extensionElements>
-        <camunda:in source="var2" target="var2" />
-        <camunda:out source="var3" target="var3" />
+        <camunda:in source="variable2" target="var2" />
+        <camunda:out source="variable3" target="var3" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0zgt1ib</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wp7vka</bpmn:outgoing>

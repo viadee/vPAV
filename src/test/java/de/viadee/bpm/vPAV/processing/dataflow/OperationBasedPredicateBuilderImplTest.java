@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,135 +49,135 @@ import static org.junit.Assert.*;
 
 public class OperationBasedPredicateBuilderImplTest {
 
-	@Test
-	public void testExactlyDoesNotFilterCorrectNumberOfOperations() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testExactlyDoesNotFilterCorrectNumberOfOperations() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build());
 
-		EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).exactly(2);
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).exactly(2);
 
-		assertTrue(result.isFulfilled());
-		assertThat(result.getMessage().orElse(null), containsString("2"));
-	}
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("2"));
+    }
 
-	@Test
-	public void testExactlyFiltersIncorrectNumberOfOperations() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testExactlyFiltersIncorrectNumberOfOperations() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build());
 
-		EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).exactly(3);
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).exactly(3);
 
-		assertFalse(result.isFulfilled());
-		assertThat(result.getMessage().orElse(null), containsString("2"));
-	}
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("2"));
+    }
 
-	@Test
-	public void testExactlySetsCorrectDescription() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testExactlySetsCorrectDescription() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build());
 
-		Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
-			assertThat(predicate.getDescription(), is("number of operations are exactly 2 times"));
-			return new Object();
-		};
-		Function<ProcessVariable, List<ProcessVariableOperation>> operationsProvider = p -> operations;
-		OperationBasedPredicateBuilder<Object> predicateBuilder = new OperationBasedPredicateBuilderImpl<>(
-				conditionSetter, operationsProvider, "number of operations are");
+        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
+            assertThat(predicate.getDescription(), is("number of operations are exactly 2 times"));
+            return new Object();
+        };
+        Function<ProcessVariable, List<ProcessVariableOperation>> operationsProvider = p -> operations;
+        OperationBasedPredicateBuilder<Object> predicateBuilder = new OperationBasedPredicateBuilderImpl<>(
+                conditionSetter, operationsProvider, "number of operations are");
 
-		predicateBuilder.exactly(2);
-	}
+        predicateBuilder.exactly(2);
+    }
 
-	@Test
-	public void testAtLeastDoesNotFilterCorrectNumberOfOperations() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build(), new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testAtLeastDoesNotFilterCorrectNumberOfOperations() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build(), new ProcessVariableOperationBuilder().build());
 
-		EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atLeast(2);
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atLeast(2);
 
-		assertTrue(result.isFulfilled());
-		assertThat(result.getMessage().orElse(null), containsString("3"));
-	}
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("3"));
+    }
 
-	@Test
-	public void testAtLeastFiltersIncorrectNumberOfOperations() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testAtLeastFiltersIncorrectNumberOfOperations() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build());
 
-		EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atLeast(3);
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atLeast(3);
 
-		assertFalse(result.isFulfilled());
-		assertThat(result.getMessage().orElse(null), containsString("2"));
-	}
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("2"));
+    }
 
-	@Test
-	public void testAtLeastSetsCorrectDescription() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testAtLeastSetsCorrectDescription() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build());
 
-		Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
-			assertThat(predicate.getDescription(), is("number of operations are at least 2 times"));
-			return new Object();
-		};
-		Function<ProcessVariable, List<ProcessVariableOperation>> operationsProvider = p -> operations;
-		OperationBasedPredicateBuilder<Object> predicateBuilder = new OperationBasedPredicateBuilderImpl<>(
-				conditionSetter, operationsProvider, "number of operations are");
+        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
+            assertThat(predicate.getDescription(), is("number of operations are at least 2 times"));
+            return new Object();
+        };
+        Function<ProcessVariable, List<ProcessVariableOperation>> operationsProvider = p -> operations;
+        OperationBasedPredicateBuilder<Object> predicateBuilder = new OperationBasedPredicateBuilderImpl<>(
+                conditionSetter, operationsProvider, "number of operations are");
 
-		predicateBuilder.atLeast(2);
-	}
+        predicateBuilder.atLeast(2);
+    }
 
-	@Test
-	public void testAtMostDoesNotFilterCorrectNumberOfOperations() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testAtMostDoesNotFilterCorrectNumberOfOperations() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build());
 
-		EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atMost(4);
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atMost(4);
 
-		assertTrue(result.isFulfilled());
-		assertThat(result.getMessage().orElse(null), containsString("2"));
-	}
+        assertTrue(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("2"));
+    }
 
-	@Test
-	public void testAtMostFiltersIncorrectNumberOfOperations() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build(), new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testAtMostFiltersIncorrectNumberOfOperations() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build(), new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build());
 
-		EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atMost(1);
+        EvaluationResult<ProcessVariable> result = createPredicateBuilderOn(operations).atMost(1);
 
-		assertFalse(result.isFulfilled());
-		assertThat(result.getMessage().orElse(null), containsString("4"));
-	}
+        assertFalse(result.isFulfilled());
+        assertThat(result.getMessage().orElse(null), containsString("4"));
+    }
 
-	@Test
-	public void testAtMostSetsCorrectDescription() {
-		List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
-				new ProcessVariableOperationBuilder().build(), new ProcessVariableOperationBuilder().build());
+    @Test
+    public void testAtMostSetsCorrectDescription() {
+        List<ProcessVariableOperation> operations = Arrays.asList(new ProcessVariableOperationBuilder().build(),
+                new ProcessVariableOperationBuilder().build(), new ProcessVariableOperationBuilder().build());
 
-		Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
-			assertThat(predicate.getDescription(), is("number of operations are at most 2 times"));
-			return new Object();
-		};
-		Function<ProcessVariable, List<ProcessVariableOperation>> operationsProvider = p -> operations;
-		OperationBasedPredicateBuilder<Object> predicateBuilder = new OperationBasedPredicateBuilderImpl<>(
-				conditionSetter, operationsProvider, "number of operations are");
+        Function<DescribedPredicateEvaluator<ProcessVariable>, Object> conditionSetter = predicate -> {
+            assertThat(predicate.getDescription(), is("number of operations are at most 2 times"));
+            return new Object();
+        };
+        Function<ProcessVariable, List<ProcessVariableOperation>> operationsProvider = p -> operations;
+        OperationBasedPredicateBuilder<Object> predicateBuilder = new OperationBasedPredicateBuilderImpl<>(
+                conditionSetter, operationsProvider, "number of operations are");
 
-		predicateBuilder.atMost(2);
-	}
+        predicateBuilder.atMost(2);
+    }
 
-	private static OperationBasedPredicateBuilderImpl<EvaluationResult<ProcessVariable>> createPredicateBuilderOn(
-			List<ProcessVariableOperation> operations) {
-		Function<DescribedPredicateEvaluator<ProcessVariable>, EvaluationResult<ProcessVariable>> conditionSetter = predicate -> predicate
-				.evaluate(new ProcessVariable(""));
-		Function<ProcessVariable, List<ProcessVariableOperation>> operationsProvider = p -> operations;
-		return new OperationBasedPredicateBuilderImpl<>(conditionSetter, operationsProvider, "operation description");
-	}
+    private static OperationBasedPredicateBuilderImpl<EvaluationResult<ProcessVariable>> createPredicateBuilderOn(
+            List<ProcessVariableOperation> operations) {
+        Function<DescribedPredicateEvaluator<ProcessVariable>, EvaluationResult<ProcessVariable>> conditionSetter = predicate -> predicate
+                .evaluate(new ProcessVariable(""));
+        Function<ProcessVariable, List<ProcessVariableOperation>> operationsProvider = p -> operations;
+        return new OperationBasedPredicateBuilderImpl<>(conditionSetter, operationsProvider, "operation description");
+    }
 
-	private class ProcessVariableOperationBuilder {
-		private VariableOperation operationType = VariableOperation.WRITE;
+    private class ProcessVariableOperationBuilder {
 
-		ProcessVariableOperation build() {
-			return new ProcessVariableOperation("name",
-					new BpmnElement("", null, new ControlFlowGraph(), new FlowAnalysis()), null, null, "",
-					operationType, "", new FlowAnalysis().getOperationCounter());
-		}
-	}
+        private VariableOperation operationType = VariableOperation.WRITE;
+
+        ProcessVariableOperation build() {
+            return new ProcessVariableOperation("name",
+                    operationType, "");
+        }
+    }
 }

@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ import java.util.List;
 @XmlRootElement(name = "issues")
 public class XmlCheckerIssues {
 
-  private List<XmlCheckerIssue> issues = new ArrayList<XmlCheckerIssue>();
+  private List<XmlCheckerIssue> issues = new ArrayList<>();
 
   public XmlCheckerIssues() {
   }
@@ -62,7 +62,4 @@ public class XmlCheckerIssues {
     this.issues.add(issue);
   }
 
-  public void addIssues(final Collection<XmlCheckerIssue> issues) {
-    this.issues.addAll(issues);
-  }
 }

@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ public enum KnownElementFieldType {
     ResultVariable("Result Variable"),
     CalledElement("Called Element"),
     CaseRef("Case Ref"),
+    LoopCharacteristics("Loop Characteristics"),
     CollectionElement("Collection"),
     ElementVariable("Element Variable"),
     LoopCardinality("Loop Cardinality"),
@@ -59,6 +60,7 @@ public enum KnownElementFieldType {
     OutputParameter("Output Parameters"),
     InputParameter("Input Parameters"),
     Signal("Signal Name"),
+    Link("Link Name"),
     Message("Message Name"), Initial("Initial"),
     UserDefined("User Defined"),
     CamundaStandardVariables("Camunda Standard Process Variables");

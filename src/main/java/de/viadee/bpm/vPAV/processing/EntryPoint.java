@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EntryPoint {
 
 	private String className;
@@ -39,14 +42,14 @@ public class EntryPoint {
 
 	private String messageName;
 
-	private String entryPoint;
+	private String entryPointName;
 
 	public EntryPoint(final String className, final String methodName, final String messageName,
-			final String entryPoint) {
+			final String entryPointName) {
 		this.className = className;
 		this.methodName = methodName;
 		this.messageName = messageName;
-		this.entryPoint = entryPoint;
+		this.entryPointName = entryPointName;
 	}
 
 	public String getClassName() {
@@ -73,11 +76,11 @@ public class EntryPoint {
 		this.messageName = messageName;
 	}
 
-	public String getEntryPoint() {
-		return entryPoint;
+	public String getEntryPointName() {
+		return entryPointName;
 	}
 
-	public void setEntryPoint(String entryPoint) {
-		this.entryPoint = entryPoint;
+	public void setEntryPointName(String entryPointName) {
+		this.entryPointName = entryPointName;
 	}
 }

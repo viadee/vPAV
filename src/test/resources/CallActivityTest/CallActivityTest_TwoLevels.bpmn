@@ -14,7 +14,7 @@
       <bpmn:incoming>SequenceFlow_After</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0sl5h6d</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="ServiceTask_First" name="Task 1" camunda:expression="execution.setVariable(&#34;varIn&#34;, true)">
+    <bpmn:serviceTask id="ServiceTask_First" name="Task 1" camunda:expression="${execution.setVariable(&#34;varIn&#34;, true)}">
       <bpmn:incoming>SequenceFlow_1sofdlp</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_Before</bpmn:outgoing>
     </bpmn:serviceTask>

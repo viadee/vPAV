@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,179 +40,145 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import net.time4j.range.IsoRecurrence;
 import net.time4j.range.MomentInterval;
 import org.camunda.bpm.engine.impl.calendar.DurationHelper;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
-import org.camunda.bpm.model.bpmn.instance.IntermediateCatchEvent;
-import org.camunda.bpm.model.bpmn.instance.StartEvent;
-import org.w3c.dom.Element;
+import org.camunda.bpm.model.bpmn.instance.*;
 
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.datatype.DatatypeFactory;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TimerExpressionChecker extends AbstractElementChecker {
 
-	public TimerExpressionChecker(final Rule rule, final BpmnScanner bpmnScanner) {
-		super(rule, bpmnScanner);
-	}
+    public TimerExpressionChecker(final Rule rule) {
+        super(rule);
+    }
 
-	/**
-	 * Check TimerEvents for correct usage of ISO 8601 and CRON definitions
-	 *
-	 * @return issues
-	 */
-	@Override
-	public Collection<CheckerIssue> check(final BpmnElement element) {
+    /**
+     * Check TimerEvents for correct usage of ISO 8601 and CRON definitions
+     *
+     * @return issues
+     */
+    @Override
+    public Collection<CheckerIssue> check(final BpmnElement element) {
 
-		final BaseElement baseElement = element.getBaseElement();
-		final Collection<CheckerIssue> issues = new ArrayList<>();
+        final BaseElement baseElement = element.getBaseElement();
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		// Map with string (contains the timer definiton) and the element itself
-		// (contains name and id)
+        // Map with string (contains the timer definiton) and the element itself
+        // (contains name and id)
 
-		// check if the element is an event and retrieve id
-		if (baseElement.getId() != null && (baseElement instanceof IntermediateCatchEvent
-				|| baseElement instanceof StartEvent || baseElement instanceof BoundaryEvent)) {
+        // check if the element is an event and retrieve id
+        if (baseElement.getId() != null && (baseElement instanceof IntermediateCatchEvent
+                || baseElement instanceof StartEvent || baseElement instanceof BoundaryEvent)) {
 
-			final Map<Element, Element> timerMap = new HashMap<>(bpmnScanner.getTimerImplementation(baseElement.getId()));
-			String timerDefinition = "";
+            ArrayList<TimerEventDefinition> timers = BpmnScanner.getTimerImplementation(baseElement);
 
-			for (Map.Entry<Element, Element> entry : timerMap.entrySet()) {
+            for (TimerEventDefinition timer : timers) {
+                if (timer.getTimeDate() != null) {
+                    try {
+                        DatatypeConverter.parseDateTime(timer.getTimeDate().getTextContent());
+                    } catch (Exception e) {
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                                Messages.getString("TimerExpressionChecker.1")));
+                    }
+                }
+                if (timer.getTimeDuration() != null) {
+                    try {
+                        DatatypeFactory.newInstance().newDuration(timer.getTimeDuration().getTextContent());
+                    } catch (Exception e) {
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                                Messages.getString("TimerExpressionChecker.2")));
+                    }
+                }
+                if (timer.getTimeCycle() != null) {
+                    boolean isCron = false;
+                    boolean isDur = false;
+                    boolean hasRepeatingIntervals = false;
+                    boolean isRepeatingDur = false;
+                    String timerCycleDefinition = timer.getTimeCycle().getTextContent();
 
-				if (entry.getValue() != null) {
-					timerDefinition = entry.getValue().getParentNode().getTextContent().trim();
-				}
+                    if (!timerCycleDefinition.contains("P") && !timerCycleDefinition.contains("Z")
+                            //$NON-NLS-1$ //$NON-NLS-2$
+                            && timerCycleDefinition.contains(" ")) { //$NON-NLS-1$
+                        isCron = true;
+                    }
 
-				if (!timerDefinition.trim().isEmpty()) {
+                    if (timerCycleDefinition.startsWith("R")) { //$NON-NLS-1$
+                        hasRepeatingIntervals = true;
+                    }
 
-					// BpmnModelConstants.BPMN_ELEMENT_TIME_DATE
-					if (entry.getValue() != null && (entry.getValue().getNodeName() != null
-							&& entry.getValue().getNodeName().contains(BpmnModelConstants.BPMN_ELEMENT_TIME_DATE))) {
-						try {
-							DatatypeConverter.parseDateTime(timerDefinition);
-						} catch (Exception e) {
-							issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
-									String.format(Messages.getString("TimerExpressionChecker.1"), //$NON-NLS-1$
-											CheckName.checkTimer(entry.getKey()))));
-						}
-					}
-					// BpmnModelConstants.BPMN_ELEMENT_TIME_DURATION
-					if (entry.getValue() != null && (entry.getValue().getNodeName() != null && entry.getValue()
-							.getNodeName().contains(BpmnModelConstants.BPMN_ELEMENT_TIME_DURATION))) {
-						try {
-							DatatypeFactory.newInstance().newDuration(timerDefinition);
-						} catch (Exception e) {
-							issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
-									String.format(Messages.getString("TimerExpressionChecker.2"), //$NON-NLS-1$
-											CheckName.checkTimer(entry.getKey()))));
-						}
-					}
-					// BpmnModelConstants.BPMN_ELEMENT_TIME_CYCLE
-					if (entry.getValue() != null && (entry.getValue().getNodeName() != null
-							&& entry.getValue().getNodeName().contains(BpmnModelConstants.BPMN_ELEMENT_TIME_CYCLE))) {
+                    if (timerCycleDefinition.startsWith("P") //$NON-NLS-1$
+                            && !(timerCycleDefinition.contains("/") || timerCycleDefinition
+                            .contains("--"))) { //$NON-NLS-1$ //$NON-NLS-2$
+                        isDur = true;
+                    }
 
-						boolean isCron = false;
-						boolean isDur = false;
-						boolean hasRepeatingIntervals = false;
-						boolean isRepeatingDur = false;
+                    if (timerCycleDefinition.contains("/P")) {
+                        isRepeatingDur = true;
+                    }
 
-						if (!timerDefinition.contains("P") && !timerDefinition.contains("Z") //$NON-NLS-1$ //$NON-NLS-2$
-								&& timerDefinition.contains(" ")) { //$NON-NLS-1$
-							isCron = true;
-						}
+                    if (isCron) {
+                        try {
+                            CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
+                            CronParser cronParser = new CronParser(cronDef);
+                            Cron cronJob = cronParser.parse(timerCycleDefinition);
+                            cronJob.validate();
+                        } catch (IllegalArgumentException e) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                                    Messages.getString("TimerExpressionChecker.10")));
+                        }
+                    }
 
-						if (timerDefinition.startsWith("R")) { //$NON-NLS-1$
-							hasRepeatingIntervals = true;
-						}
+                    if (!isCron && !hasRepeatingIntervals && !isDur) {
+                        try {
+                            MomentInterval.parseISO(timerCycleDefinition);
+                        } catch (ParseException e) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                                    Messages.getString("TimerExpressionChecker.11")));
+                        }
+                    }
 
-						if (timerDefinition.startsWith("P") //$NON-NLS-1$
-								&& !(timerDefinition.contains("/") || timerDefinition.contains("--"))) { //$NON-NLS-1$ //$NON-NLS-2$
-							isDur = true;
-						}
+                    if (!isCron && hasRepeatingIntervals && !isDur && !isRepeatingDur) {
+                        try {
+                            IsoRecurrence.parseMomentIntervals(timerCycleDefinition);
+                        } catch (ParseException ex) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                                    Messages.getString("TimerExpressionChecker.12")));
+                        }
+                    }
 
-						if (timerDefinition.contains("/P")) {
-							isRepeatingDur = true;
-						}
+                    if (isRepeatingDur) {
+                        try {
+                            new DurationHelper(timerCycleDefinition, null).getDateAfter(null);
+                        } catch (Exception ex) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                                    Messages.getString("TimerExpressionChecker.12")));
+                        }
+                    }
 
-						if (isCron) {
-							try {
-								CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
-								CronParser cronParser = new CronParser(cronDef);
-								Cron cronJob = cronParser.parse(timerDefinition);
-								cronJob.validate();
-							} catch (IllegalArgumentException e) {
-								issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
-										String.format(Messages.getString("TimerExpressionChecker.10"), //$NON-NLS-1$
-												CheckName.checkTimer(entry.getKey()))));
-							}
-						}
+                    if (isDur && !isCron && !hasRepeatingIntervals) {
+                        try {
+                            DatatypeFactory.newInstance().newDuration(timerCycleDefinition);
+                        } catch (Exception ex) {
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                                    Messages.getString("TimerExpressionChecker.13")));
+                        }
+                    }
+                }
+                if (timer.getTimeCycle() == null && timer.getTimeDuration() == null && timer.getTimeDate() == null) {
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
+                            Messages.getString("TimerExpressionChecker.15")));
+                }
+            }
+        }
 
-						if (!isCron && !hasRepeatingIntervals && !isDur) {
-							try {
-								MomentInterval.parseISO(timerDefinition);
-							} catch (ParseException e) {
-								issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
-										String.format(Messages.getString("TimerExpressionChecker.11"), //$NON-NLS-1$
-												CheckName.checkTimer(entry.getKey()))));
-							}
-						}
-
-						if (!isCron && hasRepeatingIntervals && !isDur && !isRepeatingDur) {
-							try {
-								IsoRecurrence.parseMomentIntervals(timerDefinition);
-							} catch (ParseException ex) {
-								issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
-										String.format(Messages.getString("TimerExpressionChecker.12"), //$NON-NLS-1$
-												CheckName.checkTimer(entry.getKey()))));
-							}
-						}
-
-						if (isRepeatingDur) {
-							try{
-								new DurationHelper(timerDefinition,null).getDateAfter(null);
-							}catch(Exception ex){
-								issues.add(IssueWriter.createIssue(rule,CriticalityEnum.ERROR,element,entry,
-										String.format(Messages.getString("TimerExpressionChecker.12"),//$NON-NLS-1$
-												CheckName.checkTimer(entry.getKey()))));
-							}
-						}
-
-						if (isDur && !isCron && !hasRepeatingIntervals) {
-							try {
-								DatatypeFactory.newInstance().newDuration(timerDefinition);
-							} catch (Exception ex) {
-								issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
-										String.format(Messages.getString("TimerExpressionChecker.13"), //$NON-NLS-1$
-												CheckName.checkTimer(entry.getKey()))));
-							}
-						}
-					}
-
-				} else if (entry.getValue() == null || entry.getValue().getLocalName() == null
-						|| entry.getValue().getLocalName().isEmpty()) {
-					issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
-							String.format(Messages.getString("TimerExpressionChecker.14"), //$NON-NLS-1$
-									CheckName.checkTimer(entry.getKey()))));
-				} else if (timerDefinition.trim().isEmpty()) {
-					issues.add(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, entry,
-							String.format(Messages.getString("TimerExpressionChecker.15"), //$NON-NLS-1$
-									CheckName.checkTimer(entry.getKey()))));
-				}
-			}
-		}
-
-		return issues;
-	}
+        return issues;
+    }
 }

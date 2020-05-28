@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ public class XmlElementConvention {
         this.name = name;
     }
 
-    @XmlElement(name = "elementFieldTypes", required = false)
+    @XmlElement(name = "elementFieldTypes")
     public XmlElementFieldTypes getElementFieldTypes() {
         return elementFieldTypes;
     }
@@ -78,7 +78,7 @@ public class XmlElementConvention {
         this.elementFieldTypes = elementFieldTypes;
     }
 
-    @XmlElement(name = "description", required = false)
+    @XmlElement(name = "description")
     public String getDescription() {
         return description;
     }

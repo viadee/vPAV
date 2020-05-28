@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,7 @@ public class RuntimeConfig {
 
     private ResourceBundle resourceBundle;
 
-    private boolean test = false; // TODO: Replace with parameterized method calls, to improve separation of test
-    // and production code
+    private boolean test = false;
 
     private static Logger LOGGER = Logger.getLogger(RuntimeConfig.class.getName());
 
@@ -113,6 +112,10 @@ public class RuntimeConfig {
         return classLoader;
     }
 
+    void setApplicationContext(ApplicationContext ctx) {
+        this.ctx = ctx;
+    }
+
     public boolean isTest() {
         return test;
     }
@@ -138,10 +141,6 @@ public class RuntimeConfig {
         this.ruleSet = ruleSet;
     }
 
-    void setApplicationContext(ApplicationContext ctx) {
-        this.ctx = ctx;
-    }
-
     public ApplicationContext getApplicationContext() {
         return ctx;
     }
@@ -149,7 +148,7 @@ public class RuntimeConfig {
     /**
      * Retrieve locale. If locale can not be retrieved, use system locale
      */
-    void retrieveLocale() {
+    public void retrieveLocale() {
         if (ConfigConstants.getInstance().getLanguage().equals("de_DE")) {
             getResource("de_DE");
         } else {

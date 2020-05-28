@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,18 +31,14 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
@@ -50,19 +46,20 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
-public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
+public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
-
-	private static ClassLoader cl;
 
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
@@ -72,8 +69,11 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 		final URL classUrl = new URL(currentPath + "src/test/java/");
 		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
 		final URL[] classUrls = { classUrl, resourcesUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
+		FileScanner.setupSootClassPaths(new LinkedList<>());
+		JavaReaderStatic.setupSoot();
+		Scene.v().loadNecessaryClasses();
 	}
 
 	@AfterClass
@@ -83,10 +83,8 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 	@Test
 	public void testRecogniseVariablesInInnerAnonymousClass() {
-		Properties myProperties = new Properties();
-		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
-		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
+		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
 
 		// parse bpmn model
@@ -94,12 +92,11 @@ public class ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 		final Collection<ServiceTask> allServiceTasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null, new BpmnScanner(PATH));
+		final ProcessVariableReader variableReader = new ProcessVariableReader(null, null);
 
 		final BpmnElement element = new BpmnElement(PATH, allServiceTasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
-		final ListMultimap<String, ProcessVariableOperation> variables = ArrayListMultimap.create();
-		variables.putAll(variableReader.getVariablesFromElement(fileScanner, element, new AnalysisElement[1]));
+		variableReader.getVariablesFromElement(element, new BasicNode[1]);
 
-		Assert.assertEquals(3, variables.asMap().size());
+		Assert.assertEquals(5, element.getControlFlowGraph().getOperations().size());
 	}
 }

@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ public class DelegatedVarMapping implements DelegateVariableMapping {
     @Override
     public void mapInputVariables(DelegateExecution delegateExecution, VariableMap variableMap) {
         variableMap.putValue("inMapping", "myInputValue");
+        // inMapping is not yet available (only available in called process)
         delegateExecution.getVariable("inMapping");
     }
 

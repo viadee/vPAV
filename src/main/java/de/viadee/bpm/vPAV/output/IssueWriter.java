@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -301,6 +301,12 @@ public class IssueWriter {
 	public static CheckerIssue createIssueWithClassPath(Rule rule, CriticalityEnum classification, String classPath,
 			BpmnElement element, String message) {
 
+		return getCheckerIssue(rule, classification, classPath, element, message);
+
+	}
+
+	private static CheckerIssue getCheckerIssue(Rule rule, CriticalityEnum classification, String classPath,
+			BpmnElement element, String message) {
 		final BaseElement baseElement = element.getBaseElement();
 
 		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
@@ -312,7 +318,6 @@ public class IssueWriter {
 				element.getProcessDefinition(), classPath,
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
 				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null);
-
 	}
 
 	/**
@@ -331,17 +336,7 @@ public class IssueWriter {
 	 */
 	public static CheckerIssue createIssueWithJavaRef(Rule rule, CriticalityEnum classification, BpmnElement element,
 			String javaReference, String message) {
-		final BaseElement baseElement = element.getBaseElement();
-
-		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
-				element.getProcessDefinition(), javaReference,
-				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
-
-		return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
-				element.getProcessDefinition(), javaReference,
-				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null);
+		return getCheckerIssue(rule, classification, javaReference, element, message);
 	}
 
 	/**
@@ -360,17 +355,7 @@ public class IssueWriter {
 	 */
 	public static CheckerIssue createIssueWithBeanRef(Rule rule, CriticalityEnum classification, BpmnElement element,
 			String beanReference, String message) {
-		final BaseElement baseElement = element.getBaseElement();
-
-		IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
-				element.getProcessDefinition(), beanReference,
-				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
-
-		return new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
-				element.getProcessDefinition(), beanReference,
-				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
-				baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null);
+		return getCheckerIssue(rule, classification, beanReference, element, message);
 	}
 
 }

@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.processing.code;
 
 import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Helper;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -40,14 +41,10 @@ import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.code.flow.NodeDecorator;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
-import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
-import org.camunda.bpm.model.bpmn.instance.StartEvent;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -74,47 +71,30 @@ public class RecursionTest {
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
         RuntimeConfig.getInstance().setTest(true);
+        Properties myProperties = new Properties();
+        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+        ConfigConstants.getInstance().setProperties(myProperties);
     }
 
     @Test
     public void recursionTest() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        Properties myProperties = new Properties();
-        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
-        final File processDefinition = new File(PATH);
-
-        // parse bpmn model and set delegate
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
-        ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
-        serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.RecursiveDelegate");
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
-
-        // create data flow graphs
-        final Collection<String> calledElementHierarchy = new ArrayList<>();
         FlowAnalysis flowAnalysis = new FlowAnalysis();
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
+        final Collection<Graph> graphCollection = Helper.getModelWithDelegate("de.viadee.bpm.vPAV.delegates.RecursiveDelegate", flowAnalysis);
 
         flowAnalysis.analyze(graphCollection);
-        LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        Map<String, AnalysisElement> nodes = flowAnalysis.getNodes();
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("EndEvent_13uioac");
         AnalysisElement sequenceFlow2 = endEvent.getPredecessors().get(0);
         AnalysisElement taskDelegateElse = sequenceFlow2.getPredecessors().get(0);
-        AnalysisElement taskDelegateIf = taskDelegateElse.getPredecessors().get(0);
-        AnalysisElement taskDelegateExecute = taskDelegateElse.getPredecessors().get(1);
+        AnalysisElement taskDelegateExecute = taskDelegateElse.getPredecessors().get(0);
+        AnalysisElement taskDelegateIf = taskDelegateElse.getPredecessors().get(1);
         AnalysisElement sequenceFlow1 = taskDelegateExecute.getPredecessors().get(0);
         AnalysisElement startEvent = sequenceFlow1.getPredecessors().get(0);
 
         assertEquals("Last sequence flow should have exactly one predecessor (else node).", 1,sequenceFlow2.getPredecessors().size());
         assertEquals("Else node should have two predecessors due to recursion",2, taskDelegateElse.getPredecessors().size());
         assertEquals("If node should have two predecessors due to recursion", 2, taskDelegateIf.getPredecessors().size());
-        assertEquals("If node should be a predecessor of itself", ((NodeDecorator)taskDelegateIf).getDecoratedNode(), ((NodeDecorator) taskDelegateIf.getPredecessors().get(1)).getDecoratedNode());
-
-        // TODO check anomalies but at the moment we cannot recognize them correctly if the graph includes a loop
+        assertEquals("If node should be a predecessor of itself", taskDelegateIf, taskDelegateIf.getPredecessors().get(1));
     }
 }

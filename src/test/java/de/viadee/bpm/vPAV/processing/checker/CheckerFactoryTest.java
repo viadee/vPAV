@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.model.Setting;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -48,24 +49,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
  * unit tests for class CheckerFactoryTest
- *
  */
 public class CheckerFactoryTest {
-
-    private static final String BASE_PATH = "src/test/resources/";
-
-    private static ClassLoader cl;
 
     private final static Setting setting = new Setting("WrongChecker", null, null, null, false,
             "de.viadee.vPAV_checker_plugin");
 
     private static Map<String, Setting> settings = new HashMap<>();
-
-    private final String PATH = BASE_PATH + "CheckerFactoryTest.bpmn";
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -73,7 +68,7 @@ public class CheckerFactoryTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -96,10 +91,10 @@ public class CheckerFactoryTest {
         CheckerFactory checkerFactory = new CheckerFactory();
 
         Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH), null, null, null, null);
+                null, null, null, null);
 
-        assertTrue("Collection of Element Checker should not be empty", !checkers[0].isEmpty());
-        assertTrue("Collection of Model Checker should not be empty", !checkers[1].isEmpty());
+        assertFalse("Collection of Element Checker should not be empty", checkers[0].isEmpty());
+        assertFalse("Collection of Model Checker should not be empty", checkers[1].isEmpty());
     }
 
     /**
@@ -115,7 +110,7 @@ public class CheckerFactoryTest {
         CheckerFactory checkerFactory = new CheckerFactory();
 
         Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH), null, null, null, null);
+                null, null, null, null);
 
         assertTrue("Collection of Element Checker should be empty", checkers[0].isEmpty());
         assertTrue("Collection of Model Checker should be empty", checkers[1].isEmpty());
@@ -123,7 +118,6 @@ public class CheckerFactoryTest {
 
     /**
      * Test wrong external Checker
-     *
      */
     @Test
     public void testIncorrectExternalChecker() {
@@ -136,7 +130,7 @@ public class CheckerFactoryTest {
         CheckerFactory checkerFactory = new CheckerFactory();
 
         Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH), null, null, null, null);
+                null, null, null, null);
 
         assertTrue("Collection of Checker should be empty", checkers[0].isEmpty());
         assertTrue("Collection of Model Checker should be empty", checkers[1].isEmpty());
@@ -173,11 +167,12 @@ public class CheckerFactoryTest {
         // When
         CheckerFactory checkerFactory = new CheckerFactory();
         Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
-                new BpmnScanner(PATH), null, null, null, null);
+                null, null, null, null);
 
         // Then
         Assert.assertEquals("Wrong number of checkers was created.", 4, checkers[0].size());
-        Assert.assertEquals("Duplicated versioning checker rule was not added to incorrect checker map.", 1, checkerFactory.getIncorrectCheckers().size());
+        Assert.assertEquals("Duplicated versioning checker rule was not added to incorrect checker map.", 1,
+                checkerFactory.getIncorrectCheckers().size());
     }
 
     @Before

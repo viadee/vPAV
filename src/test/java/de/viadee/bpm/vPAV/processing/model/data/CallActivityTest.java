@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,27 +31,27 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
+import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
-import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -71,10 +71,13 @@ public class CallActivityTest {
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = {classUrl};
+        final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     @AfterClass
@@ -98,8 +101,7 @@ public class CallActivityTest {
         processIdToPathMap.put("calledProcess", "CallActivityTest/CallActivityTest_calledProcess.bpmn");
         processIdToPathMap.put("calledcalledProcess", "CallActivityTest/CallActivityTest_calledcalledProcess.bpmn");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 
@@ -114,19 +116,40 @@ public class CallActivityTest {
         final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
         Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
 
-        Assert.assertEquals("There are exactly three anomalies", 3, invalidPathMap.size());
+        Assert.assertEquals("There should be eight anomalies", 8, invalidPathMap.size());
         AnomalyContainer anomaly1 = iterator.next();
         AnomalyContainer anomaly2 = iterator.next();
         AnomalyContainer anomaly3 = iterator.next();
-        // var2
-        Assert.assertEquals("Expected a DD anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.DD,
+        AnomalyContainer anomaly4 = iterator.next();
+        AnomalyContainer anomaly5 = iterator.next();
+        AnomalyContainer anomaly6 = iterator.next();
+        AnomalyContainer anomaly7 = iterator.next();
+        AnomalyContainer anomaly8 = iterator.next();
+
+        // var4 in sequence flow 1xq2ktt after task 2
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                 anomaly1.getAnomaly());
-        // var3
+        // var3 in ServiceTask_0edbu4z in calledcalledProcess
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly4.getAnomaly().toString(), Anomaly.UR,
+                anomaly4.getAnomaly());
+        // var1 in ServiceTask_1gq1azp in called Process
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly2.getAnomaly().toString(), Anomaly.UR,
                 anomaly2.getAnomaly());
-        // var4
+        // var2 in SequenceFlow_1gfmaoe in called element
+        Assert.assertEquals("Expected a DD anomaly but got " + anomaly7.getAnomaly().toString(), Anomaly.DD,
+                anomaly7.getAnomaly());
+        // variable2 in CallActivity_0vlq6qr in In Mapping
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly3.getAnomaly().toString(), Anomaly.UR,
                 anomaly3.getAnomaly());
+        // var1 in ServiceTask_01owrcj in called Process
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly5.getAnomaly().toString(), Anomaly.UR,
+                anomaly5.getAnomaly());
+        // var1 in ServiceTask_0mfcclv in called Process
+        Assert.assertEquals("Expected a DD anomaly but got " + anomaly6.getAnomaly().toString(), Anomaly.DD,
+                anomaly6.getAnomaly());
+        // variable3 in CallActivity_0vlq6qr in Out Mapping
+        Assert.assertEquals("Expected a UR anomaly but got " + anomaly8.getAnomaly().toString(), Anomaly.UR,
+                anomaly8.getAnomaly());
     }
 
     @Test
@@ -147,10 +170,9 @@ public class CallActivityTest {
         processIdToPathMap.put("calledcalledProcess", "CallActivityTest/CallActivityTest_calledcalledProcess.bpmn");
 
         callActivity.builder().camundaIn("varIn", "inMapping");
-        callActivity.builder().camundaOut("z", "outMapping");
+        callActivity.builder().camundaOut("inMapping", "outMapping");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         for (int i = 0; i < 2; i++) {
             if (i == 1) {
@@ -161,7 +183,7 @@ public class CallActivityTest {
                 inVariable.removeAttribute("source");
                 CamundaOut outVariable = callActivity.getExtensionElements().
                         getElementsQuery().filterByType(CamundaOut.class).singleResult();
-                outVariable.setCamundaSourceExpression("${z}");
+                outVariable.setCamundaSourceExpression("${inMapping}");
                 outVariable.removeAttribute("source");
             }
 
@@ -171,7 +193,6 @@ public class CallActivityTest {
 
     @Test
     public void testEmbeddedWithDelegateVariableMapping() {
-        //TODO test also delegate expression und zwar so, dass gleiches ergebnis, damit vereinfachung
         // Usage of camunda:in and camunda:out
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
@@ -189,8 +210,7 @@ public class CallActivityTest {
 
         callActivity.builder().camundaVariableMappingClass("de.viadee.bpm.vPAV.delegates.DelegatedVarMapping");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         checkTwoLevelsAnomalies(graphBuilder, fileScanner, modelInstance, processDefinition, scanner, true);
 
@@ -198,9 +218,9 @@ public class CallActivityTest {
             if (i == 1) {
                 // Test 2: Use expression instead of class
                 callActivity.setCamundaVariableMappingClass(null);
-                callActivity.setCamundaVariableMappingDelegateExpression("${de.viadee.bpm.vPAV.delegates.DelegatedVarMapping}");
+                callActivity.setCamundaVariableMappingDelegateExpression("${delegatedVarMapping}");
                 final Map<String, String> beanMapping = new HashMap<>();
-                beanMapping.put("DelegatedVarMapping", "de/viadee/bpm/vPAV/delegates/DelegatedVarMapping.class");
+                beanMapping.put("delegatedVarMapping", "de/viadee/bpm/vPAV/delegates/DelegatedVarMapping.class");
                 RuntimeConfig.getInstance().setBeanMapping(beanMapping);
             }
 
@@ -226,8 +246,7 @@ public class CallActivityTest {
         final Map<String, String> processIdToPathMap = new HashMap<>();
         processIdToPathMap.put("calledElement", "CallActivityTest/CallActivityTest_calledElement.bpmn");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         // Test 1: Add Start Listener
         callActivity.builder().camundaExecutionListenerClass("start",
@@ -236,7 +255,8 @@ public class CallActivityTest {
         for (int i = 0; i < 2; i++) {
             if (i == 1) {
                 // Test 2: Change start listener to end listener
-                CamundaExecutionListener startListener = callActivity.getExtensionElements().getElementsQuery().filterByType(CamundaExecutionListener.class).singleResult();
+                CamundaExecutionListener startListener = callActivity.getExtensionElements().getElementsQuery()
+                        .filterByType(CamundaExecutionListener.class).singleResult();
                 startListener.setCamundaEvent("end");
             }
 
@@ -258,32 +278,79 @@ public class CallActivityTest {
             AnalysisElement sequenceFlow2_2 = iterator.next();
             AnalysisElement task1_1 = iterator.next();
             AnalysisElement ca0 = iterator.next();
+            AnalysisElement ca2 = iterator.next();
 
             Assert.assertEquals("", 0, startEvent1.getPredecessors().size());
-            Assert.assertEquals("", "StartEvent_1", sequenceFlow1.getPredecessors().get(0).getId());
-            Assert.assertEquals("", "SequenceFlow_2", endEvent1.getPredecessors().get(0).getId());
-            Assert.assertEquals("", "_SequenceFlow_2_2", endEvent1_1.getPredecessors().get(0).getId());
-            Assert.assertEquals("", "_StartEvent_1_1", sequenceFlow1_1.getPredecessors().get(0).getId());
-            Assert.assertEquals("", "_Task_1_1", sequenceFlow2_2.getPredecessors().get(0).getId());
-            Assert.assertEquals("", "_SequenceFlow_1_1", task1_1.getPredecessors().get(0).getId());
+            Assert.assertEquals("", "StartEvent_1", sequenceFlow1.getPredecessors().get(0).getGraphId());
+            Assert.assertEquals("", "SequenceFlow_2", endEvent1.getPredecessors().get(0).getGraphId());
+            Assert.assertEquals("", "_SequenceFlow_2_2", endEvent1_1.getPredecessors().get(0).getGraphId());
+            Assert.assertEquals("", "_StartEvent_1_1", sequenceFlow1_1.getPredecessors().get(0).getGraphId());
+            Assert.assertEquals("", "_Task_1_1", sequenceFlow2_2.getPredecessors().get(0).getGraphId());
+            Assert.assertEquals("", "_SequenceFlow_1_1", task1_1.getPredecessors().get(0).getGraphId());
 
             if (i == 0) {
                 // Start Listener
-                Assert.assertEquals("", "SequenceFlow_1", ca0.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "_EndEvent_1_1", sequenceFlow2.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "CallActivity__0", startEvent1_1.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "SequenceFlow_1", ca0.getPredecessors().get(0).getGraphId());
+                Assert.assertEquals("", "_EndEvent_1_1", sequenceFlow2.getPredecessors().get(0).getGraphId());
+                Assert.assertEquals("", "CallActivity__3", startEvent1_1.getPredecessors().get(0).getGraphId());
 
             } else {
                 // End Listener
-                Assert.assertEquals("", "_EndEvent_1_1", ca0.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "CallActivity__0", sequenceFlow2.getPredecessors().get(0).getId());
-                Assert.assertEquals("", "SequenceFlow_1", startEvent1_1.getPredecessors().get(0).getId());
+                Assert.assertEquals("", "_EndEvent_1_1", ca2.getPredecessors().get(0).getGraphId());
+                Assert.assertEquals("", "CallActivity__2", sequenceFlow2.getPredecessors().get(0).getGraphId());
+                Assert.assertEquals("", "CallActivity__0", startEvent1_1.getPredecessors().get(0).getGraphId());
             }
         }
     }
 
-    private void checkTwoLevelsAnomalies(ElementGraphBuilder graphBuilder, FileScanner fileScanner, BpmnModelInstance modelInstance,
-                                         File processDefinition, ProcessVariablesScanner scanner, boolean delegateTest) {
+    @Test
+    public void testAllVariableMapping() {
+        // Create processes
+        BpmnModelInstance calledProcess = Bpmn.createProcess("MyCalledProcess").startEvent("MySubStartEvent")
+                .serviceTask().camundaExpression("${execution.setVariable('varOut', true)}")
+                .serviceTask().camundaExpression("${execution.setVariable('varOut2', true)}")
+                .endEvent().done();
+        BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent()
+                .serviceTask().camundaExpression("${execution.setVariable('varIn', true)}")
+                .serviceTask().camundaExpression("${execution.setVariable('varIn2', true)}")
+                .callActivity("MyCallActivity")
+                .calledElement("MyCalledProcess").endEvent("MyEndEvent").done();
+
+        // Setup variable mapping
+        CamundaIn inMapping = modelInstance.newInstance(CamundaIn.class);
+        inMapping.setCamundaVariables("all");
+        CamundaOut outMapping = modelInstance.newInstance(CamundaOut.class);
+        outMapping.setCamundaVariables("all");
+        CallActivity myCallActivity = modelInstance.getModelElementById("MyCallActivity");
+        myCallActivity.builder().addExtensionElement(inMapping).addExtensionElement(outMapping);
+
+        HashMap<String, BpmnModelInstance> processIdToModels = new HashMap<>();
+        processIdToModels.put("MyCalledProcess", calledProcess);
+
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(processIdToModels);
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        final Collection<String> calledElementHierarchy = new ArrayList<>();
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
+                "MyProcess", calledElementHierarchy, scanner, flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+
+        Assert.assertTrue(flowAnalysis.getCallActivitiesInMapping().contains("MyCalledProcess"));
+        Assert.assertTrue(flowAnalysis.getCallActivitiesOutMapping().contains("MyCalledProcess"));
+
+        Assert.assertEquals(2, flowAnalysis.getNodes().get("_MySubStartEvent").getInUnused().size());
+        Assert.assertEquals(4, flowAnalysis.getNodes().get("MyEndEvent").getInUnused().size());
+        flowAnalysis.getNodes().get("MyEndEvent").getInUnused().forEach((key,value) -> {
+            Assert.assertEquals("MyProcess", value.getScopeId());
+        });
+
+    }
+
+    private void checkTwoLevelsAnomalies(ElementGraphBuilder graphBuilder, FileScanner fileScanner,
+            BpmnModelInstance modelInstance,
+            File processDefinition, ProcessVariablesScanner scanner, boolean delegateTest) {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 
         // create data flow graphs
@@ -317,7 +384,14 @@ public class CallActivityTest {
             // inMapping CallActivity
             Assert.assertEquals("Expected a UR anomaly but got " + anomaly4.getAnomaly().toString(), Anomaly.UR,
                     anomaly4.getAnomaly());
-            Assert.assertEquals("There should be two input variables.", 2, flowAnalysis.getNodes().get("_StartEvent_1").getInUnused().size());
+            Assert.assertEquals("There should be one input variable.", 1,
+                    flowAnalysis.getNodes().get("_StartEvent_1").getInUnused().size());
         }
+    }
+
+    @Before
+    public void clear() {
+        IssueService.getInstance().clear();
+        ProcessVariableOperation.resetIdCounter();
     }
 }

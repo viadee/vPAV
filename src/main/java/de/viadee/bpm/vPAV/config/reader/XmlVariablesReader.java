@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,24 +31,20 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 
 /**
  * Used to read the variables file (variables.xml) and extract the user defined variables
@@ -96,7 +92,7 @@ public final class XmlVariablesReader {
         HashMap<String, ListMultimap<String, ProcessVariableOperation>> operations = new HashMap<>();
 
         for (final XmlVariable variable : variableCollection) {
-            ProcessVariableOperation operation = null;
+            ProcessVariableOperation operation;
             try {
                 operation = createOperationFromXml(variable, defaultProcess);
 
@@ -157,8 +153,7 @@ public final class XmlVariablesReader {
                 op = VariableOperation.WRITE;
         }
 
-        return new ProcessVariableOperation(name, ElementChapter.UserDefined, KnownElementFieldType.UserDefined,
-                op, scope);
+        return new ProcessVariableOperation(name, op, scope);
 
     }
 }

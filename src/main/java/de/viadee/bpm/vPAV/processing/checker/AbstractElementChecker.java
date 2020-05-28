@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,12 +36,20 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 
 public abstract class AbstractElementChecker implements ElementChecker {
 
-    final protected Rule rule;
+    protected final Rule rule;
 
-    final protected BpmnScanner bpmnScanner;
+    public AbstractElementChecker(final Rule rule) {
+        this.rule = rule;
+    }
 
+    /**
+     * Creates a new Abstract Element checker.
+     * @param rule Corresponding rule
+     * @param bpmnScanner Unused bpmnScanner
+     * @deprecated since v3.0.5
+     */
+    @Deprecated
     public AbstractElementChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         this.rule = rule;
-        this.bpmnScanner = bpmnScanner;
     }
 }

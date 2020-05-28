@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.Resource;
-import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.Error;
+import org.camunda.bpm.model.bpmn.instance.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -67,37 +67,30 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
     private static Logger logger = Logger.getLogger(BoundaryErrorChecker.class.getName());
 
-    public BoundaryErrorChecker(final Rule rule, BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public BoundaryErrorChecker(final Rule rule) {
+        super(rule);
     }
 
     @Override
     public Collection<CheckerIssue> check(BpmnElement element) {
-
         final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement bpmnElement = element.getBaseElement();
 
-        String mappedTaskId = null;
-        String implementation = null;
-        String implementationRef = null;
-
         // Grab only boundaryEvents
-        if (bpmnElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_BOUNDARY_EVENT)) {
+        if (bpmnElement instanceof BoundaryEvent) {
+            BoundaryEvent boundaryEvent = (BoundaryEvent) bpmnElement;
 
             // Map<String, String> errorEventDef -> "errorRef" , "camunda:errorMessageVariable"
-            final Map<String, String> errorEventDef = bpmnScanner.getErrorEvent(bpmnElement.getId());
+            ErrorEventDefinition errorEventDefinition = BpmnScanner.getErrorEventDefinition(boundaryEvent);
 
             // Check if boundaryEvent consists of an errorEventDefinition
-            if (errorEventDef.size() != 0) {
-                mappedTaskId = bpmnScanner.getErrorEventMapping(bpmnElement.getId());
-                implementation = bpmnScanner.getImplementation(mappedTaskId);
-                implementationRef = bpmnScanner.getImplementationReference(mappedTaskId,
-                        implementation);
+            if (errorEventDefinition != null) {
+                Activity activity = boundaryEvent.getAttachedTo();
+                Map.Entry<String, String> implementation = BpmnScanner.getImplementation(activity);
 
                 // No error has been referenced
-                if (errorEventDef.entrySet().iterator().next().getKey() == null
-                        || errorEventDef.entrySet().iterator().next().getKey().isEmpty()) {
-                    final String errorCode = bpmnScanner.getErrorCodeVar(bpmnElement.getId());
+                if (errorEventDefinition.getError() == null) {
+                    final String errorCode = errorEventDefinition.getCamundaErrorCodeVariable();
                     if (errorCode == null || errorCode.isEmpty()) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
                                 String.format(Messages.getString("BoundaryErrorChecker.0"), //$NON-NLS-1$
@@ -108,50 +101,44 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                                         CheckName.checkName(bpmnElement))));
                     }
                 } else {
-
                     // Error reference could be resolved, retrieve errorDefinition
-                    final Map<String, String> errorDef = bpmnScanner
-                            .getErrorDef(errorEventDef.entrySet().iterator().next().getKey());
+                    Error errorDef = errorEventDefinition.getError();
 
                     // No errorCode has been specified
-                    if (errorDef.entrySet().iterator().next().getValue() == null
-                            || errorDef.entrySet().iterator().next().getValue().isEmpty()) {
+                    if (errorDef == null || errorDef.getErrorCode().isEmpty()) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                                 String.format(Messages.getString("BoundaryErrorChecker.2"), //$NON-NLS-1$
                                         CheckName.checkName(bpmnElement))));
 
                     } else {
-                        if (implementation != null) {
-                            // Check the BeanMapping to resolve delegate expression
-                            if (implementation.equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
-                                checkBeanMapping(element, issues, bpmnElement,
-                                        errorDef.entrySet().iterator().next().getValue(), implementationRef);
+                        // Check the BeanMapping to resolve delegate expression
+                        if (implementation.getKey().equals(BpmnConstants.CAMUNDA_DEXPRESSION)) {
+                            checkBeanMapping(element, issues, bpmnElement,
+                                    errorDef.getErrorCode(), implementation.getValue());
 
-                                // Check the directly referenced class
-                            } else if (implementation.equals(BpmnConstants.CAMUNDA_CLASS)) {
-                                if (!readResourceFile(implementationRef,
-                                        errorDef.entrySet().iterator().next().getValue())) {
-                                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                            String.format(
-                                                    Messages.getString("BoundaryErrorChecker.3"), //$NON-NLS-1$
-                                                    CheckName.checkName(bpmnElement), implementationRef)));
+                            // Check the directly referenced class
+                        } else if (implementation.getKey().equals(BpmnConstants.CAMUNDA_CLASS) && !readResourceFile(
+                                implementation.getValue(),
+                                errorDef.getErrorCode())) {
 
-                                }
-                            }
+                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                    String.format(
+                                            Messages.getString("BoundaryErrorChecker.3"), //$NON-NLS-1$
+                                            CheckName.checkName(bpmnElement), implementation.getValue())));
+
                         }
                     }
 
                     // No errorName has been specified
-                    if (errorDef.entrySet().iterator().next().getKey() == null
-                            || errorDef.entrySet().iterator().next().getKey().isEmpty()) {
+                    if (errorDef == null || errorDef.getName() == null || errorDef.getName().isEmpty()) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                                 String.format(Messages.getString("BoundaryErrorChecker.4"), //$NON-NLS-1$
                                         CheckName.checkName(bpmnElement))));
                     }
 
                     // No ErrorMessageVariable has been specified
-                    if (errorEventDef.entrySet().iterator().next().getValue() == null
-                            || errorEventDef.entrySet().iterator().next().getValue().isEmpty()) {
+                    if (errorEventDefinition.getCamundaErrorMessageVariable() == null
+                            || errorEventDefinition.getCamundaErrorMessageVariable().isEmpty()) {
                         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                                 String.format(Messages.getString("BoundaryErrorChecker.5"), //$NON-NLS-1$
                                         CheckName.checkName(bpmnElement))));
@@ -228,7 +215,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
         boolean matchingErrorCode = false;
 
-        if (fileName != null && fileName.trim().length() > 0) {
+        if (fileName.trim().length() > 0) {
             try {
                 final DirectoryScanner scanner = new DirectoryScanner();
 
@@ -274,13 +261,15 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
         if (classBody != null && !classBody.isEmpty()) {
             String remainingClassBody = classBody;
             while (remainingClassBody.contains("throw new BpmnError")) {
-                String bpmnErrorArguments = StringUtils.substringBetween(remainingClassBody, "throw new BpmnError(", ");");
+                String bpmnErrorArguments = StringUtils
+                        .substringBetween(remainingClassBody, "throw new BpmnError(", ");");
                 String delErrorCode = null;
 
                 if (bpmnErrorArguments.startsWith("\"")) {
                     // Let's assume a string is directly passed
 
-                    delErrorCode = StringUtils.substringBetween(bpmnErrorArguments, "\"", "\""); //$NON-NLS-1$ //$NON-NLS-2$
+                    delErrorCode = StringUtils
+                            .substringBetween(bpmnErrorArguments, "\"", "\""); //$NON-NLS-1$ //$NON-NLS-2$
                 } else {
                     // Let's assume a object is passed
                     String objErrorCode = StringUtils.substringBefore(bpmnErrorArguments, ",");
@@ -321,9 +310,6 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      * @return boolean
      */
     private boolean checkClassFile(final String className) {
-
-        @SuppressWarnings("unused") final String classPath =
-                className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             RuntimeConfig.getInstance().getClassLoader().loadClass(className);

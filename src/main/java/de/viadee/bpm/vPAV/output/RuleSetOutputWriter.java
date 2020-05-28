@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -47,17 +48,14 @@ import java.util.Map;
 
 /**
  * Ergebnisse aus dem Checker in ein definiertes XML-Format schreiben
- *
  */
 public class RuleSetOutputWriter {
 
     /**
      * Writes the effective ruleSet to the vPAV output folder to provide traceability
      *
-     * @param rules
-     *            Contains the actual configuration of rules
-     * @throws OutputWriterException
-     *             Occurs if output can not be written
+     * @param rules Contains the actual configuration of rules
+     * @throws OutputWriterException Occurs if output can not be written
      */
     public void write(RuleSet rules) throws OutputWriterException {
         Writer writer = null;
@@ -68,20 +66,21 @@ public class RuleSetOutputWriter {
 
         try {
             writer = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(ConfigConstants.EFFECTIVE_RULESET), "utf-8"));
+                    new OutputStreamWriter(new FileOutputStream(ConfigConstants.EFFECTIVE_RULESET),
+                            StandardCharsets.UTF_8));
             final JAXBContext context = JAXBContext.newInstance(XmlRuleSet.class);
             final Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             m.marshal(transformToXmlDatastructure(rules), writer);
-        } catch (final UnsupportedEncodingException e) {
-            throw new OutputWriterException("unsupported encoding");
         } catch (final FileNotFoundException e) {
             throw new OutputWriterException("Effective config file couldn't be generated");
         } catch (final JAXBException e) {
             throw new OutputWriterException("xml output (effective config file) couldn't be generated (jaxb-error)");
         } finally {
             try {
-                writer.close();
+                if (writer != null) {
+                    writer.close();
+                }
             } catch (Exception ex) {
                 /* ignore */
             }
@@ -91,7 +90,7 @@ public class RuleSetOutputWriter {
     /**
      * Reads the final ruleSet and recreates a XML file
      *
-     * @param rules
+     * @param rules RuleSet
      * @return xmlRuleSet
      */
     private static XmlRuleSet transformToXmlDatastructure(final RuleSet rules) {
@@ -108,14 +107,14 @@ public class RuleSetOutputWriter {
                 Rule rule = ruleEntry.getValue();
 
                 // Get XmlModelConventions
-                Collection<XmlModelConvention> xModelConventions = new ArrayList<XmlModelConvention>();
+                Collection<XmlModelConvention> xModelConventions = new ArrayList<>();
                 for (ModelConvention modCon : rule.getModelConventions()) {
                     XmlModelConvention xmlMoCon = new XmlModelConvention(modCon.getType());
                     xModelConventions.add(xmlMoCon);
                 }
 
                 // Get XmlElementConvention
-                Collection<XmlElementConvention> xElementConventions = new ArrayList<XmlElementConvention>();
+                Collection<XmlElementConvention> xElementConventions = new ArrayList<>();
                 for (ElementConvention elCon : rule.getElementConventions()) {
                     ElementFieldTypes eFT = elCon.getElementFieldTypes();
                     if (eFT != null) {
@@ -145,7 +144,8 @@ public class RuleSetOutputWriter {
                             xSettings.add(xmlSetting);
                         }
                     } else {
-                        XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getId(), s.getRequired(),
+                        XmlSetting xmlSetting = new XmlSetting(s.getName(), null, s.getType(), s.getId(),
+                                s.getRequired(),
                                 s.getValue());
                         xSettings.add(xmlSetting);
                     }

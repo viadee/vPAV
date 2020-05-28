@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,20 +31,23 @@
  */
 package de.viadee.bpm.vPAV.processing.code;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,14 +63,17 @@ public class ProcessVariablesLifecycleOrderTest {
 
     @BeforeClass
     public static void setup() throws IOException {
+        RuntimeConfig.getInstance().setTest(true);
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
-        final URL[] classUrls = { classUrl };
+        final URL classUrl = new URL(currentPath + "src/test/java/");
+        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+        final URL[] classUrls = { classUrl, resourcesUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
-        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     @Test
@@ -77,7 +83,6 @@ public class ProcessVariablesLifecycleOrderTest {
         // and with 1 Multi Instance Task (Loop Cardinality & Completion Condition expression)
         // and with 1 Receive Task (Message)
         // and with 1 Intermediate Throw Event (Link)
-        // TODO add variables in extension elements and sequence flows
 
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
@@ -90,7 +95,7 @@ public class ProcessVariablesLifecycleOrderTest {
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
 
         // create data flow graphs
         final Collection<String> calledElementHierarchy = new ArrayList<>();
@@ -100,7 +105,7 @@ public class ProcessVariablesLifecycleOrderTest {
 
         flowAnalysis.analyze(graphCollection);
 
-        LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        Map<String, AnalysisElement> nodes = flowAnalysis.getNodes();
         assertEquals("There should be 22 nodes.", 22, nodes.size());
 
         // Find throw event
@@ -108,22 +113,22 @@ public class ProcessVariablesLifecycleOrderTest {
 
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("MyEndEvent");
-        AnalysisElement sequenceFlow4 = endEvent.getPredecessors().get(0);
-        AnalysisElement gateway = sequenceFlow4.getPredecessors().get(0);
-        AnalysisElement sequenceFlow3 = gateway.getPredecessors().get(0);
-        AnalysisElement receiveTask = sequenceFlow3.getPredecessors().get(0);
-        AnalysisElement sequenceFlow2 = receiveTask.getPredecessors().get(0);
+        AnalysisElement sequenceFlow_0ml2hlg = endEvent.getPredecessors().get(0);
+        AnalysisElement gateway = sequenceFlow_0ml2hlg.getPredecessors().get(0);
+        AnalysisElement sequenceFlow_1f9tqmg= gateway.getPredecessors().get(0);
+        AnalysisElement receiveTask = sequenceFlow_1f9tqmg.getPredecessors().get(0);
+        AnalysisElement sequenceFlow_0zu24g0 = receiveTask.getPredecessors().get(0);
 
         // Mulit-Instance Task
-        AnalysisElement multiInstanceDelegate = sequenceFlow2.getPredecessors().get(0);
+        AnalysisElement multiInstanceDelegate = sequenceFlow_0zu24g0.getPredecessors().get(0);
         AnalysisElement completionCondition = multiInstanceDelegate.getPredecessors().get(0);
         AnalysisElement loopCardinality = completionCondition.getPredecessors().get(0);
         AnalysisElement defaultLoopVariables = loopCardinality.getPredecessors().get(0);
-        AnalysisElement sequenceFlow1 = defaultLoopVariables.getPredecessors().get(0);
+        AnalysisElement sequenceFlow_1qw9mzs = defaultLoopVariables.getPredecessors().get(0);
 
         // Service Task
         // Order is only correct because the listeners are ordered like this in the bpmn file
-        AnalysisElement outputParameter = sequenceFlow1.getPredecessors().get(0);
+        AnalysisElement outputParameter = sequenceFlow_1qw9mzs.getPredecessors().get(0);
         AnalysisElement endListenerDelegate = outputParameter.getPredecessors().get(0);
         AnalysisElement endListenerExpression = endListenerDelegate.getPredecessors().get(0);
         AnalysisElement implementationExpression = endListenerExpression.getPredecessors().get(0);
@@ -168,7 +173,7 @@ public class ProcessVariablesLifecycleOrderTest {
         // Check discovery of process variables
         assertEquals(
                 "Last Sequence Flow should have two input parameters because the service task has one output parameter and one defined variable.",
-                2, sequenceFlow4.getInUnused().size());
+                2, sequenceFlow_0ml2hlg.getInUnused().size());
         assertEquals("Delegate Start Listener should have one passed input parameter.", 1,
                 startListenerDelegate.getInUnused().size());
     }
@@ -176,9 +181,6 @@ public class ProcessVariablesLifecycleOrderTest {
     @Test
     public void testProcessVariablesLifecycleWithCallActivity() {
         // Test with In/Out Variable Injection, Input/Output Parameters and Start/End Listeners
-        // TODO add all other things like Delegate Variable Mapping
-        // TODO Add delegate
-
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
@@ -194,8 +196,7 @@ public class ProcessVariablesLifecycleOrderTest {
         final Map<String, String> processIdToPathMap = new HashMap<>();
         processIdToPathMap.put("calledProcess", "ProcessVariablesLifecycleOrderTest_CalledProcess.bpmn");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null,
-                new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap, null, null);
 
         // create data flow graphs
         final Collection<String> calledElementHierarchy = new ArrayList<>();
@@ -205,20 +206,22 @@ public class ProcessVariablesLifecycleOrderTest {
 
         flowAnalysis.analyze(graphCollection);
 
-        LinkedHashMap<String, AnalysisElement> nodes = flowAnalysis.getNodes();
+        Map<String, AnalysisElement> nodes = flowAnalysis.getNodes();
         // Start from end event and go to start.
         AnalysisElement endEvent = nodes.get("MyEndEvent");
-        AnalysisElement sequenceFlow1 = endEvent.getPredecessors().get(0);
-        AnalysisElement outputParameter = sequenceFlow1.getPredecessors().get(0);
+        AnalysisElement sequenceFlow_1qw9mzs = endEvent.getPredecessors().get(0);
+        AnalysisElement outputParameter = sequenceFlow_1qw9mzs.getPredecessors().get(0);
         AnalysisElement endListener2 = outputParameter.getPredecessors().get(0);
         AnalysisElement endListener1 = endListener2.getPredecessors().get(0);
         AnalysisElement endListenerExpression = endListener1.getPredecessors().get(0);
-        AnalysisElement endEventCalledProcess = endListenerExpression.getPredecessors().get(0);
+        AnalysisElement outMapping =  endListenerExpression.getPredecessors().get(0);
+        AnalysisElement endEventCalledProcess = outMapping.getPredecessors().get(0);
         AnalysisElement serviceTaskCalledProcess = endEventCalledProcess.getPredecessors().get(0).getPredecessors()
                 .get(0);
         AnalysisElement startEventCalledProcess = serviceTaskCalledProcess.getPredecessors().get(0).getPredecessors()
                 .get(0);
-        AnalysisElement startListenerExpression = startEventCalledProcess.getPredecessors().get(0);
+        AnalysisElement inMapping = startEventCalledProcess.getPredecessors().get(0);
+        AnalysisElement startListenerExpression = inMapping.getPredecessors().get(0);
         AnalysisElement startListener2 = startListenerExpression.getPredecessors().get(0);
         AnalysisElement startListener1 = startListener2.getPredecessors().get(0);
         AnalysisElement inputParameter = startListener1.getPredecessors().get(0);
@@ -226,16 +229,16 @@ public class ProcessVariablesLifecycleOrderTest {
         AnalysisElement startEvent = serviceTask.getPredecessors().get(0).getPredecessors().get(0);
 
         assertEquals("Output parameter should write variable {MyOutputParameter}.", 1, outputParameter.getDefined().size());
-        assertEquals("Input parameter should write variable {MyInputParamter}.", 1, inputParameter.getDefined().size());
-        assertEquals("End Listener 2 was not correctly included.", "MyCallActivity__6", endListener2.getId());
-        assertEquals("Expression End Listener was not correctly included.", "MyCallActivity__4",
-                endListenerExpression.getId());
+        assertEquals("Input parameter should write variable {MyInputParamter}.", 1, inMapping.getDefined().size());
+        assertEquals("End Listener 2 was not correctly included.", KnownElementFieldType.Class, ((BasicNode)endListener2).getFieldType());
+        assertEquals("Expression End Listener was not correctly included.", KnownElementFieldType.Expression,
+                ((BasicNode)endListenerExpression).getFieldType());
         assertEquals("Start Listener 1 was not correctly included.", "MyCallActivity__1", startListener1.getId());
         assertEquals("Expression Start Listener was not correctly included.", "MyCallActivity__3",
                 startListenerExpression.getId());
-        assertEquals("_EndEvent_SUCC", endEventCalledProcess.getId());
-        assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getId());
-        assertEquals("_StartEvent_1", startEventCalledProcess.getId());
+        assertEquals("_EndEvent_SUCC", endEventCalledProcess.getGraphId());
+        assertEquals("_MyCalledServiceTask", serviceTaskCalledProcess.getGraphId());
+        assertEquals("_StartEvent_1", startEventCalledProcess.getGraphId());
         assertEquals("Start event was not reached.", "MyStartEvent", startEvent.getId());
         assertEquals("Start event should not have any predecessors.", 0, startEvent.getPredecessors().size());
 
@@ -245,12 +248,8 @@ public class ProcessVariablesLifecycleOrderTest {
         assertEquals("Start Listener should have one own defined variable.", 1,
                 startListener1.getDefined().size());
         assertEquals("Start Listener 2 should have three input variables.", 3, startListener2.getInUnused().size());
-        assertEquals("Child start event should have four input variables.", 4,
+        assertEquals("Child start event should have one input variables.", 1,
                 startEventCalledProcess.getInUnused().size());
-        assertEquals("Child start event should have one defined input variable mapping.", 1,
-                startEventCalledProcess.getDefined().size());
-        assertEquals("Child end event should have one defined output variable mapping.", 1,
-                endEventCalledProcess.getDefined().size());
         assertEquals("End Listener with Expression should have five input variables", 5,
                 endListenerExpression.getInUnused().size());
         assertEquals("Second End Listener with Expression should have four unused input variables", 4,
@@ -260,7 +259,7 @@ public class ProcessVariablesLifecycleOrderTest {
 
         assertEquals(
                 "Third Sequence Flow (1qw9mzs) shouldn't have defined variables because the output parameters are already defined in an own node.",
-                0, sequenceFlow1.getDefined().size());
+                0, sequenceFlow_1qw9mzs.getDefined().size());
 
         assertEquals("End event should have four unused input variables.", 4, endEvent.getInUnused().size());
         assertEquals("End event should have one used input variable.", 1, endEvent.getInUsed().size());

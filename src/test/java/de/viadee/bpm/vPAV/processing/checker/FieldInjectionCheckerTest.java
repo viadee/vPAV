@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -41,8 +40,10 @@ import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -62,15 +63,13 @@ public class FieldInjectionCheckerTest {
 
 	private static FieldInjectionChecker checker;
 
-	private static ClassLoader cl;
-
 	private final Rule rule = new Rule("FieldInjectionChecker", true, null, null, null, null);
 
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 
 		// Bean-Mapping
-		final Map<String, String> beanMapping = new HashMap<String, String>();
+		final Map<String, String> beanMapping = new HashMap<>();
 		beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.delegates.DelegateWithWrongType");
 		RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
@@ -78,7 +77,7 @@ public class FieldInjectionCheckerTest {
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().getResource("en_US");
 	}
@@ -90,7 +89,7 @@ public class FieldInjectionCheckerTest {
 	@Test
     public void testCorrectFieldInjection() {
 		final String PATH = BASE_PATH + "FieldInjectionCheckerTest_CorrectFieldInjection.bpmn";
-		checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
+		checker = new FieldInjectionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -114,7 +113,7 @@ public class FieldInjectionCheckerTest {
 	@Test
     public void testWrongTypeOfFieldInjection() {
 		final String PATH = BASE_PATH + "FieldInjectionCheckerTest_WrongType.bpmn";
-		checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
+		checker = new FieldInjectionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -138,7 +137,7 @@ public class FieldInjectionCheckerTest {
 	@Test
     public void testNoSetterMethod() {
 		final String PATH = BASE_PATH + "FieldInjectionCheckerTest_NoSetter.bpmn";
-		checker = new FieldInjectionChecker(rule, new BpmnScanner(PATH));
+		checker = new FieldInjectionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

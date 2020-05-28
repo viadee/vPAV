@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,11 +45,11 @@ public class ProcessVariablesScanner {
 
     private Set<String> javaResources;
 
-    private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<String, Collection<String>>();
+    private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<>();
 
-    private Map<String, Collection<String>> processIdToVariableMap = new HashMap<String, Collection<String>>();
+    private Map<String, Collection<String>> processIdToVariableMap = new HashMap<>();
 
-    private Set<String> camundaProcessEntryPoints = new HashSet<String>();
+    private Set<String> camundaProcessEntryPoints = new HashSet<>();
 
     private List<EntryPoint> entryPoints = new ArrayList<>();
 
@@ -66,12 +66,10 @@ public class ProcessVariablesScanner {
 
     /**
      * scan java resources for variables and retrieve important information such as message ids and entrypoints
-     *
      */
     public void scanProcessVariables() {
         for (final String filePath : javaResources) {
             if (!filePath.startsWith("javax")) {
-                // TODO: Use ids properly to resolve process variable manipulation
                 final Set<String> messageIds = new HashSet<>();
                 final Set<String> processIds = new HashSet<>();
                 retrieveMethod(filePath, messageIds, processIds);
@@ -82,12 +80,9 @@ public class ProcessVariablesScanner {
     /**
      * Retrieve the method name which contains the entrypoint (e.g. "startProcessByXYZ")
      *
-     * @param filePath
-     *            fully qualified path to the java class
-     * @param messageIds
-     *            Set of messageIds (used to retrieve variable manipulation later on)
-     * @param processIds
-     *            Set of processIds (used to retrieve variable manipulation later on)
+     * @param filePath   fully qualified path to the java class
+     * @param messageIds Set of messageIds (used to retrieve variable manipulation later on)
+     * @param processIds Set of processIds (used to retrieve variable manipulation later on)
      */
     private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
         final String sootPath = FileScanner.getSootPath();
@@ -118,24 +113,21 @@ public class ProcessVariablesScanner {
                             for (Unit unit : pc) {
                                 if (unit instanceof AssignStmt) {
                                     final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
-                                    if (rightBox.contains(entryPoint)) {
-                                        if (((AssignStmt) unit).getRightOpBox()
-                                                .getValue() instanceof JInterfaceInvokeExpr) {
-                                            final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
-                                                    .getRightOpBox().getValue();
-                                            checkExpression(filePath, messageIds, method, entryPoint, expr);
-                                        }
+                                    if (rightBox.contains(entryPoint) && ((AssignStmt) unit).getRightOpBox()
+                                            .getValue() instanceof JInterfaceInvokeExpr) {
+                                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
+                                                .getRightOpBox().getValue();
+                                        checkExpression(filePath, messageIds, method, entryPoint, expr);
                                     }
                                 }
                                 if (unit instanceof InvokeStmt) {
-                                    final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue().toString();
-                                    if (rightBox.contains(entryPoint)) {
-                                        if (((InvokeStmt) unit).getInvokeExprBox()
-                                                .getValue() instanceof JInterfaceInvokeExpr) {
-                                            final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
-                                                    .getInvokeExprBox().getValue();
-                                            checkExpression(filePath, messageIds, method, entryPoint, expr);
-                                        }
+                                    final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue()
+                                            .toString();
+                                    if (rightBox.contains(entryPoint) && ((InvokeStmt) unit).getInvokeExprBox()
+                                            .getValue() instanceof JInterfaceInvokeExpr) {
+                                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
+                                                .getInvokeExprBox().getValue();
+                                        checkExpression(filePath, messageIds, method, entryPoint, expr);
                                     }
                                 }
                             }
@@ -152,19 +144,14 @@ public class ProcessVariablesScanner {
     /**
      * Checks the current expression and creates a new entrypoint
      *
-     * @param filePath
-     *            Current filePath of the model
-     * @param messageIds
-     *            List of message ids
-     * @param method
-     *            Current method
-     * @param entryPoint
-     *            Current entryPoint
-     * @param expr
-     *            Current expression
+     * @param filePath   Current filePath of the model
+     * @param messageIds List of message ids
+     * @param method     Current method
+     * @param entryPoint Current entryPoint
+     * @param expr       Current expression
      */
     private void checkExpression(final String filePath, final Set<String> messageIds, final SootMethod method,
-                                 final String entryPoint, final JInterfaceInvokeExpr expr) {
+            final String entryPoint, final JInterfaceInvokeExpr expr) {
         if (expr != null) {
             final String ex = expr.getArgBox(0).getValue().toString();
             if (entryPoint.equals(CamundaMethodServices.CORRELATE_MESSAGE)) {
@@ -180,13 +167,11 @@ public class ProcessVariablesScanner {
     /**
      * Strips unnecessary characters and returns cleaned name
      *
-     * @param className
-     *            Classname to be stripped of unused chars
-     * @param dot
-     *            Replace dots
+     * @param className Classname to be stripped of unused chars
+     * @param dot       Replace dots
      * @return cleaned String
      */
-    static String cleanString(String className, boolean dot) {
+    public static String cleanString(String className, boolean dot) {
         final String replaceDot = ".";
         final String replaceEmpty = "";
         final String replaceSingleBackSlash = "\\";

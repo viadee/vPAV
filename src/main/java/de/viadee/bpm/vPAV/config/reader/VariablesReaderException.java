@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,6 @@ package de.viadee.bpm.vPAV.config.reader;
 public class VariablesReaderException extends Exception {
 
   private static final long serialVersionUID = 7310325755339964000L;
-
-  public VariablesReaderException(final Throwable e) {
-    super(e);
-  }
 
   public VariablesReaderException(final String message) {
     super(message);
