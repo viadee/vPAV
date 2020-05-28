@@ -331,11 +331,11 @@ public class ProcessVariableReaderTest {
         Assert.assertEquals(5, element.getControlFlowGraph().getOperations().size());
         Iterator<ProcessVariableOperation> operations = element.getControlFlowGraph().getOperations().values()
                 .iterator();
+        assertProcessVariableOperation(operations.next(), "varOne", VariableOperation.READ);
+        assertProcessVariableOperation(operations.next(), "arr", VariableOperation.READ);
         assertProcessVariableOperation(operations.next(), "idx", VariableOperation.READ);
         assertProcessVariableOperation(operations.next(), "arr", VariableOperation.READ);
-        assertProcessVariableOperation(operations.next(), "arr", VariableOperation.READ);
         assertProcessVariableOperation(operations.next(), "varTwo", VariableOperation.READ);
-        assertProcessVariableOperation(operations.next(), "varOne", VariableOperation.READ);
 
         // Test bean method
         element.setControlFlowGraph(new ControlFlowGraph());
@@ -346,9 +346,9 @@ public class ProcessVariableReaderTest {
         Assert.assertEquals(3, element.getControlFlowGraph().getOperations().size());
         operations = element.getControlFlowGraph().getOperations().values()
                 .iterator();
+        assertProcessVariableOperation(operations.next(), "(unknown)", VariableOperation.READ);
         assertProcessVariableOperation(operations.next(), "writeVariable", VariableOperation.WRITE);
         assertProcessVariableOperation(operations.next(), "myVariable", VariableOperation.READ);
-        assertProcessVariableOperation(operations.next(), "(unknown)", VariableOperation.READ);
 
         // Test bean execute
         element.setControlFlowGraph(new ControlFlowGraph());
@@ -359,8 +359,8 @@ public class ProcessVariableReaderTest {
         Assert.assertEquals(2, element.getControlFlowGraph().getOperations().size());
         operations = element.getControlFlowGraph().getOperations().values()
                 .iterator();
-        assertProcessVariableOperation(operations.next(), "numberEntities", VariableOperation.READ);
         assertProcessVariableOperation(operations.next(), "isExternalProcess", VariableOperation.WRITE);
+        assertProcessVariableOperation(operations.next(), "numberEntities", VariableOperation.READ);
 
         // Test camunda spin function
         // REMEMBER multiple method calls are not (yet) supported

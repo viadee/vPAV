@@ -245,8 +245,8 @@ public class ScopeTest {
         BpmnElement element2 = getBpmnElement(modelInstance.getModelElementById("MySecondTask"));
         reader.getVariablesFromElement(element2, new BasicNode[1]);
         Iterator<ProcessVariableOperation> defined = element2.getControlFlowGraph().getOperations().values().iterator();
-        ProcessVariableOperation listener = defined.next();
         ProcessVariableOperation inputParameter = defined.next();
+        ProcessVariableOperation listener = defined.next();
         ProcessVariableOperation outputParameter = defined.next();
         Assert.assertEquals(3, element2.getControlFlowGraph().getNodes().size());
         Assert.assertEquals("aNewValue", inputParameter.getName());
