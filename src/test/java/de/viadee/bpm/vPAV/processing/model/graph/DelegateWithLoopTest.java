@@ -72,7 +72,6 @@ public class DelegateWithLoopTest {
     public void testDelegateLoop() {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ModelWithTwoDelegates_UR.bpmn";
         final File processDefinition = new File(PATH);
 

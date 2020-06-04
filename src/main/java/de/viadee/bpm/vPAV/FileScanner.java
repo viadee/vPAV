@@ -87,8 +87,6 @@ public class FileScanner {
 
 	private Map<String, String> processIdToPathMap;
 
-	private String scanPath;
-
 	private static String scheme = null;
 
 	private static StringBuilder sootPath = new StringBuilder();
@@ -128,7 +126,7 @@ public class FileScanner {
 			System.exit(0);
 		}
 
-		scanPath = ConfigConstants.getInstance().getScanPath();
+		String scanPath = ConfigConstants.getInstance().getScanPath();
 		String filePattern = ConfigConstants.getInstance().getFilePattern();
 
 		scanner.setBasedir(scanPath);
@@ -555,9 +553,4 @@ public class FileScanner {
 		}
 		return sootPath.toString().substring(0, sootPath.toString().length() - 1);
 	}
-
-	public void setScanPath(String scanPath) {
-		this.scanPath = scanPath;
-	}
-
 }

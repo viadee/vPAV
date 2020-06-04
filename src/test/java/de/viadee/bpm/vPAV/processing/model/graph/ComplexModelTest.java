@@ -82,7 +82,6 @@ public class ComplexModelTest {
 	public void testGraphOnComplexModel() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
 		final File processdefinition = new File(PATH);
 

@@ -93,8 +93,6 @@ public class ProcessVariableReaderTest {
     @Test
     public void testResolveDynamicLocalVariables() {
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -118,8 +116,6 @@ public class ProcessVariableReaderTest {
     @Test
     public void testRecogniseVariablesInClass() {
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -138,9 +134,6 @@ public class ProcessVariableReaderTest {
 
     @Test
     public void testRecogniseInputOutputAssociations() {
-
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ProcessVariableReaderTest_InputOutputCallActivity.bpmn";
 
         // parse bpmn model
@@ -265,7 +258,6 @@ public class ProcessVariableReaderTest {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 

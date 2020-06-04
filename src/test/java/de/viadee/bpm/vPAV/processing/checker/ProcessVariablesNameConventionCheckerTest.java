@@ -101,8 +101,6 @@ public class ProcessVariablesNameConventionCheckerTest {
 	 */
 	@Test
 	public void testCorrectProcessVariableNames() {
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH
 				+ "ModelWithTwoDelegates_UR.bpmn";
 
@@ -132,8 +130,6 @@ public class ProcessVariablesNameConventionCheckerTest {
 	 */
 	@Test
 	public void testWrongProcessVariableNames() {
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH
 				+ "ProcessVariablesNameConventionCheckerTest_WrongProcessVariablesNamingConvention.bpmn";
 
