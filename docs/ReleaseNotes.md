@@ -7,8 +7,7 @@ nav_order: 8
 ## 3.0.5
 
 ### Features
-[**Issue 157**](https://github.com/viadee/vPAV/issues/157) Strings used as variable names are resolved and recognized in every position
-
+[**Issue 157**](https://github.com/viadee/vPAV/issues/157) Strings used as variable names are resolved and recognized in every position  
 "All" variable mappings are supported
 
 ### Fixes
@@ -19,7 +18,7 @@ Subprocesses are now correctly included in the graph
 ## 3.0.3
 
 ### Features
-[**Issue 151**](https://github.com/viadee/vPAV/issues/151) Scanning projects built with Java 9 to 11 is now supported 
+[**Issue 151**](https://github.com/viadee/vPAV/issues/151) Scanning projects built with Java 9 to 11 is now supported  
 [**Issue 147**](https://github.com/viadee/vPAV/issues/147) Variable names can be resolved when final string objects are used
 
 ### Fixes
