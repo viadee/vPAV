@@ -1,3 +1,7 @@
+---
+title: Process Variables Model Checker
+parent: Available Checkers
+---
 Process Variables Model Checker
 =================================
 The Process Variables Model Checker processes BPMN models and checks a model for anomalies in the data flow. The following anomalies are checked:
@@ -40,15 +44,15 @@ For debugging purposes check **%Chapter%** and **%ElementFieldType%**.
 
 | **Defined-Deleted**                                  | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![Delete unused variable](img/ProcessVariablesModelChecker_DU.PNG "remove unused variable")             |
+|![Delete unused variable](../img/ProcessVariablesModelChecker_DU.PNG "remove unused variable")             |
 | |
 
 | **Defined-Defined (Overwritten)**                                  | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![Defined-defined variable](img/ProcessVariablesModelChecker_DD.PNG "overwritten variable")             |
+|![Defined-defined variable](../img/ProcessVariablesModelChecker_DD.PNG "overwritten variable")             |
 | |
 
 | **Undefined-Reference**                                  | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![Try to read undefined variable](img/ProcessVariablesModelChecker_UR.PNG "Undefined-reference variable")             |
+|![Try to read undefined variable](../img/ProcessVariablesModelChecker_UR.PNG "Undefined-reference variable")             |
 | |

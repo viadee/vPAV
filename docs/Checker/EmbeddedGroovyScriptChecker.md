@@ -1,3 +1,7 @@
+---
+title: Embedded Groovy Script Checker
+parent: Available Checkers
+---
 Embedded Groovy Script Checker
 =================================
 The Embedded Groovy Script Checker verifies embedded scripts in listeners and script tasks for validity.
@@ -43,19 +47,19 @@ _The syntax of the script is not valid. (for groovy only)_
 
 | **there is no script format for given script**                                                         | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![No script format value](img/EmbeddedGroovyScriptChecker_EmptyScriptFormat.PNG "No script format")     |
+|![No script format value](../img/EmbeddedGroovyScriptChecker_EmptyScriptFormat.PNG "No script format")     |
 | |
 
 | **there is no script content for given script format**                                                 |
 |:------------------------------------------------------------------------------------------------------:| 
-| ![No script value](img/EmbeddedGroovyScriptChecker_EmptyScript.PNG "Script must provide a value")      |
+| ![No script value](../img/EmbeddedGroovyScriptChecker_EmptyScript.PNG "Script must provide a value")      |
 | |
 
 | **there is an empty script reference**                                                                 |
 |:------------------------------------------------------------------------------------------------------:| 
-![No script value](img/EmbeddedGroovyScriptChecker_EmptyScriptReference.PNG "Script must provide a value")|
+![No script value](../img/EmbeddedGroovyScriptChecker_EmptyScriptReference.PNG "Script must provide a value")|
 
 | **startup failed: ....**                                                                               |
 |:------------------------------------------------------------------------------------------------------:| 
-![Syntax of groovy incorrect](img/EmbeddedGroovyScriptChecker_InvalidGroovyScript.PNG "Syntax error")    |
+![Syntax of groovy incorrect](../img/EmbeddedGroovyScriptChecker_InvalidGroovyScript.PNG "Syntax error")    |
 

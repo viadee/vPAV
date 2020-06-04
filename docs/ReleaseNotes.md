@@ -1,3 +1,7 @@
+---
+title: Release notes
+nav_order: 8
+---
 # Release notes
 
 ## 3.0.5

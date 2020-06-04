@@ -1,3 +1,7 @@
+---
+title: Signal/Message Event Checker
+parent: Available Checkers
+---
 MessageEventChecker
 =================================
 The SignalEventChecker processes BPMN models and checks whether a SignalEvent refers to a signal and names it accordingly. 
@@ -27,9 +31,9 @@ _This message indicates that the Signal name has been used more than once._
 
 | **Correct usage**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![Correct usage of signal event](img/SignalEventChecker_Correct.PNG "Signal has been specified")         |
+|![Correct usage of signal event](../img/SignalEventChecker_Correct.PNG "Signal has been specified")         |
 
 
 | **Incorrect usage**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![Double usage of signal name](img/SignalEventChecker_Wrong.PNG "Double usage of signal name")         |
+|![Double usage of signal name](../img/SignalEventChecker_Wrong.PNG "Double usage of signal name")         |

@@ -1,3 +1,7 @@
+---
+title: Xor Convention Checker
+parent: Available Checkers
+---
 XOR Convention Checker
 =================================
 The XOR Convention Checker processes BPMN models and checks XOR gateways on predefined naming conventions and an existing default-path.
@@ -52,6 +56,6 @@ _The default naming convention requires XOR gateways to end with "?"._
 
 | **Correct use of naming convention**                                                                        | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![Correct use of naming convention](img/XorNamingConventionChecker.PNG "Correct naming convention specified")|
+|![Correct use of naming convention](../img/XorNamingConventionChecker.PNG "Correct naming convention specified")|
 | |
 

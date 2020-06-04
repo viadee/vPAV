@@ -1,7 +1,11 @@
+---
+title: Data Flow Checker
+parent: Available Checkers
+---
 Data Flow Checker
 =================================
 The Data Flow Checker evaluates DFVL rules and generates issues for rule violations.
-See the documentation of the [DataFlowValidationLanguage](DataFlowValidationLanguage.md) on how to define data flow rules rules.
+See the documentation of the [DataFlowValidationLanguage](../DataFlowValidationLanguage.md) on how to define data flow rules rules.
 
 
 

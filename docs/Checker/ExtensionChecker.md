@@ -1,3 +1,7 @@
+---
+title: Extension Checker
+parent: Available Checkers
+---
 ExtensionChecker
 =================================
 The ExtensionChecker processes BPMN models and checks whether an element using key-value pairs in the extension panel fit into a desired regex scheme.
@@ -39,14 +43,14 @@ _This message indicates that the key specified in the model does not fit the key
 
 | **Example of correct extension key-value pair**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![Key matches specified name in settings with correct value](img/ExtensionChecker_Correct.PNG "Correct usage of Integer as value")         |
+|![Key matches specified name in settings with correct value](../img/ExtensionChecker_Correct.PNG "Correct usage of Integer as value")         |
 
 
 | **Example of wrong extension key-value pair with missing key and usage of String instead Integer**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![Missing key and usage of String instead of Integer](img/ExtensionChecker_NoKey.PNG "Missing key and wrong value")         |
+|![Missing key and usage of String instead of Integer](../img/ExtensionChecker_NoKey.PNG "Missing key and wrong value")         |
 
 
 | **Example of wrong extension key-value pair with usage of String instead Integer**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![Usage of String instead of Integer](img/ExtensionChecker_Wrong.PNG "Wrong value")         |
+|![Usage of String instead of Integer](../img/ExtensionChecker_Wrong.PNG "Wrong value")         |
