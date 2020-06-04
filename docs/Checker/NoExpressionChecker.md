@@ -1,3 +1,7 @@
+---
+title: No Expression Checker
+parent: Available Checkers
+---
 No Expression Checker
 ================================= 
 The No Expression Checker processes BPMN models and checks whether there are expressions used against common best-practices in the model.
@@ -61,10 +65,10 @@ _There is an expression as implementation inside a task, an event or in a sequen
 
 | **Usage of expression in %element% is against best practices.**                                                                       | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![Expression in task](img/NoExpressionChecker_Task.PNG "Expression used as implementation")    |
+|![Expression in task](../img/NoExpressionChecker_Task.PNG "Expression used as implementation")    |
 | |
 
 | **Usage of expression in listeners for %element% is against best practices.**                                                 |
 |:------------------------------------------------------------------------------------------------------:| 
-![Sequenceflow with expression](img/NoExpressionChecker_SequenceFlow.PNG "Expression as implementation in an execution listener")      |
+![Sequenceflow with expression](../img/NoExpressionChecker_SequenceFlow.PNG "Expression as implementation in an execution listener")      |
 | |

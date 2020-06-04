@@ -1,3 +1,7 @@
+---
+title: Element Id Convention Checker
+parent: Available Checkers
+---
 ElementIdConventionChecker
 =================================
 The ElementIdConventionChecker verifies if id of a specific task match a predefined naming convention.
@@ -38,5 +42,5 @@ _The id of the task is invalid and has to be changed according to the naming con
 
 | **ID 'serviceTask_WrongId' is against the naming convention**                                          | 
 |:------------------------------------------------------------------------------------------------------:| 
-| No underscore allowed <br/> <br/> ![Id against naming convention](img/ElementIdConventionChecker.PNG "Task Id against naming convention")    |
+| No underscore allowed <br/> <br/> ![Id against naming convention](../img/ElementIdConventionChecker.PNG "Task Id against naming convention")    |
 | |

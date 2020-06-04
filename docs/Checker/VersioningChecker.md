@@ -1,3 +1,7 @@
+---
+title: Versioning Checker
+parent: Available Checkers
+---
 Versioning Checker
 =================================
 The Versioning Checker checks references in Service Tasks, Script Tasks, Business Rule Tasks, Send Tasks, Listenern and Message Events
@@ -41,7 +45,7 @@ de.viadee.package.v10_19.example. This versioning scheme would be identified and
 
 If the versioning scheme is based on packages, it is **mandatory** to adhere to our assumptions, i.e. two packages with different versions still contain the same classes (see figure below), else the VersioningChecker will malfunction.
 
-![Package based versioning](img/versioningSchemePackage.png "versioning with packages")
+![Package based versioning](../img/versioningSchemePackage.png "versioning with packages")
 
 
 Note, that **only one versioning scheme** can be used.
@@ -77,16 +81,16 @@ _Unless a versioned spring-bean is undeposited, it must be adapted to the versio
 
 | **current situation**                                                                                               | **class reference is deprecated or file with version doesn't exist**               | 
 | :---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------:| 
-| newest version is <br/> *de/test/TestDelegate_1_2*                                                                |![class has old/no version](img/VersioningChecker_JavaClassVersioning.PNG "old Version")|
+| newest version is <br/> *de/test/TestDelegate_1_2*                                                                |![class has old/no version](../img/VersioningChecker_JavaClassVersioning.PNG "old Version")|
 
 |                                                                                                  | **script reference is deprecated or file with version doesn't exist**       | 
 | :---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------:| 
-| newest version is <br/> *de/test/testScript_1_2.groovy*                                                              |![script has old/no version](img/VersioningChecker_ScriptVersioning.PNG "old Version") |
+| newest version is <br/> *de/test/testScript_1_2.groovy*                                                              |![script has old/no version](../img/VersioningChecker_ScriptVersioning.PNG "old Version") |
 
 
 |                                                                                                  | **bean reference is deprecated or file with version doesn't exist**                | 
 | :---------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------:| 
-| beanmapping: <br/> myBean_1_1  **<->**  de.test.TestDelegate\_1\_1 <br/><br/> newest version is<br/> *de/test/TestDelegate_1_2*      | ![bean has old/no version](img/VersioningChecker_BeanVersioning.PNG "old Version") | 
+| beanmapping: <br/> myBean_1_1  **<->**  de.test.TestDelegate\_1\_1 <br/><br/> newest version is<br/> *de/test/TestDelegate_1_2*      | ![bean has old/no version](../img/VersioningChecker_BeanVersioning.PNG "old Version") | 
 
 
 

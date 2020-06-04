@@ -1,3 +1,7 @@
+---
+title: No Script Checker
+parent: Available Checkers
+---
 No Script Checker
 ================================= 
 The No Script Checker processes BPMN models and checks whether there is a script in the model.
@@ -57,10 +61,10 @@ _ScriptTask not allowed_
 
 | **task %elementId with script**                                                                        | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![script in task](img/NoScriptChecker_task.PNG "There is a script inside a script task or a script as an execution listener or a script as a task listener or a script inside an inputOutput parameter mapping")    |
+|![script in task](../img/NoScriptChecker_task.PNG "There is a script inside a script task or a script as an execution listener or a script as a task listener or a script inside an inputOutput parameter mapping")    |
 | |
 
 | **ScriptTask %elementId not allowed**                                                |
 |:------------------------------------------------------------------------------------------------------:| 
-![ScriptTask](img/NoScriptChecker_scripttask.PNG "ScriptTask not allowed")      |
+![ScriptTask](../img/NoScriptChecker_scripttask.PNG "ScriptTask not allowed")      |
 | |

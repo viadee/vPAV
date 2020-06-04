@@ -1,3 +1,7 @@
+---
+title: Overlap Checker
+parent: Available Checkers
+---
 OverlapChecker
 =================================
 The OverlapChecker processes BPMN models and checks whether there are redundant edges (same source and target) exist.
@@ -25,9 +29,9 @@ _This message indicates that at least two or more sequence flows with identical 
 
 | **Example of correct sequence flow**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![No redundant sequence flows](img/OverlapChecker_Correct.PNG "Correct usage of sequence flow")         |
+|![No redundant sequence flows](../img/OverlapChecker_Correct.PNG "Correct usage of sequence flow")         |
 
 
 | **Example of incorrect/redundant sequence flow**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![Redundant sequence flows](img/OverlapChecker_Wrong.PNG "Redundant usage of sequence flow")         |
+|![Redundant sequence flows](../img/OverlapChecker_Wrong.PNG "Redundant usage of sequence flow")         |

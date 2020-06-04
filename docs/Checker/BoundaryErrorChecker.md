@@ -1,3 +1,7 @@
+---
+parent: Available Checkers
+title: Boundary Error Checker
+---
 BoundaryErrorChecker
 =================================
 The BoundaryErrorChecker processes BPMN models and checks whether a BoundaryErrorEvent and its ErrorCode is referenced in the tasks corresponding class/bean.
@@ -33,15 +37,15 @@ _This message indicates that the ErrorCode of the underlying task and its refere
 
 | **Example of code with "throw new BpmnError("123")"**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![Correct usage of throw declaration](img/Code.PNG "Correct usage of throw declaration")         |
+|![Correct usage of throw declaration](../img/Code.PNG "Correct usage of throw declaration")         |
 
 
 
 | **BoundaryErrorEvent attached to task (has to have either correct class reference or bean mapping)**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![BoundaryErrorEvent attached to task](img/AttachedToTask.PNG "Implementation of task")         |
+|![BoundaryErrorEvent attached to task](../img/AttachedToTask.PNG "Implementation of task")         |
 
 
 | **BoundaryErrorEvent with ErrorCode and other attributes**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![BoundaryErrorEvent with attributes](img/ErrorEvent.PNG "ErrorCode")         |
+|![BoundaryErrorEvent with attributes](../img/ErrorEvent.PNG "ErrorCode")         |

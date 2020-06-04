@@ -1,3 +1,7 @@
+---
+title: Task Naming Convention Checker
+parent: Available Checkers
+---
 Task Naming Convention Checker
 =================================
 The Task Naming Convention Checker verifies if tasks match a predefined naming convention.
@@ -40,5 +44,5 @@ _The task name is invalid and has to be changed according to the naming conventi
 
 | **task name 'Rechnung 1' is against the naming convention**                                                                        | 
 |:------------------------------------------------------------------------------------------------------:| 
-| name convention: `[A-ZÄÖÜ][a-zäöü\\-\\s]+` (All words starting with a capital letter and containing no number) <br/> <br/> ![Task name against naming convention](img/TaskNamingConventionChecker.PNG "Task name against naming convention")    |
+| name convention: `[A-ZÄÖÜ][a-zäöü\\-\\s]+` (All words starting with a capital letter and containing no number) <br/> <br/> ![Task name against naming convention](../img/TaskNamingConventionChecker.PNG "Task name against naming convention")    |
 | |

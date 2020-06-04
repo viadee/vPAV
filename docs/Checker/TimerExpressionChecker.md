@@ -1,3 +1,7 @@
+---
+title: Timer Expression Checker
+parent: Available Checkers
+---
 Timer Expression Checker
 =================================
 The Timer Expression Checker processes BPMN models and checks if time events follow the ISO 8601 scheme.
@@ -33,11 +37,11 @@ _Expressions following the QUARTZ Cron definition are also allowed, if implement
 
 | **Correct use of a ISO 8601 expression for a duration**                                                                        | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![Correct use of expression](img/TimerExpressionChecker_Duration.PNG "Correct ISO 8601 scheme specified")|
+|![Correct use of expression](../img/TimerExpressionChecker_Duration.PNG "Correct ISO 8601 scheme specified")|
 | |
 
 | **Correct use of a CRON expression**                                                                        | 
 |:------------------------------------------------------------------------------------------------------:| 
-|![Correct use of CRON expression](img/TimerExpressionChecker_CRON.PNG "Correct CRON expression specified")|
+|![Correct use of CRON expression](../img/TimerExpressionChecker_CRON.PNG "Correct CRON expression specified")|
 | |
 

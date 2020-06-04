@@ -1,3 +1,7 @@
+---
+title: DMN Task Checker
+parent: Available Checkers
+---
 DMN Task Checker
 =================================
 The DMN Task Checker processes BPMN models and checks whether a BusinessRuleTask with DMN implementation references a DMN.
@@ -30,5 +34,5 @@ _This message indicates that no decision reference to a DMN file was found._
 
 | **No Decision Ref**                                                                                    |
 |:------------------------------------------------------------------------------------------------------:| 
-|![No dec. ref specified](img/BusinessRuleTaskChecker_NoDecisionRef.PNG "No decision reference")         |
+|![No dec. ref specified](../img/BusinessRuleTaskChecker_NoDecisionRef.PNG "No decision reference")         |
 
