@@ -11,7 +11,7 @@ Further, the consistency check will provide an XML version, a JSON version and
 an visual version based on  [BPMN.io](https://bpmn.io/) of all errors and warnings found.
 
 ## Visual output
-A HTML page is gerenated to visualize the validation results.
+A HTML page is generated to visualize the validation results.
 To find the visual output, check the created vPAV folder inside your project's target folder. 
 Open the `validationResult.html` with any browser to explore your process model and the found issues.
 
