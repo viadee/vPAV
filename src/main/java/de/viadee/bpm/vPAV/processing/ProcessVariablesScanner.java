@@ -111,6 +111,7 @@ public class ProcessVariablesScanner {
                         if (body.toString().contains(entryPoint)) {
                             final PatchingChain<Unit> pc = body.getUnits();
                             for (Unit unit : pc) {
+                                // TODO i dont think that we really have to check the expressions here?
                                 if (unit instanceof AssignStmt) {
                                     final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
                                     if (rightBox.contains(entryPoint) && ((AssignStmt) unit).getRightOpBox()
