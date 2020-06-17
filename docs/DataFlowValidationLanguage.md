@@ -3,7 +3,6 @@ title: Data Flow Validation Language
 nav_order: 7
 ---
 # Data Flow Validation Language
-=================================
 The data flow validation language is a DSL embedded in Java and provides functionality for defining data flow rules and automated validating against process applications.
 
 
