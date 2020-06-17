@@ -37,7 +37,6 @@ import de.viadee.bpm.vPAV.processing.code.flow.Node;
 
 /**
  * Represents a process variable operation with some meaningful information.
- *
  */
 public class ProcessVariableOperation {
 
@@ -130,12 +129,16 @@ public class ProcessVariableOperation {
         return id;
     }
 
+    public BasicNode getNode() {
+        return node;
+    }
+
     public String getResourceFilePath() {
         return resourceFilePath;
     }
 
     public BpmnElement getElement() {
-        if(node == null) {
+        if (node == null) {
             return null;
         }
         return node.getParentElement();
