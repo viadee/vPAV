@@ -115,7 +115,7 @@ public class XmlOutputWriter implements IssueOutputWriter {
                     issue.getElementId(), elementName == null ? null : elementName.replace("\n", ""),
                     issue.getMessage(), issue.getElementDescription(), issue.getVariable(),
                     issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription(),
-                    xmlPaths.isEmpty() ? null : xmlPaths));
+                    xmlPaths.isEmpty() ? null : xmlPaths, issue.getImplementationDetails()));
         }
         return xmlIssues;
     }

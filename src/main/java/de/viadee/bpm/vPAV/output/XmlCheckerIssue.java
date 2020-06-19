@@ -39,7 +39,7 @@ import java.util.List;
 
 @XmlRootElement(name = "issue")
 @XmlType(propOrder = { "id", "ruleName", "ruleDescription", "bpmnFile", "resourceFile", "classification", "elementId",
-        "elementName", "variable", "anomaly", "paths", "message", "elementDescription" })
+        "elementName", "variable", "anomaly", "paths", "message", "implementationDetails", "elementDescription" })
 public class XmlCheckerIssue {
 
     private String id;
@@ -68,6 +68,8 @@ public class XmlCheckerIssue {
 
     private String elementDescription;
 
+    private String implementationDetails;
+
     public XmlCheckerIssue() {
     }
 
@@ -76,7 +78,7 @@ public class XmlCheckerIssue {
             final String bpmnFile, final String resourceFile, final String elementId,
             final String elementName, final String message, final String elementDescription, final String variable,
             final String anomaly,
-            final List<XmlPath> invalidPaths) {
+            final List<XmlPath> invalidPaths, final String implementationDetails) {
         super();
         this.id = id;
         this.ruleName = ruleName;
@@ -91,6 +93,7 @@ public class XmlCheckerIssue {
         this.anomaly = anomaly;
         this.paths = invalidPaths;
         this.elementDescription = elementDescription;
+        this.implementationDetails = implementationDetails;
     }
 
     @XmlElement(name = "id", required = true)
@@ -152,6 +155,11 @@ public class XmlCheckerIssue {
     @XmlElement(name = "message", required = true)
     public String getMessage() {
         return message;
+    }
+
+    @XmlElement(name = "implementationDetails")
+    public String getImplementationDetails() {
+        return implementationDetails;
     }
 
     @XmlElement(name = "elementDescription")
