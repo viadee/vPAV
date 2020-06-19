@@ -185,6 +185,9 @@ function createIssueDialog(elements) {
                     var dCardRuleDescription = document.createElement("p");
                     dCardRuleDescription.setAttribute("class", "card-ruleDescription");
 
+                    var dCardImplementationDetails = document.createElement("p");
+                    dCardImplementationDetails.setAttribute("class", "card-implementationDetails");
+
                     var dCardIssueId = document.createElement("p");
                     dCardIssueId.setAttribute("class", "card-issueId issue-id");
 
@@ -226,6 +229,7 @@ function createIssueDialog(elements) {
                     dCardText.innerHTML = "<h6><b>Issue:</b></h6> " + issue.message;
                     dCardRuleDescription.innerHTML = "<h6><b>Rule:</b></h6> " + issue.ruleDescription;
                     dCardElementDescription.innerHTML = "<h6><b>Reason:</b></h6> " + issue.elementDescription;
+                    dCardImplementationDetails.innerHTML = "<h6><b>Implementation Details:</b></h6> " + issue.implementationDetails;
                     dCardIssueId.innerHTML = "<h6><b>Issue Id:</b></h6>" + issue.id;
 
 
@@ -235,6 +239,8 @@ function createIssueDialog(elements) {
                         dCardBody.appendChild(dCardRuleDescription);
                     if (issue.elementDescription)
                         dCardBody.appendChild(dCardElementDescription);
+                    if("implementationDetails" in issue)
+                        dCardBody.appendChild(dCardImplementationDetails);
                     dCardBody.appendChild(dCardIssueId);
                     dCardBody.appendChild(dCardIssueButtons);
                     dCard.appendChild(dCardBody);
@@ -373,6 +379,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
     myRow.appendChild(createTableHeader("th_elementName", "Element-Name"));
     myRow.appendChild(createTableHeader("th_classification", "Class"));
     myRow.appendChild(createTableHeader("th_message", "Message"));
+    myRow.appendChild(createTableHeader("th_implementationDetails", "Implementation Details"));
     myRow.appendChild(createTableHeader("th_paths", "Invalid Sequenceflow"));
     myTHead.appendChild(myRow);
     myTable.appendChild(myTHead);
@@ -465,6 +472,15 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             processVariables.filter(p => issue.message.includes(`'${p.name}'`))
         .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
             myCell.innerHTML = messageText;
+            myRow.appendChild(myCell);
+
+            // implementation details
+            myCell = document.createElement("td");
+            myCell.setAttribute("style", "word-break: break-all");
+            myCell.innerHTML = "";
+            if("implementationDetails" in issue) {
+                myCell.innerHTML = issue.implementationDetails;
+            }
             myRow.appendChild(myCell);
 
             //path

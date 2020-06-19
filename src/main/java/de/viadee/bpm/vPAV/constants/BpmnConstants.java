@@ -147,6 +147,8 @@ public class BpmnConstants {
 
 	public static final String VPAV_ELEMENT_DESCRIPTION = "elementDescription";
 
+	public static final String VPAV_IMPLEMENTATION_DETAILS = "implementationDetails";
+
 	public static final String VPAV_ELEMENTS_TO_MARK = "elementsToMark";
 
 	public static final String VPAV_NO_ISSUES_ELEMENTS = "noIssuesElements";

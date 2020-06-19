@@ -341,6 +341,10 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         return elementDescription;
     }
 
+    public String getImplementationDetails() {
+        return implementationDetails;
+    }
+
     public void setClassification(final CriticalityEnum classification) {
         this.classification = classification;
     }

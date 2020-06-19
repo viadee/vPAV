@@ -43,13 +43,20 @@ public class Node extends BasicNode implements Cloneable {
 
 	private Block block;
 
-	public Node(final BpmnElement parentElement, final Block block,
+	private String javaClass;
+
+	public Node(final BpmnElement parentElement, final Block block, final String javaClass,
 			final ElementChapter elementChapter, final KnownElementFieldType fieldType) {
 		super(parentElement, elementChapter, fieldType);
 		this.block = block;
+		this.javaClass = javaClass;
 	}
 	public Block getBlock() {
 		return block;
+	}
+
+	public String getJavaClass() {
+		return javaClass;
 	}
 
 
@@ -58,6 +65,7 @@ public class Node extends BasicNode implements Cloneable {
 	{
 		Node myClone = (Node)super.clone();
 		myClone.block = block;
+		myClone.javaClass = javaClass;
 		myClone.parentElement = parentElement;
 		myClone.elementChapter = elementChapter;
 		myClone.operations = new LinkedHashMap<>();

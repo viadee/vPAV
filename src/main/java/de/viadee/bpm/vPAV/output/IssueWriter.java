@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
+import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
@@ -132,6 +133,9 @@ public class IssueWriter {
         String implementationDetails = null;
         if (var.getNode() instanceof ExpressionNode) {
             implementationDetails = ((ExpressionNode) var.getNode()).getExpression();
+        }
+        else if(var.getNode() instanceof Node) {
+            implementationDetails = ((Node) var.getNode()).getJavaClass();
         }
 
         IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,

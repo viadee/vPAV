@@ -354,7 +354,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				if (ruleIssues.isEmpty())
 					newIssues.add(new CheckerIssue(ruleName, null, CriticalityEnum.SUCCESS,
 							(ConfigConstants.JS_BASEPATH + bpmnFilename), null, "", "", null, null, null,
-							"No issues found", null));
+							"No issues found", null, null));
 			}
 		}
 
@@ -477,6 +477,12 @@ public class JsOutputWriter implements IssueOutputWriter {
 						jsonPaths.add(jsonPath);
 					}
 				}
+
+				// Add more information regarding the implementation if given
+				if(issue.getImplementationDetails() != null) {
+					obj.addProperty(BpmnConstants.VPAV_IMPLEMENTATION_DETAILS, issue.getImplementationDetails());
+				}
+
 				obj.add(BpmnConstants.VPAV_PATHS, jsonPaths);
 				obj.addProperty(BpmnConstants.VPAV_MESSAGE, issue.getMessage());
 				obj.addProperty(BpmnConstants.VPAV_ELEMENT_DESCRIPTION, issue.getElementDescription());
