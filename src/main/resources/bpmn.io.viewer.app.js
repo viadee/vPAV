@@ -198,22 +198,22 @@ function createIssueDialog(elements) {
 
                     var plusIcon = document.createElement("img");
                     plusIcon.setAttribute("src", "img/plus_icon.png");
-                    plusIcon.setAttribute("class", "button-icon plus");
+                    plusIcon.setAttribute("class", "button-icon mr-3");
 
                     var minusIcon = document.createElement("img");
                     minusIcon.setAttribute("src", "img/minus_icon.png");
-                    minusIcon.setAttribute("class", "button-icon minus");
+                    minusIcon.setAttribute("class", "button-icon mr-3");
 
                     dCardAddIssueButton.setAttribute("class", "btn btn-viadee issue-button");
                     dCardAddIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
-                    dCardAddIssueButton.innerHTML = "Add Issue";
-                    dCardAddIssueButton.appendChild(plusIcon);
+                    dCardAddIssueButton.innerHTML = "<span>Ignore Issue</span>";
+                    dCardAddIssueButton.prepend(plusIcon);
 
                     dCardRemoveIssueButton.setAttribute("class", "btn btn-viadee issue-button");
                     dCardRemoveIssueButton.disabled = true;
                     dCardRemoveIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
-                    dCardRemoveIssueButton.innerHTML = "Remove Issue";
-                    dCardRemoveIssueButton.appendChild(minusIcon);
+                    dCardRemoveIssueButton.innerHTML = "<span>Keep Issue</span>";
+                    dCardRemoveIssueButton.prepend(minusIcon);
 
                     dCardIssueButtons.appendChild(dCardAddIssueButton);
                     dCardIssueButtons.appendChild(dCardRemoveIssueButton);
@@ -405,15 +405,11 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             removeIssueButton.setAttribute("class", "btn btn-viadee issue-button-table-remove");
 
             addIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
-            addIssueButton.innerHTML = "Add Issue";
-            var b = document.createElement("a");
-            b.appendChild(addIssueButton);
+            addIssueButton.innerHTML = "Ignore Issue";
 
             removeIssueButton.setAttribute("disabled", true);
             removeIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
-            removeIssueButton.innerHTML = "Remove Issue";
-            var c = document.createElement("a");
-            c.appendChild(removeIssueButton);
+            removeIssueButton.innerHTML = "Keep Issue";
 
             myCell.setAttribute("id", issue.classification); // mark cell
 
@@ -434,8 +430,8 @@ function createIssueTable(bpmnFile, tableContent, mode) {
 
             //based on selection show button
             if (mode === tableViewModes.ISSUES) {
-                myCell.appendChild(b);
-                myCell.appendChild(c);
+                myCell.appendChild(addIssueButton);
+                myCell.appendChild(removeIssueButton);
             }
 
             //link to docu            

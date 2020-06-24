@@ -82,24 +82,17 @@ a:hover {
 
 .table-issues thead tr th:first-child,
 .table-issues tbody tr td:first-child {
-	width: 16em;
-	min-width: 17em;
-	max-width: 8em;
-}
-
-.table-issues thead tr th:nth-child(2),
-.table-issues tbody tr td:nth-child(2) {
-	width: 16em;
-	min-width: 17em;
-	max-width: 8em;
-	word-break: break-all;
+	width: 20em;
 }
 
 .table-issues thead tr th:nth-child(4),
 .table-issues tbody tr td:nth-child(4) {
-	width: 8em;
-	min-width: 8em;
-	max-width: 8em;
+	width: 5em;
+}
+
+.table-issues thead tr th:nth-child(7),
+.table-issues tbody tr td:nth-child(7) {
+	width: 12em;
 }
 
 .issue-card-body {
@@ -138,14 +131,6 @@ a:hover {
     padding-bottom: 2px;
 }
 
-.plus {
-    right: 55%;
-}
-
-.minus {
-    right: 75%;
-}
-
 .plus-table {
     right: 80%;
 }
@@ -170,8 +155,13 @@ a:hover {
 	opacity: 0.8;
 }
 
-.btn-viadee:hover {
+.btn-viadee:hover:enabled {
 	opacity: 1;
+}
+
+.btn-viadee:hover:disabled {
+	/* Overwrite bootstrap hover effect */
+	color: #fff;
 }
 
 .btn-viadee:active {
