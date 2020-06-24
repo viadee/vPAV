@@ -526,7 +526,6 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             }
             myRow.appendChild(myCell);
             //---------
-            myParent.setAttribute("class", "container-fluid");
             myTBody.appendChild(myRow);
             myTable.appendChild(myTBody);
         }
@@ -576,7 +575,6 @@ function createVariableTable(bpmnFile, tableContent) {
         myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
         myRow.appendChild(myCell);
         //---------
-        myParent.setAttribute("class", "container-fluid");
         myTBody.appendChild(myRow);
         myTable.appendChild(myTBody);
     }
@@ -612,41 +610,15 @@ function createShowOperationsLink(processVariableName) {
  * create Footer
  */
 function createFooter() {
-    const body = document.querySelector("body");
-    let footer = document.querySelector("footer");
-    //delete footer first
-    if (!(footer === null))
-        footer.parentNode.removeChild(footer);
-
-    footer = document.createElement("footer");
-    footer.setAttribute("class", "footer viadee-footer");
-
-    var fP = document.createElement("span");
-    fP.setAttribute("class", "text-muted-viadee");
+    var fP = document.querySelector("footer span");
     fP.innerHTML = viadee + " - " + vPavName + " " + vPavVersion;
-
-    var aL = document.createElement("a");
-    aL.setAttribute("class", "text-muted-viadee float-right pr-2");
-    aL.setAttribute("href", "https://viadee.github.io/vPAV/#licenses");
-    aL.innerHTML = "Licenses";
-
-    var aI = document.createElement("a");
-    aI.setAttribute("class", "text-muted-viadee float-right pr-2");
-    aI.setAttribute("href", "https://www.viadee.de/impressum-datenschutz.html");
-    aI.innerHTML = "Imprint";
-
-    fP.appendChild(aL);
-    fP.appendChild(aI);
-    footer.appendChild(fP);
-    body.appendChild(footer);
 }
-
 
 
 //set Filename as Header
 function setUeberschrift(name) {
     let subName = name.substr(0, name.length - 5);
-    document.querySelector("#modell").innerHTML = subName;
+    document.querySelector("#model").innerHTML = subName;
     var mDownload = document.getElementById("model_download");
     mDownload.setAttribute("href", properties["downloadBasepath"] + name);
     setFocus(name);

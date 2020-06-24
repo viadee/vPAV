@@ -262,3 +262,7 @@ a:hover {
 #tableHeader::after {
 	content: attr(data-content);
 }
+
+.h4-img {
+	height: 1.5rem;
+}
