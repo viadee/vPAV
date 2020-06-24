@@ -29,7 +29,7 @@
                 <h4 class="nav-item text-white mb-0 ml-4 mr-2" id="model"></h4>
                 <li class="nav-item">
                     <a id="model_download" class="nav-link pl-2 pr-1 mx-1 py-3 my-n2">
-                        <img src="img/dl_button.png" alt="Download BPMN"  class="h4-img" title="Download BPMN"/>
+                        <img src="img/dl_button.png" alt="Download BPMN" class="h4-img" title="Download BPMN"/>
                     </a>
                 </li>
             </ul>
@@ -88,6 +88,29 @@
     <div class="row mt-2">
         <div class="col">
             <ul id="viewModeNavBar" class="nav nav-pills">
+                <li class="nav-item">
+                    <a onclick="controller.showIssues()" href="#" class="nav-link table-selector" id="showAllIssues">
+                        All Issues
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a onclick="controller.showSuccessfulCheckers()" href="#" class="nav-link table-selector" id="showSuccess">
+                        Process variables
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a onclick="controller.showProcessVariables()" href="#" class="nav-link table-selector" id="showVariables">
+                        Process variables
+                    </a>
+                </li>
+                <div class="btn-group-toggle ml-md-auto" data-toggle="buttons">
+                    <label class="btn btn-viadee ml-md-auto" onclick="toggleCodeReferences()">
+                        <input type="checkbox" autocomplete="off">Highlight source code
+                        references</label>
+                </div>
+                <button type="button" class="btn btn-viadee ml-md-1 global-download" onclick="downloadFile()">Download
+                    ignoreIssues
+                </button>
             </ul>
         </div>
     </div>
@@ -144,8 +167,7 @@
 <script src='js/processVariables.js'></script>
 <!-- bootstrap with dependencies-->
 <script src="js/jquery-3.4.1.min.js"></script>
-<script src="js/popper.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
 <!-- application -->
 <script src="js/properties.js"></script>
 <script src="js/bpmn.io.viewer.app.js"></script>

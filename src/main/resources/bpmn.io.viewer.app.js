@@ -351,6 +351,11 @@ function downloadFile(){
     download(new Blob([blob]),"ignoreIssues.txt", "text/plain");
 }
 
+// (Un-)highlight code references
+function toggleCodeReferences() {
+
+}
+
 //delete table under diagram
 function deleteTable() {
     let myTable = document.getElementById("table");
@@ -666,27 +671,12 @@ function showDialog() {
 
 // List all view modes
 function createViewModesNavBar(model) {
-    if (countIssues(model, elementsToMark) > 0)
-        createNavItem("All issues", "showAllIssues", "controller.showIssues()");
-    if (countIssues(model, noIssuesElements) > 0)
-        createNavItem("Checkers without issues", "showSuccess", "controller.showSuccessfulCheckers()");
-    if (proz_vars !== undefined && proz_vars.length > 0)
-        createNavItem("Process variables", "showVariables", "controller.showProcessVariables()");
-}
-
-function createNavItem(title, id, onClick) {
-    let ul = document.getElementById("viewModeNavBar");
-    let li = document.createElement("li");
-    let a = document.createElement("a");
-    a.innerHTML = title;
-    a.setAttribute("onclick", onClick);
-    a.setAttribute("href", "#");
-    a.setAttribute("class", "nav-link table-selector");
-    a.setAttribute("id", id);
-    li.appendChild(a);
-    li.setAttribute("class", "nav-item");
-
-    ul.appendChild(li);
+    if (countIssues(model, elementsToMark) <= 0)
+        document.getElementById("showAllIssues").parentNode.remove();
+    if (countIssues(model, noIssuesElements) <= 0)
+        document.getElementById("showSuccess").parentNode.remove();
+    if (proz_vars !== undefined && proz_vars.length <= 0)
+        document.getElementById("showVariables").parentNode.remove();
 }
 
 function setFocus(name) {
@@ -706,14 +696,7 @@ const overlayViewModes = Object.freeze({
 
 function createViewController() {
     let ctrl = {};
-
     var doc = document.getElementById("viewModeNavBar");
-    let globalDownloadButton = document.createElement("button");
-    globalDownloadButton.setAttribute("type", "button");
-    globalDownloadButton.setAttribute("class", "btn btn-viadee global-download");
-    globalDownloadButton.setAttribute("onclick", "downloadFile()");
-    globalDownloadButton.innerHTML = "Download ignoreIssues";
-    doc.appendChild(globalDownloadButton);
 
     /**
      * bpmn-js-seed

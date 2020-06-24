@@ -340,11 +340,10 @@ public class Runner {
 	private ArrayList<String> createAllOutputFilesArray() {
 		ArrayList<String> allFiles = new ArrayList<>();
 
-		allFiles.add("bootstrap.min.js");
+		allFiles.add("bootstrap.bundle.min.js");
 		allFiles.add("bpmn-navigated-viewer.js");
 		allFiles.add("bpmn.io.viewer.app.js");
 		allFiles.add("jquery-3.4.1.min.js");
-		allFiles.add("popper.min.js");
 		allFiles.add("infoPOM.js");
 		allFiles.add("download.js");
 
@@ -375,11 +374,10 @@ public class Runner {
 	 */
 	private Map<String, String> createFileFolderMapping() {
 		Map<String, String> fMap = new HashMap<>();
-		fMap.put("bootstrap.min.js", ConfigConstants.JS_FOLDER);
+		fMap.put("bootstrap.bundle.min.js", ConfigConstants.JS_FOLDER);
 		fMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
 		fMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
 		fMap.put("jquery-3.4.1.min.js", ConfigConstants.JS_FOLDER);
-		fMap.put("popper.min.js", ConfigConstants.JS_FOLDER);
 		fMap.put("infoPOM.js", ConfigConstants.JS_FOLDER);
 		fMap.put("download.js", ConfigConstants.JS_FOLDER);
 
