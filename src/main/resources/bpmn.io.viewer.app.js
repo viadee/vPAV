@@ -10,7 +10,7 @@ function markNodes(elements, canvas) {
 }
 
 function filterElementsByModel(elements, bpmnFile) {
-    return elements.filter(element =>(element.bpmnFile === (properties["basepath"] + bpmnFile)) && (element.elementId !== ""));
+    return elements.filter(element => (element.bpmnFile === (properties["basepath"] + bpmnFile)) && (element.elementId !== ""));
 }
 
 //mark invalid path
@@ -57,17 +57,17 @@ function addCountOverlay(overlays, elements) {
 function getProcessVariableOverlay(bpmnFile) {
     let filteredVariables = proz_vars
         .filter(p => p.bpmnFile === (properties["basepath"] + bpmnFile))
-.filter(p => p.elementIid !== "");
+        .filter(p => p.elementIid !== "");
 
     return filteredVariables.map(p => {
         let overlayData = {};
-    overlayData.i = p;
-    overlayData.anz = [p.read.length, p.write.length, p.delete.length];
-    overlayData.clickOverlay = createVariableDialog(p);
-    overlayData.classes = "badge-info badge-variable-operations";
-    overlayData.title = "variable operations";
-    return overlayData;
-});
+        overlayData.i = p;
+        overlayData.anz = [p.read.length, p.write.length, p.delete.length];
+        overlayData.clickOverlay = createVariableDialog(p);
+        overlayData.classes = "badge-info badge-variable-operations";
+        overlayData.title = "variable operations";
+        return overlayData;
+    });
 }
 
 function getIssueOverlays(bpmnFile) {
@@ -118,7 +118,7 @@ function getIssueOverlays(bpmnFile) {
     }
 
     //Add count on each issue
-    var issue = { i: "dummy", anz: 0 };
+    var issue = {i: "dummy", anz: 0};
     var issues = [];
     for (id in elementsToMark) {
         if (elementsToMark[id].bpmnFile === (properties["basepath"] + bpmnFile)) {
@@ -137,18 +137,18 @@ function getIssueOverlays(bpmnFile) {
     issues.forEach(issue => {
         issueSeverity.forEach(element => {
             if (element.id === issue.i.elementId) {
-        if (element.Criticality === "ERROR") {
-            issue.classes = "badge-danger";
-        }
-        if (element.Criticality === "WARNING") {
-            issue.classes = "badge-warning";
-        }
-        if (element.Criticality === "INFO") {
-            issue.classes = "badge-info";
-        }
-    }
-});
-});
+                if (element.Criticality === "ERROR") {
+                    issue.classes = "badge-danger";
+                }
+                if (element.Criticality === "WARNING") {
+                    issue.classes = "badge-warning";
+                }
+                if (element.Criticality === "INFO") {
+                    issue.classes = "badge-info";
+                }
+            }
+        });
+    });
     return issues;
 }
 
@@ -239,7 +239,7 @@ function createIssueDialog(elements) {
                         dCardBody.appendChild(dCardRuleDescription);
                     if (issue.elementDescription)
                         dCardBody.appendChild(dCardElementDescription);
-                    if("implementationDetails" in issue)
+                    if ("implementationDetails" in issue)
                         dCardBody.appendChild(dCardImplementationDetails);
                     dCardBody.appendChild(dCardIssueId);
                     dCardBody.appendChild(dCardIssueButtons);
@@ -327,33 +327,28 @@ function createCardForVariableOperations(operations, title) {
 }
 
 // Add single issue to the ignoreIssues list
-function addIssue(issue){
+function addIssue(issue) {
     ignoredIssues[issue[0]] = '#' + issue[1];
     issue[2].disabled = true;
     issue[3].disabled = false;
 }
 
 // Remove single issue from ignoreIssues list
-function removeIssue(issue){
+function removeIssue(issue) {
     delete ignoredIssues[issue[0]];
     issue[2].disabled = false;
     issue[3].disabled = true;
 }
 
 // download the ignoreIssues file 
-function downloadFile(){
+function downloadFile() {
     var value;
     var blob = "";
-    Object.keys(ignoredIssues).forEach(function(key) {
+    Object.keys(ignoredIssues).forEach(function (key) {
         value = ignoredIssues[key];
-        blob = blob + value + "\n"+ key + "\n";
+        blob = blob + value + "\n" + key + "\n";
     });
-    download(new Blob([blob]),"ignoreIssues.txt", "text/plain");
-}
-
-// (Un-)highlight code references
-function toggleCodeReferences() {
-
+    download(new Blob([blob]), "ignoreIssues.txt", "text/plain");
 }
 
 //delete table under diagram
@@ -472,7 +467,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             //add links for process variables contained in message
             let messageText = issue.message;
             processVariables.filter(p => issue.message.includes(`'${p.name}'`))
-        .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
+                .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
             myCell.innerHTML = messageText;
             myRow.appendChild(myCell);
 
@@ -480,7 +475,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             myCell = document.createElement("td");
             myCell.setAttribute("style", "word-break: break-all");
             myCell.innerHTML = "";
-            if("implementationDetails" in issue) {
+            if ("implementationDetails" in issue) {
                 myCell.innerHTML = issue.implementationDetails;
             }
             myRow.appendChild(myCell);
@@ -496,8 +491,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
                                 path_text += issue.paths[x][y].elementId + " -> ";
                             else
                                 path_text += issue.paths[x][y].elementId;
-                        else
-                        if (y < issue.paths[x].length - 1)
+                        else if (y < issue.paths[x].length - 1)
                             path_text += issue.paths[x][y].elementName + " -> ";
                         else
                             path_text += issue.paths[x][y].elementName
@@ -684,19 +678,20 @@ function setFocus(name) {
 }
 
 const tableViewModes = Object.freeze({
-    ISSUES:   Symbol("issues"),
-    NO_ISSUES:  Symbol("no issues"),
+    ISSUES: Symbol("issues"),
+    NO_ISSUES: Symbol("no issues"),
     VARIABLES: Symbol("process variables")
 });
 
 const overlayViewModes = Object.freeze({
-    ISSUES:   Symbol("issues"),
-    VARIABLES:  Symbol("process variables")
+    ISSUES: Symbol("issues"),
+    VARIABLES: Symbol("process variables")
 });
 
 function createViewController() {
     let ctrl = {};
     var doc = document.getElementById("viewModeNavBar");
+    let bpmnViewer;
 
     /**
      * bpmn-js-seed
@@ -710,7 +705,7 @@ function createViewController() {
         document.querySelector("#canvas").innerHTML = "";
 
         // create viewer
-        let bpmnViewer = new window.BpmnJS({
+        bpmnViewer = new window.BpmnJS({
             container: '#canvas'
         });
 
@@ -785,7 +780,7 @@ function createViewController() {
         }
     }
 
-    ctrl.init = function() {
+    ctrl.init = function () {
         updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, diagramXMLSource[0])
     };
 
@@ -801,7 +796,7 @@ function createViewController() {
         updateView(overlayViewModes.VARIABLES, tableViewModes.VARIABLES, this.currentModel);
     };
 
-    ctrl.showPath = function(elementId, path_nr, path) {
+    ctrl.showPath = function (elementId, path_nr, path) {
         updateDiagram(this.currentModel, getElementsOnPath(elementId, path_nr), []);
 
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
@@ -810,28 +805,28 @@ function createViewController() {
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
     };
 
-    ctrl.markElement = function(elementId) {
+    ctrl.markElement = function (elementId) {
         updateDiagram(this.currentModel, [{elementId: elementId, classification: 'one-element'}], []);
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     };
 
-    ctrl.showVariableOperations = function(variableName) {
+    ctrl.showVariableOperations = function (variableName) {
         let processVariable = processVariables.find(p => p.name === variableName);
         let operations = processVariable.read.concat(processVariable.write, processVariable.delete);
         let elements = operations.map(o => {
             o.classification = "one-element";
-        return o;
-    });
+            return o;
+        });
 
         updateDiagram(this.currentModel, elements, getProcessVariableOverlay(this.currentModel.name));
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     };
 
-    ctrl.resetOverlay = function() {
+    ctrl.resetOverlay = function () {
         updateView(this.currentOverlayViewMode, this.currentTableViewMode, this.currentModel);
     };
 
-    ctrl.switchModel = function(modelName) {
+    ctrl.switchModel = function (modelName) {
         let model = getModel(modelName);
         if (model === null) throw "model not found";
 
@@ -839,6 +834,35 @@ function createViewController() {
         document.getElementById(model.name).setAttribute("class", "nav-link model-selector active");
 
         updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, model);
+    };
+
+    // (Un-)highlight code references
+    ctrl.showElementsWithCodeReferences = function () {
+        let code_elements = [];
+
+        // TODO calculate that only once after loading
+        // Use all elements
+        Object.values(bpmnViewer.get('elementRegistry')._elements).forEach(element => {
+            // Loop through attributes of element
+            for(let [key, value] of Object.entries(element.element.businessObject.$attrs)) {
+                if(sourceCodeAttributes.includes(key)) {
+                    console.log(element);
+                    code_elements.push({elementId: element.element.id, classification: 'one-element'})
+                }
+            }
+
+            // Loop through extension elements like listeners
+            if(element.element.businessObject.hasOwnProperty("extensionElements")) {
+                element.element.businessObject.extensionElements.values.forEach(extension => {
+                    // Check if at least one source code reference is part of the properties
+                    if(Object.getOwnPropertyNames(extension).some(v=> sourceCodeAttributes.indexOf(v) !== -1)) {
+                        console.log(extension);
+                    }
+                });
+            }
+        });
+
+        updateDiagram(this.currentModel, code_elements, []);
     };
 
     return ctrl;
@@ -855,8 +879,8 @@ function showUnlocatedCheckers() {
             </div>
         </div>`;
 
-    document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
-});
+        document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
+    });
 }
 
 // Init
@@ -866,3 +890,5 @@ const controller = createViewController();
 controller.init();
 showUnlocatedCheckers();
 
+// Define attributes which reference source code
+const sourceCodeAttributes = ["camunda:class", "class", "camunda:delegateExpression", "delegateExpression"];
