@@ -416,7 +416,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
 
             defaultCheckers.forEach(element => {
                 if (issue.ruleName === element.rulename) {
-                    a.setAttribute("href", "https://viadee.github.io/vPAV/" + issue.ruleName + ".html");
+                    a.setAttribute("href", "https://viadee.github.io/vPAV/Checker/" + issue.ruleName + ".html");
                     a.setAttribute("title", "Checker documentation");
                     a.style.fontWeight = 'bold';
                 }
