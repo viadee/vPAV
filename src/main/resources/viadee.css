@@ -240,7 +240,7 @@ a:hover {
 }
 
 .viadee-footer {
-	background: #7EBCA9;
+	background: #7ebca9;
 }
 
 #canvas {
@@ -253,4 +253,8 @@ a:hover {
 
 .h4-img {
 	height: 1.5rem;
+}
+
+.btn.active {
+	box-shadow: 0 0 0 0.2rem #7aa1a382;
 }

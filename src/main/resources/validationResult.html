@@ -87,7 +87,7 @@
     </div>
     <div class="row mt-2">
         <div class="col">
-            <ul id="viewModeNavBar" class="nav nav-pills">
+            <ul id="viewModeNavBar" class="nav nav-pills align-items-start">
                 <li class="nav-item">
                     <a onclick="controller.showIssues()" href="#" class="nav-link table-selector" id="showAllIssues">
                         All Issues
@@ -95,20 +95,20 @@
                 </li>
                 <li class="nav-item">
                     <a onclick="controller.showSuccessfulCheckers()" href="#" class="nav-link table-selector" id="showSuccess">
-                        Process variables
+                        Successful Checkers
                     </a>
                 </li>
                 <li class="nav-item">
                     <a onclick="controller.showProcessVariables()" href="#" class="nav-link table-selector" id="showVariables">
-                        Process variables
+                        Process Variables
                     </a>
                 </li>
                 <div class="btn-group-toggle ml-md-auto" data-toggle="buttons">
-                    <label class="btn btn-viadee ml-md-auto" onclick="controller.showElementsWithCodeReferences()">
+                    <label class="btn btn-viadee ml-md-auto" onclick="controller.showElementsWithCodeReferences(this)">
                         <input type="checkbox" autocomplete="off">Highlight source code
                         references</label>
                 </div>
-                <button type="button" class="btn btn-viadee ml-md-1 global-download" onclick="downloadFile()">Download
+                <button type="button" class="btn btn-viadee ml-md-1 global-download mt-0" onclick="downloadFile()">Download
                     ignoreIssues
                 </button>
             </ul>

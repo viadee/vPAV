@@ -837,32 +837,36 @@ function createViewController() {
     };
 
     // (Un-)highlight code references
-    ctrl.showElementsWithCodeReferences = function () {
-        let code_elements = [];
+    ctrl.showElementsWithCodeReferences = function (btn) {
+        if(btn.classList.contains("active")) {
+            this.resetOverlay();
+        }
+        else {
+            let code_elements = [];
 
-        // TODO calculate that only once after loading
-        // Use all elements
-        Object.values(bpmnViewer.get('elementRegistry')._elements).forEach(element => {
-            // Loop through attributes of element
-            for(let [key, value] of Object.entries(element.element.businessObject.$attrs)) {
-                if(sourceCodeAttributes.includes(key)) {
-                    console.log(element);
-                    code_elements.push({elementId: element.element.id, classification: 'one-element'})
-                }
-            }
-
-            // Loop through extension elements like listeners
-            if(element.element.businessObject.hasOwnProperty("extensionElements")) {
-                element.element.businessObject.extensionElements.values.forEach(extension => {
-                    // Check if at least one source code reference is part of the properties
-                    if(Object.getOwnPropertyNames(extension).some(v=> sourceCodeAttributes.indexOf(v) !== -1)) {
-                        console.log(extension);
+            // TODO calculate that only once after loading
+            // Use all elements
+            Object.values(bpmnViewer.get('elementRegistry')._elements).forEach(element => {
+                // Loop through attributes of element
+                for (let [key, value] of Object.entries(element.element.businessObject.$attrs)) {
+                    if (sourceCodeAttributes.includes(key)) {
+                        code_elements.push({elementId: element.element.id, classification: 'code-element'})
                     }
-                });
-            }
-        });
+                }
 
-        updateDiagram(this.currentModel, code_elements, []);
+                // Loop through extension elements like listeners
+                if (element.element.businessObject.hasOwnProperty("extensionElements")) {
+                    element.element.businessObject.extensionElements.values.forEach(extension => {
+                        // Check if at least one source code reference is part of the properties
+                        if (Object.getOwnPropertyNames(extension).some(v => sourceCodeAttributes.indexOf(v) !== -1)) {
+                            code_elements.push({elementId: element.element.id, classification: 'code-element'})
+                        }
+                    });
+                }
+            });
+
+            updateDiagram(this.currentModel, code_elements, []);
+        }
     };
 
     return ctrl;
@@ -891,4 +895,6 @@ controller.init();
 showUnlocatedCheckers();
 
 // Define attributes which reference source code
-const sourceCodeAttributes = ["camunda:class", "class", "camunda:delegateExpression", "delegateExpression"];
+const sourceCodeAttributes = ["camunda:class", "class",
+    "camunda:delegateExpression", "delegateExpression",
+    "camunda:variableMappingClass", "camunda:variableMappingDelegateExpression"];
