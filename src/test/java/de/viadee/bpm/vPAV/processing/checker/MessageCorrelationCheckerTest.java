@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,23 +31,22 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -56,7 +55,6 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 public class MessageCorrelationCheckerTest {
 
@@ -89,7 +87,7 @@ public class MessageCorrelationCheckerTest {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessageStartEvent.bpmn";
 
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final Set<String> testSet = new HashSet<String>();
+		final Set<String> testSet = new HashSet<>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
@@ -98,7 +96,7 @@ public class MessageCorrelationCheckerTest {
 
 		scanner.scanProcessVariables();
 
-		checker = new MessageCorrelationChecker(rule, new BpmnScanner(PATH), scanner);
+		checker = new MessageCorrelationChecker(rule, scanner);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -126,7 +124,7 @@ public class MessageCorrelationCheckerTest {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessageReceiveTask.bpmn";
 
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final Set<String> testSet = new HashSet<String>();
+		final Set<String> testSet = new HashSet<>();
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate2.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
@@ -135,7 +133,7 @@ public class MessageCorrelationCheckerTest {
 
 		scanner.scanProcessVariables();
 
-		checker = new MessageCorrelationChecker(rule, new BpmnScanner(PATH), scanner);
+		checker = new MessageCorrelationChecker(rule, scanner);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -172,7 +170,7 @@ public class MessageCorrelationCheckerTest {
 
 		scanner.scanProcessVariables();
 
-		checker = new MessageCorrelationChecker(rule, new BpmnScanner(PATH), scanner);
+		checker = new MessageCorrelationChecker(rule, scanner);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -207,7 +205,7 @@ public class MessageCorrelationCheckerTest {
 
 		scanner.scanProcessVariables();
 
-		checker = new MessageCorrelationChecker(rule, new BpmnScanner(PATH), scanner);
+		checker = new MessageCorrelationChecker(rule, scanner);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

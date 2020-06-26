@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,11 @@ public class BoundaryErrorEventDelegateCorrect implements org.camunda.bpm.engine
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        throw new BpmnError("123");
+        if (false) {
+            throw new BpmnError("preceding_error_code", "error message");
+        } else {
+            throw new BpmnError("123", "error message");
+        }
     }
 
 }

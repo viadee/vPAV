@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,10 +65,8 @@ public class ElementBasedPredicateBuilderImpl<T> implements ElementBasedPredicat
 
     @Override
     public T ofType(Class<?> clazz) {
-        final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> {
-            return new EvaluationResult<>(clazz.isInstance(element.getBaseElement()), element,
-                    element.getBaseElement().getClass().getSimpleName());
-        };
+        final Function<BpmnElement, EvaluationResult<BpmnElement>> evaluator = element -> new EvaluationResult<>(clazz.isInstance(element.getBaseElement()), element,
+                element.getBaseElement().getClass().getSimpleName());
         final String description = String.format("of type '%s'", clazz.getSimpleName());
         return thatFulfill(new DescribedPredicateEvaluator<>(evaluator, description));
     }

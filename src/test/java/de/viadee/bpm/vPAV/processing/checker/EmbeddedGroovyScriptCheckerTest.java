@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -44,8 +43,10 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.ScriptTask;
 import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.bpmn.instance.Task;
-import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -59,8 +60,6 @@ public class EmbeddedGroovyScriptCheckerTest {
 
     private static ElementChecker checker;
 
-    private static ClassLoader cl;
-
     private final Rule rule = new Rule("EmbeddedGroovyScriptChecker", true, null, null, null, null);
 
     @BeforeClass
@@ -69,7 +68,7 @@ public class EmbeddedGroovyScriptCheckerTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().getResource("en_US");
     }
@@ -81,9 +80,7 @@ public class EmbeddedGroovyScriptCheckerTest {
     public void testEmptyScriptReference() {
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptReference.bpmn";
 
-        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
-
-        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
+        checker = new EmbeddedGroovyScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -110,9 +107,7 @@ public class EmbeddedGroovyScriptCheckerTest {
     public void testEmptyScriptFormat() {
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptFormat.bpmn";
 
-        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
-
-        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
+        checker = new EmbeddedGroovyScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -139,9 +134,7 @@ public class EmbeddedGroovyScriptCheckerTest {
     public void testEmptyScript() {
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScript.bpmn";
 
-        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
-
-        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
+        checker = new EmbeddedGroovyScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -169,9 +162,7 @@ public class EmbeddedGroovyScriptCheckerTest {
     public void testScriptInInputOutputMapping() {
         final String PATH = BASE_PATH + "ProcessVariablesMapping_InputScript.bpmn";
 
-        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
-
-        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
+        checker = new EmbeddedGroovyScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -194,9 +185,7 @@ public class EmbeddedGroovyScriptCheckerTest {
     public void testInvalidGroovyScript() {
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_InvalidGroovyScript.bpmn";
 
-        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
-
-        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
+        checker = new EmbeddedGroovyScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -224,9 +213,7 @@ public class EmbeddedGroovyScriptCheckerTest {
 
         final String PATH = BASE_PATH + "EmbeddedGroovyScriptCheckerTest_EmptyScriptTaskListener.bpmn";
 
-        final BpmnScanner bpmnScanner = new BpmnScanner(PATH);
-
-        checker = new EmbeddedGroovyScriptChecker(rule, bpmnScanner);
+        checker = new EmbeddedGroovyScriptChecker(rule);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

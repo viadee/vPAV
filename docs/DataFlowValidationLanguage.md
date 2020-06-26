@@ -1,5 +1,8 @@
-Data Flow Validation Lanugage
-=================================
+---
+title: Data Flow Validation Language
+nav_order: 7
+---
+# Data Flow Validation Language
 The data flow validation language is a DSL embedded in Java and provides functionality for defining data flow rules and automated validating against process applications.
 
 
@@ -63,7 +66,7 @@ DataFlowRule rule = processVariables().thatAre().prefixed("ext_")
 
 ## Execution
 
-Data flow rules can either be executed as part of the vPAV workflow with the [`DataFlowChecker`](DataFlowChecker.md) or as separate unit test.
+Data flow rules can either be executed as part of the vPAV workflow with the [`DataFlowChecker`](Checker/DataFlowChecker.md) or as separate unit test.
 
 The following snippet shows an exemplary setup for evaluating rules as unit tests:
 

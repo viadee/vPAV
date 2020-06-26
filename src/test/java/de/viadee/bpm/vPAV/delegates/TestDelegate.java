@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,5 +39,10 @@ public class TestDelegate implements org.camunda.bpm.engine.delegate.JavaDelegat
     public void execute(DelegateExecution execution) throws Exception {
         execution.setVariable("isExternalProcess", true);
         execution.getVariable("numberEntities");
+    }
+
+    public void myMethod(DelegateExecution execution, String variable) {
+        execution.getVariable(variable);
+        execution.setVariable("writeVariable", true);
     }
 }

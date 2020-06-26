@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@ public class VertexInfo {
 
     public VertexInfo(final BpmnElement vertex) {
         this.vertex = vertex;
-        this.visitedVariables = new HashMap<String, Void>();
+        this.visitedVariables = new HashMap<>();
         this.clear();
     }
 

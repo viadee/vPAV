@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,12 @@ public class BoundaryErrorEventDelegateCorrectWithVariable implements org.camund
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
+        final String precedingErrorCode = "PRECEDING_ERROR_CODE";
         final String errorCode = "123";
-        throw new BpmnError(errorCode);
+        if (false) {
+            throw new BpmnError(precedingErrorCode, "error message");
+        } else {
+            throw new BpmnError(errorCode, "error message");
+        }
     }
 }

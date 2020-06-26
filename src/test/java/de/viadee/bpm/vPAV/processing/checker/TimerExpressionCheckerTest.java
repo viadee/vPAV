@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@ import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.*;
-import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -83,7 +82,7 @@ public class TimerExpressionCheckerTest {
 	@Test
 	public void testTimerExpression_Correct() {
 		final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Correct.bpmn";
-		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+		checker = new TimerExpressionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -101,12 +100,36 @@ public class TimerExpressionCheckerTest {
 	}
 
 	/**
+	 * Case: TimerExpression with repeating duration in start event is correct
+	 */
+
+	@Test
+	public void testTimerExpressionWithRepeatingDuration_Correct() {
+		final String PATH = BASE_PATH + "TimerExpressionCheckerTest_RepeatingDuration_Correct.bpmn";
+		checker = new TimerExpressionChecker(rule);
+
+		// parse bpmn model
+		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+
+		final Collection<BaseElement> baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+
+		for (BaseElement event : baseElements) {
+			final BpmnElement element = new BpmnElement(PATH, event, new ControlFlowGraph(), new FlowAnalysis());
+			checker.check(element);
+		}
+
+		if (IssueService.getInstance().getIssues().size() > 0) {
+			Assert.fail("correct cycle timer expression generates an issue");
+		}
+	}
+
+	/**
 	 * Case: TimerExpression in start event is wrong
 	 */
 	@Test
 	public void testTimerExpression_Wrong() {
 		final String PATH = BASE_PATH + "TimerExpressionCheckerTest_Wrong.bpmn";
-		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+		checker = new TimerExpressionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
@@ -129,7 +152,7 @@ public class TimerExpressionCheckerTest {
 	@Test
 	public void testTimerExpressions() {
 		final String PATH = BASE_PATH + "TimerExpressionCheckerTest.bpmn";
-		checker = new TimerExpressionChecker(rule, new BpmnScanner(PATH));
+		checker = new TimerExpressionChecker(rule);
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

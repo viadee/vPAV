@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -45,6 +46,7 @@ import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -53,8 +55,6 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 public class ProcessApplicationValidatorTest {
-
-    private static ClassLoader cl;
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -72,9 +72,15 @@ public class ProcessApplicationValidatorTest {
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().setTest(true);
+
+        // Setup soot
+        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        new JavaReaderStatic().setupSoot();
+        Scene.v().loadNecessaryClasses();
     }
 
     /**
@@ -96,7 +102,6 @@ public class ProcessApplicationValidatorTest {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = "src/test/resources/ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 
@@ -105,7 +110,7 @@ public class ProcessApplicationValidatorTest {
         ServiceTaskImpl serviceTask = modelInstance.getModelElementById("ServiceTask_108g52x");
         serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.OverloadedExecuteDelegate");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null, new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null, null, null);
 
         // create data flow graphs
         graphBuilder.createProcessGraph(fileScanner, modelInstance, processDefinition.getPath(), new ArrayList<>(),

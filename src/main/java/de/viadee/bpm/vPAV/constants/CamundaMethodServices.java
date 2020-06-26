@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,21 +33,10 @@ package de.viadee.bpm.vPAV.constants;
 
 import soot.RefType;
 
-import java.sql.Ref;
-
 public class CamundaMethodServices {
 
     private CamundaMethodServices() {
     }
-
-
-    public static final String ACTIVITY_BEHAVIOR = "org.camunda.bpm.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior";
-
-    public static final String JAVA_DELEGATE = "org.camunda.bpm.engine.delegate.JavaDelegate";
-
-    public static final String TASK_LISTENER = "org.camunda.bpm.engine.delegate.TaskListener";
-
-    public static final String EXECUTION_LISTENER = "org.camunda.bpm.engine.delegate.ExecutionListener";
 
     public static final String DELEGATE = "org.camunda.bpm.engine.delegate.DelegateExecution";
 
@@ -72,6 +61,10 @@ public class CamundaMethodServices {
     public static final String START_PROCESS_INSTANCE_BY_KEY = "startProcessInstanceByKey";
     
     public static final String CORRELATE_MESSAGE = "createMessageCorrelation";
+
+    public static final String EXECUTION_OBJECT = "execution";
+
+    public static final String TASK_OBJECT = "task";
 
     public static final RefType DELEGATE_EXECUTION_TYPE = RefType.v(DELEGATE);
 

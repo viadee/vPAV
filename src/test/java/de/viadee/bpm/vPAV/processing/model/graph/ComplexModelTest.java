@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.model.graph;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -59,8 +58,6 @@ public class ComplexModelTest {
 
 	private static final String BASE_PATH = "src/test/resources/";
 
-	private static ClassLoader cl;
-
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 		RuntimeConfig.getInstance().setTest(true);
@@ -69,7 +66,7 @@ public class ComplexModelTest {
 		final URL classUrl = new URL(currentPath + "src/test/java/");
 		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
 		final URL[] classUrls = { classUrl, resourcesUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 	}
 
@@ -85,7 +82,6 @@ public class ComplexModelTest {
 	public void testGraphOnComplexModel() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
 		final File processdefinition = new File(PATH);
 
@@ -106,8 +102,7 @@ public class ComplexModelTest {
 
 		long startTime = System.currentTimeMillis();
 
-		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, null, null, null,
-				new BpmnScanner(PATH));
+		final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, null, null, null);
 		// create data flow graphs
 		final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
 				processdefinition.getPath(), new ArrayList<>(), scanner, new FlowAnalysis());

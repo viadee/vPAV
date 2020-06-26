@@ -1,9 +1,24 @@
+---
+title: Release notes
+nav_order: 8
+---
 # Release notes
+
+## 3.0.5
+
+### Features
+[**Issue 157**](https://github.com/viadee/vPAV/issues/157) Strings used as variable names are resolved and recognized in every position  
+"All" variable mappings are supported
+
+### Fixes
+Subprocesses are now correctly included in the graph
+
+### Misc
 
 ## 3.0.3
 
 ### Features
-[**Issue 151**](https://github.com/viadee/vPAV/issues/151) Scanning projects built with Java 9 to 11 are now supported!
+[**Issue 151**](https://github.com/viadee/vPAV/issues/151) Scanning projects built with Java 9 to 11 is now supported  
 [**Issue 147**](https://github.com/viadee/vPAV/issues/147) Variable names can be resolved when final string objects are used
 
 ### Fixes
@@ -14,9 +29,9 @@
 ## 3.0.2
 
 ### Features
-[**Issue 30**](https://github.com/viadee/vPAV/issues/30) In/Out mappings and delegate variable mappings for call activities are now supported\
-[**Issue 139**](https://github.com/viadee/vPAV/issues/139) Users can define variables which are integrated in the data flow graph in order to improve the accuracy of the analysis\
-[**Issue 142**](https://github.com/viadee/vPAV/issues/142) Call activities with multiple listeners are supported\
+[**Issue 30**](https://github.com/viadee/vPAV/issues/30) In/Out mappings and delegate variable mappings for call activities are now supported  
+[**Issue 139**](https://github.com/viadee/vPAV/issues/139) Users can define variables which are integrated in the data flow graph in order to improve the accuracy of the analysis  
+[**Issue 142**](https://github.com/viadee/vPAV/issues/142) Call activities with multiple listeners are supported  
 [**Issue 146**](https://github.com/viadee/vPAV/issues/146) Added support for multi instance tasks
 
 ### Fixes

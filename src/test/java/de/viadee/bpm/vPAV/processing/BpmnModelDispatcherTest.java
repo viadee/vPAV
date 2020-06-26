@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -53,7 +52,6 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 
 public class BpmnModelDispatcherTest {
-	private static ClassLoader cl;
 
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
@@ -61,7 +59,7 @@ public class BpmnModelDispatcherTest {
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
 	}
@@ -70,15 +68,12 @@ public class BpmnModelDispatcherTest {
 	public void testCreateCheckerInstances() throws ConfigReaderException {
 		// Load rule set.
 		XmlConfigReader reader = new XmlConfigReader();
-		RuleSet rules = reader.read("ruleSetChild.xml");
-
-		BpmnScanner bpmnScanner = new BpmnScanner(
-				(new File("src/test/resources/XorConventionChecker_false.bpmn")).getPath());
+		RuleSet rules = reader.read("ruleSets/ruleSetChild.xml");
 
 		FileScanner fileScanner = new FileScanner(rules);
 		BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
 		Collection<ElementChecker> checkerInstances = dispatcher
-				.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, bpmnScanner, null, null, null, null)[0];
+				.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules,null, null, null, null)[0];
 
 		// Check if all checkers were created.
 		assertEquals("Wrong number of loaded checkers.", 4, checkerInstances.size());

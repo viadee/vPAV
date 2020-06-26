@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,26 +32,19 @@
 package de.viadee.bpm.vPAV.processing.code.flow;
 
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 
-public class ExpressionNode extends AbstractNode {
+public class ExpressionNode extends BasicNode {
 
 	private String expression;
 
 	public ExpressionNode(final BpmnElement parentElement,
-			final String expression, final ElementChapter elementChapter) {
-		super(parentElement, elementChapter);
+			final String expression, final ElementChapter elementChapter, final KnownElementFieldType fieldType) {
+		super(parentElement, elementChapter, fieldType);
 		this.expression = expression;
 	}
 
 	public String getExpression() {
 		return this.expression;
-	}
-
-	@Override
-	void setPreds() {
-	}
-
-	@Override
-	void setSuccs() {
 	}
 }

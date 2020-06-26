@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,40 +32,34 @@
 package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
-import de.viadee.bpm.vPAV.processing.model.graph.Path;
-import fj.Hash;
-import groovy.lang.DelegatesTo;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.testng.Assert;
+import org.junit.*;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Properties;
 
 public class UserVariablesTest {
 
     private static final String BASE_PATH = "src/test/resources/";
-
-    private static ClassLoader cl;
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
@@ -75,7 +69,7 @@ public class UserVariablesTest {
         final URL classUrl = new URL(currentPath + "src/test/java/");
         final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
         final URL[] classUrls = { classUrl, resourcesUrl };
-        cl = new URLClassLoader(classUrls);
+        ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
     }
 
@@ -85,10 +79,9 @@ public class UserVariablesTest {
     }
 
     @Test
-    public void testUserDefinedVariablesCorrect() {
+    public void testUserVariablesInclusionInGraph() {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
 
@@ -99,7 +92,7 @@ public class UserVariablesTest {
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
 
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 
@@ -108,81 +101,53 @@ public class UserVariablesTest {
         final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
 
-        flowAnalysis.analyze(graphCollection);
-
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-
-        Assert.assertEquals(invalidPathMap.size(), 0);
-
-        Assert.assertEquals(flowAnalysis.getNodes().get("ServiceTask_108g52x__0").getDefined().get("2").getName(),
-                "numberEntities",
-                "'numberEntities' should be listed as defined because it was defined by the user.");
-        Assert.assertEquals(flowAnalysis.getNodes().get("SequenceFlow_0znqs8t").getInUsed().size(), 0,
-                "Variable 'numberEntities' should not be passed to Sequence Flow because it is out of scope.");
-        Assert.assertEquals(flowAnalysis.getNodes().get("StartEvent_1__0").getDefined().get("1").getName(),
-                "anotherVariable",
-                "'anotherVariable' should be listed as defined in the start event");
-        Assert.assertEquals(flowAnalysis.getNodes().get("EndEvent_13uioac__0").getDefined().get("7").getName(),
-                "numberEntities",
-                "'numberEntities' should be listed as defined in end event");
+        Graph graph = graphCollection.iterator().next();
+        ProcessVariableOperation pvo;
+        for (BpmnElement element : graph.getVertices()) {
+            switch (element.getId()) {
+                case "StartEvent_1":
+                    // Variable 'anotherVariable' should be included as the scope is not restricted
+                    pvo = element.getControlFlowGraph().getOperations().get("anotherVariable_2").get(0);
+                    Assert.assertNotNull(pvo);
+                    break;
+                case "ServiceTask_108g52x":
+                    // Variable 'numberEntities' should be ony included in the scope of 'ServiceTask_108g52x'
+                    pvo = element.getControlFlowGraph().getOperations().get("numberEntities_0").get(0);
+                    Assert.assertNotNull(pvo);
+                    break;
+                case "EndEvent_13uioac":
+                    // Variable 'numberEntities' should be ony included in the scope of 'EndEvent_13uioac'
+                    pvo = element.getControlFlowGraph().getOperations().get("numberEntities_1").get(0);
+                    Assert.assertNotNull(pvo);
+                    break;
+            }
+        }
     }
 
     @Test
-    public void testAllOperationsCorrect() throws JAXBException {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-        final String PATH = BASE_PATH + "ModelWithTwoDelegates_UR.bpmn";
-        final File processDefinition = new File(PATH);
+    public void testXmlVariablesReader() throws JAXBException {
+        // Tests that user variables are correctly read from xml and translated to ProcessVariableOperations
+        XmlVariablesReader xmlVariablesReader = new XmlVariablesReader();
 
-        Properties myProperties = new Properties();
-        myProperties.put("userVariablesFilePath", "UserVariablesTest/variables_allOperations.xml");
-        ConfigConstants.getInstance().setProperties(myProperties);
+        HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = xmlVariablesReader
+                .read("UserVariablesTest/variables_allOperations.xml", "Process_1");
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        ListMultimap<String, ProcessVariableOperation> processVariables = userVariables.get("StartEvent");
+        ListMultimap<String, ProcessVariableOperation> serviceVariables = userVariables.get("ServiceTask_108g52x");
+        ListMultimap<String, ProcessVariableOperation> sequenceVariables = userVariables.get("SequenceFlow_1g7pl28");
 
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(new BpmnScanner(PATH));
+        Assert.assertEquals(1, processVariables.size());
+        Assert.assertEquals(VariableOperation.WRITE, processVariables.get("int_Hallo").get(0).getOperation());
 
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        Assert.assertEquals(1, serviceVariables.size());
+        Assert.assertEquals(VariableOperation.WRITE, serviceVariables.get("ext_Blub").get(0).getOperation());
+        Assert.assertEquals("ServiceTask_108g52x", serviceVariables.get("ext_Blub").get(0).getScopeId());
 
-        // create data flow graphs
-        final Collection<String> calledElementHierarchy = new ArrayList<>();
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), calledElementHierarchy, scanner, flowAnalysis);
-
-        flowAnalysis.analyze(graphCollection);
-
-        // calculate invalid paths based on data flow graphs
-        final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
-
-        Assert.assertEquals(invalidPathMap.size(), 3);
-        Iterator<AnomalyContainer> iterator = invalidPathMap.keySet().iterator();
-        AnomalyContainer anomaly1 = iterator.next();
-        AnomalyContainer anomaly2 = iterator.next();
-        AnomalyContainer anomaly3 = iterator.next();
-
-        Assert.assertEquals(anomaly1.getAnomaly(), Anomaly.UR, "'ext_Blub' should create a UR because it is not availabe in the sequence flow.");
-        Assert.assertEquals(anomaly2.getAnomaly(), Anomaly.UR, "'int_Hallo' should create a UR because it is deleted in the sequence flow before accessed.");
-        Assert.assertEquals(anomaly3.getAnomaly(), Anomaly.DU, "'int_Hallo' should create a DU because no read operation exists between the user defined write and delete operations.");
-
-        Assert.assertEquals(flowAnalysis.getNodes().get("StartEvent_1__0").getDefined().get("1").getName(), "int_Hallo",
-                "Variable 'int_Hallo' should be defined in the start event.");
-        Assert.assertEquals(flowAnalysis.getNodes().get("ServiceTask_108g52x__0").getDefined().get("2").getName(),
-                "ext_Blub",
-                "Variable 'ext_Blub' should be defined in the first service task.");
-        Assert.assertEquals(flowAnalysis.getNodes().get("SequenceFlow_1g7pl28__0").getUsed().get("8").getName(),
-                "ext_Blub",
-                "Variable 'ext_Blub' should be used in the middle sequence flow.");
-        Assert.assertEquals(flowAnalysis.getNodes().get("SequenceFlow_1g7pl28__0").getKilled().get("7").getName(),
-                "int_Hallo",
-                "Variable 'int_Hallo' should be deleted in the middle sequence flow.");
-
-        // Write operation at start (var1)
-        // Write operation at the beginning of first service task (scoped) (var2)
-        // Read operation after first service task (var2)
-        // Delete operation after first service task (var1)
+        Assert.assertEquals(2, sequenceVariables.size());
+        Assert.assertEquals(VariableOperation.READ, sequenceVariables.get("ext_Blub").get(0).getOperation());
+        Assert.assertEquals("Process_1", sequenceVariables.get("ext_Blub").get(0).getScopeId());
+        Assert.assertEquals(VariableOperation.DELETE, sequenceVariables.get("int_Hallo").get(0).getOperation());
+        Assert.assertEquals("Process_1", sequenceVariables.get("int_Hallo").get(0).getScopeId());
     }
 
     @Test
@@ -192,6 +157,12 @@ public class UserVariablesTest {
         HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = xmlVariablesReader
                 .read("UserVariablesTest/variables_incorrect.xml", "testProcess");
 
-        Assert.assertEquals(0, userVariables.size(), "Ill-defined user variable should not be included.");
+        Assert.assertEquals("Ill-defined user variable should not be included.", 0, userVariables.size());
+    }
+
+    @Before
+    public void clear() {
+        IssueService.getInstance().clear();
+        ProcessVariableOperation.resetIdCounter();
     }
 }

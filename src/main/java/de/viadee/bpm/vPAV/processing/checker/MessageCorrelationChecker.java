@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -41,88 +40,103 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.MessageEventDefinition;
+import org.camunda.bpm.model.bpmn.instance.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+
 /**
  * Class MessageCorrelationChecker
- *
+ * <p>
  * Checks a bpmn model, if message references can be resolved for message
  * events/receive tasks.
- *
  */
 public class MessageCorrelationChecker extends AbstractElementChecker {
 
-	private ProcessVariablesScanner scanner;
+    private ProcessVariablesScanner scanner;
 
-	MessageCorrelationChecker(final Rule rule, final BpmnScanner bpmnScanner, final ProcessVariablesScanner scanner) {
-		super(rule, bpmnScanner);
-		this.scanner = scanner;
-	}
+    MessageCorrelationChecker(final Rule rule, final ProcessVariablesScanner scanner) {
+        super(rule);
+        this.scanner = scanner;
+    }
 
-	@Override
-	public Collection<CheckerIssue> check(final BpmnElement element) {
-		final Collection<CheckerIssue> issues = new ArrayList<>();
+    @Override
+    public Collection<CheckerIssue> check(final BpmnElement element) {
+        final Collection<CheckerIssue> issues = new ArrayList<>();
 
-		final BaseElement baseElement = element.getBaseElement();
+        final BaseElement baseElement = element.getBaseElement();
 
-		if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)) {
+        if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_START_EVENT)) {
 
-			final Collection<MessageEventDefinition> messageEventDefinition = baseElement
-					.getChildElementsByType(MessageEventDefinition.class);
-			if (messageEventDefinition != null && messageEventDefinition.size() > 0) {
-				retrieveMessage(element, issues, baseElement, scanner.getEntryPoints());
-			}
-		}
-		if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)
-				|| baseElement.getElementType().getTypeName()
-						.equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_CATCH_EVENT)
-				|| baseElement.getElementType().getTypeName()
-						.equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT)
-				|| baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_BOUNDARY_EVENT)) {
+            final Collection<MessageEventDefinition> messageEventDefinition = baseElement
+                    .getChildElementsByType(MessageEventDefinition.class);
+            if (messageEventDefinition != null && messageEventDefinition.size() > 0) {
+                retrieveMessage(element, issues, baseElement, scanner.getEntryPoints());
+            }
+        }
+        if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)
+                || baseElement.getElementType().getTypeName()
+                .equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_CATCH_EVENT)
+                || baseElement.getElementType().getTypeName()
+                .equals(BpmnModelConstants.BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT)
+                || baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_BOUNDARY_EVENT)) {
 
-			final Collection<MessageEventDefinition> messageEventDefinition = baseElement
-					.getChildElementsByType(MessageEventDefinition.class);
-			if (messageEventDefinition != null && messageEventDefinition.size() > 0) {
-				retrieveMessage(element, issues, baseElement, scanner.getIntermediateEntryPoints());
-			}
-		}
-		if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_RECEIVE_TASK)) {
-			retrieveMessage(element, issues, baseElement, scanner.getIntermediateEntryPoints());
-		}
+            final Collection<MessageEventDefinition> messageEventDefinition = baseElement
+                    .getChildElementsByType(MessageEventDefinition.class);
+            if (messageEventDefinition != null && messageEventDefinition.size() > 0) {
+                retrieveMessage(element, issues, baseElement, scanner.getIntermediateEntryPoints());
+            }
+        }
+        if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_RECEIVE_TASK)) {
+            retrieveMessage(element, issues, baseElement, scanner.getIntermediateEntryPoints());
+        }
 
-		return issues;
-	}
+        return issues;
+    }
 
     /**
      * Retrieves the message from the bpmn element and checks if it can be resolved
-     * @param element
-     *            Current BpmnElement
-     * @param issues
-     *            List of issues
-     * @param baseElement
-     *            BaseElement of current BpmnElement
-     * @param entryPoints
-     *            List of entryPoints
+     *
+     * @param element     Current BpmnElement
+     * @param issues      List of issues
+     * @param baseElement BaseElement of current BpmnElement
+     * @param entryPoints List of entryPoints
      */
-	private void retrieveMessage(final BpmnElement element, final Collection<CheckerIssue> issues,
-			final BaseElement baseElement, final List<EntryPoint> entryPoints) {
-		final ArrayList<String> messageRefs = bpmnScanner.getMessageRefs(baseElement.getId());
-		String messageName = "";
-		if (messageRefs.size() == 1) {
-			messageName = bpmnScanner.getMessageName(messageRefs.get(0));
-		}
+    private void retrieveMessage(final BpmnElement element, final Collection<CheckerIssue> issues,
+            final BaseElement baseElement, final List<EntryPoint> entryPoints) {
+        final ArrayList<String> messages = new ArrayList<>();
+        Collection<EventDefinition> eventDefinitions = new HashSet<>();
 
-		for (EntryPoint ep : entryPoints) {
-			if (!ep.getMessageName().equals(messageName)) {
-				issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-						String.format(Messages.getString("MessageCorrelationChecker.1"), //$NON-NLS-1$
-								messageName)));
-			}
-		}
-	}
+        if (baseElement instanceof CatchEvent) {
+            eventDefinitions = ((CatchEvent) baseElement).getEventDefinitions();
+        } else if (baseElement instanceof ThrowEvent) {
+            eventDefinitions = ((ThrowEvent) baseElement).getEventDefinitions();
+        } else if (baseElement instanceof ReceiveTask) {
+            Message msg = ((ReceiveTask) baseElement).getMessage();
+            if (msg != null) {
+                messages.add(msg.getName());
+            }
+        }
 
+        for (EventDefinition eventDefinition : eventDefinitions) {
+            if (eventDefinition instanceof MessageEventDefinition) {
+                messages.add(((MessageEventDefinition) eventDefinition).getMessage().getName());
+            }
+        }
+
+        String messageName = "";
+        if (messages.size() == 1) {
+            messageName = messages.get(0);
+        }
+
+        for (EntryPoint ep : entryPoints) {
+            if (!ep.getMessageName().equals(messageName)) {
+                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                        String.format(Messages.getString("MessageCorrelationChecker.1"), //$NON-NLS-1$
+                                messageName)));
+            }
+        }
+    }
 }

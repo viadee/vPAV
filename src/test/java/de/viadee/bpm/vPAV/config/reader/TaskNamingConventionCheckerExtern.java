@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.processing.ProcessingException;
@@ -53,8 +52,8 @@ public class TaskNamingConventionCheckerExtern extends AbstractElementChecker {
 
     private String description;
 
-    public TaskNamingConventionCheckerExtern(final Rule rule, final BpmnScanner bpmnScanner) {
-        super(rule, bpmnScanner);
+    public TaskNamingConventionCheckerExtern(final Rule rule) {
+        super(rule);
 
         final Collection<ElementConvention> elementConventions = rule.getElementConventions();
         if (elementConventions == null || elementConventions.size() != 1) {
@@ -94,8 +93,7 @@ public class TaskNamingConventionCheckerExtern extends AbstractElementChecker {
 
         final Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(taskName);
-        boolean b = !matcher.matches();
-        return b;
+        return !matcher.matches();
     }
 
     private CheckerIssue createIssue(final BpmnElement element, final BaseElement baseElement, String message,

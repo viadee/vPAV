@@ -1,7 +1,7 @@
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright © 2019, viadee Unternehmensberatung AG
+ * Copyright © 2020, viadee Unternehmensberatung AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,132 +31,102 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import fj.Hash;
 
 public class ControlFlowGraph {
 
-	private LinkedHashMap<String, AbstractNode> nodes;
+    private LinkedHashMap<String, BasicNode> nodes;
 
-	private LinkedHashMap<String, ProcessVariableOperation> operations;
+    private int nodeCounter;
 
-	private int internalNodeCounter;
+    public ControlFlowGraph() {
+        nodes = new LinkedHashMap<>();
+        nodeCounter = -1;
+    }
 
-	private int recursionCounter;
+    /**
+     * Adds a node to the current CFG
+     *
+     * @param node
+     *            Node to be added to the control flow graph
+     */
+    public void addNode(final BasicNode node) {
+        String key = createHierarchy(node);
+        node.setId(key);
+        this.nodes.put(key, node);
+    }
 
-	private int nodeCounter;
+    public void addNodeWithoutNewId(final BasicNode node) {
+        this.nodes.put(node.getId(), node);
+    }
 
-	private int priorLevel;
+    /**
+     *
+     * Helper method to create ids based on hierarchy, e.g.
+     *
+     * 0 --> 1 --> 2 --> 3 --> 3.0 --> 3.0.0 --> 3.0.1 --> 3.0.2
+     *
+     * @param node
+     *            Current node
+     * @return Id of node
+     */
+    private String createHierarchy(final BasicNode node) {
+        StringBuilder key = new StringBuilder();
+        key.append(node.getParentElement().getBaseElement().getId()).append("__");
+        nodeCounter++;
+        key.append(nodeCounter);
+        return key.toString();
+    }
 
-	private List<Integer> priorLevels;
+    boolean hasNodes() {
+        return !nodes.isEmpty();
+    }
 
-	public ControlFlowGraph() {
-		nodes = new LinkedHashMap<>();
-		this.operations = new LinkedHashMap<>();
-		nodeCounter = -1;
-		internalNodeCounter = 0;
-		recursionCounter = 0;
-		priorLevel = 0;
-		priorLevels = new ArrayList<>();
-	}
+    public LinkedHashMap<String, BasicNode> getNodes() {
+        return nodes;
+    }
 
-	/**
-	 * Adds a node to the current CFG
-	 *
-	 * @param node
-	 *            Node to be added to the control flow graph
-	 */
-	public void addNode(final AbstractNode node) {
-		String key = createHierarchy(node);
-		node.setId(key);
-		this.nodes.put(key, node);
-	}
+    public BasicNode firstNode() {
+        Iterator<BasicNode> iterator = nodes.values().iterator();
+        return iterator.next();
+    }
 
-	/**
-	 *
-	 * Helper method to create ids based on hierarchy, e.g.
-	 *
-	 * 0 --> 1 --> 2 --> 3 --> 3.0 --> 3.0.0 --> 3.0.1 --> 3.0.2
-	 * 
-	 * @param node
-	 *            Current node
-	 * @return Id of node
-	 */
-	private String createHierarchy(final AbstractNode node) {
-		// TODO renew method (deleted hierarchy)
-		StringBuilder key = new StringBuilder();
-		key.append(node.getParentElement().getBaseElement().getId()).append("__");
-		nodeCounter++;
-		key.append(nodeCounter);
-		priorLevel = internalNodeCounter - 1;
-		return key.toString();
-	}
+    public BasicNode lastNode() {
+        Iterator<BasicNode> iterator = nodes.values().iterator();
+        BasicNode node = null;
+        while (iterator.hasNext()) {
+            node = iterator.next();
+        }
+        return node;
+    }
 
-	boolean hasImplementedDelegate() {
-		for (AbstractNode node : nodes.values()) {
-			if (node.getElementChapter().equals(ElementChapter.Implementation)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public ListMultimap<String, ProcessVariableOperation> getOperations() {
+        ListMultimap<String, ProcessVariableOperation> operations = ArrayListMultimap.create();
+        for (BasicNode node : nodes.values()) {
+            for (Map.Entry<String, ProcessVariableOperation> entry : node.getOperations().entrySet()) {
+                operations.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return operations;
+    }
 
-	boolean hasNodes() {
-		return !nodes.isEmpty();
-	}
+    // Only used for tests
+    public HashSet<String> getVariablesOfOperations() {
+        HashSet<String> variableNames = new HashSet<>();
+        ListMultimap<String, ProcessVariableOperation> operations = getOperations();
+        for (ProcessVariableOperation pvo : operations.values()) {
+            variableNames.add(pvo.getName());
+        }
+        return variableNames;
+    }
 
-	public void incrementRecursionCounter() {
-		this.recursionCounter++;
-	}
-
-	public void decrementRecursionCounter() {
-		this.recursionCounter--;
-	}
-
-	public void resetInternalNodeCounter() {
-		this.internalNodeCounter = 0;
-	}
-
-	public LinkedHashMap<String, AbstractNode> getNodes() {
-		return nodes;
-	}
-
-	public int getPriorLevel() {
-		return priorLevel;
-	}
-
-	public void setInternalNodeCounter(int internalNodeCounter) {
-		this.internalNodeCounter = internalNodeCounter;
-	}
-
-	AbstractNode firstNode() {
-		Iterator<AbstractNode> iterator = nodes.values().iterator();
-		return iterator.next();
-	}
-
-	AbstractNode lastNode() {
-		Iterator<AbstractNode> iterator = nodes.values().iterator();
-		AbstractNode node = null;
-		while (iterator.hasNext()) {
-			node = iterator.next();
-		}
-		return node;
-	}
-
-	private List<Integer> getPriorLevels() {
-		return priorLevels;
-	}
-
-	public void addPriorLevel(int i) {
-		this.priorLevels.add(i);
-	}
-
-	public void removePriorLevel() {
-		this.priorLevels.remove(priorLevels.size() - 1);
-	}
+    public void removeNode(BasicNode node) {
+        nodes.remove(node.getId());
+    }
 }
