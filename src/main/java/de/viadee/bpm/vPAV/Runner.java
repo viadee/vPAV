@@ -132,7 +132,7 @@ public class Runner {
 
 		final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
 		try {
-			String ruleSetPath = ConfigConstants.getInstance().getBasepath() + ConfigConstants.getInstance().getRuleSetFileName();
+			String ruleSetPath = ConfigConstants.getInstance().getRuleSetPath() + ConfigConstants.getInstance().getRuleSetFileName();
 			if (new File(ruleSetPath).exists()) {
 				RuleSet localRule = new XmlConfigReader().read(ConfigConstants.getInstance().getRuleSetFileName());
 

@@ -31,12 +31,12 @@
  */
 package de.viadee.bpm.vPAV.constants;
 
+import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.config.reader.PropertiesReader;
+
 import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Logger;
-
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.config.reader.PropertiesReader;
 
 /**
  * Class to hold global constants
@@ -148,6 +148,10 @@ public class ConfigConstants {
      */
     public void setProperties(Properties newProperties) {
         this.properties = newProperties;
+    }
+
+    public String getRuleSetPath() {
+        return properties.getProperty("ruleSetPath", ConfigConstants.TEST_BASEPATH);
     }
 
     public String getBasepath() {
