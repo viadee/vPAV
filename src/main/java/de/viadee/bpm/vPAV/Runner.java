@@ -134,10 +134,13 @@ public class Runner {
 		try {
 			String ruleSetPath = ConfigConstants.getInstance().getRuleSetPath() + ConfigConstants.getInstance().getRuleSetFileName();
 			if (new File(ruleSetPath).exists()) {
-				RuleSet localRule = new XmlConfigReader().read(ConfigConstants.getInstance().getRuleSetFileName());
+				RuleSet localRules = new XmlConfigReader().read(ConfigConstants.getInstance().getRuleSetFileName());
 
-				if (localRule.hasParentRuleSet()) {
-					rules = mergeRuleSet(localRule, new XmlConfigReader().read(ConfigConstants.getInstance().getParentRuleSetFileName()));
+				if (localRules.hasParentRuleSet()) {
+					rules = mergeRuleSet(localRules, new XmlConfigReader().read(ConfigConstants.getInstance().getParentRuleSetFileName()));
+				}
+				else {
+					rules = localRules;
 				}
 			} else {
 				rules = new XmlConfigReader().read(ConfigConstants.RULESETDEFAULT);
