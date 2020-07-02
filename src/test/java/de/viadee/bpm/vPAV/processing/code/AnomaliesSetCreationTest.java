@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
@@ -47,6 +48,7 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,14 +64,17 @@ public class AnomaliesSetCreationTest {
 
     @BeforeClass
     public static void setup() throws IOException {
+        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        new JavaReaderStatic().setupSoot();
+        Scene.v().loadNecessaryClasses();
+
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
         final URL classUrl = new URL(currentPath + "src/test/java");
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
-        RuntimeConfig.getInstance().setTest(true);
     }
 
     @Before
