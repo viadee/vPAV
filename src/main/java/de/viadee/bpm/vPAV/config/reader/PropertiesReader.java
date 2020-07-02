@@ -33,6 +33,8 @@ package de.viadee.bpm.vPAV.config.reader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -48,13 +50,13 @@ public class PropertiesReader {
         InputStream input = null;
         Properties properties = new Properties();
         try {
-            input = this.getClass().getClassLoader().getResourceAsStream("vPav.properties");
-            if (input == null) {
+            Path propertiesPath = findPropertiesPath();
+            if (propertiesPath == null) {
                 LOGGER.info("vPav.properties file could not be found. Falling back to default values...");
             } else {
+                input = Files.newInputStream(propertiesPath);
                 properties.load(input);
             }
-
         } catch (IOException e) {
             LOGGER.warning("Could not read vPav.properties file. Falling back to default values...");
         } finally {
@@ -67,5 +69,26 @@ public class PropertiesReader {
             }
         }
         return properties;
+    }
+
+    private Path findPropertiesPath() throws IOException {
+        final Path[] foundFile = new Path[1];
+        String pattern = "{vPav, vpav, vPAV}.properties";
+        FileSystem fs = FileSystems.getDefault();
+        PathMatcher matcher = fs.getPathMatcher("glob:" + pattern);
+        FileVisitor<Path> matcherVisitor = new SimpleFileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {
+                Path name = file.getFileName();
+                if (matcher.matches(name)) {
+                    foundFile[0] = file;
+                    return FileVisitResult.TERMINATE;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        };
+        Files.walkFileTree(Paths.get(""), matcherVisitor);
+        return foundFile[0];
     }
 }
