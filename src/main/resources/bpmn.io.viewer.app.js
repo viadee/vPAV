@@ -152,6 +152,22 @@ function getIssueOverlays(bpmnFile) {
     return issues;
 }
 
+function getCodeReferenceOverlays(bpmnFile, elements) {
+    var numReferences = [];
+    for (let [key, e] of Object.entries(elements)) {
+        let extRefs = Object.values(e.extensions).map(ext => Object.keys(ext).length).reduce((a, b) => a + b);
+        numReferences.push({
+            anz: [Object.keys(e.references).length + extRefs],
+            title: "references",
+            classes: "badge-warning",
+            i: {elementId: key},
+            clickOverlay: createCodeReferenceDialog(key, e)
+        });
+    }
+
+    return numReferences;
+}
+
 function createIssueDialog(elements) {
     // add DialogMessage
     return function clickOverlay() {
@@ -314,6 +330,72 @@ function createVariableDialog(processVariable) {
 
         showDialog('show');
     }
+}
+
+function createCodeReferenceDialog(name, element) {
+    // add DialogMessage
+    return function clickOverlay() {
+        //clear dialog
+        const dialogContent = document.querySelector(".modal-body");
+        while (dialogContent.hasChildNodes()) {
+            dialogContent.removeChild(dialogContent.lastChild);
+        }
+        document.querySelector(".modal-title").innerHTML = "Code References";
+
+        // Create card for direct references
+        if(Object.keys(element.references).length > 0 ) {
+            let directReferences = "<table class='card-text'><tbody>";
+
+            for(const [key, value] of Object.entries(element.references)) {
+                directReferences +=  `<tr><td>${key}</td><td>${value}</td></tr>`;
+            }
+            directReferences += "</tbody></table>";
+
+            dialogContent.appendChild(createCard("Direct Code References", directReferences));
+        }
+
+        // Create card per extension
+        for(const [ext, value] of Object.entries(element.extensions)) {
+            let extReferences = "<table class='card-text'><tbody>";
+
+            for(const [key, ref] of Object.entries(value)) {
+                extReferences +=  `<tr><td>${key}</td><td>${ref}</td></tr>`;
+            }
+            extReferences += "</tbody></table>";
+
+            dialogContent.appendChild(createCard("References in " + ext, extReferences));
+        }
+
+        const dialogFooter = document.querySelector(".modal-footer");
+        while (dialogFooter.hasChildNodes()) {
+            dialogFooter.removeChild(dialogFooter.lastChild);
+        }
+        let closeButton = document.createElement("button");
+        closeButton.setAttribute("type", "button");
+        closeButton.setAttribute("class", "btn btn-viadee");
+        closeButton.setAttribute("data-dismiss", "modal");
+        closeButton.innerHTML = "Close";
+        dialogFooter.appendChild(closeButton);
+
+        showDialog('show');
+    }
+}
+
+function createCard(title, content) {
+    var dCard = document.createElement("div");
+    dCard.setAttribute("class", "card bg-light mb-3");
+
+    var dCardBody = document.createElement("div");
+    dCardBody.setAttribute("class", "card-body");
+    dCardBody.innerHTML = content;
+
+    var dCardTitle = document.createElement("h5");
+    dCardTitle.setAttribute("class", "card-header");
+    dCardTitle.innerHTML = title;
+    dCard.appendChild(dCardTitle);
+
+    dCard.appendChild(dCardBody);
+    return dCard;
 }
 
 function createCardForVariableOperations(operations, title) {
@@ -685,14 +767,15 @@ const tableViewModes = Object.freeze({
 
 const overlayViewModes = Object.freeze({
     ISSUES: Symbol("issues"),
-    VARIABLES: Symbol("process variables")
+    VARIABLES: Symbol("process variables"),
+    CODE: Symbol("code references")
 });
 
 function createViewController() {
     let ctrl = {};
     var doc = document.getElementById("viewModeNavBar");
     let bpmnViewer;
-    let code_elements = [];
+    let code_elements = {};
 
     /**
      * bpmn-js-seed
@@ -761,6 +844,9 @@ function createViewController() {
         } else if (overlayViewMode === overlayViewModes.VARIABLES) {
             elements = [];
             overlayData = getProcessVariableOverlay(model.name);
+        } else if (overlayViewMode === overlayViewModes.CODE) {
+            elements = [];
+            overlayData = getCodeReferenceOverlays(model.name, code_elements);
         }
 
         updateDiagram(model, elements, overlayData);
@@ -842,20 +928,31 @@ function createViewController() {
     ctrl.loadCodeElements = function () {
         // Use all elements
         Object.values(bpmnViewer.get('elementRegistry')._elements).forEach(element => {
-            // Loop through attributes of element
-            for (let [key, value] of Object.entries(element.element.businessObject.$attrs)) {
-                if (sourceCodeAttributes.includes(key)) {
-                    code_elements.push({elementId: element.element.id, classification: 'code-element'})
+            // Loop through all possible code references
+            sourceCodeAttributes.forEach(ref => {
+                if (Object.keys(element.element.businessObject.$attrs).includes(ref)) {
+                    if (!(element.element.id in code_elements)) {
+                        code_elements[element.element.id] = {"references": {}, "extensions": {}};
+                    }
+                    code_elements[element.element.id].references[ref] = element.element.businessObject.$attrs[ref];
                 }
-            }
+            });
 
             // Loop through extension elements like listeners
             if (element.element.businessObject.hasOwnProperty("extensionElements")) {
                 element.element.businessObject.extensionElements.values.forEach(extension => {
-                    // Check if at least one source code reference is part of the properties
-                    if (Object.getOwnPropertyNames(extension).some(v => sourceCodeAttributes.indexOf(v) !== -1)) {
-                        code_elements.push({elementId: element.element.id, classification: 'code-element'})
-                    }
+                    // Loop through all possible code references
+                    sourceCodeAttributes.forEach(ref => {
+                        if (Object.keys(element.element.businessObject.$attrs).includes(ref)) {
+                            if (!(element.element.id in code_elements)) {
+                                code_elements[element.element.id] = {"references": {}, "extensions": {}};
+                            }
+                            if (!(extension.$type in code_elements[element.element.id].extensions)) {
+                                code_elements[element.element.id].extensions[extension.$type] = {};
+                            }
+                            code_elements[element.element.id].extensions[extension.$type][ref] = element.element.businessObject.$attrs[ref];
+                        }
+                    });
                 });
             }
         });
@@ -866,7 +963,7 @@ function createViewController() {
         if (btn.classList.contains("active")) {
             this.resetOverlay();
         } else {
-            updateDiagram(this.currentModel, code_elements, []);
+            updateView(overlayViewModes.CODE, tableViewModes.ISSUES, this.currentModel);
         }
     };
 
