@@ -110,6 +110,12 @@ public class JsonOutputWriter implements IssueOutputWriter {
 						jsonPaths.add(jsonPath);
 					}
 				}
+
+				// Add more information regarding the implementation if given
+				if(issue.getImplementationDetails() != null) {
+					obj.addProperty(BpmnConstants.VPAV_IMPLEMENTATION_DETAILS, issue.getImplementationDetails());
+				}
+
 				obj.add(BpmnConstants.VPAV_PATHS, jsonPaths);
 				obj.addProperty(BpmnConstants.VPAV_MESSAGE, issue.getMessage());
 				obj.addProperty(BpmnConstants.VPAV_ELEMENT_DESCRIPTION, issue.getElementDescription());

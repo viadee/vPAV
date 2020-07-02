@@ -73,7 +73,7 @@ public class ProcessVariablesCreatorTest {
                 null, null, new BasicNode[1]);
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
-        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args);
+        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args, method.getDeclaringClass().getJavaPackageName());
 
         // Three methods, method 1 interrupted by method calls = four nodes
         Collection<BasicNode> nodes = cfg.getNodes().values();
@@ -109,9 +109,9 @@ public class ProcessVariablesCreatorTest {
         ProcessVariablesCreator vr = new ProcessVariablesCreator(
                 new BpmnElement("", baseElement, cfg, new FlowAnalysis()), null,
                 null, new BasicNode[1]);
-        vr.handleProcessVariableManipulation(blockOne, blockOneOpOne);
-        vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo);
-        vr.handleProcessVariableManipulation(blockTwo, blockTwoOpOne);
+        vr.handleProcessVariableManipulation(blockOne, blockOneOpOne, "my.class.name");
+        vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo, "my.class.name");
+        vr.handleProcessVariableManipulation(blockTwo, blockTwoOpOne, "my.class.name");
 
         Collection<BasicNode> nodes = cfg.getNodes().values();
         Iterator<BasicNode> iterator = nodes.iterator();
@@ -210,19 +210,19 @@ public class ProcessVariablesCreatorTest {
         Block anotherBlock = mock(Block.class);
 
         // Add first block
-        vr.addNodeIfNotExisting(block);
+        vr.addNodeIfNotExisting(block, "my.class.name");
         Assert.assertEquals(1, vr.getNodes().size());
 
         // Adding block again shouldn´t create new node
-        vr.addNodeIfNotExisting(block);
+        vr.addNodeIfNotExisting(block, "my.class.name");
         Assert.assertEquals(1, vr.getNodes().size());
 
         // Add another block
-        vr.addNodeIfNotExisting(anotherBlock);
+        vr.addNodeIfNotExisting(anotherBlock, "my.class.name");
         Assert.assertEquals(2, vr.getNodes().size());
 
         // Adding first block again should now create new node
-        vr.addNodeIfNotExisting(block);
+        vr.addNodeIfNotExisting(block, "my.class.name");
         Assert.assertEquals(3, vr.getNodes().size());
     }
 
@@ -240,16 +240,16 @@ public class ProcessVariablesCreatorTest {
         when(pvo.getOperation()).thenReturn(VariableOperation.WRITE);
         Block block = mock(Block.class);
 
-        Node firstNode = new Node(element, block, null, null);
+        Node firstNode = new Node(element, block, "my.class.name",null, null);
         firstNode.addOperation(pvo);
-        Node secondNode = new Node(element, block, null, null);
+        Node secondNode = new Node(element, block,"my.class.name", null, null);
         secondNode.addOperation(pvo);
-        Node thirdNode = new Node(element, block, null, null);
-        Node fourthNode = new Node(element, block, null, null);
+        Node thirdNode = new Node(element, block,"my.class.name", null, null);
+        Node fourthNode = new Node(element, block, "my.class.name",null, null);
         fourthNode.addOperation(pvo);
-        Node fifthNode = new Node(element, block, null, null);
+        Node fifthNode = new Node(element, block, "my.class.name",null, null);
         fifthNode.addOperation(pvo);
-        Node sixthNode = new Node(element, block, null, null);
+        Node sixthNode = new Node(element, block, "my.class.name",null, null);
         sixthNode.addOperation(pvo);
 
         vr.getNodes().add(firstNode);
@@ -304,7 +304,7 @@ public class ProcessVariablesCreatorTest {
                 null, null, "Process_1");
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
-        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args);
+        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args, sc.getJavaPackageName());
         return cfg;
     }
 

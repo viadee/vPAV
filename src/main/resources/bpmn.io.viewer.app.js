@@ -10,7 +10,7 @@ function markNodes(elements, canvas) {
 }
 
 function filterElementsByModel(elements, bpmnFile) {
-    return elements.filter(element =>(element.bpmnFile === (properties["basepath"] + bpmnFile)) && (element.elementId !== ""));
+    return elements.filter(element => (element.bpmnFile === (properties["basepath"] + bpmnFile)) && (element.elementId !== ""));
 }
 
 //mark invalid path
@@ -57,17 +57,17 @@ function addCountOverlay(overlays, elements) {
 function getProcessVariableOverlay(bpmnFile) {
     let filteredVariables = proz_vars
         .filter(p => p.bpmnFile === (properties["basepath"] + bpmnFile))
-.filter(p => p.elementIid !== "");
+        .filter(p => p.elementIid !== "");
 
     return filteredVariables.map(p => {
         let overlayData = {};
-    overlayData.i = p;
-    overlayData.anz = [p.read.length, p.write.length, p.delete.length];
-    overlayData.clickOverlay = createVariableDialog(p);
-    overlayData.classes = "badge-info badge-variable-operations";
-    overlayData.title = "variable operations";
-    return overlayData;
-});
+        overlayData.i = p;
+        overlayData.anz = [p.read.length, p.write.length, p.delete.length];
+        overlayData.clickOverlay = createVariableDialog(p);
+        overlayData.classes = "badge-info badge-variable-operations";
+        overlayData.title = "variable operations";
+        return overlayData;
+    });
 }
 
 function getIssueOverlays(bpmnFile) {
@@ -118,7 +118,7 @@ function getIssueOverlays(bpmnFile) {
     }
 
     //Add count on each issue
-    var issue = { i: "dummy", anz: 0 };
+    var issue = {i: "dummy", anz: 0};
     var issues = [];
     for (id in elementsToMark) {
         if (elementsToMark[id].bpmnFile === (properties["basepath"] + bpmnFile)) {
@@ -137,19 +137,35 @@ function getIssueOverlays(bpmnFile) {
     issues.forEach(issue => {
         issueSeverity.forEach(element => {
             if (element.id === issue.i.elementId) {
-        if (element.Criticality === "ERROR") {
-            issue.classes = "badge-danger";
-        }
-        if (element.Criticality === "WARNING") {
-            issue.classes = "badge-warning";
-        }
-        if (element.Criticality === "INFO") {
-            issue.classes = "badge-info";
-        }
-    }
-});
-});
+                if (element.Criticality === "ERROR") {
+                    issue.classes = "badge-danger";
+                }
+                if (element.Criticality === "WARNING") {
+                    issue.classes = "badge-warning";
+                }
+                if (element.Criticality === "INFO") {
+                    issue.classes = "badge-info";
+                }
+            }
+        });
+    });
     return issues;
+}
+
+function getCodeReferenceOverlays(bpmnFile, elements) {
+    var numReferences = [];
+    for (let [key, e] of Object.entries(elements)) {
+        let extRefs = Object.values(e.extensions).map(ext => Object.keys(ext).length).reduce((a, b) => a + b, 0);
+        numReferences.push({
+            anz: [Object.keys(e.references).length + extRefs],
+            title: "references",
+            classes: "badge-warning",
+            i: {elementId: key},
+            clickOverlay: createCodeReferenceDialog(key, e)
+        });
+    }
+
+    return numReferences;
 }
 
 function createIssueDialog(elements) {
@@ -185,6 +201,9 @@ function createIssueDialog(elements) {
                     var dCardRuleDescription = document.createElement("p");
                     dCardRuleDescription.setAttribute("class", "card-ruleDescription");
 
+                    var dCardImplementationDetails = document.createElement("p");
+                    dCardImplementationDetails.setAttribute("class", "card-implementationDetails");
+
                     var dCardIssueId = document.createElement("p");
                     dCardIssueId.setAttribute("class", "card-issueId issue-id");
 
@@ -195,22 +214,22 @@ function createIssueDialog(elements) {
 
                     var plusIcon = document.createElement("img");
                     plusIcon.setAttribute("src", "img/plus_icon.png");
-                    plusIcon.setAttribute("class", "button-icon plus");
+                    plusIcon.setAttribute("class", "button-icon mr-3");
 
                     var minusIcon = document.createElement("img");
                     minusIcon.setAttribute("src", "img/minus_icon.png");
-                    minusIcon.setAttribute("class", "button-icon minus");
+                    minusIcon.setAttribute("class", "button-icon mr-3");
 
                     dCardAddIssueButton.setAttribute("class", "btn btn-viadee issue-button");
                     dCardAddIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
-                    dCardAddIssueButton.innerHTML = "Add Issue";
-                    dCardAddIssueButton.appendChild(plusIcon);
+                    dCardAddIssueButton.innerHTML = "<span>Ignore Issue</span>";
+                    dCardAddIssueButton.prepend(plusIcon);
 
                     dCardRemoveIssueButton.setAttribute("class", "btn btn-viadee issue-button");
                     dCardRemoveIssueButton.disabled = true;
                     dCardRemoveIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
-                    dCardRemoveIssueButton.innerHTML = "Remove Issue";
-                    dCardRemoveIssueButton.appendChild(minusIcon);
+                    dCardRemoveIssueButton.innerHTML = "<span>Keep Issue</span>";
+                    dCardRemoveIssueButton.prepend(minusIcon);
 
                     dCardIssueButtons.appendChild(dCardAddIssueButton);
                     dCardIssueButtons.appendChild(dCardRemoveIssueButton);
@@ -226,6 +245,7 @@ function createIssueDialog(elements) {
                     dCardText.innerHTML = "<h6><b>Issue:</b></h6> " + issue.message;
                     dCardRuleDescription.innerHTML = "<h6><b>Rule:</b></h6> " + issue.ruleDescription;
                     dCardElementDescription.innerHTML = "<h6><b>Reason:</b></h6> " + issue.elementDescription;
+                    dCardImplementationDetails.innerHTML = "<h6><b>Implementation Details:</b></h6> " + issue.implementationDetails;
                     dCardIssueId.innerHTML = "<h6><b>Issue Id:</b></h6>" + issue.id;
 
 
@@ -235,6 +255,8 @@ function createIssueDialog(elements) {
                         dCardBody.appendChild(dCardRuleDescription);
                     if (issue.elementDescription)
                         dCardBody.appendChild(dCardElementDescription);
+                    if ("implementationDetails" in issue)
+                        dCardBody.appendChild(dCardImplementationDetails);
                     dCardBody.appendChild(dCardIssueId);
                     dCardBody.appendChild(dCardIssueButtons);
                     dCard.appendChild(dCardBody);
@@ -310,6 +332,72 @@ function createVariableDialog(processVariable) {
     }
 }
 
+function createCodeReferenceDialog(name, element) {
+    // add DialogMessage
+    return function clickOverlay() {
+        //clear dialog
+        const dialogContent = document.querySelector(".modal-body");
+        while (dialogContent.hasChildNodes()) {
+            dialogContent.removeChild(dialogContent.lastChild);
+        }
+        document.querySelector(".modal-title").innerHTML = "Code References";
+
+        // Create card for direct references
+        if (Object.keys(element.references).length > 0) {
+            let directReferences = "<table class='card-text code-table'><tbody>";
+
+            for (const [key, value] of Object.entries(element.references)) {
+                directReferences += `<tr><td>${key}</td><td>${value}</td></tr>`;
+            }
+            directReferences += "</tbody></table>";
+
+            dialogContent.appendChild(createCard("Direct Code References", directReferences));
+        }
+
+        // Create card per extension
+        for (const [ext, value] of Object.entries(element.extensions)) {
+            let extReferences = "<table class='card-text code-table'><tbody>";
+
+            for (const [key, ref] of Object.entries(value)) {
+                extReferences += `<tr><td>${key}</td><td>${ref}</td></tr>`;
+            }
+            extReferences += "</tbody></table>";
+
+            dialogContent.appendChild(createCard("References in " + ext, extReferences));
+        }
+
+        const dialogFooter = document.querySelector(".modal-footer");
+        while (dialogFooter.hasChildNodes()) {
+            dialogFooter.removeChild(dialogFooter.lastChild);
+        }
+        let closeButton = document.createElement("button");
+        closeButton.setAttribute("type", "button");
+        closeButton.setAttribute("class", "btn btn-viadee");
+        closeButton.setAttribute("data-dismiss", "modal");
+        closeButton.innerHTML = "Close";
+        dialogFooter.appendChild(closeButton);
+
+        showDialog('show');
+    }
+}
+
+function createCard(title, content) {
+    var dCard = document.createElement("div");
+    dCard.setAttribute("class", "card bg-light mb-3");
+
+    var dCardBody = document.createElement("div");
+    dCardBody.setAttribute("class", "card-body");
+    dCardBody.innerHTML = content;
+
+    var dCardTitle = document.createElement("h5");
+    dCardTitle.setAttribute("class", "card-header");
+    dCardTitle.innerHTML = title;
+    dCard.appendChild(dCardTitle);
+
+    dCard.appendChild(dCardBody);
+    return dCard;
+}
+
 function createCardForVariableOperations(operations, title) {
     var dCardText = document.createElement("p");
     dCardText.setAttribute("class", "card-text");
@@ -321,28 +409,28 @@ function createCardForVariableOperations(operations, title) {
 }
 
 // Add single issue to the ignoreIssues list
-function addIssue(issue){
+function addIssue(issue) {
     ignoredIssues[issue[0]] = '#' + issue[1];
     issue[2].disabled = true;
     issue[3].disabled = false;
 }
 
 // Remove single issue from ignoreIssues list
-function removeIssue(issue){
+function removeIssue(issue) {
     delete ignoredIssues[issue[0]];
     issue[2].disabled = false;
     issue[3].disabled = true;
 }
 
 // download the ignoreIssues file 
-function downloadFile(){
+function downloadFile() {
     var value;
     var blob = "";
-    Object.keys(ignoredIssues).forEach(function(key) {
+    Object.keys(ignoredIssues).forEach(function (key) {
         value = ignoredIssues[key];
-        blob = blob + value + "\n"+ key + "\n";
+        blob = blob + value + "\n" + key + "\n";
     });
-    download(new Blob([blob]),"ignoreIssues.txt", "text/plain");
+    download(new Blob([blob]), "ignoreIssues.txt", "text/plain");
 }
 
 //delete table under diagram
@@ -373,6 +461,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
     myRow.appendChild(createTableHeader("th_elementName", "Element-Name"));
     myRow.appendChild(createTableHeader("th_classification", "Class"));
     myRow.appendChild(createTableHeader("th_message", "Message"));
+    myRow.appendChild(createTableHeader("th_implementationDetails", "Implementation Details"));
     myRow.appendChild(createTableHeader("th_paths", "Invalid Sequenceflow"));
     myTHead.appendChild(myRow);
     myTable.appendChild(myTHead);
@@ -398,15 +487,11 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             removeIssueButton.setAttribute("class", "btn btn-viadee issue-button-table-remove");
 
             addIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
-            addIssueButton.innerHTML = "Add Issue";
-            var b = document.createElement("a");
-            b.appendChild(addIssueButton);
+            addIssueButton.innerHTML = "Ignore Issue";
 
             removeIssueButton.setAttribute("disabled", true);
             removeIssueButton.addEventListener("click", removeIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
-            removeIssueButton.innerHTML = "Remove Issue";
-            var c = document.createElement("a");
-            c.appendChild(removeIssueButton);
+            removeIssueButton.innerHTML = "Keep Issue";
 
             myCell.setAttribute("id", issue.classification); // mark cell
 
@@ -418,6 +503,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
                 if (issue.ruleName === element.rulename) {
                     a.setAttribute("href", "https://viadee.github.io/vPAV/Checker/" + issue.ruleName + ".html");
                     a.setAttribute("title", "Checker documentation");
+                    a.setAttribute("target", "_blank");
                     a.style.fontWeight = 'bold';
                 }
             });
@@ -426,8 +512,8 @@ function createIssueTable(bpmnFile, tableContent, mode) {
 
             //based on selection show button
             if (mode === tableViewModes.ISSUES) {
-                myCell.appendChild(b);
-                myCell.appendChild(c);
+                myCell.appendChild(addIssueButton);
+                myCell.appendChild(removeIssueButton);
             }
 
             //link to docu            
@@ -463,8 +549,17 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             //add links for process variables contained in message
             let messageText = issue.message;
             processVariables.filter(p => issue.message.includes(`'${p.name}'`))
-        .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
+                .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
             myCell.innerHTML = messageText;
+            myRow.appendChild(myCell);
+
+            // implementation details
+            myCell = document.createElement("td");
+            myCell.setAttribute("style", "word-break: break-all");
+            myCell.innerHTML = "";
+            if ("implementationDetails" in issue) {
+                myCell.innerHTML = issue.implementationDetails;
+            }
             myRow.appendChild(myCell);
 
             //path
@@ -478,8 +573,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
                                 path_text += issue.paths[x][y].elementId + " -> ";
                             else
                                 path_text += issue.paths[x][y].elementId;
-                        else
-                        if (y < issue.paths[x].length - 1)
+                        else if (y < issue.paths[x].length - 1)
                             path_text += issue.paths[x][y].elementName + " -> ";
                         else
                             path_text += issue.paths[x][y].elementName
@@ -509,7 +603,6 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             }
             myRow.appendChild(myCell);
             //---------
-            myParent.setAttribute("class", "container-fluid");
             myTBody.appendChild(myRow);
             myTable.appendChild(myTBody);
         }
@@ -559,7 +652,6 @@ function createVariableTable(bpmnFile, tableContent) {
         myCell.innerHTML = elementLinks.map(l => l.outerHTML).join(", ");
         myRow.appendChild(myCell);
         //---------
-        myParent.setAttribute("class", "container-fluid");
         myTBody.appendChild(myRow);
         myTable.appendChild(myTBody);
     }
@@ -595,41 +687,15 @@ function createShowOperationsLink(processVariableName) {
  * create Footer
  */
 function createFooter() {
-    const body = document.querySelector("body");
-    let footer = document.querySelector("footer");
-    //delete footer first
-    if (!(footer === null))
-        footer.parentNode.removeChild(footer);
-
-    footer = document.createElement("footer");
-    footer.setAttribute("class", "footer viadee-footer");
-
-    var fP = document.createElement("span");
-    fP.setAttribute("class", "text-muted-viadee");
+    var fP = document.querySelector("footer span");
     fP.innerHTML = viadee + " - " + vPavName + " " + vPavVersion;
-
-    var aL = document.createElement("a");
-    aL.setAttribute("class", "text-muted-viadee float-right pr-2");
-    aL.setAttribute("href", "https://viadee.github.io/vPAV/#licenses");
-    aL.innerHTML = "Licenses";
-
-    var aI = document.createElement("a");
-    aI.setAttribute("class", "text-muted-viadee float-right pr-2");
-    aI.setAttribute("href", "https://www.viadee.de/impressum-datenschutz.html");
-    aI.innerHTML = "Imprint";
-
-    fP.appendChild(aL);
-    fP.appendChild(aI);
-    footer.appendChild(fP);
-    body.appendChild(footer);
 }
-
 
 
 //set Filename as Header
 function setUeberschrift(name) {
     let subName = name.substr(0, name.length - 5);
-    document.querySelector("#modell").innerHTML = subName;
+    document.querySelector("#model").innerHTML = subName;
     var mDownload = document.getElementById("model_download");
     mDownload.setAttribute("href", properties["downloadBasepath"] + name);
     setFocus(name);
@@ -681,27 +747,12 @@ function showDialog() {
 
 // List all view modes
 function createViewModesNavBar(model) {
-    if (countIssues(model, elementsToMark) > 0)
-        createNavItem("All issues", "showAllIssues", "controller.showIssues()");
-    if (countIssues(model, noIssuesElements) > 0)
-        createNavItem("Checkers without issues", "showSuccess", "controller.showSuccessfulCheckers()");
-    if (proz_vars !== undefined && proz_vars.length > 0)
-        createNavItem("Process variables", "showVariables", "controller.showProcessVariables()");
-}
-
-function createNavItem(title, id, onClick) {
-    let ul = document.getElementById("viewModeNavBar");
-    let li = document.createElement("li");
-    let a = document.createElement("a");
-    a.innerHTML = title;
-    a.setAttribute("onclick", onClick);
-    a.setAttribute("href", "#");
-    a.setAttribute("class", "nav-link table-selector");
-    a.setAttribute("id", id);
-    li.appendChild(a);
-    li.setAttribute("class", "nav-item");
-
-    ul.appendChild(li);
+    if (countIssues(model, elementsToMark) <= 0)
+        document.getElementById("showAllIssues").parentNode.remove();
+    if (countIssues(model, noIssuesElements) <= 0)
+        document.getElementById("showSuccess").parentNode.remove();
+    if (proz_vars !== undefined && proz_vars.length <= 0)
+        document.getElementById("showVariables").parentNode.remove();
 }
 
 function setFocus(name) {
@@ -709,26 +760,22 @@ function setFocus(name) {
 }
 
 const tableViewModes = Object.freeze({
-    ISSUES:   Symbol("issues"),
-    NO_ISSUES:  Symbol("no issues"),
+    ISSUES: Symbol("issues"),
+    NO_ISSUES: Symbol("no issues"),
     VARIABLES: Symbol("process variables")
 });
 
 const overlayViewModes = Object.freeze({
-    ISSUES:   Symbol("issues"),
-    VARIABLES:  Symbol("process variables")
+    ISSUES: Symbol("issues"),
+    VARIABLES: Symbol("process variables"),
+    CODE: Symbol("code references")
 });
 
 function createViewController() {
     let ctrl = {};
-
     var doc = document.getElementById("viewModeNavBar");
-    let globalDownloadButton = document.createElement("button");
-    globalDownloadButton.setAttribute("type", "button");
-    globalDownloadButton.setAttribute("class", "btn btn-viadee global-download");
-    globalDownloadButton.setAttribute("onclick", "downloadFile()");
-    globalDownloadButton.innerHTML = "Download ignoreIssues";
-    doc.appendChild(globalDownloadButton);
+    let bpmnViewer;
+    let code_elements = {};
 
     /**
      * bpmn-js-seed
@@ -742,7 +789,7 @@ function createViewController() {
         document.querySelector("#canvas").innerHTML = "";
 
         // create viewer
-        let bpmnViewer = new window.BpmnJS({
+        bpmnViewer = new window.BpmnJS({
             container: '#canvas'
         });
 
@@ -760,6 +807,7 @@ function createViewController() {
             setUeberschrift(diagramXML.name);
             addCountOverlay(overlays, overlayData);
             markNodes(elements, canvas);
+            controller.loadCodeElements();
         });
     }
 
@@ -796,6 +844,9 @@ function createViewController() {
         } else if (overlayViewMode === overlayViewModes.VARIABLES) {
             elements = [];
             overlayData = getProcessVariableOverlay(model.name);
+        } else if (overlayViewMode === overlayViewModes.CODE) {
+            elements = [];
+            overlayData = getCodeReferenceOverlays(model.name, code_elements);
         }
 
         updateDiagram(model, elements, overlayData);
@@ -817,8 +868,8 @@ function createViewController() {
         }
     }
 
-    ctrl.init = function() {
-        updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, diagramXMLSource[0])
+    ctrl.init = function () {
+        updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, diagramXMLSource[0]);
     };
 
     ctrl.showIssues = function () {
@@ -833,7 +884,7 @@ function createViewController() {
         updateView(overlayViewModes.VARIABLES, tableViewModes.VARIABLES, this.currentModel);
     };
 
-    ctrl.showPath = function(elementId, path_nr, path) {
+    ctrl.showPath = function (elementId, path_nr, path) {
         updateDiagram(this.currentModel, getElementsOnPath(elementId, path_nr), []);
 
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
@@ -842,28 +893,28 @@ function createViewController() {
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse");
     };
 
-    ctrl.markElement = function(elementId) {
+    ctrl.markElement = function (elementId) {
         updateDiagram(this.currentModel, [{elementId: elementId, classification: 'one-element'}], []);
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     };
 
-    ctrl.showVariableOperations = function(variableName) {
+    ctrl.showVariableOperations = function (variableName) {
         let processVariable = processVariables.find(p => p.name === variableName);
         let operations = processVariable.read.concat(processVariable.write, processVariable.delete);
         let elements = operations.map(o => {
             o.classification = "one-element";
-        return o;
-    });
+            return o;
+        });
 
         updateDiagram(this.currentModel, elements, getProcessVariableOverlay(this.currentModel.name));
         document.getElementById("reset").setAttribute("class", "btn btn-viadee mt-2 collapse.show");
     };
 
-    ctrl.resetOverlay = function() {
+    ctrl.resetOverlay = function () {
         updateView(this.currentOverlayViewMode, this.currentTableViewMode, this.currentModel);
     };
 
-    ctrl.switchModel = function(modelName) {
+    ctrl.switchModel = function (modelName) {
         let model = getModel(modelName);
         if (model === null) throw "model not found";
 
@@ -871,6 +922,45 @@ function createViewController() {
         document.getElementById(model.name).setAttribute("class", "nav-link model-selector active");
 
         updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, model);
+    };
+
+    // Create list of code elements
+    ctrl.loadCodeElements = function () {
+        // Use all elements
+        Object.values(bpmnViewer.get('elementRegistry')._elements).forEach(element => {
+            // Loop through all possible code references
+            sourceCodeAttributes.forEach(ref => {
+                if (Object.keys(element.element.businessObject.$attrs).includes(ref)) {
+                    if (!(element.element.id in code_elements)) {
+                        code_elements[element.element.id] = {"references": {}, "extensions": {}};
+                    }
+                    code_elements[element.element.id].references[ref] = element.element.businessObject.$attrs[ref];
+                }
+            });
+
+            // Loop through extension elements like listeners
+            if (element.element.businessObject.hasOwnProperty("extensionElements")) {
+                element.element.businessObject.extensionElements.values.forEach(extension => {
+                    // Loop through all possible code references
+                    sourceCodeAttributes.forEach(ref => {
+                        if (Object.keys(extension).includes(ref)) {
+                            if (!(element.element.id in code_elements)) {
+                                code_elements[element.element.id] = {"references": {}, "extensions": {}};
+                            }
+                            if (!(extension.$type in code_elements[element.element.id].extensions)) {
+                                code_elements[element.element.id].extensions[extension.$type] = {};
+                            }
+                            code_elements[element.element.id].extensions[extension.$type][ref] = extension[ref];
+                        }
+                    });
+                });
+            }
+        });
+    };
+
+    // (Un-)highlight code references
+    ctrl.showElementsWithCodeReferences = function (btn) {
+        updateView(overlayViewModes.CODE, tableViewModes.ISSUES, this.currentModel);
     };
 
     return ctrl;
@@ -887,9 +977,14 @@ function showUnlocatedCheckers() {
             </div>
         </div>`;
 
-    document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
-});
+        document.getElementById("unlocatedCheckersContainer").innerHTML += warningMsg;
+    });
 }
+
+// Define attributes which reference source code
+const sourceCodeAttributes = ["camunda:class", "class",
+    "camunda:delegateExpression", "delegateExpression",
+    "camunda:variableMappingClass", "camunda:variableMappingDelegateExpression"];
 
 // Init
 let bpmnFile = diagramXMLSource[0].name;
@@ -897,4 +992,3 @@ createViewModesNavBar(bpmnFile);
 const controller = createViewController();
 controller.init();
 showUnlocatedCheckers();
-

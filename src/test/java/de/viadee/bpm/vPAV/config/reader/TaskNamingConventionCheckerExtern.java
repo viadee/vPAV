@@ -101,6 +101,6 @@ public class TaskNamingConventionCheckerExtern extends AbstractElementChecker {
         return new CheckerIssue(rule.getName(), rule.getRuleDescription(), error,
                 element.getProcessDefinition(),
                 null, baseElement.getId(), baseElement.getAttributeValue("name"), null, null, null,
-                message, description);
+                message, description, null);
     }
 }
