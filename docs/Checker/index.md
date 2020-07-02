@@ -11,7 +11,7 @@ Currently, the following checkers are implemented:
 
 | Checker                                                                              | Summary                                                                  | Status       |
 | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------   | ------------ |
-|[JavaDelegateChecker](avaDelegateChecker.md)                                         | Is the implementation (or Spring bean reference) available and usable?   | Done         |
+|[JavaDelegateChecker](JavaDelegateChecker.md)                                         | Is the implementation (or Spring bean reference) available and usable?   | Done         |
 |[DmnTaskChecker](DmnTaskChecker.md)                                                   | Is the implementation available?                                         | Done         |
 |[EmbeddedGroovyScriptChecker](EmbeddedGroovyScriptChecker.md)                         | Is the implementation available and does it look like a script?          | Done         |
 |[ProcessVariablesModelChecker](ProcessVariablesModelChecker.md)                       | Are process variables in the model provided in the code for all paths?   | Done |
