@@ -692,6 +692,7 @@ function createViewController() {
     let ctrl = {};
     var doc = document.getElementById("viewModeNavBar");
     let bpmnViewer;
+    let code_elements = [];
 
     /**
      * bpmn-js-seed
@@ -723,6 +724,7 @@ function createViewController() {
             setUeberschrift(diagramXML.name);
             addCountOverlay(overlays, overlayData);
             markNodes(elements, canvas);
+            controller.loadCodeElements();
         });
     }
 
@@ -781,7 +783,7 @@ function createViewController() {
     }
 
     ctrl.init = function () {
-        updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, diagramXMLSource[0])
+        updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, diagramXMLSource[0]);
     };
 
     ctrl.showIssues = function () {
@@ -836,35 +838,34 @@ function createViewController() {
         updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, model);
     };
 
-    // (Un-)highlight code references
-    ctrl.showElementsWithCodeReferences = function (btn) {
-        if(btn.classList.contains("active")) {
-            this.resetOverlay();
-        }
-        else {
-            let code_elements = [];
+    // Create list of code elements
+    ctrl.loadCodeElements = function () {
+        // Use all elements
+        Object.values(bpmnViewer.get('elementRegistry')._elements).forEach(element => {
+            // Loop through attributes of element
+            for (let [key, value] of Object.entries(element.element.businessObject.$attrs)) {
+                if (sourceCodeAttributes.includes(key)) {
+                    code_elements.push({elementId: element.element.id, classification: 'code-element'})
+                }
+            }
 
-            // TODO calculate that only once after loading
-            // Use all elements
-            Object.values(bpmnViewer.get('elementRegistry')._elements).forEach(element => {
-                // Loop through attributes of element
-                for (let [key, value] of Object.entries(element.element.businessObject.$attrs)) {
-                    if (sourceCodeAttributes.includes(key)) {
+            // Loop through extension elements like listeners
+            if (element.element.businessObject.hasOwnProperty("extensionElements")) {
+                element.element.businessObject.extensionElements.values.forEach(extension => {
+                    // Check if at least one source code reference is part of the properties
+                    if (Object.getOwnPropertyNames(extension).some(v => sourceCodeAttributes.indexOf(v) !== -1)) {
                         code_elements.push({elementId: element.element.id, classification: 'code-element'})
                     }
-                }
+                });
+            }
+        });
+    };
 
-                // Loop through extension elements like listeners
-                if (element.element.businessObject.hasOwnProperty("extensionElements")) {
-                    element.element.businessObject.extensionElements.values.forEach(extension => {
-                        // Check if at least one source code reference is part of the properties
-                        if (Object.getOwnPropertyNames(extension).some(v => sourceCodeAttributes.indexOf(v) !== -1)) {
-                            code_elements.push({elementId: element.element.id, classification: 'code-element'})
-                        }
-                    });
-                }
-            });
-
+    // (Un-)highlight code references
+    ctrl.showElementsWithCodeReferences = function (btn) {
+        if (btn.classList.contains("active")) {
+            this.resetOverlay();
+        } else {
             updateDiagram(this.currentModel, code_elements, []);
         }
     };
@@ -887,14 +888,14 @@ function showUnlocatedCheckers() {
     });
 }
 
+// Define attributes which reference source code
+const sourceCodeAttributes = ["camunda:class", "class",
+    "camunda:delegateExpression", "delegateExpression",
+    "camunda:variableMappingClass", "camunda:variableMappingDelegateExpression"];
+
 // Init
 let bpmnFile = diagramXMLSource[0].name;
 createViewModesNavBar(bpmnFile);
 const controller = createViewController();
 controller.init();
 showUnlocatedCheckers();
-
-// Define attributes which reference source code
-const sourceCodeAttributes = ["camunda:class", "class",
-    "camunda:delegateExpression", "delegateExpression",
-    "camunda:variableMappingClass", "camunda:variableMappingDelegateExpression"];
