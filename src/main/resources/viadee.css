@@ -255,6 +255,14 @@ a:hover {
 	height: 1.5rem;
 }
 
-.btn.active {
-	box-shadow: 0 0 0 0.2rem #7aa1a382;
+.code-table {
+	width: 100%;
+}
+
+.code-table td {
+	width: 50%;
+}
+
+.code-table td:first-of-type {
+	font-weight: bold;
 }

@@ -155,7 +155,7 @@ function getIssueOverlays(bpmnFile) {
 function getCodeReferenceOverlays(bpmnFile, elements) {
     var numReferences = [];
     for (let [key, e] of Object.entries(elements)) {
-        let extRefs = Object.values(e.extensions).map(ext => Object.keys(ext).length).reduce((a, b) => a + b);
+        let extRefs = Object.values(e.extensions).map(ext => Object.keys(ext).length).reduce((a, b) => a + b, 0);
         numReferences.push({
             anz: [Object.keys(e.references).length + extRefs],
             title: "references",
@@ -343,11 +343,11 @@ function createCodeReferenceDialog(name, element) {
         document.querySelector(".modal-title").innerHTML = "Code References";
 
         // Create card for direct references
-        if(Object.keys(element.references).length > 0 ) {
-            let directReferences = "<table class='card-text'><tbody>";
+        if (Object.keys(element.references).length > 0) {
+            let directReferences = "<table class='card-text code-table'><tbody>";
 
-            for(const [key, value] of Object.entries(element.references)) {
-                directReferences +=  `<tr><td>${key}</td><td>${value}</td></tr>`;
+            for (const [key, value] of Object.entries(element.references)) {
+                directReferences += `<tr><td>${key}</td><td>${value}</td></tr>`;
             }
             directReferences += "</tbody></table>";
 
@@ -355,11 +355,11 @@ function createCodeReferenceDialog(name, element) {
         }
 
         // Create card per extension
-        for(const [ext, value] of Object.entries(element.extensions)) {
-            let extReferences = "<table class='card-text'><tbody>";
+        for (const [ext, value] of Object.entries(element.extensions)) {
+            let extReferences = "<table class='card-text code-table'><tbody>";
 
-            for(const [key, ref] of Object.entries(value)) {
-                extReferences +=  `<tr><td>${key}</td><td>${ref}</td></tr>`;
+            for (const [key, ref] of Object.entries(value)) {
+                extReferences += `<tr><td>${key}</td><td>${ref}</td></tr>`;
             }
             extReferences += "</tbody></table>";
 
@@ -943,14 +943,14 @@ function createViewController() {
                 element.element.businessObject.extensionElements.values.forEach(extension => {
                     // Loop through all possible code references
                     sourceCodeAttributes.forEach(ref => {
-                        if (Object.keys(element.element.businessObject.$attrs).includes(ref)) {
+                        if (Object.keys(extension).includes(ref)) {
                             if (!(element.element.id in code_elements)) {
                                 code_elements[element.element.id] = {"references": {}, "extensions": {}};
                             }
                             if (!(extension.$type in code_elements[element.element.id].extensions)) {
                                 code_elements[element.element.id].extensions[extension.$type] = {};
                             }
-                            code_elements[element.element.id].extensions[extension.$type][ref] = element.element.businessObject.$attrs[ref];
+                            code_elements[element.element.id].extensions[extension.$type][ref] = extension[ref];
                         }
                     });
                 });
@@ -960,11 +960,7 @@ function createViewController() {
 
     // (Un-)highlight code references
     ctrl.showElementsWithCodeReferences = function (btn) {
-        if (btn.classList.contains("active")) {
-            this.resetOverlay();
-        } else {
-            updateView(overlayViewModes.CODE, tableViewModes.ISSUES, this.currentModel);
-        }
+        updateView(overlayViewModes.CODE, tableViewModes.ISSUES, this.currentModel);
     };
 
     return ctrl;
