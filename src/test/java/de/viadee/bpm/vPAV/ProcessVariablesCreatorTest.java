@@ -52,6 +52,8 @@ import static org.mockito.Mockito.when;
 
 public class ProcessVariablesCreatorTest {
 
+    private static SootClass mockSootClass;
+
     @BeforeClass
     public static void setupSoot() {
         RuntimeConfig.getInstance().setTest(true);
@@ -59,6 +61,9 @@ public class ProcessVariablesCreatorTest {
         FileScanner.setupSootClassPaths(new LinkedList<>());
         JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
+
+        mockSootClass = mock(SootClass.class);
+        when(mockSootClass.getName()).thenReturn("my.class.name");
     }
 
     @Test
@@ -73,7 +78,7 @@ public class ProcessVariablesCreatorTest {
                 null, null, new BasicNode[1]);
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
-        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args, method.getDeclaringClass().getJavaPackageName());
+        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args, method.getDeclaringClass());
 
         // Three methods, method 1 interrupted by method calls = four nodes
         Collection<BasicNode> nodes = cfg.getNodes().values();
@@ -109,9 +114,9 @@ public class ProcessVariablesCreatorTest {
         ProcessVariablesCreator vr = new ProcessVariablesCreator(
                 new BpmnElement("", baseElement, cfg, new FlowAnalysis()), null,
                 null, new BasicNode[1]);
-        vr.handleProcessVariableManipulation(blockOne, blockOneOpOne, "my.class.name");
-        vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo, "my.class.name");
-        vr.handleProcessVariableManipulation(blockTwo, blockTwoOpOne, "my.class.name");
+        vr.handleProcessVariableManipulation(blockOne, blockOneOpOne, mockSootClass);
+        vr.handleProcessVariableManipulation(blockOne, blockOneOpTwo, mockSootClass);
+        vr.handleProcessVariableManipulation(blockTwo, blockTwoOpOne, mockSootClass);
 
         Collection<BasicNode> nodes = cfg.getNodes().values();
         Iterator<BasicNode> iterator = nodes.iterator();
@@ -210,19 +215,19 @@ public class ProcessVariablesCreatorTest {
         Block anotherBlock = mock(Block.class);
 
         // Add first block
-        vr.addNodeIfNotExisting(block, "my.class.name");
+        vr.addNodeIfNotExisting(block, mockSootClass);
         Assert.assertEquals(1, vr.getNodes().size());
 
         // Adding block again shouldn´t create new node
-        vr.addNodeIfNotExisting(block, "my.class.name");
+        vr.addNodeIfNotExisting(block, mockSootClass);
         Assert.assertEquals(1, vr.getNodes().size());
 
         // Add another block
-        vr.addNodeIfNotExisting(anotherBlock, "my.class.name");
+        vr.addNodeIfNotExisting(anotherBlock, mockSootClass);
         Assert.assertEquals(2, vr.getNodes().size());
 
         // Adding first block again should now create new node
-        vr.addNodeIfNotExisting(block, "my.class.name");
+        vr.addNodeIfNotExisting(block, mockSootClass);
         Assert.assertEquals(3, vr.getNodes().size());
     }
 
@@ -304,7 +309,7 @@ public class ProcessVariablesCreatorTest {
                 null, null, "Process_1");
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
-        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args, sc.getJavaPackageName());
+        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args, sc);
         return cfg;
     }
 

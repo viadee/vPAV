@@ -40,6 +40,7 @@ import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
+import soot.SootClass;
 import soot.Value;
 import soot.toolkits.graph.Block;
 
@@ -87,7 +88,7 @@ public class ProcessVariablesCreator {
      * @param args  Arguments passed to block
      * @return last created BasicNode or null if no were created
      */
-    public BasicNode startBlockProcessing(final Block block, final List<Value> args, final String javaClass) {
+    public BasicNode startBlockProcessing(final Block block, final List<Value> args, final SootClass javaClass) {
         ObjectReader objectReader = new ObjectReader(this, javaClass);
         objectReader.processBlock(block, args, null, null);
         cleanEmptyNodes();
@@ -105,7 +106,7 @@ public class ProcessVariablesCreator {
      * @param block Block in which the process variable manipulation was found
      * @param pvo   ProcessVariableOperation that was found
      */
-    public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo, String javaClass) {
+    public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo, SootClass javaClass) {
         pvo.setIndex(element.getFlowAnalysis().getOperationCounter());
         element.getFlowAnalysis().incrementOperationCounter();
 
@@ -114,7 +115,7 @@ public class ProcessVariablesCreator {
             lastNode().addOperation(pvo);
         } else {
             // Add new block
-            Node node = new Node(element, block, javaClass, chapter, fieldType);
+            Node node = new Node(element, block, javaClass.getName(), chapter, fieldType);
             node.addOperation(pvo);
             nodes.add(node);
             element.getControlFlowGraph().addNode(node);
@@ -128,12 +129,12 @@ public class ProcessVariablesCreator {
      * @param block Block for that a node is created
      * @return Newly created block or last block if it is associated with the passed block
      */
-    public BasicNode addNodeIfNotExisting(Block block, String javaClass) {
+    public BasicNode addNodeIfNotExisting(Block block, SootClass javaClass) {
         if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
             return lastNode();
         } else {
             // Add new block
-            Node node = new Node(element, block, javaClass, chapter, fieldType);
+            Node node = new Node(element, block, javaClass.getName(), chapter, fieldType);
             nodes.add(node);
             element.getControlFlowGraph().addNode(node);
             updatePredecessor(node);
@@ -207,11 +208,11 @@ public class ProcessVariablesCreator {
         predecessor = node;
     }
 
-    public Node getNodeOfBlock(Block block, String javaClass) {
+    public Node getNodeOfBlock(Block block, SootClass javaClass) {
         if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
             return lastNode();
         } else {
-            Node node = new Node(element, block, javaClass, chapter, fieldType);
+            Node node = new Node(element, block, javaClass.getName(), chapter, fieldType);
             nodes.add(node);
             element.getControlFlowGraph().addNode(node);
             if (predecessor != null) {

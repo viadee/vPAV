@@ -61,12 +61,12 @@ public class ObjectReader {
 
     public BasicNode returnNode;
 
-    private String currentJavaClass;
+    private SootClass currentJavaClass;
 
     // Only used for testing purposes
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
-            ProcessVariablesCreator processVariablesCreator, String currentJavaClass) {
+            ProcessVariablesCreator processVariablesCreator, SootClass currentJavaClass) {
         this.localStringVariables = localStrings;
         this.localObjectVariables = localObjects;
         this.thisObject = thisObject;
@@ -79,7 +79,7 @@ public class ObjectReader {
      *
      * @param processVariablesCreator that is used for creating the data flow graph
      */
-    public ObjectReader(ProcessVariablesCreator processVariablesCreator, String currentJavaClass) {
+    public ObjectReader(ProcessVariablesCreator processVariablesCreator, SootClass currentJavaClass) {
         this.processVariablesCreator = processVariablesCreator;
         this.currentJavaClass = currentJavaClass;
     }
@@ -90,7 +90,8 @@ public class ObjectReader {
      * @param processVariablesCreator that is used for creating the data flow graph
      * @param thisObject              ObjectVariable that refers to the object that contains the block
      */
-    private ObjectReader(ProcessVariablesCreator processVariablesCreator, ObjectVariable thisObject, String currentJavaClass) {
+    private ObjectReader(ProcessVariablesCreator processVariablesCreator, ObjectVariable thisObject,
+            SootClass currentJavaClass) {
         this.processVariablesCreator = processVariablesCreator;
         this.thisObject = thisObject;
         this.currentJavaClass = currentJavaClass;
@@ -124,7 +125,7 @@ public class ObjectReader {
         if (thisName == null) {
             // Find out variable name of this reference, it's always defined in the first unit
             // If not, it´s a static method
-            if(block.iterator().next() instanceof IdentityStmt) {
+            if (block.iterator().next() instanceof IdentityStmt) {
                 thisName = getThisNameFromUnit(unitIt.next());
             }
         }
@@ -299,9 +300,24 @@ public class ObjectReader {
 
                 // Method on this object is called
                 if (targetObjName.equals(thisName)) {
+                    if (expr.getMethod() != null) {
+                        Block nextBlock = SootResolverSimplified.getBlockFromMethod(expr.getMethod());
+
+                        if (nextBlock != null) {
+                            return this
+                                    .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args,
+                                            argValues,
+                                            null);
+                        }
+
+                    }
+                    // Search method in class hierarchy
                     return this
-                            .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args, argValues,
+                            .processBlock(SootResolverSimplified.getBlockFromMethod(
+                                    findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())), args,
+                                    argValues,
                                     null);
+
                 } else {
                     // Method on another object is called
                     targetObj = localObjectVariables.get(targetObjName);
@@ -327,7 +343,8 @@ public class ObjectReader {
             if (nextBlock == null) {
                 return null;
             }
-            ObjectReader or = new ObjectReader(processVariablesCreator, targetObj, method.getDeclaringClass().getPackageName());
+            ObjectReader or = new ObjectReader(processVariablesCreator, targetObj,
+                    method.getDeclaringClass());
             return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
         }
     }
@@ -355,6 +372,16 @@ public class ObjectReader {
             }
         }
         return null;
+    }
+
+    SootMethod findMethodInHierachy(SootClass currentClass, SootMethodRef methodRef) {
+        if (currentClass.getMethod(methodRef.getName(), methodRef.getParameterTypes(), methodRef.getReturnType())
+                != null) {
+            return currentClass
+                    .getMethod(methodRef.getName(), methodRef.getParameterTypes(), methodRef.getReturnType());
+        }
+        // Search in super class
+        return findMethodInHierachy(currentClass.getSuperclass(), methodRef);
     }
 
     /**
