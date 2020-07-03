@@ -64,8 +64,6 @@ public class ObjectReaderTest {
 
     private static SootClass anonymousInnerSootClass;
 
-    private static SootClass mockSootClass;
-
     private static String testClassName = "de.viadee.package.TestObject";
 
     private ObjectVariable objVariable1 = new ObjectVariable();
@@ -90,9 +88,6 @@ public class ObjectReaderTest {
                 .forceResolve("de.viadee.bpm.vPAV.AnotherSimpleObject", SootClass.SIGNATURES);
         anonymousInnerSootClass = Scene.v()
                 .forceResolve("de.viadee.bpm.vPAV.delegates.TestDelegateAnonymousInnerClass", SootClass.SIGNATURES);
-
-        mockSootClass = mock(SootClass.class);
-        when(mockSootClass.getName()).thenReturn("my.class.name");
     }
 
     @Before
@@ -110,7 +105,7 @@ public class ObjectReaderTest {
         localObjectVariables.put("objVariable1", objVariable1);
         localObjectVariables.put("$r2", anotherObject);
         objectReader = new ObjectReader(localStringVariables, localObjectVariables, new ObjectVariable(),
-                processVariablesCreator, mockSootClass);
+                processVariablesCreator, thisSootClass);
 
         // Create string fields
         objectReader.getThisObject().updateStringField("variableField1", "valueField1");
@@ -127,7 +122,7 @@ public class ObjectReaderTest {
 
     @Test
     public void testGetThisNameFromUnit() {
-        ObjectReader cr = new ObjectReader(null, mockSootClass);
+        ObjectReader cr = new ObjectReader(null, thisSootClass);
         // Test that name of reference to this object is correctly resolved
         Value localVal = new JimpleLocal("this", RefType.v("java.lang.Object"));
         Value identityVal = new ThisRef(RefType.v("java.lang.Object"));
@@ -146,7 +141,7 @@ public class ObjectReaderTest {
         args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
         args.add(StringConstant.v("myVariableValue"));
         ArrayList<Object> argValues = objectReader.resolveArgs(args, null);
-        ObjectReader cr = new ObjectReader(null, mockSootClass);
+        ObjectReader cr = new ObjectReader(null, thisSootClass);
         cr.handleIdentityStmt(stmt, args, argValues);
         Assert.assertEquals("myVariableValue", cr.getLocalStringVariables().get("r2").getValue());
     }

@@ -300,7 +300,7 @@ public class ObjectReader {
 
                 // Method on this object is called
                 if (targetObjName.equals(thisName)) {
-                    if (expr.getMethod() != null) {
+                    if (expr.getMethod() != null && expr.getMethod().getDeclaringClass() == this.currentJavaClass) {
                         Block nextBlock = SootResolverSimplified.getBlockFromMethod(expr.getMethod());
 
                         if (nextBlock != null) {
@@ -375,8 +375,8 @@ public class ObjectReader {
     }
 
     SootMethod findMethodInHierachy(SootClass currentClass, SootMethodRef methodRef) {
-        if (currentClass.getMethod(methodRef.getName(), methodRef.getParameterTypes(), methodRef.getReturnType())
-                != null) {
+        if (currentClass
+                .declaresMethod(methodRef.getName(), methodRef.getParameterTypes(), methodRef.getReturnType())) {
             return currentClass
                     .getMethod(methodRef.getName(), methodRef.getParameterTypes(), methodRef.getReturnType());
         }

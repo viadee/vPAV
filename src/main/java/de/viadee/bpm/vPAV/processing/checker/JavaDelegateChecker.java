@@ -50,11 +50,13 @@ import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootResolver;
+import soot.SootResolver.SootClassNotFoundException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Class JavaDelegateChecker
@@ -198,7 +200,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         // check implementations of BPMN_ELEMENT_INTERMEDIATE_THROW_EVENT and
         // BPMN_ELEMENT_END_EVENT
-        if (bpmnElement instanceof  IntermediateThrowEvent
+        if (bpmnElement instanceof IntermediateThrowEvent
                 || bpmnElement instanceof EndEvent) {
 
             if (implementationAttr != null && implementationAttr.getKey().equals(BpmnConstants.IMPLEMENTATION)) {
@@ -247,7 +249,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             issues.addAll(checkListener(element, executionClass, executionDelegate, false));
         }
         if (!taskClass.isEmpty() || !taskDelegate.isEmpty() || !taskExpression.isEmpty()) {
-            issues.addAll(checkListener(element, taskClass, taskDelegate,true));
+            issues.addAll(checkListener(element, taskClass, taskDelegate, true));
         }
         return issues;
     }
@@ -358,53 +360,18 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         // If a class path has been found, check the correctness
         try {
+            // Soot can also resolve classes which do not exist...
             Class<?> clazz = RuntimeConfig.getInstance().getClassLoader().loadClass(className);
 
             // Checks, whether the correct interface was implemented
-            Class<?> sClass = clazz.getSuperclass();
-            boolean extendsSuperClass = false;
-            if (!listener && sClass.getName().contains(BpmnConstants.SUPERCLASS_ABSTRACT_BPMN_ACTIVITY_BEHAVIOR)) {
-                extendsSuperClass = true;
-            }
+            SootClass sClass = Scene.v()
+                    .forceResolve(className, SootClass.SIGNATURES);
 
             // Checks, whether the correct interface was implemented
-            Class<?>[] interfaces = clazz.getInterfaces();
-            boolean interfaceImplemented = false;
-            for (final Class<?> _interface : interfaces) {
-                if (!listener) {
-                    if (_interface.getName().contains(BpmnConstants.INTERFACE_DEL)
-                            || _interface.getName().contains(BpmnConstants.INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR)
-                            || _interface.getName().contains(BpmnConstants.INTERFACE_ACTIVITY_BEHAVIOUR)) {
-                        interfaceImplemented = true;
-                        if (_interface.getName().contains(BpmnConstants.INTERFACE_ACTIVITY_BEHAVIOUR) && !_interface
-                                .getName().contains(BpmnConstants.INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR)) {
-                            // ActivityBehavior is not a very good practice and should be avoided as much as
-                            // possible
-                            issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.INFO, classPath,
-                                    element, String.format(Messages.getString("JavaDelegateChecker.20"), //$NON-NLS-1$
-                                            clazz.getSimpleName(), location.getKey())));
-                        }
-                    } else {
-                        interfaceImplemented = checkTransitiveInterfaces(_interface, false);
-                    }
-                } else {
-                    if (taskListener && _interface.getName().contains(BpmnConstants.INTERFACE_TASK_LISTENER)) {
-                        interfaceImplemented = true;
-                    } else if (_interface.getName().contains(BpmnConstants.INTERFACE_EXECUTION_LISTENER)
-                            || _interface.getName().contains(BpmnConstants.INTERFACE_DEL)) {
-                        interfaceImplemented = true;
-                    }
-                }
-            }
+            checkImplementsInterface(sClass, listener, taskListener, issues, classPath, element, location.getKey(),
+                    sClass);
 
-            if (!interfaceImplemented && !extendsSuperClass) {
-                // class implements not the interface "JavaDelegate"
-                issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,
-                        String.format(Messages.getString("JavaDelegateChecker.21"), //$NON-NLS-1$
-                                clazz.getSimpleName(), location.getKey())));
-            }
-
-        } catch (final ClassNotFoundException e) {
+        } catch (SootClassNotFoundException | ClassNotFoundException e) {
             // Throws an error, if the class was not found
             if (!className.isEmpty()) {
                 issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,
@@ -420,23 +387,75 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         return issues;
     }
 
+    private void checkImplementsInterface(SootClass sootClass, boolean listener, boolean taskListener,
+            Collection<CheckerIssue> issues, String classPath,
+            BpmnElement element, String locationKey, SootClass initialClass) {
+        Set<String> interfaces = sootClass.getInterfaces().stream().map(SootClass::getShortName)
+                .collect(Collectors.toSet());
+
+        if (!listener) {
+            if (interfaces.contains(BpmnConstants.INTERFACE_DEL)
+                    || interfaces.contains(BpmnConstants.INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR)
+                    || interfaces.contains(BpmnConstants.INTERFACE_ACTIVITY_BEHAVIOUR)) {
+
+                if (interfaces.contains(BpmnConstants.INTERFACE_ACTIVITY_BEHAVIOUR) && !interfaces
+                        .contains(BpmnConstants.INTERFACE_SIGNALLABLE_ACTIVITY_BEHAVIOR)) {
+                    // ActivityBehavior is not a very good practice and should be avoided as much as
+                    // possible
+                    issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.INFO, classPath,
+                            element, String.format(Messages.getString("JavaDelegateChecker.20"), //$NON-NLS-1$
+                                    initialClass.getShortName(), locationKey)));
+                }
+                return;
+            } else {
+                for (SootClass i : sootClass.getInterfaces()) {
+                    // Check transitive interfaces
+                    if (checkTransitiveInterfaces(i)) {
+                        return;
+                    }
+                }
+            }
+        } else {
+            if (taskListener && interfaces.contains(BpmnConstants.INTERFACE_TASK_LISTENER)) {
+                return;
+            } else if (interfaces.contains(BpmnConstants.INTERFACE_EXECUTION_LISTENER) || interfaces
+                    .contains(BpmnConstants.INTERFACE_DEL)) {
+                return;
+            }
+        }
+
+        if (sootClass.hasSuperclass()) {
+            if (sootClass.getSuperclass().getShortName()
+                    .equals(BpmnConstants.SUPERCLASS_ABSTRACT_BPMN_ACTIVITY_BEHAVIOR)) {
+                return;
+            }
+            checkImplementsInterface(sootClass.getSuperclass(), listener, taskListener, issues, classPath, element,
+                    locationKey, initialClass);
+        } else {
+            // class implements not the interface "JavaDelegate"
+            issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,
+                    String.format(Messages.getString("JavaDelegateChecker.21"), //$NON-NLS-1$
+                            initialClass.getShortName(), locationKey)));
+        }
+    }
+
     /**
      * Recursively checks for the correct interface implementation of a given
      * delegate
      *
-     * @param _interface          Current interface
-     * @param implementsInterface Bool that indicates whether the JavaDelegate Interface is
-     *                            implemented
+     * @param _interface Current interface
      * @return True/false
      */
-    private boolean checkTransitiveInterfaces(final Class<?> _interface, boolean implementsInterface) {
-        if (_interface.getSimpleName().equals(BpmnConstants.INTERFACE_DEL)) {
-            implementsInterface = true;
+    private boolean checkTransitiveInterfaces(SootClass _interface) {
+        if (_interface.getShortName().equals(BpmnConstants.INTERFACE_DEL)) {
+            return true;
         } else {
-            for (Class<?> superInterface : _interface.getInterfaces()) {
-                implementsInterface = checkTransitiveInterfaces(superInterface, implementsInterface);
+            for (SootClass i : _interface.getInterfaces()) {
+                if (checkTransitiveInterfaces(i)) {
+                    return true;
+                }
             }
         }
-        return implementsInterface;
+        return false;
     }
 }
