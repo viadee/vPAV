@@ -371,7 +371,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             checkImplementsInterface(sClass, listener, taskListener, issues, classPath, element, location.getKey(),
                     sClass);
 
-        } catch (SootClassNotFoundException | ClassNotFoundException e) {
+        } catch (SootClassNotFoundException | ClassNotFoundException | AssertionError e) {
             // Throws an error, if the class was not found
             if (!className.isEmpty()) {
                 issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,
