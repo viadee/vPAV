@@ -33,7 +33,6 @@ package de.viadee.bpm.vPAV.processing;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -142,6 +141,8 @@ public class BpmnModelDispatcher {
 			final Collection<String> resourcesNewestVersions, final RuleSet conf) {
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
 		// TODO check how relevant this method still is
+
+		JavaReaderStatic.setupSoot();
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
