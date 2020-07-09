@@ -31,25 +31,12 @@
  */
 package de.viadee.bpm.vPAV;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
+import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -63,12 +50,18 @@ import org.camunda.bpm.model.dmn.DmnModelException;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.camunda.bpm.model.dmn.instance.Decision;
 
-import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.config.model.Setting;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
-import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * scans maven project for files, which are necessary for the later analysis
@@ -215,6 +208,24 @@ public class FileScanner {
 		} catch (MalformedURLException e) {
 			LOGGER.warning("Could not find target/classes folder");
 		}
+
+		final String whiteListProperty = ConfigConstants.getInstance().getWhiteList();
+		if (!whiteListProperty.isEmpty()) {
+            List<String> whitelist = Arrays.stream(whiteListProperty.split("\\s*,\\s*"))
+                    .map(entry -> entry.replace("/","\\\\").trim())
+                    .collect(Collectors.toList());
+
+            for (String item : whitelist){
+                Pattern pattern = Pattern.compile(item);
+                for (String classPathEntry : classPathEntries) {
+                    if (pattern.matcher(classPathEntry).find()) {
+                        addStringToSootPath(classPathEntry);
+                    }
+                }
+            }
+        }
+
+
 
 		for (String entry: classPathEntries) {
 			// retrieve all jars during runtime and pass them to get class files

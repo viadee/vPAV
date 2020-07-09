@@ -150,6 +150,10 @@ public class ConfigConstants {
         this.properties = newProperties;
     }
 
+    public String getWhiteList() {
+        return properties.getProperty("whitelist", "");
+    }
+
     public String getRuleSetPath() {
         return properties.getProperty("ruleSetPath", ConfigConstants.TEST_BASEPATH);
     }
