@@ -210,24 +210,19 @@ public class FileScanner {
 		}
 
 		final String whiteListProperty = ConfigConstants.getInstance().getWhiteList();
-		if (!whiteListProperty.isEmpty()) {
-            List<String> whitelist = Arrays.stream(whiteListProperty.split("\\s*,\\s*"))
-                    .map(entry -> entry.replace("/","\\\\").trim())
-                    .collect(Collectors.toList());
-
-            for (String item : whitelist){
-                Pattern pattern = Pattern.compile(item);
-                for (String classPathEntry : classPathEntries) {
-                    if (pattern.matcher(classPathEntry).find()) {
-                        addStringToSootPath(classPathEntry);
-                    }
-                }
-            }
-        }
-
-
+		List<String> whitelist = Arrays.stream(whiteListProperty.split("\\s*,\\s*"))
+				.map(entry -> entry.replace("/","\\\\").trim())
+				.collect(Collectors.toList());
 
 		for (String entry: classPathEntries) {
+			if (!whiteListProperty.isEmpty()) {
+				for (String item : whitelist){
+					Pattern pattern = Pattern.compile(item);
+					if (pattern.matcher(entry).find()) {
+						addStringToSootPath(entry);
+					}
+				}
+			}
 			// retrieve all jars during runtime and pass them to get class files
 			if (Pattern.compile(".*target/classes.*").matcher(entry).find()
 					|| Pattern.compile(".*target/test-classes.*").matcher(entry).find()) {
