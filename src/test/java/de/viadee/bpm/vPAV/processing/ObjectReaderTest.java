@@ -284,7 +284,9 @@ public class ObjectReaderTest {
         SootMethod method = thisSootClass.getMethodByName("methodWithReturn");
         SootMethodRef methodRef = mock(SootMethodRef.class);
         when(methodRef.resolve()).thenReturn(method);
+        when(methodRef.getName()).thenReturn("methodWithReturn");
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        when(methodRef.getDeclaringClass()).thenReturn(method.getDeclaringClass());
         InvokeExpr invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")),
                 methodRef, new ArrayList<>());
         Object returnValue = objectReader.handleInvokeExpr(null, invokeExpr, "this");
@@ -295,6 +297,7 @@ public class ObjectReaderTest {
         methodRef = mock(SootMethodRef.class);
         when(methodRef.resolve()).thenReturn(method);
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        when(methodRef.getDeclaringClass()).thenReturn(method.getDeclaringClass());
         invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")), methodRef,
                 new ArrayList<>());
         returnValue = objectReader.handleInvokeExpr(null, invokeExpr, "this");
@@ -306,6 +309,7 @@ public class ObjectReaderTest {
         methodRef = mock(SootMethodRef.class);
         when(methodRef.resolve()).thenReturn(method);
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        when(methodRef.getDeclaringClass()).thenReturn(method.getDeclaringClass());
         invokeExpr = new JVirtualInvokeExpr(
                 new JimpleLocal("$r2", RefType.v("de.viadee.bpm.vPAV.AnotherSimpleObject")), methodRef,
                 new ArrayList<>());
@@ -319,6 +323,7 @@ public class ObjectReaderTest {
         methodRef = mock(SootMethodRef.class);
         when(methodRef.resolve()).thenReturn(method);
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        when(methodRef.getDeclaringClass()).thenReturn(method.getDeclaringClass());
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("localString", RefType.v("java.lang.String")));
         invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")), methodRef,

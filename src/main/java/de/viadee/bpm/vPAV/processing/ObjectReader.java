@@ -281,8 +281,8 @@ public class ObjectReader {
      */
     Object handleInvokeExpr(Block block, InvokeExpr expr, String thisName) {
         CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
-                .findByNameAndNumberOfBoxes(expr.getMethod().getName(),
-                        expr.getMethod().getDeclaringClass().getName(), expr.getArgCount());
+                .findByNameAndNumberOfBoxes(expr.getMethodRef().getName(),
+                        expr.getMethodRef().getDeclaringClass().getName(), expr.getArgCount());
 
         if (foundMethod != null) {
             // Process variable is manipulated
@@ -335,7 +335,8 @@ public class ObjectReader {
             }
 
             // Process method from another class/object
-            if (method.getDeclaringClass().getPackageName().startsWith("java.")) {
+            if (method.getDeclaringClass().getPackageName().startsWith("java.") || method.getDeclaringClass()
+                    .getPackageName().startsWith("org.camunda.")) {
                 // Skip native java classes
                 return null;
             }
