@@ -42,6 +42,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -68,6 +69,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
     public JavaDelegateChecker(final Rule rule) {
         super(rule);
+        new JavaReaderStatic().setupSoot();
     }
 
     /**

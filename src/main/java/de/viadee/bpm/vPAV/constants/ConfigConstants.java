@@ -124,6 +124,8 @@ public class ConfigConstants {
 
     public static final String CRITICALITY = "Criticality";
 
+    public static final String WHITELIST_SOOT_DEPENDENCIES = "org/camunda/bpm/camunda-engine";
+
     private static Logger logger = Logger.getLogger(ConfigConstants.class.getName());
 
     private static ConfigConstants instance;
@@ -151,7 +153,7 @@ public class ConfigConstants {
     }
 
     public String getWhiteList() {
-        return properties.getProperty("whitelist", "");
+        return properties.getProperty("whitelist", "") + "," + WHITELIST_SOOT_DEPENDENCIES;
     }
 
     public String getRuleSetPath() {
