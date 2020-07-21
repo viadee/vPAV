@@ -140,7 +140,6 @@ public class BpmnModelDispatcher {
 			final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
 			final Collection<String> resourcesNewestVersions, final RuleSet conf) {
 		FlowAnalysis flowAnalysis = new FlowAnalysis();
-		// TODO check how relevant this method still is
 
 		JavaReaderStatic.setupSoot();
 

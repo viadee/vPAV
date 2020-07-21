@@ -69,7 +69,6 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
     public JavaDelegateChecker(final Rule rule) {
         super(rule);
-        new JavaReaderStatic().setupSoot();
     }
 
     /**
