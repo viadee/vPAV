@@ -114,7 +114,8 @@ public class BpmnModelDispatcher {
 
 		// Execute model checkers.
 		for (ModelChecker checker : (Collection<ModelChecker>) checkers[1]) {
-			issues.addAll(checker.check());
+			// TODO add flow analysis
+			issues.addAll(checker.check(modelInstance, graphBuilder));
 		}
 
 		// Execute element checkers.
@@ -155,6 +156,12 @@ public class BpmnModelDispatcher {
 
 		final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, null, null,
 				null, null);
+
+		// Execute model checkers.
+		for (ModelChecker checker : (Collection<ModelChecker>) checkers[1]) {
+			// TODO ?
+			issues.addAll(checker.check(modelInstance, graphBuilder));
+		}
 
 		// Execute element checkers.
 		executeCheckers(processDefinition, baseElements, graphBuilder, issues, (Collection<ElementChecker>) checkers[0],
