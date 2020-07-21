@@ -121,9 +121,15 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                 .getListener(bpmnElement,
                         BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionListener.forEach(listener -> {
-            executionDelegate.add(((CamundaExecutionListener) listener).getCamundaDelegateExpression());
-            executionClass.add(((CamundaExecutionListener) listener).getCamundaClass());
-            executionExpression.add(((CamundaExecutionListener) listener).getCamundaExpression());
+            if (((CamundaExecutionListener) listener).getCamundaDelegateExpression() != null) {
+                executionDelegate.add(((CamundaExecutionListener) listener).getCamundaDelegateExpression());
+            }
+            if (((CamundaExecutionListener) listener).getCamundaClass() != null) {
+                executionClass.add(((CamundaExecutionListener) listener).getCamundaClass());
+            }
+            if (((CamundaExecutionListener) listener).getCamundaExpression() != null) {
+                executionExpression.add(((CamundaExecutionListener) listener).getCamundaExpression());
+            }
         });
 
         if (implementationAttr != null && (bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
