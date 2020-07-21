@@ -153,7 +153,11 @@ public class ConfigConstants {
     }
 
     public String getWhiteList() {
-        return properties.getProperty("whitelist", "") + "," + WHITELIST_SOOT_DEPENDENCIES;
+        if (properties.getProperty("whitelist") != null) {
+            return properties.getProperty("whitelist") + "," + WHITELIST_SOOT_DEPENDENCIES;
+        } else {
+            return WHITELIST_SOOT_DEPENDENCIES;
+        }
     }
 
     public String getRuleSetPath() {
