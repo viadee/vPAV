@@ -31,7 +31,10 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
 import java.util.Collection;
 
@@ -41,7 +44,12 @@ import java.util.Collection;
  */
 public interface ModelChecker {
 
-    Collection<CheckerIssue> check();
+    // Used if checker does not depend on variables
+    Collection<CheckerIssue> check(final BpmnModelInstance modelInstance, final ElementGraphBuilder graphBuilder);
+
+    // Used if checker needs the analyzed variables
+    Collection<CheckerIssue> check(final BpmnModelInstance modelInstance, final ElementGraphBuilder graphBuilder, final
+            FlowAnalysis flowAnalysis);
 
     default boolean isSingletonChecker() {
         return false;
