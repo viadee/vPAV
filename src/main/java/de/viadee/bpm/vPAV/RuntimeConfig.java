@@ -31,22 +31,17 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import org.springframework.context.ApplicationContext;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-
-import org.springframework.context.ApplicationContext;
-
-import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 
 public class RuntimeConfig {
 
@@ -61,6 +56,8 @@ public class RuntimeConfig {
     private ClassLoader classLoader;
 
     private ResourceBundle resourceBundle;
+
+    private Runner runner;
 
     private boolean test = false;
 
@@ -209,6 +206,14 @@ public class RuntimeConfig {
 
     private void setResourceBundle(ResourceBundle resourceBundle) {
         this.resourceBundle = resourceBundle;
+    }
+
+    public Runner getRunner() {
+        return runner;
+    }
+
+    public void setRunner(Runner runner) {
+        this.runner = runner;
     }
 
 }

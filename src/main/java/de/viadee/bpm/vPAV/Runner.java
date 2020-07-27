@@ -85,9 +85,9 @@ public class Runner {
 	/**
 	 * Main method which represents lifecycle of the validation process. Calls main
 	 * functions
-	 *
 	 */
 	public void viadeeProcessApplicationValidator() {
+		RuntimeConfig.getInstance().setRunner(this);
 
 		// 1
 		rules = readConfig();

@@ -31,9 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.Messages;
-import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.*;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -82,6 +80,7 @@ public class DmnTaskChecker extends AbstractElementChecker {
                                 String.format(Messages.getString("DmnTaskChecker.0"), //$NON-NLS-1$
                                         CheckName.checkName(bpmnElement))));
                     } else {
+
                         issues.addAll(checkDMNFile(element, implementation.getValue()));
                     }
                 }
@@ -107,6 +106,15 @@ public class DmnTaskChecker extends AbstractElementChecker {
 
         // If a dmn path has been found, check the correctness
         URL urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnPath);
+        if (urlDMN == null) {
+            // Trying to retrieve the dmn filename by dmn id if the native reference doesn't result in a match
+            String dmnFileName = RuntimeConfig.getInstance().getRunner()
+                    .getFileScanner().getDecisionRefToPathMap().get(dmnName);
+            //Set new dmn url if retrieval from id was successfully
+            if (dmnFileName != null) {
+                urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnFileName);
+            }
+        }
 
         if (urlDMN == null) {
             // Throws an error, if the class was not found
