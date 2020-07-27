@@ -31,7 +31,9 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.*;
+import de.viadee.bpm.vPAV.BpmnScanner;
+import de.viadee.bpm.vPAV.Messages;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -46,10 +48,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Checks, whether a business rule task with dmn implementation is valid
- *
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
@@ -92,10 +94,8 @@ public class DmnTaskChecker extends AbstractElementChecker {
     /**
      * Check if the referenced DMN in a BusinessRuleTask exists
      *
-     * @param element
-     *            BpmnElement
-     * @param dmnName
-     *            Name of DMN-File
+     * @param element BpmnElement
+     * @param dmnName Name of DMN-File
      * @return issues
      */
     private Collection<CheckerIssue> checkDMNFile(final BpmnElement element, final String dmnName) {
@@ -108,11 +108,13 @@ public class DmnTaskChecker extends AbstractElementChecker {
         URL urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnPath);
         if (urlDMN == null) {
             // Trying to retrieve the dmn filename by dmn id if the native reference doesn't result in a match
-            String dmnFileName = RuntimeConfig.getInstance().getRunner()
-                    .getFileScanner().getDecisionRefToPathMap().get(dmnName);
-            //Set new dmn url if retrieval from id was successfully
-            if (dmnFileName != null) {
-                urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnFileName);
+            if (RuntimeConfig.getInstance().getFileScanner().getDecisionRefToPathMap().containsKey(dmnName)) {
+                String dmnFileName = RuntimeConfig.getInstance()
+                        .getFileScanner().getDecisionRefToPathMap().get(dmnName);
+                //Set new dmn url if retrieval by dmn id was successfull
+                if (dmnFileName != null) {
+                    urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnFileName);
+                }
             }
         }
 

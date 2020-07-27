@@ -57,7 +57,7 @@ public class RuntimeConfig {
 
     private ResourceBundle resourceBundle;
 
-    private Runner runner;
+    private FileScanner fileScanner;
 
     private boolean test = false;
 
@@ -208,12 +208,12 @@ public class RuntimeConfig {
         this.resourceBundle = resourceBundle;
     }
 
-    public Runner getRunner() {
-        return runner;
+    public FileScanner getFileScanner() {
+        return fileScanner;
     }
 
-    public void setRunner(Runner runner) {
-        this.runner = runner;
+    public void setFileScanner(FileScanner fileScanner) {
+        this.fileScanner = fileScanner;
     }
 
 }

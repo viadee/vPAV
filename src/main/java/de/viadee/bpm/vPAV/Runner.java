@@ -87,8 +87,6 @@ public class Runner {
 	 * functions
 	 */
 	public void viadeeProcessApplicationValidator() {
-		RuntimeConfig.getInstance().setRunner(this);
-
 		// 1
 		rules = readConfig();
 
@@ -627,6 +625,7 @@ public class Runner {
 
 	public void setFileScanner(FileScanner fileScanner) {
 		this.fileScanner = fileScanner;
+		RuntimeConfig.getInstance().setFileScanner(fileScanner);
 	}
 
 	public Map<String, String> getWrongCheckersMap() {
