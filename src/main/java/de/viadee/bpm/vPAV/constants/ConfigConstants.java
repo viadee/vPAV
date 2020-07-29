@@ -233,15 +233,7 @@ public class ConfigConstants {
             }
         }
     }
-
-    public Boolean isMultiProjectScan() {
-        return Boolean.parseBoolean(properties.getProperty("multiProjectReport", "false"));
-    }
-
-    public String[] getGeneratedReports() {
-        return properties.getProperty("generatedReports", "").split(",");
-    }
-
+    
     /**
      * @param languageCode language code like de_DE
      * @deprecated As of release 3.0.0, language should be directly set in
