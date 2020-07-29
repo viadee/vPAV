@@ -88,6 +88,8 @@ public class ConfigConstants {
 
     public static final String VALIDATION_FOLDER = "target/vPAV/";
 
+    public static final String VALIDATION_HTML_OUTPUT_FILE = "validationResult.html";
+
     public static final String JS_FOLDER = "target/vPAV/js/";
 
     public static final String CSS_FOLDER = "target/vPAV/css/";
@@ -230,6 +232,14 @@ public class ConfigConstants {
                 return "en";
             }
         }
+    }
+
+    public Boolean isMultiProjectScan() {
+        return Boolean.parseBoolean(properties.getProperty("multiProjectReport", "false"));
+    }
+
+    public String[] getGeneratedReports() {
+        return properties.getProperty("generatedReports", "").split(",");
     }
 
     /**

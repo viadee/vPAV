@@ -369,7 +369,7 @@ public class Runner {
 		fMap.put("minus_icon.png", ConfigConstants.IMG_FOLDER);
 		fMap.put("plus_icon.png", ConfigConstants.IMG_FOLDER);
 
-		fMap.put("validationResult.html", ConfigConstants.VALIDATION_FOLDER);
+		fMap.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, ConfigConstants.VALIDATION_FOLDER);
 
 		return fMap;
 	}
