@@ -74,8 +74,6 @@ public class Runner {
 
 	private Map<String, String> wrongCheckersMap = new HashMap<>();
 
-	private ArrayList<String> allOutputFilesArray = createAllOutputFilesArray();
-
 	private Collection<BpmnElement> elements = new ArrayList<>();
 
 	private Collection<ProcessVariable> processVariables = new ArrayList<>();
@@ -326,48 +324,20 @@ public class Runner {
 	}
 
 	/**
-	 * Copies all necessary files and deletes outputFiles
+	 * Copies files to vPAV folder
 	 */
 	private void copyFiles() {
 		if (ConfigConstants.getInstance().isHtmlOutputEnabled()) {
-			for (String file : allOutputFilesArray)
-				copyFileToVPAVFolder(file);
+			fileMapping.keySet().forEach(file -> {
+				InputStream source = Runner.class.getClassLoader().getResourceAsStream(file);
+				Path destination = Paths.get(fileMapping.get(file) + file);
+				try {
+					Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					throw new RuntimeException("Files couldn't be written");
+				}
+			});
 		}
-	}
-
-	/**
-	 * Creates ArrayList to hold output files
-	 *
-	 * @return ArrayList<String> allFiles
-	 */
-	private ArrayList<String> createAllOutputFilesArray() {
-		ArrayList<String> allFiles = new ArrayList<>();
-
-		allFiles.add("bootstrap.bundle.min.js");
-		allFiles.add("bpmn-navigated-viewer.js");
-		allFiles.add("bpmn.io.viewer.app.js");
-		allFiles.add("jquery-3.4.1.min.js");
-		allFiles.add("infoPOM.js");
-		allFiles.add("download.js");
-
-		allFiles.add("bootstrap.min.css");
-		allFiles.add("viadee.css");
-		allFiles.add("MarkerStyle.css");
-
-		allFiles.add("vPAV.png");
-		allFiles.add("viadee_weiss.png");
-		allFiles.add("github.png");
-		allFiles.add("error.png");
-		allFiles.add("warning.png");
-		allFiles.add("info.png");
-		allFiles.add("success.png");
-		allFiles.add("dl_button.png");
-		allFiles.add("minus_icon.png");
-		allFiles.add("plus_icon.png");
-
-		allFiles.add("validationResult.html");
-
-		return allFiles;
 	}
 
 	/**
@@ -402,21 +372,6 @@ public class Runner {
 		fMap.put("validationResult.html", ConfigConstants.VALIDATION_FOLDER);
 
 		return fMap;
-	}
-
-	/**
-	 * Copies files to vPAV folder
-	 *
-	 * @param file File who will be copied to vPAV folder
-	 */
-	private void copyFileToVPAVFolder(String file) {
-		InputStream source = Runner.class.getClassLoader().getResourceAsStream(file);
-		Path destination = Paths.get(fileMapping.get(file) + file);
-		try {
-			Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-			throw new RuntimeException("Files couldn't be written");
-		}
 	}
 
 	/**
