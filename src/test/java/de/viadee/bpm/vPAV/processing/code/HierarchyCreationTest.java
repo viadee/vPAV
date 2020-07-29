@@ -74,7 +74,7 @@ public class HierarchyCreationTest {
     public void createHierarchyTest() {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
-        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+        myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
         ConfigConstants.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_HierarchyCreation.bpmn";

@@ -73,7 +73,7 @@ public class DelegateInheritanceTest {
     @Before
     public void setupProperties() {
         Properties myProperties = new Properties();
-        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+        myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
         ConfigConstants.getInstance().setProperties(myProperties);
     }
 

@@ -38,14 +38,12 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
-import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
@@ -232,7 +230,7 @@ public class CallActivityTest {
     public void testEmbeddingCallActivitiesWithListener() {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
-        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+        myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
         ConfigConstants.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "CallActivityTest_SingleCallActivity.bpmn";

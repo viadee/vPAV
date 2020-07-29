@@ -95,9 +95,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 	/**
 	 * Creates list which contains elements with multiple issues and the marks it
 	 * with highest severity
-	 * 
-	 * @param issues
-	 *            Collected issues
+	 *
+	 * @param issues Collected issues
 	 */
 	private Map<String, CriticalityEnum> createIssueSeverity(final Collection<CheckerIssue> issues) {
 		Map<String, CriticalityEnum> issueSeverity = new HashMap<>();
@@ -117,9 +116,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 	/**
 	 * Extract external rules from active ruleset
-	 * 
-	 * @param activeRules
-	 *            Active RuleSet
+	 *
+	 * @param activeRules Active RuleSet
 	 * @return List of external configured checkers
 	 */
 	private ArrayList<String> extractExternalCheckers(final ArrayList<String> activeRules) {
@@ -180,7 +178,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			if ((wrongCheckers != null && !wrongCheckers.isEmpty())
 					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
 				try (OutputStreamWriter wrongAndDefaultCheckers = new OutputStreamWriter(
-						new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8)) {
+						new FileOutputStream(ConfigConstants.VALIDATION_JS_CHECKERS), StandardCharsets.UTF_8)) {
 					wrongAndDefaultCheckers.write(wrongCheckers);
 					wrongAndDefaultCheckers.write(defaultCheckers);
 				} catch (IOException e) {
@@ -189,7 +187,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			} else if ((wrongCheckers == null || wrongCheckers.isEmpty())
 					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
 				try (OutputStreamWriter defaultCheckerJS = new OutputStreamWriter(
-						new FileOutputStream(ConfigConstants.VALIDATION_CHECKERS), StandardCharsets.UTF_8)) {
+						new FileOutputStream(ConfigConstants.VALIDATION_JS_CHECKERS), StandardCharsets.UTF_8)) {
 					defaultCheckerJS.write(defaultCheckers);
 				} catch (IOException e) {
 					throw new OutputWriterException(errorMsg, e);
@@ -198,7 +196,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 			if (issueSeverity != null && !issueSeverity.isEmpty()) {
 				try (OutputStreamWriter issueSeverityWriter = new OutputStreamWriter(
-						new FileOutputStream(ConfigConstants.VALIDATION_ISSUE_SEVERITY), StandardCharsets.UTF_8)) {
+						new FileOutputStream(ConfigConstants.VALIDATION_JS_ISSUE_SEVERITY), StandardCharsets.UTF_8)) {
 					issueSeverityWriter.write(issueSeverity);
 				} catch (IOException e) {
 					throw new OutputWriterException(errorMsg, e);
@@ -232,7 +230,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 */
 	public void writeVars(final Collection<BpmnElement> elements, final Collection<ProcessVariable> processVariables) {
 
-		try (FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESSVARIABLES, true)) {
+		try (FileWriter writer = new FileWriter(ConfigConstants.VALIDATION_JS_PROCESS_VARIABLES, true)) {
 
 			// write elements containing operations
 			JsonArray jsonElements = elements.stream()
@@ -341,7 +339,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 			for (CheckerIssue issue : issues) {
 				String prettyBpmnFilename = replace("\\", issue.getBpmnFile());
-				if (!prettyBpmnFilename.equals(ConfigConstants.JS_BASEPATH + bpmnFilename))
+				if (!prettyBpmnFilename.equals(ConfigConstants.JS_BASE_PATH + bpmnFilename))
 					modelIssues.remove(issue);
 			}
 
@@ -353,7 +351,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				}
 				if (ruleIssues.isEmpty())
 					newIssues.add(new CheckerIssue(ruleName, null, CriticalityEnum.SUCCESS,
-							(ConfigConstants.JS_BASEPATH + bpmnFilename), null, "", "", null, null, null,
+							(ConfigConstants.JS_BASE_PATH + bpmnFilename), null, "", "", null, null, null,
 							"No issues found", null, null));
 			}
 		}
@@ -534,7 +532,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		if (wrongCheckers != null && wrongCheckers.size() > 0) {
 			for (Map.Entry<String, String> entry : wrongCheckers.entrySet()) {
 				final JsonObject obj = new JsonObject();
-				obj.addProperty(ConfigConstants.RULENAME, entry.getKey());
+				obj.addProperty(ConfigConstants.RULE_NAME, entry.getKey());
 				obj.addProperty(ConfigConstants.MESSAGE, entry.getValue());
 				jsonIssues.add(obj);
 			}
@@ -565,9 +563,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 	/**
 	 * Transforms the map of ignored issues into JSON format
-	 * 
-	 * @param ignoredIssues
-	 *            Map of issues to be ignored
+	 *
+	 * @param ignoredIssues Map of issues to be ignored
 	 * @return JavaScript variables containing the issues to be ignored
 	 */
 	private String transformIgnoredIssuesToJsDatastructure(final Map<String, String> ignoredIssues) {
@@ -587,9 +584,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 	}
 
 	/**
-	 * 
-	 * @param defaultCheckers
-	 *            ArrayList of default vPAV checkers
+	 * @param defaultCheckers ArrayList of default vPAV checkers
 	 * @return JavaScript variables containing the default checkers
 	 */
 	private String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
@@ -598,7 +593,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		if (defaultCheckers != null && defaultCheckers.size() > 0) {
 			for (String entry : defaultCheckers) {
 				final JsonObject obj = new JsonObject();
-				obj.addProperty(ConfigConstants.RULENAME, entry);
+				obj.addProperty(ConfigConstants.RULE_NAME, entry);
 				jsonIssues.add(obj);
 			}
 		}

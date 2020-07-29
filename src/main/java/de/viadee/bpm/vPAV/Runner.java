@@ -141,7 +141,7 @@ public class Runner {
 					rules = localRules;
 				}
 			} else {
-				rules = new XmlConfigReader().read(ConfigConstants.RULESETDEFAULT);
+				rules = new XmlConfigReader().read(ConfigConstants.RULESET_DEFAULT);
 			}
 
 			ruleSetOutputWriter.write(rules);

@@ -81,7 +81,7 @@ public class ProcessVariablesModelCheckerStatic {
 		final Set<String> resources = new HashSet<>();
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+		myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
 		ConfigConstants.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";

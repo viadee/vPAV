@@ -31,21 +31,12 @@
  */
 package de.viadee.bpm.vPAV.processing.code;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
-import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.Helper;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.impl.instance.ServiceTaskImpl;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -72,7 +63,7 @@ public class RecursionTest {
         RuntimeConfig.getInstance().getResource("en_US");
         RuntimeConfig.getInstance().setTest(true);
         Properties myProperties = new Properties();
-        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
+        myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
         ConfigConstants.getInstance().setProperties(myProperties);
     }
 

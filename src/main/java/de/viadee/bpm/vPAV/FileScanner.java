@@ -506,19 +506,19 @@ public class FileScanner {
 			if (rule != null && rule.isActive()) {
 				Setting setting = null;
 				final Map<String, Setting> settings = rule.getSettings();
-				if (settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
-						&& !settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
-					setting = settings.get(ConfigConstants.VERSIONINGSCHEMECLASS);
+				if (settings.containsKey(ConfigConstants.VERSIONING_SCHEME_CLASS)
+						&& !settings.containsKey(ConfigConstants.VERSIONING_SCHEME_PACKAGE)) {
+					setting = settings.get(ConfigConstants.VERSIONING_SCHEME_CLASS);
 					isDirectory = false;
-				} else if (!settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
-						&& settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
-					setting = settings.get(ConfigConstants.VERSIONINGSCHEMEPACKAGE);
+				} else if (!settings.containsKey(ConfigConstants.VERSIONING_SCHEME_CLASS)
+						&& settings.containsKey(ConfigConstants.VERSIONING_SCHEME_PACKAGE)) {
+					setting = settings.get(ConfigConstants.VERSIONING_SCHEME_PACKAGE);
 					isDirectory = true;
 				}
 				if (setting == null) {
 					throw new ConfigItemNotFoundException("VersioningChecker: Versioning Scheme could not be read. "
-							+ "Possible options: " + ConfigConstants.VERSIONINGSCHEMECLASS + " or "
-							+ ConfigConstants.VERSIONINGSCHEMEPACKAGE);
+							+ "Possible options: " + ConfigConstants.VERSIONING_SCHEME_CLASS + " or "
+							+ ConfigConstants.VERSIONING_SCHEME_PACKAGE);
 				} else {
 					scheme = setting.getValue().trim();
 				}
