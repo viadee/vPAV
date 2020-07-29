@@ -70,7 +70,7 @@ public class Runner {
 
 	private Map<String, String> ignoredIssuesMap = new HashMap<>();
 
-	private Map<String, String> fileMapping = createFileFolderMapping();
+	private Map<String, String> fileMapping = mapStaticFilesToTargetFolders();
 
 	private Map<String, String> wrongCheckersMap = new HashMap<>();
 
@@ -341,37 +341,37 @@ public class Runner {
 	}
 
 	/**
-	 * Creates Map for files and corresponding folders
+	 * Creates a map for static files regarding the HTML output and their corresponding folders
 	 *
-	 * @return Map<String , String> fMap
+	 * @return Map<String, String> fMap
 	 */
-	private Map<String, String> createFileFolderMapping() {
-		Map<String, String> fMap = new HashMap<>();
-		fMap.put("bootstrap.bundle.min.js", ConfigConstants.JS_FOLDER);
-		fMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
-		fMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
-		fMap.put("jquery-3.4.1.min.js", ConfigConstants.JS_FOLDER);
-		fMap.put("infoPOM.js", ConfigConstants.JS_FOLDER);
-		fMap.put("download.js", ConfigConstants.JS_FOLDER);
+	private Map<String, String> mapStaticFilesToTargetFolders() {
+		Map<String, String> fileToFolderMap = new HashMap<>();
+		fileToFolderMap.put("bootstrap.bundle.min.js", ConfigConstants.JS_FOLDER);
+		fileToFolderMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
+		fileToFolderMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
+		fileToFolderMap.put("jquery-3.4.1.min.js", ConfigConstants.JS_FOLDER);
+		fileToFolderMap.put("infoPOM.js", ConfigConstants.JS_FOLDER);
+		fileToFolderMap.put("download.js", ConfigConstants.JS_FOLDER);
 
-		fMap.put("bootstrap.min.css", ConfigConstants.CSS_FOLDER);
-		fMap.put("viadee.css", ConfigConstants.CSS_FOLDER);
-		fMap.put("MarkerStyle.css", ConfigConstants.CSS_FOLDER);
+		fileToFolderMap.put("bootstrap.min.css", ConfigConstants.CSS_FOLDER);
+		fileToFolderMap.put("viadee.css", ConfigConstants.CSS_FOLDER);
+		fileToFolderMap.put("MarkerStyle.css", ConfigConstants.CSS_FOLDER);
 
-		fMap.put("vPAV.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("viadee_weiss.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("github.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("error.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("warning.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("info.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("success.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("dl_button.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("minus_icon.png", ConfigConstants.IMG_FOLDER);
-		fMap.put("plus_icon.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("vPAV.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("viadee_weiss.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("github.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("error.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("warning.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("info.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("success.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("dl_button.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("minus_icon.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("plus_icon.png", ConfigConstants.IMG_FOLDER);
 
-		fMap.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, ConfigConstants.VALIDATION_FOLDER);
+		fileToFolderMap.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, ConfigConstants.VALIDATION_FOLDER);
 
-		return fMap;
+		return fileToFolderMap;
 	}
 
 	/**
