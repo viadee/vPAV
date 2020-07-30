@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV;
 
+import com.google.gson.Gson;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
@@ -44,10 +45,12 @@ import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,6 +74,8 @@ public class Runner {
 	private Map<String, String> ignoredIssuesMap = new HashMap<>();
 
 	private Map<String, String> fileMapping = mapStaticFilesToTargetFolders();
+
+	private List<String> externalReportsPaths = null;
 
 	private Map<String, String> wrongCheckersMap = new HashMap<>();
 
@@ -107,6 +112,8 @@ public class Runner {
 
 		// 7
 		copyFiles();
+
+		writeGeneratedReportsOverviewJS();
 
 		logger.info("BPMN validation successfully completed");
 	}
@@ -163,11 +170,15 @@ public class Runner {
 		deleteFiles();
 		createvPAVFolder();
 		try {
-			Files.createDirectory(Paths.get(ConfigConstants.JS_FOLDER));
+			Files.createDirectory(Paths.get(ConfigConstants.JS_FOLDER_SINGLE_PROJECT));
 			Files.createDirectory(Paths.get(ConfigConstants.CSS_FOLDER));
 			Files.createDirectory(Paths.get(ConfigConstants.IMG_FOLDER));
+			if (ConfigConstants.getInstance().isMultiProjectScan()) {
+				Files.createDirectory(Paths.get(ConfigConstants.EXTERNAL_REPORTS_FOLDER));
+				Files.createDirectory(Paths.get(ConfigConstants.JS_FOLDER_MULTI_PROJECT));
+			}
 		} catch (IOException e) {
-			logger.warning("Could not create either output folder for JS, CSS or IMG");
+			logger.warning("Could not create either for JS, CSS, IMG or external reports output folder");
 		}
 
 	}
@@ -328,15 +339,53 @@ public class Runner {
 	 */
 	private void copyFiles() {
 		if (ConfigConstants.getInstance().isHtmlOutputEnabled()) {
+			//Copy HTML Output for a single unit tested project
 			fileMapping.keySet().forEach(file -> {
 				InputStream source = Runner.class.getClassLoader().getResourceAsStream(file);
 				Path destination = Paths.get(fileMapping.get(file) + file);
 				try {
 					Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
-					throw new RuntimeException("Files couldn't be written");
+					throw new RuntimeException("Couldn't write HTML output");
 				}
 			});
+			//Copy reports from external vPAV projects
+			if (ConfigConstants.getInstance().isMultiProjectScan()) {
+				externalReportsPaths = new LinkedList<String>();
+				for (int i = 0; i < ConfigConstants.getInstance().getGeneratedReports().length; i++) {
+					String sourcePath =
+							ConfigConstants.getInstance().getGeneratedReports()[i]
+									+ ConfigConstants.VALIDATION_FOLDER;
+					File sourceLocation = new File(sourcePath);
+					File targetLocation = new File(ConfigConstants.EXTERNAL_REPORTS_FOLDER,
+							String.format("report_%d", i));
+
+					String relativeTargetPath = "." +
+							targetLocation.getPath()
+									.substring(ConfigConstants.EXTERNAL_REPORTS_FOLDER.length() - 1)
+									.replace("\\", "/") + '/';
+					externalReportsPaths.add(relativeTargetPath + ConfigConstants.VALIDATION_HTML_OUTPUT_FILE);
+					try {
+						FileUtils.copyDirectory(sourceLocation, targetLocation);
+					} catch (IOException e) {
+						throw new RuntimeException("Couldn't copy external reports");
+					}
+				}
+			}
+		}
+	}
+
+	private void writeGeneratedReportsOverviewJS() {
+		if (ConfigConstants.getInstance().isMultiProjectScan() && externalReportsPaths.size() > 0) {
+			String reportsPathsAsJS = "let reportsPaths = ";
+			reportsPathsAsJS += new Gson().toJson(externalReportsPaths);
+			File reportsPathsFile = new File(ConfigConstants.JS_FOLDER_MULTI_PROJECT +
+					ConfigConstants.VALIDATION_OVERVIEW_REPORT_PATHS_JS);
+			try {
+				FileUtils.write(reportsPathsFile, reportsPathsAsJS, (Charset) null);
+			} catch (IOException e) {
+				throw new RuntimeException("Couldn't write external reports paths JS");
+			}
 		}
 	}
 
@@ -347,12 +396,12 @@ public class Runner {
 	 */
 	private Map<String, String> mapStaticFilesToTargetFolders() {
 		Map<String, String> fileToFolderMap = new HashMap<>();
-		fileToFolderMap.put("bootstrap.bundle.min.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("jquery-3.4.1.min.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("infoPOM.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("download.js", ConfigConstants.JS_FOLDER);
+		fileToFolderMap.put("bootstrap.bundle.min.js", ConfigConstants.JS_FOLDER_SINGLE_PROJECT);
+		fileToFolderMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER_SINGLE_PROJECT);
+		fileToFolderMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER_SINGLE_PROJECT);
+		fileToFolderMap.put("jquery-3.4.1.min.js", ConfigConstants.JS_FOLDER_SINGLE_PROJECT);
+		fileToFolderMap.put("infoPOM.js", ConfigConstants.JS_FOLDER_SINGLE_PROJECT);
+		fileToFolderMap.put("download.js", ConfigConstants.JS_FOLDER_SINGLE_PROJECT);
 
 		fileToFolderMap.put("bootstrap.min.css", ConfigConstants.CSS_FOLDER);
 		fileToFolderMap.put("viadee.css", ConfigConstants.CSS_FOLDER);
@@ -370,6 +419,13 @@ public class Runner {
 		fileToFolderMap.put("plus_icon.png", ConfigConstants.IMG_FOLDER);
 
 		fileToFolderMap.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, ConfigConstants.VALIDATION_FOLDER);
+
+		if (ConfigConstants.getInstance().isMultiProjectScan()) {
+			fileToFolderMap.put(ConfigConstants.VALIDATION_OVERVIEW_HTML_OUTPUT_FILE,
+					ConfigConstants.EXTERNAL_REPORTS_FOLDER);
+			fileToFolderMap.put(ConfigConstants.VALIDATION_OVERVIEW_JS_OUTPUT_FILE,
+					ConfigConstants.JS_FOLDER_MULTI_PROJECT);
+		}
 
 		return fileToFolderMap;
 	}

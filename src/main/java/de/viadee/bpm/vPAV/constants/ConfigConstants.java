@@ -46,7 +46,7 @@ public class ConfigConstants {
 
     public static final String VALIDATION_FOLDER = "target/vPAV/";
 
-    public static final String JS_FOLDER = VALIDATION_FOLDER + "js/";
+    public static final String JS_FOLDER_SINGLE_PROJECT = VALIDATION_FOLDER + "js/";
 
     public static final String CSS_FOLDER = VALIDATION_FOLDER + "css/";
 
@@ -96,25 +96,23 @@ public class ConfigConstants {
 
     public static final String VALIDATION_XML_OUTPUT = VALIDATION_FOLDER + "bpmn_validation.xml";
 
-    public static final String VALIDATION_JS_MODEL_OUTPUT = JS_FOLDER + "bpmn_model.js";
+    public static final String VALIDATION_JS_MODEL_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "bpmn_model.js";
 
-    public static final String VALIDATION_JS_OUTPUT = JS_FOLDER + "bpmn_validation.js";
+    public static final String VALIDATION_JS_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "bpmn_validation.js";
 
-    public static final String PROPERTIES_JS_OUTPUT = JS_FOLDER + "properties.js";
+    public static final String PROPERTIES_JS_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "properties.js";
 
-    public static final String VALIDATION_JS_CHECKERS = JS_FOLDER + "checkers.js";
+    public static final String VALIDATION_JS_CHECKERS = JS_FOLDER_SINGLE_PROJECT + "checkers.js";
 
-    public static final String VALIDATION_JS_SUCCESS_OUTPUT = JS_FOLDER + "bpmn_validation_success.js";
+    public static final String VALIDATION_JS_SUCCESS_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "bpmn_validation_success.js";
 
-    public static final String VALIDATION_JS_ISSUE_SEVERITY = JS_FOLDER + "issue_severity.js";
+    public static final String VALIDATION_JS_ISSUE_SEVERITY = JS_FOLDER_SINGLE_PROJECT + "issue_severity.js";
 
-    public static final String VALIDATION_JS_PROCESS_VARIABLES = JS_FOLDER + "processVariables.js";
+    public static final String VALIDATION_JS_PROCESS_VARIABLES = JS_FOLDER_SINGLE_PROJECT + "processVariables.js";
 
     public static final String VALIDATION_JSON_OUTPUT = VALIDATION_FOLDER + "bpmn_validation.json";
 
-    public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = JS_FOLDER + "ignoredIssues.js";
-
-    public static final String VALIDATION_HTML_OUTPUT_FILE = "validationResult.html";
+    public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "ignoredIssues.js";
 
     public static final String VERSIONING_SCHEME_PACKAGE = "versioningSchemePackage";
 
@@ -129,6 +127,18 @@ public class ConfigConstants {
     public static final String CRITICALITY = "Criticality";
 
     public static final String WHITELIST_SOOT_DEPENDENCIES = "org/camunda/bpm/camunda-engine";
+
+    public static final String EXTERNAL_REPORTS_FOLDER = VALIDATION_FOLDER + "externalReports/";
+
+    public static final String JS_FOLDER_MULTI_PROJECT = EXTERNAL_REPORTS_FOLDER + "js/";
+
+    public static final String VALIDATION_HTML_OUTPUT_FILE = "validationResult.html";
+
+    public static final String VALIDATION_OVERVIEW_HTML_OUTPUT_FILE = "overview.html";
+
+    public static final String VALIDATION_OVERVIEW_JS_OUTPUT_FILE = "overview.js";
+
+    public static final String VALIDATION_OVERVIEW_REPORT_PATHS_JS = "reportPaths.js";
 
     private static Logger logger = Logger.getLogger(ConfigConstants.class.getName());
 
@@ -234,6 +244,14 @@ public class ConfigConstants {
                 return "en";
             }
         }
+    }
+
+    public Boolean isMultiProjectScan() {
+        return Boolean.parseBoolean(properties.getProperty("multiProjectReport", "false"));
+    }
+
+    public String[] getGeneratedReports() {
+        return properties.getProperty("generatedReports", "").split(",");
     }
 
     /**
