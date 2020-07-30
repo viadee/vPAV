@@ -83,10 +83,8 @@ public class Runner {
 	/**
 	 * Main method which represents lifecycle of the validation process. Calls main
 	 * functions
-	 *
 	 */
 	public void viadeeProcessApplicationValidator() {
-
 		// 1
 		rules = readConfig();
 
@@ -582,6 +580,7 @@ public class Runner {
 
 	public void setFileScanner(FileScanner fileScanner) {
 		this.fileScanner = fileScanner;
+		RuntimeConfig.getInstance().setFileScanner(fileScanner);
 	}
 
 	public Map<String, String> getWrongCheckersMap() {
