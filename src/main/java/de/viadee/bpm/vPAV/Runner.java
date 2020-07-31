@@ -357,7 +357,7 @@ public class Runner {
 							.getGeneratedReports()[i];
 					File sourceLocation = new File(sourcePath);
 					File targetLocation = new File(ConfigConstants.EXTERNAL_REPORTS_FOLDER,
-							String.format("report_%d", i));
+							String.format("report_%d", i + 1));
 					String relativeTargetPath = "." + targetLocation.getPath()
 							.substring(ConfigConstants.EXTERNAL_REPORTS_FOLDER.length() - 1)
 							.replace("\\", "/") + '/';
