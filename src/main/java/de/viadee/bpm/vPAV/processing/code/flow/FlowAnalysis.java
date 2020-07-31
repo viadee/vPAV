@@ -491,7 +491,8 @@ public class FlowAnalysis {
         LinkedHashMap<String, ProcessVariableOperation> tempInUnused = new LinkedHashMap<>(predecessor.getOutUnused());
 
         // Subprocess or call activity
-        if (!isChildOrSiblingOfScope(analysisElement.getBaseElement(), scopePredecessor)) {
+        if (!isChildOrSiblingOfScope(analysisElement.getBaseElement(), scopePredecessor) &&
+                !predecessor.getBaseElement().getScope().getElementType().getTypeName().equals("subProcess")) {
             // Check for local variables in element like input parameters
             filterLocalVariables(predecessor, tempInUnused, tempInUsed);
 
