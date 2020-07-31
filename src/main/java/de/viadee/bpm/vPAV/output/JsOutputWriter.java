@@ -613,6 +613,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		reportsPathsAsJS += new Gson().toJson(externalReportsPaths);
 		File reportsPathsFile = new File(ConfigConstants.JS_FOLDER_MULTI_PROJECT +
 				ConfigConstants.VALIDATION_OVERVIEW_REPORT_PATHS_JS);
+		reportsPathsAsJS += ";";
 		try {
 			FileUtils.write(reportsPathsFile, reportsPathsAsJS, (Charset) null);
 		} catch (IOException e) {
