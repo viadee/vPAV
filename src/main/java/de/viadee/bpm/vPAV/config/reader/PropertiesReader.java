@@ -37,7 +37,6 @@ import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -71,29 +70,7 @@ public class PropertiesReader {
             }
         }
 
-        //Validate properties regarding multi project report support
-        //TODO redo checks
-        if (properties.containsKey("multiProjectReport")) {
-            String[] paths = { "" };
-            try {
-                paths = properties.get("generatedReports").toString().split(",");
-            } catch (NullPointerException e) {
-                throw new RuntimeException("No generated reports folders defined");
-            }
-            if (properties.get("multiProjectReport").equals("true") && paths.length < 1) {
-                throw new RuntimeException("Invalid definition for generated reports folders");
-            } else if (properties.get("multiProjectReport").equals("false") && paths.length > 0) {
-                throw new RuntimeException(
-                        "Generated reports folders not allowed when multi project report is disabled");
-            }
-            for (String path : paths) {
-                try {
-                    Paths.get(path);
-                } catch (InvalidPathException ex) {
-                    throw new RuntimeException("Invalid path in generated reports folder: " + path);
-                }
-            }
-        }
+        this.validateProperties(properties);
 
         return properties;
     }
@@ -118,4 +95,33 @@ public class PropertiesReader {
         Files.walkFileTree(Paths.get(""), matcherVisitor);
         return foundFile[0];
     }
+
+    private void validateProperties(Properties properties) {
+        //Validate properties regarding multi project report support
+        if (properties.containsKey("multiProjectReport")) {
+            if (properties.containsKey("outputhtml") && properties.get("outputhtml").equals("false")) {
+                throw new RuntimeException("Multi project scan not allowed when HTML output is disabled");
+            }
+            String[] paths = { "" };
+            try {
+                paths = properties.get("generatedReports").toString().split(",");
+            } catch (NullPointerException e) {
+                throw new RuntimeException("No generated reports folders defined");
+            }
+            if (properties.get("multiProjectReport").equals("true") && paths.length < 1) {
+                throw new RuntimeException("Invalid definition for generated reports folders");
+            } else if (properties.get("multiProjectReport").equals("false") && paths.length > 0) {
+                throw new RuntimeException(
+                        "Generated reports folders not allowed when multi project report is disabled");
+            }
+            for (String path : paths) {
+                try {
+                    Paths.get(path);
+                } catch (InvalidPathException ex) {
+                    throw new RuntimeException("Invalid path in generated reports folder: " + path);
+                }
+            }
+        }
+    }
+
 }
