@@ -353,17 +353,14 @@ public class Runner {
 			if (ConfigConstants.getInstance().isMultiProjectScan()) {
 				externalReportsPaths = new LinkedList<String>();
 				for (int i = 0; i < ConfigConstants.getInstance().getGeneratedReports().length; i++) {
-					String sourcePath =
-							ConfigConstants.getInstance().getGeneratedReports()[i]
-									+ ConfigConstants.VALIDATION_FOLDER;
+					String sourcePath = ConfigConstants.getInstance()
+							.getGeneratedReports()[i];
 					File sourceLocation = new File(sourcePath);
 					File targetLocation = new File(ConfigConstants.EXTERNAL_REPORTS_FOLDER,
 							String.format("report_%d", i));
-
-					String relativeTargetPath = "." +
-							targetLocation.getPath()
-									.substring(ConfigConstants.EXTERNAL_REPORTS_FOLDER.length() - 1)
-									.replace("\\", "/") + '/';
+					String relativeTargetPath = "." + targetLocation.getPath()
+							.substring(ConfigConstants.EXTERNAL_REPORTS_FOLDER.length() - 1)
+							.replace("\\", "/") + '/';
 					externalReportsPaths.add(relativeTargetPath + ConfigConstants.VALIDATION_HTML_OUTPUT_FILE);
 					try {
 						FileUtils.copyDirectory(sourceLocation, targetLocation);
