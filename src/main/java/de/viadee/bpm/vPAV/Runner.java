@@ -75,8 +75,6 @@ public class Runner {
 
 	private Map<String, String> fileMapping = mapStaticFilesToTargetFolders();
 
-	private List<String> externalReportsPaths = null;
-
 	private Map<String, String> wrongCheckersMap = new HashMap<>();
 
 	private Collection<BpmnElement> elements = new ArrayList<>();
@@ -85,10 +83,11 @@ public class Runner {
 
 	private Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
 
+	private List<String> externalReportsPaths = new ArrayList<>();
+
 	/**
 	 * Main method which represents lifecycle of the validation process. Calls main
 	 * functions
-	 *
 	 */
 	public void viadeeProcessApplicationValidator() {
 
@@ -113,7 +112,8 @@ public class Runner {
 		// 7
 		copyFiles();
 
-		writeGeneratedReportsOverviewJS();
+		//8
+		checkReportsOverviewPathGeneration();
 
 		logger.info("BPMN validation successfully completed");
 	}
@@ -372,20 +372,6 @@ public class Runner {
 		}
 	}
 
-	private void writeGeneratedReportsOverviewJS() {
-		if (ConfigConstants.getInstance().isMultiProjectScan() && externalReportsPaths.size() > 0) {
-			String reportsPathsAsJS = "let reportsPaths = ";
-			reportsPathsAsJS += new Gson().toJson(externalReportsPaths);
-			File reportsPathsFile = new File(ConfigConstants.JS_FOLDER_MULTI_PROJECT +
-					ConfigConstants.VALIDATION_OVERVIEW_REPORT_PATHS_JS);
-			try {
-				FileUtils.write(reportsPathsFile, reportsPathsAsJS, (Charset) null);
-			} catch (IOException e) {
-				throw new RuntimeException("Couldn't write external reports paths JS");
-			}
-		}
-	}
-
 	/**
 	 * Creates a map for static files regarding the HTML output and their corresponding folders
 	 *
@@ -597,6 +583,13 @@ public class Runner {
 				issues.add(row);
 			}
 
+		}
+	}
+
+	private void checkReportsOverviewPathGeneration() {
+		if (ConfigConstants.getInstance().isMultiProjectScan() && externalReportsPaths.size() > 0) {
+			JsOutputWriter jsOutputWriter = new JsOutputWriter();
+			jsOutputWriter.writeGeneratedReportsOverviewJS(externalReportsPaths);
 		}
 	}
 

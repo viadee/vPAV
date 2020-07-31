@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.output;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -40,10 +41,12 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -598,6 +601,23 @@ public class JsOutputWriter implements IssueOutputWriter {
 			}
 		}
 		return ("\n var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+	}
+
+	/**
+	 * Generates the JS file containing the relative paths of the external vPAV reports
+	 *
+	 * @param externalReportsPaths List of the relative paths
+	 */
+	public void writeGeneratedReportsOverviewJS(List<String> externalReportsPaths) {
+		String reportsPathsAsJS = "let reportsPaths = ";
+		reportsPathsAsJS += new Gson().toJson(externalReportsPaths);
+		File reportsPathsFile = new File(ConfigConstants.JS_FOLDER_MULTI_PROJECT +
+				ConfigConstants.VALIDATION_OVERVIEW_REPORT_PATHS_JS);
+		try {
+			FileUtils.write(reportsPathsFile, reportsPathsAsJS, (Charset) null);
+		} catch (IOException e) {
+			throw new RuntimeException("Couldn't write external reports paths JS");
+		}
 	}
 
 	public Map<String, String> getIgnoredIssuesMap() {
