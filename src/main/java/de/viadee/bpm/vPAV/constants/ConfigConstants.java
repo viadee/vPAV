@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 
 public class ConfigConstants {
 
-    public static final String VALIDATION_FOLDER = "target/vPAV/";
+    public static final String VALIDATION_FOLDER = "vPAV/";
 
     public static final String JS_FOLDER_SINGLE_PROJECT = VALIDATION_FOLDER + "js/";
 
