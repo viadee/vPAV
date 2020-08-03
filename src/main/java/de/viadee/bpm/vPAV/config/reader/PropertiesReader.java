@@ -32,6 +32,8 @@
 package de.viadee.bpm.vPAV.config.reader;
 
 
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
@@ -114,11 +116,11 @@ public class PropertiesReader {
                 throw new RuntimeException(
                         "Generated reports folders not allowed when multi project report is disabled");
             }
-            for (String path : paths) {
-                try {
-                    Paths.get(path);
-                } catch (InvalidPathException ex) {
-                    throw new RuntimeException("Invalid path in generated reports folder: " + path);
+            for (String stringPath : paths) {
+                Path path = Paths.get(stringPath + ConfigConstants.VALIDATION_HTML_OUTPUT_FILE);
+                if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new RuntimeException(String.format("No %s in generated reports folder found: ",
+                            ConfigConstants.VALIDATION_HTML_OUTPUT_FILE) + stringPath);
                 }
             }
         }
