@@ -48,10 +48,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Checks, whether a business rule task with dmn implementation is valid
- *
  */
 public class DmnTaskChecker extends AbstractElementChecker {
 
@@ -82,6 +82,7 @@ public class DmnTaskChecker extends AbstractElementChecker {
                                 String.format(Messages.getString("DmnTaskChecker.0"), //$NON-NLS-1$
                                         CheckName.checkName(bpmnElement))));
                     } else {
+
                         issues.addAll(checkDMNFile(element, implementation.getValue()));
                     }
                 }
@@ -93,10 +94,8 @@ public class DmnTaskChecker extends AbstractElementChecker {
     /**
      * Check if the referenced DMN in a BusinessRuleTask exists
      *
-     * @param element
-     *            BpmnElement
-     * @param dmnName
-     *            Name of DMN-File
+     * @param element BpmnElement
+     * @param dmnName Name of DMN-File
      * @return issues
      */
     private Collection<CheckerIssue> checkDMNFile(final BpmnElement element, final String dmnName) {
@@ -107,6 +106,17 @@ public class DmnTaskChecker extends AbstractElementChecker {
 
         // If a dmn path has been found, check the correctness
         URL urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnPath);
+        if (urlDMN == null) {
+            // Trying to retrieve the dmn filename by dmn id if the native reference doesn't result in a match
+            if (RuntimeConfig.getInstance().getFileScanner().getDecisionRefToPathMap().containsKey(dmnName)) {
+                String dmnFileName = RuntimeConfig.getInstance()
+                        .getFileScanner().getDecisionRefToPathMap().get(dmnName);
+                //Set new dmn url if retrieval by dmn id was successfull
+                if (dmnFileName != null) {
+                    urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnFileName);
+                }
+            }
+        }
 
         if (urlDMN == null) {
             // Throws an error, if the class was not found
