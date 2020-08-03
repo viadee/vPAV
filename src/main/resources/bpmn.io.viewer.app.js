@@ -433,6 +433,21 @@ function downloadFile() {
     download(new Blob([blob]), "ignoreIssues.txt", "text/plain");
 }
 
+//Starts a download if the client browser allows downloads of local resources
+function downloadModel() {
+    let modelPath = properties["downloadBasepath"] + controller.currentModel.name;
+    fetch(modelPath, {mode: 'no-cors'})
+        .then(response => {
+            console.log(response);
+            response.text();
+        })
+        .then(data => {
+            console.log(data);
+            download(new Blob([data]), controller.currentModel.name, "application/xml");
+        })
+        .catch(error => console.error(error));
+}
+
 //delete table under diagram
 function deleteTable() {
     let myTable = document.getElementById("table");
@@ -516,7 +531,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
                 myCell.appendChild(removeIssueButton);
             }
 
-            //link to docu            
+            //link to docu
             myRow.appendChild(myCell);
 
             //elementId
