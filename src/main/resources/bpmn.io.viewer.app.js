@@ -422,7 +422,7 @@ function removeIssue(issue) {
     issue[3].disabled = true;
 }
 
-// download the ignoreIssues file 
+// download the ignoreIssues file
 function downloadFile() {
     var value;
     var blob = "";
@@ -433,19 +433,9 @@ function downloadFile() {
     download(new Blob([blob]), "ignoreIssues.txt", "text/plain");
 }
 
-//Starts a download if the client browser allows downloads of local resources
+// download the BPMN xml file
 function downloadModel() {
-    let modelPath = properties["downloadBasepath"] + controller.currentModel.name;
-    fetch(modelPath, {mode: 'no-cors'})
-        .then(response => {
-            console.log(response);
-            response.text();
-        })
-        .then(data => {
-            console.log(data);
-            download(new Blob([data]), controller.currentModel.name, "application/xml");
-        })
-        .catch(error => console.error(error));
+    download(controller.currentModel.xml, controller.currentModel.name, "application/xml");
 }
 
 //delete table under diagram
@@ -711,8 +701,6 @@ function createFooter() {
 function setUeberschrift(name) {
     let subName = name.substr(0, name.length - 5);
     document.querySelector("#model").innerHTML = subName;
-    var mDownload = document.getElementById("model_download");
-    mDownload.setAttribute("href", properties["downloadBasepath"] + name);
     setFocus(name);
 }
 
