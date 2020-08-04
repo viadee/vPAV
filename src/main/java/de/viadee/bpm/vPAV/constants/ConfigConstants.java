@@ -54,7 +54,7 @@ public class ConfigConstants {
 
     public static final String MAIN_FOLDER = "src/main/";
 
-    public static final String BASE_PATH = MAIN_FOLDER + "resources/";
+    private static final String BASE_PATH = MAIN_FOLDER + "resources/";
 
     public static final String JAVA_PATH = MAIN_FOLDER + "java/";
 
