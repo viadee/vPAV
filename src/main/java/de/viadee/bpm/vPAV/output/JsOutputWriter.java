@@ -42,6 +42,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
 import java.net.URI;
@@ -518,6 +519,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 		obj.addProperty("basepath", basePath.replaceAll("/", "\\\\"));
 
 		obj.addProperty("downloadBasepath", absolutePath);
+
+		String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
+		String projectName = rootPath.substring(rootPath.lastIndexOf('/') + 1);
+		obj.addProperty("projectName", projectName);
 
 		return ("var properties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
 	}

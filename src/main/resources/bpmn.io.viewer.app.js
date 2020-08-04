@@ -422,7 +422,7 @@ function removeIssue(issue) {
     issue[3].disabled = true;
 }
 
-// download the ignoreIssues file 
+// download the ignoreIssues file
 function downloadFile() {
     var value;
     var blob = "";
@@ -431,6 +431,11 @@ function downloadFile() {
         blob = blob + value + "\n" + key + "\n";
     });
     download(new Blob([blob]), "ignoreIssues.txt", "text/plain");
+}
+
+// download the BPMN xml file
+function downloadModel() {
+    download(controller.currentModel.xml, controller.currentModel.name, "application/xml");
 }
 
 //delete table under diagram
@@ -516,7 +521,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
                 myCell.appendChild(removeIssueButton);
             }
 
-            //link to docu            
+            //link to docu
             myRow.appendChild(myCell);
 
             //elementId
@@ -696,8 +701,6 @@ function createFooter() {
 function setUeberschrift(name) {
     let subName = name.substr(0, name.length - 5);
     document.querySelector("#model").innerHTML = subName;
-    var mDownload = document.getElementById("model_download");
-    mDownload.setAttribute("href", properties["downloadBasepath"] + name);
     setFocus(name);
 }
 
@@ -808,6 +811,7 @@ function createViewController() {
             addCountOverlay(overlays, overlayData);
             markNodes(elements, canvas);
             controller.loadCodeElements();
+            document.getElementById('project_name').innerText = properties["projectName"];
         });
     }
 

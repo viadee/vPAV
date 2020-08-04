@@ -28,7 +28,7 @@
             <ul class="navbar-nav bd-navbar-nav flex-row align-items-center">
                 <h4 class="nav-item text-white mb-0 ml-4 mr-2" id="model"></h4>
                 <li class="nav-item">
-                    <a id="model_download" class="nav-link pl-2 pr-1 mx-1 py-3 my-n2">
+                    <a id="model_download" class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" onclick="downloadModel()">
                         <img src="img/dl_button.png" alt="Download BPMN" class="h4-img" title="Download BPMN"/>
                     </a>
                 </li>
@@ -51,6 +51,9 @@
 </header>
 
 <body>
+
+<h3 id="project_name" class="placeholder-top text-secondary mb-0 ml-4 mr-2"></h3>
+
 <div class="container-fluid">
     <!-- navBar -->
     <div class="row placeholder-top">
@@ -166,7 +169,7 @@
 <script src='js/download.js'></script>
 <script src='js/processVariables.js'></script>
 <!-- bootstrap with dependencies-->
-<script src="js/jquery-3.4.1.min.js"></script>
+<script src="js/jquery-3.5.1.min.js"></script>
 <script src="js/bootstrap.bundle.min.js"></script>
 <!-- application -->
 <script src="js/properties.js"></script>
