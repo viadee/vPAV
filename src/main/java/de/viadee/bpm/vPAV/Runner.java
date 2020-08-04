@@ -290,7 +290,7 @@ public class Runner {
 	 * Create vPAV folder
 	 */
 	private void createvPAVFolder() {
-		File vPavDir = new File(ConfigConstants.VALIDATION_FOLDER);
+		File vPavDir = new File(ConfigConstants.getInstance().getValidationFolder());
 
 		if (!vPavDir.exists()) {
 			boolean success = vPavDir.mkdirs();
@@ -304,7 +304,7 @@ public class Runner {
 	 * Delete files from validation folder
 	 */
 	private void deleteFiles() {
-		File index = new File(ConfigConstants.VALIDATION_FOLDER);
+		File index = new File(ConfigConstants.getInstance().getValidationFolder());
 		if (index.exists()) {
 			String[] entries = index.list();
 			for (String entry : entries) {
@@ -367,7 +367,8 @@ public class Runner {
 		fileToFolderMap.put("minus_icon.png", ConfigConstants.IMG_FOLDER);
 		fileToFolderMap.put("plus_icon.png", ConfigConstants.IMG_FOLDER);
 
-		fileToFolderMap.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, ConfigConstants.VALIDATION_FOLDER);
+		fileToFolderMap
+				.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, ConfigConstants.getInstance().getValidationFolder());
 
 		return fileToFolderMap;
 	}

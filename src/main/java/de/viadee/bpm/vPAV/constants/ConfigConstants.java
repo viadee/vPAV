@@ -44,13 +44,11 @@ import java.util.logging.Logger;
 
 public class ConfigConstants {
 
-    public static final String VALIDATION_FOLDER = "target/vPAV/";
+    public static final String JS_FOLDER = getInstance().getValidationFolder() + "js/";
 
-    public static final String JS_FOLDER = VALIDATION_FOLDER + "js/";
+    public static final String CSS_FOLDER = getInstance().getValidationFolder() + "css/";
 
-    public static final String CSS_FOLDER = VALIDATION_FOLDER + "css/";
-
-    public static final String IMG_FOLDER = VALIDATION_FOLDER + "img/";
+    public static final String IMG_FOLDER = getInstance().getValidationFolder() + "img/";
 
     public static final String MAIN_FOLDER = "src/main/";
 
@@ -92,9 +90,9 @@ public class ConfigConstants {
 
     public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
 
-    public static final String EFFECTIVE_RULESET = VALIDATION_FOLDER + "effectiveRuleSet.xml";
+    public static final String EFFECTIVE_RULESET = getInstance().getValidationFolder() + "effectiveRuleSet.xml";
 
-    public static final String VALIDATION_XML_OUTPUT = VALIDATION_FOLDER + "bpmn_validation.xml";
+    public static final String VALIDATION_XML_OUTPUT = getInstance().getValidationFolder() + "bpmn_validation.xml";
 
     public static final String VALIDATION_JS_MODEL_OUTPUT = JS_FOLDER + "bpmn_model.js";
 
@@ -110,7 +108,7 @@ public class ConfigConstants {
 
     public static final String VALIDATION_JS_PROCESS_VARIABLES = JS_FOLDER + "processVariables.js";
 
-    public static final String VALIDATION_JSON_OUTPUT = VALIDATION_FOLDER + "bpmn_validation.json";
+    public static final String VALIDATION_JSON_OUTPUT = getInstance().getValidationFolder() + "bpmn_validation.json";
 
     public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = JS_FOLDER + "ignoredIssues.js";
 
@@ -162,6 +160,10 @@ public class ConfigConstants {
         } else {
             return WHITELIST_SOOT_DEPENDENCIES;
         }
+    }
+
+    public String getValidationFolder() {
+        return properties.getProperty("validationFolder", "target/vPAV") + '/';
     }
 
     public String getRuleSetPath() {
