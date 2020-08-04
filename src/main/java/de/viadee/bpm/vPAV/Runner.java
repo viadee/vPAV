@@ -331,7 +331,7 @@ public class Runner {
 				Path destination = Paths.get(fileMapping.get(file) + file);
 				try {
 					Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException e) {
+				} catch (IOException | NullPointerException e) {
 					throw new RuntimeException("Files couldn't be written");
 				}
 			});
