@@ -348,7 +348,7 @@ public class Runner {
 		fileToFolderMap.put("bootstrap.bundle.min.js", ConfigConstants.JS_FOLDER);
 		fileToFolderMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
 		fileToFolderMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("jquery-3.4.1.min.js", ConfigConstants.JS_FOLDER);
+		fileToFolderMap.put("jquery-3.5.1.min.js", ConfigConstants.JS_FOLDER);
 		fileToFolderMap.put("infoPOM.js", ConfigConstants.JS_FOLDER);
 		fileToFolderMap.put("download.js", ConfigConstants.JS_FOLDER);
 
