@@ -57,9 +57,9 @@ public class SpringTest {
     public void validateModel() {
         RuntimeConfig.getInstance().setTest(true);
         Properties properties = new Properties();
-        properties.put("basepath", ConfigConstants.getInstance().getBasepath() + "spring/");
-        properties.put("ruleSetPath", ConfigConstants.getInstance().getBasepath() + "spring/");
-        ConfigConstants.getInstance().setProperties(properties);
+        properties.put("basepath", RuntimeConfig.getInstance().getBasepath() + "spring/");
+        properties.put("ruleSetPath", RuntimeConfig.getInstance().getBasepath() + "spring/");
+        RuntimeConfig.getInstance().setProperties(properties);
         Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelInconsistencies(ctx);
         Assert.assertEquals(1, issues.size());
         Assert.assertEquals("UnkownVariable", issues.iterator().next().getVariable());

@@ -44,15 +44,9 @@ import java.util.logging.Logger;
 
 public class ConfigConstants {
 
-    public static final String JS_FOLDER_SINGLE_PROJECT = getInstance().getValidationFolder() + "js/";
-
-    public static final String CSS_FOLDER = getInstance().getValidationFolder() + "css/";
-
-    public static final String IMG_FOLDER = getInstance().getValidationFolder() + "img/";
-
     public static final String MAIN_FOLDER = "src/main/";
 
-    private static final String BASE_PATH = MAIN_FOLDER + "resources/";
+    public static final String BASE_PATH = MAIN_FOLDER + "resources/";
 
     public static final String JAVA_PATH = MAIN_FOLDER + "java/";
 
@@ -64,7 +58,7 @@ public class ConfigConstants {
 
     public static final String TEST_FOLDER = "src/test/";
 
-    public static final String JAVA_PATH_TEST = TEST_FOLDER + "/java/";
+    public static final String JAVA_PATH_TEST = TEST_FOLDER + "java/";
 
     public static final String BASE_PATH_TEST = TEST_FOLDER + "resources/";
 
@@ -90,27 +84,7 @@ public class ConfigConstants {
 
     public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
 
-    public static final String EFFECTIVE_RULESET = getInstance().getValidationFolder() + "effectiveRuleSet.xml";
-
-    public static final String VALIDATION_XML_OUTPUT = getInstance().getValidationFolder() + "bpmn_validation.xml";
-
-    public static final String VALIDATION_JS_MODEL_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "bpmn_model.js";
-
-    public static final String VALIDATION_JS_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "bpmn_validation.js";
-
-    public static final String PROPERTIES_JS_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "properties.js";
-
-    public static final String VALIDATION_JS_CHECKERS = JS_FOLDER_SINGLE_PROJECT + "checkers.js";
-
-    public static final String VALIDATION_JS_SUCCESS_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "bpmn_validation_success.js";
-
-    public static final String VALIDATION_JS_ISSUE_SEVERITY = JS_FOLDER_SINGLE_PROJECT + "issue_severity.js";
-
-    public static final String VALIDATION_JS_PROCESS_VARIABLES = JS_FOLDER_SINGLE_PROJECT + "processVariables.js";
-
-    public static final String VALIDATION_JSON_OUTPUT = getInstance().getValidationFolder() + "bpmn_validation.json";
-
-    public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = JS_FOLDER_SINGLE_PROJECT + "ignoredIssues.js";
+    public static final String VALIDATION_HTML_OUTPUT_FILE = "validationResult.html";
 
     public static final String VERSIONING_SCHEME_PACKAGE = "versioningSchemePackage";
 
@@ -125,18 +99,6 @@ public class ConfigConstants {
     public static final String CRITICALITY = "Criticality";
 
     public static final String WHITELIST_SOOT_DEPENDENCIES = "org/camunda/bpm/camunda-engine";
-
-    public static final String EXTERNAL_REPORTS_FOLDER = getInstance().getValidationFolder() + "externalReports/";
-
-    public static final String JS_FOLDER_MULTI_PROJECT = EXTERNAL_REPORTS_FOLDER + "js/";
-
-    public static final String VALIDATION_HTML_OUTPUT_FILE = "validationResult.html";
-
-    public static final String VALIDATION_OVERVIEW_HTML_OUTPUT_FILE = "overview.html";
-
-    public static final String VALIDATION_OVERVIEW_JS_OUTPUT_FILE = "overview.js";
-
-    public static final String VALIDATION_OVERVIEW_REPORT_PATHS_JS = "reportPaths.js";
 
     private static Logger logger = Logger.getLogger(ConfigConstants.class.getName());
 
@@ -246,14 +208,6 @@ public class ConfigConstants {
                 return "en";
             }
         }
-    }
-
-    public Boolean isMultiProjectScan() {
-        return Boolean.parseBoolean(properties.getProperty("multiProjectReport", "false"));
-    }
-
-    public String[] getGeneratedReports() {
-        return properties.getProperty("generatedReports", "").split(",");
     }
 
     /**

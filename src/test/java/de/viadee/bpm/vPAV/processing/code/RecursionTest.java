@@ -60,11 +60,11 @@ public class RecursionTest {
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
         RuntimeConfig.getInstance().setTest(true);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
     }
 
     @Test

@@ -64,7 +64,7 @@ public class ExecutionListenerTest {
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
         RuntimeConfig.getInstance().setTest(true);
     }
 
@@ -73,7 +73,7 @@ public class ExecutionListenerTest {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ProcessVariablesModelChecker_ExecutionListenerTest.bpmn";
         final File processDefinition = new File(PATH);

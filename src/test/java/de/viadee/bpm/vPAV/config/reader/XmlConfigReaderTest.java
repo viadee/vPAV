@@ -50,9 +50,7 @@ public class XmlConfigReaderTest {
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL classUrl = new URL(new File(ConfigConstants.BASE_PATH_TEST).toURI().toURL().toString());
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
@@ -70,7 +68,7 @@ public class XmlConfigReaderTest {
         XmlConfigReader reader = new XmlConfigReader();
 
         // When
-        RuleSet result = reader.read(ConfigConstants.getInstance().getRuleSetFileName());
+        RuleSet result = reader.read(RuntimeConfig.getInstance().getRuleSetFileName());
 
         // Then
         assertFalse("No element rules could be read", result.getElementRules().isEmpty());

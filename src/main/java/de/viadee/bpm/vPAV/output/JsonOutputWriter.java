@@ -34,8 +34,8 @@ package de.viadee.bpm.vPAV.output;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -61,7 +61,8 @@ public class JsonOutputWriter implements IssueOutputWriter {
 		if (json != null && !json.isEmpty()) {
 
 			try (OutputStreamWriter osWriter = new OutputStreamWriter(
-					new FileOutputStream(ConfigConstants.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8)) {
+					new FileOutputStream(RuntimeConfig.getInstance().getValidationJsonOutput()),
+					StandardCharsets.UTF_8)) {
 				osWriter.write(json);
 			} catch (final IOException ex) {
 				throw new OutputWriterException("json output couldn't be written");

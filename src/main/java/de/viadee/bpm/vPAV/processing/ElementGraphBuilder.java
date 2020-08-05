@@ -41,6 +41,7 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -144,7 +145,7 @@ public class ElementGraphBuilder {
         HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
         try {
             // Use first process as default process
-            userVariables = (new XmlVariablesReader()).read(ConfigConstants.getInstance().getUserVariablesFilePath(),
+            userVariables = (new XmlVariablesReader()).read(RuntimeConfig.getInstance().getUserVariablesFilePath(),
                     processes.iterator().next().getId());
         } catch (JAXBException e) {
             e.printStackTrace();
@@ -660,7 +661,7 @@ public class ElementGraphBuilder {
             final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
         // read called process
         final BpmnModelInstance subModel = Bpmn
-                .readModelFromFile(new File(ConfigConstants.getInstance().getBasepath() + callActivityPath));
+                .readModelFromFile(new File(RuntimeConfig.getInstance().getBasepath() + callActivityPath));
 
         // transform process into data flow
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,

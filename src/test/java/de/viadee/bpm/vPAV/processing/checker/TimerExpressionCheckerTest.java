@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
@@ -72,7 +71,7 @@ public class TimerExpressionCheckerTest {
 		final URL[] classUrls = { classUrl };
 		cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
+		RuntimeConfig.getInstance().setResource("en_US");
 	}
 
 	/**

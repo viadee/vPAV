@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -61,8 +62,6 @@ import java.util.Map;
  */
 public class NoScriptCheckerTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
-
     private static NoScriptChecker checker;
 
     private static Map<String, Setting> setting = new HashMap<>();
@@ -71,13 +70,11 @@ public class NoScriptCheckerTest {
 
     @BeforeClass
     public static void setup() throws MalformedURLException {
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL classUrl = new URL(new File(ConfigConstants.JAVA_PATH_TEST).toURI().toURL().toString());
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
     }
 
     /**
@@ -85,7 +82,7 @@ public class NoScriptCheckerTest {
      */
     @Test
     public void testModelWithNoScript() {
-        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithoutScript.bpmn";
+        final String PATH = ConfigConstants.BASE_PATH_TEST + "NoScriptCheckerTest_ModelWithoutScript.bpmn";
         checker = new NoScriptChecker(rule);
 
         // parse bpmn model
@@ -106,7 +103,7 @@ public class NoScriptCheckerTest {
      */
     @Test
     public void testModelWithInputScript() {
-        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithInputScript.bpmn";
+        final String PATH = ConfigConstants.BASE_PATH_TEST + "NoScriptCheckerTest_ModelWithInputScript.bpmn";
         checker = new NoScriptChecker(rule);
 
         // parse bpmn model
@@ -135,7 +132,7 @@ public class NoScriptCheckerTest {
      */
     @Test
     public void testModelWithOutputScript() {
-        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithOutputScript.bpmn";
+        final String PATH = ConfigConstants.BASE_PATH_TEST + "NoScriptCheckerTest_ModelWithOutputScript.bpmn";
         checker = new NoScriptChecker(rule);
 
         // parse bpmn model
@@ -164,7 +161,8 @@ public class NoScriptCheckerTest {
      */
     @Test
     public void testModelWithExecutionlistenerScript() {
-        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithExecutionlistenerScript.bpmn";
+        final String PATH =
+                ConfigConstants.BASE_PATH_TEST + "NoScriptCheckerTest_ModelWithExecutionlistenerScript.bpmn";
         checker = new NoScriptChecker(rule);
 
         // parse bpmn model
@@ -192,7 +190,7 @@ public class NoScriptCheckerTest {
      */
     @Test
     public void testModelWithTasklistenerScript() {
-        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithTasklistenerScript.bpmn";
+        final String PATH = ConfigConstants.BASE_PATH_TEST + "NoScriptCheckerTest_ModelWithTasklistenerScript.bpmn";
         checker = new NoScriptChecker(rule);
 
         // parse bpmn model
@@ -221,7 +219,7 @@ public class NoScriptCheckerTest {
      */
     @Test
     public void testModelWithScriptTask() {
-        final String PATH = BASE_PATH + "NoScriptCheckerTest_ModelWithScriptTask.bpmn";
+        final String PATH = ConfigConstants.BASE_PATH_TEST + "NoScriptCheckerTest_ModelWithScriptTask.bpmn";
         checker = new NoScriptChecker(rule);
 
         // parse bpmn model

@@ -112,7 +112,7 @@ public class RuleSetTest {
         Properties properties = new Properties();
         properties.put("ruleSet", "ruleSets/ruleSetChild.xml");
         properties.put("parentRuleSet", "ruleSets/parentRuleSet.xml");
-        ConfigConstants.getInstance().setProperties(properties);
+        RuntimeConfig.getInstance().setProperties(properties);
 
         Runner runner = new Runner();
         RuleSet rules = runner.readConfig();
@@ -132,7 +132,7 @@ public class RuleSetTest {
         RuntimeConfig.getInstance().setTest(true);
         Properties properties = new Properties();
         properties.put("ruleSet", "ruleSets/ruleSetLocal.xml");
-        ConfigConstants.getInstance().setProperties(properties);
+        RuntimeConfig.getInstance().setProperties(properties);
 
         Runner runner = new Runner();
         RuleSet rules = runner.readConfig();

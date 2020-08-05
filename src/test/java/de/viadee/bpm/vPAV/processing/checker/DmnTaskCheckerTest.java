@@ -33,7 +33,6 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
-import de.viadee.bpm.vPAV.Runner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
@@ -79,7 +78,7 @@ public class DmnTaskCheckerTest {
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
         RuntimeConfig.getInstance().setTest(true);
     }
 

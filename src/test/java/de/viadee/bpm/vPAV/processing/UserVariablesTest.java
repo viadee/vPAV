@@ -87,7 +87,7 @@ public class UserVariablesTest {
 
         Properties myProperties = new Properties();
         myProperties.put("userVariablesFilePath", "UserVariablesTest/" + ConfigConstants.USER_VARIABLES_FILE);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
