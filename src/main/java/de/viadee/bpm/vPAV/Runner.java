@@ -44,6 +44,7 @@ import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ModelDispatchResult;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.URI;
@@ -307,17 +308,10 @@ public class Runner {
 	private void deleteFiles() {
 		File index = new File(RuntimeConfig.getInstance().getValidationFolder());
 		if (index.exists()) {
-			String[] entries = index.list();
-			for (String entry : entries) {
-				File currentFile = new File(index.getPath(), entry);
-				if (currentFile.isDirectory()) {
-					String[] subEntries = currentFile.list();
-					for (String subentry : subEntries) {
-						File file = new File(currentFile.getPath(), subentry);
-						file.delete();
-					}
-				}
-				currentFile.delete();
+			try {
+				FileUtils.deleteDirectory(index);
+			} catch (IOException e) {
+				logger.warning("Couldn't delete directory: " + e.getMessage());
 			}
 		}
 	}
