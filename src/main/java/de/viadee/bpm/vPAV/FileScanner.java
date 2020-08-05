@@ -94,12 +94,12 @@ public class FileScanner {
 
 		final DirectoryScanner scanner = new DirectoryScanner();
 		File basedir = null;
-		String basepath = ConfigConstants.getInstance().getBasepath();
+		String basepath = RuntimeConfig.getInstance().getBasepath();
 
 		if (basepath.startsWith("file:/")) {
 			// Convert URI
 			try {
-				basedir = new File(new URI(ConfigConstants.getInstance().getBasepath()));
+				basedir = new File(new URI(RuntimeConfig.getInstance().getBasepath()));
 			} catch (URISyntaxException e) {
 				LOGGER.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
 			}
@@ -119,8 +119,8 @@ public class FileScanner {
 			System.exit(0);
 		}
 
-		String scanPath = ConfigConstants.getInstance().getScanPath();
-		String filePattern = ConfigConstants.getInstance().getFilePattern();
+		String scanPath = RuntimeConfig.getInstance().getScanPath();
+		String filePattern = RuntimeConfig.getInstance().getFilePattern();
 
 		scanner.setBasedir(scanPath);
 		// get file paths of process definitions
@@ -209,14 +209,14 @@ public class FileScanner {
 			LOGGER.warning("Could not find target/classes folder");
 		}
 
-		final String whiteListProperty = ConfigConstants.getInstance().getWhiteList();
+		final String whiteListProperty = RuntimeConfig.getInstance().getWhiteList();
 		List<String> whitelist = Arrays.stream(whiteListProperty.split("\\s*,\\s*"))
-				.map(entry -> entry.replace("/","\\\\").trim())
+				.map(entry -> entry.replace("/", "\\\\").trim())
 				.collect(Collectors.toList());
 
-		for (String entry: classPathEntries) {
+		for (String entry : classPathEntries) {
 			if (!whiteListProperty.isEmpty()) {
-				for (String item : whitelist){
+				for (String item : whitelist) {
 					Pattern pattern = Pattern.compile(item);
 					if (pattern.matcher(entry).find()) {
 						addStringToSootPath(entry);
@@ -350,12 +350,12 @@ public class FileScanner {
 			// read bpmn file
 			BpmnModelInstance modelInstance;
 			File bpmnfile = null;
-			String basepath = ConfigConstants.getInstance().getBasepath();
+			String basepath = RuntimeConfig.getInstance().getBasepath();
 
 			if (basepath.startsWith("file:/")) {
 				// Convert URI
 				try {
-					bpmnfile = new File(new URI(ConfigConstants.getInstance().getBasepath() + path));
+					bpmnfile = new File(new URI(RuntimeConfig.getInstance().getBasepath() + path));
 				} catch (URISyntaxException e) {
 					LOGGER.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
 				}
@@ -397,7 +397,7 @@ public class FileScanner {
 			// read dmn file
 			DmnModelInstance modelInstance;
 			try {
-				modelInstance = Dmn.readModelFromFile(new File(ConfigConstants.getInstance().getBasepath() + path));
+				modelInstance = Dmn.readModelFromFile(new File(RuntimeConfig.getInstance().getBasepath() + path));
 			} catch (final DmnModelException ex) {
 				throw new RuntimeException("dmn model couldn't be read", ex);
 			}

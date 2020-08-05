@@ -56,15 +56,11 @@ import java.util.*;
 
 public class ComplexModelTest {
 
-	private static final String BASE_PATH = "src/test/resources/";
-
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 		RuntimeConfig.getInstance().setTest(true);
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java/");
-		final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+		final URL classUrl = new URL(new File(ConfigConstants.JAVA_PATH_TEST).toURI().toURL().toString());
+		final URL resourcesUrl = new URL(new File(ConfigConstants.BASE_PATH_TEST).toURI().toURL().toString());
 		final URL[] classUrls = { classUrl, resourcesUrl };
 		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
@@ -72,18 +68,16 @@ public class ComplexModelTest {
 
 	/**
 	 * Case: Check complex model for invalid paths
-	 * 
+	 * <p>
 	 * Included: * sub processes * boundary events * java delegate * spring bean *
 	 * DMN model
-	 * 
-
 	 */
 	@Test
 	public void testGraphOnComplexModel() {
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		final String PATH = BASE_PATH + "ComplexModelTest_GraphOnComplexModel.bpmn";
-		final File processdefinition = new File(PATH);
+		final File processdefinition = new File(
+				ConfigConstants.BASE_PATH_TEST + "ComplexModelTest_GraphOnComplexModel.bpmn");
 
 		// parse bpmn model
 		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processdefinition);
@@ -121,7 +115,7 @@ public class ComplexModelTest {
 
 	/**
 	 * Create paths between two gateways
-	 * 
+	 *
 	 * @param gateway1_id
 	 * @param gateway2_id
 	 * @param modelInstance
@@ -145,7 +139,7 @@ public class ComplexModelTest {
 
 	/**
 	 * create an bpmn element
-	 * 
+	 *
 	 * @param parentElement
 	 * @param id
 	 * @param elementClass
@@ -161,7 +155,7 @@ public class ComplexModelTest {
 
 	/**
 	 * create a sequence flow
-	 * 
+	 *
 	 * @param process
 	 * @param from
 	 * @param to

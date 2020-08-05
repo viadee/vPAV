@@ -228,7 +228,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                     if (fileName.endsWith(".java")) //$NON-NLS-1$
                         scanner.setBasedir(ConfigConstants.JAVA_PATH);
                     else
-                        scanner.setBasedir(ConfigConstants.getInstance().getBasepath());
+                        scanner.setBasedir(RuntimeConfig.getInstance().getBasepath());
                 }
 
                 Resource s = scanner.getResource(fileName);

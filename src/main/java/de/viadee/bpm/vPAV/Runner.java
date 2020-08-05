@@ -128,14 +128,15 @@ public class Runner {
 
 		final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
 		try {
-			String ruleSetPath = ConfigConstants.getInstance().getRuleSetPath() + ConfigConstants.getInstance().getRuleSetFileName();
+			String ruleSetPath =
+					RuntimeConfig.getInstance().getRuleSetPath() + RuntimeConfig.getInstance().getRuleSetFileName();
 			if (new File(ruleSetPath).exists()) {
-				RuleSet localRules = new XmlConfigReader().read(ConfigConstants.getInstance().getRuleSetFileName());
+				RuleSet localRules = new XmlConfigReader().read(RuntimeConfig.getInstance().getRuleSetFileName());
 
 				if (localRules.hasParentRuleSet()) {
-					rules = mergeRuleSet(localRules, new XmlConfigReader().read(ConfigConstants.getInstance().getParentRuleSetFileName()));
-				}
-				else {
+					rules = mergeRuleSet(localRules,
+							new XmlConfigReader().read(RuntimeConfig.getInstance().getParentRuleSetFileName()));
+				} else {
 					rules = localRules;
 				}
 			} else {
@@ -161,9 +162,9 @@ public class Runner {
 		deleteFiles();
 		createvPAVFolder();
 		try {
-			Files.createDirectory(Paths.get(ConfigConstants.JS_FOLDER));
-			Files.createDirectory(Paths.get(ConfigConstants.CSS_FOLDER));
-			Files.createDirectory(Paths.get(ConfigConstants.IMG_FOLDER));
+			Files.createDirectory(Paths.get(RuntimeConfig.JS_FOLDER));
+			Files.createDirectory(Paths.get(RuntimeConfig.CSS_FOLDER));
+			Files.createDirectory(Paths.get(RuntimeConfig.IMG_FOLDER));
 		} catch (IOException e) {
 			logger.warning("Could not create either output folder for JS, CSS or IMG");
 		}
@@ -290,7 +291,7 @@ public class Runner {
 	 * Create vPAV folder
 	 */
 	private void createvPAVFolder() {
-		File vPavDir = new File(ConfigConstants.getInstance().getValidationFolder());
+		File vPavDir = new File(RuntimeConfig.getInstance().getValidationFolder());
 
 		if (!vPavDir.exists()) {
 			boolean success = vPavDir.mkdirs();
@@ -304,7 +305,7 @@ public class Runner {
 	 * Delete files from validation folder
 	 */
 	private void deleteFiles() {
-		File index = new File(ConfigConstants.getInstance().getValidationFolder());
+		File index = new File(RuntimeConfig.getInstance().getValidationFolder());
 		if (index.exists()) {
 			String[] entries = index.list();
 			for (String entry : entries) {
@@ -325,7 +326,7 @@ public class Runner {
 	 * Copies files to vPAV folder
 	 */
 	private void copyFiles() {
-		if (ConfigConstants.getInstance().isHtmlOutputEnabled()) {
+		if (RuntimeConfig.getInstance().isHtmlOutputEnabled()) {
 			fileMapping.keySet().forEach(file -> {
 				InputStream source = Runner.class.getClassLoader().getResourceAsStream(file);
 				Path destination = Paths.get(fileMapping.get(file) + file);
@@ -345,30 +346,30 @@ public class Runner {
 	 */
 	private Map<String, String> mapStaticFilesToTargetFolders() {
 		Map<String, String> fileToFolderMap = new HashMap<>();
-		fileToFolderMap.put("bootstrap.bundle.min.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("bpmn-navigated-viewer.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("bpmn.io.viewer.app.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("jquery-3.5.1.min.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("infoPOM.js", ConfigConstants.JS_FOLDER);
-		fileToFolderMap.put("download.js", ConfigConstants.JS_FOLDER);
+		fileToFolderMap.put("bootstrap.bundle.min.js", RuntimeConfig.JS_FOLDER);
+		fileToFolderMap.put("bpmn-navigated-viewer.js", RuntimeConfig.JS_FOLDER);
+		fileToFolderMap.put("bpmn.io.viewer.app.js", RuntimeConfig.JS_FOLDER);
+		fileToFolderMap.put("jquery-3.5.1.min.js", RuntimeConfig.JS_FOLDER);
+		fileToFolderMap.put("infoPOM.js", RuntimeConfig.JS_FOLDER);
+		fileToFolderMap.put("download.js", RuntimeConfig.JS_FOLDER);
 
-		fileToFolderMap.put("bootstrap.min.css", ConfigConstants.CSS_FOLDER);
-		fileToFolderMap.put("viadee.css", ConfigConstants.CSS_FOLDER);
-		fileToFolderMap.put("MarkerStyle.css", ConfigConstants.CSS_FOLDER);
+		fileToFolderMap.put("bootstrap.min.css", RuntimeConfig.CSS_FOLDER);
+		fileToFolderMap.put("viadee.css", RuntimeConfig.CSS_FOLDER);
+		fileToFolderMap.put("MarkerStyle.css", RuntimeConfig.CSS_FOLDER);
 
-		fileToFolderMap.put("vPAV.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("viadee_weiss.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("github.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("error.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("warning.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("info.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("success.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("dl_button.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("minus_icon.png", ConfigConstants.IMG_FOLDER);
-		fileToFolderMap.put("plus_icon.png", ConfigConstants.IMG_FOLDER);
+		fileToFolderMap.put("vPAV.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("viadee_weiss.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("github.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("error.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("warning.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("info.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("success.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("dl_button.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("minus_icon.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("plus_icon.png", RuntimeConfig.IMG_FOLDER);
 
 		fileToFolderMap
-				.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, ConfigConstants.getInstance().getValidationFolder());
+				.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, RuntimeConfig.getInstance().getValidationFolder());
 
 		return fileToFolderMap;
 	}
@@ -503,12 +504,12 @@ public class Runner {
 		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
 		ModelDispatchResult dispatchResult;
 		File bpmnfile = null;
-		String basepath = ConfigConstants.getInstance().getBasepath();
+		String basepath = RuntimeConfig.getInstance().getBasepath();
 
 		if (basepath.startsWith("file:/")) {
 			// Convert URI
 			try {
-				bpmnfile = new File(new URI(ConfigConstants.getInstance().getBasepath() + processDefinition));
+				bpmnfile = new File(new URI(RuntimeConfig.getInstance().getBasepath() + processDefinition));
 			} catch (URISyntaxException e) {
 				logger.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
 			}

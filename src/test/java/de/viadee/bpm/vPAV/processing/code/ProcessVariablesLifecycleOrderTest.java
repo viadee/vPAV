@@ -87,7 +87,7 @@ public class ProcessVariablesLifecycleOrderTest {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ProcessVariablesLifecycleOrderTest.bpmn";
         final File processDefinition = new File(PATH);
@@ -184,7 +184,7 @@ public class ProcessVariablesLifecycleOrderTest {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ProcessVariablesLifecycleOrderTest_WithCallActivity.bpmn";
         final File processDefinition = new File(PATH);

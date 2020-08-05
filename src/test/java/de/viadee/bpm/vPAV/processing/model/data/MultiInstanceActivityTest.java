@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
@@ -65,10 +66,8 @@ public class MultiInstanceActivityTest {
     @BeforeClass
     public static void setup() throws MalformedURLException {
         RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
+        final URL classUrl = new URL(new File(ConfigConstants.JAVA_PATH).toURI().toURL().toString());
+        final URL resourcesUrl = new URL(new File(ConfigConstants.BASE_PATH_TEST).toURI().toURL().toString());
         final URL[] classUrls = { classUrl, resourcesUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);

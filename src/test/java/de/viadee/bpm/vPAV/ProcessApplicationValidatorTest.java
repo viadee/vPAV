@@ -61,7 +61,7 @@ public class ProcessApplicationValidatorTest {
         // Set custom basepath.
         Properties myProperties = new Properties();
         myProperties.put("basepath", "src/test/resources/ProcessApplicationValidatorTest/");
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
 
         // Bean-Mapping
         final Map<String, String> beanMapping = new HashMap<>();

@@ -81,7 +81,7 @@ public class CallActivityTest {
     @AfterClass
     public static void tearDown() {
         Properties myProperties = new Properties();
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
     }
 
     @Test
@@ -231,7 +231,7 @@ public class CallActivityTest {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "CallActivityTest_SingleCallActivity.bpmn";
         final File processDefinition = new File(PATH);

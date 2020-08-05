@@ -65,26 +65,26 @@ public class StaticInterProceduralTest {
 		final String PATH = BASE_PATH + "ProcessVariablesModelChecker_InterproceduralAnalysis.bpmn";
 
 		// parse bpmn model
-		final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
+        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
 
-		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
+        final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 
-		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
-				new FlowAnalysis());
+        final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(),
+                new FlowAnalysis());
 
-		// Set custom basepath.
-		Properties myProperties = new Properties();
-		myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
-		ConfigConstants.getInstance().setProperties(myProperties);
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		new JavaReaderStatic()
-				.getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null,
-						null, new BasicNode[1]);
-		ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
+        // Set custom basepath.
+        Properties myProperties = new Properties();
+        myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
+        RuntimeConfig.getInstance().setProperties(myProperties);
+        final FileScanner fileScanner = new FileScanner(new RuleSet());
+        new JavaReaderStatic()
+                .getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInterProc", element, null,
+                        null, new BasicNode[1]);
+        ListMultimap<String, ProcessVariableOperation> variables = element.getControlFlowGraph().getOperations();
 
-		// Then
-		assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
-				variables.size());
-	}
+        // Then
+        assertEquals("Static reader should also find variable from TestInterProcAnother class and TestInterPocOther", 5,
+                variables.size());
+    }
 
 }

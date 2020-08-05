@@ -80,7 +80,7 @@ public class ScopeTest {
     public void setupProperties() {
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
     }
 
     @Test
