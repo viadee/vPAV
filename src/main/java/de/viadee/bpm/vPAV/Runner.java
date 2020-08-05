@@ -318,17 +318,10 @@ public class Runner {
 	private void deleteFiles() {
 		File index = new File(RuntimeConfig.getInstance().getValidationFolder());
 		if (index.exists()) {
-			String[] entries = index.list();
-			for (String entry : entries) {
-				File currentFile = new File(index.getPath(), entry);
-				if (currentFile.isDirectory()) {
-					String[] subEntries = currentFile.list();
-					for (String subentry : subEntries) {
-						File file = new File(currentFile.getPath(), subentry);
-						file.delete();
-					}
-				}
-				currentFile.delete();
+			try {
+				FileUtils.deleteDirectory(index);
+			} catch (IOException e) {
+				logger.warning("Couldn't delete directory: " + e.getMessage());
 			}
 		}
 	}
