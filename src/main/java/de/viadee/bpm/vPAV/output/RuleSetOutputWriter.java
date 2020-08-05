@@ -60,13 +60,13 @@ public class RuleSetOutputWriter {
     public void write(RuleSet rules) throws OutputWriterException {
         Writer writer = null;
 
-        Path path = Paths.get(RuntimeConfig.EFFECTIVE_RULESET);
+        Path path = Paths.get(RuntimeConfig.getInstance().getEffectiveRuleset());
         if (path.toFile().exists())
             path.toFile().delete();
 
         try {
             writer = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(RuntimeConfig.EFFECTIVE_RULESET),
+                    new OutputStreamWriter(new FileOutputStream(RuntimeConfig.getInstance().getEffectiveRuleset()),
                             StandardCharsets.UTF_8));
             final JAXBContext context = JAXBContext.newInstance(XmlRuleSet.class);
             final Marshaller m = context.createMarshaller();

@@ -61,7 +61,8 @@ public class JsonOutputWriter implements IssueOutputWriter {
 		if (json != null && !json.isEmpty()) {
 
 			try (OutputStreamWriter osWriter = new OutputStreamWriter(
-					new FileOutputStream(RuntimeConfig.VALIDATION_JSON_OUTPUT), StandardCharsets.UTF_8)) {
+					new FileOutputStream(RuntimeConfig.getInstance().getValidationJsonOutput()),
+					StandardCharsets.UTF_8)) {
 				osWriter.write(json);
 			} catch (final IOException ex) {
 				throw new OutputWriterException("json output couldn't be written");

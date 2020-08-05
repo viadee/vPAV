@@ -48,34 +48,6 @@ public class RuntimeConfig {
 
     private static Logger logger = Logger.getLogger(RuntimeConfig.class.getName());
 
-    public static final String JS_FOLDER = getInstance().getValidationFolder() + "js/";
-
-    public static final String VALIDATION_IGNORED_ISSUES_OUTPUT = JS_FOLDER + "ignoredIssues.js";
-
-    public static final String VALIDATION_JS_PROCESS_VARIABLES = JS_FOLDER + "processVariables.js";
-
-    public static final String VALIDATION_JS_ISSUE_SEVERITY = JS_FOLDER + "issue_severity.js";
-
-    public static final String VALIDATION_JS_SUCCESS_OUTPUT = JS_FOLDER + "bpmn_validation_success.js";
-
-    public static final String VALIDATION_JS_CHECKERS = JS_FOLDER + "checkers.js";
-
-    public static final String PROPERTIES_JS_OUTPUT = JS_FOLDER + "properties.js";
-
-    public static final String VALIDATION_JS_OUTPUT = JS_FOLDER + "bpmn_validation.js";
-
-    public static final String VALIDATION_JS_MODEL_OUTPUT = JS_FOLDER + "bpmn_model.js";
-
-    public static final String CSS_FOLDER = getInstance().getValidationFolder() + "css/";
-
-    public static final String IMG_FOLDER = getInstance().getValidationFolder() + "img/";
-
-    public static final String EFFECTIVE_RULESET = getInstance().getValidationFolder() + "effectiveRuleSet.xml";
-
-    public static final String VALIDATION_XML_OUTPUT = getInstance().getValidationFolder() + "bpmn_validation.xml";
-
-    public static final String VALIDATION_JSON_OUTPUT = getInstance().getValidationFolder() + "bpmn_validation.json";
-
     private static RuntimeConfig instance;
 
     private ApplicationContext ctx;
@@ -352,6 +324,62 @@ public class RuntimeConfig {
     @Deprecated
     public void setLanguage(String languageCode) {
         properties.setProperty("language", languageCode);
+    }
+
+    public String getJsFolder() {
+        return getValidationFolder() + "js/";
+    }
+
+    public String getValidationIgnoredIssuesOutput() {
+        return getJsFolder() + "ignoredIssues.js";
+    }
+
+    public String getValidationJsProcessVariables() {
+        return getJsFolder() + "processVariables.js";
+    }
+
+    public String getValidationJsIssueSeverity() {
+        return getJsFolder() + "issue_severity.js";
+    }
+
+    public String getValidationJsSuccessOutput() {
+        return getJsFolder() + "bpmn_validation_success.js";
+    }
+
+    public String getValidationJsCheckers() {
+        return getJsFolder() + "checkers.js";
+    }
+
+    public String getPropertiesJsOutput() {
+        return getJsFolder() + "properties.js";
+    }
+
+    public String getValidationJsOutput() {
+        return getJsFolder() + "bpmn_validation.js";
+    }
+
+    public String getValidationJsModelOutput() {
+        return getJsFolder() + "bpmn_model.js";
+    }
+
+    public String getCssFolder() {
+        return getValidationFolder() + "css/";
+    }
+
+    public String getImgFolder() {
+        return getValidationFolder() + "img/";
+    }
+
+    public String getEffectiveRuleset() {
+        return getValidationFolder() + "effectiveRuleSet.xml";
+    }
+
+    public String getValidationXmlOutput() {
+        return getValidationFolder() + "bpmn_validation.xml";
+    }
+
+    public String getValidationJsonOutput() {
+        return getValidationFolder() + "bpmn_validation.json";
     }
 
 }

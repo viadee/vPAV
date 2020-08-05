@@ -63,7 +63,8 @@ public class XmlOutputWriter implements IssueOutputWriter {
         Writer writer = null;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(RuntimeConfig.VALIDATION_XML_OUTPUT), StandardCharsets.UTF_8));
+                    new FileOutputStream(RuntimeConfig.getInstance().getValidationXmlOutput()),
+                    StandardCharsets.UTF_8));
             final JAXBContext context = JAXBContext.newInstance(XmlCheckerIssues.class);
             final Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);

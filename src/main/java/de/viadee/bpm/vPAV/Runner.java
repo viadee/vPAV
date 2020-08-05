@@ -162,9 +162,9 @@ public class Runner {
 		deleteFiles();
 		createvPAVFolder();
 		try {
-			Files.createDirectory(Paths.get(RuntimeConfig.JS_FOLDER));
-			Files.createDirectory(Paths.get(RuntimeConfig.CSS_FOLDER));
-			Files.createDirectory(Paths.get(RuntimeConfig.IMG_FOLDER));
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolder()));
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getCssFolder()));
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getImgFolder()));
 		} catch (IOException e) {
 			logger.warning("Could not create either output folder for JS, CSS or IMG");
 		}
@@ -346,27 +346,27 @@ public class Runner {
 	 */
 	private Map<String, String> mapStaticFilesToTargetFolders() {
 		Map<String, String> fileToFolderMap = new HashMap<>();
-		fileToFolderMap.put("bootstrap.bundle.min.js", RuntimeConfig.JS_FOLDER);
-		fileToFolderMap.put("bpmn-navigated-viewer.js", RuntimeConfig.JS_FOLDER);
-		fileToFolderMap.put("bpmn.io.viewer.app.js", RuntimeConfig.JS_FOLDER);
-		fileToFolderMap.put("jquery-3.5.1.min.js", RuntimeConfig.JS_FOLDER);
-		fileToFolderMap.put("infoPOM.js", RuntimeConfig.JS_FOLDER);
-		fileToFolderMap.put("download.js", RuntimeConfig.JS_FOLDER);
+		fileToFolderMap.put("bootstrap.bundle.min.js", RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put("bpmn-navigated-viewer.js", RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put("bpmn.io.viewer.app.js", RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put("jquery-3.5.1.min.js", RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put("download.js", RuntimeConfig.getInstance().getJsFolder());
 
-		fileToFolderMap.put("bootstrap.min.css", RuntimeConfig.CSS_FOLDER);
-		fileToFolderMap.put("viadee.css", RuntimeConfig.CSS_FOLDER);
-		fileToFolderMap.put("MarkerStyle.css", RuntimeConfig.CSS_FOLDER);
+		fileToFolderMap.put("bootstrap.min.css", RuntimeConfig.getInstance().getCssFolder());
+		fileToFolderMap.put("viadee.css", RuntimeConfig.getInstance().getCssFolder());
+		fileToFolderMap.put("MarkerStyle.css", RuntimeConfig.getInstance().getCssFolder());
 
-		fileToFolderMap.put("vPAV.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("viadee_weiss.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("github.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("error.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("warning.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("info.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("success.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("dl_button.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("minus_icon.png", RuntimeConfig.IMG_FOLDER);
-		fileToFolderMap.put("plus_icon.png", RuntimeConfig.IMG_FOLDER);
+		fileToFolderMap.put("vPAV.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("viadee_weiss.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("github.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("error.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("warning.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("info.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("success.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("dl_button.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("minus_icon.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put("plus_icon.png", RuntimeConfig.getInstance().getImgFolder());
 
 		fileToFolderMap
 				.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, RuntimeConfig.getInstance().getValidationFolder());
