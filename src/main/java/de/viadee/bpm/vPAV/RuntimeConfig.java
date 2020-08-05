@@ -181,20 +181,19 @@ public class RuntimeConfig {
      */
     public void retrieveLocale() {
         if (getLanguage().equals("de_DE")) {
-            getResource("de_DE");
+            setResource("de_DE");
         } else {
-            getResource("en_US");
+            setResource("en_US");
         }
     }
 
-    //TODO rename to setter
     /**
      * Set base directory and set ResourceBundle
      *
      * @param locale Locale extracted from ruleSet or either default system locale
      *               Localization
      */
-    public void getResource(final String locale) {
+    public void setResource(final String locale) {
         setResourceBundle(fromClassLoader("messages_" + locale));
     }
 

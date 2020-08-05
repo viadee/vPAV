@@ -31,14 +31,11 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
-import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.ElementFieldTypes;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -87,7 +84,7 @@ public class ProcessVariablesNameConventionCheckerTest {
 		final URL[] classUrls = { classUrl };
 		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
+		RuntimeConfig.getInstance().setResource("en_US");
 	}
 
 	@AfterClass

@@ -52,7 +52,6 @@ import soot.Scene;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
@@ -84,7 +83,7 @@ public class JavaDelegateCheckerTest {
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
 
         // Bean-Mapping
         final Map<String, String> beanMapping = new HashMap<>();
