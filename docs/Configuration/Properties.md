@@ -17,6 +17,7 @@ parentRuleSet=ruleSets/parentRuleSet.xml
 ruleSet=myRuleSet.xml
 scanpath=target/test-classes/
 userVariablesFilePath=subfolder/myVariables.xml
+validationFolder=../myReports
 ```
 {: .fs-6 .fw-300 }
 
@@ -58,3 +59,7 @@ By default, `target/classes/` is used. But if you customized the location, you c
 ## User variables path
 If you created a custom `variables.xml` file (see  [Defining variables](Configuration/UserVariables.mde)), you can modify the name and the relative path. 
 To do so, add the property `userVariablesFilePath=subfolder/myVariables.xml`.
+
+## Validation folder path
+You can specify the validation folder where the vPAV generated output will be stored. By default `target/vPAV/` is set.
+`target/vPAV/` ist not persistent and will be deleted when Maven executes the `clean` goal.
