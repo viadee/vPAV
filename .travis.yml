@@ -1,7 +1,17 @@
 language: java
 jdk:
     - openjdk8
-install: 
-script: mvn install -DskipTests=false -Dmaven.javadoc.skip=true
+addons:
+    # sonarcloud analysis with the travis plugin, see https://docs.travis-ci.com/user/sonarcloud/
+    sonarcloud:
+        organization: "viadee"
+        # token is provided by the environment variable SONAR_TOKEN in travis settings
+        token:  $SONAR_TOKEN
+script: >-
+    if [ "${SONAR_TOKEN}" != "" ]; then
+      mvn install -DskipTests=false -Dmaven.javadoc.skip=true sonar:sonar
+    else
+      mvn install -DskipTests=false -Dmaven.javadoc.skip=true
+    fi
 notifications:
     slack: viadee:RkhVsV7eSLSkL7v5Tck1ernR
