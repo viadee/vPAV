@@ -48,7 +48,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.*;
 
-public class RunnerTest {
+public class RuleSetTest {
 
     private static ClassLoader cl;
 
@@ -112,7 +112,7 @@ public class RunnerTest {
         Properties properties = new Properties();
         properties.put("ruleSet", "ruleSets/ruleSetChild.xml");
         properties.put("parentRuleSet", "ruleSets/parentRuleSet.xml");
-        ConfigConstants.getInstance().setProperties(properties);
+        RuntimeConfig.getInstance().setProperties(properties);
 
         Runner runner = new Runner();
         RuleSet rules = runner.readConfig();
@@ -125,5 +125,30 @@ public class RunnerTest {
         assertTrue("Parent rule of ExtensionChecker was not loaded.",
                 elementRules.get("ExtensionChecker").containsKey("ExtensionChecker"));
         assertEquals("NoScriptChecker rule was not loaded from parent.", 1, elementRules.get("NoScriptChecker").size());
+    }
+
+    @Test
+    public void testLoadLocalRuleSet() {
+        RuntimeConfig.getInstance().setTest(true);
+        Properties properties = new Properties();
+        properties.put("ruleSet", "ruleSets/ruleSetLocal.xml");
+        RuntimeConfig.getInstance().setProperties(properties);
+
+        Runner runner = new Runner();
+        RuleSet rules = runner.readConfig();
+
+        Map<String, Map<String, Rule>> allRules = rules.getAllRules();
+        assertFalse("No rules could be read", allRules.isEmpty());
+        assertEquals("Number of total element rules is wrong.", 5, allRules.size());
+        assertFalse("OverlapChecker should be inactive.",
+                allRules.get("OverlapChecker").values().iterator().next().isActive());
+        assertTrue("DataFlowChecker should be active.",
+                allRules.get("DataFlowChecker").values().iterator().next().isActive());
+        assertTrue("JavaDelegateChecker should be active.",
+                allRules.get("JavaDelegateChecker").values().iterator().next().isActive());
+        assertTrue("ProcessVariablesModelChecker should be active.",
+                allRules.get("ProcessVariablesModelChecker").values().iterator().next().isActive());
+        assertTrue("TimerExpressionChecker should be active.",
+                allRules.get("TimerExpressionChecker").values().iterator().next().isActive());
     }
 }

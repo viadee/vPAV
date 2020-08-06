@@ -29,56 +29,16 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.code.flow;
+package de.viadee.bpm.vPAV.delegates;
 
-import java.util.LinkedHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import soot.toolkits.graph.Block;
+public abstract class SuperClassDelegate implements org.camunda.bpm.engine.delegate.JavaDelegate {
 
-public class Node extends BasicNode implements Cloneable {
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
+        executeImpl(execution);
+    }
 
-	private Block block;
-
-	private String javaClass;
-
-	public Node(final BpmnElement parentElement, final Block block, final String javaClass,
-			final ElementChapter elementChapter, final KnownElementFieldType fieldType) {
-		super(parentElement, elementChapter, fieldType);
-		this.block = block;
-		this.javaClass = javaClass;
-	}
-	public Block getBlock() {
-		return block;
-	}
-
-	public String getJavaClass() {
-		return javaClass;
-	}
-
-
-	public Object clone() throws
-			CloneNotSupportedException
-	{
-		Node myClone = (Node)super.clone();
-		myClone.block = block;
-		myClone.javaClass = javaClass;
-		myClone.parentElement = parentElement;
-		myClone.elementChapter = elementChapter;
-		myClone.operations = new LinkedHashMap<>();
-		myClone.defined = new LinkedHashMap<>();
-		myClone.used = new LinkedHashMap<>();
-		myClone.killed = new LinkedHashMap<>();
-		myClone.outUnused = new LinkedHashMap<>();
-		myClone.outUsed = new LinkedHashMap<>();
-		myClone.inUnused = new LinkedHashMap<>();
-		myClone.inUsed = new LinkedHashMap<>();
-		myClone.predecessors = new LinkedHashMap<>();
-		myClone.successors = new LinkedHashMap<>();
-
-		return myClone;
-	}
+    public abstract void executeImpl(DelegateExecution execution);
 }

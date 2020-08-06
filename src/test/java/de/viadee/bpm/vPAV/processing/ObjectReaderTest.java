@@ -105,7 +105,7 @@ public class ObjectReaderTest {
         localObjectVariables.put("objVariable1", objVariable1);
         localObjectVariables.put("$r2", anotherObject);
         objectReader = new ObjectReader(localStringVariables, localObjectVariables, new ObjectVariable(),
-                processVariablesCreator);
+                processVariablesCreator, thisSootClass);
 
         // Create string fields
         objectReader.getThisObject().updateStringField("variableField1", "valueField1");
@@ -122,7 +122,7 @@ public class ObjectReaderTest {
 
     @Test
     public void testGetThisNameFromUnit() {
-        ObjectReader cr = new ObjectReader(null);
+        ObjectReader cr = new ObjectReader(null, thisSootClass);
         // Test that name of reference to this object is correctly resolved
         Value localVal = new JimpleLocal("this", RefType.v("java.lang.Object"));
         Value identityVal = new ThisRef(RefType.v("java.lang.Object"));
@@ -141,7 +141,7 @@ public class ObjectReaderTest {
         args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
         args.add(StringConstant.v("myVariableValue"));
         ArrayList<Object> argValues = objectReader.resolveArgs(args, null);
-        ObjectReader cr = new ObjectReader(null);
+        ObjectReader cr = new ObjectReader(null, thisSootClass);
         cr.handleIdentityStmt(stmt, args, argValues);
         Assert.assertEquals("myVariableValue", cr.getLocalStringVariables().get("r2").getValue());
     }
@@ -284,7 +284,9 @@ public class ObjectReaderTest {
         SootMethod method = thisSootClass.getMethodByName("methodWithReturn");
         SootMethodRef methodRef = mock(SootMethodRef.class);
         when(methodRef.resolve()).thenReturn(method);
+        when(methodRef.getName()).thenReturn("methodWithReturn");
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        when(methodRef.getDeclaringClass()).thenReturn(method.getDeclaringClass());
         InvokeExpr invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")),
                 methodRef, new ArrayList<>());
         Object returnValue = objectReader.handleInvokeExpr(null, invokeExpr, "this");
@@ -295,6 +297,7 @@ public class ObjectReaderTest {
         methodRef = mock(SootMethodRef.class);
         when(methodRef.resolve()).thenReturn(method);
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        when(methodRef.getDeclaringClass()).thenReturn(method.getDeclaringClass());
         invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")), methodRef,
                 new ArrayList<>());
         returnValue = objectReader.handleInvokeExpr(null, invokeExpr, "this");
@@ -306,6 +309,7 @@ public class ObjectReaderTest {
         methodRef = mock(SootMethodRef.class);
         when(methodRef.resolve()).thenReturn(method);
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        when(methodRef.getDeclaringClass()).thenReturn(method.getDeclaringClass());
         invokeExpr = new JVirtualInvokeExpr(
                 new JimpleLocal("$r2", RefType.v("de.viadee.bpm.vPAV.AnotherSimpleObject")), methodRef,
                 new ArrayList<>());
@@ -319,6 +323,7 @@ public class ObjectReaderTest {
         methodRef = mock(SootMethodRef.class);
         when(methodRef.resolve()).thenReturn(method);
         when(methodRef.declaringClass()).thenReturn(method.getDeclaringClass());
+        when(methodRef.getDeclaringClass()).thenReturn(method.getDeclaringClass());
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("localString", RefType.v("java.lang.String")));
         invokeExpr = new JVirtualInvokeExpr(new JimpleLocal("this", RefType.v("java.lang.Object")), methodRef,

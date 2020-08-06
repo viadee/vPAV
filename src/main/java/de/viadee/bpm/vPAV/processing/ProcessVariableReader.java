@@ -190,11 +190,11 @@ public final class ProcessVariableReader {
                     scopeElementId, predecessor);
         }
         for (String messageName : messages) {
-            parseJuelExpression(element, ElementChapter.Signal, KnownElementFieldType.Signal, messageName,
+            parseJuelExpression(element, ElementChapter.Message, KnownElementFieldType.Message, messageName,
                     scopeElementId, predecessor);
         }
         for (String linkName : links) {
-            parseJuelExpression(element, ElementChapter.Signal, KnownElementFieldType.Signal, linkName, scopeElementId,
+            parseJuelExpression(element, ElementChapter.Link, KnownElementFieldType.Link, linkName, scopeElementId,
                     predecessor);
         }
     }

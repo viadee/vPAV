@@ -31,8 +31,8 @@
  */
 package de.viadee.bpm.vPAV.output;
 
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -63,7 +63,8 @@ public class XmlOutputWriter implements IssueOutputWriter {
         Writer writer = null;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(ConfigConstants.VALIDATION_XML_OUTPUT), StandardCharsets.UTF_8));
+                    new FileOutputStream(RuntimeConfig.getInstance().getValidationXmlOutput()),
+                    StandardCharsets.UTF_8));
             final JAXBContext context = JAXBContext.newInstance(XmlCheckerIssues.class);
             final Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -115,7 +116,7 @@ public class XmlOutputWriter implements IssueOutputWriter {
                     issue.getElementId(), elementName == null ? null : elementName.replace("\n", ""),
                     issue.getMessage(), issue.getElementDescription(), issue.getVariable(),
                     issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription(),
-                    xmlPaths.isEmpty() ? null : xmlPaths));
+                    xmlPaths.isEmpty() ? null : xmlPaths, issue.getImplementationDetails()));
         }
         return xmlIssues;
     }

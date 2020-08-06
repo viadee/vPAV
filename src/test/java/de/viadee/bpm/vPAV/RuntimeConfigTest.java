@@ -31,13 +31,88 @@
  */
 package de.viadee.bpm.vPAV;
 
+import de.viadee.bpm.vPAV.config.model.RuleSet;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.HashMap;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
 public class RuntimeConfigTest {
+
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        ClassLoader cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().setTest(true);
+    }
+
+    @After
+    public void resetConfigConstants() {
+        RuntimeConfig.getInstance().setProperties(new Properties());
+    }
+
+    @Test
+    public void testCustomBasePathExists() {
+        // Set custom basepath.
+        Properties myProperties = new Properties();
+        myProperties.put("basepath", "src/test/resources/ConfigConstantsTest/");
+        RuntimeConfig.getInstance().setProperties(myProperties);
+        Assert.assertEquals("BasePath could not be successfully injected", "src/test/resources/ConfigConstantsTest/",
+                RuntimeConfig.getInstance().getBasepath());
+
+        // Create file scanner.
+        RuleSet ruleSet = new RuleSet();
+        FileScanner fileScanner = new FileScanner(ruleSet);
+        Map<String, String> map = fileScanner.getProcessIdToPathMap();
+        Assert.assertFalse("BasePath was changed but BPMN model was not found.", map.isEmpty());
+        Assert.assertEquals("Wrong bpmn file was found.", "ConfigConstantsTest.bpmn", map.get("Process_1"));
+    }
+
+    @Test
+    public void testCreateOutputHtmlPropertyExists() {
+        Properties myProperties = new Properties();
+        myProperties.put("outputhtml", false);
+        RuntimeConfig.getInstance().setProperties(myProperties);
+        Assert.assertTrue("Output Html property should be false.", RuntimeConfig.getInstance().isHtmlOutputEnabled());
+    }
+
+    @Test
+    public void testCreateOutputHtmlPropertyNotExists() {
+        Assert.assertTrue("Output Html property should be true because it is not set.",
+                RuntimeConfig.getInstance().isHtmlOutputEnabled());
+    }
+
+    @Test
+    public void testLanguagePropertyExists() {
+        Properties myProperties = new Properties();
+        myProperties.put("language", "en");
+        RuntimeConfig.getInstance().setProperties(myProperties);
+        Assert.assertEquals("Language was not correctly loaded.", "en", RuntimeConfig.getInstance().getLanguage());
+    }
+
+    @Test
+    public void testLanguagePropertyNotExists() {
+        String expected;
+        if (Locale.getDefault().toString().equals("de_DE")) {
+            expected = "de";
+        } else {
+            expected = "en";
+        }
+
+        Assert.assertEquals("Default language was not used.", expected, RuntimeConfig.getInstance().getLanguage());
+    }
 
     @Test
     public void runtimeConfigMustBeInitialized() {
@@ -46,6 +121,34 @@ public class RuntimeConfigTest {
 
         // Then
         assertNotNull("Runtime Config is not initialized", rc);
+    }
+
+    @Test
+    public void testCustomValidationFolderIsApplied() {
+        String validationFolder = "./foo/bar";
+        Properties properties = new Properties();
+        properties.put("validationFolder", validationFolder);
+        RuntimeConfig rc = RuntimeConfig.getInstance();
+        rc.setProperties(properties);
+        List<String> dependentPaths = new LinkedList<String>();
+        dependentPaths.add(rc.getValidationFolder());
+        dependentPaths.add(rc.getValidationIgnoredIssuesOutput());
+        dependentPaths.add(rc.getValidationJsProcessVariables());
+        dependentPaths.add(rc.getValidationJsIssueSeverity());
+        dependentPaths.add(rc.getValidationJsSuccessOutput());
+        dependentPaths.add(rc.getValidationJsCheckers());
+        dependentPaths.add(rc.getPropertiesJsOutput());
+        dependentPaths.add(rc.getValidationJsOutput());
+        dependentPaths.add(rc.getValidationJsModelOutput());
+        dependentPaths.add(rc.getCssFolder());
+        dependentPaths.add(rc.getImgFolder());
+        dependentPaths.add(rc.getEffectiveRuleset());
+        dependentPaths.add(rc.getValidationXmlOutput());
+        dependentPaths.add(rc.getValidationJsonOutput());
+        for (String path : dependentPaths) {
+            assertTrue(String.format("Path doesn't start with validation folder: %s", path),
+                    path.startsWith(validationFolder));
+        }
     }
 
     @Test

@@ -83,8 +83,6 @@ public class Model_ProcessVariableReaderStaticAnonymousInnerClassesTest {
 
 	@Test
 	public void testRecogniseVariablesInInnerAnonymousClass() {
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 		final String PATH = BASE_PATH + "ProcessVariablesStaticReaderTest_AnonymousInnerClass.bpmn";
 
 		// parse bpmn model

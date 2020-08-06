@@ -221,14 +221,14 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
 
                 if (RuntimeConfig.getInstance().isTest()) {
                     if (fileName.endsWith(".java")) //$NON-NLS-1$
-                        scanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
+                        scanner.setBasedir(ConfigConstants.JAVA_PATH_TEST);
                     else
-                        scanner.setBasedir(ConfigConstants.TEST_BASEPATH);
+                        scanner.setBasedir(ConfigConstants.BASE_PATH_TEST);
                 } else {
                     if (fileName.endsWith(".java")) //$NON-NLS-1$
-                        scanner.setBasedir(ConfigConstants.JAVAPATH);
+                        scanner.setBasedir(ConfigConstants.JAVA_PATH);
                     else
-                        scanner.setBasedir(ConfigConstants.getInstance().getBasepath());
+                        scanner.setBasedir(RuntimeConfig.getInstance().getBasepath());
                 }
 
                 Resource s = scanner.getResource(fileName);

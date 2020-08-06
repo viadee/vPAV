@@ -31,9 +31,13 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
+import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -74,7 +78,8 @@ public class DmnTaskCheckerTest {
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
+        RuntimeConfig.getInstance().setTest(true);
     }
 
     /**
@@ -104,11 +109,16 @@ public class DmnTaskCheckerTest {
 
     /**
      * Case: DMN task with wrong DMN-File
-     *
      */
 
     @Test
-    public void testDMNTaskWithWrongDMN() {
+    public void testDMNTaskWithWrongDMN() throws ConfigReaderException {
+        // Load rule set.
+        XmlConfigReader reader = new XmlConfigReader();
+        RuleSet rules = reader.read("ruleSets/ruleSetChild.xml");
+
+        FileScanner fileScanner = new FileScanner(rules);
+        RuntimeConfig.getInstance().setFileScanner(fileScanner);
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_wrongDMNReference.bpmn";
         checker = new DmnTaskChecker(rule);
 
@@ -135,11 +145,16 @@ public class DmnTaskCheckerTest {
 
     /**
      * Case: read referenced DMN
-     *
      */
 
     @Test
-    public void testReadReferencedDMNFile() {
+    public void testReadReferencedDMNFile() throws ConfigReaderException {
+        // Load rule set.
+        XmlConfigReader reader = new XmlConfigReader();
+        RuleSet rules = reader.read("ruleSets/ruleSetChild.xml");
+
+        FileScanner fileScanner = new FileScanner(rules);
+        RuntimeConfig.getInstance().setFileScanner(fileScanner);
         final String PATH = BASE_PATH + "DmnTaskCheckerTest_ReadReferencedDMN.bpmn";
         checker = new DmnTaskChecker(rule);
 

@@ -82,8 +82,6 @@ public class ProcessVariableOperationReaderTest {
 
     @Test
     public void testRecogniseVariablesInClass() {
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
 
         // parse bpmn model

@@ -31,9 +31,11 @@
  */
 package de.viadee.bpm.vPAV.processing.checker;
 
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -46,13 +48,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -67,14 +71,11 @@ public class JavaDelegateCheckerTest {
     private final Rule rule = new Rule("JavaDelegateChecker", true, null, null, null, null);
 
     @BeforeClass
-    public static void setup() throws MalformedURLException {
-
-        // Bean-Mapping
-        final Map<String, String> beanMapping = new HashMap<>();
-        beanMapping.put("FalschesDelegate_bla", "de.test.Test");
-        beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.delegates.TestDelegate");
-        beanMapping.put("transitiveDelegate", "de.viadee.bpm.vPAV.delegates.TransitiveDelegate");
-        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
+    public static void setup() throws IOException {
+        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        new JavaReaderStatic().setupSoot();
+        Scene.v().loadNecessaryClasses();
 
         final File file = new File(".");
         final String currentPath = file.toURI().toURL().toString();
@@ -82,7 +83,14 @@ public class JavaDelegateCheckerTest {
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
+
+        // Bean-Mapping
+        final Map<String, String> beanMapping = new HashMap<>();
+        beanMapping.put("FalschesDelegate_bla", "de.test.Test");
+        beanMapping.put("testDelegate", "de.viadee.bpm.vPAV.delegates.TestDelegate");
+        beanMapping.put("transitiveDelegate", "de.viadee.bpm.vPAV.delegates.TransitiveDelegate");
+        RuntimeConfig.getInstance().setBeanMapping(beanMapping);
     }
 
     /**

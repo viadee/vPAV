@@ -61,7 +61,7 @@ public class ProcessApplicationValidatorTest {
         // Set custom basepath.
         Properties myProperties = new Properties();
         myProperties.put("basepath", "src/test/resources/ProcessApplicationValidatorTest/");
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
 
         // Bean-Mapping
         final Map<String, String> beanMapping = new HashMap<>();
@@ -102,7 +102,6 @@ public class ProcessApplicationValidatorTest {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = "src/test/resources/ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 

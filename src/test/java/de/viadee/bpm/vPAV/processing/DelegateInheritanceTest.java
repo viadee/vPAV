@@ -29,39 +29,61 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.spring;
+package de.viadee.bpm.vPAV.processing;
 
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.Helper;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import soot.Scene;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Properties;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = { SayHelloDelegate.class })
-public class SpringTest {
+public class DelegateInheritanceTest {
 
-    @Autowired
-    private ApplicationContext ctx;
+    private static final String BASE_PATH = "src/test/resources/";
+
+    @BeforeClass
+    public static void setup() throws IOException {
+        RuntimeConfig.getInstance().setTest(true);
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        new JavaReaderStatic().setupSoot();
+        Scene.v().loadNecessaryClasses();
+
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        ClassLoader cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+    }
+
+    @Before
+    public void setupProperties() {
+        Properties myProperties = new Properties();
+        myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
+        RuntimeConfig.getInstance().setProperties(myProperties);
+    }
 
     @Test
-    public void validateModel() {
-        RuntimeConfig.getInstance().setTest(true);
-        Properties properties = new Properties();
-        properties.put("basepath", RuntimeConfig.getInstance().getBasepath() + "spring/");
-        properties.put("ruleSetPath", RuntimeConfig.getInstance().getBasepath() + "spring/");
-        RuntimeConfig.getInstance().setProperties(properties);
-        Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelInconsistencies(ctx);
-        Assert.assertEquals(1, issues.size());
-        Assert.assertEquals("UnkownVariable", issues.iterator().next().getVariable());
+    public void testDelegateInheritance() {
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
+        final Collection<Graph> graphCollection = Helper
+                .getModelWithDelegate("de.viadee.bpm.vPAV.delegates.SubClassDelegate", flowAnalysis);
+
+        flowAnalysis.analyze(graphCollection);
+        Assert.assertEquals(2, flowAnalysis.getNodes().get("ServiceTask_108g52x__0").getOperations().size());
     }
 }

@@ -69,7 +69,7 @@ public class ProcessVariablesModelCheckerStatic {
 		final URL[] classUrls = { classUrl };
 		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
+		RuntimeConfig.getInstance().setResource("en_US");
 		RuntimeConfig.getInstance().setTest(true);
 	}
 
@@ -81,8 +81,8 @@ public class ProcessVariablesModelCheckerStatic {
 		final Set<String> resources = new HashSet<>();
 		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
 		Properties myProperties = new Properties();
-		myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
-		ConfigConstants.getInstance().setProperties(myProperties);
+		myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
+		RuntimeConfig.getInstance().setProperties(myProperties);
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTestStatic_GraphCreation.bpmn";
 		final File processDefinition = new File(PATH);

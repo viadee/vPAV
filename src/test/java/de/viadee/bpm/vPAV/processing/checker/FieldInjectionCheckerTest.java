@@ -79,7 +79,7 @@ public class FieldInjectionCheckerTest {
 		final URL[] classUrls = { classUrl };
 		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().getResource("en_US");
+		RuntimeConfig.getInstance().setResource("en_US");
 	}
 
 	/**

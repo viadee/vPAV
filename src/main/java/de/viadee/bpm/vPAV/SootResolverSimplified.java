@@ -54,6 +54,27 @@ public class SootResolverSimplified {
     public static Block getBlockFromClass(String className, String methodName, List<Type> parameterTypes,
             Type returnType) {
         SootClass sootClass = setupSootClass(className);
+        if (sootClass == null) {
+            LOGGER.warning("Class " + className + " could not be loaded.");
+            return null;
+        }
+        return getBlockFromClass(setupSootClass(className), methodName, parameterTypes, returnType);
+    }
+
+    public static SootMethod getMethodFromClass(SootClass sootClass, String methodName, List<Type> parameterTypes,
+            Type returnType) {
+        if (defaultMethods.contains(methodName)) {
+            // Create parameter types for entry point methods
+            parameterTypes = getParametersForDefaultMethods(methodName);
+            returnType = VoidType.v();
+        }
+
+        SootMethod sootMethod = getSootMethod(sootClass, methodName, parameterTypes, returnType);
+        return sootMethod;
+    }
+
+    public static Block getBlockFromClass(SootClass sootClass, String methodName, List<Type> parameterTypes,
+            Type returnType) {
         if (sootClass != null) {
             if (defaultMethods.contains(methodName)) {
                 // Create parameter types for entry point methods
@@ -65,11 +86,11 @@ public class SootResolverSimplified {
             return getBlockFromMethod(sootMethod);
         }
 
-        LOGGER.warning("Class " + className + " could not be loaded.");
+        LOGGER.warning("Class " + sootClass.getName() + " could not be loaded.");
         return null;
     }
 
-    private static SootMethod getSootMethod(final SootClass sootClass, final String methodName,
+    public static SootMethod getSootMethod(final SootClass sootClass, final String methodName,
             List<Type> parameterTypes, final Type returnType) {
         SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
@@ -115,7 +136,7 @@ public class SootResolverSimplified {
         return null;
     }
 
-    private static SootClass setupSootClass(String className) {
+    public static SootClass setupSootClass(String className) {
         className = ProcessVariablesScanner.cleanString(className, true);
         SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
         if (sootClass != null) {

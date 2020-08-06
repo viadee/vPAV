@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE xml>
+<ruleSet>
+    <rule>
+        <name>OverlapChecker</name>
+        <state>false</state>
+    </rule>
+    <rule>
+        <name>DataFlowChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>JavaDelegateChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>ProcessVariablesModelChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>TimerExpressionChecker</name>
+        <state>true</state>
+    </rule>
+</ruleSet>

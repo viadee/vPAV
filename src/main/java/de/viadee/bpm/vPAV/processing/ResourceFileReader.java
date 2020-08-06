@@ -75,14 +75,14 @@ public class ResourceFileReader {
 
                 if (RuntimeConfig.getInstance().isTest()) {
                     if (fileName.endsWith(".java"))
-                        directoryScanner.setBasedir(ConfigConstants.TEST_JAVAPATH);
+                        directoryScanner.setBasedir(ConfigConstants.JAVA_PATH_TEST);
                     else
-                        directoryScanner.setBasedir(ConfigConstants.TEST_BASEPATH);
+                        directoryScanner.setBasedir(ConfigConstants.BASE_PATH_TEST);
                 } else {
                     if (fileName.endsWith(".java"))
-                        directoryScanner.setBasedir(ConfigConstants.JAVAPATH);
+                        directoryScanner.setBasedir(ConfigConstants.JAVA_PATH);
                     else
-                        directoryScanner.setBasedir(ConfigConstants.getInstance().getBasepath());
+                        directoryScanner.setBasedir(RuntimeConfig.getInstance().getBasepath());
                 }
 
                 Resource s = directoryScanner.getResource(fileName);

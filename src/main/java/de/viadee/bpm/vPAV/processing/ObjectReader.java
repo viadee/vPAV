@@ -61,14 +61,17 @@ public class ObjectReader {
 
     public BasicNode returnNode;
 
+    private SootClass currentJavaClass;
+
     // Only used for testing purposes
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
-            ProcessVariablesCreator processVariablesCreator) {
+            ProcessVariablesCreator processVariablesCreator, SootClass currentJavaClass) {
         this.localStringVariables = localStrings;
         this.localObjectVariables = localObjects;
         this.thisObject = thisObject;
         this.processVariablesCreator = processVariablesCreator;
+        this.currentJavaClass = currentJavaClass;
     }
 
     /**
@@ -76,8 +79,9 @@ public class ObjectReader {
      *
      * @param processVariablesCreator that is used for creating the data flow graph
      */
-    public ObjectReader(ProcessVariablesCreator processVariablesCreator) {
+    public ObjectReader(ProcessVariablesCreator processVariablesCreator, SootClass currentJavaClass) {
         this.processVariablesCreator = processVariablesCreator;
+        this.currentJavaClass = currentJavaClass;
     }
 
     /**
@@ -86,9 +90,11 @@ public class ObjectReader {
      * @param processVariablesCreator that is used for creating the data flow graph
      * @param thisObject              ObjectVariable that refers to the object that contains the block
      */
-    private ObjectReader(ProcessVariablesCreator processVariablesCreator, ObjectVariable thisObject) {
+    private ObjectReader(ProcessVariablesCreator processVariablesCreator, ObjectVariable thisObject,
+            SootClass currentJavaClass) {
         this.processVariablesCreator = processVariablesCreator;
         this.thisObject = thisObject;
+        this.currentJavaClass = currentJavaClass;
     }
 
     /**
@@ -119,7 +125,7 @@ public class ObjectReader {
         if (thisName == null) {
             // Find out variable name of this reference, it's always defined in the first unit
             // If not, it´s a static method
-            if(block.iterator().next() instanceof IdentityStmt) {
+            if (block.iterator().next() instanceof IdentityStmt) {
                 thisName = getThisNameFromUnit(unitIt.next());
             }
         }
@@ -143,12 +149,12 @@ public class ObjectReader {
             // e. g. return temp$3
             else if (unit instanceof ReturnStmt) {
                 Object returnValue = handleReturnStmt(block, unit, thisName);
-                returnNode = processVariablesCreator.addNodeIfNotExisting(block);
+                returnNode = processVariablesCreator.addNodeIfNotExisting(block, currentJavaClass);
                 return returnValue;
             }
             // return
             else if (unit instanceof ReturnVoidStmt) {
-                returnNode = processVariablesCreator.addNodeIfNotExisting(block);
+                returnNode = processVariablesCreator.addNodeIfNotExisting(block, currentJavaClass);
                 return null;
             }
         }
@@ -158,7 +164,7 @@ public class ObjectReader {
             Node blockNode = null;
             for (Block succ : block.getSuccs()) {
                 if (blockNode == null) {
-                    blockNode = processVariablesCreator.getNodeOfBlock(block);
+                    blockNode = processVariablesCreator.getNodeOfBlock(block, currentJavaClass);
                 }
 
                 processVariablesCreator.pushNodeToStack(blockNode);
@@ -275,8 +281,8 @@ public class ObjectReader {
      */
     Object handleInvokeExpr(Block block, InvokeExpr expr, String thisName) {
         CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
-                .findByNameAndNumberOfBoxes(expr.getMethod().getName(),
-                        expr.getMethod().getDeclaringClass().getName(), expr.getArgCount());
+                .findByNameAndNumberOfBoxes(expr.getMethodRef().getName(),
+                        expr.getMethodRef().getDeclaringClass().getName(), expr.getArgCount());
 
         if (foundMethod != null) {
             // Process variable is manipulated
@@ -294,9 +300,24 @@ public class ObjectReader {
 
                 // Method on this object is called
                 if (targetObjName.equals(thisName)) {
+                    if (expr.getMethod() != null && expr.getMethod().getDeclaringClass() == this.currentJavaClass) {
+                        Block nextBlock = SootResolverSimplified.getBlockFromMethod(expr.getMethod());
+
+                        if (nextBlock != null) {
+                            return this
+                                    .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args,
+                                            argValues,
+                                            null);
+                        }
+
+                    }
+                    // Search method in class hierarchy
                     return this
-                            .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args, argValues,
+                            .processBlock(SootResolverSimplified.getBlockFromMethod(
+                                    findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())), args,
+                                    argValues,
                                     null);
+
                 } else {
                     // Method on another object is called
                     targetObj = localObjectVariables.get(targetObjName);
@@ -314,9 +335,8 @@ public class ObjectReader {
             }
 
             // Process method from another class/object
-            ObjectReader or = new ObjectReader(processVariablesCreator, targetObj);
-
-            if (method.getDeclaringClass().getPackageName().startsWith("java.")) {
+            if (method.getDeclaringClass().getPackageName().startsWith("java.") || method.getDeclaringClass()
+                    .getPackageName().startsWith("org.camunda.")) {
                 // Skip native java classes
                 return null;
             }
@@ -324,6 +344,8 @@ public class ObjectReader {
             if (nextBlock == null) {
                 return null;
             }
+            ObjectReader or = new ObjectReader(processVariablesCreator, targetObj,
+                    method.getDeclaringClass());
             return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
         }
     }
@@ -351,6 +373,16 @@ public class ObjectReader {
             }
         }
         return null;
+    }
+
+    SootMethod findMethodInHierachy(SootClass currentClass, SootMethodRef methodRef) {
+        if (currentClass
+                .declaresMethod(methodRef.getName(), methodRef.getParameterTypes(), methodRef.getReturnType())) {
+            return currentClass
+                    .getMethod(methodRef.getName(), methodRef.getParameterTypes(), methodRef.getReturnType());
+        }
+        // Search in super class
+        return findMethodInHierachy(currentClass.getSuperclass(), methodRef);
     }
 
     /**
@@ -559,7 +591,7 @@ public class ObjectReader {
                     processVariablesCreator.getScopeId());
         }
 
-        processVariablesCreator.handleProcessVariableManipulation(block, pvo);
+        processVariablesCreator.handleProcessVariableManipulation(block, pvo, currentJavaClass);
     }
 
     /**

@@ -45,9 +45,9 @@ public class IssueIDHashingTest {
 	@Test
 	public void testElementIDsShouldImpactHash() {
 		final CheckerIssue issue1 = new CheckerIssue("ruleName", "ruleDescription", CriticalityEnum.ERROR,
-				"folder/file.bpmn", "elementId123", "elementName Some Name", "Message to be displayed");
+				"folder/file.bpmn", "elementId123", "elementName Some Name", "Message to be displayed", "my.class.name");
 		final CheckerIssue issue2 = new CheckerIssue("ruleName", "ruleDescription", CriticalityEnum.ERROR,
-				"folder/file.bpmn", "elementId888", "elementName Some Name", "Message to be displayed");
+				"folder/file.bpmn", "elementId888", "elementName Some Name", "Message to be displayed", "my.class.name");
 
 		assertNotEquals("Element ID does not impact an issues hash", issue1.getId(), issue2.getId());
 	}
@@ -60,9 +60,9 @@ public class IssueIDHashingTest {
 	@Test
 	public void testPathDelimitersShouldNotImpactHash() {
 		final CheckerIssue issue1 = new CheckerIssue("ruleName", "ruleDescription", CriticalityEnum.ERROR,
-				"folder/file.bpmn", "elementId123", "elementName Some Name", "Message to be displayed");
+				"folder/file.bpmn", "elementId123", "elementName Some Name", "Message to be displayed", "my.class.name");
 		final CheckerIssue issue2 = new CheckerIssue("ruleName", "ruleDescription", CriticalityEnum.ERROR,
-				"folder\\file.bpmn", "elementId123", "elementName Some Name", "Message to be displayed");
+				"folder\\file.bpmn", "elementId123", "elementName Some Name", "Message to be displayed", "my.class.name");
 
 		assertEquals("Issue hash may not depend on operating systeme specific path delimiters", issue1.getId(),
 				issue2.getId());

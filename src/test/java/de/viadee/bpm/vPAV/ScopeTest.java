@@ -69,7 +69,7 @@ public class ScopeTest {
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
         RuntimeConfig.getInstance().setTest(true);
         FileScanner.setupSootClassPaths(new LinkedList<>());
         JavaReaderStatic.setupSoot();
@@ -79,8 +79,8 @@ public class ScopeTest {
     @Before
     public void setupProperties() {
         Properties myProperties = new Properties();
-        myProperties.put("scanpath", ConfigConstants.TEST_TARGET_PATH);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
+        RuntimeConfig.getInstance().setProperties(myProperties);
     }
 
     @Test
@@ -295,7 +295,6 @@ public class ScopeTest {
         ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap);
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
                 new ProcessVariablesScanner(null), flowAnalysis);
 
@@ -384,7 +383,6 @@ public class ScopeTest {
         ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null);
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
         // Test that input parameters are not passed beyond scope
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().serviceTask("MyServiceTask")
@@ -407,7 +405,6 @@ public class ScopeTest {
         ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null);
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
         // Test that global variables are accessible in subprocesses and that variables are accessible outside
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().serviceTask()
@@ -438,7 +435,6 @@ public class ScopeTest {
         ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, processIdToPathMap);
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
 
         // Test that variables in called processes are scoped
         BpmnModelInstance modelInstance = Bpmn.createProcess().startEvent().serviceTask()

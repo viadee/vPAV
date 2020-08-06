@@ -82,13 +82,12 @@ public class UserVariablesTest {
     public void testUserVariablesInclusionInGraph() {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
 
         Properties myProperties = new Properties();
         myProperties.put("userVariablesFilePath", "UserVariablesTest/" + ConfigConstants.USER_VARIABLES_FILE);
-        ConfigConstants.getInstance().setProperties(myProperties);
+        RuntimeConfig.getInstance().setProperties(myProperties);
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));

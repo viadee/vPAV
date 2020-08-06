@@ -43,100 +43,99 @@ import java.util.HashMap;
 
 public class ProcessApplicationValidator {
 
-	private static Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
+    private static Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
 
-	/**
-	 * Find model errors without spring context but manual bean map
-	 * 
-	 * @param beanMap
-	 *            Map to resolve beans
-	 * @return all issues
-	 */
-	public static Collection<CheckerIssue> findModelInconsistencies(final HashMap<String, String> beanMap) {
-		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-		RuntimeConfig.getInstance().setBeanMapping(beanMap);
-		Runner runner = createRunner();
+    public static void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {
+        ProcessApplicationValidator.dataFlowRules = dataFlowRules;
+    }
 
-		return runner.getFilteredIssues();
-	}
+    /**
+     * Find model errors without spring context but manual bean map
+     *
+     * @param beanMap Map to resolve beans
+     * @return all issues
+     */
+    public static Collection<CheckerIssue> findModelInconsistencies(final HashMap<String, String> beanMap) {
+        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+        RuntimeConfig.getInstance().setBeanMapping(beanMap);
+        Runner runner = createRunner();
 
-	/**
-	 * Find model errors without spring context
-	 *
-	 * @return all issues
-	 */
-	public static Collection<CheckerIssue> findModelInconsistencies() {
-		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-		Runner runner = createRunner();
+        return runner.getFilteredIssues();
+    }
 
-		return runner.getFilteredIssues();
-	}
+    /**
+     * Find model errors without spring context
+     *
+     * @return all issues
+     */
+    public static Collection<CheckerIssue> findModelInconsistencies() {
+        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+        Runner runner = createRunner();
 
-	/**
-	 * Find issues with given ApplicationContext (Spring)
-	 *
-	 * @param ctx
-	 *            - Spring context
-	 * @return all issues
-	 */
-	public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
-		RuntimeConfig.getInstance().setApplicationContext(ctx);
-		RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
-		RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
-		Runner runner = createRunner();
-		return runner.getFilteredIssues();
-	}
+        return runner.getFilteredIssues();
+    }
 
-	/**
-	 * Find model errors with given ApplicationContext (Spring)
-	 *
-	 * @param ctx
-	 *            - Spring context
-	 * @return all issues
-	 */
-	public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {
-		return filterErrors(findModelInconsistencies(ctx));
-	}
+    /**
+     * Find issues with given ApplicationContext (Spring)
+     *
+     * @param ctx - Spring context
+     * @return all issues
+     */
+    public static Collection<CheckerIssue> findModelInconsistencies(ApplicationContext ctx) {
+        RuntimeConfig.getInstance().setApplicationContext(ctx);
+        RuntimeConfig.getInstance().setBeanMapping(BeanMappingGenerator.generateBeanMappingFile(ctx));
+        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+        Runner runner = createRunner();
+        return runner.getFilteredIssues();
+    }
 
-	/**
-	 * Find model errors without spring context but manual bean map
-	 *
-	 * @param beanMap
-	 *            Map to resolve beans
-	 * @return issues with status error
-	 */
-	public static Collection<CheckerIssue> findModelErrors(final HashMap<String, String> beanMap) {
-		return filterErrors(findModelInconsistencies(beanMap));
-	}
+    /**
+     * Find model errors with given ApplicationContext (Spring)
+     *
+     * @param ctx - Spring context
+     * @return all issues
+     */
+    public static Collection<CheckerIssue> findModelErrors(ApplicationContext ctx) {
+        return filterErrors(findModelInconsistencies(ctx));
+    }
 
-	/**
-	 * Filter an issue collection by status
-	 *
-	 * @param filteredIssues
-	 *            - Filtered issues
-	 * @return issues with status
-	 */
-	private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues) {
-		Collection<CheckerIssue> filteredErrors = new ArrayList<>();
+    /**
+     * Find model errors without spring context but manual bean map
+     *
+     * @param beanMap Map to resolve beans
+     * @return issues with status error
+     */
+    public static Collection<CheckerIssue> findModelErrors(final HashMap<String, String> beanMap) {
+        return filterErrors(findModelInconsistencies(beanMap));
+    }
 
-		for (CheckerIssue issue : filteredIssues) {
-			if (issue.getClassification().equals(CriticalityEnum.ERROR)) {
-				filteredErrors.add(issue);
-			}
-		}
-		return filteredErrors;
-	}
+    /**
+     * Filter an issue collection by status
+     *
+     * @param filteredIssues - Filtered issues
+     * @return issues with status
+     */
+    private static Collection<CheckerIssue> filterErrors(Collection<CheckerIssue> filteredIssues) {
+        Collection<CheckerIssue> filteredErrors = new ArrayList<>();
 
-	/**
-	 * Creates a new runner and returns it
-	 *
-	 * @return Runner
-	 */
-	private static Runner createRunner() {
-		Runner runner = new Runner();
-		runner.setDataFlowRules(dataFlowRules);
-		dataFlowRules = new ArrayList<>();
-		runner.viadeeProcessApplicationValidator();
-		return runner;
-	}
+        for (CheckerIssue issue : filteredIssues) {
+            if (issue.getClassification().equals(CriticalityEnum.ERROR)) {
+                filteredErrors.add(issue);
+            }
+        }
+        return filteredErrors;
+    }
+
+    /**
+     * Creates a new runner and returns it
+     *
+     * @return Runner
+     */
+    private static Runner createRunner() {
+        Runner runner = new Runner();
+        runner.setDataFlowRules(dataFlowRules);
+        dataFlowRules = new ArrayList<>();
+        runner.viadeeProcessApplicationValidator();
+        return runner;
+    }
 }

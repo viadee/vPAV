@@ -58,10 +58,6 @@ public class Helper {
 
     public static ModelInstance emptyModel = Bpmn.createEmptyModel();
 
-    static {
-        fileScanner.setScanPath(ConfigConstants.TEST_JAVAPATH);
-    }
-
     public static Collection<Graph> getModelWithDelegate(String delegateClass, FlowAnalysis flowAnalysis) {
         final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
         final Collection<String> calledElementHierarchy = new ArrayList<>();

@@ -74,7 +74,7 @@ public class BoundaryErrorCheckerTest {
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
         RuntimeConfig.getInstance().setTest(true);
-        RuntimeConfig.getInstance().getResource("en_US");
+        RuntimeConfig.getInstance().setResource("en_US");
 
         // Bean-Mapping
         final Map<String, String> beanMapping = new HashMap<>();

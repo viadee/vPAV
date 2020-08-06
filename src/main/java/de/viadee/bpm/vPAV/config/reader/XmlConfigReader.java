@@ -190,9 +190,10 @@ public final class XmlConfigReader implements ConfigReader {
     private static RuleSet splitRules(Map<String, Map<String, Rule>> rules) {
         // Check if rule set has parent
         boolean hasParentRuleSet = false;
-        if (rules.containsKey(ConfigConstants.HASPARENTRULESET)) {
-            hasParentRuleSet = rules.get(ConfigConstants.HASPARENTRULESET).get(ConfigConstants.HASPARENTRULESET).isActive();
-            rules.remove(ConfigConstants.HASPARENTRULESET);
+        if (rules.containsKey(ConfigConstants.HAS_PARENT_RULESET)) {
+            hasParentRuleSet = rules.get(ConfigConstants.HAS_PARENT_RULESET).get(ConfigConstants.HAS_PARENT_RULESET)
+                    .isActive();
+            rules.remove(ConfigConstants.HAS_PARENT_RULESET);
         }
 
         HashMap<String, Map<String, Rule>> elementRules = new HashMap<>();
@@ -264,9 +265,11 @@ public final class XmlConfigReader implements ConfigReader {
     }
 
     private static void checkSingletonRule(Map<String, Map<String, Rule>> rules) {
-        Map<String, Rule> rulesSubset = rules.get(ConfigConstants.HASPARENTRULESET);
-        if (rulesSubset != null && (rulesSubset.size() > 1 || rulesSubset.get(ConfigConstants.HASPARENTRULESET) == null)) {
-            LOGGER.severe("Rule '" + ConfigConstants.HASPARENTRULESET + "' is only allowed once and without defining an ID.");
+        Map<String, Rule> rulesSubset = rules.get(ConfigConstants.HAS_PARENT_RULESET);
+        if (rulesSubset != null && (rulesSubset.size() > 1
+                || rulesSubset.get(ConfigConstants.HAS_PARENT_RULESET) == null)) {
+            LOGGER.severe("Rule '" + ConfigConstants.HAS_PARENT_RULESET
+                    + "' is only allowed once and without defining an ID.");
         }
     }
 

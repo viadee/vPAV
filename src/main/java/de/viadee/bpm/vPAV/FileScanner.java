@@ -31,25 +31,12 @@
  */
 package de.viadee.bpm.vPAV;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
+import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -63,12 +50,18 @@ import org.camunda.bpm.model.dmn.DmnModelException;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.camunda.bpm.model.dmn.instance.Decision;
 
-import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.config.model.Setting;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
-import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * scans maven project for files, which are necessary for the later analysis
@@ -87,8 +80,6 @@ public class FileScanner {
 
 	private Map<String, String> processIdToPathMap;
 
-	private String scanPath;
-
 	private static String scheme = null;
 
 	private static StringBuilder sootPath = new StringBuilder();
@@ -103,12 +94,12 @@ public class FileScanner {
 
 		final DirectoryScanner scanner = new DirectoryScanner();
 		File basedir = null;
-		String basepath = ConfigConstants.getInstance().getBasepath();
+		String basepath = RuntimeConfig.getInstance().getBasepath();
 
 		if (basepath.startsWith("file:/")) {
 			// Convert URI
 			try {
-				basedir = new File(new URI(ConfigConstants.getInstance().getBasepath()));
+				basedir = new File(new URI(RuntimeConfig.getInstance().getBasepath()));
 			} catch (URISyntaxException e) {
 				LOGGER.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
 			}
@@ -128,8 +119,8 @@ public class FileScanner {
 			System.exit(0);
 		}
 
-		scanPath = ConfigConstants.getInstance().getScanPath();
-		String filePattern = ConfigConstants.getInstance().getFilePattern();
+		String scanPath = RuntimeConfig.getInstance().getScanPath();
+		String filePattern = RuntimeConfig.getInstance().getFilePattern();
 
 		scanner.setBasedir(scanPath);
 		// get file paths of process definitions
@@ -218,7 +209,20 @@ public class FileScanner {
 			LOGGER.warning("Could not find target/classes folder");
 		}
 
-		for (String entry: classPathEntries) {
+		final String whiteListProperty = RuntimeConfig.getInstance().getWhiteList();
+		List<String> whitelist = Arrays.stream(whiteListProperty.split("\\s*,\\s*"))
+				.map(entry -> entry.replace("/", "\\\\").trim())
+				.collect(Collectors.toList());
+
+		for (String entry : classPathEntries) {
+			if (!whiteListProperty.isEmpty()) {
+				for (String item : whitelist) {
+					Pattern pattern = Pattern.compile(item);
+					if (pattern.matcher(entry).find()) {
+						addStringToSootPath(entry);
+					}
+				}
+			}
 			// retrieve all jars during runtime and pass them to get class files
 			if (Pattern.compile(".*target/classes.*").matcher(entry).find()
 					|| Pattern.compile(".*target/test-classes.*").matcher(entry).find()) {
@@ -346,12 +350,12 @@ public class FileScanner {
 			// read bpmn file
 			BpmnModelInstance modelInstance;
 			File bpmnfile = null;
-			String basepath = ConfigConstants.getInstance().getBasepath();
+			String basepath = RuntimeConfig.getInstance().getBasepath();
 
 			if (basepath.startsWith("file:/")) {
 				// Convert URI
 				try {
-					bpmnfile = new File(new URI(ConfigConstants.getInstance().getBasepath() + path));
+					bpmnfile = new File(new URI(RuntimeConfig.getInstance().getBasepath() + path));
 				} catch (URISyntaxException e) {
 					LOGGER.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
 				}
@@ -393,7 +397,7 @@ public class FileScanner {
 			// read dmn file
 			DmnModelInstance modelInstance;
 			try {
-				modelInstance = Dmn.readModelFromFile(new File(ConfigConstants.getInstance().getBasepath() + path));
+				modelInstance = Dmn.readModelFromFile(new File(RuntimeConfig.getInstance().getBasepath() + path));
 			} catch (final DmnModelException ex) {
 				throw new RuntimeException("dmn model couldn't be read", ex);
 			}
@@ -502,19 +506,19 @@ public class FileScanner {
 			if (rule != null && rule.isActive()) {
 				Setting setting = null;
 				final Map<String, Setting> settings = rule.getSettings();
-				if (settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
-						&& !settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
-					setting = settings.get(ConfigConstants.VERSIONINGSCHEMECLASS);
+				if (settings.containsKey(ConfigConstants.VERSIONING_SCHEME_CLASS)
+						&& !settings.containsKey(ConfigConstants.VERSIONING_SCHEME_PACKAGE)) {
+					setting = settings.get(ConfigConstants.VERSIONING_SCHEME_CLASS);
 					isDirectory = false;
-				} else if (!settings.containsKey(ConfigConstants.VERSIONINGSCHEMECLASS)
-						&& settings.containsKey(ConfigConstants.VERSIONINGSCHEMEPACKAGE)) {
-					setting = settings.get(ConfigConstants.VERSIONINGSCHEMEPACKAGE);
+				} else if (!settings.containsKey(ConfigConstants.VERSIONING_SCHEME_CLASS)
+						&& settings.containsKey(ConfigConstants.VERSIONING_SCHEME_PACKAGE)) {
+					setting = settings.get(ConfigConstants.VERSIONING_SCHEME_PACKAGE);
 					isDirectory = true;
 				}
 				if (setting == null) {
 					throw new ConfigItemNotFoundException("VersioningChecker: Versioning Scheme could not be read. "
-							+ "Possible options: " + ConfigConstants.VERSIONINGSCHEMECLASS + " or "
-							+ ConfigConstants.VERSIONINGSCHEMEPACKAGE);
+							+ "Possible options: " + ConfigConstants.VERSIONING_SCHEME_CLASS + " or "
+							+ ConfigConstants.VERSIONING_SCHEME_PACKAGE);
 				} else {
 					scheme = setting.getValue().trim();
 				}
@@ -555,9 +559,4 @@ public class FileScanner {
 		}
 		return sootPath.toString().substring(0, sootPath.toString().length() - 1);
 	}
-
-	public void setScanPath(String scanPath) {
-		this.scanPath = scanPath;
-	}
-
 }
