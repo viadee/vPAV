@@ -16,9 +16,6 @@
     <rule>
         <name>ProcessVariablesModelChecker</name>
         <state>true</state>
-        <settings>
-            <setting name="UseStaticAnalysisBoolean">false</setting>
-        </settings>
     </rule>
     <rule>
         <name>TimerExpressionChecker</name>

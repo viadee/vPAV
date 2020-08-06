@@ -87,9 +87,6 @@
     <rule>
         <name>ProcessVariablesModelChecker</name>
         <state>true</state>
-        <settings>
-            <setting name="UseStaticAnalysisBoolean">true</setting>
-        </settings>
     </rule>
     <rule>
         <name>ProcessVariablesNameConventionChecker</name>
