@@ -49,7 +49,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -169,15 +168,15 @@ public class Runner {
 		deleteFiles();
 		createvPAVFolder();
 		try {
-			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolder()));
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolderOfSingleProject()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getCssFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getImgFolder()));
-			if (ConfigConstants.getInstance().isMultiProjectScan()) {
-				Files.createDirectory(Paths.get(ConfigConstants.EXTERNAL_REPORTS_FOLDER));
-				Files.createDirectory(Paths.get(ConfigConstants.JS_FOLDER_MULTI_PROJECT));
+			if (RuntimeConfig.getInstance().isMultiProjectScan()) {
+				Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getExternalReportsFolder()));
+				Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolderOfMultiProject()));
 			}
 		} catch (IOException e) {
-			logger.warning("Could not create either output folder for JS, CSS or IMG");
+			logger.warning("Could not create either for JS, CSS, IMG or external reports output folder");
 		}
 
 	}
@@ -341,16 +340,15 @@ public class Runner {
 				}
 			});
 			//Copy reports from external vPAV projects
-			if (ConfigConstants.getInstance().isMultiProjectScan()) {
+			if (RuntimeConfig.getInstance().isMultiProjectScan()) {
 				externalReportsPaths = new LinkedList<String>();
-				for (int i = 0; i < ConfigConstants.getInstance().getGeneratedReports().length; i++) {
-					String sourcePath = ConfigConstants.getInstance()
-							.getGeneratedReports()[i];
+				for (int i = 0; i < RuntimeConfig.getInstance().getGeneratedReports().length; i++) {
+					String sourcePath = RuntimeConfig.getInstance().getGeneratedReports()[i];
 					File sourceLocation = new File(sourcePath);
-					File targetLocation = new File(ConfigConstants.EXTERNAL_REPORTS_FOLDER,
+					File targetLocation = new File(RuntimeConfig.getInstance().getExternalReportsFolder(),
 							String.format("report_%d", i + 1));
 					String relativeTargetPath = "." + targetLocation.getPath()
-							.substring(ConfigConstants.EXTERNAL_REPORTS_FOLDER.length() - 1)
+							.substring(RuntimeConfig.getInstance().getExternalReportsFolder().length() - 1)
 							.replace("\\", "/") + '/';
 					externalReportsPaths.add(relativeTargetPath + ConfigConstants.VALIDATION_HTML_OUTPUT_FILE);
 					try {
@@ -370,12 +368,12 @@ public class Runner {
 	 */
 	private Map<String, String> mapStaticFilesToTargetFolders() {
 		Map<String, String> fileToFolderMap = new HashMap<>();
-		fileToFolderMap.put("bootstrap.bundle.min.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("bpmn-navigated-viewer.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("bpmn.io.viewer.app.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("jquery-3.5.1.min.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("download.js", RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put("bootstrap.bundle.min.js", RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+		fileToFolderMap.put("bpmn-navigated-viewer.js", RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+		fileToFolderMap.put("bpmn.io.viewer.app.js", RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+		fileToFolderMap.put("jquery-3.5.1.min.js", RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+		fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+		fileToFolderMap.put("download.js", RuntimeConfig.getInstance().getJsFolderOfSingleProject());
 
 		fileToFolderMap.put("bootstrap.min.css", RuntimeConfig.getInstance().getCssFolder());
 		fileToFolderMap.put("viadee.css", RuntimeConfig.getInstance().getCssFolder());
@@ -395,11 +393,11 @@ public class Runner {
 		fileToFolderMap
 				.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, RuntimeConfig.getInstance().getValidationFolder());
 
-		if (ConfigConstants.getInstance().isMultiProjectScan()) {
+		if (RuntimeConfig.getInstance().isMultiProjectScan()) {
 			fileToFolderMap.put(ConfigConstants.VALIDATION_OVERVIEW_HTML_OUTPUT_FILE,
-					ConfigConstants.EXTERNAL_REPORTS_FOLDER);
+					RuntimeConfig.getInstance().getExternalReportsFolder());
 			fileToFolderMap.put(ConfigConstants.VALIDATION_OVERVIEW_JS_OUTPUT_FILE,
-					ConfigConstants.JS_FOLDER_MULTI_PROJECT);
+					RuntimeConfig.getInstance().getJsFolderOfMultiProject());
 		}
 
 		return fileToFolderMap;
@@ -579,7 +577,7 @@ public class Runner {
 	}
 
 	private void checkReportsOverviewPathGeneration() {
-		if (ConfigConstants.getInstance().isMultiProjectScan() && externalReportsPaths.size() > 0) {
+		if (RuntimeConfig.getInstance().isMultiProjectScan() && externalReportsPaths.size() > 0) {
 			JsOutputWriter jsOutputWriter = new JsOutputWriter();
 			jsOutputWriter.writeGeneratedReportsOverviewJS(externalReportsPaths);
 		}

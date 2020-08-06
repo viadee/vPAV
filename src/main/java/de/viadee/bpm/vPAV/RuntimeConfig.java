@@ -326,40 +326,40 @@ public class RuntimeConfig {
         properties.setProperty("language", languageCode);
     }
 
-    public String getJsFolder() {
+    public String getJsFolderOfSingleProject() {
         return getValidationFolder() + "js/";
     }
 
     public String getValidationIgnoredIssuesOutput() {
-        return getJsFolder() + "ignoredIssues.js";
+        return getJsFolderOfSingleProject() + "ignoredIssues.js";
     }
 
     public String getValidationJsProcessVariables() {
-        return getJsFolder() + "processVariables.js";
+        return getJsFolderOfSingleProject() + "processVariables.js";
     }
 
     public String getValidationJsIssueSeverity() {
-        return getJsFolder() + "issue_severity.js";
+        return getJsFolderOfSingleProject() + "issue_severity.js";
     }
 
     public String getValidationJsSuccessOutput() {
-        return getJsFolder() + "bpmn_validation_success.js";
+        return getJsFolderOfSingleProject() + "bpmn_validation_success.js";
     }
 
     public String getValidationJsCheckers() {
-        return getJsFolder() + "checkers.js";
+        return getJsFolderOfSingleProject() + "checkers.js";
     }
 
     public String getPropertiesJsOutput() {
-        return getJsFolder() + "properties.js";
+        return getJsFolderOfSingleProject() + "properties.js";
     }
 
     public String getValidationJsOutput() {
-        return getJsFolder() + "bpmn_validation.js";
+        return getJsFolderOfSingleProject() + "bpmn_validation.js";
     }
 
     public String getValidationJsModelOutput() {
-        return getJsFolder() + "bpmn_model.js";
+        return getJsFolderOfSingleProject() + "bpmn_model.js";
     }
 
     public String getCssFolder() {
@@ -368,6 +368,14 @@ public class RuntimeConfig {
 
     public String getImgFolder() {
         return getValidationFolder() + "img/";
+    }
+
+    public String getExternalReportsFolder() {
+        return getValidationFolder() + "externalReports/";
+    }
+
+    public String getJsFolderOfMultiProject() {
+        return getExternalReportsFolder() + "js/";
     }
 
     public String getEffectiveRuleset() {
@@ -380,6 +388,14 @@ public class RuntimeConfig {
 
     public String getValidationJsonOutput() {
         return getValidationFolder() + "bpmn_validation.json";
+    }
+
+    public Boolean isMultiProjectScan() {
+        return Boolean.parseBoolean(properties.getProperty("multiProjectReport", "false"));
+    }
+
+    public String[] getGeneratedReports() {
+        return properties.getProperty("generatedReports", "").split(",");
     }
 
 }
