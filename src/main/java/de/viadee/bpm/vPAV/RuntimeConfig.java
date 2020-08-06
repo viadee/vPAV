@@ -82,7 +82,7 @@ public class RuntimeConfig {
     private Properties properties;
 
     private RuntimeConfig() {
-        properties = new PropertiesReader().read();
+        properties = new PropertiesReader().initProperties();
     }
 
     public static RuntimeConfig getInstance() {
