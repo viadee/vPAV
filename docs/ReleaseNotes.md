@@ -10,7 +10,6 @@ nav_order: 8
 [**Issue 180**](https://github.com/viadee/vPAV/issues/180) Implementations of Camunda API are found when abstract classes are used
 
 [**Issue 172**](https://github.com/viadee/vPAV/issues/172)
-
 [**Issue 159**](https://github.com/viadee/vPAV/issues/159) Elements which reference source code can be highlighted in the frontend and contain a reference to the implementation
 
 [**Issue 179**](https://github.com/viadee/vPAV/issues/179) DMNs can be referenced by their IDs
