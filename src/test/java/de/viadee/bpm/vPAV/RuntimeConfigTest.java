@@ -41,10 +41,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -124,6 +121,34 @@ public class RuntimeConfigTest {
 
         // Then
         assertNotNull("Runtime Config is not initialized", rc);
+    }
+
+    @Test
+    public void testCustomValidationFolderIsApplied() {
+        String validationFolder = "./foo/bar";
+        Properties properties = new Properties();
+        properties.put("validationFolder", validationFolder);
+        RuntimeConfig rc = RuntimeConfig.getInstance();
+        rc.setProperties(properties);
+        List<String> dependentPaths = new LinkedList<String>();
+        dependentPaths.add(rc.getValidationFolder());
+        dependentPaths.add(rc.getValidationIgnoredIssuesOutput());
+        dependentPaths.add(rc.getValidationJsProcessVariables());
+        dependentPaths.add(rc.getValidationJsIssueSeverity());
+        dependentPaths.add(rc.getValidationJsSuccessOutput());
+        dependentPaths.add(rc.getValidationJsCheckers());
+        dependentPaths.add(rc.getPropertiesJsOutput());
+        dependentPaths.add(rc.getValidationJsOutput());
+        dependentPaths.add(rc.getValidationJsModelOutput());
+        dependentPaths.add(rc.getCssFolder());
+        dependentPaths.add(rc.getImgFolder());
+        dependentPaths.add(rc.getEffectiveRuleset());
+        dependentPaths.add(rc.getValidationXmlOutput());
+        dependentPaths.add(rc.getValidationJsonOutput());
+        for (String path : dependentPaths) {
+            assertTrue(String.format("Path doesn't start with validation folder: %s", path),
+                    path.startsWith(validationFolder));
+        }
     }
 
     @Test
