@@ -46,7 +46,13 @@ public class PropertiesReader {
 
     private static final Logger LOGGER = Logger.getLogger(PropertiesReader.class.getName());
 
-    public Properties read() {
+    public Properties initProperties() {
+        Properties properties = readPropertiesFromFile();
+
+        return properties;
+    }
+
+    protected Properties readPropertiesFromFile() {
         InputStream input = null;
         Properties properties = new Properties();
         try {
@@ -71,7 +77,7 @@ public class PropertiesReader {
         return properties;
     }
 
-    private Path findPropertiesPath() throws IOException {
+    protected Path findPropertiesPath() throws IOException {
         final Path[] foundFile = new Path[1];
         String pattern = "{vPav, vpav, vPAV}.properties";
         FileSystem fs = FileSystems.getDefault();
