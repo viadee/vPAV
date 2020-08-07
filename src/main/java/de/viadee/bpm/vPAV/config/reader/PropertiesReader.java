@@ -31,10 +31,16 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesParameterException;
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -48,7 +54,7 @@ public class PropertiesReader {
 
     public Properties initProperties() {
         Properties properties = readPropertiesFromFile();
-
+        this.validateProperties(properties);
         return properties;
     }
 
@@ -96,5 +102,19 @@ public class PropertiesReader {
         };
         Files.walkFileTree(Paths.get(""), matcherVisitor);
         return foundFile[0];
+    }
+
+    protected void validateProperties(Properties properties) {
+        List<String> allowedProperties = Arrays.asList("outputhtml", "language", "basepath", "parentRuleSet", "ruleSet",
+                "scanpath", "userVariablesFilePath", "validationFolder");
+        properties.keySet().forEach(key -> {
+            if (!allowedProperties.contains(key)) {
+                throw new InvalidPropertiesParameterException("Not allowed property: " + key);
+            }
+            if (StringUtils.isEmpty(properties.getProperty((String) key)) ||
+                    StringUtils.isBlank(properties.getProperty((String) key))) {
+                throw new InvalidPropertiesParameterException("Empty property: " + key);
+            }
+        });
     }
 }
