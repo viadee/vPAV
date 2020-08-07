@@ -29,13 +29,17 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.exceptions;
 
-public class ConfigItemNotFoundException extends Exception {
+public class ProcessingException extends RuntimeException {
 
-  private static final long serialVersionUID = 3363611391920321684L;
+  private static final long serialVersionUID = -7507728646377465787L;
 
-  public ConfigItemNotFoundException(final String message) {
+  public ProcessingException(final String message, Throwable e) {
+    super(message, e);
+  }
+
+  public ProcessingException(final String message) {
     super(message);
   }
 }

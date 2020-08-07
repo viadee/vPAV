@@ -35,7 +35,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.model.Setting;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.ConfigItemNotFoundException;
+import de.viadee.bpm.vPAV.exceptions.ConfigItemNotFoundException;
 import de.viadee.bpm.vPAV.processing.checker.VersioningChecker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;

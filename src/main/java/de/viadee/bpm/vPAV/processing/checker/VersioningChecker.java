@@ -42,7 +42,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.ProcessingException;
+import de.viadee.bpm.vPAV.exceptions.ProcessingException;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
