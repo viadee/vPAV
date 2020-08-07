@@ -31,9 +31,6 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
@@ -51,7 +48,7 @@ public class PropertiesReader {
 
     public Properties initProperties() {
         Properties properties = readPropertiesFromFile();
-
+        this.validateProperties(properties);
         return properties;
     }
 
@@ -78,7 +75,6 @@ public class PropertiesReader {
             }
         }
 
-        this.validateProperties(properties);
 
         return properties;
     }
@@ -132,4 +128,18 @@ public class PropertiesReader {
         }
     }
 
+
+    protected void validateProperties(Properties properties) {
+        List<String> allowedProperties = Arrays.asList("outputhtml", "language", "basepath", "parentRuleSet", "ruleSet",
+                "scanpath", "userVariablesFilePath", "validationFolder");
+        properties.keySet().forEach(key -> {
+            if (!allowedProperties.contains(key)) {
+                throw new InvalidPropertiesParameterException("Not allowed property: " + key);
+            }
+            if (StringUtils.isEmpty(properties.getProperty((String) key)) ||
+                    StringUtils.isBlank(properties.getProperty((String) key))) {
+                throw new InvalidPropertiesParameterException("Empty property: " + key);
+            }
+        });
+    }
 }
