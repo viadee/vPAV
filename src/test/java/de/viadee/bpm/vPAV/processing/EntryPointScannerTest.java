@@ -29,65 +29,48 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.model.graph;
+package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.EntryPointScanner;
-import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
-public class DelegateWithLoopTest {
-
-    private static final String BASE_PATH = "src/test/resources/";
+public class EntryPointScannerTest {
 
     @BeforeClass
-    public static void setup() throws MalformedURLException {
+    public static void setup() {
         RuntimeConfig.getInstance().setTest(true);
-        final File file = new File(".");
-        final String currentPath = file.toURI().toURL().toString();
-        final URL classUrl = new URL(currentPath + "src/test/java/");
-        final URL resourcesUrl = new URL(currentPath + "src/test/resources/");
-        final URL[] classUrls = { classUrl, resourcesUrl };
-        ClassLoader cl = new URLClassLoader(classUrls);
-        RuntimeConfig.getInstance().setClassLoader(cl);
-        RuntimeConfig.getInstance().setResource("en_US");
+        FileScanner.setupSootClassPaths(new LinkedList<>());
+        JavaReaderStatic.setupSoot();
+        Scene.v().loadNecessaryClasses();
+        String currentPath = (new File(".")).toURI().getPath();
+        Scene.v().extendSootClassPath(currentPath + "src/test/java");
+        Scene.v().defaultClassPath();
     }
 
     @Test
-    public void testDelegateLoop() {
-        final EntryPointScanner scanner = new EntryPointScanner(null);
+    public void testFindVariablesMap() {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final String PATH = BASE_PATH + "ModelWithTwoDelegates_UR.bpmn";
-        final File processDefinition = new File(PATH);
+        final Set<String> testSet = new HashSet<>();
+        testSet.add("de/viadee/bpm/vPAV/delegates/RuntimeServiceInit.java");
+        fileScanner.setJavaResourcesFileInputStream(testSet);
 
-        // parse bpmn model
-        final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(new File(PATH));
-
-        ServiceTask serviceTask = modelInstance.getModelElementById("ServiceTask_05g4a96");
-        serviceTask.setCamundaClass("de.viadee.bpm.vPAV.delegates.LoopDelegate");
-
-        final ElementGraphBuilder graphBuilder = new ElementGraphBuilder();
-        // create data flow graphs
-
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
-        final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
-                processDefinition.getPath(), new ArrayList<>(), scanner, flowAnalysis);
-
-        flowAnalysis.analyze(graphCollection);
+        final EntryPointScanner scanner = new EntryPointScanner(
+                fileScanner.getJavaResourcesFileInputStream());
+        scanner.scanProcessVariables();
+        Assert.assertEquals(1, scanner.getEntryPoints().size());
     }
 
 }

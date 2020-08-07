@@ -55,7 +55,6 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -63,7 +62,6 @@ import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.xml.ModelInstance;
 
 /**
  * Creates data flow graph based on a bpmn model
@@ -136,7 +134,7 @@ public class ElementGraphBuilder {
      */
     public Collection<Graph> createProcessGraph(final FileScanner fileScanner, final BpmnModelInstance modelInstance,
             final String processDefinition, final Collection<String> calledElementHierarchy,
-            final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
+            final EntryPointScanner scanner, final FlowAnalysis flowAnalysis) {
 
         final Collection<Graph> graphCollection = new ArrayList<>();
 
@@ -224,7 +222,7 @@ public class ElementGraphBuilder {
      * @param scanner OuterProcessVariablesScanner
      * @param graph   Graph
      */
-    private void createVariablesOfFlowElement(final ProcessVariablesScanner scanner, final Graph graph,
+    private void createVariablesOfFlowElement(final EntryPointScanner scanner, final Graph graph,
             final BpmnElement bpmnElement,
             final ListMultimap<String, ProcessVariableOperation> userVariables) {
         final FlowElement element = (FlowElement) bpmnElement.getBaseElement();
@@ -559,7 +557,7 @@ public class ElementGraphBuilder {
      */
     private void integrateCallActivityFlow(final FileScanner fileScanner, final String processDefinition,
             final BpmnElement element, final FlowElement activity, final Graph graph,
-            final Collection<String> calledElementHierarchy, final ProcessVariablesScanner scanner,
+            final Collection<String> calledElementHierarchy, final EntryPointScanner scanner,
             final FlowAnalysis flowAnalysis) {
 
         Collection<Graph> subGraphs = null;
@@ -658,7 +656,7 @@ public class ElementGraphBuilder {
      */
     private Collection<Graph> createSubDataFlowsFromCallActivity(final FileScanner fileScanner,
             final Collection<String> calledElementHierarchy, final String callActivityPath,
-            final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
+            final EntryPointScanner scanner, final FlowAnalysis flowAnalysis) {
         // read called process
         final BpmnModelInstance subModel = Bpmn
                 .readModelFromFile(new File(RuntimeConfig.getInstance().getBasepath() + callActivityPath));
@@ -673,7 +671,7 @@ public class ElementGraphBuilder {
     // Used for testing
     private Collection<Graph> createSubDataFlowsFromCallActivity(final FileScanner fileScanner,
             final Collection<String> calledElementHierarchy, final BpmnModelInstance subModel,
-            final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
+            final EntryPointScanner scanner, final FlowAnalysis flowAnalysis) {
         // transform process into data flow
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
                 messageIdToVariables, processIdToVariables, rule);

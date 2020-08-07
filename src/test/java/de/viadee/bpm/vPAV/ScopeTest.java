@@ -36,7 +36,7 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -296,7 +296,7 @@ public class ScopeTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         FileScanner fileScanner = new FileScanner(new RuleSet());
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
-                new ProcessVariablesScanner(null), flowAnalysis);
+                new EntryPointScanner(null), flowAnalysis);
 
         flowAnalysis.analyze(graphs);
         Assert.assertEquals("test",
@@ -390,7 +390,7 @@ public class ScopeTest {
                 .camundaOutputParameter("myOutputParameter", "myValue").sequenceFlowId("MySequenceFlow")
                 .endEvent().done();
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
-                new ProcessVariablesScanner(null), flowAnalysis);
+                new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphs);
 
         // Only myOutputParameter is accessible after the service task
@@ -416,7 +416,7 @@ public class ScopeTest {
                 .done();
         flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
-                new ProcessVariablesScanner(null), flowAnalysis);
+                new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphs);
         Assert.assertEquals(1, flowAnalysis.getNodes().get("MyServiceTask__0").getInUnused().size());
         Assert.assertEquals("globalVar",
@@ -442,7 +442,7 @@ public class ScopeTest {
                 .calledElement("calledProcess")
                 .endEvent("MyEndEvent").done();
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
-                new ProcessVariablesScanner(null), flowAnalysis);
+                new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphs);
 
         // Variable set in caller process is not available in called process

@@ -88,7 +88,7 @@ public class JavaReaderStatic {
             } else {
                 // Java Delegate or Listener
                 SootClass sootClass = Scene.v()
-                        .forceResolve(ProcessVariablesScanner.cleanString(classFile, true), SootClass.SIGNATURES);
+                        .forceResolve(EntryPointScanner.cleanString(classFile), SootClass.SIGNATURES);
                 SootClass implementingClass = findClassWithDelegateMethod(sootClass);
                 if (implementingClass == null) {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
@@ -150,7 +150,7 @@ public class JavaReaderStatic {
             final EntryPoint entryPoint, BasicNode[] predecessor) {
 
         if (className != null && className.trim().length() > 0) {
-            className = ProcessVariablesScanner.cleanString(className, true);
+            className = EntryPointScanner.cleanString(className);
             SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
 
             if (sootClass != null) {

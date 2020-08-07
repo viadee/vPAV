@@ -80,7 +80,7 @@ public class UserVariablesTest {
 
     @Test
     public void testUserVariablesInclusionInGraph() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);

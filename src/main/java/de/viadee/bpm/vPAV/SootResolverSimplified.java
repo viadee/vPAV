@@ -32,7 +32,7 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import soot.*;
 import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.Block;
@@ -137,7 +137,7 @@ public class SootResolverSimplified {
     }
 
     public static SootClass setupSootClass(String className) {
-        className = ProcessVariablesScanner.cleanString(className, true);
+        className = EntryPointScanner.cleanString(className);
         SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
         if (sootClass != null) {
             sootClass.setApplicationClass();

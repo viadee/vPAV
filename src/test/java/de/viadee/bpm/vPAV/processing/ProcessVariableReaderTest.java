@@ -35,7 +35,6 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -258,7 +257,7 @@ public class ProcessVariableReaderTest {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+        final EntryPointScanner scanner = new EntryPointScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 
         // parse bpmn model and set delegate

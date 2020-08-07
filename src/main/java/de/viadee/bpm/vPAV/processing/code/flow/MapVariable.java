@@ -29,71 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class EntryPoint {
+/**
+ * Represents an object variable (= currently everything that type isn´t String) during soot block analysis.
+ */
+public class MapVariable extends ObjectVariable {
 
-	private String className;
+    private Map<String, Object> values;
 
-	private String methodName;
+    public MapVariable() {
+        super();
+        values = new HashMap<>();
+    }
 
-	private String messageName;
+    public void put(String key, Object v) {
+        values.put(key, v);
+    }
 
-	private String entryPointName;
+    public Map<String, Object> getValues() {
+        return values;
+    }
 
-	private Map<String, Object> processVariables;
-
-	public EntryPoint(final String className, final String methodName, final String messageName,
-			final String entryPointName) {
-		this.className = className;
-		this.methodName = methodName;
-		this.messageName = messageName;
-		this.entryPointName = entryPointName;
-		this.processVariables = new HashMap<>();
-	}
-
-	public String getClassName() {
-		return className;
-	}
-
-	public void setClassName(String className) {
-		this.className = className;
-	}
-
-	public String getMethodName() {
-		return methodName;
-	}
-
-	public void setMethodName(String methodName) {
-		this.methodName = methodName;
-	}
-
-	public String getMessageName() {
-		return messageName;
-	}
-
-	public void setMessageName(String messageName) {
-		this.messageName = messageName;
-	}
-
-	public String getEntryPointName() {
-		return entryPointName;
-	}
-
-	public void setEntryPointName(String entryPointName) {
-		this.entryPointName = entryPointName;
-	}
-
-	public Map<String, Object> getProcessVariables() {
-		return processVariables;
-	}
-
-	public void setProcessVariables(Map<String, Object> processVariables) {
-		this.processVariables = processVariables;
-	}
+    public void setValues(Map<String, Object> values) {
+        this.values = values;
+    }
 }

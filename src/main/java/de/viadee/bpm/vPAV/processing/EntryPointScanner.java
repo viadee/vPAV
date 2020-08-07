@@ -41,7 +41,7 @@ import soot.options.Options;
 
 import java.util.*;
 
-public class ProcessVariablesScanner {
+public class EntryPointScanner {
 
     private Set<String> javaResources;
 
@@ -55,7 +55,7 @@ public class ProcessVariablesScanner {
 
     private List<EntryPoint> intermediateEntryPoints = new ArrayList<>();
 
-    public ProcessVariablesScanner(final Set<String> javaResources) {
+    public EntryPointScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
         camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID);
         camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY);
@@ -85,22 +85,7 @@ public class ProcessVariablesScanner {
      * @param processIds Set of processIds (used to retrieve variable manipulation later on)
      */
     private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
-        final String sootPath = FileScanner.getSootPath();
-        System.setProperty("soot.class.path", sootPath);
-
-        // TODO dont setup soot always again but only once at start
-        Options.v().set_whole_program(true);
-        Options.v().set_allow_phantom_refs(true);
-        ArrayList<String> excludedClasses = new ArrayList<>();
-        excludedClasses.add("java.*");
-        excludedClasses.add("sun.*");
-        excludedClasses.add("jdk.*");
-        excludedClasses.add("javax.*");
-        Options.v().set_exclude(excludedClasses);
-        Options.v().set_no_bodies_for_excluded(true);
-        Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
-
-        SootClass sootClass = Scene.v().forceResolve(cleanString(filePath, true), SootClass.SIGNATURES);
+        SootClass sootClass = Scene.v().forceResolve(cleanString(filePath), SootClass.SIGNATURES);
 
         if (sootClass != null && !sootClass.isInterface()) {
             sootClass.setApplicationClass();
@@ -169,35 +154,16 @@ public class ProcessVariablesScanner {
      * Strips unnecessary characters and returns cleaned name
      *
      * @param className Classname to be stripped of unused chars
-     * @param dot       Replace dots
      * @return cleaned String
      */
-    public static String cleanString(String className, boolean dot) {
-        final String replaceDot = ".";
-        final String replaceEmpty = "";
-        final String replaceSingleBackSlash = "\\";
-        final String replaceSingleForwardSlash = "/";
-        final String replaceDotClass = ".class";
-        final String replaceDotJava = ".java";
-
-        if (dot) {
-            if (System.getProperty("os.name").startsWith("Windows")) {
-                className = className.replace(replaceSingleBackSlash, replaceDot)
-                        .replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotClass, replaceEmpty);
-            } else {
-                className = className.replace(replaceSingleForwardSlash, replaceDot).replace(replaceDotClass,
-                        replaceEmpty).replace(replaceDotJava, replaceEmpty);
-            }
+    public static String cleanString(String className) {
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            return className.replace("\\", ".")
+                    .replace("/", ".").replace(".class", "");
         } else {
-            if (System.getProperty("os.name").startsWith("Windows")) {
-                className = className.replace(replaceDot, replaceSingleBackSlash);
-                className = className.concat(replaceDotClass);
-            } else {
-                className = className.replace(replaceDot, replaceSingleForwardSlash);
-                className = className.concat(replaceDotClass);
-            }
+            return className.replace("/", ".").replace(".class",
+                    "").replace(".java", "");
         }
-        return className;
     }
 
     /**

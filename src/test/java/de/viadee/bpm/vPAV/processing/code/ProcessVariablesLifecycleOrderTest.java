@@ -37,7 +37,7 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.AnalysisElement;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -84,7 +84,7 @@ public class ProcessVariablesLifecycleOrderTest {
         // and with 1 Receive Task (Message)
         // and with 1 Intermediate Throw Event (Link)
 
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
         RuntimeConfig.getInstance().setProperties(myProperties);
@@ -181,7 +181,7 @@ public class ProcessVariablesLifecycleOrderTest {
     @Test
     public void testProcessVariablesLifecycleWithCallActivity() {
         // Test with In/Out Variable Injection, Input/Output Parameters and Start/End Listeners
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
         RuntimeConfig.getInstance().setProperties(myProperties);

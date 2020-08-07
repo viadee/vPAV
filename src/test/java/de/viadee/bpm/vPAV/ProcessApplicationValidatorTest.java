@@ -32,10 +32,9 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -79,7 +78,7 @@ public class ProcessApplicationValidatorTest {
         // Setup soot
         RuntimeConfig.getInstance().setTest(true);
         FileScanner.setupSootClassPaths(new LinkedList<>());
-        new JavaReaderStatic().setupSoot();
+        JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
     }
 
@@ -92,7 +91,7 @@ public class ProcessApplicationValidatorTest {
         final Set<String> testSet = new HashSet<>();
         testSet.add("de/viadee/bpm/vPAV/TestDelegate.java");
         fileScanner.setJavaResourcesFileInputStream(testSet);
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+        final EntryPointScanner scanner = new EntryPointScanner(
                 fileScanner.getJavaResourcesFileInputStream());
         scanner.scanProcessVariables();
     }
@@ -102,7 +101,7 @@ public class ProcessApplicationValidatorTest {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = "src/test/resources/ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+        final EntryPointScanner scanner = new EntryPointScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 
         // parse bpmn model and set delegate

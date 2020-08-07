@@ -62,7 +62,7 @@ public class JavaReaderStaticTest {
     public static void setupSoot() {
         RuntimeConfig.getInstance().setTest(true);
         FileScanner.setupSootClassPaths(new LinkedList<>());
-        new JavaReaderStatic().setupSoot();
+        JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
     }
 

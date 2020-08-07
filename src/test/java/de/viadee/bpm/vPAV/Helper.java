@@ -32,9 +32,8 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
@@ -59,7 +58,7 @@ public class Helper {
     public static ModelInstance emptyModel = Bpmn.createEmptyModel();
 
     public static Collection<Graph> getModelWithDelegate(String delegateClass, FlowAnalysis flowAnalysis) {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final Collection<String> calledElementHierarchy = new ArrayList<>();
         final File processDefinition = new File(MODEL_DELEGATE_PATH);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -77,7 +76,7 @@ public class Helper {
         beanMapping.put("methodDelegate", delegateClass);
         RuntimeConfig.getInstance().setBeanMapping(beanMapping);
 
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final Collection<String> calledElementHierarchy = new ArrayList<>();
         final File processDefinition = new File(MODEL_DELEGATE_PATH);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);

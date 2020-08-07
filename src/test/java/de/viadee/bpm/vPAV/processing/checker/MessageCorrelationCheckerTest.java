@@ -36,7 +36,7 @@ import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -91,7 +91,7 @@ public class MessageCorrelationCheckerTest {
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+		final EntryPointScanner scanner = new EntryPointScanner(
 				fileScanner.getJavaResourcesFileInputStream());
 
 		scanner.scanProcessVariables();
@@ -128,7 +128,7 @@ public class MessageCorrelationCheckerTest {
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate2.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+		final EntryPointScanner scanner = new EntryPointScanner(
 				fileScanner.getJavaResourcesFileInputStream());
 
 		scanner.scanProcessVariables();
@@ -165,7 +165,7 @@ public class MessageCorrelationCheckerTest {
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate3.java");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+		final EntryPointScanner scanner = new EntryPointScanner(
 				fileScanner.getJavaResourcesFileInputStream());
 
 		scanner.scanProcessVariables();
@@ -200,7 +200,7 @@ public class MessageCorrelationCheckerTest {
 		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate4.class");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+		final EntryPointScanner scanner = new EntryPointScanner(
 				fileScanner.getJavaResourcesFileInputStream());
 
 		scanner.scanProcessVariables();

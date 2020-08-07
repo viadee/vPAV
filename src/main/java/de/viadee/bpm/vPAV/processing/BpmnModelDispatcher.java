@@ -74,7 +74,7 @@ public class BpmnModelDispatcher {
      * @return issues
      */
     public ModelDispatchResult dispatchWithVariables(final FileScanner fileScanner, final File processDefinition,
-            final ProcessVariablesScanner scanner, final Collection<DataFlowRule> dataFlowRules, final RuleSet conf) {
+            final EntryPointScanner scanner, final Collection<DataFlowRule> dataFlowRules, final RuleSet conf) {
         final Map<String, String> decisionRefToPathMap = fileScanner.getDecisionRefToPathMap();
         final Map<String, String> processIdToPathMap = fileScanner.getProcessIdToPathMap();
         final Collection<String> resourcesNewestVersions = fileScanner.getResourcesNewestVersions();
@@ -142,8 +142,6 @@ public class BpmnModelDispatcher {
             final Map<String, String> decisionRefToPathMap, final Map<String, String> processIdToPathMap,
             final Collection<String> resourcesNewestVersions, final RuleSet conf) {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
-
-        JavaReaderStatic.setupSoot();
 
         // parse bpmn model
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(processDefinition);
@@ -260,7 +258,7 @@ public class BpmnModelDispatcher {
      * @return CheckerCollection
      */
     Collection[] createCheckerInstances(final Collection<String> resourcesNewestVersions, final RuleSet conf,
-            final ProcessVariablesScanner scanner,
+            final EntryPointScanner scanner,
             final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
             final Map<AnomalyContainer, List<Path>> invalidPathMap) {
         CheckerFactory checkerFactory = new CheckerFactory();

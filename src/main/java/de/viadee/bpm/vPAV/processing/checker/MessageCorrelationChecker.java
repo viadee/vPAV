@@ -35,7 +35,7 @@ import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.EntryPoint;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -55,9 +55,9 @@ import java.util.List;
  */
 public class MessageCorrelationChecker extends AbstractElementChecker {
 
-    private ProcessVariablesScanner scanner;
+    private EntryPointScanner scanner;
 
-    MessageCorrelationChecker(final Rule rule, final ProcessVariablesScanner scanner) {
+    MessageCorrelationChecker(final Rule rule, final EntryPointScanner scanner) {
         super(rule);
         this.scanner = scanner;
     }
