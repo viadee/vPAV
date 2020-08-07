@@ -88,6 +88,7 @@ public class ProcessVariablesScanner {
         final String sootPath = FileScanner.getSootPath();
         System.setProperty("soot.class.path", sootPath);
 
+        // TODO dont setup soot always again but only once at start
         Options.v().set_whole_program(true);
         Options.v().set_allow_phantom_refs(true);
         ArrayList<String> excludedClasses = new ArrayList<>();
@@ -111,7 +112,6 @@ public class ProcessVariablesScanner {
                         if (body.toString().contains(entryPoint)) {
                             final PatchingChain<Unit> pc = body.getUnits();
                             for (Unit unit : pc) {
-                                // TODO i dont think that we really have to check the expressions here?
                                 if (unit instanceof AssignStmt) {
                                     final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
                                     if (rightBox.contains(entryPoint) && ((AssignStmt) unit).getRightOpBox()
