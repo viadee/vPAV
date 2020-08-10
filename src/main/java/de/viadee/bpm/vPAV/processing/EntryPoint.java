@@ -54,6 +54,15 @@ public class EntryPoint {
 		this.processVariables = new HashSet<>();
 	}
 
+	public EntryPoint(final String className, final String methodName, final String messageName,
+			final String entryPointName, final Set<String> processVariables) {
+		this.className = className;
+		this.methodName = methodName;
+		this.messageName = messageName;
+		this.entryPointName = entryPointName;
+		this.processVariables = processVariables;
+	}
+
 	public String getClassName() {
 		return className;
 	}

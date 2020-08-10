@@ -32,9 +32,9 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.SootResolverSimplified;
-import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
@@ -57,7 +57,7 @@ public class ObjectReader {
 
     private static HashMap<String, ObjectVariable> staticObjectVariables = new HashMap<>();
 
-    private ProcessVariablesCreator processVariablesCreator;
+    private ObjectReaderReceiver objectReaderReceiver;
 
     public BasicNode returnNode;
 
@@ -66,33 +66,33 @@ public class ObjectReader {
     // Only used for testing purposes
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
-            ProcessVariablesCreator processVariablesCreator, SootClass currentJavaClass) {
+            ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass) {
         this.localStringVariables = localStrings;
         this.localObjectVariables = localObjects;
         this.thisObject = thisObject;
-        this.processVariablesCreator = processVariablesCreator;
+        this.objectReaderReceiver = objectReaderReceiver;
         this.currentJavaClass = currentJavaClass;
     }
 
     /**
      * Constructor that is called the first time when starting an analysis.
      *
-     * @param processVariablesCreator that is used for creating the data flow graph
+     * @param objectReaderReceiver that is used for creating the data flow graph
      */
-    public ObjectReader(ProcessVariablesCreator processVariablesCreator, SootClass currentJavaClass) {
-        this.processVariablesCreator = processVariablesCreator;
+    public ObjectReader(ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass) {
+        this.objectReaderReceiver = objectReaderReceiver;
         this.currentJavaClass = currentJavaClass;
     }
 
     /**
      * Constructor that is called when another block is entered during the analysis.
      *
-     * @param processVariablesCreator that is used for creating the data flow graph
-     * @param thisObject              ObjectVariable that refers to the object that contains the block
+     * @param objectReaderReceiver that is used for creating the data flow graph
+     * @param thisObject           ObjectVariable that refers to the object that contains the block
      */
-    private ObjectReader(ProcessVariablesCreator processVariablesCreator, ObjectVariable thisObject,
+    private ObjectReader(ObjectReaderReceiver objectReaderReceiver, ObjectVariable thisObject,
             SootClass currentJavaClass) {
-        this.processVariablesCreator = processVariablesCreator;
+        this.objectReaderReceiver = objectReaderReceiver;
         this.thisObject = thisObject;
         this.currentJavaClass = currentJavaClass;
     }
@@ -114,7 +114,7 @@ public class ObjectReader {
 
         // Eventually add objects, arrays and int
         if (processedBlocks.contains(hashBlock(block))) {
-            processVariablesCreator.visitBlockAgain(block);
+            objectReaderReceiver.visitBlockAgain(block);
             return null;
         }
         processedBlocks.add(hashBlock(
@@ -149,12 +149,12 @@ public class ObjectReader {
             // e. g. return temp$3
             else if (unit instanceof ReturnStmt) {
                 Object returnValue = handleReturnStmt(block, unit, thisName);
-                returnNode = processVariablesCreator.addNodeIfNotExisting(block, currentJavaClass);
+                returnNode = objectReaderReceiver.addNodeIfNotExisting(block, currentJavaClass);
                 return returnValue;
             }
             // return
             else if (unit instanceof ReturnVoidStmt) {
-                returnNode = processVariablesCreator.addNodeIfNotExisting(block, currentJavaClass);
+                returnNode = objectReaderReceiver.addNodeIfNotExisting(block, currentJavaClass);
                 return null;
             }
         }
@@ -164,14 +164,14 @@ public class ObjectReader {
             Node blockNode = null;
             for (Block succ : block.getSuccs()) {
                 if (blockNode == null) {
-                    blockNode = processVariablesCreator.getNodeOfBlock(block, currentJavaClass);
+                    blockNode = objectReaderReceiver.getNodeOfBlock(block, currentJavaClass);
                 }
 
-                processVariablesCreator.pushNodeToStack(blockNode);
+                objectReaderReceiver.pushNodeToStack(blockNode);
                 this.processBlock(succ, args, argValues, thisName);
             }
             if (returnNode != null) {
-                processVariablesCreator.pushNodeToStack(returnNode);
+                objectReaderReceiver.pushNodeToStack(returnNode);
             }
         }
 
@@ -288,8 +288,13 @@ public class ObjectReader {
             // Process variable is manipulated
             notifyVariablesReader(block, expr, foundMethod);
             return null;
-        }
-        else {
+        } else if (CamundaEntryPointFunctions
+                .isEntryPoint(expr.getMethodRef().getName(), expr.getMethodRef().getDeclaringClass(),
+                        expr.getArgCount())) {
+            // Process entry point
+            notifyEntryPointProcessor(expr, thisName);
+            return null;
+        } else {
             List<Value> args = expr.getArgs();
             List<Object> argValues = resolveArgs(args, thisName);
             ObjectVariable targetObj;
@@ -325,8 +330,7 @@ public class ObjectReader {
 
                     if (targetObj == null) {
                         targetObj = new ObjectVariable();
-                    }
-                    else if(targetObj instanceof MapVariable) {
+                    } else if (targetObj instanceof MapVariable) {
                         // Handle operation on map variable
                         handleMapOperation((MapVariable) targetObj, method, expr, block, thisName);
                         return null;
@@ -350,7 +354,7 @@ public class ObjectReader {
             if (nextBlock == null) {
                 return null;
             }
-            ObjectReader or = new ObjectReader(processVariablesCreator, targetObj,
+            ObjectReader or = new ObjectReader(objectReaderReceiver, targetObj,
                     method.getDeclaringClass());
             return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
         }
@@ -600,13 +604,18 @@ public class ObjectReader {
         // Variable map maps variables to child of call activity
         if (camundaMethod.getService().equals(CamundaMethodServices.VARIABLE_MAP)) {
             pvo = new ProcessVariableOperation(variableName, type,
-                    processVariablesCreator.getScopeIdOfChild());
+                    objectReaderReceiver.getScopeIdOfChild());
         } else {
             pvo = new ProcessVariableOperation(variableName, type,
-                    processVariablesCreator.getScopeId());
+                    objectReaderReceiver.getScopeId());
         }
 
-        processVariablesCreator.handleProcessVariableManipulation(block, pvo, currentJavaClass);
+        objectReaderReceiver.handleProcessVariableManipulation(block, pvo, currentJavaClass);
+    }
+
+    public void notifyEntryPointProcessor(InvokeExpr expr, String thisName) {
+        objectReaderReceiver
+                .addEntryPoint(this.currentJavaClass.getName(), expr, resolveArgs(expr.getArgs(), thisName));
     }
 
     /**
@@ -633,12 +642,11 @@ public class ObjectReader {
     }
 
     public void handleMapOperation(MapVariable map, SootMethod method, InvokeExpr expr, Block block, String thisName) {
-        if(method.getName().equals("put")) {
+        if (method.getName().equals("put")) {
             // Resolve name of variable
             String variableName = resolveStringValue(block, expr.getArg(0), thisName);
             map.put(variableName, expr.getArg(1));
-        }
-        else if(method.getName().equals("remove")) {
+        } else if (method.getName().equals("remove")) {
             // Delete variable
             String variableName = resolveStringValue(block, expr.getArg(0), thisName);
             map.remove(variableName);

@@ -32,16 +32,20 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.processing.code.flow.MapVariable;
 import soot.*;
 import soot.jimple.AssignStmt;
+import soot.jimple.InvokeExpr;
 import soot.jimple.InvokeStmt;
 import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.options.Options;
+import soot.toolkits.graph.Block;
 
 import java.util.*;
 
-public class EntryPointScanner {
+public class EntryPointScanner extends ObjectReaderReceiver {
 
     private Set<String> javaResources;
 
@@ -93,7 +97,11 @@ public class EntryPointScanner {
             for (SootMethod method : sootClass.getMethods()) {
                 if (!method.isPhantom() && !method.isAbstract()) {
                     final Body body = method.retrieveActiveBody();
-                    for (String entryPoint : camundaProcessEntryPoints) {
+                    ObjectReader objectReader = new ObjectReader(this, sootClass);
+                    Block block = SootResolverSimplified.getBlockFromMethod(method);
+                    objectReader.processBlock(block, new ArrayList<>(), new ArrayList<>(), null);
+
+     /*               for (String entryPoint : camundaProcessEntryPoints) {
                         if (body.toString().contains(entryPoint)) {
                             final PatchingChain<Unit> pc = body.getUnits();
                             for (Unit unit : pc) {
@@ -121,7 +129,7 @@ public class EntryPointScanner {
                         if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
                             processIds.add(entryPoint);
                         }
-                    }
+                    } */
                 }
             }
         }
@@ -202,4 +210,22 @@ public class EntryPointScanner {
         return processIdToVariableMap;
     }
 
+    public void addEntryPoint(String className, InvokeExpr expr, List<Object> args) {
+        String methodName = expr.getMethod().getName();
+
+        if (expr.getArgCount() > 1) {
+            // Variables might be passed
+            for(Object o: args) {
+                if(o instanceof MapVariable) {
+                    Set<String> variables = ((MapVariable) o).getValues().keySet();
+                    EntryPoint ep = new EntryPoint(className, methodName, null, methodName, variables);
+                    this.entryPoints.add(ep);
+                    return;
+                }
+            }
+        }
+
+        EntryPoint ep = new EntryPoint(className, methodName, null, methodName);
+        this.entryPoints.add(ep);
+    }
 }

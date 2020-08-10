@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ObjectReader;
+import de.viadee.bpm.vPAV.processing.ObjectReaderReceiver;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
@@ -47,7 +48,7 @@ import soot.toolkits.graph.Block;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessVariablesCreator {
+public class ProcessVariablesCreator extends ObjectReaderReceiver {
 
     private ArrayList<Node> nodes = new ArrayList<>();
 

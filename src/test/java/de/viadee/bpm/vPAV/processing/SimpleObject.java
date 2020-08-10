@@ -33,7 +33,9 @@ package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.AnotherSimpleObject;
 import fj.Hash;
+import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.impl.RuntimeServiceImpl;
 
 import java.util.HashMap;
 
