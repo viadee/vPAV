@@ -43,11 +43,11 @@ import soot.SootClass;
  */
 public enum CamundaEntryPointFunctions {
 
-    StartProcessInstanceById("startProcessInstanceById", 1, 4),
-    StartProcessInstanceByKey("startProcessInstanceByKey", 1, 4),
-    StartProcessInstanceByMessage("startProcessInstanceByMessage", 1, 3),
-    StartProcessInstanceByMessageAndProcessDefinitionId("startProcessInstanceByMessageAndProcessDefinitionId", 2, 4),
-    CreateMessageCorrelation("createMessageCorrelation", 1, 1);
+    StartProcessInstanceById("startProcessInstanceById", 1, 4, false),
+    StartProcessInstanceByKey("startProcessInstanceByKey", 1, 4, false),
+    StartProcessInstanceByMessage("startProcessInstanceByMessage", 1, 3, true),
+    StartProcessInstanceByMessageAndProcessDefinitionId("startProcessInstanceByMessageAndProcessDefinitionId", 2, 4, true),
+    CreateMessageCorrelation("createMessageCorrelation", 1, 1, true);
 
     private String name;
 
@@ -55,34 +55,37 @@ public enum CamundaEntryPointFunctions {
 
     private int maxArgs;
 
+    private boolean withMessage;
+
     /**
      * @param name     - of the Camunda method
      * @param minArgs- parameter number that must at least exist
      * @param maxArgs  - maximum number of parameters which are allowed
      */
-    CamundaEntryPointFunctions(final String name, int minArgs, int maxArgs) {
+    CamundaEntryPointFunctions(final String name, int minArgs, int maxArgs, boolean withMessage) {
         this.name = name;
         this.minArgs = minArgs;
         this.maxArgs = maxArgs;
+        this.withMessage = withMessage;
     }
 
     public String getName() {
         return name;
     }
 
-    public static boolean isEntryPoint(String name, SootClass sc, int argCount) {
+    public static CamundaEntryPointFunctions findEntryPoint(String name, SootClass sc, int argCount) {
         SootClass rs = Scene.v().forceResolve("org.camunda.bpm.engine.RuntimeService", 0);
 
         if (!(sc.getInterfaces().contains(rs) || sc.equals(rs))) {
-            return false;
+            return null;
         }
 
         for (CamundaEntryPointFunctions f : values()) {
             if (f.getName().equals(name) && f.getMinArgs() <= argCount && f.getMaxArgs() >= argCount) {
-                return true;
+                return f;
             }
         }
-        return false;
+        return null;
     }
 
     public int getMinArgs() {
@@ -99,5 +102,13 @@ public enum CamundaEntryPointFunctions {
 
     public void setMaxArgs(int maxArgs) {
         this.maxArgs = maxArgs;
+    }
+
+    public boolean isWithMessage() {
+        return withMessage;
+    }
+
+    public void setWithMessage(boolean withMessage) {
+        this.withMessage = withMessage;
     }
 }

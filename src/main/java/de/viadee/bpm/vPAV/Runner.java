@@ -88,13 +88,13 @@ public class Runner {
 	 */
 	public void viadeeProcessApplicationValidator() {
 		// 1
-		JavaReaderStatic.setupSoot();
-
-		// 2
 		rules = readConfig();
 
-		// 3
+		// 2
 		setFileScanner(new FileScanner(rules));
+
+		// 3
+		JavaReaderStatic.setupSoot();
 
 		// 4
 		getProcessVariables(rules);

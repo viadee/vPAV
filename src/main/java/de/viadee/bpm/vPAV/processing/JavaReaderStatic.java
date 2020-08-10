@@ -214,5 +214,6 @@ public class JavaReaderStatic {
         Options.v().set_exclude(Arrays.asList(exClasses));
         Options.v().set_no_bodies_for_excluded(true);
         Scene.v().extendSootClassPath(Scene.v().defaultClassPath());
+        Scene.v().loadNecessaryClasses();
     }
 }

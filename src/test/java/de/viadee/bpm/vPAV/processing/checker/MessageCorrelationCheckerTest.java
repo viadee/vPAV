@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.EntryPointScanner;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
@@ -47,6 +48,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import soot.Scene;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -54,6 +56,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 public class MessageCorrelationCheckerTest {
@@ -67,7 +70,7 @@ public class MessageCorrelationCheckerTest {
 	@BeforeClass
 	public static void setup() throws MalformedURLException {
 		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
+		String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
 		ClassLoader cl = new URLClassLoader(classUrls);
@@ -75,6 +78,13 @@ public class MessageCorrelationCheckerTest {
 		RuntimeConfig.getInstance().setResource("en_US");
 		RuntimeConfig.getInstance().setTest(true);
 		rule = createRule();
+
+		FileScanner.setupSootClassPaths(new LinkedList<>());
+		JavaReaderStatic.setupSoot();
+		Scene.v().loadNecessaryClasses();
+		currentPath = (new File(".")).toURI().getPath();
+		Scene.v().extendSootClassPath(currentPath + "src/test/java");
+		Scene.v().defaultClassPath();
 	}
 
 	/**
@@ -88,7 +98,7 @@ public class MessageCorrelationCheckerTest {
 
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final Set<String> testSet = new HashSet<>();
-		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate.java");
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final EntryPointScanner scanner = new EntryPointScanner(
@@ -125,7 +135,7 @@ public class MessageCorrelationCheckerTest {
 
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final Set<String> testSet = new HashSet<>();
-		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate2.java");
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate2");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final EntryPointScanner scanner = new EntryPointScanner(
@@ -160,13 +170,10 @@ public class MessageCorrelationCheckerTest {
     public void testAllCorrectMessages() {
 		final String PATH = BASE_PATH + "MessageCorrelationChecker_correctMessages.bpmn";
 
-		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final Set<String> testSet = new HashSet<>();
-		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate3.java");
-		fileScanner.setJavaResourcesFileInputStream(testSet);
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate3");
 
-		final EntryPointScanner scanner = new EntryPointScanner(
-				fileScanner.getJavaResourcesFileInputStream());
+		final EntryPointScanner scanner = new EntryPointScanner(testSet);
 
 		scanner.scanProcessVariables();
 
@@ -197,7 +204,7 @@ public class MessageCorrelationCheckerTest {
 
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
 		final Set<String> testSet = new HashSet<>();
-		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate4.class");
+		testSet.add("de/viadee/bpm/vPAV/delegates/MessageCorrelationDelegate4");
 		fileScanner.setJavaResourcesFileInputStream(testSet);
 
 		final EntryPointScanner scanner = new EntryPointScanner(

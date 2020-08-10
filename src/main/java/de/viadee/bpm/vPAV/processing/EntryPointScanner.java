@@ -35,6 +35,7 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.MapVariable;
+import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
 import soot.*;
 import soot.jimple.AssignStmt;
 import soot.jimple.InvokeExpr;
@@ -59,6 +60,8 @@ public class EntryPointScanner extends ObjectReaderReceiver {
 
     private List<EntryPoint> intermediateEntryPoints = new ArrayList<>();
 
+    private Set<String> processIds = new HashSet<>();
+
     public EntryPointScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
         camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID);
@@ -74,6 +77,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
     public void scanProcessVariables() {
         for (final String filePath : javaResources) {
             if (!filePath.startsWith("javax")) {
+                // TODO why do we create these sets and never use them?
                 final Set<String> messageIds = new HashSet<>();
                 final Set<String> processIds = new HashSet<>();
                 retrieveMethod(filePath, messageIds, processIds);
@@ -210,22 +214,33 @@ public class EntryPointScanner extends ObjectReaderReceiver {
         return processIdToVariableMap;
     }
 
-    public void addEntryPoint(String className, InvokeExpr expr, List<Object> args) {
+    public void addEntryPoint(CamundaEntryPointFunctions function, String className, InvokeExpr expr, List<Object> args) {
         String methodName = expr.getMethod().getName();
+        String messageName = "";
+
+        if(function.isWithMessage()) {
+            messageName = (String) args.get(0);
+        }
 
         if (expr.getArgCount() > 1) {
             // Variables might be passed
             for(Object o: args) {
                 if(o instanceof MapVariable) {
                     Set<String> variables = ((MapVariable) o).getValues().keySet();
-                    EntryPoint ep = new EntryPoint(className, methodName, null, methodName, variables);
+                    EntryPoint ep = new EntryPoint(className, methodName, messageName, methodName, variables);
                     this.entryPoints.add(ep);
                     return;
                 }
             }
         }
 
-        EntryPoint ep = new EntryPoint(className, methodName, null, methodName);
-        this.entryPoints.add(ep);
+        EntryPoint ep = new EntryPoint(className, methodName, messageName, methodName);
+
+        if(function.equals(CamundaEntryPointFunctions.CreateMessageCorrelation)) {
+            processIds.add(function.getName());
+        }
+        else {
+            this.entryPoints.add(ep);
+        }
     }
 }

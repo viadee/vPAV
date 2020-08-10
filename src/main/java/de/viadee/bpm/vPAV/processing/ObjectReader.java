@@ -284,15 +284,18 @@ public class ObjectReader {
                 .findByNameAndNumberOfBoxes(expr.getMethodRef().getName(),
                         expr.getMethodRef().getDeclaringClass().getName(), expr.getArgCount());
 
+        CamundaEntryPointFunctions foundEntryPoint = CamundaEntryPointFunctions
+                .findEntryPoint(expr.getMethodRef().getName(), expr.getMethodRef().getDeclaringClass(),
+                        expr.getArgCount());
+
         if (foundMethod != null) {
             // Process variable is manipulated
             notifyVariablesReader(block, expr, foundMethod);
             return null;
-        } else if (CamundaEntryPointFunctions
-                .isEntryPoint(expr.getMethodRef().getName(), expr.getMethodRef().getDeclaringClass(),
-                        expr.getArgCount())) {
+        } else if (foundEntryPoint != null) {
             // Process entry point
-            notifyEntryPointProcessor(expr, thisName);
+            // TODO check message name for expression?!
+            notifyEntryPointProcessor(foundEntryPoint, expr, thisName);
             return null;
         } else {
             List<Value> args = expr.getArgs();
@@ -613,9 +616,9 @@ public class ObjectReader {
         objectReaderReceiver.handleProcessVariableManipulation(block, pvo, currentJavaClass);
     }
 
-    public void notifyEntryPointProcessor(InvokeExpr expr, String thisName) {
+    public void notifyEntryPointProcessor(CamundaEntryPointFunctions func, InvokeExpr expr, String thisName) {
         objectReaderReceiver
-                .addEntryPoint(this.currentJavaClass.getName(), expr, resolveArgs(expr.getArgs(), thisName));
+                .addEntryPoint(func, this.currentJavaClass.getName(), expr, resolveArgs(expr.getArgs(), thisName));
     }
 
     /**

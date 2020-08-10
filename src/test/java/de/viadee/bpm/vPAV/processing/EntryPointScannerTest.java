@@ -73,4 +73,6 @@ public class EntryPointScannerTest {
         Assert.assertEquals("The variable 'variable' should have been found.","variable", scanner.getEntryPoints().get(0).getProcessVariables().iterator().next());
     }
 
+    // TODO integrate found variables in analysis
+
 }
