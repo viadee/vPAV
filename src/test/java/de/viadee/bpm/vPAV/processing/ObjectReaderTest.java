@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.MapVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.ObjectVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.StringVariable;
 import org.junit.Assert;
@@ -202,6 +203,18 @@ public class ObjectReaderTest {
         StaticFieldRef valueStatic = mock(StaticFieldRef.class, CALLS_REAL_METHODS);
         valueStatic.setFieldRef(fieldRef);
         Assert.assertSame(staticObjField, objectReader.resolveObjectVariable(null, valueStatic, null));
+    }
+
+    @Test
+    public void testMapVariableOperations() {
+        // Test that all units are correctly processed in the right order
+        SootMethod method = thisSootClass.getMethodByName("mapMethod");
+        objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), new ArrayList<>(), new ArrayList<>(), null);
+        MapVariable map = (MapVariable) objectReader.getLocalObjectVariables().get("r1");
+        Assert.assertEquals("Map should contain exactly 2 variables.",2, map.getValues().size());
+        Assert.assertNull("Map should not contain variable 'first'.", map.getValues().get("first"));
+        Assert.assertNotNull("Map should contain variable 'second'.", map.getValues().get("second"));
+        Assert.assertNotNull("Map should contain variable 'third'.", map.getValues().get("third"));
     }
 
     @Test

@@ -288,7 +288,8 @@ public class ObjectReader {
             // Process variable is manipulated
             notifyVariablesReader(block, expr, foundMethod);
             return null;
-        } else {
+        }
+        else {
             List<Value> args = expr.getArgs();
             List<Object> argValues = resolveArgs(args, thisName);
             ObjectVariable targetObj;
@@ -324,6 +325,11 @@ public class ObjectReader {
 
                     if (targetObj == null) {
                         targetObj = new ObjectVariable();
+                    }
+                    else if(targetObj instanceof MapVariable) {
+                        // Handle operation on map variable
+                        handleMapOperation((MapVariable) targetObj, method, expr, block, thisName);
+                        return null;
                     }
 
                     SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr, targetObj);
@@ -560,7 +566,16 @@ public class ObjectReader {
             }
         } else if (rightValue instanceof NewExpr) {
             // New object is instantiated, we add an empty object as constructors are not resolved yet
-            ObjectVariable ob = new ObjectVariable();
+
+            // If Map is created, created map variable, otherwise normal object variable
+            ObjectVariable ob;
+            if (((RefType) rightValue.getType()).getSootClass().getInterfaces()
+                    .contains(Scene.v().forceResolve("java.util.Map", 0))) {
+                ob = new MapVariable();
+            } else {
+                ob = new ObjectVariable();
+            }
+
             // If it is an inner class we also add the reference to it
             if (((NewExpr) rightValue).getBaseType().getSootClass().hasOuterClass()) {
                 ob.setImplementation(((NewExpr) rightValue).getBaseType().getSootClass());
@@ -615,6 +630,20 @@ public class ObjectReader {
             }
         }
         return list;
+    }
+
+    public void handleMapOperation(MapVariable map, SootMethod method, InvokeExpr expr, Block block, String thisName) {
+        if(method.getName().equals("put")) {
+            // Resolve name of variable
+            String variableName = resolveStringValue(block, expr.getArg(0), thisName);
+            map.put(variableName, expr.getArg(1));
+        }
+        else if(method.getName().equals("remove")) {
+            // Delete variable
+            String variableName = resolveStringValue(block, expr.getArg(0), thisName);
+            map.remove(variableName);
+        }
+        // TODO support putall
     }
 
     public static int hashBlock(Block block) {

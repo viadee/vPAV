@@ -31,6 +31,8 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
+import soot.Value;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,22 +41,26 @@ import java.util.Map;
  */
 public class MapVariable extends ObjectVariable {
 
-    private Map<String, Object> values;
+    private Map<String, Value> values;
 
     public MapVariable() {
         super();
         values = new HashMap<>();
     }
 
-    public void put(String key, Object v) {
+    public void put(String key, Value v) {
         values.put(key, v);
     }
 
-    public Map<String, Object> getValues() {
+    public void remove(String key) {
+        values.remove(key);
+    }
+
+    public Map<String, Value> getValues() {
         return values;
     }
 
-    public void setValues(Map<String, Object> values) {
+    public void setValues(Map<String, Value> values) {
         this.values = values;
     }
 }
