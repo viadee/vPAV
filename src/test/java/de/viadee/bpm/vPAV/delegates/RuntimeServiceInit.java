@@ -46,5 +46,4 @@ public class RuntimeServiceInit {
         variables.put("variable", "firstValue");
         runtimeService.startProcessInstanceByKey("loanApproval", variables);
     }
-
 }

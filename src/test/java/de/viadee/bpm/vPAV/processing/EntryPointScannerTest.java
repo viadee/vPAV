@@ -38,6 +38,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import soot.Scene;
+import soot.SootClass;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -62,15 +63,14 @@ public class EntryPointScannerTest {
 
     @Test
     public void testFindVariablesMap() {
-        final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final Set<String> testSet = new HashSet<>();
-        testSet.add("de/viadee/bpm/vPAV/delegates/RuntimeServiceInit.java");
-        fileScanner.setJavaResourcesFileInputStream(testSet);
+        final Set<String> javaResources = new HashSet<>();
+        javaResources.add("de/viadee/bpm/vPAV/delegates/RuntimeServiceInit");
 
-        final EntryPointScanner scanner = new EntryPointScanner(
-                fileScanner.getJavaResourcesFileInputStream());
+        final EntryPointScanner scanner = new EntryPointScanner(javaResources);
         scanner.scanProcessVariables();
-        Assert.assertEquals(1, scanner.getEntryPoints().size());
+        Assert.assertEquals("One entry point should be found.", 1, scanner.getEntryPoints().size());
+        Assert.assertEquals("One variable should be passed on start.", 1, scanner.getEntryPoints().get(0).getProcessVariables().size());
+        Assert.assertEquals("The variable 'variable' should have been found.","variable", scanner.getEntryPoints().get(0).getProcessVariables().iterator().next());
     }
 
 }
