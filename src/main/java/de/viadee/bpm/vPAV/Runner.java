@@ -323,7 +323,7 @@ public class Runner {
 		if (RuntimeConfig.getInstance().isHtmlOutputEnabled()) {
 			fileMapping.keySet().forEach(file -> {
 				InputStream source = Runner.class.getClassLoader().getResourceAsStream(file);
-				Path destination = Paths.get(fileMapping.get(file) + file);
+				Path destination = Paths.get(fileMapping.get(file) + file.substring(file.lastIndexOf('/')));
 				try {
 					Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException | NullPointerException e) {
@@ -340,30 +340,49 @@ public class Runner {
 	 */
 	private Map<String, String> mapStaticFilesToTargetFolders() {
 		Map<String, String> fileToFolderMap = new HashMap<>();
-		fileToFolderMap.put("bootstrap.bundle.min.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("bpmn-navigated-viewer.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("bpmn.io.viewer.app.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("jquery-3.5.1.min.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("download.js", RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap.bundle.min.js",
+				RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bpmn-navigated-viewer.js",
+				RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bpmn.io.viewer.app.js",
+				RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery-3.5.1.min.js",
+				RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
+				RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getJsFolder());
 
-		fileToFolderMap.put("bootstrap.min.css", RuntimeConfig.getInstance().getCssFolder());
-		fileToFolderMap.put("viadee.css", RuntimeConfig.getInstance().getCssFolder());
-		fileToFolderMap.put("MarkerStyle.css", RuntimeConfig.getInstance().getCssFolder());
+		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
+				RuntimeConfig.getInstance().getCssFolder());
+		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "viadee.css",
+				RuntimeConfig.getInstance().getCssFolder());
+		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "MarkerStyle.css",
+				RuntimeConfig.getInstance().getCssFolder());
 
-		fileToFolderMap.put("vPAV.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("viadee_weiss.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("github.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("error.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("warning.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("info.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("success.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("dl_button.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("minus_icon.png", RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put("plus_icon.png", RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "vPAV.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "viadee_weiss.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "github.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "error.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "warning.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "info.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "success.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "dl_button.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "minus_icon.png",
+				RuntimeConfig.getInstance().getImgFolder());
+		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "plus_icon.png",
+				RuntimeConfig.getInstance().getImgFolder());
 
 		fileToFolderMap
-				.put(ConfigConstants.VALIDATION_HTML_OUTPUT_FILE, RuntimeConfig.getInstance().getValidationFolder());
+				.put(ConfigConstants.HTML_INPUT_FOLDER + ConfigConstants.HTML_FILE,
+						RuntimeConfig.getInstance().getValidationFolder());
 
 		return fileToFolderMap;
 	}
@@ -402,7 +421,6 @@ public class Runner {
 		final Collection<String> ignoredIssues = collectIgnoredIssues();
 
 		final HashMap<String, CheckerIssue> filteredIssues = new HashMap<>(issuesMap);
-
 		// remove issues that are listed in ignore file
 		for (Map.Entry<String, CheckerIssue> entry : issuesMap.entrySet()) {
 			if (ignoredIssues.contains(entry.getKey())) {

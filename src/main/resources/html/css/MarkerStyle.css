@@ -1,0 +1,69 @@
+:root {
+	--var-path: #f5c6cb;
+	--var-one-element: rgb(223, 173, 72);
+	--var-code-element: rgb(223, 173, 72);
+	--var-error: /*rgba(223, 173, 72, 1);*/ rgba(126, 188, 169, 0.7);
+	--var-warning: /*rgba(172,181,123, 1.0);*/ rgba(126, 188, 169, 0.7);
+	--var-info: rgba(112,186,204, 1.0);
+	--var-success: rgba(126, 188, 169, 0.7);
+}
+
+.success .djs-visual> :nth-child(1) {
+	stroke: var(--var-success) !important;
+}
+
+.success:not(.djs-connection) .djs-visual> :nth-child(1), #SUCCESS{
+	fill: var(--var-success) !important;
+	background-color:  var(--var-success);	
+}
+
+.info .djs-visual> :nth-child(1) {
+	stroke: var(--var-info) !important;
+}
+
+.info:not(.djs-connection) .djs-visual> :nth-child(1), #INFO{
+	fill: var(--var-info) !important;
+	background-color:  var(--var-info);	
+}
+
+.warning .djs-visual> :nth-child(1) {
+	stroke: var(--var-warning) !important;
+}
+
+.warning:not(.djs-connection) .djs-visual> :nth-child(1), #WARNING{
+	fill: var(--var-warning) !important;
+	background-color:  var(--var-warning);	
+}
+
+.error .djs-visual> :nth-child(1) {
+	stroke: var(--var-error) !important;
+}
+
+.error:not(.djs-connection) .djs-visual> :nth-child(1), #ERROR{
+	fill: var(--var-error) !important;
+	background-color:  var(--var-error);	
+}
+
+.path .djs-visual> :nth-child(1) {
+	stroke: var(--var-path) !important;
+}
+
+.path:not(.djs-connection) .djs-visual> :nth-child(1) {
+	fill: var(--var-path) !important;
+}
+
+.one-element .djs-visual> :nth-child(1) {
+	stroke: var(--var-one-element) !important;
+}
+
+.one-element:not(.djs-connection) .djs-visual> :nth-child(1) {
+	fill: var(--var-one-element) !important;
+}
+
+.code-element .djs-visual> :nth-child(1) {
+	stroke: var(--var-code-element) !important;
+}
+
+.code-element:not(.djs-connection) .djs-visual> :nth-child(1) {
+	fill: var(--var-code-element) !important;
+}
