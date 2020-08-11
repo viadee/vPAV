@@ -31,10 +31,17 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesConfiguration;
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesParameterException;
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -75,7 +82,6 @@ public class PropertiesReader {
             }
         }
 
-
         return properties;
     }
 
@@ -100,38 +106,9 @@ public class PropertiesReader {
         return foundFile[0];
     }
 
-    private void validateProperties(Properties properties) {
-        //Validate properties regarding multi project report support
-        if (properties.containsKey("multiProjectReport")) {
-            if (properties.containsKey("outputhtml") && properties.get("outputhtml").equals("false")) {
-                throw new RuntimeException("Multi project scan not allowed when HTML output is disabled");
-            }
-            String[] paths = { "" };
-            try {
-                paths = properties.get("generatedReports").toString().split(",");
-            } catch (NullPointerException e) {
-                throw new RuntimeException("No generated reports folders defined");
-            }
-            if (properties.get("multiProjectReport").equals("true") && paths.length < 1) {
-                throw new RuntimeException("Invalid definition for generated reports folders");
-            } else if (properties.get("multiProjectReport").equals("false") && paths.length > 0) {
-                throw new RuntimeException(
-                        "Generated reports folders not allowed when multi project report is disabled");
-            }
-            for (String stringPath : paths) {
-                Path path = Paths.get(stringPath + ConfigConstants.VALIDATION_HTML_OUTPUT_FILE);
-                if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
-                    throw new RuntimeException(String.format("No %s in generated reports folder found: ",
-                            ConfigConstants.VALIDATION_HTML_OUTPUT_FILE) + stringPath);
-                }
-            }
-        }
-    }
-
-
     protected void validateProperties(Properties properties) {
         List<String> allowedProperties = Arrays.asList("outputhtml", "language", "basepath", "parentRuleSet", "ruleSet",
-                "scanpath", "userVariablesFilePath", "validationFolder");
+                "scanpath", "userVariablesFilePath", "validationFolder", "multiProjectReport", "generatedReports");
         properties.keySet().forEach(key -> {
             if (!allowedProperties.contains(key)) {
                 throw new InvalidPropertiesParameterException("Not allowed property: " + key);
@@ -141,5 +118,37 @@ public class PropertiesReader {
                 throw new InvalidPropertiesParameterException("Empty property: " + key);
             }
         });
+
+        //Validate properties regarding multi project report support
+        if (properties.containsKey("multiProjectReport")) {
+            if (properties.get("multiProjectReport").equals("true")) {
+                if (properties.containsKey("generatedReports")) {
+                    String[] paths = properties.get("generatedReports").toString().split(",");
+                    if (properties.containsKey("outputhtml") && properties.get("outputhtml").equals("false")) {
+                        throw new InvalidPropertiesConfiguration(
+                                "Multi project scan not allowed when HTML output is disabled");
+                    }
+                    if (paths.length < 2) {
+                        throw new InvalidPropertiesParameterException(
+                                "At least 2 external report folders must be defined");
+                    }
+                    for (String stringPath : paths) {
+                        Path path = Paths.get(stringPath + ConfigConstants.VALIDATION_HTML_OUTPUT_FILE);
+                        if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+                            throw new InvalidPropertiesParameterException(
+                                    String.format("No %s in generated reports folder found: ",
+                                            ConfigConstants.VALIDATION_HTML_OUTPUT_FILE) + stringPath);
+                        }
+                    }
+                } else
+                    throw new InvalidPropertiesConfiguration(
+                            "Enabled multi report scan needs defined external reports paths");
+            } else if (properties.get("multiProjectReport").equals("false") && properties
+                    .containsKey("generatedReports")) {
+                throw new InvalidPropertiesConfiguration(
+                        "External reports paths not allowed with disabled multi report scan");
+            }
+        }
+
     }
 }
