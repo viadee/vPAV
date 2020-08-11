@@ -43,23 +43,27 @@ public class EntryPoint {
 
 	private String entryPointName;
 
+	private String processDefinitionKey;
+
 	private Set<String> processVariables;
 
 	public EntryPoint(final String className, final String methodName, final String messageName,
-			final String entryPointName) {
+			final String entryPointName, final String processDefinitionKey) {
 		this.className = className;
 		this.methodName = methodName;
 		this.messageName = messageName;
 		this.entryPointName = entryPointName;
+		this.processDefinitionKey = processDefinitionKey;
 		this.processVariables = new HashSet<>();
 	}
 
 	public EntryPoint(final String className, final String methodName, final String messageName,
-			final String entryPointName, final Set<String> processVariables) {
+			final String entryPointName, final String processDefinitionKey, final Set<String> processVariables) {
 		this.className = className;
 		this.methodName = methodName;
 		this.messageName = messageName;
 		this.entryPointName = entryPointName;
+		this.processDefinitionKey = processDefinitionKey;
 		this.processVariables = processVariables;
 	}
 
@@ -101,5 +105,13 @@ public class EntryPoint {
 
 	public void setProcessVariables(Set<String> processVariables) {
 		this.processVariables = processVariables;
+	}
+
+	public String getProcessDefinitionKey() {
+		return processDefinitionKey;
+	}
+
+	public void setProcessDefinitionKey(String processDefinitionKey) {
+		this.processDefinitionKey = processDefinitionKey;
 	}
 }

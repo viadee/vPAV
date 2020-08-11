@@ -100,7 +100,6 @@ public class EntryPointScanner extends ObjectReaderReceiver {
             Scene.v().loadNecessaryClasses();
             for (SootMethod method : sootClass.getMethods()) {
                 if (!method.isPhantom() && !method.isAbstract()) {
-                    final Body body = method.retrieveActiveBody();
                     ObjectReader objectReader = new ObjectReader(this, sootClass);
                     Block block = SootResolverSimplified.getBlockFromMethod(method);
                     objectReader.processBlock(block, new ArrayList<>(), new ArrayList<>(), null);
@@ -153,11 +152,11 @@ public class EntryPointScanner extends ObjectReaderReceiver {
         if (expr != null) {
             final String ex = expr.getArgBox(0).getValue().toString();
             if (entryPoint.equals(CamundaMethodServices.CORRELATE_MESSAGE)) {
-                intermediateEntryPoints
-                        .add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
+                //           intermediateEntryPoints
+                //                  .add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
             } else {
                 messageIds.add(entryPoint);
-                entryPoints.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
+                //           entryPoints.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
             }
         }
     }
@@ -214,32 +213,37 @@ public class EntryPointScanner extends ObjectReaderReceiver {
         return processIdToVariableMap;
     }
 
-    public void addEntryPoint(CamundaEntryPointFunctions function, String className, InvokeExpr expr, List<Object> args) {
+    public void addEntryPoint(CamundaEntryPointFunctions function, String className, InvokeExpr expr,
+            List<Object> args) {
         String methodName = expr.getMethod().getName();
         String messageName = "";
+        String processDefinitionKey = null;
 
-        if(function.isWithMessage()) {
+        if (function.isWithMessage()) {
             messageName = (String) args.get(0);
+        }
+
+        if (function.equals(CamundaEntryPointFunctions.StartProcessInstanceByKey)) {
+            processDefinitionKey = (String) args.get(0);
         }
 
         if (expr.getArgCount() > 1) {
             // Variables might be passed
-            for(Object o: args) {
-                if(o instanceof MapVariable) {
+            for (Object o : args) {
+                if (o instanceof MapVariable) {
                     Set<String> variables = ((MapVariable) o).getValues().keySet();
-                    EntryPoint ep = new EntryPoint(className, methodName, messageName, methodName, variables);
+                    EntryPoint ep = new EntryPoint(className, methodName, messageName, methodName, processDefinitionKey, variables);
                     this.entryPoints.add(ep);
                     return;
                 }
             }
         }
 
-        EntryPoint ep = new EntryPoint(className, methodName, messageName, methodName);
+        EntryPoint ep = new EntryPoint(className, methodName, messageName, methodName,  processDefinitionKey);
 
-        if(function.equals(CamundaEntryPointFunctions.CreateMessageCorrelation)) {
+        if (function.equals(CamundaEntryPointFunctions.CreateMessageCorrelation)) {
             processIds.add(function.getName());
-        }
-        else {
+        } else {
             this.entryPoints.add(ep);
         }
     }

@@ -43,7 +43,7 @@ import javax.xml.bind.JAXBException;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.*;
@@ -55,9 +55,6 @@ import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -263,6 +260,18 @@ public class ElementGraphBuilder {
                     new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
                             ElementChapter.Implementation, KnownElementFieldType.Class,
                             ep, predecessor);
+                }
+                if(graph.getProcessId().equals(ep.getProcessDefinitionKey()) && !ep.getProcessVariables().isEmpty()) {
+                    BasicNode userVarNode = new BasicNode(bpmnElement, ElementChapter.ProcessStart,
+                            KnownElementFieldType.ProcessStart);
+                    // todo hier weitermachen
+                    for (String var : ep.getProcessVariables()) {
+                        ProcessVariableOperation pvo = new ProcessVariableOperation(var, VariableOperation.WRITE, "" );
+                        userVarNode.addOperation(var.getValue());
+                    }
+
+                    bpmnElement.getControlFlowGraph().addNode(userVarNode);
+                    predecessor[0] = userVarNode;
                 }
             }
             graph.addStartNode(bpmnElement);

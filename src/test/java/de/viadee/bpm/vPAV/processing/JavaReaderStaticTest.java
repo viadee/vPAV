@@ -120,7 +120,7 @@ public class JavaReaderStaticTest {
 
         final EntryPoint entry = new EntryPoint(
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java", "startProcess",
-                "schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage");
+                "schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage", null);
 
         new JavaReaderStatic()
                 .getVariablesFromClass("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables",
