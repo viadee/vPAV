@@ -166,8 +166,9 @@ public class Runner {
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getCssFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getImgFolder()));
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
 		} catch (IOException e) {
-			logger.warning("Could not create either output folder for JS, CSS or IMG");
+			logger.warning("Could not create one of the resources output folders:" + e.getMessage());
 		}
 
 	}
@@ -349,8 +350,9 @@ public class Runner {
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery-3.5.1.min.js",
 				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
+				//TODO put POM.js in Js writer
 				RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
 				RuntimeConfig.getInstance().getCssFolder());
