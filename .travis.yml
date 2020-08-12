@@ -8,10 +8,12 @@ addons:
         # token is provided by the environment variable SONAR_TOKEN in travis settings
         token:  $SONAR_TOKEN
 script: >-
-    if [ "${SONAR_TOKEN}" != "" ]; then
-      mvn install -DskipTests=false -Dmaven.javadoc.skip=true sonar:sonar
-    else
-      mvn install -DskipTests=false -Dmaven.javadoc.skip=true
+    if [[ "$CI_BRANCH_NAME" == sonarqube ]] || [[ "$CI_BRANCH_NAME" == development ]]; then
+      if [ "${SONAR_TOKEN}" != "" ]; then
+            mvn install -DskipTests=false -Dmaven.javadoc.skip=true sonar:sonar
+          else
+            mvn install -DskipTests=false -Dmaven.javadoc.skip=true
+          fi
     fi
 notifications:
     slack: viadee:RkhVsV7eSLSkL7v5Tck1ernR
