@@ -380,7 +380,7 @@ public class Runner {
 				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
 				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
-		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
 				RuntimeConfig.getInstance().getCssFolder());
