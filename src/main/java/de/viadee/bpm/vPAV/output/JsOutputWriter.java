@@ -529,6 +529,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
 		String projectName = rootPath.substring(rootPath.lastIndexOf('/') + 1);
 		obj.addProperty("projectName", projectName);
+		obj.addProperty("isMultiProjectScan", RuntimeConfig.getInstance().isMultiProjectScan().toString());
 
 		return ("var properties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
 	}
