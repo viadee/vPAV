@@ -32,13 +32,12 @@
 package de.viadee.bpm.vPAV.config.reader;
 
 import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesParameterException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
