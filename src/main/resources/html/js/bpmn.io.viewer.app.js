@@ -811,7 +811,9 @@ function createViewController() {
             addCountOverlay(overlays, overlayData);
             markNodes(elements, canvas);
             controller.loadCodeElements();
-            document.getElementById('project_name').innerText = properties["projectName"];
+            if (properties["isMultiProjectScan"] !== "true") {
+                document.getElementById('project_name').innerText = properties["projectName"];
+            }
         });
     }
 
