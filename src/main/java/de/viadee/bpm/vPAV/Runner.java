@@ -171,12 +171,14 @@ public class Runner {
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolderOfSingleProject()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getCssFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getImgFolder()));
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
 			if (RuntimeConfig.getInstance().isMultiProjectScan()) {
 				Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getExternalReportsFolder()));
 				Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolderOfMultiProject()));
 			}
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
 		} catch (IOException e) {
-			logger.warning("Could not create either for JS, CSS, IMG or external reports output folder");
+			logger.warning("Could not create one of the resources output folders:" + e.getMessage());
 		}
 
 	}

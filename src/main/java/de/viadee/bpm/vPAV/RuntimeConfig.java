@@ -330,36 +330,40 @@ public class RuntimeConfig {
         return getValidationFolder() + "js/";
     }
 
+    public String getDataFolder() {
+        return getValidationFolder() + "data/";
+    }
+
     public String getValidationIgnoredIssuesOutput() {
-        return getJsFolderOfSingleProject() + "ignoredIssues.js";
+        return getDataFolder() + "ignoredIssues.js";
     }
 
     public String getValidationJsProcessVariables() {
-        return getJsFolderOfSingleProject() + "processVariables.js";
+        return getDataFolder() + "processVariables.js";
     }
 
     public String getValidationJsIssueSeverity() {
-        return getJsFolderOfSingleProject() + "issue_severity.js";
+        return getDataFolder() + "issue_severity.js";
     }
 
     public String getValidationJsSuccessOutput() {
-        return getJsFolderOfSingleProject() + "bpmn_validation_success.js";
+        return getDataFolder() + "bpmn_validation_success.js";
     }
 
     public String getValidationJsCheckers() {
-        return getJsFolderOfSingleProject() + "checkers.js";
+        return getDataFolder() + "checkers.js";
     }
 
     public String getPropertiesJsOutput() {
-        return getJsFolderOfSingleProject() + "properties.js";
+        return getDataFolder() + "properties.js";
     }
 
     public String getValidationJsOutput() {
-        return getJsFolderOfSingleProject() + "bpmn_validation.js";
+        return getDataFolder() + "bpmn_validation.js";
     }
 
     public String getValidationJsModelOutput() {
-        return getJsFolderOfSingleProject() + "bpmn_model.js";
+        return getDataFolder() + "bpmn_model.js";
     }
 
     public String getCssFolder() {
@@ -379,15 +383,15 @@ public class RuntimeConfig {
     }
 
     public String getEffectiveRuleset() {
-        return getValidationFolder() + "effectiveRuleSet.xml";
+        return getDataFolder() + "effectiveRuleSet.xml";
     }
 
     public String getValidationXmlOutput() {
-        return getValidationFolder() + "bpmn_validation.xml";
+        return getDataFolder() + "bpmn_validation.xml";
     }
 
     public String getValidationJsonOutput() {
-        return getValidationFolder() + "bpmn_validation.json";
+        return getDataFolder() + "bpmn_validation.json";
     }
 
     public Boolean isMultiProjectScan() {
