@@ -1,19 +1,13 @@
 language: java
 jdk:
-    - openjdk8
+  - openjdk8
 addons:
-    # sonarcloud analysis with the travis plugin, see https://docs.travis-ci.com/user/sonarcloud/
-    sonarcloud:
-        organization: "viadee"
-        # token is provided by the environment variable SONAR_TOKEN in travis settings
-        token:  $SONAR_TOKEN
-script: >-
-    if [[ "$CI_BRANCH_NAME" == sonarqube ]] || [[ "$CI_BRANCH_NAME" == development ]]; then
-      if [ "${SONAR_TOKEN}" != "" ]; then
-            mvn install -DskipTests=false -Dmaven.javadoc.skip=true sonar:sonar
-          else
-            mvn install -DskipTests=false -Dmaven.javadoc.skip=true
-          fi
-    fi
+  sonarcloud:
+    organization: "viadee"
+    token:
+      secure: "GzuUawWh0BszwMxcabDzWSRhjwBlbCPfJhDjDAj1YB245Ym07IjPybYK7JRvA47inFa+twiaKjzbRW3A86Sra3DtJS5pKIJNbhsyqrQ1skeA4TxlUMTpVmUNJeTIXECAYE6uAUthQqigdXhOJO3gnmtvPQD4xhbOLLPtz8WWkc+pUFdz2v28dlwIsbQd2SWQHSNGZz0Wi0Qr1SIfLrSCJ9+nhDud3yaa9mLmQLHU3Qi2eYtJKNZeZsZ5BF0oVmp+uEmqzxcAnujAB0SRwc12CE0sNz+yCeTt1iJf75jPP4hmSLlpzoDhw6B8sGHVea3dFBPDr5WdxGMOmNW+cJecLNumfL/U2ni1ucBg8V6Z3knmP0L2ZwAwqgHzN3oLGAOhHR8pQhtYl/t7JVR7D05o5cPjN3hbZF91uQ4gAV4zJ7G35jxU+8dx/97mpcvvYwo3Iddi5hcFLTdr6wc6cyjZjHMQoTog0VdLcD/tdvv2UAy40Npih0MStTCC5D7Au6AQz2lx66zHrSeYGWFL14Cic3YZSMQJKehi+haSr3bfrKz0lb27T9vmEOvRLC91cjZRVDEoG8iqwr1RDIJfp2e0raOvlrbsVn/SqjUvEBwTNLfT1qX1ppVdcgQ0yreoc+WaS8iiE4+w3EGJCx0fwTRaVFYPcFI50Kn30RqGeUUuTWE=" # encrypted value of your token
+script:
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=vPAV
 notifications:
-    slack: viadee:RkhVsV7eSLSkL7v5Tck1ernR
+  slack: viadee:RkhVsV7eSLSkL7v5Tck1ernR

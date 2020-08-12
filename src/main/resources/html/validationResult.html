@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/viadee.css">
+    <link rel="stylesheet" href="css/MarkerStyle.css">
+
+    <style type="text/css">
+        * {
+            font-family: Arial;
+        }
+    </style>
+
+    <title>Process Model Validation Report</title>
+</head>
+
+<header class="navbar sticky-top navbar-expand viadee-lightblue-bg header-size">
+    <div class="container-fluid">
+        <a class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" href="https://viadee.github.io/vPAV/" target="_blank">
+            <img class="d-block" src="img/vPAV.png" alt="vPAV" height="60" title="documentation"/>
+        </a>
+        <div class="navbar-nav-scroll">
+            <ul class="navbar-nav bd-navbar-nav flex-row align-items-center">
+                <h4 class="nav-item text-white mb-0 ml-4 mr-2" id="model"></h4>
+                <li class="nav-item">
+                    <a id="model_download" class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" onclick="downloadModel()">
+                        <img src="img/dl_button.png" alt="Download BPMN" class="h4-img" title="Download BPMN"/>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <ul class="navbar-nav ml-md-auto align-items-center">
+            <li class="nav-item">
+                <a class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" id="github-logo" href="https://github.com/viadee/vPAV">
+                    <img src="img/github.png" alt="GitHub" class="h4-img" title="GitHub vPAV"/>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link pl-2 pr-1 mx-1 py-0 my-n2" href="https://www.viadee.de/">
+                    <img src="img/viadee_weiss.png" alt="viadee Homepage" height="70" title="viadee Homepage"/>
+                </a>
+            </li>
+        </ul>
+    </div>
+</header>
+
+<body>
+
+<h3 id="project_name" class="placeholder-top text-secondary mb-0 ml-4 mr-2"></h3>
+
+<div class="container-fluid">
+    <!-- navBar -->
+    <div class="row placeholder-top">
+        <div class="col">
+            <ul id="linkList" class="nav nav-pills">
+            </ul>
+        </div>
+    </div>
+
+    <!-- Path-->
+    <div class="row collapse" id="rowPath">
+        <div class="col">
+            <div class="alert alert-danger mt-2 mb-0 ml-0 pb-1 pt-1 viadee-small-alert" role="alert"
+                 id="invalidPath"></div>
+        </div>
+    </div>
+
+    <!-- element to draw bpmn diagram in -->
+    <div class="row">
+        <div class="col">
+            <div class="m-0 p-0 viadee-green-border" id="canvas"></div>
+        </div>
+    </div>
+
+    <!-- Unlocated checkers-->
+    <div id="unlocatedCheckersContainer">
+    </div>
+
+    <!-- reset Button -->
+    <div class="row">
+        <div class="col">
+            <button type="button" class="btn btn-viadee mt-2 collapse" id="reset">Reset diagram</button>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col">
+            <ul id="viewModeNavBar" class="nav nav-pills align-items-start">
+                <li class="nav-item">
+                    <a onclick="controller.showIssues()" href="#" class="nav-link table-selector" id="showAllIssues">
+                        All Issues
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a onclick="controller.showSuccessfulCheckers()" href="#" class="nav-link table-selector" id="showSuccess">
+                        Successful Checkers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a onclick="controller.showProcessVariables()" href="#" class="nav-link table-selector" id="showVariables">
+                        Process Variables
+                    </a>
+                </li>
+                <div class="btn-group-toggle ml-md-auto" data-toggle="buttons">
+                    <label class="btn btn-viadee ml-md-auto" onclick="controller.showElementsWithCodeReferences(this)">
+                        <input type="checkbox" autocomplete="off">Highlight source code
+                        references</label>
+                </div>
+                <button type="button" class="btn btn-viadee ml-md-1 global-download mt-0" onclick="downloadFile()">Download
+                    ignoreIssues
+                </button>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Issue table -->
+    <div class="row">
+        <div class="col">
+            <table id="table" class="table table-row table-bordered .table-responsive"></table>
+        </div>
+    </div>
+
+    <div class="modal" id="issueModal">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header viadee-lightblue-bg viadee-head">
+                    <h4 class="modal-title"></h4>
+                    <button type="button" class="close btn-viadee-close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer viadee-footer mt-auto py-3">
+    <div class="container-fluid">
+        	<span class="text-muted-viadee">
+
+		</span>
+        <a class="text-muted-viadee float-right pr-2" href="https://viadee.github.io/vPAV/#licenses" target="_blank">Licenses</a>
+        <a class="text-muted-viadee float-right pr-2" href="https://www.viadee.de/impressum-datenschutz.html"
+           target="_blank">Imprint</a>
+    </div>
+</footer>
+
+
+<!-- scripts -->
+<!-- bpmn-js viewer -->
+<script src="js/bpmn-navigated-viewer.js"></script>
+<!-- bpmn-files, issues, unlocated checkers and pomInfo -->
+<script src="js/checkers.js"></script>
+<script src="js/bpmn_model.js"></script>
+<script src="js/bpmn_validation.js"></script>
+<script src="js/bpmn_validation_success.js"></script>
+<script src="js/infoPOM.js"></script>
+<script src="js/issue_severity.js"></script>
+<script src="js/ignoredIssues.js"></script>
+<script src='js/download.js'></script>
+<script src='js/processVariables.js'></script>
+<!-- bootstrap with dependencies-->
+<script src="js/jquery-3.5.1.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<!-- application -->
+<script src="js/properties.js"></script>
+<script src="js/bpmn.io.viewer.app.js"></script>
+
+</body>
+
+</html>
