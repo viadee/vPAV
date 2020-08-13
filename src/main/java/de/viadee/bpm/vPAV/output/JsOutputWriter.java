@@ -623,7 +623,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 	public void writeGeneratedReportsOverviewJS(List<String> externalReportsPaths) {
 		String reportsPathsAsJS = "let reportsPaths = ";
 		reportsPathsAsJS += new Gson().toJson(externalReportsPaths);
-		File reportsPathsFile = new File(RuntimeConfig.getInstance().getJsFolderOfMultiProject() +
+		File reportsPathsFile = new File(RuntimeConfig.getInstance().getExternalReportsFolder() +
 				ConfigConstants.VALIDATION_OVERVIEW_REPORT_PATHS_JS);
 		reportsPathsAsJS += ";";
 		try {

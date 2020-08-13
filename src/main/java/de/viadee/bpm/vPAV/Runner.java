@@ -174,7 +174,6 @@ public class Runner {
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
 			if (RuntimeConfig.getInstance().isMultiProjectScan()) {
 				Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getExternalReportsFolder()));
-				Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolderOfMultiProject()));
 			}
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
 		} catch (IOException e) {

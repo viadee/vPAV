@@ -378,10 +378,6 @@ public class RuntimeConfig {
         return getValidationFolder() + "externalReports/";
     }
 
-    public String getJsFolderOfMultiProject() {
-        return getExternalReportsFolder() + "js/";
-    }
-
     public String getEffectiveRuleset() {
         return getDataFolder() + "effectiveRuleSet.xml";
     }
