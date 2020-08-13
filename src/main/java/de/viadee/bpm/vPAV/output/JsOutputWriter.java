@@ -346,7 +346,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 			for (CheckerIssue issue : issues) {
 				String prettyBpmnFilename = replace("\\", issue.getBpmnFile());
-				if (!prettyBpmnFilename.equals(ConfigConstants.JS_BASE_PATH + bpmnFilename))
+				if (!prettyBpmnFilename.equals(ConfigConstants.JAVA_BASE_PATH + bpmnFilename))
 					modelIssues.remove(issue);
 			}
 
@@ -358,7 +358,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				}
 				if (ruleIssues.isEmpty())
 					newIssues.add(new CheckerIssue(ruleName, null, CriticalityEnum.SUCCESS,
-							(ConfigConstants.JS_BASE_PATH + bpmnFilename), null, "", "", null, null, null,
+							(ConfigConstants.JAVA_BASE_PATH + bpmnFilename), null, "", "", null, null, null,
 							"No issues found", null, null));
 			}
 		}
