@@ -414,13 +414,6 @@ public class Runner {
 				.put(ConfigConstants.HTML_INPUT_FOLDER + ConfigConstants.HTML_FILE,
 						RuntimeConfig.getInstance().getValidationFolder());
 
-		if (RuntimeConfig.getInstance().isMultiProjectScan()) {
-			fileToFolderMap.put(ConfigConstants.VALIDATION_OVERVIEW_HTML_OUTPUT_FILE,
-					RuntimeConfig.getInstance().getExternalReportsFolder());
-			fileToFolderMap.put(ConfigConstants.VALIDATION_OVERVIEW_JS_OUTPUT_FILE,
-					RuntimeConfig.getInstance().getJsFolderOfMultiProject());
-		}
-
 		return fileToFolderMap;
 	}
 

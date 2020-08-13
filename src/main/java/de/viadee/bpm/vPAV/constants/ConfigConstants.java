@@ -103,10 +103,6 @@ public class ConfigConstants {
 
     public static final String VALIDATION_HTML_OUTPUT_FILE = "validationResult.html";
 
-    public static final String VALIDATION_OVERVIEW_HTML_OUTPUT_FILE = "./overview.html";
-
-    public static final String VALIDATION_OVERVIEW_JS_OUTPUT_FILE = "./overview.js";
-
     public static final String VALIDATION_OVERVIEW_REPORT_PATHS_JS = "reportPaths.js";
 
     private ConfigConstants() {
