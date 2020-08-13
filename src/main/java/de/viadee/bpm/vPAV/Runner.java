@@ -350,8 +350,10 @@ public class Runner {
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery-3.5.1.min.js",
 				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
-				//TODO put POM.js in Js writer
 				RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
+				RuntimeConfig.getInstance().getJsFolder());
+		//TODO put POM.js in Js writer
 		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
