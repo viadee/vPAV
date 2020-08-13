@@ -168,7 +168,7 @@ public class Runner {
 		deleteFiles();
 		createvPAVFolder();
 		try {
-			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolderOfSingleProject()));
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getCssFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getImgFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
@@ -371,17 +371,17 @@ public class Runner {
 	private Map<String, String> mapStaticFilesToTargetFolders() {
 		Map<String, String> fileToFolderMap = new HashMap<>();
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap.bundle.min.js",
-				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bpmn-navigated-viewer.js",
-				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bpmn.io.viewer.app.js",
-				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery-3.5.1.min.js",
-				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
-				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
-				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+				RuntimeConfig.getInstance().getJsFolder());
 		//TODO put POM.js in Js writer
 		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 

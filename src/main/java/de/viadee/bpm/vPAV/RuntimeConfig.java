@@ -326,7 +326,7 @@ public class RuntimeConfig {
         properties.setProperty("language", languageCode);
     }
 
-    public String getJsFolderOfSingleProject() {
+    public String getJsFolder() {
         return getValidationFolder() + "js/";
     }
 
