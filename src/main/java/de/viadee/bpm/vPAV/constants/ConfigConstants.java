@@ -55,7 +55,7 @@ public class ConfigConstants {
 
     public static final String BASE_PATH_TEST = TEST_FOLDER + "resources/";
 
-    public static final String JS_BASE_PATH = MAIN_FOLDER + "resources/";
+    public static final String JAVA_BASE_PATH = MAIN_FOLDER + "resources/";
 
     public static final String DATA_FOLDER = "data/";
 
