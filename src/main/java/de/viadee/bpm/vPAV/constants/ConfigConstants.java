@@ -57,6 +57,8 @@ public class ConfigConstants {
 
     public static final String JS_BASE_PATH = MAIN_FOLDER + "resources/";
 
+    public static final String DATA_FOLDER = "data/";
+
     public static final String RULESET = "ruleSet.xml";
 
     public static final String RULESET_DEFAULT = "ruleSetDefault.xml";

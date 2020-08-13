@@ -331,7 +331,7 @@ public class RuntimeConfig {
     }
 
     public String getDataFolder() {
-        return getValidationFolder() + "data/";
+        return getValidationFolder() + ConfigConstants.DATA_FOLDER;
     }
 
     public String getValidationIgnoredIssuesOutput() {

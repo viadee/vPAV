@@ -345,18 +345,19 @@ public class Runner {
 			if (RuntimeConfig.getInstance().isMultiProjectScan()) {
 				externalReportsPaths = new LinkedList<String>();
 				for (int i = 0; i < RuntimeConfig.getInstance().getGeneratedReports().length; i++) {
-					String sourcePath = RuntimeConfig.getInstance().getGeneratedReports()[i];
+					String sourcePath = RuntimeConfig.getInstance().getGeneratedReports()[i] +
+							File.separator + ConfigConstants.DATA_FOLDER;
 					File sourceLocation = new File(sourcePath);
 					File targetLocation = new File(RuntimeConfig.getInstance().getExternalReportsFolder(),
 							String.format("report_%d", i + 1));
 					String relativeTargetPath = "." + targetLocation.getPath()
 							.substring(RuntimeConfig.getInstance().getExternalReportsFolder().length() - 1)
 							.replace("\\", "/") + '/';
-					externalReportsPaths.add(relativeTargetPath + ConfigConstants.VALIDATION_HTML_OUTPUT_FILE);
+					externalReportsPaths.add(relativeTargetPath);
 					try {
 						FileUtils.copyDirectory(sourceLocation, targetLocation);
 					} catch (IOException e) {
-						throw new RuntimeException("Couldn't copy external reports");
+						throw new RuntimeException("Couldn't copy external reports folder:" + e.getMessage());
 					}
 				}
 			}

@@ -133,11 +133,11 @@ public class PropertiesReader {
                                 "At least 2 external report folders must be defined");
                     }
                     for (String stringPath : paths) {
-                        Path path = Paths.get(stringPath + ConfigConstants.VALIDATION_HTML_OUTPUT_FILE);
+                        Path path = Paths.get(stringPath + ConfigConstants.DATA_FOLDER);
                         if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
                             throw new InvalidPropertiesParameterException(
-                                    String.format("No %s in generated reports folder found: ",
-                                            ConfigConstants.VALIDATION_HTML_OUTPUT_FILE) + stringPath);
+                                    String.format("No %s folder found in reports folder: ",
+                                            ConfigConstants.DATA_FOLDER) + stringPath);
                         }
                     }
                 } else
