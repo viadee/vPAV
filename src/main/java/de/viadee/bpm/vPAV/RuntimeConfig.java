@@ -375,7 +375,7 @@ public class RuntimeConfig {
     }
 
     public String getExternalReportsFolder() {
-        return getValidationFolder() + "externalReports/";
+        return getValidationFolder() + ConfigConstants.VALIDATION_OVERVIEW_REPORTS_FOLDER;
     }
 
     public String getEffectiveRuleset() {

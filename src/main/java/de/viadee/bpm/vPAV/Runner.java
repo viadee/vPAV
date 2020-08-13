@@ -346,12 +346,12 @@ public class Runner {
 				for (int i = 0; i < RuntimeConfig.getInstance().getGeneratedReports().length; i++) {
 					String sourcePath = RuntimeConfig.getInstance().getGeneratedReports()[i] +
 							File.separator + ConfigConstants.DATA_FOLDER;
+					String reportFolderName = String.format("report_%d", i + 1);
 					File sourceLocation = new File(sourcePath);
 					File targetLocation = new File(RuntimeConfig.getInstance().getExternalReportsFolder(),
-							String.format("report_%d", i + 1));
-					String relativeTargetPath = "." + targetLocation.getPath()
-							.substring(RuntimeConfig.getInstance().getExternalReportsFolder().length() - 1)
-							.replace("\\", "/") + '/';
+							reportFolderName);
+					String relativeTargetPath = "./" + ConfigConstants.VALIDATION_OVERVIEW_REPORTS_FOLDER +
+							reportFolderName + '/';
 					externalReportsPaths.add(relativeTargetPath);
 					try {
 						FileUtils.copyDirectory(sourceLocation, targetLocation);
