@@ -380,6 +380,9 @@ public class Runner {
 				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
 				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
+				RuntimeConfig.getInstance().getJsFolderOfSingleProject());
+		//TODO put POM.js in Js writer
 		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
@@ -451,7 +454,6 @@ public class Runner {
 		final Collection<String> ignoredIssues = collectIgnoredIssues();
 
 		final HashMap<String, CheckerIssue> filteredIssues = new HashMap<>(issuesMap);
-
 		// remove issues that are listed in ignore file
 		for (Map.Entry<String, CheckerIssue> entry : issuesMap.entrySet()) {
 			if (ignoredIssues.contains(entry.getKey())) {
