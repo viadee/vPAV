@@ -1,5 +1,4 @@
-let scriptFiles = [
-    //generated data
+[    //generated data
     "data/checkers.js", "data/bpmn_model.js", "data/bpmn_validation.js", "data/bpmn_validation_success.js",
     "data/infoPOM.js", "data/issue_severity.js", "data/ignoredIssues.js",
     "data/processVariables.js",
@@ -8,14 +7,10 @@ let scriptFiles = [
     //bpmn-js viewer
     "js/bpmn-navigated-viewer.js",
     //application
-    "js/download.js", "data/properties.js", "js/bpmn.io.viewer.app.js"
-
-];
-
-let scriptFragment = new DocumentFragment();
-for (let scriptSrc of scriptFiles) {
-    let script = document.createElement("script");
-    script.src = scriptSrc;
-    scriptFragment.appendChild(script);
-}
-document.body.appendChild(scriptFragment);
+    "js/download.js", "data/properties.js", "js/bpmn.io.viewer.app.js"]
+    .forEach(scriptSrc => {
+        let script = document.createElement("script");
+        script.src = scriptSrc;
+        script.async = false; //script tags added by DOM API are async by default (╯°□°）╯︵ ┻━┻
+        document.body.appendChild(script);
+    });
