@@ -16,6 +16,7 @@ let scriptFragment = new DocumentFragment();
 for (let scriptSrc of scriptFiles) {
     let script = document.createElement("script");
     script.src = scriptSrc;
+    script.async = false; //script tags added by DOM API are async by default (╯°□°）╯︵ ┻━┻
     scriptFragment.appendChild(script);
 }
 document.body.appendChild(scriptFragment);
