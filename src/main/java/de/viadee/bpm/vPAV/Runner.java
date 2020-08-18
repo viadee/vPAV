@@ -394,6 +394,8 @@ public class Runner {
 				RuntimeConfig.getInstance().getCssFolder());
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "all.css",
 				RuntimeConfig.getInstance().getCssFolder());
+		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "simple-sidebar.css",
+				RuntimeConfig.getInstance().getCssFolder());
 
 		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "vPAV.png",
 				RuntimeConfig.getInstance().getImgFolder());

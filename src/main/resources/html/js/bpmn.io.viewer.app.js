@@ -991,6 +991,11 @@ function showUnlocatedCheckers() {
     });
 }
 
+function toggleSideBar() {
+    document.getElementById("sidebar-wrapper").classList.toggle("collapse");
+    Array.from(document.getElementsByClassName("col")).forEach(element => element.classList.toggle("pl-0"));
+}
+
 // Define attributes which reference source code
 const sourceCodeAttributes = ["camunda:class", "class",
     "camunda:delegateExpression", "delegateExpression",

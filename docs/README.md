@@ -37,6 +37,7 @@ All licenses of reused components can be found on the [maven site](http://rawgit
 - [jQuery](https://jquery.org/license/) licensed under MIT
 - [PopperJS](https://github.com/FezVrasta/popper.js/blob/master/LICENSE.md) licensed under MIT
 - [Soot](https://github.com/Sable/soot) licensed under a LGPL 2.1  license
+- [Start Bootstrap - Simple Sidebar](https://github.com/StartBootstrap/startbootstrap-simple-sidebar) licensed under MIT
 
 Soot and bpmn.io provide the basis for the two most exciting features of the validator, i.e. finding inconsistencies in the data and control flow across model and code an the visualization thereof. We would like to explicitly thank these two communities for their continued effort.
 
