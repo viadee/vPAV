@@ -817,10 +817,7 @@ function createViewController() {
             addCountOverlay(overlays, overlayData);
             markNodes(elements, canvas);
             controller.loadCodeElements();
-            if (properties["isMultiProjectScan"] !== "true") {
-                document.body.getElementsByTagName("header")[0].insertAdjacentHTML("afterend",
-                    `<h3 id="project_name" class="placeholder-top text-secondary mb-0 ml-4 mr-2">${properties["projectName"]}</h3>`);
-            }
+            document.getElementById('project_name').innerText = properties["projectName"];
         });
     }
 
