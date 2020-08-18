@@ -212,13 +212,11 @@ function createIssueDialog(elements) {
                     var dCardAddIssueButton = document.createElement("button");
                     var dCardRemoveIssueButton = document.createElement("button");
 
-                    var plusIcon = document.createElement("img");
-                    plusIcon.setAttribute("src", "img/plus_icon.png");
-                    plusIcon.setAttribute("class", "button-icon mr-3");
+                    var plusIcon = document.createElement("span");
+                    plusIcon.setAttribute("class", "text-white fas fa-plus-circle fa-lg mr-3");
 
-                    var minusIcon = document.createElement("img");
-                    minusIcon.setAttribute("src", "img/minus_icon.png");
-                    minusIcon.setAttribute("class", "button-icon mr-3");
+                    var minusIcon = document.createElement("span");
+                    minusIcon.setAttribute("class", "text-white fas fa-minus-circle fa-lg mr-3");
 
                     dCardAddIssueButton.setAttribute("class", "btn btn-viadee issue-button");
                     dCardAddIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
@@ -234,14 +232,11 @@ function createIssueDialog(elements) {
                     dCardIssueButtons.appendChild(dCardAddIssueButton);
                     dCardIssueButtons.appendChild(dCardRemoveIssueButton);
 
-                    var oImg = document.createElement("img");
-                    oImg.setAttribute('src', 'img/' + issue.classification.toLowerCase() + '.png');
-                    oImg.setAttribute('alt', 'issue.classification');
-                    oImg.setAttribute('class', 'float-left mr-2');
-                    oImg.setAttribute("title", issue.classification);
+                    let oIcon = document.createElement("span");
+                    oIcon.setAttribute('class', 'float-left mr-2 ' + mapClassificationTypeToToSpanIconClass(issue.classification));
 
                     dCardTitle.innerHTML = issue.ruleName;
-                    dCardTitle.appendChild(oImg);
+                    dCardTitle.appendChild(oIcon);
                     dCardText.innerHTML = "<h6><b>Issue:</b></h6> " + issue.message;
                     dCardRuleDescription.innerHTML = "<h6><b>Rule:</b></h6> " + issue.ruleDescription;
                     dCardElementDescription.innerHTML = "<h6><b>Reason:</b></h6> " + issue.elementDescription;
@@ -282,6 +277,19 @@ function createIssueDialog(elements) {
         closeButton.innerHTML = "Close";
         dialogFooter.appendChild(closeButton);
         showDialog('show');
+    }
+}
+
+function mapClassificationTypeToToSpanIconClass(classification) {
+    switch (classification) {
+        case "INFO":
+            return "text-primary fas fa-info-circle fa-lg";
+        case "SUCCESS":
+            return "text-success fas fa-check-circle fa-lg";
+        case "WARNING":
+            return "text-warning fas fa-exclamation-circle fa-lg";
+        case "ERROR":
+            return "text-danger fas fa-times-circle fa-lg";
     }
 }
 
@@ -542,11 +550,9 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             //classification
             myCell = document.createElement("td");
             myCell.setAttribute("align", "center");
-            var oImg = document.createElement("img");
-            oImg.setAttribute('src', 'img/' + issue.classification.toLowerCase() + '.png');
-            oImg.setAttribute('alt', 'issue.classification');
-            oImg.setAttribute("title", issue.classification);
-            myCell.appendChild(oImg);
+            let oIcon = document.createElement("span");
+            oIcon.setAttribute('class', mapClassificationTypeToToSpanIconClass(issue.classification));
+            myCell.appendChild(oIcon);
             myRow.appendChild(myCell);
 
             //message

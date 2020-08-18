@@ -171,6 +171,7 @@ public class Runner {
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getCssFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getImgFolder()));
+			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getFontFolder()));
 			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
 			if (RuntimeConfig.getInstance().isMultiProjectScan()) {
 				Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getExternalReportsFolder()));
@@ -391,27 +392,44 @@ public class Runner {
 				RuntimeConfig.getInstance().getCssFolder());
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "MarkerStyle.css",
 				RuntimeConfig.getInstance().getCssFolder());
+		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "all.css",
+				RuntimeConfig.getInstance().getCssFolder());
 
 		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "vPAV.png",
 				RuntimeConfig.getInstance().getImgFolder());
 		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "viadee_weiss.png",
 				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "github.png",
-				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "error.png",
-				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "warning.png",
-				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "info.png",
-				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "success.png",
-				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "dl_button.png",
-				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "minus_icon.png",
-				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "plus_icon.png",
-				RuntimeConfig.getInstance().getImgFolder());
+
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.eot",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.svg",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.ttf",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.woff",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.woff2",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.eot",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.svg",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.ttf",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.woff",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.woff2",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.eot",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.svg",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.ttf",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.woff",
+				RuntimeConfig.getInstance().getFontFolder());
+		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.woff2",
+				RuntimeConfig.getInstance().getFontFolder());
 
 		fileToFolderMap
 				.put(ConfigConstants.HTML_INPUT_FOLDER + ConfigConstants.HTML_FILE,
