@@ -374,6 +374,10 @@ public class RuntimeConfig {
         return getValidationFolder() + "img/";
     }
 
+    public String getFontFolder() {
+        return getValidationFolder() + "webfonts/";
+    }
+
     public String getEffectiveRuleset() {
         return getDataFolder() + "effectiveRuleSet.xml";
     }

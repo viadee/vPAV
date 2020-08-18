@@ -87,6 +87,8 @@ public class ConfigConstants {
 
     public static final String IMG_INPUT_FOLDER = HTML_INPUT_FOLDER + "img/";
 
+    public static final String FONT_INPUT_FOLDER = HTML_INPUT_FOLDER + "webfonts/";
+
     public static final String VERSIONING_SCHEME_PACKAGE = "versioningSchemePackage";
 
     public static final String VERSIONING_SCHEME_CLASS = "versioningSchemeClass";
