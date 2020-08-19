@@ -17,6 +17,7 @@ function loadJs(js) {
         let script = document.createElement("script");
         script.src = scriptSrc;
         script.async = false; //script tags added by DOM API are async by default (╯°□°）╯︵ ┻━┻
+        script.defer = true;
         document.body.appendChild(script);
     });
 }
@@ -25,10 +26,12 @@ let dataFiles = generateJsDataArray();
 dataFiles.push('externalReports/reportPaths.js');
 loadJs(dataFiles);
 dataFiles = undefined;
-loadJs([
-    //bootstrap with dependencies
-    "js/jquery-3.5.1.min.js", "js/bootstrap.bundle.min.js",
-    //bpmn-js viewer
-    "js/bpmn-navigated-viewer.js",
-    //application
-    "js/download.js", "js/bpmn.io.viewer.app.js"]);
+if (!window.BpmnJS) {
+    loadJs([
+        //bootstrap with dependencies
+        "js/jquery-3.5.1.min.js", "js/bootstrap.bundle.min.js",
+        //bpmn-js viewer
+        "js/bpmn-navigated-viewer.js",
+        //application
+        "js/download.js", "js/bpmn.io.viewer.app.js"]);
+}
