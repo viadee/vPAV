@@ -12,26 +12,71 @@ function generateJsDataArray(dataPath = 'data/') {
     return dataFiles.map(file => dataPath + file);
 }
 
-function loadJs(js) {
-    js.forEach(scriptSrc => {
+function loadDomElements(scriptNodes, callback = null) {
+    let fragment = document.createDocumentFragment();
+    if (callback) {
+        const lastScript = scriptNodes[scriptNodes.length - 1];
+        lastScript.onload = callback;
+    }
+    scriptNodes.forEach(script => {
+        fragment.appendChild(script);
+    });
+    document.body.appendChild(fragment);
+}
+
+function resetData() {
+    diagramXMLSource = undefined;
+    elementsToMark = undefined;
+    noIssuesElements = undefined;
+    unlocatedCheckers = undefined;
+    defaultCheckers = undefined;
+    ignoredIssues = undefined;
+    vPavVersion = undefined;
+    viadee = undefined;
+    vPavName = undefined;
+    issueSeverity = undefined;
+    proz_vars = undefined;
+    processVariables = undefined;
+    properties = undefined;
+}
+
+function createScriptTags(scriptSources, isData = false) {
+    if (isData) {
+        Array.from(document.getElementsByClassName("data-script")).forEach(script => {
+            document.body.removeChild(script);
+        });
+        resetData();
+    }
+    return scriptSources.map(scriptSource => {
         let script = document.createElement("script");
-        script.src = scriptSrc;
+        script.src = scriptSource;
         script.async = false; //script tags added by DOM API are async by default (╯°□°）╯︵ ┻━┻
-        script.defer = true;
-        document.body.appendChild(script);
+        if (isData) {
+            script.className = "data-script";
+        }
+        return script;
     });
 }
 
+function loadLogicJs() {
+    if (!window.BpmnJS) {
+        loadDomElements(
+            createScriptTags([
+                //bootstrap with dependencies
+                "js/jquery-3.5.1.min.js", "js/bootstrap.bundle.min.js",
+                //bpmn-js viewer
+                "js/bpmn-navigated-viewer.js",
+                //application
+                "js/download.js", "js/bpmn.io.viewer.app.js"], false));
+    }
+}
+
+var documentBackup;
+if (!documentBackup) {
+    documentBackup = document.cloneNode(true);
+}
 let dataFiles = generateJsDataArray();
 dataFiles.push('externalReports/reportPaths.js');
-loadJs(dataFiles);
+loadDomElements(createScriptTags(dataFiles, true));
 dataFiles = undefined;
-if (!window.BpmnJS) {
-    loadJs([
-        //bootstrap with dependencies
-        "js/jquery-3.5.1.min.js", "js/bootstrap.bundle.min.js",
-        //bpmn-js viewer
-        "js/bpmn-navigated-viewer.js",
-        //application
-        "js/download.js", "js/bpmn.io.viewer.app.js"]);
-}
+loadLogicJs();

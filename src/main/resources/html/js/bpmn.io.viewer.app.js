@@ -993,6 +993,7 @@ function showUnlocatedCheckers() {
 
 function toggleSideBar() {
     document.getElementById("sidebar-wrapper").classList.toggle("collapse");
+    //removes empty space space on the left between canvas frame and sidebar
     Array.from(document.getElementsByClassName("col")).forEach(element => element.classList.toggle("pl-0"));
 }
 
@@ -1001,9 +1002,22 @@ const sourceCodeAttributes = ["camunda:class", "class",
     "camunda:delegateExpression", "delegateExpression",
     "camunda:variableMappingClass", "camunda:variableMappingDelegateExpression"];
 
-// Init
-let bpmnFile = diagramXMLSource[0].name;
-createViewModesNavBar(bpmnFile);
-const controller = createViewController();
-controller.init();
-showUnlocatedCheckers();
+function loadExternalReport(reportPath) {
+    document.documentElement.innerHTML = documentBackup.documentElement.innerHTML;
+    loadDomElements(createScriptTags(generateJsDataArray(reportPath), true), initPage);
+    loadLogicJs();
+}
+
+var controller;
+var bpmnFile;
+
+function initPage() {
+    bpmnFile = diagramXMLSource[0].name;
+    createViewModesNavBar(bpmnFile);
+    controller = createViewController();
+    controller.init();
+    showUnlocatedCheckers();
+}
+
+initPage();
+
