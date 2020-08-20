@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.output;
 
+import de.viadee.bpm.vPAV.exceptions.OutputWriterException;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
 import java.util.Collection;

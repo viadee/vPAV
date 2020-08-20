@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.output;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.*;
 import de.viadee.bpm.vPAV.config.reader.*;
+import de.viadee.bpm.vPAV.exceptions.OutputWriterException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
