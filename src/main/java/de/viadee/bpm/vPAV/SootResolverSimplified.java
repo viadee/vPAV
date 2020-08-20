@@ -32,7 +32,9 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.EntryPointScanner;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import soot.*;
 import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.Block;
@@ -138,7 +140,7 @@ public class SootResolverSimplified {
 
     public static SootClass setupSootClass(String className) {
         className = EntryPointScanner.cleanString(className);
-        SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
+        SootClass sootClass = Scene.v().forceResolve(fixClassPathForSoot(className), SootClass.SIGNATURES);
         if (sootClass != null) {
             sootClass.setApplicationClass();
             Scene.v().loadNecessaryClasses();
@@ -200,6 +202,28 @@ public class SootResolverSimplified {
         }
 
         return parameters;
+    }
+
+    public static String fixClassPathForSoot(String classFile) {
+        // Trim class path because soot depends on the scan path
+        // Fixme: hacky way that hopefully works for all use cases
+
+        int scanpathLength = RuntimeConfig.getInstance().getScanPath().length();
+        String className = classFile.replaceAll("\\.", "/");
+        if ((ConfigConstants.TARGET_TEST_PATH + className)
+                .startsWith(RuntimeConfig.getInstance().getScanPath())) {
+            classFile = classFile
+                    .substring(scanpathLength - ConfigConstants.TARGET_TEST_PATH.length());
+        } else if ((ConfigConstants.TARGET_CLASS_FOLDER + className)
+                .startsWith(RuntimeConfig.getInstance().getScanPath())) {
+            classFile = classFile
+                    .substring(
+                            scanpathLength - ConfigConstants.TARGET_CLASS_FOLDER.length());
+        } else if (className.startsWith(RuntimeConfig.getInstance().getScanPath())) {
+            classFile = classFile
+                    .substring(scanpathLength);
+        }
+        return classFile;
     }
 
 }

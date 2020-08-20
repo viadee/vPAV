@@ -33,8 +33,10 @@ package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessVariablesCreator;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -72,13 +74,11 @@ public class JavaReaderStatic {
 
         if (classFile != null && classFile.trim().length() > 0) {
 
-            final String sootPath = FileScanner.getSootPath();
-            System.setProperty("soot.class.path", sootPath);
-
             if (element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_CLASS) != null
                     || element.getBaseElement().getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
+
                 // Delegate Variable Mapping
                 classFetcherNew(classFile, "mapInputVariables", element,
                         ElementChapter.InputImplementation, fieldType, predecessor);
@@ -88,7 +88,8 @@ public class JavaReaderStatic {
             } else {
                 // Java Delegate or Listener
                 SootClass sootClass = Scene.v()
-                        .forceResolve(EntryPointScanner.cleanString(classFile), SootClass.SIGNATURES);
+                        .forceResolve(fixClassPathForSoot(EntryPointScanner.cleanString(classFile)),
+                                SootClass.SIGNATURES);
                 SootClass implementingClass = findClassWithDelegateMethod(sootClass);
                 if (implementingClass == null) {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
@@ -151,7 +152,7 @@ public class JavaReaderStatic {
 
         if (className != null && className.trim().length() > 0) {
             className = EntryPointScanner.cleanString(className);
-            SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
+            SootClass sootClass = Scene.v().forceResolve(fixClassPathForSoot(className), SootClass.SIGNATURES);
 
             if (sootClass != null) {
                 sootClass.setApplicationClass();

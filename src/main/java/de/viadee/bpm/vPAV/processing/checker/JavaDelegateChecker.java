@@ -40,6 +40,7 @@ import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
@@ -58,6 +59,8 @@ import soot.SootResolver.SootClassNotFoundException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.viadee.bpm.vPAV.SootResolverSimplified.fixClassPathForSoot;
 
 /**
  * Class JavaDelegateChecker
@@ -163,8 +166,15 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                             // if beanMapping ${...} reference
                             if (identifierNodes.iterator().hasNext()) {
                                 for (final IdentifierNode node : identifierNodes) {
-                                    final String classFile = RuntimeConfig.getInstance().getBeanMapping()
+                                    String classFile = RuntimeConfig.getInstance().getBeanMapping()
                                             .get(node.getName());
+
+                                    if (classFile.replaceAll("\\.", "/")
+                                            .startsWith(RuntimeConfig.getInstance().getScanPath())) {
+                                        classFile = classFile
+                                                .substring(RuntimeConfig.getInstance().getScanPath().length());
+                                    }
+
                                     // correct beanmapping was found -> check if class exists
                                     if (classFile != null && classFile.trim().length() > 0) {
                                         issues.addAll(checkClassFile(element, classFile, false, false));
@@ -367,18 +377,15 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         // If a class path has been found, check the correctness
         try {
-            // Soot can also resolve classes which do not exist...
-            Class<?> clazz = RuntimeConfig.getInstance().getClassLoader().loadClass(className);
-
             // Checks, whether the correct interface was implemented
             SootClass sClass = Scene.v()
-                    .forceResolve(className, SootClass.SIGNATURES);
+                    .forceResolve(fixClassPathForSoot(className), SootClass.SIGNATURES);
 
             // Checks, whether the correct interface was implemented
             checkImplementsInterface(sClass, listener, taskListener, issues, classPath, element, location.getKey(),
                     sClass);
 
-        } catch (SootClassNotFoundException | ClassNotFoundException | AssertionError e) {
+        } catch (SootClassNotFoundException | AssertionError e) {
             // Throws an error, if the class was not found
             if (!className.isEmpty()) {
                 issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,

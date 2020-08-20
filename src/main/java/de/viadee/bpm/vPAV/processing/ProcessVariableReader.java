@@ -1112,7 +1112,7 @@ public final class ProcessVariableReader {
         return null;
     }
 
-    private BasicNode addNodeAndGetNewPredecessor(BasicNode node, ControlFlowGraph cg,
+    static BasicNode addNodeAndGetNewPredecessor(BasicNode node, ControlFlowGraph cg,
             BasicNode predecessor) {
         cg.addNode(node);
         if (predecessor != null) {

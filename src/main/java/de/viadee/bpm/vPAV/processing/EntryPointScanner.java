@@ -46,6 +46,8 @@ import soot.toolkits.graph.Block;
 
 import java.util.*;
 
+import static de.viadee.bpm.vPAV.SootResolverSimplified.fixClassPathForSoot;
+
 public class EntryPointScanner extends ObjectReaderReceiver {
 
     private Set<String> javaResources;
@@ -93,7 +95,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
      * @param processIds Set of processIds (used to retrieve variable manipulation later on)
      */
     private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
-        SootClass sootClass = Scene.v().forceResolve(cleanString(filePath), SootClass.SIGNATURES);
+        SootClass sootClass = Scene.v().forceResolve(fixClassPathForSoot(cleanString(filePath)), SootClass.SIGNATURES);
 
         if (sootClass != null && !sootClass.isInterface()) {
             sootClass.setApplicationClass();

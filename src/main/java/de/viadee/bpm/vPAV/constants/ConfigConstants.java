@@ -43,7 +43,7 @@ public class ConfigConstants {
 
     public static final String JAVA_PATH = MAIN_FOLDER + "java/";
 
-    public static final String TARGET_CLASS_FOLDER = "target/classes";
+    public static final String TARGET_CLASS_FOLDER = "target/classes/";
 
     public static final String TARGET_TEST_PATH = "target/test-classes/";
 
