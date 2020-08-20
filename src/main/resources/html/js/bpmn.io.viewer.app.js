@@ -1008,10 +1008,17 @@ function loadExternalReport(reportPath) {
     loadLogicJs();
 }
 
+function createProjectsNavbar() {
+    if (properties.isMultiProjectScan === "true") {
+        document.getElementById("navbar-toggle").classList.toggle("d-none");
+    }
+}
+
 var controller;
 var bpmnFile;
 
 function initPage() {
+    createProjectsNavbar();
     createDiagramTabs();
     bpmnFile = diagramXMLSource[0].name;
     createViewModesNavBar(bpmnFile);
