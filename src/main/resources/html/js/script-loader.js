@@ -71,12 +71,24 @@ function loadLogicJs() {
     }
 }
 
+function loadDataJs() {
+    loadDomElements(createScriptTags(["externalReports/reportPaths.js"], true), () => {
+        if (reportsPaths) {
+            reportsPaths.forEach(path => {
+                loadDomElements(createScriptTags([path + "properties.js"], true),
+                    () => {
+                        projectNames.push(properties.projectName)
+                    });
+            });
+        }
+    });
+    loadDomElements(createScriptTags(generateJsDataArray(), true));
+}
+
 var documentBackup;
 if (!documentBackup) {
     documentBackup = document.cloneNode(true);
 }
-let dataFiles = generateJsDataArray();
-dataFiles.push('externalReports/reportPaths.js');
-loadDomElements(createScriptTags(dataFiles, true));
-dataFiles = undefined;
+var projectNames = [];
+loadDataJs();
 loadLogicJs();

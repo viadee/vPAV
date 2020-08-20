@@ -622,7 +622,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @param externalReportsPaths List of the relative paths
 	 */
 	public void writeGeneratedReportsOverviewJS(List<String> externalReportsPaths) {
-		String reportsPathsAsJS = "let reportsPaths = ";
+		String reportsPathsAsJS = "var reportsPaths = ";
 		reportsPathsAsJS += new Gson().toJson(externalReportsPaths);
 		File reportsPathsFile = new File(RuntimeConfig.getInstance().getExternalReportsFolder() +
 				ConfigConstants.VALIDATION_OVERVIEW_REPORT_PATHS_JS);
