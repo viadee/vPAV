@@ -223,6 +223,7 @@ public class SootResolverSimplified {
             classFile = classFile
                     .substring(scanpathLength);
         }
+
         return classFile;
     }
 

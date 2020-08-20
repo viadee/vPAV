@@ -39,6 +39,7 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.config.reader.PropertiesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
@@ -58,6 +59,7 @@ import soot.SootResolver;
 import soot.SootResolver.SootClassNotFoundException;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static de.viadee.bpm.vPAV.SootResolverSimplified.fixClassPathForSoot;
@@ -168,12 +170,6 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                                 for (final IdentifierNode node : identifierNodes) {
                                     String classFile = RuntimeConfig.getInstance().getBeanMapping()
                                             .get(node.getName());
-
-                                    if (classFile.replaceAll("\\.", "/")
-                                            .startsWith(RuntimeConfig.getInstance().getScanPath())) {
-                                        classFile = classFile
-                                                .substring(RuntimeConfig.getInstance().getScanPath().length());
-                                    }
 
                                     // correct beanmapping was found -> check if class exists
                                     if (classFile != null && classFile.trim().length() > 0) {
@@ -381,11 +377,15 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             SootClass sClass = Scene.v()
                     .forceResolve(fixClassPathForSoot(className), SootClass.SIGNATURES);
 
+            if(sClass.isPhantom()) {
+                throw new ClassNotFoundException("Soot class is phantom and does probably not exist.");
+            }
+
             // Checks, whether the correct interface was implemented
             checkImplementsInterface(sClass, listener, taskListener, issues, classPath, element, location.getKey(),
                     sClass);
 
-        } catch (SootClassNotFoundException | AssertionError e) {
+        } catch (SootClassNotFoundException | AssertionError | ClassNotFoundException e) {
             // Throws an error, if the class was not found
             if (!className.isEmpty()) {
                 issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,

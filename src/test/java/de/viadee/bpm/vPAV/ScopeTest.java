@@ -403,7 +403,6 @@ public class ScopeTest {
     @Test
     public void testScopeConsideredInAnalysisSubprocess() {
         ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null);
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
         FileScanner fileScanner = new FileScanner(new RuleSet());
 
         // Test that global variables are accessible in subprocesses and that variables are accessible outside
@@ -414,7 +413,7 @@ public class ScopeTest {
                 .subProcessDone()
                 .endEvent("MyEndEvent")
                 .done();
-        flowAnalysis = new FlowAnalysis();
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
                 new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphs);
@@ -458,5 +457,4 @@ public class ScopeTest {
     private BpmnElement getBpmnElement(BaseElement element) {
         return new BpmnElement(null, element, new ControlFlowGraph(), new FlowAnalysis());
     }
-
 }

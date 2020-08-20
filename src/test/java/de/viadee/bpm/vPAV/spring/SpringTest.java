@@ -31,20 +31,30 @@
  */
 package de.viadee.bpm.vPAV.spring;
 
+import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import soot.Scene;
+import soot.SootClass;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Properties;
+
+import static de.viadee.bpm.vPAV.SootResolverSimplified.fixClassPathForSoot;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = { SayHelloDelegate.class, RuntimeServiceInit.class })
@@ -62,6 +72,7 @@ public class SpringTest {
         properties.put("ruleSetPath", RuntimeConfig.getInstance().getBasepath() + "spring/");
         RuntimeConfig.getInstance().setProperties(properties);
         Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelInconsistencies(ctx);
+
         Assert.assertEquals("There should be exactly one UR issue.", 1, issues.size());
         Assert.assertEquals("UnknownVariable", issues.iterator().next().getVariable());
     }

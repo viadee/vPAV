@@ -42,10 +42,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.VoidType;
+import soot.*;
 import soot.options.Options;
 import soot.toolkits.graph.Block;
 
@@ -207,6 +204,7 @@ public class JavaReaderStatic {
     }
 
     public static void setupSoot() {
+        G.reset();
         final String sootPath = FileScanner.getSootPath();
         System.setProperty("soot.class.path", sootPath);
         Options.v().set_whole_program(true);
