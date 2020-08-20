@@ -726,7 +726,7 @@ function showDialog() {
 }
 
 // List all ProcessInstances
-(function () {
+function createDiagramTabs() {
     var first = true;
     for (var id = 0; id <= diagramXMLSource.length - 1; id++) {
         let model = diagramXMLSource[id];
@@ -752,7 +752,7 @@ function showDialog() {
         a.setAttribute("id", model.name);
         ul.appendChild(li);
     }
-})();
+}
 
 // List all view modes
 function createViewModesNavBar(model) {
@@ -1012,6 +1012,7 @@ var controller;
 var bpmnFile;
 
 function initPage() {
+    createDiagramTabs();
     bpmnFile = diagramXMLSource[0].name;
     createViewModesNavBar(bpmnFile);
     controller = createViewController();
