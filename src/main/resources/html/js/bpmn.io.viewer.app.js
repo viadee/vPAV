@@ -1005,7 +1005,6 @@ const sourceCodeAttributes = ["camunda:class", "class",
 function loadExternalReport(reportPath) {
     document.documentElement.innerHTML = documentBackup.documentElement.innerHTML;
     loadDomElements(createScriptTags(generateJsDataArray(reportPath), true), initPage);
-    loadLogicJs();
 }
 
 function createProjectsNavbar() {
