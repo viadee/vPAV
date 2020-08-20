@@ -31,10 +31,15 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesParameterException;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -46,7 +51,13 @@ public class PropertiesReader {
 
     private static final Logger LOGGER = Logger.getLogger(PropertiesReader.class.getName());
 
-    public Properties read() {
+    public Properties initProperties() {
+        Properties properties = readPropertiesFromFile();
+        this.validateProperties(properties);
+        return properties;
+    }
+
+    protected Properties readPropertiesFromFile() {
         InputStream input = null;
         Properties properties = new Properties();
         try {
@@ -71,7 +82,7 @@ public class PropertiesReader {
         return properties;
     }
 
-    private Path findPropertiesPath() throws IOException {
+    protected Path findPropertiesPath() throws IOException {
         final Path[] foundFile = new Path[1];
         String pattern = "{vPav, vpav, vPAV}.properties";
         FileSystem fs = FileSystems.getDefault();
@@ -90,5 +101,19 @@ public class PropertiesReader {
         };
         Files.walkFileTree(Paths.get(""), matcherVisitor);
         return foundFile[0];
+    }
+
+    protected void validateProperties(Properties properties) {
+        List<String> allowedProperties = Arrays.asList("outputhtml", "language", "basepath", "parentRuleSet", "ruleSet",
+                "scanpath", "userVariablesFilePath", "validationFolder");
+        properties.keySet().forEach(key -> {
+            if (!allowedProperties.contains(key)) {
+                throw new InvalidPropertiesParameterException("Not allowed property: " + key);
+            }
+            if (StringUtils.isEmpty(properties.getProperty((String) key)) ||
+                    StringUtils.isBlank(properties.getProperty((String) key))) {
+                throw new InvalidPropertiesParameterException("Empty property: " + key);
+            }
+        });
     }
 }

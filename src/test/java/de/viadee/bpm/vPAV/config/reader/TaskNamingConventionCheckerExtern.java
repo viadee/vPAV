@@ -33,7 +33,7 @@ package de.viadee.bpm.vPAV.config.reader;
 
 import de.viadee.bpm.vPAV.config.model.ElementConvention;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.processing.ProcessingException;
+import de.viadee.bpm.vPAV.exceptions.ProcessingException;
 import de.viadee.bpm.vPAV.processing.checker.AbstractElementChecker;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
