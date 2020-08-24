@@ -74,6 +74,7 @@ function loadLogicJs() {
 function loadDataJs() {
     loadDomElements(createScriptTags(["externalReports/reportPaths.js"], true), () => {
         if (reportsPaths) {
+            projectNames = [];
             reportsPaths.forEach(path => {
                 loadDomElements(createScriptTags([path + "properties.js"], true),
                     () => {
@@ -89,6 +90,6 @@ var documentBackup;
 if (!documentBackup) {
     documentBackup = document.cloneNode(true);
 }
-var projectNames = [];
+var projectNames;
 loadDataJs();
 loadLogicJs();

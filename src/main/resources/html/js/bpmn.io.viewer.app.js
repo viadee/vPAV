@@ -1008,16 +1008,36 @@ function loadExternalReport(reportPath) {
 }
 
 function createProjectsNavbar() {
-    if (properties.isMultiProjectScan === "true") {
-        document.getElementById("navbar-toggle").classList.toggle("d-none");
-    }
+    document.getElementById("navbar-toggle").classList.toggle("d-none");
+    console.log(projectNames);
+    console.log(projectNames.length);
+    sidebarHtml = `
+            <div id="sidebar-wrapper" class="border-right collapse">
+            <div id="sidebar" class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <p><i class="mr-2 fas fa-list-ul"></i>Project summary</p>
+                </a>
+                ${reportsPaths.map((_, index) => {
+        return `
+                    <a href="#" class="list-group-item list-group-item-action"
+                        onclick="loadExternalReport(reportsPaths[${index}])">
+                    <p><i class="mr-2 fas fa-chevron-right">${projectNames[index]}</i></p>
+                    </a>
+                    `
+    })}
+            </div>
+        </div>
+    `;
+    document.getElementById("wrapper").insertAdjacentHTML("afterbegin", sidebarHtml);
 }
 
 var controller;
 var bpmnFile;
 
 function initPage() {
-    createProjectsNavbar();
+    if (properties.isMultiProjectScan === "true") {
+        createProjectsNavbar();
+    }
     createDiagramTabs();
     bpmnFile = diagramXMLSource[0].name;
     createViewModesNavBar(bpmnFile);
