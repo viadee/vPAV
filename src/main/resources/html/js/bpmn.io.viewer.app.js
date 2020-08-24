@@ -1035,7 +1035,7 @@ var controller;
 var bpmnFile;
 
 function initPage() {
-    if (reportData && reportData.isMultiProjectScan === "true") {
+    if (typeof reportData !== "undefined" && reportData.isMultiProjectScan === "true") {
         createProjectsNavbar();
     }
     createDiagramTabs();
