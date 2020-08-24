@@ -1021,7 +1021,7 @@ function createProjectsNavbar() {
         return `
                     <a href="#" class="list-group-item list-group-item-action"
                         onclick="loadExternalReport(reportData.reportsPaths[${index}])">
-                    <p class="text-white"><i class="text-white mr-2 fas fa-chevron-right"></i>${projectNames[index]}</p>
+                    <p class="text-white"><i class="text-white mr-2 fas fa-file"></i>${projectNames[index]}</p>
                     </a>
                     `
     }).join("")}
