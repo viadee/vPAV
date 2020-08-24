@@ -616,7 +616,7 @@ public class Runner {
 	private void checkReportsOverviewPathGeneration() {
 		if (RuntimeConfig.getInstance().isMultiProjectScan() && externalReportsPaths.size() > 0) {
 			JsOutputWriter jsOutputWriter = new JsOutputWriter();
-			jsOutputWriter.writeGeneratedReportsOverviewJS(externalReportsPaths);
+			jsOutputWriter.writeGeneratedReportsData(externalReportsPaths);
 		}
 	}
 

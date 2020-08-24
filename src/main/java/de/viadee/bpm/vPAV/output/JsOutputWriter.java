@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.output;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -527,7 +526,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 		String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
 		String projectName = rootPath.substring(rootPath.lastIndexOf('/') + 1);
 		obj.addProperty("projectName", projectName);
-		obj.addProperty("isMultiProjectScan", RuntimeConfig.getInstance().isMultiProjectScan().toString());
 
 		return createJsonString(false, "properties", obj);
 	}
@@ -540,7 +538,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the wrong checkers
 	 */
 	private String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
-		final String varName = "unlocatedCheckers";
 		final JsonArray jsonIssues = new JsonArray();
 		if (wrongCheckers != null && wrongCheckers.size() > 0) {
 			for (Map.Entry<String, String> entry : wrongCheckers.entrySet()) {
@@ -620,14 +617,17 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 *
 	 * @param externalReportsPaths List of the relative paths
 	 */
-	public void writeGeneratedReportsOverviewJS(List<String> externalReportsPaths) {
-		String reportsPathsAsJS = "var reportsPaths = ";
-		reportsPathsAsJS += new Gson().toJson(externalReportsPaths);
+	public void writeGeneratedReportsData(List<String> externalReportsPaths) {
+		JsonObject obj = new JsonObject();
+		obj.addProperty("isMultiProjectScan", RuntimeConfig.getInstance().isMultiProjectScan().toString());
+		JsonArray array = new JsonArray();
+		externalReportsPaths.forEach(array::add);
+		obj.add("reportsPaths", array);
 		File reportsPathsFile = new File(RuntimeConfig.getInstance().getExternalReportsFolder() +
-				ConfigConstants.VALIDATION_OVERVIEW_REPORT_PATHS_JS);
-		reportsPathsAsJS += ";";
+				ConfigConstants.VALIDATION_OVERVIEW_REPORT_DATA_JS);
+		String reportData = createJsonString(false, "reportData", obj);
 		try {
-			FileUtils.write(reportsPathsFile, reportsPathsAsJS, (Charset) null);
+			FileUtils.write(reportsPathsFile, reportData, (Charset) null);
 		} catch (IOException e) {
 			throw new RuntimeException("Couldn't write external reports paths JS");
 		}

@@ -72,10 +72,10 @@ function loadLogicJs() {
 }
 
 function loadDataJs() {
-    loadDomElements(createScriptTags(["externalReports/reportPaths.js"], true), () => {
-        if (reportsPaths) {
+    loadDomElements(createScriptTags(["externalReports/reportData.js"], true), () => {
+        if (reportData.reportsPaths) {
             projectNames = [];
-            reportsPaths.forEach(path => {
+            reportData.reportsPaths.forEach(path => {
                 loadDomElements(createScriptTags([path + "properties.js"], true),
                     () => {
                         projectNames.push(properties.projectName)

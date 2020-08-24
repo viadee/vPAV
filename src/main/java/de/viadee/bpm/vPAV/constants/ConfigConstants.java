@@ -109,7 +109,7 @@ public class ConfigConstants {
 
     public static final String VALIDATION_OVERVIEW_REPORTS_FOLDER = "externalReports/";
 
-    public static final String VALIDATION_OVERVIEW_REPORT_PATHS_JS = "reportPaths.js";
+    public static final String VALIDATION_OVERVIEW_REPORT_DATA_JS = "reportData.js";
 
     private ConfigConstants() {
     }

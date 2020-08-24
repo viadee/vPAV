@@ -1017,10 +1017,10 @@ function createProjectsNavbar() {
                 <a href="#" class="list-group-item list-group-item-action">
                     <p><i class="mr-2 fas fa-list-ul"></i>Project summary</p>
                 </a>
-                ${reportsPaths.map((_, index) => {
+                ${reportData.reportsPaths.map((_, index) => {
         return `
                     <a href="#" class="list-group-item list-group-item-action"
-                        onclick="loadExternalReport(reportsPaths[${index}])">
+                        onclick="loadExternalReport(reportData.reportsPaths[${index}])">
                     <p><i class="mr-2 fas fa-chevron-right">${projectNames[index]}</i></p>
                     </a>
                     `
@@ -1035,7 +1035,7 @@ var controller;
 var bpmnFile;
 
 function initPage() {
-    if (properties.isMultiProjectScan === "true") {
+    if (reportData && reportData.isMultiProjectScan === "true") {
         createProjectsNavbar();
     }
     createDiagramTabs();
