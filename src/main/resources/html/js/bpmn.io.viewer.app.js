@@ -1011,7 +1011,7 @@ function createProjectsNavbar() {
     document.getElementById("navbar-toggle").classList.toggle("d-none");
     console.log(projectNames);
     console.log(projectNames.length);
-    sidebarHtml = `
+    const sidebarHtml = `
             <div id="sidebar-wrapper" class="border-right collapse">
             <div id="sidebar" class="list-group list-group-flush">
                 <a href="#" class="list-group-item list-group-item-action">
@@ -1024,7 +1024,7 @@ function createProjectsNavbar() {
                     <p><i class="mr-2 fas fa-chevron-right">${projectNames[index]}</i></p>
                     </a>
                     `
-    })}
+    }).join("")}
             </div>
         </div>
     `;
