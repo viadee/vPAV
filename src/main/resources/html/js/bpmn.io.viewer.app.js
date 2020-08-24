@@ -1015,13 +1015,13 @@ function createProjectsNavbar() {
             <div id="sidebar-wrapper" class="border-right collapse">
             <div id="sidebar" class="list-group list-group-flush">
                 <a href="#" class="list-group-item list-group-item-action">
-                    <p><i class="mr-2 fas fa-list-ul"></i>Project summary</p>
+                    <p class="text-white"><i class="text-white mr-2 fas fa-list-ul"></i>Project summary</p>
                 </a>
                 ${reportData.reportsPaths.map((_, index) => {
         return `
                     <a href="#" class="list-group-item list-group-item-action"
                         onclick="loadExternalReport(reportData.reportsPaths[${index}])">
-                    <p><i class="mr-2 fas fa-chevron-right">${projectNames[index]}</i></p>
+                    <p class="text-white"><i class="text-white mr-2 fas fa-chevron-right"></i>${projectNames[index]}</p>
                     </a>
                     `
     }).join("")}

@@ -15,7 +15,7 @@
     -moz-transition: margin .25s ease-out;
     -o-transition: margin .25s ease-out;
     transition: margin .25s ease-out;
-    /*background-color: rgba(126, 188, 169, 0.5);*/
+    background-color: rgb(126, 188, 169);
 }
 
 #sidebar-wrapper .sidebar-heading {
@@ -37,12 +37,13 @@
 
 #sidebar > .list-group-item {
     padding-bottom: 0.0rem;
-    /*background-color: rgba(126, 188, 169, 0.25);*/
+    background-color: rgb(126, 188, 169);
 }
 
-/*#sidebar > a.list-group-item.selected a.list-group-item.selected:hover {*/
-/*    background-color: rgba(126, 188, 169, 0.5);*/
-/*}*/
+#sidebar > a.list-group-item:hover {
+    background: #DFAD47;
+    color: whitesmoke;
+}
 
 @media (min-width: 768px) {
     #sidebar-wrapper {
