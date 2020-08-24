@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.output;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -245,14 +246,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 					.map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
 					.filter(o -> o.has("elementId")).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 			StringBuilder jsFile = new StringBuilder();
-			jsFile.append("var proz_vars = ")
-					.append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonElements)).append(";\n\n");
-
+			jsFile.append(createJsonString(false, "proz_vars", jsonElements)).append(";\n\n");
 			JsonArray jsonVariables = processVariables.stream().map(JsOutputWriter::transformProcessVariablesToJson)
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
-			jsFile.append("var processVariables = ")
-					.append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonVariables)).append(";");
-
+			jsFile.append(createJsonString(false, "processVariables", jsonVariables));
 			writer.write(jsFile.toString());
 		} catch (IOException e1) {
 			logger.warning("Processvariables couldn't be written");
@@ -485,7 +482,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				}
 
 				// Add more information regarding the implementation if given
-				if(issue.getImplementationDetails() != null) {
+				if (issue.getImplementationDetails() != null) {
 					obj.addProperty(BpmnConstants.VPAV_IMPLEMENTATION_DETAILS, issue.getImplementationDetails());
 				}
 
@@ -495,7 +492,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+		return createJsonString(false, varName, jsonIssues);
 	}
 
 	/**
@@ -527,8 +524,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
 		String projectName = rootPath.substring(rootPath.lastIndexOf('/') + 1);
 		obj.addProperty("projectName", projectName);
-
-		return ("var properties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
+		return createJsonString(false, "properties", obj);
 	}
 
 	/**
@@ -539,7 +535,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the wrong checkers
 	 */
 	private String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
-		final String varName = "unlocatedCheckers";
 		final JsonArray jsonIssues = new JsonArray();
 		if (wrongCheckers != null && wrongCheckers.size() > 0) {
 			for (Map.Entry<String, String> entry : wrongCheckers.entrySet()) {
@@ -549,7 +544,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+		return createJsonString(false, "unlocatedCheckers", jsonIssues);
 	}
 
 	/**
@@ -560,7 +555,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the issues' id and severity
 	 */
 	private String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
-		final String varName = "issueSeverity";
 		final JsonArray jsonIssues = new JsonArray();
 		if (issues != null && issues.size() > 0) {
 			for (Map.Entry<String, CriticalityEnum> entry : issues.entrySet()) {
@@ -570,7 +564,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+		return createJsonString(false, "issueSeverity", jsonIssues);
 	}
 
 	/**
@@ -580,7 +574,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the issues to be ignored
 	 */
 	private String transformIgnoredIssuesToJsDatastructure(final Map<String, String> ignoredIssues) {
-		final String ignoredIssuesList = "ignoredIssues";
 		final JsonArray ignoredIssesJson = new JsonArray();
 
 		if (ignoredIssues != null && ignoredIssues.size() > 0) {
@@ -591,8 +584,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				ignoredIssesJson.add(obj);
 			}
 		}
-		return ("var " + ignoredIssuesList + " = "
-				+ new GsonBuilder().setPrettyPrinting().create().toJson(ignoredIssues) + ";");
+		return createJsonString(false, "ignoredIssues", ignoredIssesJson);
 	}
 
 	/**
@@ -600,7 +592,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the default checkers
 	 */
 	private String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
-		final String varName = "defaultCheckers";
 		final JsonArray jsonIssues = new JsonArray();
 		if (defaultCheckers != null && defaultCheckers.size() > 0) {
 			for (String entry : defaultCheckers) {
@@ -609,7 +600,12 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return ("\n var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+		return createJsonString(true, "defaultCheckers", jsonIssues);
+	}
+
+	private String createJsonString(Boolean newline, String jsonIdentifier, JsonElement jsonText) {
+		return (newline ? "\n" : "" + "var " + jsonIdentifier + " = " +
+				new GsonBuilder().setPrettyPrinting().create().toJson(jsonText) + ";");
 	}
 
 	public Map<String, String> getIgnoredIssuesMap() {
