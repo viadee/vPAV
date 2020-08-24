@@ -80,7 +80,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
 				BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
 		final String bpmn = transformToXMLDatastructure();
-		final String wrongCheckers = transformToJsDatastructure(getWrongCheckersMap());
+		final String wrongCheckers = transformToJsDatastructure(getWrongCheckersMap()) + "\n";
 		final String defaultCheckers = transformDefaultRulesToJsDatastructure(
 				extractExternalCheckers(RuntimeConfig.getInstance().getActiveRules()));
 		final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
@@ -248,10 +248,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 					.map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
 					.filter(o -> o.has("elementId")).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 			StringBuilder jsFile = new StringBuilder();
-			jsFile.append(createJsonString(false, "proz_vars", jsonElements)).append(";\n\n");
+			jsFile.append(createJsonString("proz_vars", jsonElements)).append(";\n\n");
 			JsonArray jsonVariables = processVariables.stream().map(JsOutputWriter::transformProcessVariablesToJson)
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
-			jsFile.append(createJsonString(false, "processVariables", jsonVariables));
+			jsFile.append(createJsonString("processVariables", jsonVariables));
 			writer.write(jsFile.toString());
 		} catch (IOException e1) {
 			logger.warning("Processvariables couldn't be written");
@@ -494,7 +494,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return createJsonString(false, varName, jsonIssues);
+		return createJsonString(varName, jsonIssues);
 	}
 
 	/**
@@ -526,8 +526,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
 		String projectName = rootPath.substring(rootPath.lastIndexOf('/') + 1);
 		obj.addProperty("projectName", projectName);
-
-		return createJsonString(false, "properties", obj);
+		return createJsonString("properties", obj);
 	}
 
 	/**
@@ -547,7 +546,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return createJsonString(false, "unlocatedCheckers", jsonIssues);
+		return createJsonString("unlocatedCheckers", jsonIssues);
 	}
 
 	/**
@@ -567,7 +566,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return createJsonString(false, "issueSeverity", jsonIssues);
+		return createJsonString("issueSeverity", jsonIssues);
 	}
 
 	/**
@@ -577,7 +576,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the issues to be ignored
 	 */
 	private String transformIgnoredIssuesToJsDatastructure(final Map<String, String> ignoredIssues) {
-		final String ignoredIssuesList = "ignoredIssues";
 		final JsonArray ignoredIssesJson = new JsonArray();
 
 		if (ignoredIssues != null && ignoredIssues.size() > 0) {
@@ -588,7 +586,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				ignoredIssesJson.add(obj);
 			}
 		}
-		return createJsonString(false, "ignoredIssues", ignoredIssesJson);
+		return createJsonString("ignoredIssues", ignoredIssesJson);
 	}
 
 	/**
@@ -604,11 +602,11 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return createJsonString(true, "defaultCheckers", jsonIssues);
+		return createJsonString("defaultCheckers", jsonIssues);
 	}
 
-	private String createJsonString(Boolean newline, String jsonIdentifier, JsonElement jsonText) {
-		return (newline ? "\n" : "" + "var " + jsonIdentifier + " = " +
+	private String createJsonString(String jsonIdentifier, JsonElement jsonText) {
+		return ("var " + jsonIdentifier + " = " +
 				new GsonBuilder().setPrettyPrinting().create().toJson(jsonText) + ";");
 	}
 
@@ -625,7 +623,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		obj.add("reportsPaths", array);
 		File reportsPathsFile = new File(RuntimeConfig.getInstance().getExternalReportsFolder() +
 				ConfigConstants.VALIDATION_OVERVIEW_REPORT_DATA_JS);
-		String reportData = createJsonString(false, "reportData", obj);
+		String reportData = createJsonString("reportData", obj);
 		try {
 			FileUtils.write(reportsPathsFile, reportData, (Charset) null);
 		} catch (IOException e) {
