@@ -1029,6 +1029,11 @@ function createProjectsNavbar() {
         </div>
     `;
     document.getElementById("wrapper").insertAdjacentHTML("afterbegin", sidebarHtml);
+    //Set active the selected project item sidebar, otherwise set active the first sidebar item, which is the project overview
+    const loadedProjectEntry = Array.from(document.querySelectorAll("#sidebar a > p"))
+        .find(paragraph => paragraph.textContent === properties.projectName);
+    loadedProjectEntry ? loadedProjectEntry.parentNode.classList.toggle("selected") : document.querySelector("#sidebar a > p").parentNode.classList.toggle("selected")
+
 }
 
 var controller;

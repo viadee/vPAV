@@ -40,7 +40,7 @@
     background-color: rgb(126, 188, 169);
 }
 
-#sidebar > a.list-group-item:hover {
+#sidebar > a.selected, #sidebar > a.list-group-item:hover {
     background: #DFAD47;
     color: whitesmoke;
 }
