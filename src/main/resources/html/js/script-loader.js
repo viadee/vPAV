@@ -50,9 +50,11 @@ function createScriptTags(scriptSources, isData = false) {
     return scriptSources.map(scriptSource => {
         let script = document.createElement("script");
         script.src = scriptSource;
-        script.async = false; //script tags added by DOM API are async by default (╯°□°）╯︵ ┻━┻
         if (isData) {
             script.className = "data-script";
+        } else {
+            script.async = false; //script tags added by DOM API are async by default (╯°□°）╯︵ ┻━┻
+            script.defer = true;
         }
         return script;
     });
