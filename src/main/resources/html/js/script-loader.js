@@ -24,7 +24,10 @@ function loadDomElements(scriptNodes, callback = null) {
     document.body.appendChild(fragment);
 }
 
-function resetData() {
+function unloadDataScripts() {
+    Array.from(document.getElementsByClassName("data-script")).forEach(script => {
+        document.body.removeChild(script);
+    });
     diagramXMLSource = undefined;
     elementsToMark = undefined;
     noIssuesElements = undefined;
@@ -41,12 +44,6 @@ function resetData() {
 }
 
 function createScriptTags(scriptSources, isData = false) {
-    if (isData) {
-        Array.from(document.getElementsByClassName("data-script")).forEach(script => {
-            document.body.removeChild(script);
-        });
-        resetData();
-    }
     return scriptSources.map(scriptSource => {
         let script = document.createElement("script");
         script.src = scriptSource;
@@ -62,14 +59,14 @@ function createScriptTags(scriptSources, isData = false) {
 
 function loadLogicJs() {
     if (!window.BpmnJS) {
-        loadDomElements(
-            createScriptTags([
-                //bootstrap with dependencies
-                "js/jquery-3.5.1.min.js", "js/bootstrap.bundle.min.js",
-                //bpmn-js viewer
-                "js/bpmn-navigated-viewer.js",
-                //application
-                "js/download.js", "js/bpmn.io.viewer.app.js"], false));
+        const executionScripts = createScriptTags([
+            //bootstrap with dependencies
+            "js/jquery-3.5.1.min.js", "js/bootstrap.bundle.min.js",
+            //bpmn-js viewer
+            "js/bpmn-navigated-viewer.js",
+            //application
+            "js/download.js", "js/bpmn.io.viewer.app.js"], false);
+        loadDomElements(executionScripts, false);
     }
 }
 

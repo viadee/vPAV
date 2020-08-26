@@ -1004,6 +1004,7 @@ const sourceCodeAttributes = ["camunda:class", "class",
 
 function loadExternalReport(reportPath) {
     document.documentElement.innerHTML = documentBackup.documentElement.innerHTML;
+    unloadDataScripts();
     loadDomElements(createScriptTags(generateJsDataArray(reportPath), true), initPage);
 }
 
