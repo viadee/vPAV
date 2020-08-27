@@ -698,8 +698,12 @@ function createShowOperationsLink(processVariableName) {
  * create Footer
  */
 function createFooter() {
-    let footer = `
-    <footer class="footer viadee-footer mt-auto py-3">
+    const oldFooter = document.getElementById("footer");
+    if (oldFooter) {
+        oldFooter.parentNode.removeChild(oldFooter);
+    }
+    const footer = `
+    <footer id="footer" class="footer viadee-footer mt-auto py-3">
     <div class="container-fluid">
         <span class="text-muted-viadee">${viadee + " - " + vPavName + " " + vPavVersion}</span>
         <a class="text-muted-viadee float-right pr-2" href="https://viadee.github.io/vPAV/#licenses" target="_blank">Licenses</a>
@@ -714,10 +718,14 @@ function createFooter() {
 
 //set Filename as Header
 function createHeader(name) {
-    let modelName = name ? name.substr(0, name.length - 5) : "";
-    let projectName = properties["projectName"] ? properties["projectName"] : "";
-    let header = `
-    <nav role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
+    const oldHeader = document.getElementById("header");
+    if (oldHeader) {
+        oldHeader.parentNode.removeChild(oldHeader);
+    }
+    const modelName = name ? name.substr(0, name.length - 5) : "";
+    const projectName = properties["projectName"] ? properties["projectName"] : "";
+    const header = `
+    <nav id="header" role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
     <ul class="nav align-items-center">
         <li class="nav-item">
             <a href="https://viadee.github.io/vPAV/" target="_blank">
