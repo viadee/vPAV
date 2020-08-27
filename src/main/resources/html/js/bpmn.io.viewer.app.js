@@ -721,7 +721,7 @@ function createHeader(name) {
         oldHeader.parentNode.removeChild(oldHeader);
     }
     const modelName = name ? name.substr(0, name.length - 5) : "";
-    const projectName = properties["projectName"] ? properties["projectName"] : "";
+    const projectName = properties ? properties["projectName"] : "";
     const header = `
 <nav id="header" role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
             <ul class="nav align-items-center">
@@ -740,11 +740,11 @@ function createHeader(name) {
                 <li class="nav-item">
                     <h4 class="nav-item navbar-text text-white mb-0 ml-4 mr-2" id="model">${modelName}</h4>
                 </li>
-                <li class="nav-item">
+                ${properties ? `<li class="nav-item">
                     <a id="model_download" class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" onclick="downloadModel()">
                         <span class="text-white fas fa-arrow-alt-circle-down fa-2x"></span>
                     </a>
-                </li>
+                </li>` : ""}
             </ul>
             <ul class="nav navbar-center align-items-center">
                 <li class="nav-item">
@@ -777,7 +777,8 @@ function createProjectsNavbar() {
     const sidebarHtml = `
             <div id="sidebar-wrapper" class="border-right collapse">
             <div id="sidebar" class="list-group list-group-flush">
-                <a href="#" class="list-group-item list-group-item-action">
+                <a href="#" class="list-group-item list-group-item-action"
+                onclick="createProjectSummary()">
                     <p class="text-white"><i class="text-white mr-2 fas fa-list-ul"></i>Project summary</p>
                 </a>
                 ${reportData.reportsPaths.map((_, index) => {
@@ -793,10 +794,20 @@ function createProjectsNavbar() {
     `;
     document.getElementById("wrapper").insertAdjacentHTML("afterbegin", sidebarHtml);
     //Set active the selected project item sidebar, otherwise set active the first sidebar item, which is the project overview
+    const projectName = properties ? properties.projectName : "";
     const loadedProjectEntry = Array.from(document.querySelectorAll("#sidebar a > p"))
-        .find(paragraph => paragraph.textContent === properties.projectName);
+        .find(paragraph => paragraph.textContent === projectName);
     loadedProjectEntry ? loadedProjectEntry.parentNode.classList.toggle("selected") :
         document.querySelector("#sidebar a > p").parentNode.classList.toggle("selected")
+}
+
+function createProjectSummary() {
+    resetDocument();
+    createHeader();
+    createFooter();
+    const mainContent = document.getElementById("content");
+    mainContent.innerHTML = `<p>Foo</p>`;
+
 }
 
 //get issue count from specific bpmnFile
@@ -1090,9 +1101,13 @@ const sourceCodeAttributes = ["camunda:class", "class",
     "camunda:delegateExpression", "delegateExpression",
     "camunda:variableMappingClass", "camunda:variableMappingDelegateExpression"];
 
-function loadExternalReport(reportPath) {
+function resetDocument() {
     document.documentElement.innerHTML = documentBackup.documentElement.innerHTML;
     unloadDataScripts();
+}
+
+function loadExternalReport(reportPath) {
+    resetDocument();
     loadDomElements(createScriptTags(generateJsDataArray(reportPath), true), initPage);
 }
 
