@@ -27,60 +27,18 @@
 
     <div id="page-content-wrapper">
 
-        <nav id="header" role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
-            <ul class="nav align-items-center">
-                <li class="nav-item">
-                    <button id="navbar-toggle" class="btn btn-outline-light mr-3 d-none" type="button"
-                            onclick="toggleSideBar()"
-                            aria-controls="nav-content" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="text-white fas fa-bars"></span>
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <a href="https://viadee.github.io/vPAV/" target="_blank">
-                        <img class="d-block" src="img/vPAV.png" alt="vPAV" height="60" title="documentation"/>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <h4 class="nav-item navbar-text text-white mb-0 ml-4 mr-2" id="model"></h4>
-                </li>
-                <li class="nav-item">
-                    <a id="model_download" class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" onclick="downloadModel()">
-                        <span class="text-white fas fa-arrow-alt-circle-down fa-2x"></span>
-                    </a>
-                </li>
-            </ul>
-            <ul class="nav navbar-center align-items-center">
-                <li class="nav-item">
-                    <h3 id="project_name" class="navbar-text text-white"></h3>
-                </li>
-            </ul>
-            <ul class="nav navbar-right align-items-center">
-                <li class="nav-item">
-                    <a class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" id="github-logo"
-                       href="https://github.com/viadee/vPAV">
-                        <span class="text-white fab fa-github fa-2x"></span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link pl-2 pr-1 mx-1 py-0 my-n2" href="https://www.viadee.de/">
-                        <img src="img/viadee_weiss.png" alt="viadee Homepage" height="70" title="viadee Homepage"/>
-                    </a>
-                </li>
-            </ul>
-        </nav>
 
-        <div id="content" class="container-fluid">
-            <!-- navBar -->
-            <div class="row placeholder-top">
-                <div class="col">
-                    <ul id="linkList" class="nav nav-pills">
-                    </ul>
-                </div>
+    <div id="content" class="container-fluid">
+        <!-- navBar -->
+        <div class="row placeholder-top">
+            <div class="col">
+                <ul id="linkList" class="nav nav-pills">
+                </ul>
             </div>
+        </div>
 
-            <!-- Path-->
-            <div class="row collapse" id="rowPath">
+        <!-- Path-->
+        <div class="row collapse" id="rowPath">
                 <div class="col">
                     <div class="alert alert-danger mt-2 mb-0 ml-0 pb-1 pt-1 viadee-small-alert" role="alert"
                          id="invalidPath"></div>
@@ -164,19 +122,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Footer -->
-<footer class="footer viadee-footer mt-auto py-3">
-    <div class="container-fluid">
-        	<span class="text-muted-viadee">
-
-		</span>
-        <a class="text-muted-viadee float-right pr-2" href="https://viadee.github.io/vPAV/#licenses"
-           target="_blank">Licenses</a>
-        <a class="text-muted-viadee float-right pr-2" href="https://www.viadee.de/impressum-datenschutz.html"
-           target="_blank">Imprint</a>
-    </div>
-</footer>
     </div>
 </div>
 <script src="js/script-loader.js"></script>
