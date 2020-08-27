@@ -774,8 +774,6 @@ function createHeader(name) {
 
 function createProjectsNavbar() {
     document.getElementById("navbar-toggle").classList.toggle("d-none");
-    console.log(projectNames);
-    console.log(projectNames.length);
     const sidebarHtml = `
             <div id="sidebar-wrapper" class="border-right collapse">
             <div id="sidebar" class="list-group list-group-flush">
