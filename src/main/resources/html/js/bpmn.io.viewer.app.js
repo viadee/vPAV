@@ -698,16 +698,62 @@ function createShowOperationsLink(processVariableName) {
  * create Footer
  */
 function createFooter() {
-    var fP = document.querySelector("footer span");
-    fP.innerHTML = viadee + " - " + vPavName + " " + vPavVersion;
+    let footer = `
+    <footer class="footer viadee-footer mt-auto py-3">
+    <div class="container-fluid">
+        <span class="text-muted-viadee">${viadee + " - " + vPavName + " " + vPavVersion}</span>
+        <a class="text-muted-viadee float-right pr-2" href="https://viadee.github.io/vPAV/#licenses" target="_blank">Licenses</a>
+        <a class="text-muted-viadee float-right pr-2" href="https://www.viadee.de/impressum-datenschutz.html"
+           target="_blank">Imprint</a>
+    </div>
+</footer>
+`;
+    document.getElementById("content").insertAdjacentHTML("afterEnd", footer);
 }
 
 
 //set Filename as Header
-function setUeberschrift(name) {
-    let subName = name.substr(0, name.length - 5);
-    document.querySelector("#model").innerHTML = subName;
-    setFocus(name);
+function createHeader(name) {
+    let modelName = name ? name.substr(0, name.length - 5) : "";
+    let projectName = properties["projectName"] ? properties["projectName"] : "";
+    let header = `
+    <nav role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
+    <ul class="nav align-items-center">
+        <li class="nav-item">
+            <a href="https://viadee.github.io/vPAV/" target="_blank">
+                <img class="d-block" src="img/vPAV.png" alt="vPAV" height="60" title="documentation"/>
+            </a>
+        </li>
+        <li class="nav-item">
+            <h4 class="nav-item navbar-text text-white mb-0 ml-4 mr-2" id="model">${modelName}</h4>
+        </li>
+        <li class="nav-item">
+            <a id="model_download" class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" onclick="downloadModel()">
+                <span class="text-white fas fa-arrow-alt-circle-down fa-2x"></span>
+            </a>
+        </li>
+    </ul>
+    <ul class="nav navbar-center align-items-center">
+        <li class="nav-item">
+            <h3 id="project_name" class="navbar-text text-white">${projectName}</h3>
+        </li>
+    </ul>
+    <ul class="nav navbar-right align-items-center">
+        <li class="nav-item">
+            <a class="nav-link pl-2 pr-1 mx-1 py-3 my-n2" id="github-logo"
+               href="https://github.com/viadee/vPAV">
+                <span class="text-white fab fa-github fa-2x"></span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link pl-2 pr-1 mx-1 py-0 my-n2" href="https://www.viadee.de/">
+                <img src="img/viadee_weiss.png" alt="viadee Homepage" height="70" title="viadee Homepage"/>
+            </a>
+        </li>
+    </ul>
+</nav>
+    `;
+    document.getElementById("content").insertAdjacentHTML("beforeBegin", header);
 }
 
 //get issue count from specific bpmnFile
@@ -813,11 +859,10 @@ function createViewController() {
 
             // zoom to fit full viewport
             canvas.zoom('fit-viewport');
-            setUeberschrift(diagramXML.name);
+            createHeader(diagramXML.name);
             addCountOverlay(overlays, overlayData);
             markNodes(elements, canvas);
             controller.loadCodeElements();
-            document.getElementById('project_name').innerText = properties["projectName"];
         });
     }
 
