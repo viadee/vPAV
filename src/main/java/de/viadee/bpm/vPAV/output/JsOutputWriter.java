@@ -248,10 +248,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 					.map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
 					.filter(o -> o.has("elementId")).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 			StringBuilder jsFile = new StringBuilder();
-			jsFile.append(createJsonString("proz_vars", jsonElements)).append(";\n\n");
+			jsFile.append(transformJsonToJs("proz_vars", jsonElements)).append(";\n\n");
 			JsonArray jsonVariables = processVariables.stream().map(JsOutputWriter::transformProcessVariablesToJson)
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
-			jsFile.append(createJsonString("processVariables", jsonVariables));
+			jsFile.append(transformJsonToJs("processVariables", jsonVariables));
 			writer.write(jsFile.toString());
 		} catch (IOException e1) {
 			logger.warning("Processvariables couldn't be written");
@@ -494,7 +494,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return createJsonString(varName, jsonIssues);
+		return transformJsonToJs(varName, jsonIssues);
 	}
 
 	/**
@@ -514,8 +514,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			} catch (URISyntaxException e) {
 				logger.log(Level.SEVERE, "URI of path seems to be malformed.", e);
 			}
-		}
-		else {
+		} else {
 			// Create download basepath
 			absolutePath = "file:///" + new File(basePath).getAbsolutePath() + "/";
 		}
@@ -523,10 +522,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 		obj.addProperty("downloadBasepath", absolutePath);
 
-		String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
-		String projectName = rootPath.substring(rootPath.lastIndexOf('/') + 1);
-		obj.addProperty("projectName", projectName);
-		return createJsonString("properties", obj);
+		obj.addProperty("projectName", RuntimeConfig.getInstance().getProjectName());
+		return transformJsonToJs("properties", obj);
 	}
 
 	/**
@@ -546,7 +543,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return createJsonString("unlocatedCheckers", jsonIssues);
+		return transformJsonToJs("unlocatedCheckers", jsonIssues);
 	}
 
 	/**
@@ -566,7 +563,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return createJsonString("issueSeverity", jsonIssues);
+		return transformJsonToJs("issueSeverity", jsonIssues);
 	}
 
 	/**
@@ -586,7 +583,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				ignoredIssesJson.add(obj);
 			}
 		}
-		return createJsonString("ignoredIssues", ignoredIssesJson);
+		return transformJsonToJs("ignoredIssues", ignoredIssesJson);
 	}
 
 	/**
@@ -602,12 +599,12 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return createJsonString("defaultCheckers", jsonIssues);
+		return transformJsonToJs("defaultCheckers", jsonIssues);
 	}
 
-	private String createJsonString(String jsonIdentifier, JsonElement jsonText) {
-		return ("var " + jsonIdentifier + " = " +
-				new GsonBuilder().setPrettyPrinting().create().toJson(jsonText) + ";");
+	private String transformJsonToJs(String jsIdentifier, JsonElement json) {
+		return ("var " + jsIdentifier + " = " +
+				JsonOutputWriter.getJsonString(json) + ";");
 	}
 
 	/**
@@ -623,7 +620,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		obj.add("reportsPaths", array);
 		File reportsPathsFile = new File(RuntimeConfig.getInstance().getExternalReportsFolder() +
 				ConfigConstants.VALIDATION_OVERVIEW_REPORT_DATA_JS);
-		String reportData = createJsonString("reportData", obj);
+		String reportData = transformJsonToJs("reportData", obj);
 		try {
 			FileUtils.write(reportsPathsFile, reportData, (Charset) null);
 		} catch (IOException e) {

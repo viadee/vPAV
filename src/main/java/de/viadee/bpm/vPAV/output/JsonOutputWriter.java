@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV.output;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -125,6 +126,11 @@ public class JsonOutputWriter implements IssueOutputWriter {
 			}
 		}
 
-		return new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues);
+		return getJsonString(jsonIssues);
 	}
+
+	public static String getJsonString(JsonElement json) {
+		return new GsonBuilder().setPrettyPrinting().create().toJson(json);
+	}
+
 }

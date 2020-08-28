@@ -34,12 +34,14 @@ package de.viadee.bpm.vPAV;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.PropertiesReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -392,6 +394,11 @@ public class RuntimeConfig {
 
     public String getValidationJsonOutput() {
         return getDataFolder() + "bpmn_validation.json";
+    }
+
+    public String getProjectName() {
+        String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
+        return rootPath.substring(rootPath.lastIndexOf('/') + 1);
     }
 
     public Boolean isMultiProjectScan() {
