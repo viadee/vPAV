@@ -32,10 +32,8 @@
 package de.viadee.bpm.vPAV.processing.model.data;
 
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.springframework.util.DigestUtils;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -276,9 +274,9 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     }
 
     public String getId() {
-        return getMD5(
-                ruleName + "_" + cleanPath(bpmnFile) + "_" + cleanPath(resourceFile) + "_" + elementId + "_" + variable
-                        + "_" + message);
+        final String inputString = ruleName + "_" + cleanPath(bpmnFile) + "_" + cleanPath(resourceFile) + "_"
+                + elementId + "_" + variable + "_" + message;
+        return DigestUtils.md5DigestAsHex(inputString.getBytes());
     }
 
     // by replacing this way, ignored issues from a windows system remain ignored on
@@ -371,26 +369,6 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     public void setRuleDescription(final String ruleDescription) {
         this.ruleDescription = ruleDescription;
-    }
-
-    /**
-     * @param input String
-     * @return hashed Input
-     */
-    public static String getMD5(String input) {
-        try {
-            final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            final byte[] messageDigestByteArray = messageDigest.digest(input.getBytes());
-            final BigInteger number = new BigInteger(1, messageDigestByteArray);
-            String hashtext = number.toString(16);
-            // Now we need to zero pad it if you actually want the full 32 chars.
-            while (hashtext.length() < 32) {
-                hashtext = "0" + hashtext;
-            }
-            return hashtext;
-        } catch (final NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
