@@ -219,7 +219,7 @@ function createIssueDialog(elements) {
                     minusIcon.setAttribute("class", "text-white fas fa-minus-circle fa-lg mr-3");
 
                     dCardAddIssueButton.setAttribute("class", "btn btn-viadee issue-button");
-                    dCardAddIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
+                    dCardAddIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.elementId, issue.message, dCardAddIssueButton, dCardRemoveIssueButton]));
                     dCardAddIssueButton.innerHTML = "<span>Ignore Issue</span>";
                     dCardAddIssueButton.prepend(plusIcon);
 
@@ -418,9 +418,9 @@ function createCardForVariableOperations(operations, title) {
 
 // Add single issue to the ignoreIssues list
 function addIssue(issue) {
-    ignoredIssues[issue[0]] = '#' + issue[1];
-    issue[2].disabled = true;
-    issue[3].disabled = false;
+    ignoredIssues[issue[0]] = `#Element-ID: ${issue[1]}; ${issue[2]}`;
+    issue[3].disabled = true;
+    issue[4].disabled = false;
 }
 
 // Remove single issue from ignoreIssues list
@@ -499,7 +499,7 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             var removeIssueButton = document.createElement("button");
             removeIssueButton.setAttribute("class", "btn btn-viadee issue-button-table-remove");
 
-            addIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.message, addIssueButton, removeIssueButton]));
+            addIssueButton.addEventListener("click", addIssue.bind(null, [issue.id, issue.elementId, issue.message, addIssueButton, removeIssueButton]));
             addIssueButton.innerHTML = "Ignore Issue";
 
             removeIssueButton.setAttribute("disabled", true);
