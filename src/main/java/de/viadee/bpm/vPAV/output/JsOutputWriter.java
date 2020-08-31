@@ -31,7 +31,7 @@
  */
 package de.viadee.bpm.vPAV.output;
 
-import com.google.gson.GsonBuilder;
+import com.cronutils.utils.StringUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -43,7 +43,6 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
 import java.net.URI;
@@ -87,7 +86,16 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
 		final String properties = transformPropertiesToJsonDatastructure();
 
-		writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues, properties);
+		final Map<String, String> fileMap = new HashMap<>();
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsOutput(), json);
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsSuccessOutput(), json_noIssues);
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsModelOutput(), bpmn);
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsCheckers(), wrongCheckers + defaultCheckers);
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsIssueSeverity(), issueSeverity);
+		fileMap.put(RuntimeConfig.getInstance().getValidationIgnoredIssuesOutput(), ignoredIssues);
+		fileMap.put(RuntimeConfig.getInstance().getPropertiesJsOutput(), properties);
+
+		writeJS(fileMap);
 	}
 
 	public void prepareMaps(final Map<String, String> wrongCheckers, final Map<String, String> ignoredIssues,
@@ -136,97 +144,20 @@ public class JsOutputWriter implements IssueOutputWriter {
 	}
 
 	/**
-	 *
-	 * @param json
-	 *            Elements to be marked (jsonified)
-	 * @param json_noIssues
-	 *            No issues (jsonified)
-	 * @param bpmn
-	 *            BPMN Model
-	 * @param wrongCheckers
-	 *            Wrong Checkers
-	 * @param defaultCheckers
-	 *            Default Checkers
-	 * @param issueSeverity
-	 *            Issue severity
-	 * @param ignoredIssues
-	 *            Ignored issues
-	 * @param properties
-	 * 	          vPav properties
-	 * @throws OutputWriterException
-	 *             If JavaScript could not be written
+	 * @param files A map with filenames as key and content as value
+	 * @throws OutputWriterException If JS could not be written
 	 */
-	private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
-			final String defaultCheckers, final String issueSeverity, final String ignoredIssues, final String properties)
-			throws OutputWriterException {
-		if (json != null && !json.isEmpty() && properties != null && !properties.isEmpty()) {
-			String errorMsg = "js output couldn't be written";
-
-			try (FileWriter file = new FileWriter(RuntimeConfig.getInstance().getValidationJsModelOutput())) {
-				file.write(bpmn);
-			} catch (IOException e) {
-				throw new OutputWriterException(errorMsg, e);
-			}
-			try (OutputStreamWriter osWriter = new OutputStreamWriter(
-					new FileOutputStream(RuntimeConfig.getInstance().getValidationJsOutput()),
-					StandardCharsets.UTF_8)) {
-				osWriter.write(json);
-			} catch (IOException e) {
-				throw new OutputWriterException(errorMsg, e);
-			}
-			try (OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
-					new FileOutputStream(RuntimeConfig.getInstance().getValidationJsSuccessOutput()),
-					StandardCharsets.UTF_8)) {
-				osWriterSuccess.write(json_noIssues);
-			} catch (IOException e) {
-				throw new OutputWriterException(errorMsg, e);
-			}
-
-			if ((wrongCheckers != null && !wrongCheckers.isEmpty())
-					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
-				try (OutputStreamWriter wrongAndDefaultCheckers = new OutputStreamWriter(
-						new FileOutputStream(RuntimeConfig.getInstance().getValidationJsCheckers()),
+	private void writeJS(Map<String, String> files) throws OutputWriterException {
+		final String errorMessage = "JS output couldn't be written";
+		for (Map.Entry<String, String> entry : files.entrySet()) {
+			if (!StringUtils.isEmpty(entry.getValue())) {
+				try (OutputStreamWriter streamWriter = new OutputStreamWriter(
+						new FileOutputStream(entry.getKey()),
 						StandardCharsets.UTF_8)) {
-					wrongAndDefaultCheckers.write(wrongCheckers);
-					wrongAndDefaultCheckers.write(defaultCheckers);
+					streamWriter.write(entry.getValue());
 				} catch (IOException e) {
-					throw new OutputWriterException(errorMsg, e);
+					throw new OutputWriterException(errorMessage, e);
 				}
-			} else if ((wrongCheckers == null || wrongCheckers.isEmpty())
-					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
-				try (OutputStreamWriter defaultCheckerJS = new OutputStreamWriter(
-						new FileOutputStream(RuntimeConfig.getInstance().getValidationJsCheckers()),
-						StandardCharsets.UTF_8)) {
-					defaultCheckerJS.write(defaultCheckers);
-				} catch (IOException e) {
-					throw new OutputWriterException(errorMsg, e);
-				}
-			}
-
-			if (issueSeverity != null && !issueSeverity.isEmpty()) {
-				try (OutputStreamWriter issueSeverityWriter = new OutputStreamWriter(
-						new FileOutputStream(RuntimeConfig.getInstance().getValidationJsIssueSeverity()),
-						StandardCharsets.UTF_8)) {
-					issueSeverityWriter.write(issueSeverity);
-				} catch (IOException e) {
-					throw new OutputWriterException(errorMsg, e);
-				}
-			}
-			if (ignoredIssues != null && !ignoredIssues.isEmpty()) {
-				try (OutputStreamWriter ignoredIssuesWriter = new OutputStreamWriter(
-						new FileOutputStream(RuntimeConfig.getInstance().getValidationIgnoredIssuesOutput()),
-						StandardCharsets.UTF_8)) {
-					ignoredIssuesWriter.write(ignoredIssues);
-				} catch (IOException e) {
-					throw new OutputWriterException(errorMsg, e);
-				}
-			}
-			try (OutputStreamWriter osWriter = new OutputStreamWriter(
-					new FileOutputStream(RuntimeConfig.getInstance().getPropertiesJsOutput()),
-					StandardCharsets.UTF_8)) {
-				osWriter.write(properties);
-			} catch (IOException e) {
-				throw new OutputWriterException(errorMsg, e);
 			}
 		}
 	}
