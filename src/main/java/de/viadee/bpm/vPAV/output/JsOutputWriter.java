@@ -35,6 +35,7 @@ import com.cronutils.utils.StringUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
@@ -55,6 +56,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Create the JavaScript file for HTML-output; Needs: issues and bpmnFile names
@@ -85,6 +87,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
 		final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
 		final String properties = transformPropertiesToJsonDatastructure();
+		final String summary = transformSummaryToJson(issues);
 
 		final Map<String, String> fileMap = new HashMap<>();
 		fileMap.put(RuntimeConfig.getInstance().getValidationJsOutput(), json);
@@ -94,6 +97,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		fileMap.put(RuntimeConfig.getInstance().getValidationJsIssueSeverity(), issueSeverity);
 		fileMap.put(RuntimeConfig.getInstance().getValidationIgnoredIssuesOutput(), ignoredIssues);
 		fileMap.put(RuntimeConfig.getInstance().getPropertiesJsOutput(), properties);
+		fileMap.put(RuntimeConfig.getInstance().getProjectSummaryJsOutput(), summary);
 
 		writeJS(fileMap);
 	}
@@ -457,11 +461,71 @@ public class JsOutputWriter implements IssueOutputWriter {
 		return transformJsonToJs("properties", obj);
 	}
 
+	private String transformSummaryToJson(Collection<CheckerIssue> issues) {
+		final String projectName = "projectName";
+		final String warnings = "warnings";
+		final String errors = "errors";
+		final String ignoredIssues = "ignoredIssues";
+		final String flawedElements = "flawedElements";
+		final JsonObject projectSummary = new JsonObject();
+
+		//Total statics for project
+		projectSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
+		final Long warningsTotal = issues.stream()
+				.filter(issue -> issue.getClassification().equals(CriticalityEnum.WARNING)).count();
+		projectSummary.addProperty(warnings, warningsTotal);
+		final Long errorsTotal = issues.stream()
+				.filter(issue -> issue.getClassification().equals(CriticalityEnum.ERROR)).count();
+		projectSummary.addProperty(errors, errorsTotal);
+		final Integer ignoredIssuesTotal = getIgnoredIssuesMap().size();
+		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
+		final Long flawedElementsTotal = issues.stream()
+				.map(CheckerIssue::getElementId).distinct().count();
+		projectSummary.addProperty(flawedElements, flawedElementsTotal);
+
+		//Statistics per BPMN model
+		final JsonArray modelsStats = new JsonArray();
+		final List<String> modelsList = issues.stream()
+				.map(CheckerIssue::getBpmnFile).distinct()
+				.collect(Collectors.toList());
+		modelsList.forEach(model -> {
+			final JsonObject modelObject = new JsonObject();
+			modelObject.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
+			modelObject.addProperty("modelName", model);
+			final Long warningsModelCount = issues.stream()
+					.filter(issue -> issue.getBpmnFile().equals(model) &&
+							issue.getClassification().equals(CriticalityEnum.WARNING))
+					.count();
+			modelObject.addProperty(warnings, warningsModelCount);
+			final Long errorsModelCount = issues.stream()
+					.filter(issue -> issue.getBpmnFile().equals(model) &&
+							issue.getClassification().equals(CriticalityEnum.ERROR))
+					.count();
+			modelObject.addProperty(errors, errorsModelCount);
+			final Long issuesModelCount = IssueService.getInstance().getIssues()
+					.stream() //Retrieve the unfiltered issue collection
+					.filter(issue -> issue.getBpmnFile().equals(model))
+					.filter(issue -> getIgnoredIssuesMap().containsKey(issue.getId()))
+					.distinct() //Some types of issues can be multiple times in the collection
+					.count();
+			modelObject.addProperty(ignoredIssues, issuesModelCount);
+			final Long flawedElementsModelCount = issues.stream()
+					.filter(issue -> issue.getBpmnFile().equals(model))
+					.map(CheckerIssue::getElementId)
+					.distinct() //The same element can have multiple issues
+					.count();
+			modelObject.addProperty(flawedElements, flawedElementsModelCount);
+
+			modelsStats.add(modelObject);
+		});
+		projectSummary.add("models", modelsStats);
+		return transformJsonToJs("projectSummary", projectSummary);
+	}
+
 	/**
 	 * Transforms the collection of wrong checkers into JSON format
 	 *
-	 * @param wrongCheckers
-	 *            Map of wrongly configured checkers
+	 * @param wrongCheckers Map of wrongly configured checkers
 	 * @return JavaScript variables containing the wrong checkers
 	 */
 	private String transformToJsDatastructure(final Map<String, String> wrongCheckers) {

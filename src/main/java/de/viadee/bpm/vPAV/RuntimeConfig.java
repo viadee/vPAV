@@ -409,4 +409,8 @@ public class RuntimeConfig {
         return properties.getProperty("generatedReports", "").split(",");
     }
 
+    public String getProjectSummaryJsOutput() {
+        return getDataFolder() + "summary.js";
+    }
+
 }
