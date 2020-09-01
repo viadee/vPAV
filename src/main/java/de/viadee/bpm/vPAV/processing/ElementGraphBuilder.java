@@ -31,39 +31,30 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.bind.JAXBException;
-
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.*;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
+import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.xml.ModelInstance;
+import org.camunda.bpm.model.bpmn.instance.*;
+
+import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.util.*;
 
 /**
  * Creates data flow graph based on a bpmn model
@@ -215,7 +206,20 @@ public class ElementGraphBuilder {
             graphCollection.add(graph);
         }
 
+        fillElementIdToBpmnFileMap(processDefinition);
+
         return graphCollection;
+    }
+
+    private void fillElementIdToBpmnFileMap(final String processDefinition) {
+        if (IssueService.getInstance().getElementIdToBpmnFileMap().containsKey(processDefinition)) {
+            final Map<String, Set<String>> elementIdToBpmnFileMap = IssueService.getInstance()
+                    .getElementIdToBpmnFileMap();
+            Set<String> elementIdSet = elementIdToBpmnFileMap.get(processDefinition);
+            elementIdSet.addAll(elementMap.keySet());
+        } else {
+            IssueService.getInstance().getElementIdToBpmnFileMap().put(processDefinition, elementMap.keySet());
+        }
     }
 
     /**

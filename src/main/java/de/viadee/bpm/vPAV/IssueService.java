@@ -33,14 +33,15 @@ package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 public class IssueService {
 
     private static IssueService instance;
 
     private Collection<CheckerIssue> issues;
+
+    private final Map<String, Set<String>> elementIdToBpmnFileMap = new HashMap<>();
 
     private IssueService() {
         issues = new ArrayList<>();
@@ -55,6 +56,10 @@ public class IssueService {
 
     public Collection<CheckerIssue> getIssues() {
         return issues;
+    }
+
+    public Map<String, Set<String>> getElementIdToBpmnFileMap() {
+        return elementIdToBpmnFileMap;
     }
 
     public void setIssues(Collection<CheckerIssue> issues) {

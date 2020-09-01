@@ -466,6 +466,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String warnings = "warnings";
 		final String errors = "errors";
 		final String ignoredIssues = "ignoredIssues";
+		final String elementsCount = "elementsCount";
 		final String flawedElements = "flawedElements";
 		final JsonObject projectSummary = new JsonObject();
 
@@ -479,6 +480,11 @@ public class JsOutputWriter implements IssueOutputWriter {
 		projectSummary.addProperty(errors, errorsTotal);
 		final Integer ignoredIssuesTotal = getIgnoredIssuesMap().size();
 		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
+		final Integer elementsCountTotal =
+				IssueService.getInstance().getElementIdToBpmnFileMap().values().stream()
+						.mapToInt(Set::size)
+						.sum();
+		projectSummary.addProperty(elementsCount, elementsCountTotal);
 		final Long flawedElementsTotal = issues.stream()
 				.map(CheckerIssue::getElementId).distinct().count();
 		projectSummary.addProperty(flawedElements, flawedElementsTotal);
@@ -509,6 +515,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 					.distinct() //Some types of issues can be multiple times in the collection
 					.count();
 			modelObject.addProperty(ignoredIssues, issuesModelCount);
+			final Integer elementsModelCount = IssueService.getInstance().getElementIdToBpmnFileMap()
+					.get(model)
+					.size();
+			modelObject.addProperty(elementsCount, elementsModelCount);
 			final Long flawedElementsModelCount = issues.stream()
 					.filter(issue -> issue.getBpmnFile().equals(model))
 					.map(CheckerIssue::getElementId)
