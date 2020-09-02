@@ -135,15 +135,15 @@ function getIssueOverlays(bpmnFile) {
     issues.forEach(issue => issue.clickOverlay = createIssueDialog(issues));
     issues.forEach(issue => issue.title = "issues");
     issues.forEach(issue => {
-        issueSeverity.forEach(element => {
-            if (element.id === issue.i.elementId) {
-                if (element.Criticality === "ERROR") {
+        elementsToMark.forEach(element => {
+            if (element.elementId === issue.i.elementId) {
+                if (element.classification === "ERROR") {
                     issue.classes = "badge-danger";
                 }
-                if (element.Criticality === "WARNING") {
+                if (element.classification === "WARNING") {
                     issue.classes = "badge-warning";
                 }
-                if (element.Criticality === "INFO") {
+                if (element.classification === "INFO") {
                     issue.classes = "badge-info";
                 }
             }

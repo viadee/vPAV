@@ -134,7 +134,6 @@ public class RuntimeConfigTest {
         dependentPaths.add(rc.getValidationFolder());
         dependentPaths.add(rc.getValidationIgnoredIssuesOutput());
         dependentPaths.add(rc.getValidationJsProcessVariables());
-        dependentPaths.add(rc.getValidationJsIssueSeverity());
         dependentPaths.add(rc.getValidationJsSuccessOutput());
         dependentPaths.add(rc.getValidationJsCheckers());
         dependentPaths.add(rc.getPropertiesJsOutput());

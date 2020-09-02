@@ -344,10 +344,6 @@ public class RuntimeConfig {
         return getDataFolder() + "processVariables.js";
     }
 
-    public String getValidationJsIssueSeverity() {
-        return getDataFolder() + "issue_severity.js";
-    }
-
     public String getValidationJsSuccessOutput() {
         return getDataFolder() + "bpmn_validation_success.js";
     }
