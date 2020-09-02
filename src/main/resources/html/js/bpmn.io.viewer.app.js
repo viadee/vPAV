@@ -703,7 +703,7 @@ function createFooter() {
         oldFooter.parentNode.removeChild(oldFooter);
     }
     const footer = `
-    <footer id="footer" class="footer fixed-bottom viadee-footer mt-auto py-3">
+    <footer id="footer" class="footer sticky-bottom viadee-footer mt-auto py-3">
     <div class="container-fluid">
         <span class="text-muted-viadee">${viadee + " - " + vPavName + " " + vPavVersion}</span>
         <a class="text-muted-viadee float-right pr-2" href="https://viadee.github.io/vPAV/#licenses" target="_blank">Licenses</a>
