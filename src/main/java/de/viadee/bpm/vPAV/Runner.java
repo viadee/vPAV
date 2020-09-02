@@ -312,7 +312,11 @@ public class Runner {
 		if (RuntimeConfig.getInstance().isHtmlOutputEnabled()) {
 			fileMapping.keySet().forEach(file -> {
 				InputStream source = Runner.class.getClassLoader().getResourceAsStream(file);
-				Path destination = Paths.get(fileMapping.get(file) + file.substring(file.lastIndexOf('/')));
+				int subStringIndex = file.lastIndexOf('/');
+				if (subStringIndex == -1) {
+					subStringIndex = 0;
+				}
+				Path destination = Paths.get(fileMapping.get(file) + file.substring(subStringIndex));
 				try {
 					Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException | NullPointerException e) {
@@ -341,8 +345,7 @@ public class Runner {
 				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
 				RuntimeConfig.getInstance().getJsFolder());
-		//TODO put POM.js in Js writer
-		fileToFolderMap.put("./infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
+		fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
 				RuntimeConfig.getInstance().getCssFolder());
