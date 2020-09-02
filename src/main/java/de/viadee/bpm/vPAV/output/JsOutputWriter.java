@@ -80,7 +80,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String wrongCheckers = transformToJsDatastructure(getWrongCheckersMap()) + "\n";
 		final String defaultCheckers = transformDefaultRulesToJsDatastructure(
 				extractExternalCheckers(RuntimeConfig.getInstance().getActiveRules()));
-		final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
 		final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
 		final String properties = transformPropertiesToJsonDatastructure();
 
@@ -89,7 +88,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 		fileMap.put(RuntimeConfig.getInstance().getValidationJsSuccessOutput(), json_noIssues);
 		fileMap.put(RuntimeConfig.getInstance().getValidationJsModelOutput(), bpmn);
 		fileMap.put(RuntimeConfig.getInstance().getValidationJsCheckers(), wrongCheckers + defaultCheckers);
-		fileMap.put(RuntimeConfig.getInstance().getValidationJsIssueSeverity(), issueSeverity);
 		fileMap.put(RuntimeConfig.getInstance().getValidationIgnoredIssuesOutput(), ignoredIssues);
 		fileMap.put(RuntimeConfig.getInstance().getPropertiesJsOutput(), properties);
 
@@ -473,26 +471,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 			}
 		}
 		return transformJsonToJs("unlocatedCheckers", jsonIssues);
-	}
-
-	/**
-	 * Transforms the collection of issue severities into JSON format
-	 *
-	 * @param issues
-	 *            Map of collected issues
-	 * @return JavaScript variables containing the issues' id and severity
-	 */
-	private String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
-		final JsonArray jsonIssues = new JsonArray();
-		if (issues != null && issues.size() > 0) {
-			for (Map.Entry<String, CriticalityEnum> entry : issues.entrySet()) {
-				final JsonObject obj = new JsonObject();
-				obj.addProperty(BpmnConstants.ATTR_ID, entry.getKey());
-				obj.addProperty(ConfigConstants.CRITICALITY, entry.getValue().name());
-				jsonIssues.add(obj);
-			}
-		}
-		return transformJsonToJs("issueSeverity", jsonIssues);
 	}
 
 	/**
