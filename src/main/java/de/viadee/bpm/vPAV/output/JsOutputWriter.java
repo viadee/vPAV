@@ -102,28 +102,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 	}
 
 	/**
-	 * Creates list which contains elements with multiple issues and the marks it
-	 * with highest severity
-	 *
-	 * @param issues Collected issues
-	 */
-	private Map<String, CriticalityEnum> createIssueSeverity(final Collection<CheckerIssue> issues) {
-		Map<String, CriticalityEnum> issueSeverity = new HashMap<>();
-		for (CheckerIssue issue : issues) {
-			if (!issueSeverity.containsKey(issue.getElementId())) {
-				issueSeverity.put(issue.getElementId(), issue.getClassification());
-			} else if (issueSeverity.containsKey(issue.getElementId())
-					&& issueSeverity.get(issue.getElementId()).equals(CriticalityEnum.WARNING)) {
-				if (issue.getClassification().equals(CriticalityEnum.ERROR)) {
-					issueSeverity.put(issue.getElementId(), issue.getClassification());
-				}
-			}
-		}
-
-		return issueSeverity;
-	}
-
-	/**
 	 * Extract external rules from active ruleset
 	 *
 	 * @param activeRules Active RuleSet
