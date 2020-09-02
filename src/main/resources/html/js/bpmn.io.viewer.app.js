@@ -135,19 +135,16 @@ function getIssueOverlays(bpmnFile) {
     issues.forEach(issue => issue.clickOverlay = createIssueDialog(issues));
     issues.forEach(issue => issue.title = "issues");
     issues.forEach(issue => {
-        elementsToMark.forEach(element => {
-            if (element.elementId === issue.i.elementId) {
-                if (element.classification === "ERROR") {
-                    issue.classes = "badge-danger";
-                }
-                if (element.classification === "WARNING") {
-                    issue.classes = "badge-warning";
-                }
-                if (element.classification === "INFO") {
-                    issue.classes = "badge-info";
-                }
-            }
-        });
+        const distinctClassifications = unique(elementsToMark
+            .filter(element => element.elementId === issue.i.elementId)
+            .map(element => element.classification));
+        if (distinctClassifications.includes("ERROR")) {
+            issue.classes = "badge-danger";
+        } else if (distinctClassifications.includes("WARNING")) {
+            issue.classes = "badge-warning";
+        } else if (distinctClassifications.includes("INFO")) {
+            issue.classes = "badge-info";
+        }
     });
     return issues;
 }
