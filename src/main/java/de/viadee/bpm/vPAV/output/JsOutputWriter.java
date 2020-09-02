@@ -474,19 +474,19 @@ public class JsOutputWriter implements IssueOutputWriter {
 		projectSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
 		final Long warningsTotal = issues.stream()
 				.filter(issue -> issue.getClassification().equals(CriticalityEnum.WARNING)).count();
-		projectSummary.addProperty(warnings, warningsTotal);
 		final Long errorsTotal = issues.stream()
 				.filter(issue -> issue.getClassification().equals(CriticalityEnum.ERROR)).count();
-		projectSummary.addProperty(errors, errorsTotal);
 		final Integer ignoredIssuesTotal = getIgnoredIssuesMap().size();
-		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
 		final Integer elementsCountTotal =
 				IssueService.getInstance().getElementIdToBpmnFileMap().values().stream()
 						.mapToInt(Set::size)
 						.sum();
-		projectSummary.addProperty(elementsCount, elementsCountTotal);
 		final Long flawedElementsTotal = issues.stream()
 				.map(CheckerIssue::getElementId).distinct().count();
+		projectSummary.addProperty(warnings, warningsTotal);
+		projectSummary.addProperty(errors, errorsTotal);
+		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
+		projectSummary.addProperty(elementsCount, elementsCountTotal);
 		projectSummary.addProperty(flawedElements, flawedElementsTotal);
 
 		//Statistics per BPMN model
@@ -496,34 +496,35 @@ public class JsOutputWriter implements IssueOutputWriter {
 				.collect(Collectors.toList());
 		modelsList.forEach(model -> {
 			final JsonObject modelObject = new JsonObject();
-			modelObject.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
-			modelObject.addProperty("modelName", model);
 			final Long warningsModelCount = issues.stream()
 					.filter(issue -> issue.getBpmnFile().equals(model) &&
 							issue.getClassification().equals(CriticalityEnum.WARNING))
 					.count();
-			modelObject.addProperty(warnings, warningsModelCount);
 			final Long errorsModelCount = issues.stream()
 					.filter(issue -> issue.getBpmnFile().equals(model) &&
 							issue.getClassification().equals(CriticalityEnum.ERROR))
 					.count();
-			modelObject.addProperty(errors, errorsModelCount);
-			final Long issuesModelCount = IssueService.getInstance().getIssues()
-					.stream() //Retrieve the unfiltered issue collection
+			final Long issuesModelCount = IssueService.getInstance()
+					.getIssues() //Retrieve the unfiltered issue collection
+					.stream()
 					.filter(issue -> issue.getBpmnFile().equals(model))
 					.filter(issue -> getIgnoredIssuesMap().containsKey(issue.getId()))
 					.distinct() //Some types of issues can be multiple times in the collection
 					.count();
-			modelObject.addProperty(ignoredIssues, issuesModelCount);
 			final Integer elementsModelCount = IssueService.getInstance().getElementIdToBpmnFileMap()
 					.get(model)
 					.size();
-			modelObject.addProperty(elementsCount, elementsModelCount);
 			final Long flawedElementsModelCount = issues.stream()
 					.filter(issue -> issue.getBpmnFile().equals(model))
 					.map(CheckerIssue::getElementId)
 					.distinct() //The same element can have multiple issues
 					.count();
+			modelObject.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
+			modelObject.addProperty("modelName", model);
+			modelObject.addProperty(warnings, warningsModelCount);
+			modelObject.addProperty(errors, errorsModelCount);
+			modelObject.addProperty(ignoredIssues, issuesModelCount);
+			modelObject.addProperty(elementsCount, elementsModelCount);
 			modelObject.addProperty(flawedElements, flawedElementsModelCount);
 
 			modelsStats.add(modelObject);
