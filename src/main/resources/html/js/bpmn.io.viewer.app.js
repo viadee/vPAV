@@ -135,19 +135,16 @@ function getIssueOverlays(bpmnFile) {
     issues.forEach(issue => issue.clickOverlay = createIssueDialog(issues));
     issues.forEach(issue => issue.title = "issues");
     issues.forEach(issue => {
-        elementsToMark.forEach(element => {
-            if (element.elementId === issue.i.elementId) {
-                if (element.classification === "ERROR") {
-                    issue.classes = "badge-danger";
-                }
-                if (element.classification === "WARNING") {
-                    issue.classes = "badge-warning";
-                }
-                if (element.classification === "INFO") {
-                    issue.classes = "badge-info";
-                }
-            }
-        });
+        const distinctClassifications = unique(elementsToMark
+            .filter(element => element.elementId === issue.i.elementId)
+            .map(element => element.classification));
+        if (distinctClassifications.includes("ERROR")) {
+            issue.classes = "badge-danger";
+        } else if (distinctClassifications.includes("WARNING")) {
+            issue.classes = "badge-warning";
+        } else if (distinctClassifications.includes("INFO")) {
+            issue.classes = "badge-info";
+        }
     });
     return issues;
 }
@@ -703,7 +700,7 @@ function createFooter() {
         oldFooter.parentNode.removeChild(oldFooter);
     }
     const footer = `
-    <footer id="footer" class="footer fixed-bottom viadee-footer mt-auto py-3">
+    <footer id="footer" class="footer sticky-bottom viadee-footer mt-auto py-3">
     <div class="container-fluid">
         <span class="text-muted-viadee">${viadee + " - " + vPavName + " " + vPavVersion}</span>
         <a class="text-muted-viadee float-right pr-2" href="https://viadee.github.io/vPAV/#licenses" target="_blank">Licenses</a>
