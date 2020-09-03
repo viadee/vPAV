@@ -213,12 +213,10 @@ public class ElementGraphBuilder {
 
     private void fillElementIdToBpmnFileMap(final String processDefinition) {
         if (IssueService.getInstance().getElementIdToBpmnFileMap().containsKey(processDefinition)) {
-            final Map<String, Set<String>> elementIdToBpmnFileMap = IssueService.getInstance()
-                    .getElementIdToBpmnFileMap();
-            Set<String> elementIdSet = elementIdToBpmnFileMap.get(processDefinition);
-            elementIdSet.addAll(elementMap.keySet());
+            IssueService.getInstance().getElementIdToBpmnFileMap().get(processDefinition).addAll(elementMap.keySet());
         } else {
-            IssueService.getInstance().getElementIdToBpmnFileMap().put(processDefinition, elementMap.keySet());
+            IssueService.getInstance().getElementIdToBpmnFileMap().put(processDefinition,
+                    new HashSet<String>(elementMap.keySet()));
         }
     }
 
