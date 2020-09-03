@@ -1100,12 +1100,13 @@ const sourceCodeAttributes = ["camunda:class", "class",
 
 function resetDocument() {
     document.documentElement.innerHTML = documentBackup.documentElement.innerHTML;
-    unloadDataScripts();
+    unloadDataScriptTags();
 }
 
-function loadExternalReport(reportPath) {
+async function loadExternalReport(reportPath) {
     resetDocument();
-    loadDomElements(createScriptTags(generateJsDataArray(reportPath), true), initPage);
+    await loadDomElements(createScriptTags(generateScriptSourcesArray(reportPath), true));
+    initPage();
 }
 
 var controller;

@@ -1,6 +1,6 @@
-function generateJsDataArray(dataPath = 'data/') {
+function generateScriptSourcesArray(sourcePath = 'data/') {
     //generated model data by vPAV
-    let dataFiles = ["checkers.js",
+    const srcFiles = ["checkers.js",
         "bpmn_model.js",
         "bpmn_validation.js",
         "bpmn_validation_success.js",
@@ -9,25 +9,13 @@ function generateJsDataArray(dataPath = 'data/') {
         "ignoredIssues.js",
         "processVariables.js",
         "properties.js"]
-    return dataFiles.map(file => dataPath + file);
+    return srcFiles.map(file => sourcePath + file);
 }
 
-function loadDomElements(scriptNodes, callback = null) {
-    let fragment = document.createDocumentFragment();
-    if (callback) {
-        const lastScript = scriptNodes[scriptNodes.length - 1];
-        lastScript.onload = callback;
-    }
-    scriptNodes.forEach(script => {
-        fragment.appendChild(script);
-    });
-    document.body.appendChild(fragment);
-}
-
-function unloadDataScripts() {
-    Array.from(document.getElementsByClassName("data-script")).forEach(script => {
+function unloadDataScriptTags() {
+    for (let script of Array.from(document.getElementsByClassName("data-script"))) {
         document.body.removeChild(script);
-    });
+    }
     diagramXMLSource = undefined;
     elementsToMark = undefined;
     noIssuesElements = undefined;
@@ -43,46 +31,61 @@ function unloadDataScripts() {
     properties = undefined;
 }
 
-function createScriptTags(scriptSources, isData = false) {
+function createScriptTags(scriptSources, isDataScript = false) {
     return scriptSources.map(scriptSource => {
-        let script = document.createElement("script");
+        const script = document.createElement("script");
         script.src = scriptSource;
-        if (isData) {
+        script.async = false; //script tags added by DOM API are async by default (╯°□°）╯︵ ┻━┻
+        if (isDataScript) {
             script.className = "data-script";
-        } else {
-            script.async = false; //script tags added by DOM API are async by default (╯°□°）╯︵ ┻━┻
-            script.defer = true;
         }
         return script;
     });
 }
 
-function loadLogicJs() {
+function loadDomElements(scriptNodes) {
+    return new Promise(function (resolve, reject) {
+        const fragment = document.createDocumentFragment();
+        const lastScriptTag = scriptNodes[scriptNodes.length - 1];
+        lastScriptTag.onload = function () {
+            resolve()
+        }
+        lastScriptTag.onerror = function () {
+            reject(`Error loading script: ${this.src}`);
+        }
+        scriptNodes.forEach(script => {
+            fragment.appendChild(script);
+        });
+        document.body.appendChild(fragment);
+    });
+}
+
+async function loadLogicJs() {
     if (!window.BpmnJS) {
-        const executionScripts = createScriptTags([
+        const executionScripts = [
             //bootstrap with dependencies
             "js/jquery-3.5.1.min.js", "js/bootstrap.bundle.min.js",
             //bpmn-js viewer
             "js/bpmn-navigated-viewer.js",
             //application
-            "js/download.js", "js/bpmn.io.viewer.app.js"], false);
-        loadDomElements(executionScripts, false);
+            "js/download.js", "js/bpmn.io.viewer.app.js"];
+        const executionScriptsTags = createScriptTags(executionScripts, false);
+        await loadDomElements(executionScriptsTags, false);
     }
 }
 
-function loadDataJs() {
-    loadDomElements(createScriptTags(["externalReports/reportData.js"], true), () => {
-        if (reportData.reportsPaths) {
-            projectNames = [];
-            reportData.reportsPaths.forEach(path => {
-                loadDomElements(createScriptTags([path + "properties.js"], true),
-                    () => {
-                        projectNames.push(properties.projectName)
-                    });
-            });
+async function loadDataJs() {
+    try {
+        await loadDomElements(createScriptTags(["externalReports/reportData.js"], true));
+        projectNames = [];
+        for await (let path of reportData.reportsPaths) {
+            await loadDomElements(createScriptTags([path + "properties.js"], true));
+            projectNames.push(properties.projectName)
         }
-    });
-    loadDomElements(createScriptTags(generateJsDataArray(), true));
+    } catch (error) {
+        console.warn(error);
+    }
+    await loadDomElements(createScriptTags(generateScriptSourcesArray(), true));
 }
 
 var documentBackup;
@@ -90,5 +93,7 @@ if (!documentBackup) {
     documentBackup = document.cloneNode(true);
 }
 var projectNames;
-loadDataJs();
-loadLogicJs();
+(async () => {
+    await loadDataJs();
+    await loadLogicJs();
+})();
