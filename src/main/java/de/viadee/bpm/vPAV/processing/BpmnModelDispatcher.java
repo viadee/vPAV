@@ -120,7 +120,7 @@ public class BpmnModelDispatcher {
         }
 
         // Execute element checkers.
-        executeCheckers(processDefinition, baseElements, graphBuilder, issues, (Collection<ElementChecker>) checkers[0],
+        executeCheckers(processDefinition, baseElements, graphBuilder, (Collection<ElementChecker>) checkers[0],
                 flowAnalysis);
 
         return new ModelDispatchResult(issues, bpmnElements, processVariables);
@@ -159,7 +159,7 @@ public class BpmnModelDispatcher {
                 null, null);
 
         // Execute element checkers.
-        executeCheckers(processDefinition, baseElements, graphBuilder, issues, (Collection<ElementChecker>) checkers[0],
+        executeCheckers(processDefinition, baseElements, graphBuilder, (Collection<ElementChecker>) checkers[0],
                 flowAnalysis);
 
         return new ModelDispatchResult(issues,
@@ -228,13 +228,12 @@ public class BpmnModelDispatcher {
      * @param baseElements      List of baseElements
      * @param graphBuilder      ElementGraphBuilder used for data flow of a BPMN
      *                          Model
-     * @param issues            List of issues
      * @param checkerInstances  ElementCheckers from ruleSet
      * @param flowAnalysis      FlowAnalysis
      */
     private void executeCheckers(final File processDefinition, final Collection<BaseElement> baseElements,
-            final ElementGraphBuilder graphBuilder, final Collection<CheckerIssue> issues,
-            Collection<ElementChecker> checkerInstances, final FlowAnalysis flowAnalysis) {
+            final ElementGraphBuilder graphBuilder, final Collection<ElementChecker> checkerInstances,
+            final FlowAnalysis flowAnalysis) {
         // execute element checkers
         for (final BaseElement baseElement : baseElements) {
             BpmnElement element = graphBuilder.getElement(baseElement.getId());
