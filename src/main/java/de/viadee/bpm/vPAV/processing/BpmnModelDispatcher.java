@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
@@ -50,9 +51,11 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.Process;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Calls model and element checkers for a concrete bpmn processdefinition
@@ -70,6 +73,19 @@ public class BpmnModelDispatcher {
         modelInstance = Bpmn.readModelFromFile(processDefinition);
         // hold bpmn elements
         baseElements = modelInstance.getModelElementsByType(BaseElement.class);
+
+        final Set<String> elementIdsSet = new HashSet<String>(baseElements.stream()
+                .filter(element -> !(element.getElementType().getInstanceType()//Process elements aren't checked
+                        .equals((Process.class))))
+                .map(BaseElement::getId)
+                .collect(Collectors.toSet()));
+        if (IssueService.getInstance().getElementIdToBpmnFileMap().containsKey(processDefinition.getPath())) {
+            IssueService.getInstance().getElementIdToBpmnFileMap().get(processDefinition.getPath())
+                    .addAll(elementIdsSet);
+        } else {
+            IssueService.getInstance().getElementIdToBpmnFileMap().put(processDefinition.getPath(),
+                    new HashSet<String>(elementIdsSet));
+        }
     }
 
     /**

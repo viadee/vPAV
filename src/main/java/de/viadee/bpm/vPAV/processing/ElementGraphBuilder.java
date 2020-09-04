@@ -34,7 +34,6 @@ package de.viadee.bpm.vPAV.processing;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
-import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
@@ -206,18 +205,7 @@ public class ElementGraphBuilder {
             graphCollection.add(graph);
         }
 
-        fillElementIdToBpmnFileMap(processDefinition);
-
         return graphCollection;
-    }
-
-    private void fillElementIdToBpmnFileMap(final String processDefinition) {
-        if (IssueService.getInstance().getElementIdToBpmnFileMap().containsKey(processDefinition)) {
-            IssueService.getInstance().getElementIdToBpmnFileMap().get(processDefinition).addAll(elementMap.keySet());
-        } else {
-            IssueService.getInstance().getElementIdToBpmnFileMap().put(processDefinition,
-                    new HashSet<String>(elementMap.keySet()));
-        }
     }
 
     /**
