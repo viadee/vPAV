@@ -439,15 +439,15 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 	private String transformSummaryToJson(Collection<CheckerIssue> issues) {
 		final String projectName = "projectName";
+		final String modelName = "modelName";
 		final String warnings = "warnings";
 		final String errors = "errors";
-		final String ignoredIssues = "ignoredIssues";
 		final String elementsCount = "elementsCount";
+		final String ignoredIssues = "ignoredIssues";
 		final String flawedElements = "flawedElements";
 		final JsonObject projectSummary = new JsonObject();
 
 		//Total statics for project
-		projectSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
 		final Long warningsTotal = issues.stream()
 				.filter(issue -> issue.getClassification().equals(CriticalityEnum.WARNING)).count();
 		final Long errorsTotal = issues.stream()
@@ -459,6 +459,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 						.sum();
 		final Long flawedElementsTotal = issues.stream()
 				.map(CheckerIssue::getElementId).distinct().count();
+		projectSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
+		projectSummary.addProperty(modelName, "");
 		projectSummary.addProperty(warnings, warningsTotal);
 		projectSummary.addProperty(errors, errorsTotal);
 		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
@@ -496,11 +498,11 @@ public class JsOutputWriter implements IssueOutputWriter {
 					.distinct() //The same element can have multiple issues
 					.count();
 			modelObject.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
-			modelObject.addProperty("modelName", model);
+			modelObject.addProperty(modelName, model);
 			modelObject.addProperty(warnings, warningsModelCount);
 			modelObject.addProperty(errors, errorsModelCount);
-			modelObject.addProperty(ignoredIssues, issuesModelCount);
 			modelObject.addProperty(elementsCount, elementsModelCount);
+			modelObject.addProperty(ignoredIssues, issuesModelCount);
 			modelObject.addProperty(flawedElements, flawedElementsModelCount);
 
 			modelsStats.add(modelObject);
