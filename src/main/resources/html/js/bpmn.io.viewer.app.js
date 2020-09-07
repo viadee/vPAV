@@ -810,12 +810,12 @@ async function createProjectSummary() {
                 <tr>
                     <th>Project name</th>
                     <th>Model name</th>
-                    <th>Warnings</th>
-                    <th>Errors</th>
                     <th>Total elements</th>
                     <th>Analyzed elements</th>
                     <th>Ignored issues</th> 
-                    <th>Flawed elements</th> 
+                    <th>Flawed elements</th>
+                    <th>Warnings</th>
+                    <th>Errors</th>
                 </tr>
             </thead>
             <tbody>
@@ -824,24 +824,24 @@ async function createProjectSummary() {
                     <tr>
                         <td>${projectSummary.projectName}</td>
                         <td>${projectSummary.modelName}</td>
-                        <td>${projectSummary.warnings}</td>
-                        <td>${projectSummary.errors}</td>
                         <td>${projectSummary.totalElements}</td>
                         <td>${projectSummary.analyzedElements}</td>
                         <td>${projectSummary.ignoredIssues}</td>
                         <td>${projectSummary.flawedElements}</td>
+                        <td>${projectSummary.warnings}</td>
+                        <td>${projectSummary.errors}</td>
                     </tr>
                     ${projectSummary.models.map(projectModel => {
             return `
                          <tr>
                              <td>${projectModel.projectName}</td>
                              <td>${projectModel.modelName}</td>
-                             <td>${projectModel.warnings}</td>
-                             <td>${projectModel.errors}</td>
                              <td>${projectModel.totalElements}</td>
                              <td>${projectModel.analyzedElements}</td>
                              <td>${projectModel.ignoredIssues}</td>
                              <td>${projectModel.flawedElements}</td>
+                             <td>${projectModel.warnings}</td>
+                             <td>${projectModel.errors}</td>
                          </tr>
                   `
         }).join("")}              `
