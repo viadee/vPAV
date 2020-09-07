@@ -44,6 +44,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
 import java.net.URI;
@@ -475,17 +476,17 @@ public class JsOutputWriter implements IssueOutputWriter {
 		modelsList.forEach(model -> {
 			final JsonObject modelObject = new JsonObject();
 			final Long warningsModelCount = issues.stream()
-					.filter(issue -> issue.getBpmnFile().equals(model) &&
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
 							issue.getClassification().equals(CriticalityEnum.WARNING))
 					.count();
 			final Long errorsModelCount = issues.stream()
-					.filter(issue -> issue.getBpmnFile().equals(model) &&
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
 							issue.getClassification().equals(CriticalityEnum.ERROR))
 					.count();
 			final Long issuesModelCount = IssueService.getInstance()
 					.getIssues() //Retrieve the unfiltered issue collection
 					.stream()
-					.filter(issue -> issue.getBpmnFile().equals(model))
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
 					.filter(issue -> getIgnoredIssuesMap().containsKey(issue.getId()))
 					.distinct() //Some types of issues can be multiple times in the collection
 					.count();
@@ -493,7 +494,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 					.get(model)
 					.size();
 			final Long flawedElementsModelCount = issues.stream()
-					.filter(issue -> issue.getBpmnFile().equals(model))
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
 					.map(CheckerIssue::getElementId)
 					.distinct() //The same element can have multiple issues
 					.count();
