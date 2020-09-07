@@ -470,9 +470,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 		//Statistics per BPMN model
 		final JsonArray modelsStats = new JsonArray();
-		//		final List<String> modelsList = issues.stream()
-		//				.map(CheckerIssue::getBpmnFile).distinct()
-		//				.collect(Collectors.toList());
 		final List<String> modelsList = new ArrayList<>(
 				IssueService.getInstance().getElementIdToBpmnFileMap().keySet());
 		modelsList.forEach(model -> {
