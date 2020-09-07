@@ -465,7 +465,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		projectSummary.addProperty(warnings, warningsTotal);
 		projectSummary.addProperty(errors, errorsTotal);
 		projectSummary.addProperty(totalElements, elementsCountTotal);
-		projectSummary.addProperty(analyzedElements, elementsCountTotal - flawedElementsTotal.intValue());
+		projectSummary.addProperty(analyzedElements, elementsCountTotal - ignoredIssuesTotal);
 		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
 		projectSummary.addProperty(flawedElements, flawedElementsTotal);
 
@@ -503,7 +503,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			modelObject.addProperty(warnings, warningsModelCount);
 			modelObject.addProperty(errors, errorsModelCount);
 			modelObject.addProperty(totalElements, elementsModelCount);
-			modelObject.addProperty(analyzedElements, elementsModelCount - flawedElementsModelCount.intValue());
+			modelObject.addProperty(analyzedElements, elementsModelCount - issuesModelCount);
 			modelObject.addProperty(ignoredIssues, issuesModelCount);
 			modelObject.addProperty(flawedElements, flawedElementsModelCount);
 
