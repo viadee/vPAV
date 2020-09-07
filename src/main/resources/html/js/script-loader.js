@@ -79,9 +79,12 @@ async function loadDataJs() {
     try {
         await loadDomElements(createScriptTags(["externalReports/reportData.js"], true));
         projectNames = [];
+        projectSummaries = [];
         for await (let path of reportData.reportsPaths) {
             await loadDomElements(createScriptTags([path + "properties.js"], true));
-            projectNames.push(properties.projectName)
+            projectNames.push(properties.projectName);
+            await loadDomElements(createScriptTags([path + "summary.js"], true));
+            projectSummaries.push(projectSummary);
         }
     } catch (error) {
         console.warn(error);
@@ -93,6 +96,7 @@ var documentBackup;
 if (!documentBackup) {
     documentBackup = document.cloneNode(true);
 }
+var projectSummaries;
 var projectNames;
 (async () => {
     await loadDataJs();

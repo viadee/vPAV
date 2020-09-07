@@ -803,8 +803,52 @@ function createProjectSummary() {
     createHeader();
     createFooter();
     const mainContent = document.getElementById("content");
-    mainContent.innerHTML = `<p>Foo</p>`;
-
+    mainContent.innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Project name</th>
+                    <th>Model name</th>
+                    <th>Warnings</th>
+                    <th>Errors</th>
+                    <th>Existing elements</th>
+                    <th>Analyzed elements</th>
+                    <th>Ignored issues</th> 
+                    <th>Flawed elements</th> 
+                </tr>
+            </thead>
+            <tbody>
+              ${projectSummaries.map(projectSummary => {
+        return `
+                    <tr>
+                        <td>${projectSummary.projectName}</td>
+                        <td>${projectSummary.modelName}</td>
+                        <td>${projectSummary.warnings}</td>
+                        <td>${projectSummary.errors}</td>
+                        <td>${projectSummary.existingElements}</td>
+                        <td>${projectSummary.analyzedElements}</td>
+                        <td>${projectSummary.ignoredIssues}</td>
+                        <td>${projectSummary.flawedElements}</td>
+                    </tr>
+                    ${projectSummary.models.map(projectModel => {
+            return `
+                         <tr>
+                             <td>${projectModel.projectName}</td>
+                             <td>${projectModel.modelName}</td>
+                             <td>${projectModel.warnings}</td>
+                             <td>${projectModel.errors}</td>
+                             <td>${projectModel.existingElements}</td>
+                             <td>${projectModel.analyzedElements}</td>
+                             <td>${projectModel.ignoredIssues}</td>
+                             <td>${projectModel.flawedElements}</td>
+                         </tr>
+                  `
+        }).join("")}
+              `
+    }).join("")};            
+            </tbody>    
+        </table>
+`;
 }
 
 //get issue count from specific bpmnFile
