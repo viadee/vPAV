@@ -804,7 +804,7 @@ async function createProjectSummary() {
     createHeader();
     createFooter();
     const mainContent = document.getElementById("content");
-    mainContent.innerHTML = `
+    const summaryTemplate = `
         <table>
             <thead>
                 <tr>
@@ -844,12 +844,12 @@ async function createProjectSummary() {
                              <td>${projectModel.flawedElements}</td>
                          </tr>
                   `
-        }).join("")}
-              `
-    }).join("")};            
+        }).join("")}              `
+    }).join("")}            
             </tbody>    
         </table>
 `;
+    mainContent.innerHTML = summaryTemplate;
 }
 
 //get issue count from specific bpmnFile
