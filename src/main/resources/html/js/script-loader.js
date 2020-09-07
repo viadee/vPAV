@@ -5,7 +5,6 @@ function generateScriptSourcesArray(sourcePath = 'data/') {
         "bpmn_validation.js",
         "bpmn_validation_success.js",
         "infoPOM.js",
-        "issue_severity.js",
         "ignoredIssues.js",
         "processVariables.js",
         "properties.js",
