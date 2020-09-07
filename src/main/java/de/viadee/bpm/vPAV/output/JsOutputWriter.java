@@ -463,8 +463,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 		projectSummary.addProperty(modelName, "");
 		projectSummary.addProperty(warnings, warningsTotal);
 		projectSummary.addProperty(errors, errorsTotal);
-		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
 		projectSummary.addProperty(elementsCount, elementsCountTotal);
+		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
 		projectSummary.addProperty(flawedElements, flawedElementsTotal);
 
 		//Statistics per BPMN model
