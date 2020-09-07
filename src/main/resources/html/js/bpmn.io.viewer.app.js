@@ -798,8 +798,9 @@ function createProjectsNavbar() {
         document.querySelector("#sidebar a > p").parentNode.classList.toggle("selected")
 }
 
-function createProjectSummary() {
+async function createProjectSummary() {
     resetDocument();
+    await loadDomElements(createScriptTags(['data/infoPOM.js'], true))
     createHeader();
     createFooter();
     const mainContent = document.getElementById("content");
