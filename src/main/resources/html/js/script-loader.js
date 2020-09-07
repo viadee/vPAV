@@ -8,7 +8,9 @@ function generateScriptSourcesArray(sourcePath = 'data/') {
         "issue_severity.js",
         "ignoredIssues.js",
         "processVariables.js",
-        "properties.js"]
+        "properties.js",
+        "summary.js"
+    ]
     return srcFiles.map(file => sourcePath + file);
 }
 
