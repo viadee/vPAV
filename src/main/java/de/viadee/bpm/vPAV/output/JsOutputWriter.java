@@ -442,7 +442,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String modelName = "modelName";
 		final String warnings = "warnings";
 		final String errors = "errors";
-		final String elementsCount = "elementsCount";
+		final String existingElements = "existingElements";
+		final String analyzedElements = "analyzedElements";
 		final String ignoredIssues = "ignoredIssues";
 		final String flawedElements = "flawedElements";
 		final JsonObject projectSummary = new JsonObject();
@@ -463,7 +464,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 		projectSummary.addProperty(modelName, "");
 		projectSummary.addProperty(warnings, warningsTotal);
 		projectSummary.addProperty(errors, errorsTotal);
-		projectSummary.addProperty(elementsCount, elementsCountTotal);
+		projectSummary.addProperty(existingElements, elementsCountTotal);
+		projectSummary.addProperty(analyzedElements, elementsCountTotal - flawedElementsTotal.intValue());
 		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
 		projectSummary.addProperty(flawedElements, flawedElementsTotal);
 
@@ -501,7 +503,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 			modelObject.addProperty(modelName, model);
 			modelObject.addProperty(warnings, warningsModelCount);
 			modelObject.addProperty(errors, errorsModelCount);
-			modelObject.addProperty(elementsCount, elementsModelCount);
+			modelObject.addProperty(existingElements, elementsModelCount);
+			modelObject.addProperty(analyzedElements, elementsModelCount - flawedElementsModelCount.intValue());
 			modelObject.addProperty(ignoredIssues, issuesModelCount);
 			modelObject.addProperty(flawedElements, flawedElementsModelCount);
 
