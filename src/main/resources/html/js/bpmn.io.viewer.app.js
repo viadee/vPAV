@@ -812,7 +812,7 @@ async function createProjectSummary() {
                     <th>Model name</th>
                     <th>Warnings</th>
                     <th>Errors</th>
-                    <th>Existing elements</th>
+                    <th>Total elements</th>
                     <th>Analyzed elements</th>
                     <th>Ignored issues</th> 
                     <th>Flawed elements</th> 
@@ -826,7 +826,7 @@ async function createProjectSummary() {
                         <td>${projectSummary.modelName}</td>
                         <td>${projectSummary.warnings}</td>
                         <td>${projectSummary.errors}</td>
-                        <td>${projectSummary.existingElements}</td>
+                        <td>${projectSummary.totalElements}</td>
                         <td>${projectSummary.analyzedElements}</td>
                         <td>${projectSummary.ignoredIssues}</td>
                         <td>${projectSummary.flawedElements}</td>
@@ -838,7 +838,7 @@ async function createProjectSummary() {
                              <td>${projectModel.modelName}</td>
                              <td>${projectModel.warnings}</td>
                              <td>${projectModel.errors}</td>
-                             <td>${projectModel.existingElements}</td>
+                             <td>${projectModel.totalElements}</td>
                              <td>${projectModel.analyzedElements}</td>
                              <td>${projectModel.ignoredIssues}</td>
                              <td>${projectModel.flawedElements}</td>
