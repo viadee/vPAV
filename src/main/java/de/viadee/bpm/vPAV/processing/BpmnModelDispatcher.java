@@ -48,6 +48,7 @@ import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.apache.commons.io.FilenameUtils;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
@@ -69,6 +70,7 @@ public class BpmnModelDispatcher {
     Collection<BaseElement> baseElements;
 
     private void prepareDispatcher(final File processDefinition) {
+        final String key = FilenameUtils.separatorsToUnix(processDefinition.getPath());
         // parse bpmn model
         modelInstance = Bpmn.readModelFromFile(processDefinition);
         // hold bpmn elements
@@ -79,12 +81,10 @@ public class BpmnModelDispatcher {
                         .equals((Process.class))))
                 .map(BaseElement::getId)
                 .collect(Collectors.toSet()));
-        if (IssueService.getInstance().getElementIdToBpmnFileMap().containsKey(processDefinition.getPath())) {
-            IssueService.getInstance().getElementIdToBpmnFileMap().get(processDefinition.getPath())
-                    .addAll(elementIdsSet);
+        if (IssueService.getInstance().getElementIdToBpmnFileMap().containsKey(key)) {
+            IssueService.getInstance().getElementIdToBpmnFileMap().get(key).addAll(elementIdsSet);
         } else {
-            IssueService.getInstance().getElementIdToBpmnFileMap().put(processDefinition.getPath(),
-                    new HashSet<String>(elementIdsSet));
+            IssueService.getInstance().getElementIdToBpmnFileMap().put(key, new HashSet<String>(elementIdsSet));
         }
     }
 

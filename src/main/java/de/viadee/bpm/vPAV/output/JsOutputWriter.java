@@ -56,7 +56,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * Create the JavaScript file for HTML-output; Needs: issues and bpmnFile names
@@ -471,9 +470,11 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 		//Statistics per BPMN model
 		final JsonArray modelsStats = new JsonArray();
-		final List<String> modelsList = issues.stream()
-				.map(CheckerIssue::getBpmnFile).distinct()
-				.collect(Collectors.toList());
+		//		final List<String> modelsList = issues.stream()
+		//				.map(CheckerIssue::getBpmnFile).distinct()
+		//				.collect(Collectors.toList());
+		final List<String> modelsList = new ArrayList<>(
+				IssueService.getInstance().getElementIdToBpmnFileMap().keySet());
 		modelsList.forEach(model -> {
 			final JsonObject modelObject = new JsonObject();
 			final Long warningsModelCount = issues.stream()
