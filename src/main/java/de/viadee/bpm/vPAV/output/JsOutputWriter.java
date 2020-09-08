@@ -442,10 +442,20 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String modelName = "modelName";
 		final String totalElements = "totalElements";
 		final String analyzedElements = "analyzedElements";
+		final String issuesString = "issues";
 		final String ignoredIssues = "ignoredIssues";
 		final String flawedElements = "flawedElements";
 		final String warnings = "warnings";
 		final String errors = "errors";
+		final String warningElements = "warningElements";
+		final String errorElements = "errorElements";
+
+		final String issuesRatio = "issuesRatio";
+		final String warningRatio = "warningRatio";
+		final String errorRatio = "errorRatio";
+		final String warningElementsRatio = "warningElementsRatio";
+		final String errorElementsRatio = "errorElementsRatio";
+		final String flawedElementsRatio = "flawedElementsRatio";
 		final JsonObject projectSummary = new JsonObject();
 
 		//Total statics for project
@@ -454,6 +464,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				IssueService.getInstance().getElementIdToBpmnFileMap().values().stream()
 						.mapToInt(Set::size)
 						.sum();
+		final Integer analyzedElementsCount = elementsCountTotal - ignoredIssuesTotal;
 		final Long flawedElementsTotal = issues.stream()
 				.map(CheckerIssue::getElementId).distinct().count();
 		projectSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
@@ -461,21 +472,46 @@ public class JsOutputWriter implements IssueOutputWriter {
 				.filter(issue -> issue.getClassification().equals(CriticalityEnum.WARNING)).count();
 		final Long errorsTotal = issues.stream()
 				.filter(issue -> issue.getClassification().equals(CriticalityEnum.ERROR)).count();
+		final Long warningsElementsTotal = issues.stream()
+				.filter(issue -> issue.getClassification().equals(CriticalityEnum.WARNING))
+				.map(CheckerIssue::getElementId)
+				.distinct()
+				.count();
+		final Long errorsElementsTotal = issues.stream()
+				.filter(issue -> issue.getClassification().equals(CriticalityEnum.ERROR))
+				.map(CheckerIssue::getElementId)
+				.distinct()
+				.count();
+		final Double issuesRatioTotal = (double) issues.size() / (double) analyzedElementsCount * 100;
+		final Double warningRatioTotal = (double) warningsTotal / (double) analyzedElementsCount * 100;
+		final Double errorRatioTotal = (double) errorsTotal / (double) analyzedElementsCount * 100;
+		final Double warningElementsTotalRatio = (double) warningsElementsTotal / (double) analyzedElementsCount * 100;
+		final Double errorElementsTotalRatio = (double) errorsElementsTotal / (double) analyzedElementsCount * 100;
+		final Double flawedElementsTotalRatio = (double) flawedElementsTotal / (double) analyzedElementsCount * 100;
 		projectSummary.addProperty(modelName, "");
 		projectSummary.addProperty(totalElements, elementsCountTotal);
-		projectSummary.addProperty(analyzedElements, elementsCountTotal - ignoredIssuesTotal);
+		projectSummary.addProperty(analyzedElements, analyzedElementsCount);
+		projectSummary.addProperty(issuesString, issues.size());
 		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
 		projectSummary.addProperty(flawedElements, flawedElementsTotal);
 		projectSummary.addProperty(warnings, warningsTotal);
 		projectSummary.addProperty(errors, errorsTotal);
+		projectSummary.addProperty(warningElements, warningsElementsTotal);
+		projectSummary.addProperty(errorElements, errorsElementsTotal);
+		projectSummary.addProperty(issuesRatio, issuesRatioTotal);
+		projectSummary.addProperty(warningRatio, warningRatioTotal);
+		projectSummary.addProperty(errorRatio, errorRatioTotal);
+		projectSummary.addProperty(warningElementsRatio, warningElementsTotalRatio);
+		projectSummary.addProperty(errorElementsRatio, errorElementsTotalRatio);
+		projectSummary.addProperty(flawedElementsRatio, flawedElementsTotalRatio);
 
 		//Statistics per BPMN model
 		final JsonArray modelsStats = new JsonArray();
 		final List<String> modelsList = new ArrayList<>(
 				IssueService.getInstance().getElementIdToBpmnFileMap().keySet());
 		modelsList.forEach(model -> {
-			final JsonObject modelObject = new JsonObject();
-			final Long issuesModelCount = IssueService.getInstance()
+			final JsonObject modelSummary = new JsonObject();
+			final Long ignoredIssuesModelCount = IssueService.getInstance()
 					.getIssues() //Retrieve the unfiltered issue collection
 					.stream()
 					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
@@ -485,6 +521,10 @@ public class JsOutputWriter implements IssueOutputWriter {
 			final Integer elementsModelCount = IssueService.getInstance().getElementIdToBpmnFileMap()
 					.get(model)
 					.size();
+			final Integer analyzedElementsModelCount = elementsModelCount - Math.toIntExact(ignoredIssuesModelCount);
+			final Long issuesModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
+					.count();
 			final Long flawedElementsModelCount = issues.stream()
 					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
 					.map(CheckerIssue::getElementId)
@@ -498,16 +538,46 @@ public class JsOutputWriter implements IssueOutputWriter {
 					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
 							issue.getClassification().equals(CriticalityEnum.ERROR))
 					.count();
-			modelObject.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
-			modelObject.addProperty(modelName, model);
-			modelObject.addProperty(totalElements, elementsModelCount);
-			modelObject.addProperty(analyzedElements, elementsModelCount - issuesModelCount);
-			modelObject.addProperty(ignoredIssues, issuesModelCount);
-			modelObject.addProperty(flawedElements, flawedElementsModelCount);
-			modelObject.addProperty(warnings, warningsModelCount);
-			modelObject.addProperty(errors, errorsModelCount);
+			final Long warningsElementsModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
+							issue.getClassification().equals(CriticalityEnum.WARNING))
+					.map(CheckerIssue::getElementId)
+					.distinct()
+					.count();
+			final Long errorsElementsModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
+							issue.getClassification().equals(CriticalityEnum.ERROR))
+					.map(CheckerIssue::getElementId)
+					.distinct()
+					.count();
+			final Double issuesRatioModel = (double) (issuesModelCount) / (double) analyzedElementsModelCount * 100;
+			final Double warningRatioModel = (double) (warningsModelCount) / (double) analyzedElementsModelCount * 100;
+			final Double errorRatioModel = (double) (errorsModelCount) / (double) analyzedElementsModelCount * 100;
+			final Double warningElementsModelRatio = (double) warningsElementsModelCount /
+					(double) analyzedElementsModelCount * 100;
+			final Double errorElementsModelRatio = (double) errorsElementsModelCount /
+					(double) analyzedElementsModelCount * 100;
+			final Double flawedElementsModelRatio = (double) flawedElementsModelCount /
+					(double) analyzedElementsModelCount * 100;
+			modelSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
+			modelSummary.addProperty(modelName, model);
+			modelSummary.addProperty(totalElements, elementsModelCount);
+			modelSummary.addProperty(analyzedElements, analyzedElementsModelCount);
+			modelSummary.addProperty(issuesString, issuesModelCount);
+			modelSummary.addProperty(ignoredIssues, ignoredIssuesModelCount);
+			modelSummary.addProperty(flawedElements, flawedElementsModelCount);
+			modelSummary.addProperty(warnings, warningsModelCount);
+			modelSummary.addProperty(errors, errorsModelCount);
+			modelSummary.addProperty(warningElements, warningsElementsModelCount);
+			modelSummary.addProperty(errorElements, errorsElementsModelCount);
+			modelSummary.addProperty(issuesRatio, issuesRatioModel);
+			modelSummary.addProperty(warningRatio, warningRatioModel);
+			modelSummary.addProperty(errorRatio, errorRatioModel);
+			modelSummary.addProperty(warningElementsRatio, warningElementsModelRatio);
+			modelSummary.addProperty(errorElementsRatio, errorElementsModelRatio);
+			modelSummary.addProperty(flawedElementsRatio, flawedElementsModelRatio);
 
-			modelsStats.add(modelObject);
+			modelsStats.add(modelSummary);
 		});
 		projectSummary.add("models", modelsStats);
 		return transformJsonToJs("projectSummary", projectSummary);
