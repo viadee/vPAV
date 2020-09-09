@@ -805,51 +805,47 @@ async function createProjectSummary() {
     createFooter();
     const mainContent = document.getElementById("content");
     const summaryTemplate = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Project name</th>
-                    <th>Model name</th>
-                    <th>Total elements</th>
-                    <th>Analyzed elements</th>
-                    <th>Ignored issues</th> 
-                    <th>Flawed elements</th>
-                    <th>Warnings</th>
-                    <th>Errors</th>
-                </tr>
-            </thead>
-            <tbody>
               ${projectSummaries.map(projectSummary => {
         return `
-                    <tr>
-                        <td>${projectSummary.projectName}</td>
-                        <td>${projectSummary.modelName}</td>
-                        <td>${projectSummary.totalElements}</td>
-                        <td>${projectSummary.analyzedElements}</td>
-                        <td>${projectSummary.ignoredIssues}</td>
-                        <td>${projectSummary.flawedElements}</td>
-                        <td>${projectSummary.warnings}</td>
-                        <td>${projectSummary.errors}</td>
-                    </tr>
-                    ${projectSummary.models.map(projectModel => {
-            return `
-                         <tr>
-                             <td>${projectModel.projectName}</td>
-                             <td>${projectModel.modelName}</td>
-                             <td>${projectModel.totalElements}</td>
-                             <td>${projectModel.analyzedElements}</td>
-                             <td>${projectModel.ignoredIssues}</td>
-                             <td>${projectModel.flawedElements}</td>
-                             <td>${projectModel.warnings}</td>
-                             <td>${projectModel.errors}</td>
-                         </tr>
-                  `
-        }).join("")}              `
-    }).join("")}            
-            </tbody>    
-        </table>
+        <div class="col mt-3">
+            <h3 class="row">
+                <span class="badge badge-secondary">
+                    ${projectSummary.projectName}
+                </span>
+            </h3>
+            <div class="row">           
+                ${smallBoxTemplate("Issue ratio", "fas fa-percentage",
+            Math.round(projectSummary.issuesRatio))}
+                ${smallBoxTemplate("Flawed elements ratio", "fas fa-info-circle",
+            Math.round(projectSummary.flawedElementsRatio))}
+                ${smallBoxTemplate("Warning elements ratio", "fas fa-exclamation-circle",
+            Math.round(projectSummary.warningElementsRatio))}
+                ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle",
+            Math.round(projectSummary.errorElementsRatio))} 
+            </div> 
+                            <h3 class="small-box-footer">
+                    More info
+                    <i class="fas fa-arrow-circle-right"></i>
+                </h3>   
+             `
+    })
+        .join("")}            
 `;
     mainContent.innerHTML = summaryTemplate;
+    $(".knob").knob();
+}
+
+function smallBoxTemplate(label, icon, value) {
+    return `
+            <div class="col small-box bg-info mb-0">
+                    <input class="knob" data-readonly="true" value="${value}"
+                        data-fgcolor="#39CCCC" readonly="readonly">
+                    <h5 class="knob-label">${label}</h5>
+                <div class="icon">
+                    <i class="${icon}"></i>
+                </div>
+            </div>
+    `;
 }
 
 //get issue count from specific bpmnFile

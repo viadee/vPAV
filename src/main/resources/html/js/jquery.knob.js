@@ -129,7 +129,7 @@
 
                     // Output formatting, allows to add unit: %, ms ...
                     format: function(v) {
-                        return v;
+                        return `${v}%`;
                     },
                     parse: function (v) {
                         return parseFloat(v);
@@ -191,7 +191,7 @@
             // add to DOM before Canvas init is triggered
             this.$div = $('<div style="'
                 + (this.o.inline ? 'display:inline;' : '')
-                + 'width:' + this.o.width + 'px;height:' + this.o.height + 'px;'
+                + 'width:' + this.o.width + 'px;height:' + this.o.height + 'px;' + 'text-align:center;'
                 + '"></div>');
 
             this.$.wrap(this.$div).before(this.$c);
