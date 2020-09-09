@@ -376,6 +376,8 @@ public class Runner {
 				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery.knob.js",
 				RuntimeConfig.getInstance().getJsFolder());
+		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap-table.js",
+				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
 				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
@@ -391,6 +393,8 @@ public class Runner {
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "simple-sidebar.css",
 				RuntimeConfig.getInstance().getCssFolder());
 		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "adminlte.css",
+				RuntimeConfig.getInstance().getCssFolder());
+		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap-table.css",
 				RuntimeConfig.getInstance().getCssFolder());
 
 		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "vPAV.png",

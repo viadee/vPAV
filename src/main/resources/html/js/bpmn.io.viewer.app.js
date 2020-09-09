@@ -823,13 +823,42 @@ async function createProjectSummary() {
                 ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle",
             Math.round(projectSummary.errorElementsRatio))} 
             </div> 
-                            <h3 class="small-box-footer">
+                            <h3 class="small-box-footer"  data-toggle="modal" data-target="#modalTable">
                     More info
                     <i class="fas fa-arrow-circle-right"></i>
                 </h3>   
              `
     })
-        .join("")}            
+        .join("")}
+        <div id="modalTable" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal table</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table id="table"
+          data-toggle="table"
+          data-height="299"
+          data-url="json/data1.json">
+          <thead>
+            <tr>
+              <th data-field="id">ID</th>
+              <th data-field="name">Item Name</th>
+              <th data-field="price">Item Price</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>         
 `;
     mainContent.innerHTML = summaryTemplate;
     $(".knob").knob();
