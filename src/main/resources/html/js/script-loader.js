@@ -65,11 +65,17 @@ async function loadLogicJs() {
     if (!window.BpmnJS) {
         const executionScripts = [
             //bootstrap with dependencies
-            "js/jquery-3.5.1.min.js", "js/bootstrap.bundle.min.js",
+            "js/jquery-3.5.1.min.js",
+            "js/bootstrap.bundle.min.js",
             //bpmn-js viewer
             "js/bpmn-navigated-viewer.js",
+            //AdminLTE
+            "js/adminlte.js",
+            "js/jquery.knob.js",
+            //miscellaneous
+            "js/download.js",
             //application
-            "js/download.js", "js/bpmn.io.viewer.app.js"];
+            "js/bpmn.io.viewer.app.js"];
         const executionScriptsTags = createScriptTags(executionScripts, false);
         await loadDomElements(executionScriptsTags, false);
     }
