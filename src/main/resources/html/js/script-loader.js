@@ -72,6 +72,7 @@ async function loadLogicJs() {
             //AdminLTE
             "js/adminlte.js",
             "js/jquery.knob.js",
+            "js/bootstrap-table",
             //miscellaneous
             "js/download.js",
             //application
