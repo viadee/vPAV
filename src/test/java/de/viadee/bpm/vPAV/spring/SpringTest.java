@@ -73,6 +73,9 @@ public class SpringTest {
         RuntimeConfig.getInstance().setProperties(properties);
         Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelInconsistencies(ctx);
 
+        for(CheckerIssue is: issues) {
+            System.out.println(is.getAnomaly().getDescription());
+        }
         Assert.assertEquals("There should be one UR issue.", 1, issues.size());
     }
 }
