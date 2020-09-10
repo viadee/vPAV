@@ -70,7 +70,7 @@ public class FileScanner {
 
     private final Set<String> processDefinitions;
 
-    private static Set<String> resourcesFileInputStream = new HashSet<>();
+    private Set<String> resourcesFileInputStream = new HashSet<>();
 
     private static Set<String> includedFiles = new HashSet<>();
 

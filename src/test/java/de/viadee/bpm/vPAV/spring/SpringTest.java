@@ -31,8 +31,12 @@
  */
 package de.viadee.bpm.vPAV.spring;
 
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -43,12 +47,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import soot.G;
+import soot.Scene;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 
 @RunWith(SpringRunner.class)
@@ -61,21 +64,20 @@ public class SpringTest {
     @BeforeClass
     public static void setup() {
         G.reset();
+        IssueService.getInstance().clear();
+
     }
 
     @Test
     public void validateModel() {
         RuntimeConfig.getInstance().setTest(true);
         Properties properties = new Properties();
-        properties.put("scanpath", RuntimeConfig.getInstance().getScanPath() + "de/viadee/bpm/vPAV/spring/");
-        properties.put("basepath", RuntimeConfig.getInstance().getBasepath() + "spring/");
-        properties.put("ruleSetPath", RuntimeConfig.getInstance().getBasepath() + "spring/");
+        properties.put("scanpath", ConfigConstants.TARGET_TEST_PATH + "de/viadee/bpm/vPAV/spring/");
+        properties.put("basepath", ConfigConstants.BASE_PATH_TEST + "spring/");
+        properties.put("ruleSetPath", ConfigConstants.BASE_PATH_TEST + "spring/");
         RuntimeConfig.getInstance().setProperties(properties);
         Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelInconsistencies(ctx);
 
-        for(CheckerIssue is: issues) {
-            System.out.println(is.getAnomaly().getDescription());
-        }
         Assert.assertEquals("There should be one UR issue.", 1, issues.size());
     }
 }

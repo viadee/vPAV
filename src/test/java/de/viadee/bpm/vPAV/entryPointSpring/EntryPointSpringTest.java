@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.entryPointSpring;
 
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -51,7 +52,7 @@ import java.util.Properties;
  * Tests that the variables from the entry points are included in the analysis.
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = { SayHelloDelegate.class, RuntimeServiceInit.class })
+@ContextConfiguration(classes = { EntryPointSpringDelegate.class, RuntimeServiceInit.class })
 public class EntryPointSpringTest {
 
     @Autowired
@@ -60,6 +61,7 @@ public class EntryPointSpringTest {
     @BeforeClass
     public static void setup() {
         G.reset();
+        IssueService.getInstance().clear();
     }
 
     @Test

@@ -36,7 +36,7 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SayHelloDelegate implements JavaDelegate {
+public class EntryPointSpringDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
@@ -45,5 +45,6 @@ public class SayHelloDelegate implements JavaDelegate {
         execution.getVariable("variable_id");
         execution.getVariable("variable_message");
         execution.getVariable("variable_message_id");
+        execution.getVariable("test");
     }
 }
