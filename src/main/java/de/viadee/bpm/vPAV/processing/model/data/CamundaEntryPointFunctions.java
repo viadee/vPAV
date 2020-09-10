@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
-import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import soot.Scene;
 import soot.SootClass;
 
@@ -46,8 +45,8 @@ public enum CamundaEntryPointFunctions {
     StartProcessInstanceById("startProcessInstanceById", 1, 4, false),
     StartProcessInstanceByKey("startProcessInstanceByKey", 1, 4, false),
     StartProcessInstanceByMessage("startProcessInstanceByMessage", 1, 3, true),
-    StartProcessInstanceByMessageAndProcessDefinitionId("startProcessInstanceByMessageAndProcessDefinitionId", 2, 4, true),
-    CreateMessageCorrelation("createMessageCorrelation", 1, 1, true);
+    StartProcessInstanceByMessageAndProcessDefinitionId("startProcessInstanceByMessageAndProcessDefinitionId", 2, 4, true);
+ //   CreateMessageCorrelation("createMessageCorrelation", 1, 1, true);
 
     private String name;
 
@@ -92,23 +91,11 @@ public enum CamundaEntryPointFunctions {
         return minArgs;
     }
 
-    public void setMinArgs(int minArgs) {
-        this.minArgs = minArgs;
-    }
-
     public int getMaxArgs() {
         return maxArgs;
     }
 
-    public void setMaxArgs(int maxArgs) {
-        this.maxArgs = maxArgs;
-    }
-
     public boolean isWithMessage() {
         return withMessage;
-    }
-
-    public void setWithMessage(boolean withMessage) {
-        this.withMessage = withMessage;
     }
 }

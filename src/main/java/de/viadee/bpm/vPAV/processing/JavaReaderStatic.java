@@ -161,7 +161,7 @@ public class JavaReaderStatic {
                                 chapter, fieldType,
                                 predecessor);
                         pvc.startBlockProcessing(block, new ArrayList<>(),
-                                method.getDeclaringClass());
+                                method.getDeclaringClass(), method.getName());
                     }
                 }
             }
@@ -177,7 +177,7 @@ public class JavaReaderStatic {
                 predecessor);
         BasicNode lastNode = processVariablesCreator
                 .startBlockProcessing(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName),
-                        sootClass);
+                        sootClass, methodName);
         if (lastNode != null) {
             predecessor[0] = lastNode;
         }
@@ -197,7 +197,7 @@ public class JavaReaderStatic {
                 predecessor);
         BasicNode lastNode = processVariablesCreator
                 .startBlockProcessing(block, SootResolverSimplified.getParameterValuesForDefaultMethods(methodName),
-                        sootClass);
+                        sootClass, methodName);
         if (lastNode != null) {
             predecessor[0] = lastNode;
         }

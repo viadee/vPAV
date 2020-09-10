@@ -29,48 +29,21 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.entryPointSpring;
 
-import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
-import de.viadee.bpm.vPAV.processing.code.flow.Node;
-import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
-import soot.SootClass;
-import soot.Value;
-import soot.jimple.InvokeExpr;
-import soot.toolkits.graph.Block;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
+@Component
+public class SayHelloDelegate implements JavaDelegate {
 
-public abstract class ObjectReaderReceiver {
-
-    public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo, SootClass javaClass) {
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
+        execution.getVariable("variable");
+        execution.getVariable("variable_invalid");
+        execution.getVariable("variable_id");
+        execution.getVariable("variable_message");
+        execution.getVariable("variable_message_id");
     }
-
-    public BasicNode addNodeIfNotExisting(Block block, SootClass javaClass) {
-        return null;
-    }
-
-    public void visitBlockAgain(Block block) {
-    }
-
-    public Node getNodeOfBlock(Block block, SootClass javaClass) {
-        return null;
-    }
-
-    public String getScopeId() {
-        return "";
-    }
-
-    public String getScopeIdOfChild() {
-        return "";
-    }
-
-    public void pushNodeToStack(BasicNode blockNode) {
-    }
-
-    public void addEntryPoint(CamundaEntryPointFunctions func, String className, String methodName, InvokeExpr expr, List<Object> args) {
-    }
-
 }

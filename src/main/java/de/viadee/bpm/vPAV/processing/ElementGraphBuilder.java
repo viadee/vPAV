@@ -42,6 +42,7 @@ import java.util.Map;
 import javax.xml.bind.JAXBException;
 
 import de.viadee.bpm.vPAV.RuntimeConfig;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -183,7 +184,7 @@ public class ElementGraphBuilder {
                     }
                 }
 
-                createVariablesOfFlowElement(scanner, graph, node, userVariables.get(element.getId()));
+                createVariablesOfFlowElement(scanner, graph, node, userVariables.get(element.getId()), processes.size());
 
                 // mention element
                 elementMap.put(element.getId(), node);
@@ -223,7 +224,7 @@ public class ElementGraphBuilder {
      */
     private void createVariablesOfFlowElement(final EntryPointScanner scanner, final Graph graph,
             final BpmnElement bpmnElement,
-            final ListMultimap<String, ProcessVariableOperation> userVariables) {
+            final ListMultimap<String, ProcessVariableOperation> userVariables, int numProcesses) {
         final FlowElement element = (FlowElement) bpmnElement.getBaseElement();
         BasicNode[] predecessor = new BasicNode[1];
 
@@ -257,13 +258,7 @@ public class ElementGraphBuilder {
             // startProcessInstanceByKey
 
             for (EntryPoint ep : scanner.getEntryPoints()) {
-                if (ep.getMessageName().equals(messageName)) {
-                    // Check InitialVariableOperations
-                    new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
-                            ElementChapter.Implementation, KnownElementFieldType.Class,
-                            ep, predecessor);
-                }
-                if (graph.getProcessId().equals(ep.getProcessDefinitionKey()) && !ep.getProcessVariables().isEmpty()) {
+                if (isEntryPointApplicable(ep, graph, messageName, numProcesses)) {
                     BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.ProcessStart,
                             KnownElementFieldType.ProcessStart);
                     String scopeId = element.getScope().getAttributeValue(BpmnConstants.ATTR_ID);
@@ -683,5 +678,35 @@ public class ElementGraphBuilder {
                 .createProcessGraph(fileScanner, subModel, subModel.getModel().getModelName(), calledElementHierarchy,
                         scanner,
                         flowAnalysis);
+    }
+
+    public boolean isEntryPointApplicable(EntryPoint ep, Graph graph, String messageName, int numProcesses) {
+        if (ep.getProcessVariables().isEmpty()) {
+            return false;
+        }
+
+        // Key matches process id
+        if (graph.getProcessId().equals(ep.getProcessDefinitionKey())) {
+            return true;
+        }
+
+        // Process id is used and we have only one process
+        if (ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID) && numProcesses == 1) {
+            return true;
+        }
+
+        // Process is started by message and message names must be equal
+        if (ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE) && ep
+                .getMessageName().equals(messageName)) {
+            return true;
+        }
+
+        // Message names must match and only one process is allowed because we cannot match process ids to processes
+        if (ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF) && ep
+                .getMessageName().equals(messageName) && numProcesses == 1) {
+            return true;
+        }
+
+        return false;
     }
 }

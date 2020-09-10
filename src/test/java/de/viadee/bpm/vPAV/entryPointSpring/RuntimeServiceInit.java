@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.spring;
+package de.viadee.bpm.vPAV.entryPointSpring;
 
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.spring.boot.starter.event.PostDeployEvent;
@@ -40,9 +40,33 @@ public class RuntimeServiceInit {
 
     private RuntimeService runtimeService;
 
-    public void processPostDeploy(PostDeployEvent event) {
+    public void startByKey(PostDeployEvent event) {
         HashMap<String, Object> variables = new HashMap<>();
-        variables.put("variable", "firstValue");
+        variables.put("variable", "value");
         runtimeService.startProcessInstanceByKey("Process_1", variables);
+    }
+
+    public void startByInvalidKey(PostDeployEvent event) {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("variable_invalid", "value");
+        runtimeService.startProcessInstanceByKey("invalid", variables);
+    }
+
+    public void startById(PostDeployEvent event) {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("variable_id", "value");
+        runtimeService.startProcessInstanceById("someIdThatIsNotKnown", variables);
+    }
+
+    public void startByMessage(PostDeployEvent event) {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("variable_message", "value");
+        runtimeService.startProcessInstanceByMessage("myMessageName", variables);
+    }
+
+    public void startByMessageAndId() {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("variable_message_id", "value");
+        runtimeService.startProcessInstanceByMessageAndProcessDefinitionId("myMessageName", "someId", variables);
     }
 }

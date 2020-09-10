@@ -65,6 +65,8 @@ public class ObjectReader {
 
     private SootClass currentJavaClass;
 
+    private String currentMethod;
+
     // Only used for testing purposes
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
@@ -87,16 +89,29 @@ public class ObjectReader {
     }
 
     /**
+     * Constructor that is called the first time when starting an analysis.
+     *
+     * @param objectReaderReceiver that is used for creating the data flow graph
+     */
+    public ObjectReader(ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass,
+            String currentMethod) {
+        this.objectReaderReceiver = objectReaderReceiver;
+        this.currentJavaClass = currentJavaClass;
+        this.currentMethod = currentMethod;
+    }
+
+    /**
      * Constructor that is called when another block is entered during the analysis.
      *
      * @param objectReaderReceiver that is used for creating the data flow graph
      * @param thisObject           ObjectVariable that refers to the object that contains the block
      */
     private ObjectReader(ObjectReaderReceiver objectReaderReceiver, ObjectVariable thisObject,
-            SootClass currentJavaClass) {
+            SootClass currentJavaClass, String sootMethod) {
         this.objectReaderReceiver = objectReaderReceiver;
         this.thisObject = thisObject;
         this.currentJavaClass = currentJavaClass;
+        this.currentMethod = sootMethod;
     }
 
     /**
@@ -360,7 +375,7 @@ public class ObjectReader {
                 return null;
             }
             ObjectReader or = new ObjectReader(objectReaderReceiver, targetObj,
-                    method.getDeclaringClass());
+                    method.getDeclaringClass(), method.getName());
             return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
         }
     }
@@ -620,7 +635,8 @@ public class ObjectReader {
 
     public void notifyEntryPointProcessor(CamundaEntryPointFunctions func, InvokeExpr expr, String thisName) {
         objectReaderReceiver
-                .addEntryPoint(func, this.currentJavaClass.getName(), expr, resolveArgs(expr.getArgs(), thisName));
+                .addEntryPoint(func, this.currentJavaClass.getName(), this.currentMethod, expr,
+                        resolveArgs(expr.getArgs(), thisName));
     }
 
     /**

@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,9 +47,13 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class EntryPointScannerTest {
+
+    private static EntryPointScanner scanner;
 
     @BeforeClass
     public static void setup() {
@@ -59,18 +64,49 @@ public class EntryPointScannerTest {
         String currentPath = (new File(".")).toURI().getPath();
         Scene.v().extendSootClassPath(currentPath + "src/test/java");
         Scene.v().defaultClassPath();
+
+        final Set<String> javaResources = new HashSet<>();
+        javaResources.add("de/viadee/bpm/vPAV/processing/EntryPointRuntimeService");
+        scanner = new EntryPointScanner(javaResources);
+        scanner.scanProcessVariables();
     }
 
     @Test
     public void testFindVariablesMap() {
-        final Set<String> javaResources = new HashSet<>();
-        javaResources.add("de/viadee/bpm/vPAV/delegates/RuntimeServiceInit");
+        List<EntryPoint> entryPoints = scanner.getEntryPoints().stream()
+                .filter(ep -> ep.getMethodName().equals("startProcessWithVariables")).collect(
+                        Collectors.toList());
+        Assert.assertEquals("One entry point should be found.", 1, entryPoints.size());
+        Assert.assertEquals("One variable should be passed on start.", 1,
+                entryPoints.get(0).getProcessVariables().size());
+        Assert.assertEquals("The variable 'anotherVariable' should have been found.", "anotherVariable",
+                entryPoints.get(0).getProcessVariables().iterator().next());
+    }
 
-        final EntryPointScanner scanner = new EntryPointScanner(javaResources);
-        scanner.scanProcessVariables();
-        Assert.assertEquals("One entry point should be found.", 1, scanner.getEntryPoints().size());
-        Assert.assertEquals("One variable should be passed on start.", 1, scanner.getEntryPoints().get(0).getProcessVariables().size());
-        Assert.assertEquals("The variable 'variable' should have been found.","variable", scanner.getEntryPoints().get(0).getProcessVariables().iterator().next());
+    @Test
+    public void testEntryPointMethod() {
+        List<EntryPoint> entryPoints = scanner.getEntryPoints().stream()
+                .filter(ep -> ep.getMethodName().equals("startProcess")).collect(
+                        Collectors.toList());
+        Assert.assertEquals(4, entryPoints.size());
+        for (EntryPoint ep : entryPoints) {
+            Assert.assertEquals("de.viadee.bpm.vPAV.processing.EntryPointRuntimeService", ep.getClassName());
+            Assert.assertEquals("startProcess", ep.getMethodName());
+        }
+
+        Assert.assertEquals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID, entryPoints.get(0).getEntryPointName());
+
+        Assert.assertEquals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY,
+                entryPoints.get(1).getEntryPointName());
+        Assert.assertEquals("myKey", entryPoints.get(1).getProcessDefinitionKey());
+
+        Assert.assertEquals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE,
+                entryPoints.get(2).getEntryPointName());
+        Assert.assertEquals("myMessage", entryPoints.get(2).getMessageName());
+
+        Assert.assertEquals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF,
+                entryPoints.get(3).getEntryPointName());
+        Assert.assertEquals("myMessage2", entryPoints.get(3).getMessageName());
     }
 
     // TODO integrate found variables in analysis

@@ -66,7 +66,6 @@ public class EntryPointScanner extends ObjectReaderReceiver {
         camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY);
         camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE);
         camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF);
-        camundaProcessEntryPoints.add(CamundaMethodServices.CORRELATE_MESSAGE);
     }
 
     /**
@@ -83,7 +82,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
     /**
      * Retrieve the method name which contains the entrypoint (e.g. "startProcessByXYZ")
      *
-     * @param filePath   fully qualified path to the java class
+     * @param filePath fully qualified path to the java class
      */
     private void retrieveMethod(final String filePath) {
         SootClass sootClass = Scene.v().forceResolve(fixClassPathForSoot(cleanString(filePath)), SootClass.SIGNATURES);
@@ -93,14 +92,13 @@ public class EntryPointScanner extends ObjectReaderReceiver {
             Scene.v().loadNecessaryClasses();
             for (SootMethod method : sootClass.getMethods()) {
                 if (!method.isPhantom() && !method.isAbstract()) {
-                    ObjectReader objectReader = new ObjectReader(this, sootClass);
+                    ObjectReader objectReader = new ObjectReader(this, sootClass, method.getName());
                     Block block = SootResolverSimplified.getBlockFromMethod(method);
                     objectReader.processBlock(block, new ArrayList<>(), new ArrayList<>(), null);
                 }
             }
         }
     }
-
 
     /**
      * Strips unnecessary characters and returns cleaned name
@@ -145,16 +143,15 @@ public class EntryPointScanner extends ObjectReaderReceiver {
         return processIdToVariableMap;
     }
 
-    public void addEntryPoint(CamundaEntryPointFunctions function, String className, InvokeExpr expr,
+    public void addEntryPoint(CamundaEntryPointFunctions function, String className, String methodName, InvokeExpr expr,
             List<Object> args) {
-        String methodName = expr.getMethod().getName();
+        String entryPointName = expr.getMethod().getName();
         String messageName = "";
         String processDefinitionKey = null;
 
         if (function.isWithMessage()) {
             messageName = (String) args.get(0);
             // TODO Check expresssion
-
 
         }
 
@@ -167,19 +164,16 @@ public class EntryPointScanner extends ObjectReaderReceiver {
             for (Object o : args) {
                 if (o instanceof MapVariable) {
                     Set<String> variables = ((MapVariable) o).getValues().keySet();
-                    EntryPoint ep = new EntryPoint(className, methodName, messageName, methodName, processDefinitionKey, variables);
+                    EntryPoint ep = new EntryPoint(className, methodName, messageName, entryPointName, processDefinitionKey,
+                            variables);
                     this.entryPoints.add(ep);
                     return;
                 }
             }
         }
 
-        EntryPoint ep = new EntryPoint(className, methodName, messageName, methodName,  processDefinitionKey);
+        EntryPoint ep = new EntryPoint(className, methodName, messageName, entryPointName, processDefinitionKey);
 
-        if (function.equals(CamundaEntryPointFunctions.CreateMessageCorrelation)) {
-            processIds.add(function.getName());
-        } else {
-            this.entryPoints.add(ep);
-        }
+        this.entryPoints.add(ep);
     }
 }
