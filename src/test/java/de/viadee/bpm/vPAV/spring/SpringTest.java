@@ -35,13 +35,19 @@ import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import soot.G;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -51,6 +57,11 @@ public class SpringTest {
 
     @Autowired
     private ApplicationContext ctx;
+
+    @BeforeClass
+    public static void setup() {
+        G.reset();
+    }
 
     @Test
     public void validateModel() {
