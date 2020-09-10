@@ -73,7 +73,7 @@ public class MessageCorrelationChecker extends AbstractElementChecker {
             final Collection<MessageEventDefinition> messageEventDefinition = baseElement
                     .getChildElementsByType(MessageEventDefinition.class);
             if (messageEventDefinition != null && messageEventDefinition.size() > 0) {
-                retrieveMessage(element, issues, baseElement, scanner.getEntryPoints());
+                retrieveMessage(element, issues, baseElement);
             }
         }
         if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_END_EVENT)
@@ -86,11 +86,11 @@ public class MessageCorrelationChecker extends AbstractElementChecker {
             final Collection<MessageEventDefinition> messageEventDefinition = baseElement
                     .getChildElementsByType(MessageEventDefinition.class);
             if (messageEventDefinition != null && messageEventDefinition.size() > 0) {
-                retrieveMessage(element, issues, baseElement, scanner.getIntermediateEntryPoints());
+                retrieveMessage(element, issues, baseElement);
             }
         }
         if (baseElement.getElementType().getTypeName().equals(BpmnModelConstants.BPMN_ELEMENT_RECEIVE_TASK)) {
-            retrieveMessage(element, issues, baseElement, scanner.getIntermediateEntryPoints());
+            retrieveMessage(element, issues, baseElement);
         }
 
         return issues;
@@ -102,10 +102,9 @@ public class MessageCorrelationChecker extends AbstractElementChecker {
      * @param element     Current BpmnElement
      * @param issues      List of issues
      * @param baseElement BaseElement of current BpmnElement
-     * @param entryPoints List of entryPoints
      */
     private void retrieveMessage(final BpmnElement element, final Collection<CheckerIssue> issues,
-            final BaseElement baseElement, final List<EntryPoint> entryPoints) {
+            final BaseElement baseElement) {
         final ArrayList<String> messages = new ArrayList<>();
         Collection<EventDefinition> eventDefinitions = new HashSet<>();
 
@@ -131,12 +130,8 @@ public class MessageCorrelationChecker extends AbstractElementChecker {
             messageName = messages.get(0);
         }
 
-        for (EntryPoint ep : entryPoints) {
-            if (!ep.getMessageName().equals(messageName)) {
-                issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                        String.format(Messages.getString("MessageCorrelationChecker.1"), //$NON-NLS-1$
-                                messageName)));
-            }
-        }
+        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                String.format(Messages.getString("MessageCorrelationChecker.1"), //$NON-NLS-1$
+                        messageName)));
     }
 }

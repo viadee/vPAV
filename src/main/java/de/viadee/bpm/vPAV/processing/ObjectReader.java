@@ -57,6 +57,8 @@ public class ObjectReader {
 
     private static HashMap<String, ObjectVariable> staticObjectVariables = new HashMap<>();
 
+    private static final RefType StringType = RefType.v("java.lang.String");
+
     private ObjectReaderReceiver objectReaderReceiver;
 
     public BasicNode returnNode;
@@ -160,7 +162,7 @@ public class ObjectReader {
         }
 
         // Process successors e.g. if or loop
-        if (block.getSuccs().size() > 0) {
+        if (!block.getSuccs().isEmpty()) {
             Node blockNode = null;
             for (Block succ : block.getSuccs()) {
                 if (blockNode == null) {
@@ -203,7 +205,7 @@ public class ObjectReader {
      */
     Object handleReturnStmt(Block block, Unit unit, String thisName) {
         ReturnStmt returnStmt = (ReturnStmt) unit;
-        if (returnStmt.getOp().getType().equals(RefType.v("java.lang.String"))) {
+        if (returnStmt.getOp().getType().equals(StringType)) {
             return resolveStringValue(block, returnStmt.getOp(), thisName);
         } else {
             return resolveObjectVariable(block, returnStmt.getOp(), thisName);
@@ -223,7 +225,7 @@ public class ObjectReader {
         if (identityStmt.getRightOp() instanceof ParameterRef) {
             int idx = ((ParameterRef) identityStmt.getRightOp()).getIndex();
             Type type = identityStmt.getRightOp().getType();
-            if (type.equals(RefType.v("java.lang.String"))) {
+            if (type.equals(StringType)) {
                 StringVariable var;
                 if (argValues == null || argValues.size() < idx + 1) {
                     var = new StringVariable("(unknown)");
@@ -422,7 +424,7 @@ public class ObjectReader {
      */
     void handleLocalAssignment(Block block, Value leftValue, Value rightValue, String thisName) {
         // Local string variable is updated
-        if (leftValue.getType().equals(RefType.v("java.lang.String"))) {
+        if (leftValue.getType().equals(StringType)) {
             String newValue = resolveStringValue(block, rightValue, thisName);
             localStringVariables.put(leftValue.toString(), new StringVariable(newValue));
         }
@@ -445,7 +447,7 @@ public class ObjectReader {
      */
     void handleFieldAssignment(Block block, Value leftValue, Value rightValue, String thisName) {
         // String field of object is updated
-        if (leftValue.getType().equals(RefType.v("java.lang.String"))) {
+        if (leftValue.getType().equals(StringType)) {
             String newValue = resolveStringValue(block, rightValue, thisName);
             String objIdentifier = getObjIdentifierFromFieldRef(leftValue);
             String varName = getVarNameFromFieldRef(leftValue);
@@ -484,7 +486,7 @@ public class ObjectReader {
         ObjectVariable staticClass = staticObjectVariables.get(classname);
 
         // String field of object is updated
-        if (leftValue.getType().equals(RefType.v("java.lang.String"))) {
+        if (leftValue.getType().equals(StringType)) {
             String newValue = resolveStringValue(block, rightValue, thisName);
             String varName = getVarNameFromFieldRef(leftValue);
             staticClass.updateStringField(varName, newValue);
@@ -631,7 +633,7 @@ public class ObjectReader {
     public ArrayList<Object> resolveArgs(List<Value> args, String thisName) {
         ArrayList<Object> list = new ArrayList<>();
         for (Value arg : args) {
-            if (arg.getType().equals(RefType.v("java.lang.String"))) {
+            if (arg.getType().equals(StringType)) {
                 list.add(resolveStringValue(null, arg, thisName));
             } else if (arg.getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE) ||
                     arg.getType().equals(CamundaMethodServices.MAP_VARIABLES_TYPE) ||

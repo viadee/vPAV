@@ -31,17 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.MapVariable;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
-import soot.*;
-import soot.jimple.AssignStmt;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootMethod;
 import soot.jimple.InvokeExpr;
-import soot.jimple.InvokeStmt;
 import soot.jimple.internal.JInterfaceInvokeExpr;
-import soot.options.Options;
 import soot.toolkits.graph.Block;
 
 import java.util.*;
@@ -60,8 +58,6 @@ public class EntryPointScanner extends ObjectReaderReceiver {
 
     private List<EntryPoint> entryPoints = new ArrayList<>();
 
-    private List<EntryPoint> intermediateEntryPoints = new ArrayList<>();
-
     private Set<String> processIds = new HashSet<>();
 
     public EntryPointScanner(final Set<String> javaResources) {
@@ -79,10 +75,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
     public void scanProcessVariables() {
         for (final String filePath : javaResources) {
             if (!filePath.startsWith("javax")) {
-                // TODO why do we create these sets and never use them?
-                final Set<String> messageIds = new HashSet<>();
-                final Set<String> processIds = new HashSet<>();
-                retrieveMethod(filePath, messageIds, processIds);
+                retrieveMethod(filePath);
             }
         }
     }
@@ -91,10 +84,8 @@ public class EntryPointScanner extends ObjectReaderReceiver {
      * Retrieve the method name which contains the entrypoint (e.g. "startProcessByXYZ")
      *
      * @param filePath   fully qualified path to the java class
-     * @param messageIds Set of messageIds (used to retrieve variable manipulation later on)
-     * @param processIds Set of processIds (used to retrieve variable manipulation later on)
      */
-    private void retrieveMethod(final String filePath, final Set<String> messageIds, final Set<String> processIds) {
+    private void retrieveMethod(final String filePath) {
         SootClass sootClass = Scene.v().forceResolve(fixClassPathForSoot(cleanString(filePath)), SootClass.SIGNATURES);
 
         if (sootClass != null && !sootClass.isInterface()) {
@@ -105,63 +96,11 @@ public class EntryPointScanner extends ObjectReaderReceiver {
                     ObjectReader objectReader = new ObjectReader(this, sootClass);
                     Block block = SootResolverSimplified.getBlockFromMethod(method);
                     objectReader.processBlock(block, new ArrayList<>(), new ArrayList<>(), null);
-
-     /*               for (String entryPoint : camundaProcessEntryPoints) {
-                        if (body.toString().contains(entryPoint)) {
-                            final PatchingChain<Unit> pc = body.getUnits();
-                            for (Unit unit : pc) {
-                                if (unit instanceof AssignStmt) {
-                                    final String rightBox = ((AssignStmt) unit).getRightOpBox().getValue().toString();
-                                    if (rightBox.contains(entryPoint) && ((AssignStmt) unit).getRightOpBox()
-                                            .getValue() instanceof JInterfaceInvokeExpr) {
-                                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((AssignStmt) unit)
-                                                .getRightOpBox().getValue();
-                                        checkExpression(filePath, messageIds, method, entryPoint, expr);
-                                    }
-                                }
-                                if (unit instanceof InvokeStmt) {
-                                    final String rightBox = ((InvokeStmt) unit).getInvokeExprBox().getValue()
-                                            .toString();
-                                    if (rightBox.contains(entryPoint) && ((InvokeStmt) unit).getInvokeExprBox()
-                                            .getValue() instanceof JInterfaceInvokeExpr) {
-                                        final JInterfaceInvokeExpr expr = (JInterfaceInvokeExpr) ((InvokeStmt) unit)
-                                                .getInvokeExprBox().getValue();
-                                        checkExpression(filePath, messageIds, method, entryPoint, expr);
-                                    }
-                                }
-                            }
-                        }
-                        if (body.toString().contains(CamundaMethodServices.CORRELATE_MESSAGE)) {
-                            processIds.add(entryPoint);
-                        }
-                    } */
                 }
             }
         }
     }
 
-    /**
-     * Checks the current expression and creates a new entrypoint
-     *
-     * @param filePath   Current filePath of the model
-     * @param messageIds List of message ids
-     * @param method     Current method
-     * @param entryPoint Current entryPoint
-     * @param expr       Current expression
-     */
-    private void checkExpression(final String filePath, final Set<String> messageIds, final SootMethod method,
-            final String entryPoint, final JInterfaceInvokeExpr expr) {
-        if (expr != null) {
-            final String ex = expr.getArgBox(0).getValue().toString();
-            if (entryPoint.equals(CamundaMethodServices.CORRELATE_MESSAGE)) {
-                //           intermediateEntryPoints
-                //                  .add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
-            } else {
-                messageIds.add(entryPoint);
-                //           entryPoints.add(new EntryPoint(filePath, method.getName(), ex.replaceAll("\"", ""), entryPoint));
-            }
-        }
-    }
 
     /**
      * Strips unnecessary characters and returns cleaned name
@@ -177,15 +116,6 @@ public class EntryPointScanner extends ObjectReaderReceiver {
             return className.replace("/", ".").replace(".class",
                     "").replace(".java", "");
         }
-    }
-
-    /**
-     * get list of intermediate entrypoints (process message, method) where process variables have been found
-     *
-     * @return returns list of locations
-     */
-    public List<EntryPoint> getIntermediateEntryPoints() {
-        return intermediateEntryPoints;
     }
 
     /**
@@ -223,6 +153,9 @@ public class EntryPointScanner extends ObjectReaderReceiver {
 
         if (function.isWithMessage()) {
             messageName = (String) args.get(0);
+            // TODO Check expresssion
+
+
         }
 
         if (function.equals(CamundaEntryPointFunctions.StartProcessInstanceByKey)) {

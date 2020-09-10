@@ -286,17 +286,7 @@ public class ElementGraphBuilder {
                 messageName = ((ReceiveTask) element).getMessage().getName();
             }
 
-            // add process variables for receive task, which set by call
-            // startProcessInstanceByKey
-
-            for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {
-                if (ep.getMessageName().equals(messageName)) {
-                    // Check InitialVariableOperations
-                    new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
-                            ElementChapter.Implementation, KnownElementFieldType.Class,
-                            ep, predecessor);
-                }
-            }
+            // TODO check message name for expression
         }
 
         // examine process variables and save it with access operation
