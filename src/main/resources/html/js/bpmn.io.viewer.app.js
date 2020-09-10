@@ -800,12 +800,12 @@ function createProjectsNavbar() {
 
 async function createProjectSummary() {
     resetDocument();
-    await loadDomElements(createScriptTags(['data/infoPOM.js'], true))
+    await loadDomElements(createScriptTags(['data/infoPOM.js'], true)); // infoPOM is needed to fill footer
     createHeader();
     createFooter();
     const mainContent = document.getElementById("content");
     const summaryTemplate = `
-              ${projectSummaries.map(projectSummary => {
+              ${projectSummaries.map((projectSummary, index) => {
         return `
         <div class="col mt-3">
             <h3 class="row">
@@ -823,34 +823,24 @@ async function createProjectSummary() {
                 ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle",
             Math.round(projectSummary.errorElementsRatio))} 
             </div> 
-                            <h3 class="small-box-footer"  data-toggle="modal" data-target="#modalTable">
+                <h3 class="small-box-footer"  data-toggle="modal" data-target="#modalTable"
+                onclick="createModalTable(${index})"}>
                     More info
                     <i class="fas fa-arrow-circle-right"></i>
                 </h3>   
              `
-    })
-        .join("")}
+    }).join("")}
         <div id="modalTable" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog mw-100 w-75" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Modal table</h5>
+        <h5 class="modal-title">Project statistics</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="table"
-          data-toggle="table"
-          data-height="299"
-          data-url="json/data1.json">
-          <thead>
-            <tr>
-              <th data-field="id">ID</th>
-              <th data-field="name">Item Name</th>
-              <th data-field="price">Item Price</th>
-            </tr>
-          </thead>
+        <table id="table">
         </table>
       </div>
       <div class="modal-footer">
@@ -861,7 +851,7 @@ async function createProjectSummary() {
 </div>         
 `;
     mainContent.innerHTML = summaryTemplate;
-    $(".knob").knob();
+    $(".knob").knob(); //Init display of knobs
 }
 
 function smallBoxTemplate(label, icon, value) {
@@ -875,6 +865,34 @@ function smallBoxTemplate(label, icon, value) {
                 </div>
             </div>
     `;
+}
+
+function createModalTable(summaryIndex) {
+    const percentageFormat = value => `${Math.round(value)}%`;
+    const columnDefinitions = [
+        {field: 'projectName', title: 'Project name', sortable: true, class: "text-nowrap"},
+        {field: 'modelName', title: 'Model name', sortable: true, class: "text-nowrap"},
+        {field: 'totalElements', title: 'Total Elements', sortable: true},
+        {field: 'analyzedElements', title: 'Analyzed elements', sortable: true},
+        {field: 'issues', title: 'Issues', sortable: true},
+        {field: 'ignoredIssues', title: 'Ignored issues', sortable: true},
+        {field: 'warnings', title: 'Warnings', sortable: true},
+        {field: 'errors', title: 'Errors', sortable: true},
+        {field: 'warningElements', title: 'Warning elements', sortable: true},
+        {field: 'errorElements', title: 'Error elements', sortable: true},
+        {field: 'issuesRatio', title: 'Issues ratio', sortable: true, formatter: percentageFormat},
+        {field: 'warningRatio', title: 'Warning ratio', sortable: true, formatter: percentageFormat},
+        {field: 'errorRatio', title: 'Error ratio', sortable: true, formatter: percentageFormat},
+        {field: 'warningElementsRatio', title: 'Warning elements ratio', sortable: true, formatter: percentageFormat},
+        {field: 'errorElementsRatio', title: 'Error elements ratio', sortable: true, formatter: percentageFormat},
+        {field: 'flawedElementsRatio', title: 'Flawed elements ratio', sortable: true, formatter: percentageFormat}];
+    const $table = $('#table')
+    $table.bootstrapTable({
+        columns: columnDefinitions, data: projectSummaries[summaryIndex].models, showColumns: true, showFullscreen: true
+    });
+    $('#modalTable').on("hidden.bs.modal", () => {
+        $table.bootstrapTable('destroy');
+    });
 }
 
 //get issue count from specific bpmnFile
