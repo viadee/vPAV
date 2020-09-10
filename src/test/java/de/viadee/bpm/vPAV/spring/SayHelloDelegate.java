@@ -41,6 +41,5 @@ public class SayHelloDelegate implements JavaDelegate {
     @Override
     public void execute(DelegateExecution execution) throws Exception {
         execution.getVariable("UnknownVariable");
-        execution.getVariable("variable");
     }
 }

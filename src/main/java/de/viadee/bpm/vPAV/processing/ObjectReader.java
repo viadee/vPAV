@@ -45,6 +45,9 @@ import soot.toolkits.graph.Block;
 
 import java.util.*;
 
+import static de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions.PutValue;
+import static de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions.PutValueTyped;
+
 public class ObjectReader {
 
     private HashSet<Integer> processedBlocks = new HashSet<>();
@@ -308,76 +311,88 @@ public class ObjectReader {
         if (foundMethod != null) {
             // Process variable is manipulated
             notifyVariablesReader(block, expr, foundMethod);
-            return null;
-        } else if (foundEntryPoint != null) {
+
+            // Also handle as Map (continue processing)
+            if (!(foundMethod.equals(PutValue) || foundMethod.equals(PutValueTyped))) {
+                return null;
+            }
+        }
+        if (foundEntryPoint != null) {
             // Process entry point
             // TODO check message name for expression?!
             notifyEntryPointProcessor(foundEntryPoint, expr, thisName);
             return null;
-        } else {
-            List<Value> args = expr.getArgs();
-            List<Object> argValues = resolveArgs(args, thisName);
-            ObjectVariable targetObj;
-            SootMethod method = expr.getMethod();
+        }
 
-            if (expr instanceof AbstractInstanceInvokeExpr) {
-                // Instance method is called
-                String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
+        List<Value> args = expr.getArgs();
+        List<Object> argValues = resolveArgs(args, thisName);
+        ObjectVariable targetObj;
+        SootMethod method = expr.getMethod();
 
-                // Method on this object is called
-                if (targetObjName.equals(thisName)) {
-                    if (expr.getMethod() != null && expr.getMethod().getDeclaringClass() == this.currentJavaClass) {
-                        Block nextBlock = SootResolverSimplified.getBlockFromMethod(expr.getMethod());
+        if (expr instanceof AbstractInstanceInvokeExpr) {
+            // Instance method is called
+            String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
 
-                        if (nextBlock != null) {
-                            return this
-                                    .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args,
-                                            argValues,
-                                            null);
-                        }
+            // Method on this object is called
+            if (targetObjName.equals(thisName)) {
+                if (expr.getMethod() != null && expr.getMethod().getDeclaringClass() == this.currentJavaClass) {
+                    Block nextBlock = SootResolverSimplified.getBlockFromMethod(expr.getMethod());
 
-                    }
-                    // Search method in class hierarchy
-                    return this
-                            .processBlock(SootResolverSimplified.getBlockFromMethod(
-                                    findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())), args,
-                                    argValues,
-                                    null);
-
-                } else {
-                    // Method on another object is called
-                    targetObj = localObjectVariables.get(targetObjName);
-
-                    if (targetObj == null) {
-                        targetObj = new ObjectVariable();
-                    } else if (targetObj instanceof MapVariable) {
-                        // Handle operation on map variable
-                        handleMapOperation((MapVariable) targetObj, method, expr, block, thisName);
-                        return null;
+                    if (nextBlock != null) {
+                        return this
+                                .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args,
+                                        argValues,
+                                        null);
                     }
 
-                    SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr, targetObj);
-                    method = (resolvedMethod != null) ? resolvedMethod : method;
                 }
+                // Search method in class hierarchy
+                return this
+                        .processBlock(SootResolverSimplified.getBlockFromMethod(
+                                findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())), args,
+                                argValues,
+                                null);
+
+            } else {
+                // Method on another object is called
+                targetObj = localObjectVariables.get(targetObjName);
+
+                if (targetObj == null) {
+                    targetObj = new ObjectVariable();
+                } else if (targetObj instanceof MapVariable) {
+                    // Handle operation on map variable
+                    handleMapOperation((MapVariable) targetObj, method, expr, block, thisName);
+                    return targetObj;
+                }
+
+                SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr, targetObj);
+                method = (resolvedMethod != null) ? resolvedMethod : method;
+            }
+        } else {
+            // Check if Camunda VariableMap is created
+            if (method.getDeclaringClass().getName().equals("org.camunda.bpm.engine.variable.Variables") && method
+                    .getName().equals("createVariables")) {
+                return new MapVariable();
+
             } else {
                 // Static method is called -> create phantom variable
                 targetObj = new ObjectVariable();
             }
-
-            // Process method from another class/object
-            if (method.getDeclaringClass().getPackageName().startsWith("java.") || method.getDeclaringClass()
-                    .getPackageName().startsWith("org.camunda.")) {
-                // Skip native java classes
-                return null;
-            }
-            Block nextBlock = SootResolverSimplified.getBlockFromMethod(method);
-            if (nextBlock == null) {
-                return null;
-            }
-            ObjectReader or = new ObjectReader(objectReaderReceiver, targetObj,
-                    method.getDeclaringClass(), method.getName());
-            return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
         }
+
+        // Process method from another class/object
+        if (method.getDeclaringClass().getPackageName().startsWith("java.") || method.getDeclaringClass()
+                .getPackageName().startsWith("org.camunda.")) {
+            // Skip native java classes
+            return null;
+        }
+        Block nextBlock = SootResolverSimplified.getBlockFromMethod(method);
+        if (nextBlock == null) {
+            return null;
+        }
+        ObjectReader or = new ObjectReader(objectReaderReceiver, targetObj,
+                method.getDeclaringClass(), method.getName());
+        return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
     }
 
     /**
@@ -388,7 +403,7 @@ public class ObjectReader {
      */
     SootMethod resolveAnonymousInnerClasses(InvokeExpr expr, ObjectVariable objectVariable) {
         List<Value> args = expr.getArgs();
-        List<Type> argTypes = argsToTypes(args);
+        List<Type> argTypes = argsToTypes(args, expr);
 
         // Resolving for inner classes does not work with above call
         // Use saved implementation
@@ -421,10 +436,15 @@ public class ObjectReader {
      * @param args List of arguments
      * @return List of argument types
      */
-    private List<Type> argsToTypes(List<Value> args) {
+    private List<Type> argsToTypes(List<Value> args, InvokeExpr expr) {
         ArrayList<Type> types = new ArrayList<>();
-        for (Value val : args) {
-            types.add(val.getType());
+        for (int i = 0; i < args.size(); i++) {
+            if (args.get(i).equals(NullConstant.v())) {
+                // Use type of method instead of null type to make resolving work
+                types.add(expr.getMethodRef().getParameterTypes().get(i));
+            } else {
+                types.add(args.get(i).getType());
+            }
         }
         return types;
     }
@@ -663,7 +683,7 @@ public class ObjectReader {
     }
 
     public void handleMapOperation(MapVariable map, SootMethod method, InvokeExpr expr, Block block, String thisName) {
-        if (method.getName().equals("put")) {
+        if (method.getName().equals("put") || method.getName().equals("putValue")) {
             // Resolve name of variable
             String variableName = resolveStringValue(block, expr.getArg(0), thisName);
             map.put(variableName, expr.getArg(1));

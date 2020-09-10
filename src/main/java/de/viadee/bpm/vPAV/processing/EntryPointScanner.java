@@ -58,8 +58,6 @@ public class EntryPointScanner extends ObjectReaderReceiver {
 
     private List<EntryPoint> entryPoints = new ArrayList<>();
 
-    private Set<String> processIds = new HashSet<>();
-
     public EntryPointScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
         camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID);
