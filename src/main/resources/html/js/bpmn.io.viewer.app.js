@@ -869,8 +869,9 @@ function smallBoxTemplate(label, icon, value) {
 
 function createModalTable(projectName) {
     const percentageFormat = value => `${Math.round(value)}%`;
+    const projectMainRowFormat = row => !row.modelName ? {classes: "bg-secondary"} : {classes: ""};
     const columnDefinitions = [
-        {field: 'projectName', title: 'Project name', sortable: true, class: "text-nowrap"},
+        {field: 'projectName', title: 'Project name', sortable: true, class: "text-nowrap max-width-5"},
         {field: 'modelName', title: 'Model name', sortable: true, class: "text-nowrap"},
         {field: 'totalElements', title: 'Total Elements', sortable: true},
         {field: 'analyzedElements', title: 'Analyzed elements', sortable: true},
@@ -890,8 +891,13 @@ function createModalTable(projectName) {
         .concat(Array.from(projectNameToSummaryMap.values()).map(summary => summary.models).flat(1));
     const $table = $('#table')
     $table.bootstrapTable({
-        columns: columnDefinitions, data: tableData,
-        showColumns: true, showFullscreen: true, search: true, searchText: projectName
+        columns: columnDefinitions,
+        data: tableData,
+        showColumns: true,
+        showFullscreen: true,
+        search: true,
+        searchText: projectName,
+        rowStyle: projectMainRowFormat
     });
     $('#modalTable').on("hidden.bs.modal", () => {
         $table.bootstrapTable('destroy');
