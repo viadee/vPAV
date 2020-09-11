@@ -269,8 +269,6 @@ a:hover {
 }
 
 .knob {
-	width: 80px;
-	height: 80px;
 	background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
 	font: bold 12px Arial;
 	color: rgb(57, 204, 204);
