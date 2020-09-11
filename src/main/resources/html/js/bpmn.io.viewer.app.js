@@ -778,11 +778,11 @@ function createProjectsNavbar() {
                 onclick="createProjectSummary()">
                     <p class="text-white"><i class="text-white mr-2 fas fa-list-ul"></i>Project summary</p>
                 </a>
-                ${reportData.reportsPaths.map((_, index) => {
+                ${projectNamesSorted.map((name) => {
         return `
                     <a href="#" class="list-group-item list-group-item-action"
-                        onclick="loadExternalReport(reportData.reportsPaths[${index}])">
-                    <p class="text-white"><i class="text-white mr-2 fas fa-file"></i>${projectNames[index]}</p>
+                        onclick="loadExternalReport('${projectNameToPathMap.get(name)}')">
+                    <p class="text-white"><i class="text-white mr-2 fas fa-file"></i>${name}</p>
                     </a>
                     `
     }).join("")}
@@ -805,26 +805,26 @@ async function createProjectSummary() {
     createFooter();
     const mainContent = document.getElementById("content");
     const summaryTemplate = `
-              ${projectSummaries.map((projectSummary, index) => {
+              ${projectNamesSorted.map((name) => {
         return `
         <div class="col mt-3">
             <h3 class="row">
                 <span class="badge badge-secondary">
-                    ${projectSummary.projectName}
+                    ${projectNameToSummaryMap.get(name).projectName}
                 </span>
             </h3>
             <div class="row">           
                 ${smallBoxTemplate("Issue ratio", "fas fa-percentage",
-            Math.round(projectSummary.issuesRatio))}
+            Math.round(projectNameToSummaryMap.get(name).issuesRatio))}
                 ${smallBoxTemplate("Flawed elements ratio", "fas fa-info-circle",
-            Math.round(projectSummary.flawedElementsRatio))}
+            Math.round(projectNameToSummaryMap.get(name).flawedElementsRatio))}
                 ${smallBoxTemplate("Warning elements ratio", "fas fa-exclamation-circle",
-            Math.round(projectSummary.warningElementsRatio))}
+            Math.round(projectNameToSummaryMap.get(name).warningElementsRatio))}
                 ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle",
-            Math.round(projectSummary.errorElementsRatio))} 
+            Math.round(projectNameToSummaryMap.get(name).errorElementsRatio))} 
             </div> 
                 <h3 class="small-box-footer"  data-toggle="modal" data-target="#modalTable"
-                onclick="createModalTable(${index})"}>
+                onclick="createModalTable('${name}')"}>
                     More info
                     <i class="fas fa-arrow-circle-right"></i>
                 </h3>   
@@ -867,7 +867,7 @@ function smallBoxTemplate(label, icon, value) {
     `;
 }
 
-function createModalTable(summaryIndex) {
+function createModalTable(projectName) {
     const percentageFormat = value => `${Math.round(value)}%`;
     const columnDefinitions = [
         {field: 'projectName', title: 'Project name', sortable: true, class: "text-nowrap"},
@@ -886,9 +886,12 @@ function createModalTable(summaryIndex) {
         {field: 'warningElementsRatio', title: 'Warning elements ratio', sortable: true, formatter: percentageFormat},
         {field: 'errorElementsRatio', title: 'Error elements ratio', sortable: true, formatter: percentageFormat},
         {field: 'flawedElementsRatio', title: 'Flawed elements ratio', sortable: true, formatter: percentageFormat}];
+    const tableData = Array.from(projectNameToSummaryMap.values())
+        .concat(Array.from(projectNameToSummaryMap.values()).map(summary => summary.models).flat(1));
     const $table = $('#table')
     $table.bootstrapTable({
-        columns: columnDefinitions, data: projectSummaries[summaryIndex].models, showColumns: true, showFullscreen: true
+        columns: columnDefinitions, data: tableData,
+        showColumns: true, showFullscreen: true, search: true, searchText: projectName
     });
     $('#modalTable').on("hidden.bs.modal", () => {
         $table.bootstrapTable('destroy');

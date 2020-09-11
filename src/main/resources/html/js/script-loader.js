@@ -85,14 +85,15 @@ async function loadLogicJs() {
 async function loadDataJs() {
     try {
         await loadDomElements(createScriptTags(["externalReports/reportData.js"], true));
-        projectNames = [];
-        projectSummaries = [];
+        projectNameToSummaryMap = new Map();
+        projectNameToPathMap = new Map();
         for await (let path of reportData.reportsPaths) {
             await loadDomElements(createScriptTags([path + "properties.js"], true));
-            projectNames.push(properties.projectName);
             await loadDomElements(createScriptTags([path + "summary.js"], true));
-            projectSummaries.push(projectSummary);
+            projectNameToSummaryMap.set(properties.projectName, projectSummary);
+            projectNameToPathMap.set(properties.projectName, path);
         }
+        projectNamesSorted = Array.from(projectNameToPathMap.keys()).sort((a, b) => a.localeCompare(b));
     } catch (error) {
         console.warn(error);
     }
@@ -103,8 +104,9 @@ var documentBackup;
 if (!documentBackup) {
     documentBackup = document.cloneNode(true);
 }
-var projectSummaries;
-var projectNames;
+var projectNameToSummaryMap;
+var projectNamesSorted;
+var projectNameToPathMap;
 (async () => {
     await loadDataJs();
     await loadLogicJs();
