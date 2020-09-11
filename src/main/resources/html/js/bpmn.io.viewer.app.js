@@ -782,7 +782,7 @@ function createProjectsNavbar() {
         return `
                     <a href="#" class="list-group-item list-group-item-action"
                         onclick="loadExternalReport('${projectNameToPathMap.get(name)}')">
-                    <p class="text-white"><i class="text-white mr-2 fas fa-file"></i>${name}</p>
+                    <p class="text-white text-nowrap"><i class="text-white mr-2 fas fa-file"></i>${name}</p>
                     </a>
                     `
     }).join("")}
