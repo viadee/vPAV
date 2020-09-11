@@ -823,7 +823,7 @@ async function createProjectSummary() {
                 ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle",
             Math.round(projectNameToSummaryMap.get(name).errorElementsRatio))} 
             </div> 
-                <h3 class="small-box-footer"  data-toggle="modal" data-target="#modalTable"
+                <h3 class="small-box-footer" data-toggle="modal" data-target="#modalTable"
                 onclick="createModalTable('${name}')"}>
                     More info
                     <i class="fas fa-arrow-circle-right"></i>
@@ -833,8 +833,8 @@ async function createProjectSummary() {
         <div id="modalTable" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog mw-100 w-75" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Project statistics</h5>
+      <div class="modal-header viadee-lightblue-bg viadee-head">
+        <h4 class="modal-title">Project statistics</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -844,7 +844,7 @@ async function createProjectSummary() {
         </table>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-viadee" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -856,10 +856,10 @@ async function createProjectSummary() {
 
 function smallBoxTemplate(label, icon, value) {
     return `
-            <div class="col small-box bg-info mb-0">
+            <div class="col small-box viadee-lightblue-bg mb-0">
                     <input class="knob" data-readonly="true" value="${value}"
-                        data-fgcolor="#39CCCC" readonly="readonly">
-                    <h5 class="knob-label">${label}</h5>
+                        data-fgcolor="#DFAD47" data-inputcolor="#EEEEEE" readonly="readonly">
+                    <h5 class="knob-label text-white">${label}</h5>
                 <div class="icon">
                     <i class="${icon}"></i>
                 </div>
@@ -869,7 +869,7 @@ function smallBoxTemplate(label, icon, value) {
 
 function createModalTable(projectName) {
     const percentageFormat = value => `${Math.round(value)}%`;
-    const projectMainRowFormat = row => !row.modelName ? {classes: "bg-secondary"} : {classes: ""};
+    const projectMainRowFormat = row => !row.modelName ? {classes: "viadee-lightblue-bg"} : {classes: ""};
     const columnDefinitions = [
         {field: 'projectName', title: 'Project name', sortable: true, class: "text-nowrap max-width-5"},
         {field: 'modelName', title: 'Model name', sortable: true, class: "text-nowrap"},
@@ -891,12 +891,8 @@ function createModalTable(projectName) {
         .concat(Array.from(projectNameToSummaryMap.values()).map(summary => summary.models).flat(1));
     const $table = $('#table')
     $table.bootstrapTable({
-        columns: columnDefinitions,
-        data: tableData,
-        showColumns: true,
-        showFullscreen: true,
-        search: true,
-        searchText: projectName,
+        columns: columnDefinitions, data: tableData, showColumns: true, showFullscreen: true,
+        buttonsClass: "viadee", search: true, searchText: projectName, showToggle: true,
         rowStyle: projectMainRowFormat
     });
     $('#modalTable').on("hidden.bs.modal", () => {
