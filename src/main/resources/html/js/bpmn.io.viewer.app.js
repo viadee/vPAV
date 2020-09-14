@@ -717,7 +717,7 @@ function createHeader(modelFileName) {
     if (oldHeader) {
         oldHeader.parentNode.removeChild(oldHeader);
     }
-    const modelName = modelFileName ? modelPath => modelFileName.substr(0, modelPath.length - 5) : "";
+    const modelName = modelFileName ? modelFileName.substr(0, modelFileName.length - 5) : "";
     const projectName = properties ? properties["projectName"] : "";
     const header = `
 <nav id="header" role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
