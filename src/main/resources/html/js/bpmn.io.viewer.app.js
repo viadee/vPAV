@@ -717,7 +717,7 @@ function createHeader(modelFileName) {
     if (oldHeader) {
         oldHeader.parentNode.removeChild(oldHeader);
     }
-    const modelName = modelFileName ? modelFileName.substr(0, modelFileName.length - 5) : "";
+    const modelName = modelFileName ? modelPath => modelFileName.substr(0, modelPath.length - 5) : "";
     const projectName = properties ? properties["projectName"] : "";
     const header = `
 <nav id="header" role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
@@ -871,13 +871,13 @@ function smallBoxTemplate(label, icon, value) {
 
 function createModalTable(projectName) {
     const percentageFormat = value => `${Math.round(value)}%`;
-    const projectMainRowFormat = row => !row.modelName ? {classes: "viadee-lightblue-bg"} : {classes: ""};
+    const projectMainRowFormat = row => !row.modelName ? {classes: "viadee-lightblue-bg font-weight-bold"} : {classes: ""};
     const headerFormat = (column) => {
-        return {classes: "uppercase", css: {'overflow-wrap': 'word-break'}};
+        return {classes: "uppercase"};
     };
     const columnDefinitions = [
-        {field: 'projectName', title: 'Project name', sortable: true, class: "text-nowrap max-width-5"},
-        {field: 'modelName', title: 'Model name', sortable: true, class: "text-nowrap"},
+        {field: 'projectName', title: 'Project name', sortable: true},
+        {field: 'modelName', title: 'Model name', sortable: true},
         {field: 'totalElements', title: 'Total Elements', sortable: true},
         {field: 'analyzedElements', title: 'Analyzed elements', sortable: true},
         {field: 'issues', title: 'Issues', sortable: true},
@@ -894,7 +894,11 @@ function createModalTable(projectName) {
         {field: 'flawedElementsRatio', title: 'Flawed elements ratio', sortable: true, formatter: percentageFormat}];
     const tableData = Array.from(projectNameToSummaryMap.values())
         .concat(Array.from(projectNameToSummaryMap.values()).map(summary => summary.models).flat(1));
-    const $table = $('#table')
+    const $table = $('#table');
+    $table.on("post-header.bs.table", () => {
+        //direct styling of inner heading divs otherwise not possible
+        document.querySelectorAll(".th-inner").forEach(heading => heading.classList.add("text-wrap"));
+    });
     $table.bootstrapTable({
         columns: columnDefinitions, data: tableData, showColumns: true, showFullscreen: true,
         buttonsClass: "viadee", search: true, searchText: projectName, showToggle: true,
