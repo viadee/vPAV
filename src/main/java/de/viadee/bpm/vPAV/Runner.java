@@ -61,7 +61,7 @@ import java.util.logging.Logger;
 
 public class Runner {
 
-    private static Logger logger = Logger.getLogger(Runner.class.getName());
+    private static final Logger logger = Logger.getLogger(Runner.class.getName());
 
     private FileScanner fileScanner;
 
@@ -71,15 +71,15 @@ public class Runner {
 
     private RuleSet rules = new RuleSet();
 
-    private Map<String, String> ignoredIssuesMap = new HashMap<>();
+    private final Map<String, String> ignoredIssuesMap = new HashMap<>();
 
-    private Map<String, String> fileMapping = mapStaticFilesToTargetFolders();
+    private final Map<String, String> fileMapping = mapStaticFilesToTargetFolders();
 
     private Map<String, String> wrongCheckersMap = new HashMap<>();
 
-    private Collection<BpmnElement> elements = new ArrayList<>();
+    private final Collection<BpmnElement> elements = new ArrayList<>();
 
-    private Collection<ProcessVariable> processVariables = new ArrayList<>();
+    private final Collection<ProcessVariable> processVariables = new ArrayList<>();
 
     private Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
 
@@ -256,28 +256,28 @@ public class Runner {
         filteredIssues = filterIssues(IssueService.getInstance().getIssues());
     }
 
-	/**
-	 * Write output files (xml / json / js)
-	 *
-	 * @param filteredIssues   List of filteredIssues
-	 * @param elements         List of BPMN element across all models
-	 * @param processVariables List of process variables across all models
-	 */
-	private void writeOutput(final Collection<CheckerIssue> filteredIssues, final Collection<BpmnElement> elements,
-			final Collection<ProcessVariable> processVariables) {
-		final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
-		final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();
-		final JsOutputWriter jsOutputWriter = new JsOutputWriter();
-		jsOutputWriter.prepareMaps(this.getWrongCheckersMap(), this.getIgnoredIssuesMap(), this.getModelPath());
-		try {
-			xmlOutputWriter.write(filteredIssues);
-			jsonOutputWriter.write(filteredIssues);
-			jsOutputWriter.write(filteredIssues);
-			jsOutputWriter.writeVars(elements, processVariables);
-		} catch (final OutputWriterException e) {
-			throw new RuntimeException("Output couldn't be written", e);
-		}
-	}
+    /**
+     * Write output files (xml / json / js)
+     *
+     * @param filteredIssues   List of filteredIssues
+     * @param elements         List of BPMN element across all models
+     * @param processVariables List of process variables across all models
+     */
+    private void writeOutput(final Collection<CheckerIssue> filteredIssues, final Collection<BpmnElement> elements,
+            final Collection<ProcessVariable> processVariables) {
+        final IssueOutputWriter xmlOutputWriter = new XmlOutputWriter();
+        final IssueOutputWriter jsonOutputWriter = new JsonOutputWriter();
+        final JsOutputWriter jsOutputWriter = new JsOutputWriter();
+        jsOutputWriter.prepareMaps(this.getWrongCheckersMap(), this.getIgnoredIssuesMap(), this.getModelPath());
+        try {
+            xmlOutputWriter.write(filteredIssues);
+            jsonOutputWriter.write(filteredIssues);
+            jsOutputWriter.write(filteredIssues);
+            jsOutputWriter.writeVars(elements, processVariables);
+        } catch (final OutputWriterException e) {
+            throw new RuntimeException("Output couldn't be written", e);
+        }
+    }
 
     /**
      * Create vPAV folder
@@ -307,47 +307,47 @@ public class Runner {
         }
     }
 
-	/**
-	 * Copies files to vPAV folder
-	 */
-	private void copyFiles() {
-		if (RuntimeConfig.getInstance().isHtmlOutputEnabled()) {
-			fileMapping.keySet().forEach(file -> {
-				InputStream source = Runner.class.getClassLoader().getResourceAsStream(file);
-				int subStringIndex = file.lastIndexOf('/');
-				if (subStringIndex == -1) {
-					subStringIndex = 0;
-				}
-				Path destination = Paths.get(fileMapping.get(file) + file.substring(subStringIndex));
-				try {
-					Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException | NullPointerException e) {
-					throw new RuntimeException("Files couldn't be written");
-				}
-			});
-		}
-	}
+    /**
+     * Copies files to vPAV folder
+     */
+    private void copyFiles() {
+        if (RuntimeConfig.getInstance().isHtmlOutputEnabled()) {
+            fileMapping.keySet().forEach(file -> {
+                InputStream source = Runner.class.getClassLoader().getResourceAsStream(file);
+                int subStringIndex = file.lastIndexOf('/');
+                if (subStringIndex == -1) {
+                    subStringIndex = 0;
+                }
+                Path destination = Paths.get(fileMapping.get(file) + file.substring(subStringIndex));
+                try {
+                    Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException | NullPointerException e) {
+                    throw new RuntimeException("Files couldn't be written");
+                }
+            });
+        }
+    }
 
-	/**
-	 * Creates a map for static files regarding the HTML output and their corresponding folders
-	 *
-	 * @return Map<String, String> fMap
-	 */
-	private Map<String, String> mapStaticFilesToTargetFolders() {
-		Map<String, String> fileToFolderMap = new HashMap<>();
-		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap.bundle.min.js",
-				RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bpmn-navigated-viewer.js",
-				RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bpmn.io.viewer.app.js",
-				RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery-3.5.1.min.js",
-				RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
-				RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
-				RuntimeConfig.getInstance().getJsFolder());
-		fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
+    /**
+     * Creates a map for static files regarding the HTML output and their corresponding folders
+     *
+     * @return Map<String, String> fMap
+     */
+    private Map<String, String> mapStaticFilesToTargetFolders() {
+        Map<String, String> fileToFolderMap = new HashMap<>();
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap.bundle.min.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bpmn-navigated-viewer.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bpmn.io.viewer.app.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery-3.5.1.min.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 
         fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
                 RuntimeConfig.getInstance().getCssFolder());

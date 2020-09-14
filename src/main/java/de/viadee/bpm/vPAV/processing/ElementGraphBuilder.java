@@ -31,35 +31,27 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.bind.JAXBException;
-
-import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.*;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.*;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-
 import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.*;
+
+import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.util.*;
 
 import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.CORRELATE_MESSAGE;
 import static de.viadee.bpm.vPAV.processing.ProcessVariableReader.addNodeAndGetNewPredecessor;
@@ -69,7 +61,7 @@ import static de.viadee.bpm.vPAV.processing.ProcessVariableReader.addNodeAndGetN
  */
 public class ElementGraphBuilder {
 
-    private Map<String, BpmnElement> elementMap = new HashMap<>();
+    private final Map<String, BpmnElement> elementMap = new HashMap<>();
 
     private Map<String, String> processIdToPathMap = new HashMap<>();
 
@@ -81,7 +73,7 @@ public class ElementGraphBuilder {
 
     private Map<String, Collection<String>> processIdToVariables;
 
-    private Map<BpmnElement, BpmnElement> splittedSubprocesses = new HashMap<>();
+    private final Map<BpmnElement, BpmnElement> splittedSubprocesses = new HashMap<>();
 
     private Rule rule;
 
@@ -731,11 +723,8 @@ public class ElementGraphBuilder {
         }
 
         // Message names must match and only one process is allowed because we cannot match process ids to processes
-        if (ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF) && ep
-                .getMessageName().equals(messageName) && numProcesses == 1) {
-            return true;
-        }
-
-        return false;
+        return ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF)
+                && ep
+                .getMessageName().equals(messageName) && numProcesses == 1;
     }
 }
