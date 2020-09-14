@@ -808,11 +808,19 @@ function showDialog() {
 // List all view modes
 function createViewModesNavBar(model) {
     if (countIssues(model, elementsToMark) <= 0)
-        document.getElementById("showAllIssues").parentNode.remove();
+        document.getElementById("showAllIssues").parentNode.classList.add("hide");
+    else
+        document.getElementById("showAllIssues").parentNode.classList.remove("hide");
+
     if (countIssues(model, noIssuesElements) <= 0)
-        document.getElementById("showSuccess").parentNode.remove();
+        document.getElementById("showSuccess").parentNode.classList.add("hide");
+    else
+        document.getElementById("showSuccess").parentNode.classList.remove("hide");
+
     if (proz_vars !== undefined && proz_vars.length <= 0)
-        document.getElementById("showVariables").parentNode.remove();
+        document.getElementById("showVariables").parentNode.classList.add("hide");
+    else
+        document.getElementById("showVariables").parentNode.classList.remove("hide");
 }
 
 function setFocus(name) {
@@ -982,6 +990,7 @@ function createViewController() {
         document.getElementById(model.name).setAttribute("class", "nav-link model-selector active");
 
         updateView(overlayViewModes.ISSUES, tableViewModes.ISSUES, model);
+        createViewModesNavBar(model.name);
     };
 
     // Create list of code elements

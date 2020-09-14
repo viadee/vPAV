@@ -29,14 +29,11 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.spring;
+package de.viadee.bpm.vPAV.entryPointSpring;
 
-import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -47,16 +44,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import soot.G;
-import soot.Scene;
 
-import java.io.File;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.Properties;
 
+/**
+ * Tests that the variables from the entry points are included in the analysis.
+ */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = { SayHelloDelegate.class })
-public class SpringTest {
+@ContextConfiguration(classes = { EntryPointSpringDelegate.class, RuntimeServiceInit.class })
+public class EntryPointSpringTest {
 
     @Autowired
     private ApplicationContext ctx;
@@ -65,19 +63,21 @@ public class SpringTest {
     public static void setup() {
         G.reset();
         IssueService.getInstance().clear();
-
     }
 
     @Test
-    public void validateModel() {
+    public void testEntryPointsIncludedInAnalysis() {
         RuntimeConfig.getInstance().setTest(true);
         Properties properties = new Properties();
-        properties.put("scanpath", ConfigConstants.TARGET_TEST_PATH + "de/viadee/bpm/vPAV/spring/");
-        properties.put("basepath", ConfigConstants.BASE_PATH_TEST + "spring/");
-        properties.put("ruleSetPath", ConfigConstants.BASE_PATH_TEST + "spring/");
+        properties.put("scanpath", RuntimeConfig.getInstance().getScanPath() + "de/viadee/bpm/vPAV/entryPointSpring/");
+        properties.put("basepath", RuntimeConfig.getInstance().getBasepath() + "entryPointSpring/");
+        properties.put("ruleSetPath", RuntimeConfig.getInstance().getBasepath() + "entryPointSpring/");
         RuntimeConfig.getInstance().setProperties(properties);
         Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelInconsistencies(ctx);
 
-        Assert.assertEquals("There should be one UR issue.", 1, issues.size());
+        Assert.assertEquals("There should be exactly two UR issues.", 2, issues.size());
+        Iterator<CheckerIssue> issueIterator = issues.iterator();
+        Assert.assertEquals("variable_cor_message_invalid", issueIterator.next().getVariable());
+        Assert.assertEquals("variable_invalid", issueIterator.next().getVariable());
     }
 }

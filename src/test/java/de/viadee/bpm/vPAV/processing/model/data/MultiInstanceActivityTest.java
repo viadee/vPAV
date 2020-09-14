@@ -38,7 +38,7 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -78,7 +78,7 @@ public class MultiInstanceActivityTest {
 
     @Test
     public void testCollection() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "MultiInstanceActivityTest_Collection.bpmn";
         final File processDefinition = new File(PATH);
@@ -117,7 +117,7 @@ public class MultiInstanceActivityTest {
      */
     @Test
     public void testCollectionChildElement() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "MultiInstanceActivityTest_Collection2.bpmn";
         final File processDefinition = new File(PATH);
@@ -156,7 +156,7 @@ public class MultiInstanceActivityTest {
 
     @Test
     public void testCorrectLoopCardinality() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "MultiInstanceActivityTest.bpmn";
         final File processDefinition = new File(PATH);
@@ -194,7 +194,7 @@ public class MultiInstanceActivityTest {
 
     @Test
     public void testLoopCardinalityExpressionVariables() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "MultiInstanceActivityTest.bpmn";
         final File processDefinition = new File(PATH);

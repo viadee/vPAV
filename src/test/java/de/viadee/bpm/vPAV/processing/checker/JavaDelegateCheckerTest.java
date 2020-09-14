@@ -74,7 +74,7 @@ public class JavaDelegateCheckerTest {
     public static void setup() throws IOException {
         RuntimeConfig.getInstance().setTest(true);
         FileScanner.setupSootClassPaths(new LinkedList<>());
-        new JavaReaderStatic().setupSoot();
+        JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
 
         final File file = new File(".");

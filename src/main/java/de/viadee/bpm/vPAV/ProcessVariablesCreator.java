@@ -33,6 +33,7 @@ package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.ObjectReader;
+import de.viadee.bpm.vPAV.processing.ObjectReaderReceiver;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
@@ -41,13 +42,14 @@ import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import soot.SootClass;
+import soot.SootMethod;
 import soot.Value;
 import soot.toolkits.graph.Block;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessVariablesCreator {
+public class ProcessVariablesCreator extends ObjectReaderReceiver {
 
     private ArrayList<Node> nodes = new ArrayList<>();
 
@@ -88,8 +90,9 @@ public class ProcessVariablesCreator {
      * @param args  Arguments passed to block
      * @return last created BasicNode or null if no were created
      */
-    public BasicNode startBlockProcessing(final Block block, final List<Value> args, final SootClass javaClass) {
-        ObjectReader objectReader = new ObjectReader(this, javaClass);
+    public BasicNode startBlockProcessing(final Block block, final List<Value> args, final SootClass javaClass,
+            String sootMethod) {
+        ObjectReader objectReader = new ObjectReader(this, javaClass, sootMethod);
         objectReader.processBlock(block, args, null, null);
         cleanEmptyNodes();
 

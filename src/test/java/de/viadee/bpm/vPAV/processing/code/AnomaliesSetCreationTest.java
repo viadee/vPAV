@@ -38,7 +38,7 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.Anomaly;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
@@ -66,7 +66,7 @@ public class AnomaliesSetCreationTest {
     public static void setup() throws IOException {
         RuntimeConfig.getInstance().setTest(true);
         FileScanner.setupSootClassPaths(new LinkedList<>());
-        new JavaReaderStatic().setupSoot();
+        JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
 
         final File file = new File(".");
@@ -86,7 +86,7 @@ public class AnomaliesSetCreationTest {
 
     @Test
     public void findModelAnomalies() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ProcessVariablesModelCheckerTest_AnomaliesCreationModel.bpmn";
         final File processDefinition = new File(PATH);

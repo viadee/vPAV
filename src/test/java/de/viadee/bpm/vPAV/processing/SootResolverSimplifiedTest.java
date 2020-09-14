@@ -52,7 +52,7 @@ public class SootResolverSimplifiedTest {
     public static void setupSoot() {
         RuntimeConfig.getInstance().setTest(true);
         FileScanner.setupSootClassPaths(new LinkedList<>());
-        new JavaReaderStatic().setupSoot();
+        JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
         String currentPath = (new File(".")).toURI().getPath();
         Scene.v().extendSootClassPath(currentPath + "src/test/java");
