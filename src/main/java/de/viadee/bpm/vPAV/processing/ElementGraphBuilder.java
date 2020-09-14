@@ -61,6 +61,7 @@ import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.instance.Process;
 
+import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.CORRELATE_MESSAGE;
 import static de.viadee.bpm.vPAV.processing.ProcessVariableReader.addNodeAndGetNewPredecessor;
 
 /**
@@ -184,7 +185,8 @@ public class ElementGraphBuilder {
                     }
                 }
 
-                createVariablesOfFlowElement(scanner, graph, node, userVariables.get(element.getId()), processes.size());
+                createVariablesOfFlowElement(scanner, graph, node, userVariables.get(element.getId()),
+                        processes.size());
 
                 // mention element
                 elementMap.put(element.getId(), node);
@@ -254,9 +256,7 @@ public class ElementGraphBuilder {
             if (messageNames.size() == 1) {
                 messageName = messageNames.get(0);
             }
-            // add process variables for start event, which set by call
-            // startProcessInstanceByKey
-
+            // add process variables for start event, which set e.g. by call startProcessInstanceByKey
             for (EntryPoint ep : scanner.getEntryPoints()) {
                 if (isEntryPointApplicable(ep, graph, messageName, numProcesses)) {
                     BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.ProcessStart,
@@ -275,13 +275,34 @@ public class ElementGraphBuilder {
                 }
             }
             graph.addStartNode(bpmnElement);
-        } else if (element instanceof ReceiveTask) {
+        } else if (element instanceof ReceiveTask || element instanceof IntermediateCatchEvent) {
             String messageName = "";
-            if (((ReceiveTask) element).getMessage() != null) {
-                messageName = ((ReceiveTask) element).getMessage().getName();
+            if (element instanceof ReceiveTask) {
+                if (((ReceiveTask) element).getMessage() != null) {
+                    messageName = ((ReceiveTask) element).getMessage().getName();
+                }
+            } else {
+
             }
 
-            // TODO check message name for expression
+            for (EntryPoint ep : scanner.getEntryPoints()) {
+                if (ep.getEntryPointName().equals(CORRELATE_MESSAGE) && ep
+                        .getMessageName().equals(messageName)) {
+                    BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.Message,
+                            KnownElementFieldType.Message);
+                    String scopeId = element.getScope().getAttributeValue(BpmnConstants.ATTR_ID);
+
+                    for (String var : ep.getProcessVariables()) {
+                        ProcessVariableOperation pvo = new ProcessVariableOperation(var, VariableOperation.WRITE,
+                                scopeId);
+                        initVarNode.addOperation(pvo);
+                    }
+
+                    bpmnElement.getControlFlowGraph().addNode(initVarNode);
+                    predecessor[0] = addNodeAndGetNewPredecessor(initVarNode, bpmnElement.getControlFlowGraph(),
+                            predecessor[0]);
+                }
+            }
         }
 
         // examine process variables and save it with access operation
@@ -696,7 +717,8 @@ public class ElementGraphBuilder {
         }
 
         // Process is started by message and message names must be equal
-        if (ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE) && ep
+        if ((ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE) || ep
+                .getEntryPointName().equals(CORRELATE_MESSAGE)) && ep
                 .getMessageName().equals(messageName)) {
             return true;
         }

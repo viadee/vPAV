@@ -54,17 +54,11 @@ public class EntryPointScanner extends ObjectReaderReceiver {
 
     private Map<String, Collection<String>> processIdToVariableMap = new HashMap<>();
 
-    private Set<String> camundaProcessEntryPoints = new HashSet<>();
-
     private List<EntryPoint> entryPoints = new ArrayList<>();
 
     public EntryPointScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
-        camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID);
-        camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY);
-        camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE);
-        camundaProcessEntryPoints.add(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF);
-    }
+     }
 
     /**
      * scan java resources for variables and retrieve important information such as message ids and entrypoints

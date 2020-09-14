@@ -34,6 +34,8 @@ package de.viadee.bpm.vPAV.processing.model.data;
 import soot.Scene;
 import soot.SootClass;
 
+import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.*;
+
 /**
  * Enum storing Camunda methods of ProcessVariable operations.
  * <p>
@@ -42,11 +44,12 @@ import soot.SootClass;
  */
 public enum CamundaEntryPointFunctions {
 
-    StartProcessInstanceById("startProcessInstanceById", 1, 4, false),
-    StartProcessInstanceByKey("startProcessInstanceByKey", 1, 4, false),
-    StartProcessInstanceByMessage("startProcessInstanceByMessage", 1, 3, true),
-    StartProcessInstanceByMessageAndProcessDefinitionId("startProcessInstanceByMessageAndProcessDefinitionId", 2, 4, true);
- //   CreateMessageCorrelation("createMessageCorrelation", 1, 1, true);
+    StartProcessInstanceById(START_PROCESS_INSTANCE_BY_ID, 1, 4, false),
+    StartProcessInstanceByKey(START_PROCESS_INSTANCE_BY_KEY, 1, 4, false),
+    StartProcessInstanceByMessage(START_PROCESS_INSTANCE_BY_MESSAGE, 1, 3, true),
+    StartProcessInstanceByMessageAndProcessDefinitionId(START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF, 2, 4, true),
+    CorrelateMessage(CORRELATE_MESSAGE, 1, 4, true);
+    //   CreateMessageCorrelation("createMessageCorrelation", 1, 1, true);
 
     private String name;
 

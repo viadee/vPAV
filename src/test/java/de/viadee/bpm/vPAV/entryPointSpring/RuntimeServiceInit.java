@@ -69,4 +69,10 @@ public class RuntimeServiceInit {
         variables.put("variable_message_id", "value");
         runtimeService.startProcessInstanceByMessageAndProcessDefinitionId("myMessageName", "someId", variables);
     }
+
+    public void correlateMessage() {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("variable_cor_message", "value");
+        runtimeService.correlateMessage("corMessage", variables);
+    }
 }

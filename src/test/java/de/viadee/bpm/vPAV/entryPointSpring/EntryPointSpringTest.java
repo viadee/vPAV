@@ -46,6 +46,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import soot.G;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Properties;
 
 /**
@@ -74,7 +75,9 @@ public class EntryPointSpringTest {
         RuntimeConfig.getInstance().setProperties(properties);
         Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelInconsistencies(ctx);
 
-        Assert.assertEquals("There should be exactly one UR issue.", 1, issues.size());
-        Assert.assertEquals("variable_invalid", issues.iterator().next().getVariable());
+        Assert.assertEquals("There should be exactly two UR issues.", 2, issues.size());
+        Iterator<CheckerIssue> issueIterator = issues.iterator();
+        Assert.assertEquals("variable_cor_message_invalid", issueIterator.next().getVariable());
+        Assert.assertEquals("variable_invalid", issueIterator.next().getVariable());
     }
 }
