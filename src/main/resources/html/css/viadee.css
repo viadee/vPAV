@@ -280,6 +280,20 @@ a:hover {
 	text-align: center;
 }
 
+.small-box {
+	border-radius: 0;
+}
+
+.small-box-container div:first-of-type {
+	border-top-left-radius: 0.25rem;
+	border-bottom-left-radius: 0.25rem;
+}
+
+.small-box-container div:last-of-type {
+	border-top-right-radius: 0.25rem;
+	border-bottom-right-radius: 0.25rem;
+}
+
 .small-box-footer {
 	background-color: #DFAD47;
 	opacity: 0.8;

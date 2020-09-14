@@ -815,7 +815,7 @@ async function createProjectSummary() {
                     ${projectNameToSummaryMap.get(name).projectName}
                 </span>
             </h3>
-            <div class="row">           
+            <div class="row small-box-container">           
                 ${smallBoxTemplate("Issue ratio", "fas fa-percentage",
             Math.round(projectNameToSummaryMap.get(name).issuesRatio))}
                 ${smallBoxTemplate("Flawed elements ratio", "fas fa-info-circle",
