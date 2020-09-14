@@ -33,7 +33,7 @@ package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -81,7 +81,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         Assert.assertEquals("MyStartEvent",
@@ -119,7 +119,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         Assert.assertEquals("MySubProcess__0",
@@ -156,7 +156,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         Assert.assertEquals("MyStartEvent",
@@ -196,7 +196,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         Assert.assertEquals(ElementChapter.ExecutionListenerStart,
@@ -234,7 +234,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
@@ -297,7 +297,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
@@ -360,7 +360,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
@@ -423,7 +423,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
@@ -488,7 +488,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess

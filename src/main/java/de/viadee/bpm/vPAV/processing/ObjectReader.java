@@ -32,9 +32,9 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.SootResolverSimplified;
-import de.viadee.bpm.vPAV.ProcessVariablesCreator;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import de.viadee.bpm.vPAV.processing.model.data.VariableOperation;
@@ -44,6 +44,9 @@ import soot.jimple.internal.*;
 import soot.toolkits.graph.Block;
 
 import java.util.*;
+
+import static de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions.PutValue;
+import static de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions.PutValueTyped;
 
 public class ObjectReader {
 
@@ -57,44 +60,61 @@ public class ObjectReader {
 
     private static HashMap<String, ObjectVariable> staticObjectVariables = new HashMap<>();
 
-    private ProcessVariablesCreator processVariablesCreator;
+    private static final RefType StringType = RefType.v("java.lang.String");
+
+    private ObjectReaderReceiver objectReaderReceiver;
 
     public BasicNode returnNode;
 
     private SootClass currentJavaClass;
 
+    private String currentMethod;
+
     // Only used for testing purposes
     ObjectReader(HashMap<String, StringVariable> localStrings,
             HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
-            ProcessVariablesCreator processVariablesCreator, SootClass currentJavaClass) {
+            ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass) {
         this.localStringVariables = localStrings;
         this.localObjectVariables = localObjects;
         this.thisObject = thisObject;
-        this.processVariablesCreator = processVariablesCreator;
+        this.objectReaderReceiver = objectReaderReceiver;
         this.currentJavaClass = currentJavaClass;
     }
 
     /**
      * Constructor that is called the first time when starting an analysis.
      *
-     * @param processVariablesCreator that is used for creating the data flow graph
+     * @param objectReaderReceiver that is used for creating the data flow graph
      */
-    public ObjectReader(ProcessVariablesCreator processVariablesCreator, SootClass currentJavaClass) {
-        this.processVariablesCreator = processVariablesCreator;
+    public ObjectReader(ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass) {
+        this.objectReaderReceiver = objectReaderReceiver;
         this.currentJavaClass = currentJavaClass;
+    }
+
+    /**
+     * Constructor that is called the first time when starting an analysis.
+     *
+     * @param objectReaderReceiver that is used for creating the data flow graph
+     */
+    public ObjectReader(ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass,
+            String currentMethod) {
+        this.objectReaderReceiver = objectReaderReceiver;
+        this.currentJavaClass = currentJavaClass;
+        this.currentMethod = currentMethod;
     }
 
     /**
      * Constructor that is called when another block is entered during the analysis.
      *
-     * @param processVariablesCreator that is used for creating the data flow graph
-     * @param thisObject              ObjectVariable that refers to the object that contains the block
+     * @param objectReaderReceiver that is used for creating the data flow graph
+     * @param thisObject           ObjectVariable that refers to the object that contains the block
      */
-    private ObjectReader(ProcessVariablesCreator processVariablesCreator, ObjectVariable thisObject,
-            SootClass currentJavaClass) {
-        this.processVariablesCreator = processVariablesCreator;
+    private ObjectReader(ObjectReaderReceiver objectReaderReceiver, ObjectVariable thisObject,
+            SootClass currentJavaClass, String sootMethod) {
+        this.objectReaderReceiver = objectReaderReceiver;
         this.thisObject = thisObject;
         this.currentJavaClass = currentJavaClass;
+        this.currentMethod = sootMethod;
     }
 
     /**
@@ -114,7 +134,7 @@ public class ObjectReader {
 
         // Eventually add objects, arrays and int
         if (processedBlocks.contains(hashBlock(block))) {
-            processVariablesCreator.visitBlockAgain(block);
+            objectReaderReceiver.visitBlockAgain(block);
             return null;
         }
         processedBlocks.add(hashBlock(
@@ -149,29 +169,29 @@ public class ObjectReader {
             // e. g. return temp$3
             else if (unit instanceof ReturnStmt) {
                 Object returnValue = handleReturnStmt(block, unit, thisName);
-                returnNode = processVariablesCreator.addNodeIfNotExisting(block, currentJavaClass);
+                returnNode = objectReaderReceiver.addNodeIfNotExisting(block, currentJavaClass);
                 return returnValue;
             }
             // return
             else if (unit instanceof ReturnVoidStmt) {
-                returnNode = processVariablesCreator.addNodeIfNotExisting(block, currentJavaClass);
+                returnNode = objectReaderReceiver.addNodeIfNotExisting(block, currentJavaClass);
                 return null;
             }
         }
 
         // Process successors e.g. if or loop
-        if (block.getSuccs().size() > 0) {
+        if (!block.getSuccs().isEmpty()) {
             Node blockNode = null;
             for (Block succ : block.getSuccs()) {
                 if (blockNode == null) {
-                    blockNode = processVariablesCreator.getNodeOfBlock(block, currentJavaClass);
+                    blockNode = objectReaderReceiver.getNodeOfBlock(block, currentJavaClass);
                 }
 
-                processVariablesCreator.pushNodeToStack(blockNode);
+                objectReaderReceiver.pushNodeToStack(blockNode);
                 this.processBlock(succ, args, argValues, thisName);
             }
             if (returnNode != null) {
-                processVariablesCreator.pushNodeToStack(returnNode);
+                objectReaderReceiver.pushNodeToStack(returnNode);
             }
         }
 
@@ -203,7 +223,7 @@ public class ObjectReader {
      */
     Object handleReturnStmt(Block block, Unit unit, String thisName) {
         ReturnStmt returnStmt = (ReturnStmt) unit;
-        if (returnStmt.getOp().getType().equals(RefType.v("java.lang.String"))) {
+        if (returnStmt.getOp().getType().equals(StringType)) {
             return resolveStringValue(block, returnStmt.getOp(), thisName);
         } else {
             return resolveObjectVariable(block, returnStmt.getOp(), thisName);
@@ -223,7 +243,7 @@ public class ObjectReader {
         if (identityStmt.getRightOp() instanceof ParameterRef) {
             int idx = ((ParameterRef) identityStmt.getRightOp()).getIndex();
             Type type = identityStmt.getRightOp().getType();
-            if (type.equals(RefType.v("java.lang.String"))) {
+            if (type.equals(StringType)) {
                 StringVariable var;
                 if (argValues == null || argValues.size() < idx + 1) {
                     var = new StringVariable("(unknown)");
@@ -284,70 +304,95 @@ public class ObjectReader {
                 .findByNameAndNumberOfBoxes(expr.getMethodRef().getName(),
                         expr.getMethodRef().getDeclaringClass().getName(), expr.getArgCount());
 
+        CamundaEntryPointFunctions foundEntryPoint = CamundaEntryPointFunctions
+                .findEntryPoint(expr.getMethodRef().getName(), expr.getMethodRef().getDeclaringClass(),
+                        expr.getArgCount());
+
         if (foundMethod != null) {
             // Process variable is manipulated
             notifyVariablesReader(block, expr, foundMethod);
+
+            // Also handle as Map (continue processing)
+            if (!(foundMethod.equals(PutValue) || foundMethod.equals(PutValueTyped))) {
+                return null;
+            }
+        }
+        if (foundEntryPoint != null) {
+            // Process entry point
+            // TODO check message name for expression?!
+            notifyEntryPointProcessor(foundEntryPoint, expr, thisName);
             return null;
-        } else {
-            List<Value> args = expr.getArgs();
-            List<Object> argValues = resolveArgs(args, thisName);
-            ObjectVariable targetObj;
-            SootMethod method = expr.getMethod();
+        }
 
-            if (expr instanceof AbstractInstanceInvokeExpr) {
-                // Instance method is called
-                String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
+        List<Value> args = expr.getArgs();
+        List<Object> argValues = resolveArgs(args, thisName);
+        ObjectVariable targetObj;
+        SootMethod method = expr.getMethod();
 
-                // Method on this object is called
-                if (targetObjName.equals(thisName)) {
-                    if (expr.getMethod() != null && expr.getMethod().getDeclaringClass() == this.currentJavaClass) {
-                        Block nextBlock = SootResolverSimplified.getBlockFromMethod(expr.getMethod());
+        if (expr instanceof AbstractInstanceInvokeExpr) {
+            // Instance method is called
+            String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
 
-                        if (nextBlock != null) {
-                            return this
-                                    .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args,
-                                            argValues,
-                                            null);
-                        }
+            // Method on this object is called
+            if (targetObjName.equals(thisName)) {
+                if (expr.getMethod() != null && expr.getMethod().getDeclaringClass() == this.currentJavaClass) {
+                    Block nextBlock = SootResolverSimplified.getBlockFromMethod(expr.getMethod());
 
-                    }
-                    // Search method in class hierarchy
-                    return this
-                            .processBlock(SootResolverSimplified.getBlockFromMethod(
-                                    findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())), args,
-                                    argValues,
-                                    null);
-
-                } else {
-                    // Method on another object is called
-                    targetObj = localObjectVariables.get(targetObjName);
-
-                    if (targetObj == null) {
-                        targetObj = new ObjectVariable();
+                    if (nextBlock != null) {
+                        return this
+                                .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args,
+                                        argValues,
+                                        null);
                     }
 
-                    SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr, targetObj);
-                    method = (resolvedMethod != null) ? resolvedMethod : method;
                 }
+                // Search method in class hierarchy
+                return this
+                        .processBlock(SootResolverSimplified.getBlockFromMethod(
+                                findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())), args,
+                                argValues,
+                                null);
+
+            } else {
+                // Method on another object is called
+                targetObj = localObjectVariables.get(targetObjName);
+
+                if (targetObj == null) {
+                    targetObj = new ObjectVariable();
+                } else if (targetObj instanceof MapVariable) {
+                    // Handle operation on map variable
+                    handleMapOperation((MapVariable) targetObj, method, expr, block, thisName);
+                    return targetObj;
+                }
+
+                SootMethod resolvedMethod = resolveAnonymousInnerClasses(expr, targetObj);
+                method = (resolvedMethod != null) ? resolvedMethod : method;
+            }
+        } else {
+            // Check if Camunda VariableMap is created
+            if (method.getDeclaringClass().getName().equals("org.camunda.bpm.engine.variable.Variables") && method
+                    .getName().equals("createVariables")) {
+                return new MapVariable();
+
             } else {
                 // Static method is called -> create phantom variable
                 targetObj = new ObjectVariable();
             }
-
-            // Process method from another class/object
-            if (method.getDeclaringClass().getPackageName().startsWith("java.") || method.getDeclaringClass()
-                    .getPackageName().startsWith("org.camunda.")) {
-                // Skip native java classes
-                return null;
-            }
-            Block nextBlock = SootResolverSimplified.getBlockFromMethod(method);
-            if (nextBlock == null) {
-                return null;
-            }
-            ObjectReader or = new ObjectReader(processVariablesCreator, targetObj,
-                    method.getDeclaringClass());
-            return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
         }
+
+        // Process method from another class/object
+        if (method.getDeclaringClass().getPackageName().startsWith("java.") || method.getDeclaringClass()
+                .getPackageName().startsWith("org.camunda.")) {
+            // Skip native java classes
+            return null;
+        }
+        Block nextBlock = SootResolverSimplified.getBlockFromMethod(method);
+        if (nextBlock == null) {
+            return null;
+        }
+        ObjectReader or = new ObjectReader(objectReaderReceiver, targetObj,
+                method.getDeclaringClass(), method.getName());
+        return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
     }
 
     /**
@@ -358,7 +403,7 @@ public class ObjectReader {
      */
     SootMethod resolveAnonymousInnerClasses(InvokeExpr expr, ObjectVariable objectVariable) {
         List<Value> args = expr.getArgs();
-        List<Type> argTypes = argsToTypes(args);
+        List<Type> argTypes = argsToTypes(args, expr);
 
         // Resolving for inner classes does not work with above call
         // Use saved implementation
@@ -391,10 +436,15 @@ public class ObjectReader {
      * @param args List of arguments
      * @return List of argument types
      */
-    private List<Type> argsToTypes(List<Value> args) {
+    private List<Type> argsToTypes(List<Value> args, InvokeExpr expr) {
         ArrayList<Type> types = new ArrayList<>();
-        for (Value val : args) {
-            types.add(val.getType());
+        for (int i = 0; i < args.size(); i++) {
+            if (args.get(i).equals(NullConstant.v())) {
+                // Use type of method instead of null type to make resolving work
+                types.add(expr.getMethodRef().getParameterTypes().get(i));
+            } else {
+                types.add(args.get(i).getType());
+            }
         }
         return types;
     }
@@ -409,7 +459,7 @@ public class ObjectReader {
      */
     void handleLocalAssignment(Block block, Value leftValue, Value rightValue, String thisName) {
         // Local string variable is updated
-        if (leftValue.getType().equals(RefType.v("java.lang.String"))) {
+        if (leftValue.getType().equals(StringType)) {
             String newValue = resolveStringValue(block, rightValue, thisName);
             localStringVariables.put(leftValue.toString(), new StringVariable(newValue));
         }
@@ -432,7 +482,7 @@ public class ObjectReader {
      */
     void handleFieldAssignment(Block block, Value leftValue, Value rightValue, String thisName) {
         // String field of object is updated
-        if (leftValue.getType().equals(RefType.v("java.lang.String"))) {
+        if (leftValue.getType().equals(StringType)) {
             String newValue = resolveStringValue(block, rightValue, thisName);
             String objIdentifier = getObjIdentifierFromFieldRef(leftValue);
             String varName = getVarNameFromFieldRef(leftValue);
@@ -471,7 +521,7 @@ public class ObjectReader {
         ObjectVariable staticClass = staticObjectVariables.get(classname);
 
         // String field of object is updated
-        if (leftValue.getType().equals(RefType.v("java.lang.String"))) {
+        if (leftValue.getType().equals(StringType)) {
             String newValue = resolveStringValue(block, rightValue, thisName);
             String varName = getVarNameFromFieldRef(leftValue);
             staticClass.updateStringField(varName, newValue);
@@ -560,7 +610,16 @@ public class ObjectReader {
             }
         } else if (rightValue instanceof NewExpr) {
             // New object is instantiated, we add an empty object as constructors are not resolved yet
-            ObjectVariable ob = new ObjectVariable();
+
+            // If Map is created, created map variable, otherwise normal object variable
+            ObjectVariable ob;
+            if (((RefType) rightValue.getType()).getSootClass().getInterfaces()
+                    .contains(Scene.v().forceResolve("java.util.Map", 0))) {
+                ob = new MapVariable();
+            } else {
+                ob = new ObjectVariable();
+            }
+
             // If it is an inner class we also add the reference to it
             if (((NewExpr) rightValue).getBaseType().getSootClass().hasOuterClass()) {
                 ob.setImplementation(((NewExpr) rightValue).getBaseType().getSootClass());
@@ -585,13 +644,19 @@ public class ObjectReader {
         // Variable map maps variables to child of call activity
         if (camundaMethod.getService().equals(CamundaMethodServices.VARIABLE_MAP)) {
             pvo = new ProcessVariableOperation(variableName, type,
-                    processVariablesCreator.getScopeIdOfChild());
+                    objectReaderReceiver.getScopeIdOfChild());
         } else {
             pvo = new ProcessVariableOperation(variableName, type,
-                    processVariablesCreator.getScopeId());
+                    objectReaderReceiver.getScopeId());
         }
 
-        processVariablesCreator.handleProcessVariableManipulation(block, pvo, currentJavaClass);
+        objectReaderReceiver.handleProcessVariableManipulation(block, pvo, currentJavaClass);
+    }
+
+    public void notifyEntryPointProcessor(CamundaEntryPointFunctions func, InvokeExpr expr, String thisName) {
+        objectReaderReceiver
+                .addEntryPoint(func, this.currentJavaClass.getName(), this.currentMethod, expr,
+                        resolveArgs(expr.getArgs(), thisName));
     }
 
     /**
@@ -604,7 +669,7 @@ public class ObjectReader {
     public ArrayList<Object> resolveArgs(List<Value> args, String thisName) {
         ArrayList<Object> list = new ArrayList<>();
         for (Value arg : args) {
-            if (arg.getType().equals(RefType.v("java.lang.String"))) {
+            if (arg.getType().equals(StringType)) {
                 list.add(resolveStringValue(null, arg, thisName));
             } else if (arg.getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE) ||
                     arg.getType().equals(CamundaMethodServices.MAP_VARIABLES_TYPE) ||
@@ -615,6 +680,19 @@ public class ObjectReader {
             }
         }
         return list;
+    }
+
+    public void handleMapOperation(MapVariable map, SootMethod method, InvokeExpr expr, Block block, String thisName) {
+        if (method.getName().equals("put") || method.getName().equals("putValue")) {
+            // Resolve name of variable
+            String variableName = resolveStringValue(block, expr.getArg(0), thisName);
+            map.put(variableName, expr.getArg(1));
+        } else if (method.getName().equals("remove")) {
+            // Delete variable
+            String variableName = resolveStringValue(block, expr.getArg(0), thisName);
+            map.remove(variableName);
+        }
+        // TODO support putall
     }
 
     public static int hashBlock(Block block) {

@@ -29,17 +29,41 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.spring;
+package de.viadee.bpm.vPAV.processing;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.springframework.stereotype.Component;
+import org.camunda.bpm.engine.RuntimeService;
+import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.camunda.bpm.engine.variable.Variables;
+import org.camunda.bpm.spring.boot.starter.event.PostDeployEvent;
 
-@Component
-public class SayHelloDelegate implements JavaDelegate {
+import java.util.HashMap;
+import java.util.Map;
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        execution.getVariable("UnknownVariable");
+public class EntryPointRuntimeService {
+
+    private RuntimeService runtimeService;
+
+    public void startProcessWithVariables(PostDeployEvent event) {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("variable", "firstValue");
+        variables.put("anotherVariable", "anotherValue");
+        variables.remove("variable");
+        runtimeService.startProcessInstanceByKey("Process_1", variables);
+    }
+
+    public void startProcess(PostDeployEvent event) {
+        runtimeService.startProcessInstanceById("myId");
+        runtimeService.startProcessInstanceByKey("myKey");
+        runtimeService.startProcessInstanceByMessage("myMessage");
+        runtimeService.startProcessInstanceByMessageAndProcessDefinitionId("myMessage2", "myId2");
+    }
+
+    public void withVariableMap(PostDeployEvent event) {
+        Map<String, Object> processVariables = Variables.createVariables()
+                .putValue("variable_camunda", "myValue");
+
+        ProcessInstance instance =
+                this.runtimeService
+                        .startProcessInstanceByKey("Process_2", processVariables);
     }
 }

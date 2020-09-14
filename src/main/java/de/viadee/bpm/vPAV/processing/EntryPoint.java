@@ -31,8 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class EntryPoint {
 
@@ -44,12 +43,28 @@ public class EntryPoint {
 
 	private String entryPointName;
 
+	private String processDefinitionKey;
+
+	private Set<String> processVariables;
+
 	public EntryPoint(final String className, final String methodName, final String messageName,
-			final String entryPointName) {
+			final String entryPointName, final String processDefinitionKey) {
 		this.className = className;
 		this.methodName = methodName;
 		this.messageName = messageName;
 		this.entryPointName = entryPointName;
+		this.processDefinitionKey = processDefinitionKey;
+		this.processVariables = new HashSet<>();
+	}
+
+	public EntryPoint(final String className, final String methodName, final String messageName,
+			final String entryPointName, final String processDefinitionKey, final Set<String> processVariables) {
+		this.className = className;
+		this.methodName = methodName;
+		this.messageName = messageName;
+		this.entryPointName = entryPointName;
+		this.processDefinitionKey = processDefinitionKey;
+		this.processVariables = processVariables;
 	}
 
 	public String getClassName() {
@@ -82,5 +97,21 @@ public class EntryPoint {
 
 	public void setEntryPointName(String entryPointName) {
 		this.entryPointName = entryPointName;
+	}
+
+	public Set<String> getProcessVariables() {
+		return processVariables;
+	}
+
+	public void setProcessVariables(Set<String> processVariables) {
+		this.processVariables = processVariables;
+	}
+
+	public String getProcessDefinitionKey() {
+		return processDefinitionKey;
+	}
+
+	public void setProcessDefinitionKey(String processDefinitionKey) {
+		this.processDefinitionKey = processDefinitionKey;
 	}
 }

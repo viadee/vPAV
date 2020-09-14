@@ -32,22 +32,18 @@
 package de.viadee.bpm.vPAV.delegates;
 
 import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.variable.Variables;
+import org.camunda.bpm.spring.boot.starter.event.PostDeployEvent;
+import org.springframework.context.event.EventListener;
 
-import java.util.Map;
+import java.util.HashMap;
 
-public class MessageCorrelationDelegate3 {
+public class RuntimeServiceInit {
 
     private RuntimeService runtimeService;
 
-    public void allCorrectMessages() {
-        final Map<String, Object> processVariables = Variables.createVariables()
-                .putValue("2", 2);
-
-        runtimeService.startProcessInstanceByMessage("TestMessage2", processVariables);
-
-        final Map<String, Object> correlateVariables = Variables.createVariables()
-                .putValue("3", 3);
-        runtimeService.createMessageCorrelation("TestMessage3").setVariables(correlateVariables).correlateWithResult();
+    public void processPostDeploy(PostDeployEvent event) {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("variable", "firstValue");
+        runtimeService.startProcessInstanceByKey("loanApproval", variables);
     }
 }

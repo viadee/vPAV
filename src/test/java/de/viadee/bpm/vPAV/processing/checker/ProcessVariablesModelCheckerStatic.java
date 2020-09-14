@@ -38,7 +38,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -79,7 +79,7 @@ public class ProcessVariablesModelCheckerStatic {
 	@Test
 	public void testProcessVariablesModelChecker() {
 		final Set<String> resources = new HashSet<>();
-		final ProcessVariablesScanner scanner = new ProcessVariablesScanner(resources);
+		final EntryPointScanner scanner = new EntryPointScanner(resources);
 		Properties myProperties = new Properties();
 		myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
 		RuntimeConfig.getInstance().setProperties(myProperties);

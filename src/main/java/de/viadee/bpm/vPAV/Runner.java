@@ -39,7 +39,8 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.exceptions.OutputWriterException;
 import de.viadee.bpm.vPAV.output.*;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -60,199 +61,200 @@ import java.util.logging.Logger;
 
 public class Runner {
 
-	private static Logger logger = Logger.getLogger(Runner.class.getName());
+    private static Logger logger = Logger.getLogger(Runner.class.getName());
 
-	private FileScanner fileScanner;
+    private FileScanner fileScanner;
 
-	private ProcessVariablesScanner variableScanner;
+    private EntryPointScanner variableScanner;
 
-	private Collection<CheckerIssue> filteredIssues;
+    private Collection<CheckerIssue> filteredIssues;
 
-	private RuleSet rules = new RuleSet();
+    private RuleSet rules = new RuleSet();
 
-	private Map<String, String> ignoredIssuesMap = new HashMap<>();
+    private Map<String, String> ignoredIssuesMap = new HashMap<>();
 
-	private Map<String, String> fileMapping = mapStaticFilesToTargetFolders();
+    private Map<String, String> fileMapping = mapStaticFilesToTargetFolders();
 
-	private Map<String, String> wrongCheckersMap = new HashMap<>();
+    private Map<String, String> wrongCheckersMap = new HashMap<>();
 
-	private Collection<BpmnElement> elements = new ArrayList<>();
+    private Collection<BpmnElement> elements = new ArrayList<>();
 
-	private Collection<ProcessVariable> processVariables = new ArrayList<>();
+    private Collection<ProcessVariable> processVariables = new ArrayList<>();
 
-	private Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
+    private Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
 
-	/**
-	 * Main method which represents lifecycle of the validation process. Calls main
-	 * functions
-	 */
-	public void viadeeProcessApplicationValidator() {
-		// 1
-		rules = readConfig();
+    /**
+     * Main method which represents lifecycle of the validation process. Calls main
+     * functions
+     */
+    public void viadeeProcessApplicationValidator() {
+        // 1
+        rules = readConfig();
 
-		// 2
-		setFileScanner(new FileScanner(rules));
+        // 2
+        setFileScanner(new FileScanner(rules));
 
-		// 3
-		getProcessVariables(rules);
+        // 3
+        JavaReaderStatic.setupSoot();
 
-		// 4
-		createIssues(rules, dataFlowRules);
+        // 4
+        getProcessVariables(rules);
 
-		// 5
-		removeIgnoredIssues();
+        // 5
+        createIssues(rules, dataFlowRules);
 
-		// 6
-		writeOutput(filteredIssues, elements, processVariables);
+        // 6
+        removeIgnoredIssues();
 
-		// 7
-		copyFiles();
+        // 7
+        writeOutput(filteredIssues, elements, processVariables);
 
-		logger.info("BPMN validation successfully completed");
-	}
+        // 8
+        copyFiles();
 
-	/**
-	 * 1) If local_ruleSet doesn't exist, then load default_RuleSet 2) If
-	 * local_ruleSet exist and parent is deactivated then override deactivatedRules
-	 * with local_ruleSet 3) If local_ruleSet exist and parent is activated then
-	 * override deactivatedRules with parent_ruleSet and then override with
-	 * local_ruleSet
-	 * <p>
-	 * write effectiveRuleSet to vPAV folder
-	 *
-	 * @return Map(String, Map ( String, Rule)) ruleSet
-	 */
-	public RuleSet readConfig() {
+        logger.info("BPMN validation successfully completed");
+    }
 
-		prepareOutputFolder();
+    /**
+     * 1) If local_ruleSet doesn't exist, then load default_RuleSet 2) If
+     * local_ruleSet exist and parent is deactivated then override deactivatedRules
+     * with local_ruleSet 3) If local_ruleSet exist and parent is activated then
+     * override deactivatedRules with parent_ruleSet and then override with
+     * local_ruleSet
+     * <p>
+     * write effectiveRuleSet to vPAV folder
+     *
+     * @return Map(String, Map ( String, Rule)) ruleSet
+     */
+    public RuleSet readConfig() {
 
-		rules = new XmlConfigReader().getDeactivatedRuleSet();
+        prepareOutputFolder();
 
-		final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
-		try {
-			String ruleSetPath =
-					RuntimeConfig.getInstance().getRuleSetPath() + RuntimeConfig.getInstance().getRuleSetFileName();
-			if (new File(ruleSetPath).exists()) {
-				RuleSet localRules = new XmlConfigReader().read(RuntimeConfig.getInstance().getRuleSetFileName());
+        rules = new XmlConfigReader().getDeactivatedRuleSet();
 
-				if (localRules.hasParentRuleSet()) {
-					rules = mergeRuleSet(localRules,
-							new XmlConfigReader().read(RuntimeConfig.getInstance().getParentRuleSetFileName()));
-				} else {
-					rules = localRules;
-				}
-			} else {
-				rules = new XmlConfigReader().read(ConfigConstants.RULESET_DEFAULT);
-			}
+        final RuleSetOutputWriter ruleSetOutputWriter = new RuleSetOutputWriter();
+        try {
+            String ruleSetPath =
+                    RuntimeConfig.getInstance().getRuleSetPath() + RuntimeConfig.getInstance().getRuleSetFileName();
+            if (new File(ruleSetPath).exists()) {
+                RuleSet localRules = new XmlConfigReader().read(RuntimeConfig.getInstance().getRuleSetFileName());
 
-			ruleSetOutputWriter.write(rules);
-			RuntimeConfig.getInstance().setRuleSet(rules);
-		} catch (final ConfigReaderException | OutputWriterException e) {
-			throw new RuntimeException(e);
-		}
+                if (localRules.hasParentRuleSet()) {
+                    rules = mergeRuleSet(localRules,
+                            new XmlConfigReader().read(RuntimeConfig.getInstance().getParentRuleSetFileName()));
+                } else {
+                    rules = localRules;
+                }
+            } else {
+                rules = new XmlConfigReader().read(ConfigConstants.RULESET_DEFAULT);
+            }
 
-		RuntimeConfig.getInstance().retrieveLocale();
+            ruleSetOutputWriter.write(rules);
+            RuntimeConfig.getInstance().setRuleSet(rules);
+        } catch (final ConfigReaderException | OutputWriterException e) {
+            throw new RuntimeException(e);
+        }
 
-		return rules;
-	}
+        RuntimeConfig.getInstance().retrieveLocale();
 
-	/**
-	 * Delete old output and create new output folder
-	 */
-	private void prepareOutputFolder() {
+        return rules;
+    }
 
-		deleteFiles();
-		createvPAVFolder();
-		try {
-			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolder()));
-			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getCssFolder()));
-			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getImgFolder()));
-			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getFontFolder()));
-			Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
-		} catch (IOException e) {
-			logger.warning("Could not create one of the resources output folders:" + e.getMessage());
-		}
+    /**
+     * Delete old output and create new output folder
+     */
+    private void prepareOutputFolder() {
 
-	}
+        deleteFiles();
+        createvPAVFolder();
+        try {
+            Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getJsFolder()));
+            Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getCssFolder()));
+            Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getImgFolder()));
+            Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getFontFolder()));
+            Files.createDirectory(Paths.get(RuntimeConfig.getInstance().getDataFolder()));
+        } catch (IOException e) {
+            logger.warning("Could not create one of the resources output folders:" + e.getMessage());
+        }
 
-	/**
-	 * merges ruleSets according to inheritance hierarchy (Deactivated &lt; global
-	 * &lt; default &lt; local)
-	 *
-	 * @param parentRules Basis RuleSet which will be overwritten
-	 * @param childRules  New RuleSet
-	 * @return Map(String, Rule) finalRules merged ruleSet
-	 */
-	protected RuleSet mergeRuleSet(final RuleSet parentRules, final RuleSet childRules) {
-		final Map<String, Map<String, Rule>> finalElementRules = new HashMap<>(parentRules.getElementRules());
-		final Map<String, Map<String, Rule>> finalModelRules = new HashMap<>(parentRules.getModelRules());
+    }
 
-		// Merge element rules.
-		for (Map.Entry<String, Map<String, Rule>> entry : childRules.getElementRules().entrySet()) {
-			if (finalElementRules.containsKey(entry.getKey())) {
-				finalElementRules.get(entry.getKey()).putAll(entry.getValue());
-			} else {
-				finalElementRules.put(entry.getKey(), entry.getValue());
-			}
-		}
+    /**
+     * merges ruleSets according to inheritance hierarchy (Deactivated &lt; global
+     * &lt; default &lt; local)
+     *
+     * @param parentRules Basis RuleSet which will be overwritten
+     * @param childRules  New RuleSet
+     * @return Map(String, Rule) finalRules merged ruleSet
+     */
+    protected RuleSet mergeRuleSet(final RuleSet parentRules, final RuleSet childRules) {
+        final Map<String, Map<String, Rule>> finalElementRules = new HashMap<>(parentRules.getElementRules());
+        final Map<String, Map<String, Rule>> finalModelRules = new HashMap<>(parentRules.getModelRules());
 
-		// Merge model rules.
-		for (Map.Entry<String, Map<String, Rule>> entry : childRules.getModelRules().entrySet()) {
-			if (finalModelRules.containsKey(entry.getKey())) {
-				finalModelRules.get(entry.getKey()).putAll(entry.getValue());
-			} else {
-				finalModelRules.put(entry.getKey(), entry.getValue());
-			}
-		}
-		return new RuleSet(finalElementRules, finalModelRules, childRules.hasParentRuleSet());
-	}
+        // Merge element rules.
+        for (Map.Entry<String, Map<String, Rule>> entry : childRules.getElementRules().entrySet()) {
+            if (finalElementRules.containsKey(entry.getKey())) {
+                finalElementRules.get(entry.getKey()).putAll(entry.getValue());
+            } else {
+                finalElementRules.put(entry.getKey(), entry.getValue());
+            }
+        }
 
-	/**
-	 * Initializes the variableScanner to scan and read outer process variables with
-	 * the current javaResources
-	 *
-	 * @param rules Rules defined in ruleSet
-	 */
-	protected void getProcessVariables(final RuleSet rules) {
-		if (oneCheckerIsActive(rules.getModelRules(), "ProcessVariablesModelChecker")
-				|| oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesNameConventionChecker")
-				|| oneCheckerIsActive(rules.getModelRules(), "DataFlowChecker")) {
-			variableScanner = new ProcessVariablesScanner(getFileScanner().getJavaResourcesFileInputStream());
-			readOuterProcessVariables(variableScanner);
-			setCheckProcessVariables();
-		} else {
-			setCheckProcessVariables();
-		}
-	}
+        // Merge model rules.
+        for (Map.Entry<String, Map<String, Rule>> entry : childRules.getModelRules().entrySet()) {
+            if (finalModelRules.containsKey(entry.getKey())) {
+                finalModelRules.get(entry.getKey()).putAll(entry.getValue());
+            } else {
+                finalModelRules.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return new RuleSet(finalElementRules, finalModelRules, childRules.hasParentRuleSet());
+    }
 
-	private boolean oneCheckerIsActive(final Map<String, Map<String, Rule>> rules, String name) {
-		if (!rules.isEmpty() && Objects.nonNull(rules.get(name))) {
-			for (Rule r : rules.get(name).values()) {
-				if (r.isActive()) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    /**
+     * Initializes the variableScanner to scan and read outer process variables with
+     * the current javaResources
+     *
+     * @param rules Rules defined in ruleSet
+     */
+    protected void getProcessVariables(final RuleSet rules) {
+        if (oneCheckerIsActive(rules.getModelRules(), "ProcessVariablesModelChecker")
+                || oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesNameConventionChecker")
+                || oneCheckerIsActive(rules.getModelRules(), "DataFlowChecker")) {
+            variableScanner = new EntryPointScanner(getFileScanner().getJavaResourcesFileInputStream());
+            readOuterProcessVariables(variableScanner);
+        }
+        setCheckProcessVariables();
+    }
 
-	/**
-	 * Creates the list of issues found for a given model and ruleSet Throws a
-	 * RuntimeException if errors are found, so automated builds in a CI/CD pipeline
-	 * will fail
-	 *
-	 * @param rules Map of rules
-	 */
-	private void createIssues(RuleSet rules, Collection<DataFlowRule> dataFlowRules) {
-		 checkModels(rules, getFileScanner(), variableScanner, dataFlowRules);
-	}
+    private boolean oneCheckerIsActive(final Map<String, Map<String, Rule>> rules, String name) {
+        if (!rules.isEmpty() && Objects.nonNull(rules.get(name))) {
+            for (Rule r : rules.get(name).values()) {
+                if (r.isActive()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-	/**
-	 * Removes whitelisted issues from the list of issues found
-	 */
-	private void removeIgnoredIssues() {
-		filteredIssues = filterIssues(IssueService.getInstance().getIssues());
-	}
+    /**
+     * Creates the list of issues found for a given model and ruleSet Throws a
+     * RuntimeException if errors are found, so automated builds in a CI/CD pipeline
+     * will fail
+     *
+     * @param rules Map of rules
+     */
+    private void createIssues(RuleSet rules, Collection<DataFlowRule> dataFlowRules) {
+        checkModels(rules, getFileScanner(), variableScanner, dataFlowRules);
+    }
+
+    /**
+     * Removes whitelisted issues from the list of issues found
+     */
+    private void removeIgnoredIssues() {
+        filteredIssues = filterIssues(IssueService.getInstance().getIssues());
+    }
 
 	/**
 	 * Write output files (xml / json / js)
@@ -277,33 +279,33 @@ public class Runner {
 		}
 	}
 
-	/**
-	 * Create vPAV folder
-	 */
-	private void createvPAVFolder() {
-		File vPavDir = new File(RuntimeConfig.getInstance().getValidationFolder());
+    /**
+     * Create vPAV folder
+     */
+    private void createvPAVFolder() {
+        File vPavDir = new File(RuntimeConfig.getInstance().getValidationFolder());
 
-		if (!vPavDir.exists()) {
-			boolean success = vPavDir.mkdirs();
-			if (!success) {
-				throw new RuntimeException("vPAV directory does not exist and could not be created");
-			}
-		}
-	}
+        if (!vPavDir.exists()) {
+            boolean success = vPavDir.mkdirs();
+            if (!success) {
+                throw new RuntimeException("vPAV directory does not exist and could not be created");
+            }
+        }
+    }
 
-	/**
-	 * Delete files from validation folder
-	 */
-	private void deleteFiles() {
-		File index = new File(RuntimeConfig.getInstance().getValidationFolder());
-		if (index.exists()) {
-			try {
-				FileUtils.deleteDirectory(index);
-			} catch (IOException e) {
-				logger.warning("Couldn't delete directory: " + e.getMessage());
-			}
-		}
-	}
+    /**
+     * Delete files from validation folder
+     */
+    private void deleteFiles() {
+        File index = new File(RuntimeConfig.getInstance().getValidationFolder());
+        if (index.exists()) {
+            try {
+                FileUtils.deleteDirectory(index);
+            } catch (IOException e) {
+                logger.warning("Couldn't delete directory: " + e.getMessage());
+            }
+        }
+    }
 
 	/**
 	 * Copies files to vPAV folder
@@ -347,274 +349,274 @@ public class Runner {
 				RuntimeConfig.getInstance().getJsFolder());
 		fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 
-		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
-				RuntimeConfig.getInstance().getCssFolder());
-		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "viadee.css",
-				RuntimeConfig.getInstance().getCssFolder());
-		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "MarkerStyle.css",
-				RuntimeConfig.getInstance().getCssFolder());
-		fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "all.css",
-				RuntimeConfig.getInstance().getCssFolder());
+        fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
+                RuntimeConfig.getInstance().getCssFolder());
+        fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "viadee.css",
+                RuntimeConfig.getInstance().getCssFolder());
+        fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "MarkerStyle.css",
+                RuntimeConfig.getInstance().getCssFolder());
+        fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "all.css",
+                RuntimeConfig.getInstance().getCssFolder());
 
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "vPAV.png",
-				RuntimeConfig.getInstance().getImgFolder());
-		fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "viadee_weiss.png",
-				RuntimeConfig.getInstance().getImgFolder());
+        fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "vPAV.png",
+                RuntimeConfig.getInstance().getImgFolder());
+        fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "viadee_weiss.png",
+                RuntimeConfig.getInstance().getImgFolder());
 
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.eot",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.svg",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.ttf",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.woff",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.woff2",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.eot",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.svg",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.ttf",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.woff",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.woff2",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.eot",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.svg",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.ttf",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.woff",
-				RuntimeConfig.getInstance().getFontFolder());
-		fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.woff2",
-				RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.eot",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.svg",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.ttf",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.woff",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.woff2",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.eot",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.svg",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.ttf",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.woff",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-regular-400.woff2",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.eot",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.svg",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.ttf",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.woff",
+                RuntimeConfig.getInstance().getFontFolder());
+        fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-solid-900.woff2",
+                RuntimeConfig.getInstance().getFontFolder());
 
-		fileToFolderMap
-				.put(ConfigConstants.HTML_INPUT_FOLDER + ConfigConstants.HTML_FILE,
-						RuntimeConfig.getInstance().getValidationFolder());
+        fileToFolderMap
+                .put(ConfigConstants.HTML_INPUT_FOLDER + ConfigConstants.HTML_FILE,
+                        RuntimeConfig.getInstance().getValidationFolder());
 
-		return fileToFolderMap;
-	}
+        return fileToFolderMap;
+    }
 
-	/**
-	 * filter issues based on black list
-	 *
-	 * @param issues all found issues
-	 * @return filtered issues
-	 */
-	private Collection<CheckerIssue> filterIssues(final Collection<CheckerIssue> issues) {
-		Collection<CheckerIssue> filteredIssues;
-		filteredIssues = getFilteredIssues(issues);
-		Collections.sort((List<CheckerIssue>) filteredIssues);
-		return filteredIssues;
-	}
+    /**
+     * filter issues based on black list
+     *
+     * @param issues all found issues
+     * @return filtered issues
+     */
+    private Collection<CheckerIssue> filterIssues(final Collection<CheckerIssue> issues) {
+        Collection<CheckerIssue> filteredIssues;
+        filteredIssues = getFilteredIssues(issues);
+        Collections.sort((List<CheckerIssue>) filteredIssues);
+        return filteredIssues;
+    }
 
-	/**
-	 * remove false positives from issue collection
-	 *
-	 * @param issues collection of issues
-	 * @return filteredIssues
-	 */
-	private Collection<CheckerIssue> getFilteredIssues(Collection<CheckerIssue> issues) {
+    /**
+     * remove false positives from issue collection
+     *
+     * @param issues collection of issues
+     * @return filteredIssues
+     */
+    private Collection<CheckerIssue> getFilteredIssues(Collection<CheckerIssue> issues) {
 
-		// all issues
-		final HashMap<String, CheckerIssue> issuesMap = new HashMap<>();
+        // all issues
+        final HashMap<String, CheckerIssue> issuesMap = new HashMap<>();
 
-		// transform Collection into a HashMap
-		for (final CheckerIssue issue : issues) {
-			if (!issuesMap.containsKey(issue.getId())) {
-				issuesMap.put(issue.getId(), issue);
-			}
-		}
-		// all issues to be ignored
-		final Collection<String> ignoredIssues = collectIgnoredIssues();
+        // transform Collection into a HashMap
+        for (final CheckerIssue issue : issues) {
+            if (!issuesMap.containsKey(issue.getId())) {
+                issuesMap.put(issue.getId(), issue);
+            }
+        }
+        // all issues to be ignored
+        final Collection<String> ignoredIssues = collectIgnoredIssues();
 
-		final HashMap<String, CheckerIssue> filteredIssues = new HashMap<>(issuesMap);
-		// remove issues that are listed in ignore file
-		for (Map.Entry<String, CheckerIssue> entry : issuesMap.entrySet()) {
-			if (ignoredIssues.contains(entry.getKey())) {
-				filteredIssues.remove(entry.getKey());
-			}
-		}
+        final HashMap<String, CheckerIssue> filteredIssues = new HashMap<>(issuesMap);
+        // remove issues that are listed in ignore file
+        for (Map.Entry<String, CheckerIssue> entry : issuesMap.entrySet()) {
+            if (ignoredIssues.contains(entry.getKey())) {
+                filteredIssues.remove(entry.getKey());
+            }
+        }
 
-		// transform back into collection
-		final Collection<CheckerIssue> finalFilteredIssues = new ArrayList<>();
-		for (Map.Entry<String, CheckerIssue> entry : filteredIssues.entrySet()) {
-			finalFilteredIssues.add(entry.getValue());
-		}
+        // transform back into collection
+        final Collection<CheckerIssue> finalFilteredIssues = new ArrayList<>();
+        for (Map.Entry<String, CheckerIssue> entry : filteredIssues.entrySet()) {
+            finalFilteredIssues.add(entry.getValue());
+        }
 
-		return finalFilteredIssues;
-	}
+        return finalFilteredIssues;
+    }
 
-	/**
-	 * Read issue ids, that should be ignored
-	 * <p>
-	 * Assumption: Each row is an issue id
-	 *
-	 * @return issue ids
-	 */
-	private Collection<String> collectIgnoredIssues() {
+    /**
+     * Read issue ids, that should be ignored
+     * <p>
+     * Assumption: Each row is an issue id
+     *
+     * @return issue ids
+     */
+    private Collection<String> collectIgnoredIssues() {
 
-		final Map<String, String> ignoredIssuesMap = getIgnoredIssuesMap();
-		final Collection<String> ignoredIssues = new ArrayList<>();
+        final Map<String, String> ignoredIssuesMap = getIgnoredIssuesMap();
+        final Collection<String> ignoredIssues = new ArrayList<>();
 
-		try (FileReader fileReader = new FileReader(ConfigConstants.IGNORE_FILE_OLD)) {
-			readIssues(ignoredIssuesMap, ignoredIssues, fileReader);
-			logger.warning("Usage of .ignoreIssues is deprecated. Please use ignoreIssues.txt to whitelist issues.");
-		} catch (IOException ex) {
-			logger.info(ex.getMessage());
-		}
+        try (FileReader fileReader = new FileReader(ConfigConstants.IGNORE_FILE_OLD)) {
+            readIssues(ignoredIssuesMap, ignoredIssues, fileReader);
+            logger.warning("Usage of .ignoreIssues is deprecated. Please use ignoreIssues.txt to whitelist issues.");
+        } catch (IOException ex) {
+            logger.info(ex.getMessage());
+        }
 
-		try (FileReader fileReader = new FileReader(ConfigConstants.IGNORE_FILE)) {
-			readIssues(ignoredIssuesMap, ignoredIssues, fileReader);
-		} catch (IOException ex) {
-			logger.info("Ignored issues couldn't be read successfully");
-		}
+        try (FileReader fileReader = new FileReader(ConfigConstants.IGNORE_FILE)) {
+            readIssues(ignoredIssuesMap, ignoredIssues, fileReader);
+        } catch (IOException ex) {
+            logger.info("Ignored issues couldn't be read successfully");
+        }
 
-		return ignoredIssues;
-	}
+        return ignoredIssues;
+    }
 
-	/**
-	 * Reads the file and appends issues to the map of ignored issues
-	 *
-	 * @param ignoredIssuesMap Map of issues to be ignored
-	 * @param ignoredIssues    Collection of ignored issues
-	 * @param fileReader       FileReader
-	 */
-	private void readIssues(final Map<String, String> ignoredIssuesMap, final Collection<String> ignoredIssues,
-			final FileReader fileReader) {
-		try (final BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-			String zeile = bufferedReader.readLine();
-			String prevLine = zeile;
-			while (zeile != null) {
-				addIgnoredIssue(ignoredIssuesMap, ignoredIssues, zeile, prevLine);
-				prevLine = zeile;
-				zeile = bufferedReader.readLine();
-			}
-		} catch (IOException e) {
-			logger.info(e.getMessage());
-		}
-	}
+    /**
+     * Reads the file and appends issues to the map of ignored issues
+     *
+     * @param ignoredIssuesMap Map of issues to be ignored
+     * @param ignoredIssues    Collection of ignored issues
+     * @param fileReader       FileReader
+     */
+    private void readIssues(final Map<String, String> ignoredIssuesMap, final Collection<String> ignoredIssues,
+            final FileReader fileReader) {
+        try (final BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+            String zeile = bufferedReader.readLine();
+            String prevLine = zeile;
+            while (zeile != null) {
+                addIgnoredIssue(ignoredIssuesMap, ignoredIssues, zeile, prevLine);
+                prevLine = zeile;
+                zeile = bufferedReader.readLine();
+            }
+        } catch (IOException e) {
+            logger.info(e.getMessage());
+        }
+    }
 
-	/**
-	 * Check consistency of all models
-	 *
-	 * @param rules           all rules of ruleSet.xml
-	 * @param fileScanner     fileScanner
-	 * @param variableScanner variableScanner
-	 * @param dataFlowRules   dataFlowRules
-	 */
-	private void checkModels(final RuleSet rules, final FileScanner fileScanner,
-			final ProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules) {
-		for (final String pathToModel : fileScanner.getProcessDefinitions()) {
-			checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules);
-		}
-	}
+    /**
+     * Check consistency of all models
+     *
+     * @param rules           all rules of ruleSet.xml
+     * @param fileScanner     fileScanner
+     * @param variableScanner variableScanner
+     * @param dataFlowRules   dataFlowRules
+     */
+    private void checkModels(final RuleSet rules, final FileScanner fileScanner,
+            final EntryPointScanner variableScanner, Collection<DataFlowRule> dataFlowRules) {
+        for (final String pathToModel : fileScanner.getProcessDefinitions()) {
+            checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules);
+        }
+    }
 
-	/**
-	 * Check consistency of a model
-	 *
-	 * @param rules             all rules of ruleSet.xml
-	 * @param processDefinition processDefinition
-	 * @param fileScanner       fileScanner
-	 * @param variableScanner   variableScanner
-	 */
-	private void checkModel(final RuleSet rules, final String processDefinition,
-			final FileScanner fileScanner, final ProcessVariablesScanner variableScanner,
-			Collection<DataFlowRule> dataFlowRules) {
-		BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
-		ModelDispatchResult dispatchResult;
-		File bpmnfile = null;
-		String basepath = RuntimeConfig.getInstance().getBasepath();
+    /**
+     * Check consistency of a model
+     *
+     * @param rules             all rules of ruleSet.xml
+     * @param processDefinition processDefinition
+     * @param fileScanner       fileScanner
+     * @param variableScanner   variableScanner
+     */
+    private void checkModel(final RuleSet rules, final String processDefinition,
+            final FileScanner fileScanner, final EntryPointScanner variableScanner,
+            Collection<DataFlowRule> dataFlowRules) {
+        BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
+        ModelDispatchResult dispatchResult;
+        File bpmnfile = null;
+        String basepath = RuntimeConfig.getInstance().getBasepath();
 
-		if (basepath.startsWith("file:/")) {
-			// Convert URI
-			try {
-				bpmnfile = new File(new URI(RuntimeConfig.getInstance().getBasepath() + processDefinition));
-			} catch (URISyntaxException e) {
-				logger.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
-			}
-		} else {
-			bpmnfile = new File(basepath + processDefinition);
-		}
+        if (basepath.startsWith("file:/")) {
+            // Convert URI
+            try {
+                bpmnfile = new File(new URI(RuntimeConfig.getInstance().getBasepath() + processDefinition));
+            } catch (URISyntaxException e) {
+                logger.log(Level.SEVERE, "URI of basedirectory seems to be malformed.", e);
+            }
+        } else {
+            bpmnfile = new File(basepath + processDefinition);
+        }
 
-		if (variableScanner != null) {
-			dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, bpmnfile, variableScanner,
-					dataFlowRules, rules);
-		} else {
-			dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(bpmnfile,
-					fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
-					fileScanner.getResourcesNewestVersions(), rules);
-		}
-		elements.addAll(dispatchResult.getBpmnElements());
-		processVariables.addAll(dispatchResult.getProcessVariables());
-		setWrongCheckersMap(bpmnModelDispatcher.getIncorrectCheckers());
-	}
+        if (variableScanner != null) {
+            dispatchResult = bpmnModelDispatcher.dispatchWithVariables(fileScanner, bpmnfile, variableScanner,
+                    dataFlowRules, rules);
+        } else {
+            dispatchResult = bpmnModelDispatcher.dispatchWithoutVariables(bpmnfile,
+                    fileScanner.getDecisionRefToPathMap(), fileScanner.getProcessIdToPathMap(),
+                    fileScanner.getResourcesNewestVersions(), rules);
+        }
+        elements.addAll(dispatchResult.getBpmnElements());
+        processVariables.addAll(dispatchResult.getProcessVariables());
+        setWrongCheckersMap(bpmnModelDispatcher.getIncorrectCheckers());
+    }
 
-	/**
-	 * @param ignoredIssuesMap Map of ignored issues
-	 * @param issues           Collection of issues
-	 * @param row              row of file
-	 * @param prevLine         Previous line
-	 */
-	private void addIgnoredIssue(final Map<String, String> ignoredIssuesMap, final Collection<String> issues,
-			final String row, final String prevLine) {
-		if (row != null && !row.isEmpty()) {
-			if (!row.trim().startsWith("#")) {
-				ignoredIssuesMap.put(row, prevLine);
-				issues.add(row);
-			}
+    /**
+     * @param ignoredIssuesMap Map of ignored issues
+     * @param issues           Collection of issues
+     * @param row              row of file
+     * @param prevLine         Previous line
+     */
+    private void addIgnoredIssue(final Map<String, String> ignoredIssuesMap, final Collection<String> issues,
+            final String row, final String prevLine) {
+        if (row != null && !row.isEmpty()) {
+            if (!row.trim().startsWith("#")) {
+                ignoredIssuesMap.put(row, prevLine);
+                issues.add(row);
+            }
 
-		}
-	}
+        }
+    }
 
-	/**
-	 * Scan process variables in external classes, which are not referenced from
-	 * model
-	 *
-	 * @param scanner OuterProcessVariablesScanner
-	 */
-	private void readOuterProcessVariables(final ProcessVariablesScanner scanner) {
-		scanner.scanProcessVariables();
-	}
+    /**
+     * Scan process variables in external classes, which are not referenced from
+     * model
+     *
+     * @param scanner OuterProcessVariablesScanner
+     */
+    private void readOuterProcessVariables(final EntryPointScanner scanner) {
+        scanner.scanProcessVariables();
+    }
 
-	public Set<String> getModelPath() {
-		return getFileScanner().getProcessDefinitions();
-	}
+    public Set<String> getModelPath() {
+        return getFileScanner().getProcessDefinitions();
+    }
 
-	public Collection<CheckerIssue> getFilteredIssues() {
-		return filteredIssues;
-	}
+    public Collection<CheckerIssue> getFilteredIssues() {
+        return filteredIssues;
+    }
 
-	public Map<String, String> getIgnoredIssuesMap() {
-		return ignoredIssuesMap;
-	}
+    public Map<String, String> getIgnoredIssuesMap() {
+        return ignoredIssuesMap;
+    }
 
-	public void setCheckProcessVariables() {
-	}
+    public void setCheckProcessVariables() {
+    }
 
-	public void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {
-		this.dataFlowRules = dataFlowRules;
-	}
+    public void setDataFlowRules(Collection<DataFlowRule> dataFlowRules) {
+        this.dataFlowRules = dataFlowRules;
+    }
 
-	public FileScanner getFileScanner() {
-		return fileScanner;
-	}
+    public FileScanner getFileScanner() {
+        return fileScanner;
+    }
 
-	public void setFileScanner(FileScanner fileScanner) {
-		this.fileScanner = fileScanner;
-		RuntimeConfig.getInstance().setFileScanner(fileScanner);
-	}
+    public void setFileScanner(FileScanner fileScanner) {
+        this.fileScanner = fileScanner;
+        RuntimeConfig.getInstance().setFileScanner(fileScanner);
+    }
 
-	public Map<String, String> getWrongCheckersMap() {
-		return wrongCheckersMap;
-	}
+    public Map<String, String> getWrongCheckersMap() {
+        return wrongCheckersMap;
+    }
 
-	public void setWrongCheckersMap(Map<String, String> wrongCheckersMap) {
-		this.wrongCheckersMap = wrongCheckersMap;
-	}
+    public void setWrongCheckersMap(Map<String, String> wrongCheckersMap) {
+        this.wrongCheckersMap = wrongCheckersMap;
+    }
 
 }

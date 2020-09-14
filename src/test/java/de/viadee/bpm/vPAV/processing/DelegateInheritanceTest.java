@@ -53,13 +53,11 @@ import java.util.Properties;
 
 public class DelegateInheritanceTest {
 
-    private static final String BASE_PATH = "src/test/resources/";
-
     @BeforeClass
     public static void setup() throws IOException {
         RuntimeConfig.getInstance().setTest(true);
         FileScanner.setupSootClassPaths(new LinkedList<>());
-        new JavaReaderStatic().setupSoot();
+        JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
 
         final File file = new File(".");
@@ -68,13 +66,6 @@ public class DelegateInheritanceTest {
         final URL[] classUrls = { classUrl };
         ClassLoader cl = new URLClassLoader(classUrls);
         RuntimeConfig.getInstance().setClassLoader(cl);
-    }
-
-    @Before
-    public void setupProperties() {
-        Properties myProperties = new Properties();
-        myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
-        RuntimeConfig.getInstance().setProperties(myProperties);
     }
 
     @Test

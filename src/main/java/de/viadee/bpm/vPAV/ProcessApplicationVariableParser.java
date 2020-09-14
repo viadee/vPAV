@@ -35,13 +35,12 @@ import de.viadee.bpm.vPAV.beans.BeanMappingGenerator;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.springframework.context.ApplicationContext;
 
 import java.io.File;
@@ -60,7 +59,7 @@ public class ProcessApplicationVariableParser {
 
         // Retrieve BPMN elements
         FileScanner fileScanner = new FileScanner(new RuleSet());
-        ProcessVariablesScanner variableScanner = readOuterProcessVariables(fileScanner);
+        EntryPointScanner variableScanner = readOuterProcessVariables(fileScanner);
         final BpmnModelInstance modelInstance = Bpmn.readModelFromFile(modelFile);
 
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(fileScanner.getDecisionRefToPathMap(),
@@ -80,8 +79,8 @@ public class ProcessApplicationVariableParser {
      *
      * @param fileScanner FileScanner
      */
-    private static ProcessVariablesScanner readOuterProcessVariables(final FileScanner fileScanner) {
-        ProcessVariablesScanner variableScanner = new ProcessVariablesScanner(
+    private static EntryPointScanner readOuterProcessVariables(final FileScanner fileScanner) {
+        EntryPointScanner variableScanner = new EntryPointScanner(
                 fileScanner.getJavaResourcesFileInputStream());
         variableScanner.scanProcessVariables();
         return variableScanner;
