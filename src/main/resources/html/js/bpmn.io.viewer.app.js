@@ -801,8 +801,8 @@ function createProjectsNavbar() {
         const projectName = properties ? properties.projectName : "";
         const loadedProjectEntry = Array.from(document.querySelectorAll("#sidebar a > div > p"))
             .find(paragraph => paragraph.textContent === projectName);
-        loadedProjectEntry ? loadedProjectEntry.parentNode.classList.toggle("selected") :
-            document.querySelector("#sidebar a > div > p").parentNode.classList.toggle("selected");
+        loadedProjectEntry ? loadedProjectEntry.parentNode.parentNode.classList.toggle("selected") :
+            document.querySelector("#sidebar > a").classList.toggle("selected");
     }
 }
 
