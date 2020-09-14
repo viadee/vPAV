@@ -777,13 +777,19 @@ function createProjectsNavbar() {
             <div id="sidebar" class="list-group list-group-flush">
                 <a href="#" class="list-group-item list-group-item-action"
                 onclick="createProjectSummary()">
-                    <p class="text-white"><i class="text-white mr-2 fas fa-list-ul"></i>Project summary</p>
+                <div class="row">
+                        <i class="col-auto text-white mr-2 fas fa-list-ul"></i>
+                      <p class="col text-white">Project summary</p>     
+                  </div> 
                 </a>
                 ${projectNamesSorted.map((name) => {
             return `
                     <a href="#" class="list-group-item list-group-item-action"
                         onclick="loadExternalReport('${projectNameToPathMap.get(name)}')">
-                    <p class="text-white"><i class="text-white mr-2 fas fa-file"></i>${name}</p>
+                        <div class="row">
+                        <i class="col-auto text-white mr-2 fas fa-file"></i>
+                      <p class="col text-white">${name}</p>   
+                      </div>   
                     </a>
                     `
         }).join("")}
@@ -793,10 +799,10 @@ function createProjectsNavbar() {
         document.getElementById("wrapper").insertAdjacentHTML("afterbegin", sidebarHtml);
         //Set active the selected project item sidebar, otherwise set active the first sidebar item, which is the project overview
         const projectName = properties ? properties.projectName : "";
-        const loadedProjectEntry = Array.from(document.querySelectorAll("#sidebar a > p"))
+        const loadedProjectEntry = Array.from(document.querySelectorAll("#sidebar a > div > p"))
             .find(paragraph => paragraph.textContent === projectName);
         loadedProjectEntry ? loadedProjectEntry.parentNode.classList.toggle("selected") :
-            document.querySelector("#sidebar a > p").parentNode.classList.toggle("selected");
+            document.querySelector("#sidebar a > div > p").parentNode.classList.toggle("selected");
     }
 }
 
