@@ -282,6 +282,7 @@ a:hover {
 
 .small-box {
 	border-radius: 0;
+	padding-top: 1rem;
 }
 
 .small-box-container div:first-of-type {
