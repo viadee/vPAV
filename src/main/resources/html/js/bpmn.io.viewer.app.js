@@ -714,12 +714,12 @@ function createFooter() {
 
 
 //set Filename as Header
-function createHeader(modelPath) {
+function createHeader(name) {
     const oldHeader = document.getElementById("header");
     if (oldHeader) {
         oldHeader.parentNode.removeChild(oldHeader);
     }
-    const modelName = modelPath ? modelPath.substr(0, modelPath.length - 5) : "";
+    const modelName = name ? name.substr(0, name.length - 5) : "";
     const projectName = properties["projectName"] ? properties["projectName"] : "";
     const header = `
     <nav id="header" role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
