@@ -49,7 +49,6 @@ public enum CamundaEntryPointFunctions {
     StartProcessInstanceByMessage(START_PROCESS_INSTANCE_BY_MESSAGE, 1, 3, true),
     StartProcessInstanceByMessageAndProcessDefinitionId(START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF, 2, 4, true),
     CorrelateMessage(CORRELATE_MESSAGE, 1, 4, true);
-    //   CreateMessageCorrelation("createMessageCorrelation", 1, 1, true);
 
     private String name;
 

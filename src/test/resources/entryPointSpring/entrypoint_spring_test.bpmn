@@ -7,14 +7,14 @@
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1aapyv6" sourceRef="StartEvent_1" targetRef="ServiceTask_108g52x" />
     <bpmn:endEvent id="EndEvent_13uioac">
-      <bpmn:incoming>SequenceFlow_0w501tt</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_030auhj</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0znqs8t" sourceRef="ServiceTask_108g52x" targetRef="Task_1536gto" />
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>SequenceFlow_1aapyv6</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_12d22da" />
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0w501tt" sourceRef="Task_1536gto" targetRef="EndEvent_13uioac" />
+    <bpmn:sequenceFlow id="SequenceFlow_0w501tt" sourceRef="Task_1536gto" targetRef="IntermediateCatchEvent_0g8wqoo" />
     <bpmn:receiveTask id="Task_1536gto" messageRef="Message_0abvyn7">
       <bpmn:extensionElements>
         <camunda:executionListener expression="${variable_cor_message}" event="start" />
@@ -23,9 +23,19 @@
       <bpmn:incoming>SequenceFlow_0znqs8t</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0w501tt</bpmn:outgoing>
     </bpmn:receiveTask>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_0g8wqoo">
+      <bpmn:extensionElements>
+        <camunda:executionListener expression="${variable_catch}" event="start" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0w501tt</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_030auhj</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_16gv45e" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_030auhj" sourceRef="IntermediateCatchEvent_0g8wqoo" targetRef="EndEvent_13uioac" />
   </bpmn:process>
   <bpmn:message id="Message_12d22da" name="myMessageName" />
   <bpmn:message id="Message_0abvyn7" name="corMessage" />
+  <bpmn:message id="Message_16gv45e" name="myCatchMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
       <bpmndi:BPMNShape id="ServiceTask_108g52x_di" bpmnElement="ServiceTask_108g52x">
@@ -39,7 +49,7 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="EndEvent_13uioac_di" bpmnElement="EndEvent_13uioac">
-        <dc:Bounds x="672" y="102" width="36" height="36" />
+        <dc:Bounds x="822" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="481" y="138" width="90" height="20" />
         </bpmndi:BPMNLabel>
@@ -61,6 +71,13 @@
       <bpmndi:BPMNShape id="ReceiveTask_04oqj9l_di" bpmnElement="Task_1536gto">
         <dc:Bounds x="490" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_03epee9_di" bpmnElement="IntermediateCatchEvent_0g8wqoo">
+        <dc:Bounds x="672" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_030auhj_di" bpmnElement="SequenceFlow_030auhj">
+        <di:waypoint x="708" y="120" />
+        <di:waypoint x="822" y="120" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

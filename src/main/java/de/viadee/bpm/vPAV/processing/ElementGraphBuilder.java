@@ -282,25 +282,32 @@ public class ElementGraphBuilder {
                     messageName = ((ReceiveTask) element).getMessage().getName();
                 }
             } else {
-
+                for (EventDefinition ed : ((IntermediateCatchEvent) element).getEventDefinitions()) {
+                    if (ed instanceof MessageEventDefinition) {
+                        messageName = ((MessageEventDefinition) ed).getMessage().getName();
+                        break;
+                    }
+                }
             }
 
-            for (EntryPoint ep : scanner.getEntryPoints()) {
-                if (ep.getEntryPointName().equals(CORRELATE_MESSAGE) && ep
-                        .getMessageName().equals(messageName)) {
-                    BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.Message,
-                            KnownElementFieldType.Message);
-                    String scopeId = element.getScope().getAttributeValue(BpmnConstants.ATTR_ID);
+            if (!messageName.equals("")) {
+                for (EntryPoint ep : scanner.getEntryPoints()) {
+                    if (ep.getEntryPointName().equals(CORRELATE_MESSAGE) && ep
+                            .getMessageName().equals(messageName)) {
+                        BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.Message,
+                                KnownElementFieldType.Message);
+                        String scopeId = element.getScope().getAttributeValue(BpmnConstants.ATTR_ID);
 
-                    for (String var : ep.getProcessVariables()) {
-                        ProcessVariableOperation pvo = new ProcessVariableOperation(var, VariableOperation.WRITE,
-                                scopeId);
-                        initVarNode.addOperation(pvo);
+                        for (String var : ep.getProcessVariables()) {
+                            ProcessVariableOperation pvo = new ProcessVariableOperation(var, VariableOperation.WRITE,
+                                    scopeId);
+                            initVarNode.addOperation(pvo);
+                        }
+
+                        bpmnElement.getControlFlowGraph().addNode(initVarNode);
+                        predecessor[0] = addNodeAndGetNewPredecessor(initVarNode, bpmnElement.getControlFlowGraph(),
+                                predecessor[0]);
                     }
-
-                    bpmnElement.getControlFlowGraph().addNode(initVarNode);
-                    predecessor[0] = addNodeAndGetNewPredecessor(initVarNode, bpmnElement.getControlFlowGraph(),
-                            predecessor[0]);
                 }
             }
         }

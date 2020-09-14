@@ -61,8 +61,6 @@ public class CamundaMethodServices {
     public static final String START_PROCESS_INSTANCE_BY_KEY = "startProcessInstanceByKey";
 
     public static final String CORRELATE_MESSAGE = "correlateMessage";
-    
-    public static final String CREATE_MESSAGE_CORRELATION = "createMessageCorrelation";
 
     public static final String EXECUTION_OBJECT = "execution";
 

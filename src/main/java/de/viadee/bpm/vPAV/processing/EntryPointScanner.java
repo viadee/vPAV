@@ -135,6 +135,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
         return processIdToVariableMap;
     }
 
+    @Override
     public void addEntryPoint(CamundaEntryPointFunctions function, String className, String methodName, InvokeExpr expr,
             List<Object> args) {
         String entryPointName = expr.getMethod().getName();
@@ -143,8 +144,6 @@ public class EntryPointScanner extends ObjectReaderReceiver {
 
         if (function.isWithMessage()) {
             messageName = (String) args.get(0);
-            // TODO Check expresssion
-
         }
 
         if (function.equals(CamundaEntryPointFunctions.StartProcessInstanceByKey)) {

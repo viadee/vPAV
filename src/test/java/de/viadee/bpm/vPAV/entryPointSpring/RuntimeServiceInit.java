@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.entryPointSpring;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.spring.boot.starter.event.PostDeployEvent;
 
@@ -70,9 +71,13 @@ public class RuntimeServiceInit {
         runtimeService.startProcessInstanceByMessageAndProcessDefinitionId("myMessageName", "someId", variables);
     }
 
-    public void correlateMessage() {
+    public void correlateMessages() {
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("variable_cor_message", "value");
         runtimeService.correlateMessage("corMessage", variables);
+
+        HashMap<String, Object> variables2 = new HashMap<>();
+        variables.put("variable_catch", "value");
+        runtimeService.correlateMessage("myCatchMessage", variables2);
     }
 }
