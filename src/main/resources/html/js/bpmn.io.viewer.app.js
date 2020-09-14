@@ -771,7 +771,8 @@ function createHeader(modelFileName) {
 
 function createProjectsNavbar() {
     document.getElementById("navbar-toggle").classList.toggle("d-none");
-    const sidebarHtml = `
+    if (!document.getElementById("sidebar-wrapper")) {
+        const sidebarHtml = `
             <div id="sidebar-wrapper" class="border-right">
             <div id="sidebar" class="list-group list-group-flush">
                 <a href="#" class="list-group-item list-group-item-action"
@@ -779,23 +780,24 @@ function createProjectsNavbar() {
                     <p class="text-white"><i class="text-white mr-2 fas fa-list-ul"></i>Project summary</p>
                 </a>
                 ${projectNamesSorted.map((name) => {
-        return `
+            return `
                     <a href="#" class="list-group-item list-group-item-action"
                         onclick="loadExternalReport('${projectNameToPathMap.get(name)}')">
                     <p class="text-white"><i class="text-white mr-2 fas fa-file"></i>${name}</p>
                     </a>
                     `
-    }).join("")}
+        }).join("")}
             </div>
         </div>
     `;
-    document.getElementById("wrapper").insertAdjacentHTML("afterbegin", sidebarHtml);
-    //Set active the selected project item sidebar, otherwise set active the first sidebar item, which is the project overview
-    const projectName = properties ? properties.projectName : "";
-    const loadedProjectEntry = Array.from(document.querySelectorAll("#sidebar a > p"))
-        .find(paragraph => paragraph.textContent === projectName);
-    loadedProjectEntry ? loadedProjectEntry.parentNode.classList.toggle("selected") :
-        document.querySelector("#sidebar a > p").parentNode.classList.toggle("selected")
+        document.getElementById("wrapper").insertAdjacentHTML("afterbegin", sidebarHtml);
+        //Set active the selected project item sidebar, otherwise set active the first sidebar item, which is the project overview
+        const projectName = properties ? properties.projectName : "";
+        const loadedProjectEntry = Array.from(document.querySelectorAll("#sidebar a > p"))
+            .find(paragraph => paragraph.textContent === projectName);
+        loadedProjectEntry ? loadedProjectEntry.parentNode.classList.toggle("selected") :
+            document.querySelector("#sidebar a > p").parentNode.classList.toggle("selected");
+    }
 }
 
 async function createProjectSummary() {
