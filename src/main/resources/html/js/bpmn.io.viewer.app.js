@@ -712,12 +712,12 @@ function createFooter() {
     document.getElementById("content").insertAdjacentHTML("afterEnd", footer);
 }
 
-function createHeader(name) {
+function createHeader(modelPath) {
     const oldHeader = document.getElementById("header");
     if (oldHeader) {
         oldHeader.parentNode.removeChild(oldHeader);
     }
-    const modelName = name ? name.substr(0, name.length - 5) : "";
+    const modelName = modelPath ? modelPath.substr(0, modelPath.length - 5) : "";
     const projectName = properties ? properties["projectName"] : "";
     const header = `
 <nav id="header" role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
