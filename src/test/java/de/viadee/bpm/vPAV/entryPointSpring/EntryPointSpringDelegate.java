@@ -45,6 +45,5 @@ public class EntryPointSpringDelegate implements JavaDelegate {
         execution.getVariable("variable_id");
         execution.getVariable("variable_message");
         execution.getVariable("variable_message_id");
-        execution.getVariable("test");
     }
 }
