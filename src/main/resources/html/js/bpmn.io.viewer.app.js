@@ -872,12 +872,17 @@ function smallBoxTemplate(label, icon, value) {
 function createModalTable(projectName) {
     const percentageFormat = value => `${Math.round(value)}%`;
     const projectMainRowFormat = row => !row.modelName ? {classes: "viadee-lightblue-bg font-weight-bold"} : {classes: ""};
+    const modelNameFormat = modelPath => {
+        const pathWithoutSuffix = modelPath.substr(0, modelPath.length - 5);
+        const modelName = pathWithoutSuffix.substring(pathWithoutSuffix.lastIndexOf("/") + 1, pathWithoutSuffix.length);
+        return modelName;
+    }
     const headerFormat = (column) => {
         return {classes: "uppercase"};
     };
     const columnDefinitions = [
         {field: 'projectName', title: 'Project name', sortable: true},
-        {field: 'modelName', title: 'Model name', sortable: true},
+        {field: 'modelName', title: 'Model name', sortable: true, formatter: modelNameFormat},
         {field: 'totalElements', title: 'Total Elements', sortable: true},
         {field: 'analyzedElements', title: 'Analyzed elements', sortable: true},
         {field: 'issues', title: 'Issues', sortable: true},
