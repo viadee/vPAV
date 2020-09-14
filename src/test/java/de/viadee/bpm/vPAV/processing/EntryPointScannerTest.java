@@ -109,6 +109,16 @@ public class EntryPointScannerTest {
         Assert.assertEquals("myMessage2", entryPoints.get(3).getMessageName());
     }
 
-    // TODO integrate found variables in analysis
+    @Test
+    public void testCamundaVariableMap() {
+        List<EntryPoint> entryPoints = scanner.getEntryPoints().stream()
+                .filter(ep -> ep.getMethodName().equals("withVariableMap")).collect(
+                        Collectors.toList());
+        Assert.assertEquals(1, entryPoints.size());
 
+        Assert.assertEquals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_KEY,
+                entryPoints.get(0).getEntryPointName());
+        Assert.assertEquals(1, entryPoints.get(0).getProcessVariables().size());
+        Assert.assertEquals("variable_camunda", entryPoints.get(0).getProcessVariables().iterator().next());
+    }
 }
