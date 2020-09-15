@@ -885,8 +885,8 @@ function createModalTable(projectName) {
         const modelName = pathWithoutSuffix.substring(pathWithoutSuffix.lastIndexOf("/") + 1, pathWithoutSuffix.length);
         return modelName;
     }
-    const headerFormat = (column) => {
-        return {classes: "uppercase"};
+    const headerFormat = () => {
+        return {classes: "align-top"};
     };
     const columnDefinitions = [
         {field: 'projectName', title: 'Project name', sortable: true},
