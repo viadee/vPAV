@@ -723,10 +723,10 @@ function createHeader(modelFileName) {
 <nav id="header" role="heading" class="navbar navbar-fixed-top viadee-lightblue-bg">
             <ul class="nav align-items-center">
                 <li class="nav-item">
-                    <button id="navbar-toggle" class="btn btn-outline-light mr-3 d-none" type="button"
+                    <button id="navbar-toggle" class="btn btn-outline-light d-none" type="button"
                             onclick="toggleSideBar()"
                             aria-controls="nav-content" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="text-white fas fa-bars"></span>
+                        <span class="fas fa-chevron-left"></span>
                     </button>
                 </li>
                 <li class="nav-item">
@@ -1212,6 +1212,9 @@ function showUnlocatedCheckers() {
 }
 
 function toggleSideBar() {
+    const iconToggleButton = document.querySelector("#navbar-toggle > span");
+    iconToggleButton.classList.toggle("fa-chevron-left");
+    iconToggleButton.classList.toggle("fa-chevron-right");
     document.getElementById("sidebar-wrapper").classList.toggle("collapse");
     //removes empty space space on the left between canvas frame and sidebar
     Array.from(document.getElementsByClassName("col")).forEach(element => element.classList.toggle("pl-0"));

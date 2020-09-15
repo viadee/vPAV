@@ -320,6 +320,14 @@ a:hover {
     font-size: 18px;
 }
 
+#navbar-toggle {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -0.5rem;
+    margin-top: -1.5rem;
+    margin-right: 1rem;
+}
+
 .small-box-footer:hover {
     background: rgba(0, 0, 0, 0.15);
     color: #ffffff;
