@@ -815,7 +815,7 @@ async function createProjectSummary() {
     const summaryTemplate = `
               ${projectNamesSorted.map((name) => {
         return `
-        <div class="col mt-3">
+        <div class="col mt-3 mb-3">
             <h3 class="row">
                 <span class="badge badge-secondary">
                     ${projectNameToSummaryMap.get(name).projectName}
@@ -830,12 +830,15 @@ async function createProjectSummary() {
             Math.round(projectNameToSummaryMap.get(name).warningElementsRatio))}
                 ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle fa-xs",
             Math.round(projectNameToSummaryMap.get(name).errorElementsRatio))} 
-            </div> 
-                <h3 class="small-box-footer rounded-bottom" data-toggle="modal" data-target="#modalTable"
+            </div>
+                <button type="button" class="row btn" data-toggle="modal" 
+                data-target="#modalTable"
                 onclick="createModalTable('${name}')"}>
-                    More info
-                    <i class="fas fa-arrow-circle-right"></i>
-                </h3>
+                <div class="d-flex flex-row justify-content-center align-items-center">
+                    <h4 class="text-white text-nowrap">More info</h4>
+                    <i class="text-white fas fa-arrow-circle-right h4 ml-1"></i>
+                </div>
+                </button>
                 </div>   
              `
     }).join("")}
