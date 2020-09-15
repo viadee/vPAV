@@ -14,6 +14,13 @@
             </elementConvention>
         </elementConventions>
     </rule>
+    <rule>
+        <name>ExternalChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="external_Location">de.viadee.bpm.vPAV.processing.checker</setting>
+        </settings>
+    </rule>
     <rule id="XorCheckerId">
         <name>XorConventionChecker</name>
         <state>true</state>

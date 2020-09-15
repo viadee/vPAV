@@ -227,9 +227,8 @@ public class Runner {
      * @param rules Rules defined in ruleSet
      */
     protected void getProcessVariables(final RuleSet rules) {
-        if (oneCheckerIsActive(rules.getModelRules(), "ProcessVariablesModelChecker")
-                || oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesNameConventionChecker")
-                || oneCheckerIsActive(rules.getModelRules(), "DataFlowChecker")) {
+        if (oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesNameConventionChecker")
+                || !rules.getActiveModelRules().isEmpty()) {
             variableScanner = new EntryPointScanner(getFileScanner().getJavaResourcesFileInputStream());
             readOuterProcessVariables(variableScanner);
         }

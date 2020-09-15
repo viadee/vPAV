@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
@@ -42,74 +43,69 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class ProcessVariablesModelChecker implements ModelChecker {
+public class ProcessVariablesModelChecker extends AbstractModelChecker {
 
-	private final Rule rule;
-
-	private final Map<AnomalyContainer, List<Path>> invalidPathsMap;
-
-	public ProcessVariablesModelChecker(final Rule rule, final Map<AnomalyContainer, List<Path>> invalidPathsMap) {
-		this.rule = rule;
-		this.invalidPathsMap = invalidPathsMap;
+	public ProcessVariablesModelChecker(Rule rule,
+			Map<AnomalyContainer, List<Path>> invalidPathsMap,
+			Collection<ProcessVariable> processVariables, FlowAnalysis flowAnalysis) {
+		super(rule, invalidPathsMap, processVariables, flowAnalysis);
 	}
 
 	/**
-	 * Checks variables of a given process and identifies read/write/delete
-	 * anomalies
-	 *
-	 * @return issues
-	 */
-	@Override
-	public Collection<CheckerIssue> check() {
+     * Checks variables of a given process and identifies read/write/delete
+     * anomalies
+     *
+     * @return issues
+     */
+    @Override
+    public Collection<CheckerIssue> check() {
 
         final Collection<CheckerIssue> issues = new ArrayList<>();
-		for (final AnomalyContainer anomaly : invalidPathsMap.keySet()) {
-			final List<Path> paths = invalidPathsMap.get(anomaly);
-			final ProcessVariableOperation var = anomaly.getVariable();
-			if (paths != null) {
-				if (anomaly.getAnomaly() == Anomaly.DD) {
-					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
-							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.0"), //$NON-NLS-1$
-									var.getName(), var.getElement().getBaseElement().getId(),
-									var.getChapter(), var.getFieldType().getDescription())));
-				} else if (anomaly.getAnomaly() == Anomaly.DU) {
-					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
-							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.1"), //$NON-NLS-1$
-									var.getName(), anomaly.getElementId(),
-									var.getChapter(), var.getFieldType().getDescription())));
-				} else if (anomaly.getAnomaly() == Anomaly.UR) {
-					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
-							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.2"), //$NON-NLS-1$
-									var.getName(), var.getElement().getBaseElement().getId(),
-									var.getChapter(), var.getFieldType().getDescription())));
-				} else if (anomaly.getAnomaly() == Anomaly.UU) {
-					issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
-							anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.3"), //$NON-NLS-1$
-									var.getName(),
-									var.getElement().getBaseElement().getId(),
-									var.getChapter(), var.getFieldType().getDescription())));
-				}
-			}
-		}
+        for (final AnomalyContainer anomaly : invalidPathsMap.keySet()) {
+            final List<Path> paths = invalidPathsMap.get(anomaly);
+            final ProcessVariableOperation var = anomaly.getVariable();
+            if (paths != null) {
+                if (anomaly.getAnomaly() == Anomaly.DD) {
+                    issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+                            anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.0"), //$NON-NLS-1$
+                                    var.getName(), var.getElement().getBaseElement().getId(),
+                                    var.getChapter(), var.getFieldType().getDescription())));
+                } else if (anomaly.getAnomaly() == Anomaly.DU) {
+                    issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+                            anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.1"), //$NON-NLS-1$
+                                    var.getName(), anomaly.getElementId(),
+                                    var.getChapter(), var.getFieldType().getDescription())));
+                } else if (anomaly.getAnomaly() == Anomaly.UR) {
+                    issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+                            anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.2"), //$NON-NLS-1$
+                                    var.getName(), var.getElement().getBaseElement().getId(),
+                                    var.getChapter(), var.getFieldType().getDescription())));
+                } else if (anomaly.getAnomaly() == Anomaly.UU) {
+                    issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
+                            anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.3"), //$NON-NLS-1$
+                                    var.getName(),
+                                    var.getElement().getBaseElement().getId(),
+                                    var.getChapter(), var.getFieldType().getDescription())));
+                }
+            }
+        }
 
-		return issues;
-	}
+        return issues;
+    }
 
-	public boolean isSingletonChecker() {
+    public boolean isSingletonChecker() {
         return true;
     }
 
-	/**
-	 *
-	 * @param anomaly
-	 *            Anomaly
-	 * @return Warning or error
-	 */
-	private CriticalityEnum determineCriticality(final Anomaly anomaly) {
-		if (anomaly == Anomaly.DD || anomaly == Anomaly.DU || anomaly == Anomaly.UU) {
-			return CriticalityEnum.WARNING;
-		} else {
-			return CriticalityEnum.ERROR;
-		}
-	}
+    /**
+     * @param anomaly Anomaly
+     * @return Warning or error
+     */
+    private CriticalityEnum determineCriticality(final Anomaly anomaly) {
+        if (anomaly == Anomaly.DD || anomaly == Anomaly.DU || anomaly == Anomaly.UU) {
+            return CriticalityEnum.WARNING;
+        } else {
+            return CriticalityEnum.ERROR;
+        }
+    }
 }

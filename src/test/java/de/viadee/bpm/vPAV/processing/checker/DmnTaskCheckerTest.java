@@ -60,7 +60,6 @@ import java.util.Collection;
 
 /**
  * Unit Tests for DmnTaskChecker
- *
  */
 public class DmnTaskCheckerTest {
 
@@ -84,7 +83,6 @@ public class DmnTaskCheckerTest {
 
     /**
      * Case: DMN task with correct DMN-File
-     *
      */
 
     @Test
@@ -109,8 +107,9 @@ public class DmnTaskCheckerTest {
 
     /**
      * Case: DMN task with wrong DMN-File
+     *
+     * @throws ConfigReaderException if ruleSet cannot be read
      */
-
     @Test
     public void testDMNTaskWithWrongDMN() throws ConfigReaderException {
         // Load rule set.
@@ -145,8 +144,9 @@ public class DmnTaskCheckerTest {
 
     /**
      * Case: read referenced DMN
+     *
+     * @throws ConfigReaderException if ruleSet cannot be read
      */
-
     @Test
     public void testReadReferencedDMNFile() throws ConfigReaderException {
         // Load rule set.

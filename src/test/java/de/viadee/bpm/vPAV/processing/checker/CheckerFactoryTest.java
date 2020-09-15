@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -91,7 +92,7 @@ public class CheckerFactoryTest {
         CheckerFactory checkerFactory = new CheckerFactory();
 
         Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         assertFalse("Collection of Element Checker should not be empty", checkers[0].isEmpty());
         assertFalse("Collection of Model Checker should not be empty", checkers[1].isEmpty());
@@ -110,7 +111,7 @@ public class CheckerFactoryTest {
         CheckerFactory checkerFactory = new CheckerFactory();
 
         Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         assertTrue("Collection of Element Checker should be empty", checkers[0].isEmpty());
         assertTrue("Collection of Model Checker should be empty", checkers[1].isEmpty());
@@ -130,7 +131,7 @@ public class CheckerFactoryTest {
         CheckerFactory checkerFactory = new CheckerFactory();
 
         Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         assertTrue("Collection of Checker should be empty", checkers[0].isEmpty());
         assertTrue("Collection of Model Checker should be empty", checkers[1].isEmpty());
@@ -167,7 +168,7 @@ public class CheckerFactoryTest {
         // When
         CheckerFactory checkerFactory = new CheckerFactory();
         Collection[] checkers = checkerFactory.createCheckerInstances(rules, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         // Then
         Assert.assertEquals("Wrong number of checkers was created.", 4, checkers[0].size());

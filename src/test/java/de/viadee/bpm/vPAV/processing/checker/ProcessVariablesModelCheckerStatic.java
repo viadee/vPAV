@@ -102,7 +102,7 @@ public class ProcessVariablesModelCheckerStatic {
 		final Map<AnomalyContainer, List<Path>> invalidPathMap = graphBuilder.createInvalidPaths(graphCollection);
 
 		final Rule rule = new Rule("ProcessVariablesModelChecker", true, null, null, null, null);
-		ModelChecker checker = new ProcessVariablesModelChecker(rule, invalidPathMap);
+		ModelChecker checker = new ProcessVariablesModelChecker(rule, invalidPathMap, null, null);
 
 		checker.check();
 

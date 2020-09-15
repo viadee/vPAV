@@ -82,7 +82,7 @@ public class XmlConfigReaderTest {
     }
 
     @Test
-    public void testLoadingCorrectXMLConfigFileWithExternalChecker() throws ConfigReaderException {
+    public void testLoadingCorrectXMLConfigFileWithExternalCheckers() throws ConfigReaderException {
         // Given
         XmlConfigReader reader = new XmlConfigReader();
 
@@ -94,12 +94,13 @@ public class XmlConfigReaderTest {
         assertNotNull("External checker rule could not be loaded",
                 result.getElementRules().get("TaskNamingConventionCheckerExtern"));
         assertFalse("No model rules could be read", result.getModelRules().isEmpty());
+        assertTrue("ExternalChecker was not recognized as model checker.", result.getModelRules().containsKey("ExternalChecker"));
     }
 
     /**
      * Test loading a non-existing config file and check for defaults
      *
-     * @throws ConfigReaderException
+     * @throws ConfigReaderException if ruleSet cannot be read
      */
     @Test()
     public void testLoadingNonExistingXMLConfigFile() throws ConfigReaderException {
@@ -137,6 +138,8 @@ public class XmlConfigReaderTest {
 
     /**
      * Test loading an incorrect config file (rulename empty)
+     *
+     * @throws ConfigReaderException if ruleSet cannot be found
      */
     @Test(expected = ConfigReaderException.class)
     public void testLoadingIncorrectXMLNameConfigFile() throws ConfigReaderException {
@@ -149,6 +152,8 @@ public class XmlConfigReaderTest {
 
     /**
      * Test loading an incorrect config file (no xml)
+     *
+     * @throws ConfigReaderException if ruleSet cannot be found
      */
     @Test(expected = ConfigReaderException.class)
     public void testLoadingIncorrectXMLConfigFile() throws ConfigReaderException {
