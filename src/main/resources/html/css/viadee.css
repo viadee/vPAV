@@ -272,23 +272,6 @@ a:hover {
     font-weight: bold;
 }
 
-.knob {
-    background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
-    font: bold 12px Arial;
-    color: rgb(57, 204, 204);
-    appearance: none;
-    outline: none;
-}
-
-.knob-label {
-    text-align: center;
-}
-
-.small-box {
-    border-radius: 0;
-    padding-top: 1rem;
-}
-
 .small-box-container div:first-of-type {
     border-top-left-radius: 0.25rem;
     border-bottom-left-radius: 0.25rem;
@@ -297,6 +280,15 @@ a:hover {
 .small-box-container div:last-of-type {
     border-top-right-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
+}
+
+.small-box {
+    border-radius: 0;
+    padding-top: 1rem;
+}
+
+.small-box > h5 {
+    opacity: .5;
 }
 
 .small-box-footer {
@@ -309,6 +301,18 @@ a:hover {
     text-align: center;
     text-decoration: none;
     z-index: 10;
+}
+
+.knob {
+    background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+    font: bold 12px Arial;
+    color: rgb(57, 204, 204);
+    appearance: none;
+    outline: none;
+}
+
+.knob-label {
+    text-align: center;
 }
 
 /*vertically align icons in summary sidebar to text*/

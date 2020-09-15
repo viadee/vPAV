@@ -866,10 +866,10 @@ async function createProjectSummary() {
 
 function smallBoxTemplate(label, icon, value) {
     return `
-            <div class="col text-center small-box viadee-lightblue-bg mb-0">
+            <div class="col text-center small-box mb-0 border-secondary">
                     <input class="knob" data-readonly="true" value="${value}" data-width="150" data-height="150"
-                        data-fgcolor="#DFAD47" data-inputcolor="#EEEEEE" readonly="readonly">
-                    <h5 class="knob-label text-white">${label}</h5>
+                        data-fgcolor="#DFAD47"  data-bgcolor="#7EBCA9" data-inputcolor="#7EBCA9" readonly="readonly">
+                    <h5 class="knob-label text-white bg-secondary rounded mt-1">${label}</h5>
                 <div class="icon">
                     <i class="${icon}"></i>
                 </div>
