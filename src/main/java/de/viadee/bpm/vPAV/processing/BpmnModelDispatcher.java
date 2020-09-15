@@ -119,7 +119,7 @@ public class BpmnModelDispatcher {
         final Collection<CheckerIssue> issues = new ArrayList<>();
 
         final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, scanner,
-                dataFlowRules, processVariables, invalidPathMap);
+                dataFlowRules, processVariables, invalidPathMap, flowAnalysis);
 
         // Execute model checkers.
         for (ModelChecker checker : (Collection<ModelChecker>) checkers[1]) {
@@ -159,7 +159,7 @@ public class BpmnModelDispatcher {
         final Collection<CheckerIssue> issues = new ArrayList<>();
 
         final Collection[] checkers = createCheckerInstances(resourcesNewestVersions, conf, null, null,
-                null, null);
+                null, null, null);
 
         // Execute element checkers.
         executeCheckers(processDefinition, baseElements, graphBuilder, (Collection<ElementChecker>) checkers[0],
@@ -264,11 +264,11 @@ public class BpmnModelDispatcher {
     Collection[] createCheckerInstances(final Collection<String> resourcesNewestVersions, final RuleSet conf,
             final EntryPointScanner scanner,
             final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
-            final Map<AnomalyContainer, List<Path>> invalidPathMap) {
+            final Map<AnomalyContainer, List<Path>> invalidPathMap, final FlowAnalysis flowAnalysis) {
         CheckerFactory checkerFactory = new CheckerFactory();
 
         final Collection[] checkerCollection = checkerFactory.createCheckerInstances(conf, resourcesNewestVersions,
-                scanner, dataFlowRules, processVariables, invalidPathMap);
+                scanner, dataFlowRules, processVariables, invalidPathMap, flowAnalysis);
 
         setIncorrectCheckers(checkerFactory.getIncorrectCheckers());
 

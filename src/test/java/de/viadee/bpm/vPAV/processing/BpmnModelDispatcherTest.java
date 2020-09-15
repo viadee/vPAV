@@ -53,42 +53,43 @@ import static org.junit.Assert.assertEquals;
 
 public class BpmnModelDispatcherTest {
 
-	@BeforeClass
-	public static void setup() throws MalformedURLException {
-		final File file = new File(".");
-		final String currentPath = file.toURI().toURL().toString();
-		final URL classUrl = new URL(currentPath + "src/test/java");
-		final URL[] classUrls = { classUrl };
-		ClassLoader cl = new URLClassLoader(classUrls);
-		RuntimeConfig.getInstance().setClassLoader(cl);
-		RuntimeConfig.getInstance().setTest(true);
-	}
+    @BeforeClass
+    public static void setup() throws MalformedURLException {
+        final File file = new File(".");
+        final String currentPath = file.toURI().toURL().toString();
+        final URL classUrl = new URL(currentPath + "src/test/java");
+        final URL[] classUrls = { classUrl };
+        ClassLoader cl = new URLClassLoader(classUrls);
+        RuntimeConfig.getInstance().setClassLoader(cl);
+        RuntimeConfig.getInstance().setTest(true);
+    }
 
-	@Test
-	public void testCreateCheckerInstances() throws ConfigReaderException {
-		// Load rule set.
-		XmlConfigReader reader = new XmlConfigReader();
-		RuleSet rules = reader.read("ruleSets/ruleSetChild.xml");
+    @Test
+    public void testCreateCheckerInstances() throws ConfigReaderException {
+        // Load rule set.
+        XmlConfigReader reader = new XmlConfigReader();
+        RuleSet rules = reader.read("ruleSets/ruleSetChild.xml");
 
-		FileScanner fileScanner = new FileScanner(rules);
-		BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
-		Collection<ElementChecker> checkerInstances = dispatcher
-				.createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules,null, null, null, null)[0];
+        FileScanner fileScanner = new FileScanner(rules);
+        BpmnModelDispatcher dispatcher = new BpmnModelDispatcher();
+        Collection<ElementChecker> checkerInstances = dispatcher
+                .createCheckerInstances(fileScanner.getResourcesNewestVersions(), rules, null, null, null, null,
+                        null)[0];
 
-		// Check if all checkers were created.
-		assertEquals("Wrong number of loaded checkers.", 4, checkerInstances.size());
-		int xor = 0, extension = 0, timer = 0;
-		for (ElementChecker c : checkerInstances) {
-			if (c instanceof XorConventionChecker) {
-				xor++;
-			} else if (c instanceof ExtensionChecker) {
-				extension++;
-			} else if (c instanceof TimerExpressionChecker) {
-				timer++;
-			}
-		}
-		assertEquals("Wrong number of loaded XorConventionCheckers.", 2, xor);
-		assertEquals("Exactly one ExtensionChecker should exist.", 1, extension);
-		assertEquals("Exactly one TimerExpressionChecker should exist.", 1, timer);
-	}
+        // Check if all checkers were created.
+        assertEquals("Wrong number of loaded checkers.", 4, checkerInstances.size());
+        int xor = 0, extension = 0, timer = 0;
+        for (ElementChecker c : checkerInstances) {
+            if (c instanceof XorConventionChecker) {
+                xor++;
+            } else if (c instanceof ExtensionChecker) {
+                extension++;
+            } else if (c instanceof TimerExpressionChecker) {
+                timer++;
+            }
+        }
+        assertEquals("Wrong number of loaded XorConventionCheckers.", 2, xor);
+        assertEquals("Exactly one ExtensionChecker should exist.", 1, extension);
+        assertEquals("Exactly one TimerExpressionChecker should exist.", 1, timer);
+    }
 }

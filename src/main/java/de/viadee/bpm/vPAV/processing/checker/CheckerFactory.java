@@ -37,6 +37,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.EntryPointScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
@@ -45,6 +46,7 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.Flow;
 import java.util.logging.Logger;
 
 /**
@@ -70,14 +72,14 @@ public class CheckerFactory {
     public Collection[] createCheckerInstances(final RuleSet ruleConf, final Collection<String> resourcesNewestVersions,
             final EntryPointScanner scanner,
             final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
-            final Map<AnomalyContainer, List<Path>> invalidPathMap) {
+            final Map<AnomalyContainer, List<Path>> invalidPathMap, final FlowAnalysis flowAnalysis) {
 
         final HashSet<String> instantiatedCheckerClasses = new HashSet<>();
         final Collection[] checkers = new Collection[2];
         checkers[0] = createElementCheckers(instantiatedCheckerClasses, ruleConf, resourcesNewestVersions,
                 scanner);
         checkers[1] = createModelCheckers(instantiatedCheckerClasses, ruleConf, dataFlowRules,
-                processVariables, invalidPathMap);
+                processVariables, invalidPathMap, flowAnalysis);
 
         return checkers;
     }
@@ -141,7 +143,7 @@ public class CheckerFactory {
     private Collection<ModelChecker> createModelCheckers(final HashSet<String> instantiatedCheckerClasses,
             final RuleSet ruleConf, final Collection<DataFlowRule> dataFlowRules,
             final Collection<ProcessVariable> processVariables,
-            final Map<AnomalyContainer, List<Path>> invalidPathMap) {
+            final Map<AnomalyContainer, List<Path>> invalidPathMap, final FlowAnalysis flowAnalysis) {
         final Collection<ModelChecker> modelCheckers = new ArrayList<>();
         ModelChecker newModelChecker;
         // Create model checkers.
@@ -152,14 +154,16 @@ public class CheckerFactory {
                     try {
                         Class<?> clazz = Class.forName(fullyQualifiedName);
                         if (rule.getName().equals("DataFlowChecker")) {
-                            Constructor<?> c = clazz.getConstructor(Rule.class, Collection.class, Collection.class);
-                            newModelChecker = (ModelChecker) c.newInstance(rule, dataFlowRules, processVariables);
-                        } else if (rule.getName().equals("ProcessVariablesModelChecker")) {
-                            Constructor<?> c = clazz.getConstructor(Rule.class, Map.class);
-                            newModelChecker = (ModelChecker) c.newInstance(rule, invalidPathMap);
+                            Constructor<?> c = clazz
+                                    .getConstructor(Rule.class, Map.class, Collection.class, Collection.class,
+                                            FlowAnalysis.class);
+                            newModelChecker = (ModelChecker) c
+                                    .newInstance(rule, invalidPathMap, processVariables, dataFlowRules, flowAnalysis);
                         } else {
-                            Constructor<?> c = clazz.getConstructor(Rule.class);
-                            newModelChecker = (ModelChecker) c.newInstance(rule);
+                            Constructor<?> c = clazz
+                                    .getConstructor(Rule.class, Map.class, Collection.class, FlowAnalysis.class);
+                            newModelChecker = (ModelChecker) c
+                                    .newInstance(rule, invalidPathMap, processVariables, flowAnalysis);
                         }
 
                         // Check if checker is singleton and if an instance already exists

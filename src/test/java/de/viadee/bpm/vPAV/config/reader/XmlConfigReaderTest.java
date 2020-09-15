@@ -82,7 +82,7 @@ public class XmlConfigReaderTest {
     }
 
     @Test
-    public void testLoadingCorrectXMLConfigFileWithExternalChecker() throws ConfigReaderException {
+    public void testLoadingCorrectXMLConfigFileWithExternalCheckers() throws ConfigReaderException {
         // Given
         XmlConfigReader reader = new XmlConfigReader();
 
@@ -94,6 +94,7 @@ public class XmlConfigReaderTest {
         assertNotNull("External checker rule could not be loaded",
                 result.getElementRules().get("TaskNamingConventionCheckerExtern"));
         assertFalse("No model rules could be read", result.getModelRules().isEmpty());
+        assertTrue("ExternalChecker was not recognized as model checker.", result.getModelRules().containsKey("ExternalChecker"));
     }
 
     /**
