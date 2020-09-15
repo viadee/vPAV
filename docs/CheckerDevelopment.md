@@ -5,7 +5,9 @@ nav_order: 6
 # Checker Development
 We try to cover a broad range of possible inconsistencies 
 but if you are missing some checks, you can simply add your own checker.
-You can find an example project [here](https://github.com/viadee/vPAV_checker_plugin_example).
+There are two types of checkers: Element checker and Model checkers.
+Element checkers are applied to each BPMN element whereas model checkers operate on the complete BPMN model.
+
 In your projects you have to add the dependency to the project with the checker-class(es) (see example below):
 
 ```xml
@@ -35,12 +37,36 @@ The value specifies the location of the checkerclass.
 	</elementConventions>
 </rule>
 ```
-## Requirements
-- Your checker-class have to extends the *AbstractElementChecker*. 
-- Only the parameters from the abstract class (`de.viadee.bpm.vPAV.config.model.Rule` and `de.viadee.bpm.vPAV.BPMNScanner`) are allowed in the constructor.
+
+## Element checkers
+Element checkers must extend the class *AbstractElementChecker*.
+Only one parameter from the abstract class `de.viadee.bpm.vPAV.config.model.Rule` is allowed in the constructor.
+
+You can find an example project [here](https://github.com/viadee/vPAV_checker_plugin_example).
+
+## Model checkers
+If you use a model checker in your project, vPAV will automatically analyze the BPMN model and process variables.
+The `FlowAnalysis` is passed to each model checker which includes a graph of the BPMN model. 
+If you want to implement a model checker, the best way to understand the parameters is to debug a project and inspect the objects.
+
+Model checkers must extend the class *AbstractModelChecker*. The model checker could look like this:
+
+```java
+ public ExternalChecker(Rule rule,
+            Map<AnomalyContainer, List<Path>> invalidPathsMap,
+            Collection<ProcessVariable> processVariables,
+            FlowAnalysis flowAnalysis) {
+        super(rule, invalidPathsMap, processVariables, flowAnalysis);
+    }
+
+    @Override public Collection<CheckerIssue> check() {
+        // TODO implement your checks
+        return new HashSet<>();
+    }
+```
 
 ## Checker instructions
-You have to return a collection of `de.viadee.bpm.vPAV.processing.model.data.CheckerIssue`.
+For both types of checkers, you have to return a collection of `de.viadee.bpm.vPAV.processing.model.data.CheckerIssue`.
 
 ``` java
 /**
@@ -66,5 +92,7 @@ You have to return a collection of `de.viadee.bpm.vPAV.processing.model.data.Che
 *            Invalid path
 * @param message
 *            Issue message
+* @param implementationDetails 
+*           like the Java class of a Delegate if the issue is related to source code
 */
  ```
