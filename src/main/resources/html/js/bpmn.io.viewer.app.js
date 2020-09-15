@@ -844,9 +844,9 @@ async function createProjectSummary() {
   <div class="modal-dialog mw-100" role="document">
     <div class="modal-content w-100 h-100">
       <div class="modal-header viadee-lightblue-bg viadee-head">
-        <h4 class="modal-title">Project statistics</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+        <h4 class="modal-title text-white">Project statistics</h4>
+        <button type="button" class="close text-white btn-viadee-close" data-dismiss="modal" aria-label="Close">
+          <span class="fas fa-times"></span>
         </button>
       </div>
       <div class="modal-body">
