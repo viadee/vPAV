@@ -841,8 +841,8 @@ async function createProjectSummary() {
     }).join("")}
               
         <div id="modalTable" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog mw-100 w-75" role="document">
-    <div class="modal-content">
+  <div class="modal-dialog mw-100" role="document">
+    <div class="modal-content w-100 h-100">
       <div class="modal-header viadee-lightblue-bg viadee-head">
         <h4 class="modal-title">Project statistics</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
