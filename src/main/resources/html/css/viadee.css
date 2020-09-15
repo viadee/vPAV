@@ -291,6 +291,26 @@ a:hover {
     opacity: .5;
 }
 
+.small-box-container > div:nth-of-type(1) > .icon {
+    color: var(--dark);
+    opacity: 0.4;
+}
+
+.small-box-container > div:nth-of-type(2) > .icon {
+    color: var(--primary);
+    opacity: 0.4;
+}
+
+.small-box-container > div:nth-of-type(3) > .icon {
+    color: var(--warning);
+    opacity: 0.4;
+}
+
+.small-box-container > div:nth-of-type(4) > .icon {
+    color: var(--danger);
+    opacity: 0.4;
+}
+
 .small-box-footer {
     background-color: #DFAD47;
     opacity: 0.8;

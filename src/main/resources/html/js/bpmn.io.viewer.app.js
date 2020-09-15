@@ -822,13 +822,13 @@ async function createProjectSummary() {
                 </span>
             </h3>
             <div class="row small-box-container">           
-                ${smallBoxTemplate("Issue ratio", "fas fa-percentage",
+                ${smallBoxTemplate("Issue ratio", "fas fa-percentage fa-xs",
             Math.round(projectNameToSummaryMap.get(name).issuesRatio))}
-                ${smallBoxTemplate("Flawed elements ratio", "fas fa-info-circle",
+                ${smallBoxTemplate("Flawed elements ratio", "fas fa-info-circle fa-xs",
             Math.round(projectNameToSummaryMap.get(name).flawedElementsRatio))}
-                ${smallBoxTemplate("Warning elements ratio", "fas fa-exclamation-triangle",
+                ${smallBoxTemplate("Warning elements ratio", "fas fa-exclamation-triangle fa-xs",
             Math.round(projectNameToSummaryMap.get(name).warningElementsRatio))}
-                ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle",
+                ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle fa-xs",
             Math.round(projectNameToSummaryMap.get(name).errorElementsRatio))} 
             </div> 
                 <h3 class="small-box-footer rounded-bottom" data-toggle="modal" data-target="#modalTable"
