@@ -36,7 +36,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -72,7 +72,7 @@ public class HierarchyCreationTest {
 
     @Test
     public void createHierarchyTest() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
         RuntimeConfig.getInstance().setProperties(myProperties);

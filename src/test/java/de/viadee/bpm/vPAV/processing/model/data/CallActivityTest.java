@@ -38,7 +38,7 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -86,7 +86,7 @@ public class CallActivityTest {
 
     @Test
     public void testEmbedding() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "CallActivityTest_embeddingCallActivity.bpmn";
         final File processDefinition = new File(PATH);
@@ -153,7 +153,7 @@ public class CallActivityTest {
     @Test
     public void testEmbeddedWithVariableMapping() {
         // Usage of camunda:in and camunda:out
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "CallActivityTest_TwoLevels.bpmn";
         final File processDefinition = new File(PATH);
@@ -192,7 +192,7 @@ public class CallActivityTest {
     @Test
     public void testEmbeddedWithDelegateVariableMapping() {
         // Usage of camunda:in and camunda:out
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "CallActivityTest_TwoLevels.bpmn";
         final File processDefinition = new File(PATH);
@@ -228,7 +228,7 @@ public class CallActivityTest {
 
     @Test
     public void testEmbeddingCallActivitiesWithListener() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         Properties myProperties = new Properties();
         myProperties.put("scanpath", ConfigConstants.TARGET_TEST_PATH);
         RuntimeConfig.getInstance().setProperties(myProperties);
@@ -329,7 +329,7 @@ public class CallActivityTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         final Collection<String> calledElementHierarchy = new ArrayList<>();
         final FileScanner fileScanner = new FileScanner(new RuleSet());
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final Collection<Graph> graphCollection = graphBuilder.createProcessGraph(fileScanner, modelInstance,
                 "MyProcess", calledElementHierarchy, scanner, flowAnalysis);
 
@@ -348,7 +348,7 @@ public class CallActivityTest {
 
     private void checkTwoLevelsAnomalies(ElementGraphBuilder graphBuilder, FileScanner fileScanner,
             BpmnModelInstance modelInstance,
-            File processDefinition, ProcessVariablesScanner scanner, boolean delegateTest) {
+            File processDefinition, EntryPointScanner scanner, boolean delegateTest) {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
 
         // create data flow graphs

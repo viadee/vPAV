@@ -39,7 +39,8 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.exceptions.OutputWriterException;
 import de.viadee.bpm.vPAV.output.*;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
+import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
@@ -64,7 +65,7 @@ public class Runner {
 
     private FileScanner fileScanner;
 
-    private ProcessVariablesScanner variableScanner;
+    private EntryPointScanner variableScanner;
 
     private Collection<CheckerIssue> filteredIssues;
 
@@ -96,18 +97,21 @@ public class Runner {
         setFileScanner(new FileScanner(rules));
 
         // 3
-        getProcessVariables(rules);
+        JavaReaderStatic.setupSoot();
 
         // 4
-        createIssues(rules, dataFlowRules);
+        getProcessVariables(rules);
 
         // 5
-        removeIgnoredIssues();
+        createIssues(rules, dataFlowRules);
 
         // 6
-        writeOutput(filteredIssues, elements, processVariables);
+        removeIgnoredIssues();
 
         // 7
+        writeOutput(filteredIssues, elements, processVariables);
+
+        // 8
         copyFiles();
 
         //8
@@ -226,12 +230,10 @@ public class Runner {
         if (oneCheckerIsActive(rules.getModelRules(), "ProcessVariablesModelChecker")
                 || oneCheckerIsActive(rules.getElementRules(), "ProcessVariablesNameConventionChecker")
                 || oneCheckerIsActive(rules.getModelRules(), "DataFlowChecker")) {
-            variableScanner = new ProcessVariablesScanner(getFileScanner().getJavaResourcesFileInputStream());
+            variableScanner = new EntryPointScanner(getFileScanner().getJavaResourcesFileInputStream());
             readOuterProcessVariables(variableScanner);
-            setCheckProcessVariables();
-        } else {
-            setCheckProcessVariables();
         }
+        setCheckProcessVariables();
     }
 
     private boolean oneCheckerIsActive(final Map<String, Map<String, Rule>> rules, String name) {
@@ -549,7 +551,7 @@ public class Runner {
      * @param dataFlowRules   dataFlowRules
      */
     private void checkModels(final RuleSet rules, final FileScanner fileScanner,
-            final ProcessVariablesScanner variableScanner, Collection<DataFlowRule> dataFlowRules) {
+            final EntryPointScanner variableScanner, Collection<DataFlowRule> dataFlowRules) {
         for (final String pathToModel : fileScanner.getProcessDefinitions()) {
             checkModel(rules, pathToModel, fileScanner, variableScanner, dataFlowRules);
         }
@@ -564,7 +566,7 @@ public class Runner {
      * @param variableScanner   variableScanner
      */
     private void checkModel(final RuleSet rules, final String processDefinition,
-            final FileScanner fileScanner, final ProcessVariablesScanner variableScanner,
+            final FileScanner fileScanner, final EntryPointScanner variableScanner,
             Collection<DataFlowRule> dataFlowRules) {
         BpmnModelDispatcher bpmnModelDispatcher = new BpmnModelDispatcher();
         ModelDispatchResult dispatchResult;
@@ -625,7 +627,7 @@ public class Runner {
      *
      * @param scanner OuterProcessVariablesScanner
      */
-    private void readOuterProcessVariables(final ProcessVariablesScanner scanner) {
+    private void readOuterProcessVariables(final EntryPointScanner scanner) {
         scanner.scanProcessVariables();
     }
 

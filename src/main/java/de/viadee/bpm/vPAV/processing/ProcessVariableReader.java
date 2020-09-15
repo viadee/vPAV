@@ -1066,7 +1066,8 @@ public final class ProcessVariableReader {
                 // Call method as it might modify variables
                 // REMEMBER: execution might already be saved as field of bean but currently we cannot detect this
                 String methodName = property.toString().split(" ")[1];
-                EntryPoint entryPoint = new EntryPoint(className, methodName, "", BpmnConstants.ATTR_EX);
+                // TODO have a look at this
+                EntryPoint entryPoint = new EntryPoint(className, methodName, "", BpmnConstants.ATTR_EX, "");
                 // read variables in class file (bean)
                 JavaReaderStatic
                         .getVariablesFromClass(className, element, elementChapter, fieldType, entryPoint,
@@ -1111,7 +1112,7 @@ public final class ProcessVariableReader {
         return null;
     }
 
-    private BasicNode addNodeAndGetNewPredecessor(BasicNode node, ControlFlowGraph cg,
+    static BasicNode addNodeAndGetNewPredecessor(BasicNode node, ControlFlowGraph cg,
             BasicNode predecessor) {
         cg.addNode(node);
         if (predecessor != null) {

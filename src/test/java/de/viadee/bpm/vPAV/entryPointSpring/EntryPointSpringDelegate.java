@@ -29,22 +29,21 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.delegates;
+package de.viadee.bpm.vPAV.entryPointSpring;
 
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.variable.Variables;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.springframework.stereotype.Component;
 
-import java.util.Map;
+@Component
+public class EntryPointSpringDelegate implements JavaDelegate {
 
-public class MessageCorrelationDelegate {
-
-    private RuntimeService runtimeService;
-
-    public void correctMessageStartEvent() {
-        final Map<String, Object> processVariables = Variables.createVariables()
-                .putValue("2", 2);
-
-        runtimeService.startProcessInstanceByMessage("TestMessage1", processVariables);
-
+    @Override
+    public void execute(DelegateExecution execution) throws Exception {
+        execution.getVariable("variable");
+        execution.getVariable("variable_invalid");
+        execution.getVariable("variable_id");
+        execution.getVariable("variable_message");
+        execution.getVariable("variable_message_id");
     }
 }

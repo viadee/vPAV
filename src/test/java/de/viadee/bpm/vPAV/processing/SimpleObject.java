@@ -32,7 +32,12 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.AnotherSimpleObject;
+import fj.Hash;
+import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.impl.RuntimeServiceImpl;
+
+import java.util.HashMap;
 
 public class SimpleObject {
 
@@ -59,5 +64,13 @@ public class SimpleObject {
 
     private void methodWithParameter(String var) {
         parameterString = var;
+    }
+
+    private void mapMethod() {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("first", "firstValue");
+        variables.put("second", methodWithReturn());
+        variables.put("third", "thirdValue");
+        variables.remove("first");
     }
 }

@@ -29,20 +29,48 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.delegates;
+package de.viadee.bpm.vPAV.processing;
 
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.variable.Variables;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.Node;
+import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import org.camunda.bpm.model.bpmn.instance.CallActivity;
+import soot.SootClass;
+import soot.Value;
+import soot.jimple.InvokeExpr;
+import soot.toolkits.graph.Block;
 
-import java.util.Map;
+import java.util.List;
 
-public class MessageCorrelationDelegate2 {
+public abstract class ObjectReaderReceiver {
 
-    private RuntimeService runtimeService;
-
-    public void correctMessageReceiveTask() {
-        final Map<String, Object> processVariables = Variables.createVariables()
-                .putValue("1", 1);
-        runtimeService.createMessageCorrelation("TestMessage").setVariables(processVariables).correlateWithResult();
+    public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo, SootClass javaClass) {
     }
+
+    public BasicNode addNodeIfNotExisting(Block block, SootClass javaClass) {
+        return null;
+    }
+
+    public void visitBlockAgain(Block block) {
+    }
+
+    public Node getNodeOfBlock(Block block, SootClass javaClass) {
+        return null;
+    }
+
+    public String getScopeId() {
+        return "";
+    }
+
+    public String getScopeIdOfChild() {
+        return "";
+    }
+
+    public void pushNodeToStack(BasicNode blockNode) {
+    }
+
+    public void addEntryPoint(CamundaEntryPointFunctions func, String className, String methodName, InvokeExpr expr, List<Object> args) {
+    }
+
 }

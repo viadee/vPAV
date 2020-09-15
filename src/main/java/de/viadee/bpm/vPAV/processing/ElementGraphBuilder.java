@@ -38,11 +38,10 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.reader.XmlVariablesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
+
+import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.*;
-import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
-import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
+import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Edge;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
@@ -54,6 +53,9 @@ import org.camunda.bpm.model.bpmn.instance.*;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.util.*;
+
+import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.CORRELATE_MESSAGE;
+import static de.viadee.bpm.vPAV.processing.ProcessVariableReader.addNodeAndGetNewPredecessor;
 
 /**
  * Creates data flow graph based on a bpmn model
@@ -126,7 +128,7 @@ public class ElementGraphBuilder {
      */
     public Collection<Graph> createProcessGraph(final FileScanner fileScanner, final BpmnModelInstance modelInstance,
             final String processDefinition, final Collection<String> calledElementHierarchy,
-            final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
+            final EntryPointScanner scanner, final FlowAnalysis flowAnalysis) {
 
         final Collection<Graph> graphCollection = new ArrayList<>();
 
@@ -176,7 +178,8 @@ public class ElementGraphBuilder {
                     }
                 }
 
-                createVariablesOfFlowElement(scanner, graph, node, userVariables.get(element.getId()));
+                createVariablesOfFlowElement(scanner, graph, node, userVariables.get(element.getId()),
+                        processes.size());
 
                 // mention element
                 elementMap.put(element.getId(), node);
@@ -214,9 +217,9 @@ public class ElementGraphBuilder {
      * @param scanner OuterProcessVariablesScanner
      * @param graph   Graph
      */
-    private void createVariablesOfFlowElement(final ProcessVariablesScanner scanner, final Graph graph,
+    private void createVariablesOfFlowElement(final EntryPointScanner scanner, final Graph graph,
             final BpmnElement bpmnElement,
-            final ListMultimap<String, ProcessVariableOperation> userVariables) {
+            final ListMultimap<String, ProcessVariableOperation> userVariables, int numProcesses) {
         final FlowElement element = (FlowElement) bpmnElement.getBaseElement();
         BasicNode[] predecessor = new BasicNode[1];
 
@@ -246,33 +249,58 @@ public class ElementGraphBuilder {
             if (messageNames.size() == 1) {
                 messageName = messageNames.get(0);
             }
-            // add process variables for start event, which set by call
-            // startProcessInstanceByKey
-
+            // add process variables for start event, which set e.g. by call startProcessInstanceByKey
             for (EntryPoint ep : scanner.getEntryPoints()) {
-                if (ep.getMessageName().equals(messageName)) {
-                    // Check InitialVariableOperations
-                    new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
-                            ElementChapter.Implementation, KnownElementFieldType.Class,
-                            ep, predecessor);
+                if (isEntryPointApplicable(ep, graph, messageName, numProcesses)) {
+                    BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.ProcessStart,
+                            KnownElementFieldType.ProcessStart);
+                    String scopeId = element.getScope().getAttributeValue(BpmnConstants.ATTR_ID);
+
+                    for (String var : ep.getProcessVariables()) {
+                        ProcessVariableOperation pvo = new ProcessVariableOperation(var, VariableOperation.WRITE,
+                                scopeId);
+                        initVarNode.addOperation(pvo);
+                    }
+
+                    bpmnElement.getControlFlowGraph().addNode(initVarNode);
+                    predecessor[0] = addNodeAndGetNewPredecessor(initVarNode, bpmnElement.getControlFlowGraph(),
+                            predecessor[0]);
                 }
             }
             graph.addStartNode(bpmnElement);
-        } else if (element instanceof ReceiveTask) {
+        } else if (element instanceof ReceiveTask || element instanceof IntermediateCatchEvent) {
             String messageName = "";
+            if (element instanceof ReceiveTask) {
             if (((ReceiveTask) element).getMessage() != null) {
                 messageName = ((ReceiveTask) element).getMessage().getName();
             }
+            } else {
+                for (EventDefinition ed : ((IntermediateCatchEvent) element).getEventDefinitions()) {
+                    if (ed instanceof MessageEventDefinition) {
+                        messageName = ((MessageEventDefinition) ed).getMessage().getName();
+                        break;
+                    }
+                }
+            }
 
-            // add process variables for receive task, which set by call
-            // startProcessInstanceByKey
+            if (!messageName.equals("")) {
+                for (EntryPoint ep : scanner.getEntryPoints()) {
+                    if (ep.getEntryPointName().equals(CORRELATE_MESSAGE) && ep
+                            .getMessageName().equals(messageName)) {
+                        BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.Message,
+                                KnownElementFieldType.Message);
+                        String scopeId = element.getScope().getAttributeValue(BpmnConstants.ATTR_ID);
 
-            for (EntryPoint ep : scanner.getIntermediateEntryPoints()) {
-                if (ep.getMessageName().equals(messageName)) {
-                    // Check InitialVariableOperations
-                    new JavaReaderStatic().getVariablesFromClass(ep.getClassName(), bpmnElement,
-                            ElementChapter.Implementation, KnownElementFieldType.Class,
-                            ep, predecessor);
+                        for (String var : ep.getProcessVariables()) {
+                            ProcessVariableOperation pvo = new ProcessVariableOperation(var, VariableOperation.WRITE,
+                                    scopeId);
+                            initVarNode.addOperation(pvo);
+                        }
+
+                        bpmnElement.getControlFlowGraph().addNode(initVarNode);
+                        predecessor[0] = addNodeAndGetNewPredecessor(initVarNode, bpmnElement.getControlFlowGraph(),
+                                predecessor[0]);
+                    }
                 }
             }
         }
@@ -549,7 +577,7 @@ public class ElementGraphBuilder {
      */
     private void integrateCallActivityFlow(final FileScanner fileScanner, final String processDefinition,
             final BpmnElement element, final FlowElement activity, final Graph graph,
-            final Collection<String> calledElementHierarchy, final ProcessVariablesScanner scanner,
+            final Collection<String> calledElementHierarchy, final EntryPointScanner scanner,
             final FlowAnalysis flowAnalysis) {
 
         Collection<Graph> subGraphs = null;
@@ -648,7 +676,7 @@ public class ElementGraphBuilder {
      */
     private Collection<Graph> createSubDataFlowsFromCallActivity(final FileScanner fileScanner,
             final Collection<String> calledElementHierarchy, final String callActivityPath,
-            final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
+            final EntryPointScanner scanner, final FlowAnalysis flowAnalysis) {
         // read called process
         final BpmnModelInstance subModel = Bpmn
                 .readModelFromFile(new File(RuntimeConfig.getInstance().getBasepath() + callActivityPath));
@@ -663,7 +691,7 @@ public class ElementGraphBuilder {
     // Used for testing
     private Collection<Graph> createSubDataFlowsFromCallActivity(final FileScanner fileScanner,
             final Collection<String> calledElementHierarchy, final BpmnModelInstance subModel,
-            final ProcessVariablesScanner scanner, final FlowAnalysis flowAnalysis) {
+            final EntryPointScanner scanner, final FlowAnalysis flowAnalysis) {
         // transform process into data flow
         final ElementGraphBuilder graphBuilder = new ElementGraphBuilder(decisionRefToPathMap, processIdToPathMap,
                 messageIdToVariables, processIdToVariables, rule);
@@ -671,5 +699,33 @@ public class ElementGraphBuilder {
                 .createProcessGraph(fileScanner, subModel, subModel.getModel().getModelName(), calledElementHierarchy,
                         scanner,
                         flowAnalysis);
+    }
+
+    public boolean isEntryPointApplicable(EntryPoint ep, Graph graph, String messageName, int numProcesses) {
+        if (ep.getProcessVariables().isEmpty()) {
+            return false;
+        }
+
+        // Key matches process id
+        if (graph.getProcessId().equals(ep.getProcessDefinitionKey())) {
+            return true;
+        }
+
+        // Process id is used and we have only one process
+        if (ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_ID) && numProcesses == 1) {
+            return true;
+        }
+
+        // Process is started by message and message names must be equal
+        if ((ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE) || ep
+                .getEntryPointName().equals(CORRELATE_MESSAGE)) && ep
+                .getMessageName().equals(messageName)) {
+            return true;
+        }
+
+        // Message names must match and only one process is allowed because we cannot match process ids to processes
+        return ep.getEntryPointName().equals(CamundaMethodServices.START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF)
+                && ep
+                .getMessageName().equals(messageName) && numProcesses == 1;
     }
 }

@@ -29,21 +29,38 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.delegates;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.variable.Variables;
+import soot.Value;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class MessageCorrelationDelegate4 {
+/**
+ * Represents an object variable (= currently everything that type isn´t String) during soot block analysis.
+ */
+public class MapVariable extends ObjectVariable {
 
-    private RuntimeService runtimeService;
+    private Map<String, Value> values;
 
-    public void incorrectMessages() {
-        final Map<String, Object> processVariables = Variables.createVariables()
-                .putValue("4", 4);
+    public MapVariable() {
+        super();
+        values = new HashMap<>();
+    }
 
-        runtimeService.startProcessInstanceByMessage("wrongMessageeeee", processVariables);
+    public void put(String key, Value v) {
+        values.put(key, v);
+    }
+
+    public void remove(String key) {
+        values.remove(key);
+    }
+
+    public Map<String, Value> getValues() {
+        return values;
+    }
+
+    public void setValues(Map<String, Value> values) {
+        this.values = values;
     }
 }

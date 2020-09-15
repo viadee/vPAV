@@ -320,3 +320,7 @@ a:hover {
     padding: 0;
     white-space: nowrap;
 }
+
+.hide {
+    display: none;
+}

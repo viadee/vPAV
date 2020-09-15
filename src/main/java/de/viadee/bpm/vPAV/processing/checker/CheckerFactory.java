@@ -36,7 +36,7 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
@@ -68,7 +68,7 @@ public class CheckerFactory {
      * @return checkers returns checkers
      */
     public Collection[] createCheckerInstances(final RuleSet ruleConf, final Collection<String> resourcesNewestVersions,
-            final ProcessVariablesScanner scanner,
+            final EntryPointScanner scanner,
             final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
             final Map<AnomalyContainer, List<Path>> invalidPathMap) {
 
@@ -84,7 +84,7 @@ public class CheckerFactory {
 
     private Collection<ElementChecker> createElementCheckers(final HashSet<String> instantiatedCheckerClasses,
             final RuleSet ruleConf, final Collection<String> resourcesNewestVersions,
-            final ProcessVariablesScanner scanner) {
+            final EntryPointScanner scanner) {
         final Collection<ElementChecker> elementCheckers = new ArrayList<>();
         AbstractElementChecker newChecker;
         // Create element checkers.
@@ -102,7 +102,7 @@ public class CheckerFactory {
                         } else if (scanner != null && rule.getName().equals("MessageCorrelationChecker")) {
                             Class<?> clazz = Class.forName(fullyQualifiedName);
                             Constructor<?> c = clazz.getConstructor(Rule.class,
-                                    ProcessVariablesScanner.class);
+                                    EntryPointScanner.class);
                             newChecker = (AbstractElementChecker) c.newInstance(rule, scanner);
                         } else {
                             Class<?> clazz = Class.forName(fullyQualifiedName);
