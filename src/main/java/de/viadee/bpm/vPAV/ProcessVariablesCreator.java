@@ -85,9 +85,10 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
 
     /**
      * Start the processing of a block and all its successors. Extracts the process variables manipulations.
-     *
      * @param block To processed block
-     * @param args  Arguments passed to block
+     * @param args Arguments passed to block
+     * @param javaClass Class that contains the block
+     * @param sootMethod Method that contains the block
      * @return last created BasicNode or null if no were created
      */
     public BasicNode startBlockProcessing(final Block block, final List<Value> args, final SootClass javaClass,

@@ -82,9 +82,9 @@ public class ObjectReader {
     }
 
     /**
-     * Constructor that is called the first time when starting an analysis.
-     *
+     * onstructor that is called the first time when starting an analysis.
      * @param objectReaderReceiver that is used for creating the data flow graph
+     * @param currentJavaClass that contains the block which will be analyzed
      */
     public ObjectReader(ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass) {
         this.objectReaderReceiver = objectReaderReceiver;
@@ -93,8 +93,9 @@ public class ObjectReader {
 
     /**
      * Constructor that is called the first time when starting an analysis.
-     *
      * @param objectReaderReceiver that is used for creating the data flow graph
+     * @param currentJavaClass that contains the block which will be analyzed
+     * @param currentMethod that contains thte block which will be analyzed
      */
     public ObjectReader(ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass,
             String currentMethod) {
