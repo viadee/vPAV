@@ -778,8 +778,8 @@ function createProjectsNavbar() {
                 <a href="#" class="list-group-item list-group-item-action"
                 onclick="createProjectSummary()">
                 <div class="row">
-                        <i class="col-auto text-white mr-2 fas fa-list-ul"></i>
-                      <p class="col text-white">Project summary</p>     
+                        <i class="col-auto text-white font-weight-bold mr-2 fas fa-list-ul"></i>
+                      <p class="col text-white font-weight-bold">Project summary</p>     
                   </div> 
                 </a>
                 ${projectNamesSorted.map((name) => {

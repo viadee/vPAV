@@ -311,6 +311,15 @@ a:hover {
     z-index: 10;
 }
 
+/*vertically align icons in summary sidebar to text*/
+#sidebar > a > div > i {
+    line-height: 1.5;
+}
+
+#sidebar > a:first-of-type > div > * {
+    font-size: 18px;
+}
+
 .small-box-footer:hover {
     background: rgba(0, 0, 0, 0.15);
     color: #ffffff;
