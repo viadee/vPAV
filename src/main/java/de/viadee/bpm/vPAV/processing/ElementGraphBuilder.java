@@ -60,7 +60,7 @@ import java.util.*;
  */
 public class ElementGraphBuilder {
 
-    private Map<String, BpmnElement> elementMap = new HashMap<>();
+    private final Map<String, BpmnElement> elementMap = new HashMap<>();
 
     private Map<String, String> processIdToPathMap = new HashMap<>();
 
@@ -72,7 +72,7 @@ public class ElementGraphBuilder {
 
     private Map<String, Collection<String>> processIdToVariables;
 
-    private Map<BpmnElement, BpmnElement> splittedSubprocesses = new HashMap<>();
+    private final Map<BpmnElement, BpmnElement> splittedSubprocesses = new HashMap<>();
 
     private Rule rule;
 
