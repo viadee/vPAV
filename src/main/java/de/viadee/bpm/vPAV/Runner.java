@@ -383,6 +383,12 @@ public class Runner {
                 RuntimeConfig.getInstance().getJsFolder());
         fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap-table-treegrid.js",
                 RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap-table-export.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "tableExport.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "FileSaver.js",
+                RuntimeConfig.getInstance().getJsFolder());
         fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
                 RuntimeConfig.getInstance().getJsFolder());
 

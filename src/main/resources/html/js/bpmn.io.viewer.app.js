@@ -942,11 +942,9 @@ function createModalTable(projectName) {
             .forEach(element => element.remove());
     });
     $table.bootstrapTable({
-        columns: columnDefinitions, data: tableData, showColumns: true, showFullscreen: true,
-        buttonsClass: "viadee", search: true,
-        searchText: projectName,
-        showToggle: true,
-        showSearchClearButton: true,
+        columns: columnDefinitions, data: tableData, showColumns: true, showFullscreen: true, buttonsClass: "viadee",
+        search: true, searchText: projectName, showToggle: true, showSearchClearButton: true, showExport: true,
+        exportTypes: ['json', 'xml', 'csv', 'txt', 'sql'],
         headerStyle: headerFormat, rowStyle: projectMainRowFormat
     });
 

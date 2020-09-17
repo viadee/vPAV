@@ -41,6 +41,7 @@ All licenses of reused components can be found on the [maven site](http://rawgit
 - [jQuery Knob](https://github.com/aterrien/jQuery-Knob) licensed under MIT
 - [Bootstrap Table](https://github.com/wenzhixin/bootstrap-table) licensed under MIT
 - [jquery-treegrid](https://github.com/maxazan/jquery-treegrid) licensed under MIT
+- [FileSaver](https://github.com/eligrey/FileSaver.js) licensed under MIT
 - [Soot](https://github.com/Sable/soot) licensed under a LGPL 2.1  license
 - [Start Bootstrap - Simple Sidebar](https://github.com/StartBootstrap/startbootstrap-simple-sidebar) licensed under MIT
 
