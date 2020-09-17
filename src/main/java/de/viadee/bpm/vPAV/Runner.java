@@ -379,8 +379,13 @@ public class Runner {
                 RuntimeConfig.getInstance().getJsFolder());
         fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap-table.js",
                 RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery.treegrid.js",
+                RuntimeConfig.getInstance().getJsFolder());
+        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "bootstrap-table-treegrid.js",
+                RuntimeConfig.getInstance().getJsFolder());
         fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "script-loader.js",
                 RuntimeConfig.getInstance().getJsFolder());
+
         fileToFolderMap.put("infoPOM.js", RuntimeConfig.getInstance().getDataFolder());
 
         fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap.min.css",
@@ -397,10 +402,20 @@ public class Runner {
                 RuntimeConfig.getInstance().getCssFolder());
         fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "bootstrap-table.css",
                 RuntimeConfig.getInstance().getCssFolder());
+        fileToFolderMap.put(ConfigConstants.CSS_INPUT_FOLDER + "jquery.treegrid.css",
+                RuntimeConfig.getInstance().getCssFolder());
 
         fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "vPAV.png",
                 RuntimeConfig.getInstance().getImgFolder());
         fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "viadee_weiss.png",
+                RuntimeConfig.getInstance().getImgFolder());
+        fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "collapse.png",
+                RuntimeConfig.getInstance().getImgFolder());
+        fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "expand.png",
+                RuntimeConfig.getInstance().getImgFolder());
+        fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "file.png",
+                RuntimeConfig.getInstance().getImgFolder());
+        fileToFolderMap.put(ConfigConstants.IMG_INPUT_FOLDER + "folder.png",
                 RuntimeConfig.getInstance().getImgFolder());
 
         fileToFolderMap.put(ConfigConstants.FONT_INPUT_FOLDER + "fa-brands-400.eot",

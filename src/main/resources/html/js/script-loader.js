@@ -73,6 +73,8 @@ async function loadLogicJs() {
             "js/adminlte.js",
             "js/jquery.knob.js",
             "js/bootstrap-table.js",
+            "js/jquery.treegrid.js",
+            "js/bootstrap-table-treegrid.js",
             //miscellaneous
             "js/download.js",
             //application

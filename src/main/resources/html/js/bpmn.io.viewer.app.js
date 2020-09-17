@@ -852,7 +852,7 @@ async function createProjectSummary() {
           <span class="fas fa-times"></span>
         </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body table-responsive">
         <table id="table">
         </table>
       </div>
@@ -881,8 +881,19 @@ function smallBoxTemplate(label, icon, value) {
 }
 
 function createModalTable(projectName) {
+    const projectNamesRowIndex = new Map();
+    const projectMainRowFormat = (row, index) => {
+        const displayIndex = index + 1;
+        if (!row.modelName) {
+            // if (!projectNamesRowIndex.get(row.projectName)) {
+            projectNamesRowIndex.set(row.projectName, displayIndex);
+            // }
+            return {classes: `viadee-lightblue-bg font-weight-bold treegrid-${displayIndex}`}
+        } else {
+            return {classes: `treegrid-${displayIndex} treegrid-parent-${projectNamesRowIndex.get(row.projectName)}`}
+        }
+    }
     const percentageFormat = value => `${Math.round(value)}%`;
-    const projectMainRowFormat = row => !row.modelName ? {classes: "viadee-lightblue-bg font-weight-bold"} : {classes: ""};
     const modelNameFormat = modelPath => {
         const pathWithoutSuffix = modelPath.substr(0, modelPath.length - 5);
         const modelName = pathWithoutSuffix.substring(pathWithoutSuffix.lastIndexOf("/") + 1, pathWithoutSuffix.length);
@@ -909,16 +920,40 @@ function createModalTable(projectName) {
         {field: 'errorElementsRatio', title: 'Error elements ratio', sortable: true, formatter: percentageFormat},
         {field: 'flawedElementsRatio', title: 'Flawed elements ratio', sortable: true, formatter: percentageFormat}];
     const tableData = Array.from(projectNameToSummaryMap.values())
-        .concat(Array.from(projectNameToSummaryMap.values()).map(summary => summary.models).flat(1));
+        .concat(Array.from(projectNameToSummaryMap.values()).map(summary => summary.models).flat(1))
+        .sort((a, b) => (a.projectName > b.projectName) ? 1 : ((b.projectName > a.projectName) ? -1 : 0));
     const $table = $('#table');
     $table.on("post-header.bs.table", () => {
         //direct styling of inner heading divs otherwise not possible
         document.querySelectorAll(".th-inner").forEach(heading => heading.classList.add("text-wrap"));
     });
+    $table.on("load-success.bs.table post-body.bs.table refresh.bs.table reset-view.bs.table", () => {
+        //copied from treegrid examples. For unknown reasons it is needed but it is unclear why. Too bad.
+        const columns = $table.bootstrapTable('getOptions').columns;
+        if (columns && columns[0][1].visible) {
+            $table.treegrid({treeColumn: 0});
+        }
+        //workaround, as setting an empty indentTemplate during treegrid init won't work for some reason
+        document.querySelectorAll("span.treegrid-indent")
+            .forEach(element => element.remove());
+
+        //Remove spacing in treegrid subitems
+        document.querySelectorAll("span.treegrid-expander:not(.treegrid-expander-expanded):not(.treegrid-expander-collapsed)")
+            .forEach(element => element.remove());
+    });
     $table.bootstrapTable({
         columns: columnDefinitions, data: tableData, showColumns: true, showFullscreen: true,
-        buttonsClass: "viadee", search: true, searchText: projectName, showToggle: true,
+        buttonsClass: "viadee", search: true,
+        searchText: projectName,
+        showToggle: true,
+        showSearchClearButton: true,
         headerStyle: headerFormat, rowStyle: projectMainRowFormat
+    });
+
+    $table.treegrid();
+    $('#modalTable').on("shown.bs.modal", () => {
+        //Trigger first time dom cleanup
+        $table.bootstrapTable('resetView');
     });
     $('#modalTable').on("hidden.bs.modal", () => {
         $table.bootstrapTable('destroy');
