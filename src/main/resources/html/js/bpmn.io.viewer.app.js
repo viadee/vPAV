@@ -905,7 +905,8 @@ function createModalTable(projectName) {
     const columnDefinitions = [
         {field: 'projectName', title: 'Project name', sortable: true},
         {field: 'modelName', title: 'Model name', sortable: true, formatter: modelNameFormat},
-        {field: 'totalElements', title: 'Total Elements', sortable: true},
+        {field: 'totalElements', title: 'Total elements', sortable: true},
+        {field: 'ignoredElements', title: 'Ignored elements', sortable: true},
         {field: 'analyzedElements', title: 'Analyzed elements', sortable: true},
         {field: 'issues', title: 'Issues', sortable: true},
         {field: 'ignoredIssues', title: 'Ignored issues', sortable: true},

@@ -441,6 +441,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String projectName = "projectName";
 		final String modelName = "modelName";
 		final String totalElements = "totalElements";
+		final String ignoredElements = "ignoredElements";
 		final String analyzedElements = "analyzedElements";
 		final String issuesString = "issues";
 		final String ignoredIssues = "ignoredIssues";
@@ -464,9 +465,17 @@ public class JsOutputWriter implements IssueOutputWriter {
 				IssueService.getInstance().getElementIdToBpmnFileMap().values().stream()
 						.mapToInt(Set::size)
 						.sum();
-		final Integer analyzedElementsCount = elementsCountTotal - ignoredIssuesTotal;
+		final Long ignoredElementsTotal = IssueService.getInstance().getIssues().stream()
+				.filter(issue -> getIgnoredIssuesMap()
+						.containsKey(issue.getId()))  //Retrieve the unfiltered issue collection
+				.map(CheckerIssue::getElementId)
+				.distinct()
+				.count();
+		final Integer analyzedElementsCount = elementsCountTotal - Math.toIntExact(ignoredElementsTotal);
 		final Long flawedElementsTotal = issues.stream()
-				.map(CheckerIssue::getElementId).distinct().count();
+				.map(CheckerIssue::getElementId)
+				.distinct()
+				.count();
 		projectSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
 		final Long warningsTotal = issues.stream()
 				.filter(issue -> issue.getClassification().equals(CriticalityEnum.WARNING)).count();
@@ -490,6 +499,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final Double flawedElementsTotalRatio = (double) flawedElementsTotal / (double) analyzedElementsCount * 100;
 		projectSummary.addProperty(modelName, "");
 		projectSummary.addProperty(totalElements, elementsCountTotal);
+		projectSummary.addProperty(ignoredElements, ignoredElementsTotal);
 		projectSummary.addProperty(analyzedElements, analyzedElementsCount);
 		projectSummary.addProperty(issuesString, issues.size());
 		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
@@ -511,9 +521,8 @@ public class JsOutputWriter implements IssueOutputWriter {
 				IssueService.getInstance().getElementIdToBpmnFileMap().keySet());
 		modelsList.forEach(model -> {
 			final JsonObject modelSummary = new JsonObject();
-			final Long ignoredIssuesModelCount = IssueService.getInstance()
-					.getIssues() //Retrieve the unfiltered issue collection
-					.stream()
+			final Long ignoredIssuesModelCount = IssueService.getInstance().getIssues()
+					.stream()//Retrieve the unfiltered issue collection
 					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
 					.filter(issue -> getIgnoredIssuesMap().containsKey(issue.getId()))
 					.distinct() //Some types of issues can be multiple times in the collection
@@ -521,7 +530,14 @@ public class JsOutputWriter implements IssueOutputWriter {
 			final Integer elementsModelCount = IssueService.getInstance().getElementIdToBpmnFileMap()
 					.get(model)
 					.size();
-			final Integer analyzedElementsModelCount = elementsModelCount - Math.toIntExact(ignoredIssuesModelCount);
+			final Long ignoredElementsModelCount = IssueService.getInstance().getIssues().stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
+					.filter(issue -> getIgnoredIssuesMap()
+							.containsKey(issue.getId()))  //Retrieve the unfiltered issue collection
+					.map(CheckerIssue::getElementId)
+					.distinct()
+					.count();
+			final Integer analyzedElementsModelCount = elementsModelCount - Math.toIntExact(ignoredElementsModelCount);
 			final Long issuesModelCount = issues.stream()
 					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
 					.count();
@@ -562,6 +578,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			modelSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
 			modelSummary.addProperty(modelName, model);
 			modelSummary.addProperty(totalElements, elementsModelCount);
+			modelSummary.addProperty(ignoredElements, ignoredElementsModelCount);
 			modelSummary.addProperty(analyzedElements, analyzedElementsModelCount);
 			modelSummary.addProperty(issuesString, issuesModelCount);
 			modelSummary.addProperty(ignoredIssues, ignoredIssuesModelCount);
