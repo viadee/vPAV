@@ -1297,10 +1297,10 @@ const toolTips = {};
 function setTooltips() {
     toolTips.projectName = "Folder name of the Java project";
     toolTips.modelName = "Name of the BPMN file project resource"
-    toolTips.totalElements = "BPMN elements amount within the model";
+    toolTips.totalElements = "Total amount fo BPMN elements";
     toolTips.ignoredElements = "BPMN elements having ignored issues";
-    toolTips.analyzedElements = "BPMN elements not having any ignored issues";
-    toolTips.issues = "Total issues of model";
+    toolTips.analyzedElements = "BPMN elements without any ignored issues";
+    toolTips.issues = "Total issues amount";
     toolTips.ignoredIssues = "Ignored issues count";
     toolTips.flawedElements = "BPMN elements having issues";
     toolTips.warnings = "Amount of warnings within issues";
