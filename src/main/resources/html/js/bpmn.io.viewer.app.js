@@ -956,7 +956,7 @@ function createModalTable(projectName) {
         document.querySelectorAll("thead > tr > th").forEach(header => {
             header.setAttribute("data-toggle", "tooltip");
             header.setAttribute("data-placement", "bottom");
-            header.setAttribute("title", toolTips[header.getAttribute("data-field")]);
+            header.setAttribute("data-original-title", toolTips[header.getAttribute("data-field")]);
         });
     });
     $table.bootstrapTable({
