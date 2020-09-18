@@ -873,7 +873,7 @@ function smallBoxTemplate(label, icon, knobValue, toolTip) {
     return `
             <div class="col text-center small-box mb-0 border-secondary">
                     <input class="knob" data-readonly="true" value="${knobValue}" data-width="150" data-height="150"
-                        data-fgcolor="#DFAD47"  data-bgcolor="#7EBCA9" data-inputcolor="#7EBCA9" readonly="readonly">
+                        data-fgcolor="#DFAD47"  data-bgcolor="#7EBCA9" data-inputcolor="#6c757d" readonly="readonly">
                         <div class="d-flex flex-row justify-content-between align-items-center rounded mt-1 p-1">
                             <h5 class="flex-column knob-label text-white mb-0">${label}</h5>
                             <span class="flex-column fa-stack fa-1x mb-0"
