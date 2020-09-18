@@ -57,7 +57,11 @@ function loadDomElements(scriptNodes) {
         scriptNodes.forEach(script => {
             fragment.appendChild(script);
         });
-        document.body.appendChild(fragment);
+        try {
+            document.body.appendChild(fragment);
+        } catch (error) {
+            reject("Error loading fragment: " + error);
+        }
     });
 }
 
@@ -100,10 +104,10 @@ async function loadDataJs() {
             projectNameToPathMap.set(properties.projectName, path);
         }
         projectNamesSorted = Array.from(projectNameToPathMap.keys()).sort((a, b) => a.localeCompare(b));
+        await loadDomElements(createScriptTags(generateScriptSourcesArray(), true));
     } catch (error) {
         console.warn(error);
     }
-    await loadDomElements(createScriptTags(generateScriptSourcesArray(), true));
 }
 
 var documentBackup;
@@ -113,6 +117,7 @@ if (!documentBackup) {
 var projectNameToSummaryMap;
 var projectNamesSorted;
 var projectNameToPathMap;
+var projectSummaryFirstTimeLoaded = false;
 (async () => {
     await loadDataJs();
     await loadLogicJs();

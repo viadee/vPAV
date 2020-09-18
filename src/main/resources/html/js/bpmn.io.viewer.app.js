@@ -1292,20 +1292,6 @@ async function loadExternalReport(reportPath) {
     initPage();
 }
 
-var controller;
-var bpmnFile;
-
-function initPage() {
-    createDiagramTabs();
-    bpmnFile = diagramXMLSource[0].name;
-    createViewModesNavBar(bpmnFile);
-    controller = createViewController();
-    controller.init();
-    showUnlocatedCheckers();
-}
-
-initPage();
-
 const toolTips = {};
 
 function setTooltips() {
@@ -1328,4 +1314,25 @@ function setTooltips() {
     toolTips.errorElementsRatio = "Error elements / (analyzed elements) * 100";
     toolTips.flawedElementsRatio = "Flawed elements / (analyzed elements) * 100";
 }
+
+var controller;
+var bpmnFile;
+
+function initPage() {
+    if (typeof reportData !== "undefined" &&
+        reportData.isMultiProjectScan === "true" &&
+        projectSummaryFirstTimeLoaded === false) {
+        projectSummaryFirstTimeLoaded = true;
+        createProjectSummary();
+    } else {
+        createDiagramTabs();
+        bpmnFile = diagramXMLSource[0].name;
+        createViewModesNavBar(bpmnFile);
+        controller = createViewController();
+        controller.init();
+        showUnlocatedCheckers();
+    }
+}
+
+initPage();
 

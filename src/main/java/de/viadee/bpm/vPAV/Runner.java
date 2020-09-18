@@ -92,32 +92,35 @@ public class Runner {
     public void viadeeProcessApplicationValidator() {
         // 1
         rules = readConfig();
-
         // 2
         setFileScanner(new FileScanner(rules));
-
         // 3
         JavaReaderStatic.setupSoot();
-
         // 4
         getProcessVariables(rules);
-
         // 5
         createIssues(rules, dataFlowRules);
-
         // 6
         removeIgnoredIssues();
-
         // 7
         writeOutput(filteredIssues, elements, processVariables);
-
         // 8
         copyFiles();
-
-        //8
-        checkReportsOverviewPathGeneration();
-
         logger.info("BPMN validation successfully completed");
+    }
+
+    public void viadeeProcessApplicationValidator(Boolean multiProjectCopyMode) {
+        if (multiProjectCopyMode) {
+            // 1
+            rules = readConfig();
+            // 8
+            copyFiles();
+            // 9
+            checkReportsOverviewPathGeneration();
+            logger.info("BPMN validation successfully completed");
+        } else {
+            viadeeProcessApplicationValidator();
+        }
     }
 
     /**
@@ -634,6 +637,9 @@ public class Runner {
         }
     }
 
+    /**
+     * Copies only the data from other vPAV reports
+     */
     private void checkReportsOverviewPathGeneration() {
         if (RuntimeConfig.getInstance().isMultiProjectScan() && externalReportsPaths.size() > 0) {
             JsOutputWriter jsOutputWriter = new JsOutputWriter();

@@ -76,6 +76,15 @@ public class ProcessApplicationValidator {
     }
 
     /**
+     * Generate a project summary from other vPAV reports
+     */
+    public static void createMultiProjectReport() {
+        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+        Runner runner = new Runner();
+        runner.viadeeProcessApplicationValidator(true);
+    }
+
+    /**
      * Find issues with given ApplicationContext (Spring)
      *
      * @param ctx - Spring context
