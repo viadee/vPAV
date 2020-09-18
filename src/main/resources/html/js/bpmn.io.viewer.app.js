@@ -832,7 +832,7 @@ async function createProjectSummary() {
                 ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle fa-xs",
             Math.round(projectNameToSummaryMap.get(name).errorElementsRatio), toolTips.errorElementsRatio)} 
             </div>
-                <button type="button" class="row btn" data-toggle="modal" 
+                <button type="button" class="row btn ml-1" data-toggle="modal" 
                 data-target="#modalTable"
                 onclick="createModalTable('${name}')"}>
                 <div class="d-flex flex-row justify-content-center align-items-center">
