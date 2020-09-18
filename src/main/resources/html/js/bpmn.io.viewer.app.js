@@ -960,7 +960,8 @@ function createModalTable(projectName) {
         });
     });
     $table.bootstrapTable({
-        columns: columnDefinitions, data: tableData, showColumns: true, showFullscreen: true, buttonsClass: "viadee",
+        columns: columnDefinitions, data: tableData, showColumns: true, showFullscreen: true,
+        classes: "table table-bordered", buttonsClass: "viadee",
         search: true, searchText: projectName, showToggle: true, showSearchClearButton: true, showExport: true,
         exportTypes: ['json', 'xml', 'csv', 'txt', 'sql'],
         headerStyle: headerFormat, rowStyle: projectMainRowFormat
