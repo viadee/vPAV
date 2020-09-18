@@ -811,6 +811,7 @@ async function createProjectSummary() {
     await loadDomElements(createScriptTags(['data/infoPOM.js'], true)); // infoPOM is needed to fill footer
     createHeader();
     createFooter();
+    setTooltips();
     const mainContent = document.getElementById("content");
     const summaryTemplate = `
               ${projectNamesSorted.map((name) => {
@@ -823,13 +824,13 @@ async function createProjectSummary() {
             </h3>
             <div class="row small-box-container">           
                 ${smallBoxTemplate("Issue ratio", "fas fa-percentage fa-xs",
-            Math.round(projectNameToSummaryMap.get(name).issuesRatio))}
+            Math.round(projectNameToSummaryMap.get(name).issuesRatio), toolTips.issuesRatio)}
                 ${smallBoxTemplate("Flawed elements ratio", "fas fa-info-circle fa-xs",
-            Math.round(projectNameToSummaryMap.get(name).flawedElementsRatio))}
+            Math.round(projectNameToSummaryMap.get(name).flawedElementsRatio), toolTips.flawedElementsRatio)}
                 ${smallBoxTemplate("Warning elements ratio", "fas fa-exclamation-triangle fa-xs",
-            Math.round(projectNameToSummaryMap.get(name).warningElementsRatio))}
+            Math.round(projectNameToSummaryMap.get(name).warningElementsRatio), toolTips.warningElementsRatio)}
                 ${smallBoxTemplate("Error elements ratio", "fas fa-times-circle fa-xs",
-            Math.round(projectNameToSummaryMap.get(name).errorElementsRatio))} 
+            Math.round(projectNameToSummaryMap.get(name).errorElementsRatio), toolTips.errorElementsRatio)} 
             </div>
                 <button type="button" class="row btn" data-toggle="modal" 
                 data-target="#modalTable"
@@ -865,14 +866,22 @@ async function createProjectSummary() {
 `;
     mainContent.innerHTML = summaryTemplate;
     $(".knob").knob(); //Init display of knobs
+    $('[data-toggle="tooltip"]').tooltip();//Init tooltips
 }
 
-function smallBoxTemplate(label, icon, value) {
+function smallBoxTemplate(label, icon, knobValue, toolTip) {
     return `
             <div class="col text-center small-box mb-0 border-secondary">
-                    <input class="knob" data-readonly="true" value="${value}" data-width="150" data-height="150"
+                    <input class="knob" data-readonly="true" value="${knobValue}" data-width="150" data-height="150"
                         data-fgcolor="#DFAD47"  data-bgcolor="#7EBCA9" data-inputcolor="#7EBCA9" readonly="readonly">
-                    <h5 class="knob-label text-white bg-secondary rounded mt-1">${label}</h5>
+                        <div class="d-flex flex-row justify-content-between align-items-center rounded mt-1 p-1">
+                            <h5 class="flex-column knob-label text-white mb-0">${label}</h5>
+                            <span class="flex-column fa-stack fa-1x mb-0"
+                            data-toggle="tooltip" data-placement="bottom" title="${toolTip}">
+                                <i class="h5 text-white fas fa-circle fa-stack-1x"></i>
+                                <i class="h5 fas text-info fas fa-question-circle fa-stack-1x fa-inverse"></i>
+                            </span>         
+                        </div>
                 <div class="icon">
                     <i class="${icon}"></i>
                 </div>
@@ -881,6 +890,7 @@ function smallBoxTemplate(label, icon, value) {
 }
 
 function createModalTable(projectName) {
+
     const projectNamesRowIndex = new Map();
     const projectMainRowFormat = (row, index) => {
         const displayIndex = index + 1;
@@ -899,7 +909,7 @@ function createModalTable(projectName) {
         const modelName = pathWithoutSuffix.substring(pathWithoutSuffix.lastIndexOf("/") + 1, pathWithoutSuffix.length);
         return modelName;
     }
-    const headerFormat = () => {
+    const headerFormat = (column) => {
         return {classes: "align-top"};
     };
     const columnDefinitions = [
@@ -941,6 +951,13 @@ function createModalTable(projectName) {
         //Remove spacing in treegrid subitems
         document.querySelectorAll("span.treegrid-expander:not(.treegrid-expander-expanded):not(.treegrid-expander-collapsed)")
             .forEach(element => element.remove());
+
+        //Setting tooltips
+        document.querySelectorAll("thead > tr > th").forEach(header => {
+            header.setAttribute("data-toggle", "tooltip");
+            header.setAttribute("data-placement", "bottom");
+            header.setAttribute("title", toolTips[header.getAttribute("data-field")]);
+        });
     });
     $table.bootstrapTable({
         columns: columnDefinitions, data: tableData, showColumns: true, showFullscreen: true, buttonsClass: "viadee",
@@ -949,7 +966,8 @@ function createModalTable(projectName) {
         headerStyle: headerFormat, rowStyle: projectMainRowFormat
     });
 
-    $table.treegrid();
+    $table.treegrid();//Init tree view
+    $('[data-toggle="tooltip"]').tooltip();//Init tooltips
     $('#modalTable').on("shown.bs.modal", () => {
         //Trigger first time dom cleanup
         $table.bootstrapTable('resetView');
@@ -1286,4 +1304,27 @@ function initPage() {
 }
 
 initPage();
+
+const toolTips = {};
+
+function setTooltips() {
+    toolTips.projectName = "Folder name of the Java project";
+    toolTips.modelName = "Name of the BPMN file project resource"
+    toolTips.totalElements = "BPMN elements amount within the model";
+    toolTips.ignoredElements = "BPMN elements having ignored issues";
+    toolTips.analyzedElements = "BPMN elements not having any ignored issues";
+    toolTips.issues = "Total issues of model";
+    toolTips.ignoredIssues = "Ignored issues count";
+    toolTips.flawedElements = "BPMN elements having issues";
+    toolTips.warnings = "Amount of warnings within issues";
+    toolTips.errors = "Amount of errors within issues";
+    toolTips.warningElements = "BPMN element count with warnings";
+    toolTips.errorElements = "BPMN element count with errors";
+    toolTips.issuesRatio = "Issues / (analyzed elements) * 100";
+    toolTips.warningRatio = "Warnings / (analyzed elements) * 100";
+    toolTips.errorRatio = "Errors / analyzed elements * 100";
+    toolTips.warningElementsRatio = "Warning elements / (analyzed elements) * 100";
+    toolTips.errorElementsRatio = "Error elements / (analyzed elements) * 100";
+    toolTips.flawedElementsRatio = "Flawed elements / (analyzed elements) * 100";
+}
 

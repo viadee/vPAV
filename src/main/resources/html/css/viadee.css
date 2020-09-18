@@ -212,6 +212,10 @@ a:hover {
     background: #7EBCA9;
 }
 
+.viadee-lightblue-color {
+    color: #7EBCA9;
+}
+
 .viadee-blue-bg {
     background-color: #3C5C8E;
 }
@@ -287,13 +291,17 @@ a:hover {
     padding-top: 1rem;
 }
 
-.small-box > h5 {
-    opacity: .5;
+.small-box > div:nth-of-type(2) {
+    background-color: rgba(108, 117, 125, 0.5);
 }
 
 .small-box-container > div:nth-of-type(1) > .icon {
     color: var(--dark);
     opacity: 0.4;
+}
+
+.tooltip-inner {
+    background-color: var(--info)
 }
 
 .small-box-container > div:nth-of-type(2) > .icon {
@@ -354,11 +362,6 @@ a:hover {
 
 .small-box-container ~ .btn {
     background-color: #DFAD47;
-    /*font-size: 2.2rem;*/
-    /*font-weight: bold;*/
-    /*margin: 0 0 10px 0;*/
-    /*padding: 0;*/
-    /*white-space: nowrap;*/
 }
 
 .hide {
