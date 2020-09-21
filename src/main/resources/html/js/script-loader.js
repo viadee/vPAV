@@ -104,10 +104,10 @@ async function loadDataJs() {
             projectNameToPathMap.set(properties.projectName, path);
         }
         projectNamesSorted = Array.from(projectNameToPathMap.keys()).sort((a, b) => a.localeCompare(b));
-        await loadDomElements(createScriptTags(generateScriptSourcesArray(), true));
     } catch (error) {
         console.warn(error);
     }
+    await loadDomElements(createScriptTags(generateScriptSourcesArray(), true));
 }
 
 var documentBackup;
