@@ -32,7 +32,7 @@
 package de.viadee.bpm.vPAV.config.reader;
 
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
-import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesConfiguration;
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesConfigurationException;
 import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesParameterException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -125,7 +125,7 @@ public class PropertiesReader {
                 if (properties.containsKey("generatedReports")) {
                     String[] paths = properties.get("generatedReports").toString().split(",");
                     if (properties.containsKey("outputhtml") && properties.get("outputhtml").equals("false")) {
-                        throw new InvalidPropertiesConfiguration(
+                        throw new InvalidPropertiesConfigurationException(
                                 "Multi project scan not allowed when HTML output is disabled");
                     }
                     if (paths.length < 2) {
@@ -141,11 +141,11 @@ public class PropertiesReader {
                         }
                     }
                 } else
-                    throw new InvalidPropertiesConfiguration(
+                    throw new InvalidPropertiesConfigurationException(
                             "Enabled multi report scan needs defined external reports paths");
             } else if (properties.get("multiProjectReport").equals("false") && properties
                     .containsKey("generatedReports")) {
-                throw new InvalidPropertiesConfiguration(
+                throw new InvalidPropertiesConfigurationException(
                         "External reports paths not allowed with disabled multi report scan");
             }
         }

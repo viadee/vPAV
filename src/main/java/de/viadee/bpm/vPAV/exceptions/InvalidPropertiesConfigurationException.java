@@ -31,13 +31,13 @@
  */
 package de.viadee.bpm.vPAV.exceptions;
 
-public class InvalidPropertiesConfiguration extends RuntimeException {
-    
-    public InvalidPropertiesConfiguration(final String message, Throwable e) {
+public class InvalidPropertiesConfigurationException extends RuntimeException {
+
+    public InvalidPropertiesConfigurationException(final String message, Throwable e) {
         super(message, e);
     }
 
-    public InvalidPropertiesConfiguration(final String message) {
+    public InvalidPropertiesConfigurationException(final String message) {
         super(message);
     }
 

@@ -31,7 +31,7 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
-import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesConfiguration;
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesConfigurationException;
 import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesParameterException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +86,7 @@ class PropertiesReaderTest {
     void testMultiReportsEnabledWhenOutputHtmlIsDisabled() {
         properties.put("multiProjectReport", "true");
         properties.put("outputhtml", "false");
-        assertThrows(InvalidPropertiesConfiguration.class, () -> {
+        assertThrows(InvalidPropertiesConfigurationException.class, () -> {
             testSubject.initProperties();
         });
     }
@@ -116,7 +116,7 @@ class PropertiesReaderTest {
     @Test
     void testMultiReportsEnabledWithoutGeneratedReportsPaths() {
         properties.put("multiProjectReport", "true");
-        assertThrows(InvalidPropertiesConfiguration.class, () -> {
+        assertThrows(InvalidPropertiesConfigurationException.class, () -> {
             testSubject.initProperties();
         });
     }
@@ -125,7 +125,7 @@ class PropertiesReaderTest {
     void testMultiReportsDisabeldWithGeneratedReportsPaths() {
         properties.put("multiProjectReport", "false");
         properties.put("generatedReports", "./a/b");
-        assertThrows(InvalidPropertiesConfiguration.class, () -> {
+        assertThrows(InvalidPropertiesConfigurationException.class, () -> {
             testSubject.initProperties();
         });
     }

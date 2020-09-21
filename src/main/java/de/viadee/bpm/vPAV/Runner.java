@@ -36,6 +36,7 @@ import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.ConfigReaderException;
 import de.viadee.bpm.vPAV.config.reader.XmlConfigReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesConfigurationException;
 import de.viadee.bpm.vPAV.exceptions.OutputWriterException;
 import de.viadee.bpm.vPAV.output.*;
 import de.viadee.bpm.vPAV.processing.BpmnModelDispatcher;
@@ -644,6 +645,10 @@ public class Runner {
         if (RuntimeConfig.getInstance().isMultiProjectScan() && externalReportsPaths.size() > 0) {
             JsOutputWriter jsOutputWriter = new JsOutputWriter();
             jsOutputWriter.writeGeneratedReportsData(externalReportsPaths);
+        } else {
+            throw new InvalidPropertiesConfigurationException( //better safe than sorry
+                    "The project configuration doesn't meet the requirements"
+                            + " to generate a summary report from multiple projects");
         }
     }
 
