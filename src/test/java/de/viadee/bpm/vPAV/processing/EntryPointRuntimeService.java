@@ -31,8 +31,10 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
+import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.camunda.bpm.engine.runtime.ProcessInstantiationBuilder;
 import org.camunda.bpm.engine.variable.Variables;
 import org.camunda.bpm.spring.boot.starter.event.PostDeployEvent;
 
@@ -42,6 +44,8 @@ import java.util.Map;
 public class EntryPointRuntimeService {
 
     private RuntimeService runtimeService;
+
+    private ProcessEngine processEngine;
 
     public void startProcessWithVariables(PostDeployEvent event) {
         HashMap<String, Object> variables = new HashMap<>();
@@ -56,6 +60,15 @@ public class EntryPointRuntimeService {
         runtimeService.startProcessInstanceByKey("myKey");
         runtimeService.startProcessInstanceByMessage("myMessage");
         runtimeService.startProcessInstanceByMessageAndProcessDefinitionId("myMessage2", "myId2");
+    }
+
+    public void startWithProcessInstantiationBuilder() {
+        ProcessInstantiationBuilder instantiationBuilder = processEngine.getRuntimeService()
+                .createProcessInstanceByKey("processKey")
+                .businessKey("key")
+                .setVariable("var", "value");
+
+        instantiationBuilder.execute();
     }
 
     public void withVariableMap(PostDeployEvent event) {

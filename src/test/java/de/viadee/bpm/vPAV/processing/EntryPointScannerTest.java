@@ -110,6 +110,21 @@ public class EntryPointScannerTest {
     }
 
     @Test
+    public void startWithProcessInstantiationBuilder() {
+        List<EntryPoint> entryPoints = scanner.getEntryPoints().stream()
+                .filter(ep -> ep.getMethodName().equals("startWithProcessInstantiationBuilder")).collect(
+                        Collectors.toList());
+        Assert.assertEquals("One entry point should be found.", 1, entryPoints.size());
+        Assert.assertEquals("processKey", entryPoints.get(0).getProcessDefinitionKey());
+        Assert.assertEquals("One variable should be passed on start.", 1,
+                entryPoints.get(0).getProcessVariables().size());
+        Assert.assertEquals("The variable 'var' should have been found.", "var",
+                entryPoints.get(0).getProcessVariables().iterator().next());
+    }
+
+    // TODO processinstantiationbuilder mit correlate message testen
+
+    @Test
     public void testCamundaVariableMap() {
         List<EntryPoint> entryPoints = scanner.getEntryPoints().stream()
                 .filter(ep -> ep.getMethodName().equals("withVariableMap")).collect(

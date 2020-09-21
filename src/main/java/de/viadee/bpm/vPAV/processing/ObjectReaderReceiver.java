@@ -32,6 +32,7 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.FluentBuilderVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
@@ -70,7 +71,11 @@ public abstract class ObjectReaderReceiver {
     public void pushNodeToStack(BasicNode blockNode) {
     }
 
-    public void addEntryPoint(CamundaEntryPointFunctions func, String className, String methodName, InvokeExpr expr, List<Object> args) {
+    public void addEntryPoint(CamundaEntryPointFunctions func, String className, String methodName, InvokeExpr expr,
+            List<Object> args) {
+    }
+
+    public void addEntryPoint(FluentBuilderVariable fb, String className, String methodName) {
     }
 
 }

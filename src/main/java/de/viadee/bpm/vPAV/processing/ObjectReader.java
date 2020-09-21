@@ -83,8 +83,9 @@ public class ObjectReader {
 
     /**
      * onstructor that is called the first time when starting an analysis.
+     *
      * @param objectReaderReceiver that is used for creating the data flow graph
-     * @param currentJavaClass that contains the block which will be analyzed
+     * @param currentJavaClass     that contains the block which will be analyzed
      */
     public ObjectReader(ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass) {
         this.objectReaderReceiver = objectReaderReceiver;
@@ -93,9 +94,10 @@ public class ObjectReader {
 
     /**
      * Constructor that is called the first time when starting an analysis.
+     *
      * @param objectReaderReceiver that is used for creating the data flow graph
-     * @param currentJavaClass that contains the block which will be analyzed
-     * @param currentMethod that contains thte block which will be analyzed
+     * @param currentJavaClass     that contains the block which will be analyzed
+     * @param currentMethod        that contains thte block which will be analyzed
      */
     public ObjectReader(ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass,
             String currentMethod) {
@@ -318,15 +320,34 @@ public class ObjectReader {
                 return null;
             }
         }
-        if (foundEntryPoint != null) {
-            // Process entry point
-            // TODO check message name for expression?!
-            notifyEntryPointProcessor(foundEntryPoint, expr, thisName);
-            return null;
-        }
 
         List<Value> args = expr.getArgs();
         List<Object> argValues = resolveArgs(args, thisName);
+
+        if (foundEntryPoint != null) {
+            if (foundEntryPoint.isFluentBuilder()) {
+                if (foundEntryPoint.equals(CamundaEntryPointFunctions.Execute) || foundEntryPoint
+                        .equals(CamundaEntryPointFunctions.ExecuteWithVariablesInReturn)) {
+                    String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
+                    FluentBuilderVariable targetObj = (FluentBuilderVariable) localObjectVariables.get(targetObjName);
+                    targetObj.setWasExecuted(true);
+                    notifyEntryPointProcessor(targetObj);
+                    return targetObj;
+                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.CreateProcessInstanceByKey)) {
+                    FluentBuilderVariable fluentBuilder = new FluentBuilderVariable(foundEntryPoint);
+                    fluentBuilder.setProcessDefinitionKey(argValues.get(0).toString());
+                    return fluentBuilder;
+                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.CreateProcessInstanceById)) {
+                    return new FluentBuilderVariable(foundEntryPoint);
+                }
+
+            } else {
+                // Process entry point
+                notifyEntryPointProcessor(foundEntryPoint, expr, thisName);
+                return null;
+            }
+        }
+
         ObjectVariable targetObj;
         SootMethod method = expr.getMethod();
 
@@ -363,6 +384,8 @@ public class ObjectReader {
                 } else if (targetObj instanceof MapVariable) {
                     // Handle operation on map variable
                     handleMapOperation((MapVariable) targetObj, method, expr, block, thisName);
+                    return targetObj;
+                } else if (targetObj instanceof FluentBuilderVariable) {
                     return targetObj;
                 }
 
@@ -658,6 +681,10 @@ public class ObjectReader {
         objectReaderReceiver
                 .addEntryPoint(func, this.currentJavaClass.getName(), this.currentMethod, expr,
                         resolveArgs(expr.getArgs(), thisName));
+    }
+
+    public void notifyEntryPointProcessor(FluentBuilderVariable fluentBuilder) {
+        objectReaderReceiver.addEntryPoint(fluentBuilder, this.currentJavaClass.getName(), this.currentMethod);
     }
 
     /**

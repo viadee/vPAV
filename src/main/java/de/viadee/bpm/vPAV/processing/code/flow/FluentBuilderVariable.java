@@ -31,36 +31,58 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import soot.Value;
-
-import java.util.HashMap;
-import java.util.Map;
+import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
 
 /**
- * Represents a map variable e.g. a HashMap.
+ * Represents a fluent builder variable. Currently, it is used to represent a ProcessInstantiationBuilder for finding entry points.
  */
-public class MapVariable extends ObjectVariable {
+public class FluentBuilderVariable extends ObjectVariable {
 
-    private Map<String, Value> values;
+    private CamundaEntryPointFunctions createMethod;
 
-    public MapVariable() {
+    private String processDefinitionKey;
+
+    private boolean wasExecuted;
+
+    private MapVariable variables;
+
+    public FluentBuilderVariable(CamundaEntryPointFunctions createMethod) {
         super();
-        values = new HashMap<>();
+        this.createMethod = createMethod;
+        wasExecuted = false;
+        processDefinitionKey = null;
+        variables = new MapVariable();
     }
 
-    public void put(String key, Value v) {
-        values.put(key, v);
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
     }
 
-    public void remove(String key) {
-        values.remove(key);
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
     }
 
-    public Map<String, Value> getValues() {
-        return values;
+    public boolean isWasExecuted() {
+        return wasExecuted;
     }
 
-    public void setValues(Map<String, Value> values) {
-        this.values = values;
+    public void setWasExecuted(boolean wasExecuted) {
+        this.wasExecuted = wasExecuted;
+    }
+
+    public MapVariable getVariables() {
+        return variables;
+    }
+
+    public void setVariables(MapVariable variables) {
+        this.variables = variables;
+    }
+
+    public CamundaEntryPointFunctions getCreateMethod() {
+        return createMethod;
+    }
+
+    public void setCreateMethod(CamundaEntryPointFunctions createMethod) {
+        this.createMethod = createMethod;
     }
 }
