@@ -276,13 +276,15 @@ public class ElementGraphBuilder {
             } else {
                 for (EventDefinition ed : ((IntermediateCatchEvent) element).getEventDefinitions()) {
                     if (ed instanceof MessageEventDefinition) {
-                        messageName = ((MessageEventDefinition) ed).getMessage().getName();
-                        break;
+                        if (Objects.nonNull(((MessageEventDefinition) ed).getMessage())) {
+                            messageName = ((MessageEventDefinition) ed).getMessage().getName();
+                            break;
+                        }
                     }
                 }
             }
 
-            if (!messageName.equals("")) {
+            if (Objects.nonNull(messageName) && !messageName.equals("")) {
                 for (EntryPoint ep : scanner.getEntryPoints()) {
                     if (ep.getEntryPointName().equals(CORRELATE_MESSAGE) && ep
                             .getMessageName().equals(messageName)) {
