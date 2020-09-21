@@ -1007,7 +1007,7 @@ function createDiagramTabs() {
         if (countIssues(model.name, elementsToMark) === 0)
             a.innerHTML = subName + " <span class='badge badge-pill badge-success badge-result pt-1 pb-1'>" + countIssues(model.name, elementsToMark) + "</span>";
         else
-            a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 badge-result'>" + countIssues(model.name, elementsToMark) + "</span>";
+            a.innerHTML = subName + " <span class='badge badge-pill pt-1 pb-1 badge-result text-white'>" + countIssues(model.name, elementsToMark) + "</span>";
         a.setAttribute("onclick", "controller.switchModel('" + model.name.replace(/\\/g, "\\\\") + "')");
         a.setAttribute("href", "#");
         if (first === true) {

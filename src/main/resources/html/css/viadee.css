@@ -364,6 +364,11 @@ a:hover {
     background-color: #DFAD47;
 }
 
+.nav-pills .nav-link:not(.active):hover {
+    /*overwrite adminlte design*/
+    color: #6c757d;
+}
+
 .hide {
     display: none;
 }
