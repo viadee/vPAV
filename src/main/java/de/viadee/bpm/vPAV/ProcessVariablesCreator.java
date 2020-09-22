@@ -42,22 +42,21 @@ import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import soot.SootClass;
-import soot.SootMethod;
-import soot.Value;
 import soot.toolkits.graph.Block;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ProcessVariablesCreator extends ObjectReaderReceiver {
 
-    private ArrayList<Node> nodes = new ArrayList<>();
+    private final ArrayList<Node> nodes = new ArrayList<>();
 
-    private BpmnElement element;
+    private final BpmnElement element;
 
-    private ElementChapter chapter;
+    private final ElementChapter chapter;
 
-    private KnownElementFieldType fieldType;
+    private final KnownElementFieldType fieldType;
 
     private String defaultScopeId;
 
@@ -85,16 +84,16 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
 
     /**
      * Start the processing of a block and all its successors. Extracts the process variables manipulations.
-     * @param block To processed block
-     * @param args Arguments passed to block
-     * @param javaClass Class that contains the block
+     *
+     * @param block      To processed block
+     * @param javaClass  Class that contains the block
      * @param sootMethod Method that contains the block
      * @return last created BasicNode or null if no were created
      */
-    public BasicNode startBlockProcessing(final Block block, final List<Value> args, final SootClass javaClass,
+    public BasicNode startBlockProcessing(final Block block, final SootClass javaClass,
             String sootMethod) {
         ObjectReader objectReader = new ObjectReader(this, javaClass, sootMethod);
-        objectReader.processBlock(block, args, null, null);
+        objectReader.processBlock(block, null, null, new HashMap<>(), new HashMap<>());
         cleanEmptyNodes();
 
         // find last node
@@ -110,12 +109,13 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
      * @param block Block in which the process variable manipulation was found
      * @param pvo   ProcessVariableOperation that was found
      */
+    @Override
     public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo, SootClass javaClass) {
         pvo.setIndex(element.getFlowAnalysis().getOperationCounter());
         element.getFlowAnalysis().incrementOperationCounter();
 
         // Block hasn't changed since the last operation, add operation to existing block
-        if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
+        if (!nodes.isEmpty() && lastNode().getBlock().equals(block)) {
             lastNode().addOperation(pvo);
         } else {
             // Add new block
@@ -133,8 +133,9 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
      * @param block Block for that a node is created
      * @return Newly created block or last block if it is associated with the passed block
      */
+    @Override
     public BasicNode addNodeIfNotExisting(Block block, SootClass javaClass) {
-        if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
+        if (!nodes.isEmpty() && lastNode().getBlock().equals(block)) {
             return lastNode();
         } else {
             // Add new block
@@ -157,10 +158,12 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
         this.defaultScopeId = scopeId;
     }
 
+    @Override
     public String getScopeId() {
         return defaultScopeId;
     }
 
+    @Override
     public String getScopeIdOfChild() {
         if (element.getBaseElement() instanceof CallActivity) {
             return ((CallActivity) element.getBaseElement()).getCalledElement();
@@ -195,6 +198,7 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
         }
     }
 
+    @Override
     public void visitBlockAgain(Block block) {
         // find first node that is associated with block and set successor
         for (Node node : nodes) {
@@ -212,8 +216,9 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
         predecessor = node;
     }
 
+    @Override
     public Node getNodeOfBlock(Block block, SootClass javaClass) {
-        if (nodes.size() > 0 && lastNode().getBlock().equals(block)) {
+        if (!nodes.isEmpty() && lastNode().getBlock().equals(block)) {
             return lastNode();
         } else {
             Node node = new Node(element, block, javaClass.getName(), chapter, fieldType);
@@ -226,11 +231,12 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
         }
     }
 
+    @Override
     public void pushNodeToStack(BasicNode blockNode) {
         predecessor = blockNode;
     }
 
-    public ArrayList<Node> getNodes() {
+    public List<Node> getNodes() {
         return nodes;
     }
 }

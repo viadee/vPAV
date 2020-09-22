@@ -48,6 +48,7 @@ import org.camunda.bpm.model.bpmn.instance.SubProcess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class NoScriptChecker extends AbstractElementChecker {
@@ -77,7 +78,7 @@ public class NoScriptChecker extends AbstractElementChecker {
             Map<String, Setting> settings = rule.getSettings();
 
             // Check all Elements with camunda:script tag
-            ArrayList<String> scriptTypes = BpmnScanner
+            List<String> scriptTypes = BpmnScanner
                     .getScriptTypes(bpmnElement);
             if (!scriptTypes.isEmpty()) {
                 if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {

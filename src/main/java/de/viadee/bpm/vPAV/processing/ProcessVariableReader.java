@@ -40,17 +40,16 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.engine.impl.juel.*;
-import org.camunda.bpm.engine.impl.juel.Node;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.impl.instance.LoopDataInputRef;
 import org.camunda.bpm.model.bpmn.instance.*;
-import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.camunda.*;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
@@ -60,7 +59,6 @@ import org.camunda.bpm.model.dmn.instance.Output;
 import org.camunda.bpm.model.dmn.instance.Text;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
-import javax.el.ELException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Logger;
@@ -129,7 +127,6 @@ public final class ProcessVariableReader {
         getVariablesFromSignalsAndMessagesAndLinks(element, predecessor);
 
         if (extensionElements != null) {
-            // TODO not 100% sure whether this is the right position or not
             // 8) Search in Input/Output-Associations (Call Activities)
             searchVariablesInInputOutputExtensions(element,
                     extensionElements, scopeElementId, predecessor);
@@ -177,9 +174,13 @@ public final class ProcessVariableReader {
 
         for (EventDefinition eventDefinition : eventDefinitions) {
             if (eventDefinition instanceof SignalEventDefinition) {
-                signals.add(((SignalEventDefinition) eventDefinition).getSignal().getName());
+                if (Objects.nonNull(((SignalEventDefinition) eventDefinition).getSignal())) {
+                    signals.add(((SignalEventDefinition) eventDefinition).getSignal().getName());
+                }
             } else if (eventDefinition instanceof MessageEventDefinition) {
-                messages.add(((MessageEventDefinition) eventDefinition).getMessage().getName());
+                if (Objects.nonNull(((MessageEventDefinition) eventDefinition).getMessage())) {
+                    messages.add(((MessageEventDefinition) eventDefinition).getMessage().getName());
+                }
             } else if (eventDefinition instanceof LinkEventDefinition) {
                 links.add(((LinkEventDefinition) eventDefinition).getName());
             }
@@ -675,7 +676,7 @@ public final class ProcessVariableReader {
                         t_delegateExpression, scopeId, predecessor);
             }
 
-            final ArrayList<String> t_fieldInjectionExpressions = BpmnScanner
+            final List<String> t_fieldInjectionExpressions = BpmnScanner
                     .getFieldInjectionExpression(baseElement);
             if (!t_fieldInjectionExpressions.isEmpty()) {
                 for (String t_fieldInjectionExpression : t_fieldInjectionExpressions)
@@ -975,6 +976,9 @@ public final class ProcessVariableReader {
         ExpressionNode expNode = new ExpressionNode(element, expression, elementChapter, fieldType);
 
         TreeStore store = new TreeStore(new Builder(Builder.Feature.METHOD_INVOCATIONS), null);
+        if (Objects.isNull(expression)) {
+            return;
+        }
         Tree tree = store.get(expression);
 
         // Only support simple expressions at the moment (only one method call or only simple reads)
@@ -1066,7 +1070,7 @@ public final class ProcessVariableReader {
                 // Call method as it might modify variables
                 // REMEMBER: execution might already be saved as field of bean but currently we cannot detect this
                 String methodName = property.toString().split(" ")[1];
-                // TODO have a look at this
+
                 EntryPoint entryPoint = new EntryPoint(className, methodName, "", BpmnConstants.ATTR_EX, "");
                 // read variables in class file (bean)
                 JavaReaderStatic

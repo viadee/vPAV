@@ -44,30 +44,46 @@ import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.*;
  */
 public enum CamundaEntryPointFunctions {
 
-    StartProcessInstanceById(START_PROCESS_INSTANCE_BY_ID, 1, 4, false),
-    StartProcessInstanceByKey(START_PROCESS_INSTANCE_BY_KEY, 1, 4, false),
-    StartProcessInstanceByMessage(START_PROCESS_INSTANCE_BY_MESSAGE, 1, 3, true),
-    StartProcessInstanceByMessageAndProcessDefinitionId(START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF, 2, 4, true),
-    CorrelateMessage(CORRELATE_MESSAGE, 1, 4, true);
+    StartProcessInstanceById(START_PROCESS_INSTANCE_BY_ID, 1, 4, false, false),
+    StartProcessInstanceByKey(START_PROCESS_INSTANCE_BY_KEY, 1, 4, false, false),
+    StartProcessInstanceByMessage(START_PROCESS_INSTANCE_BY_MESSAGE, 1, 3, true, false),
+    StartProcessInstanceByMessageAndProcessDefinitionId(START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF, 2, 4, true,
+            false),
+    CorrelateMessage(CORRELATE_MESSAGE, 1, 4, true, false),
+    CreateProcessInstanceById(CREATE_PROCESS_INSTANCE_BY_ID, 1, 1, false, true),
+    CreateProcessInstanceByKey(CREATE_PROCESS_INSTANCE_BY_KEY, 1, 1, false, true),
+    Execute(EXECUTE, 0, 2, false, true),
+    ExecuteWithVariablesInReturn(EXECUTE_WITH_VARIABLES_IN_RETURN, 0, 2, false, true),
+    SetVariable(SET_VARIABLE, 2, 2, false, true),
+    SetVariableLocal(SET_VARIABLE_LOCAL, 2, 2, false, true),
+    SetVariables(SET_VARIABLES, 1, 1, false, true),
+    SetVariablesLocal(SET_VARIABLES_LOCAL, 1, 1, false, true);
 
-    private String name;
+    private final String name;
 
-    private int minArgs;
+    private final int minArgs;
 
-    private int maxArgs;
+    private final int maxArgs;
 
-    private boolean withMessage;
+    private final boolean withMessage;
+
+    /**
+     * Describes if the method returns a fluent builder object.
+     */
+    private final boolean fluentBuilder;
 
     /**
      * @param name     - of the Camunda method
      * @param minArgs- parameter number that must at least exist
      * @param maxArgs  - maximum number of parameters which are allowed
      */
-    CamundaEntryPointFunctions(final String name, int minArgs, int maxArgs, boolean withMessage) {
+    CamundaEntryPointFunctions(final String name, int minArgs, int maxArgs, boolean withMessage,
+            boolean fluentBuilder) {
         this.name = name;
         this.minArgs = minArgs;
         this.maxArgs = maxArgs;
         this.withMessage = withMessage;
+        this.fluentBuilder = fluentBuilder;
     }
 
     public String getName() {
@@ -76,8 +92,9 @@ public enum CamundaEntryPointFunctions {
 
     public static CamundaEntryPointFunctions findEntryPoint(String name, SootClass sc, int argCount) {
         SootClass rs = Scene.v().forceResolve("org.camunda.bpm.engine.RuntimeService", 0);
+        SootClass pib = Scene.v().forceResolve("org.camunda.bpm.engine.runtime.ProcessInstantiationBuilder", 0);
 
-        if (!(sc.getInterfaces().contains(rs) || sc.equals(rs))) {
+        if (!(sc.getInterfaces().contains(rs) || sc.equals(rs) || sc.getInterfaces().contains(pib) || sc.equals(pib))) {
             return null;
         }
 
@@ -99,5 +116,9 @@ public enum CamundaEntryPointFunctions {
 
     public boolean isWithMessage() {
         return withMessage;
+    }
+
+    public boolean isFluentBuilder() {
+        return fluentBuilder;
     }
 }

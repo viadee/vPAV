@@ -72,19 +72,19 @@ public class FileScanner {
 
     private Set<String> resourcesFileInputStream = new HashSet<>();
 
-    private static Set<String> includedFiles = new HashSet<>();
+    private static final Set<String> includedFiles = new HashSet<>();
 
-    private Map<String, String> decisionRefToPathMap;
+    private final Map<String, String> decisionRefToPathMap;
 
     private Collection<String> resourcesNewestVersions = new ArrayList<>();
 
-    private Map<String, String> processIdToPathMap;
+    private final Map<String, String> processIdToPathMap;
 
     private static String scheme = null;
 
-    private static StringBuilder sootPath = new StringBuilder();
+    private static final StringBuilder sootPath = new StringBuilder();
 
-    private static Collection<String> sootPaths = new HashSet<>();
+    private static final Collection<String> sootPaths = new HashSet<>();
 
     private static boolean isDirectory = false;
 
@@ -114,8 +114,8 @@ public class FileScanner {
         scanner.scan();
         processDefinitions = new HashSet<>(Arrays.asList(scanner.getIncludedFiles()));
 
-        if (processDefinitions.size() < 1 && !RuntimeConfig.getInstance().isTest()) {
-            LOGGER.log(Level.SEVERE, "No model present in given location (" + basepath + ")");
+        if (processDefinitions.isEmpty() && !RuntimeConfig.getInstance().isTest()) {
+            LOGGER.log(Level.SEVERE, String.format("No model present in given location (%s)", basepath));
             System.exit(0);
         }
 
@@ -176,19 +176,19 @@ public class FileScanner {
                     includedFiles.addAll(Arrays.asList(scanner.getIncludedFiles()));
 
                     // filter files by versioningSchema
-                    resourcesNewestVersions = createResourcesToNewestVersions(includedFiles, versioningScheme);
+                    resourcesNewestVersions = createResourcesToNewestVersions(versioningScheme);
                 } else {
 
                     for (File file : dirs) {
                         includedFiles.add(file.getAbsolutePath());
                     }
-                    resourcesNewestVersions = createDirectoriesToNewestVersions(includedFiles, versioningScheme);
+                    resourcesNewestVersions = createDirectoriesToNewestVersions(versioningScheme);
                 }
             }
         }
     }
 
-    public static void setupSootClassPaths(LinkedList<File> dirs) {
+    public static void setupSootClassPaths(List<File> dirs) {
         // get file paths of java files
         LinkedList<File> files;
         String pathSeparator = System.getProperty("path.separator");
@@ -263,7 +263,7 @@ public class FileScanner {
      * @param list List of starting folders
      * @return List of bottom folders
      */
-    public static LinkedList<File> findLastDir(LinkedList<File> list) {
+    public static List<File> findLastDir(List<File> list) {
 
         LinkedList<File> returnList = new LinkedList<>(list);
 
@@ -287,7 +287,7 @@ public class FileScanner {
      *
      * @param classes Classes
      */
-    public static void addResources(LinkedList<File> classes) {
+    public static void addResources(List<File> classes) {
         for (File file : classes) {
             includedFiles.add(file.getName());
         }
@@ -415,13 +415,12 @@ public class FileScanner {
      *
      * @return Map
      */
-    private static Collection<String> createDirectoriesToNewestVersions(final Set<String> versionedFiles,
-            final String versioningSchema) {
+    private static Collection<String> createDirectoriesToNewestVersions(final String versioningSchema) {
         final Map<String, String> newestVersionsPathMap = new HashMap<>();
         final Map<String, String> newestVersionsMap = new HashMap<>();
 
-        if (versionedFiles != null && versioningSchema != null) {
-            for (final String versionedFile : versionedFiles) {
+        if (versioningSchema != null) {
+            for (final String versionedFile : includedFiles) {
                 final Pattern pattern = Pattern.compile(versioningSchema);
                 final Matcher matcher = pattern.matcher(versionedFile);
                 while (matcher.find()) {
@@ -457,25 +456,23 @@ public class FileScanner {
      *
      * @return Map
      */
-    private static Collection<String> createResourcesToNewestVersions(final Set<String> versionedFiles,
+    private static Collection<String> createResourcesToNewestVersions(
             final String versioningSchema) {
         final Map<String, String> newestVersionsMap = new HashMap<>();
 
-        if (versionedFiles != null) {
-            for (final String versionedFile : versionedFiles) {
-                final Pattern pattern = Pattern.compile(versioningSchema);
-                final Matcher matcher = pattern.matcher(versionedFile);
-                while (matcher.find()) {
-                    final String resource = matcher.group(1);
-                    final String oldVersion = newestVersionsMap.get(resource);
-                    if (oldVersion != null) {
-                        // If smaller than 0 this version is newer
-                        if (oldVersion.compareTo(versionedFile) < 0) {
-                            newestVersionsMap.put(resource, versionedFile);
-                        }
-                    } else {
+        for (final String versionedFile : includedFiles) {
+            final Pattern pattern = Pattern.compile(versioningSchema);
+            final Matcher matcher = pattern.matcher(versionedFile);
+            while (matcher.find()) {
+                final String resource = matcher.group(1);
+                final String oldVersion = newestVersionsMap.get(resource);
+                if (oldVersion != null) {
+                    // If smaller than 0 this version is newer
+                    if (oldVersion.compareTo(versionedFile) < 0) {
                         newestVersionsMap.put(resource, versionedFile);
                     }
+                } else {
+                    newestVersionsMap.put(resource, versionedFile);
                 }
             }
         }

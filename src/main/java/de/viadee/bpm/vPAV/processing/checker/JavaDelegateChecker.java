@@ -102,7 +102,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         }
 
         if (bpmnElement instanceof UserTask) {
-            ArrayList<ModelElementInstance> taskListener = BpmnScanner
+            List<ModelElementInstance> taskListener = BpmnScanner
                     .getListener(bpmnElement,
                             BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskListener.forEach(listener -> {
@@ -122,7 +122,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             }
         }
 
-        ArrayList<ModelElementInstance> executionListener = BpmnScanner
+        List<ModelElementInstance> executionListener = BpmnScanner
                 .getListener(bpmnElement,
                         BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionListener.forEach(listener -> {

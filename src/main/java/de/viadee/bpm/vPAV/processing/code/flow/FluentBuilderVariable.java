@@ -29,51 +29,68 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
-import de.viadee.bpm.vPAV.processing.code.flow.FluentBuilderVariable;
-import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
-import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import soot.SootClass;
-import soot.jimple.InvokeExpr;
-import soot.toolkits.graph.Block;
 
-import java.util.List;
+/**
+ * Represents a fluent builder variable. Currently, it is used to represent a ProcessInstantiationBuilder for finding entry points.
+ */
+public class FluentBuilderVariable extends ObjectVariable {
 
-public abstract class ObjectReaderReceiver {
+    private CamundaEntryPointFunctions createMethod;
 
-    public void handleProcessVariableManipulation(Block block, ProcessVariableOperation pvo, SootClass javaClass) {
+    private String processDefinitionKey;
+
+    private boolean wasExecuted;
+
+    private MapVariable variables;
+
+    public FluentBuilderVariable(CamundaEntryPointFunctions createMethod) {
+        super();
+        this.createMethod = createMethod;
+        wasExecuted = false;
+        processDefinitionKey = null;
+        variables = new MapVariable();
     }
 
-    public BasicNode addNodeIfNotExisting(Block block, SootClass javaClass) {
-        return null;
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
     }
 
-    public void visitBlockAgain(Block block) {
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
     }
 
-    public Node getNodeOfBlock(Block block, SootClass javaClass) {
-        return null;
+    public boolean isWasExecuted() {
+        return wasExecuted;
     }
 
-    public String getScopeId() {
-        return "";
+    public void setWasExecuted(boolean wasExecuted) {
+        this.wasExecuted = wasExecuted;
     }
 
-    public String getScopeIdOfChild() {
-        return "";
+    public MapVariable getVariables() {
+        return variables;
     }
 
-    public void pushNodeToStack(BasicNode blockNode) {
+    public void setVariables(MapVariable variables) {
+        this.variables = variables;
     }
 
-    public void addEntryPoint(CamundaEntryPointFunctions func, String className, String methodName, InvokeExpr expr,
-            List<Object> args) {
+    public CamundaEntryPointFunctions getCreateMethod() {
+        return createMethod;
     }
 
-    public void addEntryPoint(FluentBuilderVariable fb, String className, String methodName) {
+    public void setCreateMethod(CamundaEntryPointFunctions createMethod) {
+        this.createMethod = createMethod;
     }
 
+    public void addVariable(String key) {
+        this.variables.put(key, null);
+    }
+
+    public void addAllVariables(MapVariable map) {
+        this.variables.putAll(map.getValues());
+    }
 }

@@ -56,6 +56,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -94,7 +95,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
         }
 
         if (bpmnElement instanceof UserTask) {
-            ArrayList<ModelElementInstance> taskListener = BpmnScanner
+            List<ModelElementInstance> taskListener = BpmnScanner
                     .getListener(bpmnElement,
                             BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskListener.forEach(listener -> {
@@ -102,7 +103,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
                 taskClass.add(((CamundaTaskListener) listener).getCamundaClass());
             });
         }
-        ArrayList<ModelElementInstance> executionListener = BpmnScanner
+        List<ModelElementInstance> executionListener = BpmnScanner
                 .getListener(bpmnElement,
                         BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionListener.forEach(listener -> {
@@ -110,7 +111,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             executionClass.add(((CamundaExecutionListener) listener).getCamundaClass());
         });
 
-        final ArrayList<String> fieldInjectionVarNames = BpmnScanner.getFieldInjectionVarName(bpmnElement);
+        final List<String> fieldInjectionVarNames = BpmnScanner.getFieldInjectionVarName(bpmnElement);
 
         if (implementationAttr != null && !fieldInjectionVarNames.isEmpty() && (bpmnElement instanceof ServiceTask ||
                 bpmnElement instanceof BusinessRuleTask || bpmnElement instanceof SendTask)) {

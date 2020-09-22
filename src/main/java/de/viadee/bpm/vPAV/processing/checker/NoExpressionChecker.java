@@ -45,6 +45,7 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class NoExpressionChecker extends AbstractElementChecker {
@@ -81,7 +82,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
             if (!listener.isEmpty()
@@ -103,7 +104,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
             if (!listener.isEmpty()
@@ -114,7 +115,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
         } else if (baseElement instanceof SequenceFlow) {
 
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -123,7 +124,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         } else if (baseElement instanceof ExclusiveGateway) {
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -131,7 +132,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
         } else if (baseElement instanceof UserTask) {
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -139,7 +140,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the task listener
-            final ArrayList<ModelElementInstance> taskListener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> taskListener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!taskListener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -148,7 +149,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
 
         } else if (baseElement instanceof ManualTask) {
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
