@@ -261,7 +261,6 @@ public class ElementGraphBuilder {
                         initVarNode.addOperation(pvo);
                     }
 
-                    bpmnElement.getControlFlowGraph().addNode(initVarNode);
                     predecessor[0] = addNodeAndGetNewPredecessor(initVarNode, bpmnElement.getControlFlowGraph(),
                             predecessor[0]);
                 }
