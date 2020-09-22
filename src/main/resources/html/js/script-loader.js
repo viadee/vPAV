@@ -94,7 +94,9 @@ async function loadLogicJs() {
 
 async function loadDataJs() {
     try {
+        //Try to load summary
         await loadDomElements(createScriptTags(["externalReports/reportData.js"], true));
+        await loadDomElements(createScriptTags(["data/infoPOM.js"]));
         projectNameToSummaryMap = new Map();
         projectNameToPathMap = new Map();
         for await (let path of reportData.reportsPaths) {
@@ -106,8 +108,9 @@ async function loadDataJs() {
         projectNamesSorted = Array.from(projectNameToPathMap.keys()).sort((a, b) => a.localeCompare(b));
     } catch (error) {
         console.warn(error);
+        //As loading a summary failed, the project must be an ordinary report
+        await loadDomElements(createScriptTags(generateScriptSourcesArray(), true));
     }
-    await loadDomElements(createScriptTags(generateScriptSourcesArray(), true));
 }
 
 var documentBackup;
