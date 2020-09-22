@@ -32,7 +32,6 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.SootResolverSimplified;
-import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.processing.code.flow.FluentBuilderVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.MapVariable;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
@@ -40,7 +39,6 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.jimple.InvokeExpr;
-import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.toolkits.graph.Block;
 
 import java.util.*;
@@ -87,7 +85,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
                 if (!method.isPhantom() && !method.isAbstract()) {
                     ObjectReader objectReader = new ObjectReader(this, sootClass, method.getName());
                     Block block = SootResolverSimplified.getBlockFromMethod(method);
-                    objectReader.processBlock(block, new ArrayList<>(), new ArrayList<>(), null);
+                    objectReader.processBlock(block, new ArrayList<>(), null);
                 }
             }
         }

@@ -54,10 +54,6 @@ public class ObjectReader {
 
     private ObjectVariable thisObject = new ObjectVariable();
 
-    private HashMap<String, StringVariable> localStringVariables = new HashMap<>();
-
-    private HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
-
     private static HashMap<String, ObjectVariable> staticObjectVariables = new HashMap<>();
 
     private static final RefType StringType = RefType.v("java.lang.String");
@@ -71,11 +67,8 @@ public class ObjectReader {
     private String currentMethod;
 
     // Only used for testing purposes
-    ObjectReader(HashMap<String, StringVariable> localStrings,
-            HashMap<String, ObjectVariable> localObjects, ObjectVariable thisObject,
+    ObjectReader(ObjectVariable thisObject,
             ObjectReaderReceiver objectReaderReceiver, SootClass currentJavaClass) {
-        this.localStringVariables = localStrings;
-        this.localObjectVariables = localObjects;
         this.thisObject = thisObject;
         this.objectReaderReceiver = objectReaderReceiver;
         this.currentJavaClass = currentJavaClass;
@@ -124,12 +117,11 @@ public class ObjectReader {
      * Loops through the units of a block and notifies the ProcessVariablesCreator of used process variables.
      *
      * @param block     the block that is processed
-     * @param args      the types of arguments that were passed to the method and are available in the block
      * @param argValues the argument values (or in case of objects, references to the variable)
      * @param thisName  the local name of the current object
      * @return ObjectVariable / StringVariable that is returned by the method
      */
-    public Object processBlock(Block block, List<Value> args, List<Object> argValues, String thisName) {
+    public Object processBlock(Block block, List<Object> argValues, String thisName) {
 
         if (block == null) {
             return null;
@@ -142,6 +134,10 @@ public class ObjectReader {
         }
         processedBlocks.add(hashBlock(
                 block));
+
+        HashMap<String, StringVariable> localStringVariables = new HashMap<>();
+
+        HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
 
         final Iterator<Unit> unitIt = block.iterator();
 
@@ -158,20 +154,21 @@ public class ObjectReader {
             unit = unitIt.next();
             // e. g. r2 := @parameter1: org.camunda.bpm.engine.delegate.DelegateExecution
             if (unit instanceof IdentityStmt) {
-                handleIdentityStmt(unit, args, argValues);
+                handleIdentityStmt(unit, argValues, localStringVariables, localObjectVariables);
             }
             // e. g. $r2 = staticinvoke ... (Assignment)
             else if (unit instanceof AssignStmt) {
-                handleAssignStmt(block, unit, thisName);
+                handleAssignStmt(block, unit, thisName, localStringVariables, localObjectVariables);
             }
             // e. g. specialinvoke $r3.<de.viadee.bpm ... (Constuctor call of new object)
             else if (unit instanceof InvokeStmt) {
                 InvokeExpr expr = ((InvokeStmt) unit).getInvokeExpr();
-                handleInvokeExpr(block, expr, thisName);
+                handleInvokeExpr(block, expr, thisName, localStringVariables, localObjectVariables);
             }
             // e. g. return temp$3
             else if (unit instanceof ReturnStmt) {
-                Object returnValue = handleReturnStmt(block, unit, thisName);
+                Object returnValue = handleReturnStmt(block, unit, thisName, localStringVariables,
+                        localObjectVariables);
                 returnNode = objectReaderReceiver.addNodeIfNotExisting(block, currentJavaClass);
                 return returnValue;
             }
@@ -191,7 +188,7 @@ public class ObjectReader {
                 }
 
                 objectReaderReceiver.pushNodeToStack(blockNode);
-                this.processBlock(succ, args, argValues, thisName);
+                this.processBlock(succ, argValues, thisName);
             }
             if (returnNode != null) {
                 objectReaderReceiver.pushNodeToStack(returnNode);
@@ -219,28 +216,36 @@ public class ObjectReader {
     /**
      * Resolves the return value.
      *
-     * @param block    Current block
-     * @param unit     Current unit (return statement)
-     * @param thisName Name of current object
+     * @param block                Current block
+     * @param unit                 Current unit (return statement)
+     * @param thisName             Name of current object
+     * @param localStringVariables
+     * @param localObjectVariables
      * @return String or ObjectVariable depending on return value
      */
-    Object handleReturnStmt(Block block, Unit unit, String thisName) {
+    Object handleReturnStmt(Block block, Unit unit, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         ReturnStmt returnStmt = (ReturnStmt) unit;
         if (returnStmt.getOp().getType().equals(StringType)) {
-            return resolveStringValue(block, returnStmt.getOp(), thisName);
+            return resolveStringValue(block, returnStmt.getOp(), thisName, localStringVariables, localObjectVariables);
         } else {
-            return resolveObjectVariable(block, returnStmt.getOp(), thisName);
+            return resolveObjectVariable(block, returnStmt.getOp(), thisName, localStringVariables,
+                    localObjectVariables);
         }
     }
 
     /**
      * Handles identity statements like r2 := @parameter1:java.lang.String and translates them into local variables
      *
-     * @param unit      Identity statement
-     * @param args      Argument soot values passed to the method
-     * @param argValues "real" argument values i.e. variables that represent the argument
+     * @param unit                 Identity statement
+     * @param argValues            "real" argument values i.e. variables that represent the argument
+     * @param localStringVariables
+     * @param localObjectVariables
      */
-    void handleIdentityStmt(Unit unit, List<Value> args, List<Object> argValues) {
+    void handleIdentityStmt(Unit unit, List<Object> argValues,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         IdentityStmt identityStmt = (IdentityStmt) unit;
         // Resolve method parameters
         if (identityStmt.getRightOp() instanceof ParameterRef) {
@@ -275,21 +280,26 @@ public class ObjectReader {
     /**
      * Creates / Updates the variable that is changed by an assignment statement.
      *
-     * @param block    Current block
-     * @param unit     Current unit
-     * @param thisName Name of the current object
+     * @param block                Current block
+     * @param unit                 Current unit
+     * @param thisName             Name of the current object
+     * @param localStringVariables
+     * @param localObjectVariables
      */
-    public void handleAssignStmt(Block block, Unit unit, String thisName) {
+    public void handleAssignStmt(Block block, Unit unit, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         AssignStmt assignUnit = (AssignStmt) unit;
         Value leftValue = assignUnit.getLeftOpBox().getValue();
         Value rightValue = assignUnit.getRightOpBox().getValue();
 
         if (leftValue instanceof JimpleLocal) {
-            handleLocalAssignment(block, leftValue, rightValue, thisName);
+            handleLocalAssignment(block, leftValue, rightValue, thisName, localStringVariables, localObjectVariables);
         } else if (leftValue instanceof JInstanceFieldRef) {
-            handleFieldAssignment(block, leftValue, rightValue, thisName);
+            handleFieldAssignment(block, leftValue, rightValue, thisName, localStringVariables, localObjectVariables);
         } else if (leftValue instanceof StaticFieldRef) {
-            handleStaticFieldAssigment(block, (StaticFieldRef) leftValue, rightValue, thisName);
+            handleStaticFieldAssigment(block, (StaticFieldRef) leftValue, rightValue, thisName, localStringVariables,
+                    localObjectVariables);
         }
     }
 
@@ -297,12 +307,16 @@ public class ObjectReader {
      * Resolves invoke expressions by laoding and processing the corresponding blocks.
      * Checks for process variable manipulations.
      *
-     * @param block    Current block
-     * @param expr     Invoke expression
-     * @param thisName Name of current object
+     * @param block                Current block
+     * @param expr                 Invoke expression
+     * @param thisName             Name of current object
+     * @param localStringVariables
+     * @param localObjectVariables
      * @return String / ObjectVariable if the method returns something, null otherwise
      */
-    Object handleInvokeExpr(Block block, InvokeExpr expr, String thisName) {
+    Object handleInvokeExpr(Block block, InvokeExpr expr, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         CamundaProcessVariableFunctions foundMethod = CamundaProcessVariableFunctions
                 .findByNameAndNumberOfBoxes(expr.getMethodRef().getName(),
                         expr.getMethodRef().getDeclaringClass().getName(), expr.getArgCount());
@@ -313,7 +327,7 @@ public class ObjectReader {
 
         if (foundMethod != null) {
             // Process variable is manipulated
-            notifyVariablesReader(block, expr, foundMethod);
+            notifyVariablesReader(block, expr, foundMethod, localStringVariables, localObjectVariables);
 
             // Also handle as Map (continue processing)
             if (!(foundMethod.equals(PutValue) || foundMethod.equals(PutValueTyped))) {
@@ -322,14 +336,15 @@ public class ObjectReader {
         }
 
         List<Value> args = expr.getArgs();
-        List<Object> argValues = resolveArgs(args, thisName);
+        List<Object> argValues = resolveArgs(args, thisName, localStringVariables, localObjectVariables);
 
         if (foundEntryPoint != null) {
             if (foundEntryPoint.isFluentBuilder()) {
-                return handleFluentBuilderOperation(foundEntryPoint, expr, argValues);
+                return handleFluentBuilderOperation(foundEntryPoint, expr, argValues, localStringVariables,
+                        localObjectVariables);
             } else {
                 // Process entry point
-                notifyEntryPointProcessor(foundEntryPoint, expr, thisName);
+                notifyEntryPointProcessor(foundEntryPoint, expr, thisName, localStringVariables, localObjectVariables);
                 return null;
             }
         }
@@ -348,7 +363,7 @@ public class ObjectReader {
 
                     if (nextBlock != null) {
                         return this
-                                .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()), args,
+                                .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()),
                                         argValues,
                                         null);
                     }
@@ -357,7 +372,7 @@ public class ObjectReader {
                 // Search method in class hierarchy
                 return this
                         .processBlock(SootResolverSimplified.getBlockFromMethod(
-                                findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())), args,
+                                findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())),
                                 argValues,
                                 null);
 
@@ -369,7 +384,8 @@ public class ObjectReader {
                     targetObj = new ObjectVariable();
                 } else if (targetObj instanceof MapVariable) {
                     // Handle operation on map variable
-                    handleMapOperation((MapVariable) targetObj, method, expr, block, thisName);
+                    handleMapOperation((MapVariable) targetObj, method, expr, block, thisName, localStringVariables,
+                            localObjectVariables);
                     return targetObj;
                 } else if (targetObj instanceof FluentBuilderVariable) {
                     return targetObj;
@@ -402,7 +418,7 @@ public class ObjectReader {
         }
         ObjectReader or = new ObjectReader(objectReaderReceiver, targetObj,
                 method.getDeclaringClass(), method.getName());
-        return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), args, argValues, null);
+        return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), argValues, null);
     }
 
     /**
@@ -462,20 +478,26 @@ public class ObjectReader {
     /**
      * Resolves assignments to local variables.
      *
-     * @param block      Current block
-     * @param leftValue  Value of left side of assignment
-     * @param rightValue Value of right side of assignment
-     * @param thisName   Name of current object
+     * @param block                Current block
+     * @param leftValue            Value of left side of assignment
+     * @param rightValue           Value of right side of assignment
+     * @param thisName             Name of current object
+     * @param localStringVariables
+     * @param localObjectVariables
      */
-    void handleLocalAssignment(Block block, Value leftValue, Value rightValue, String thisName) {
+    void handleLocalAssignment(Block block, Value leftValue, Value rightValue, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         // Local string variable is updated
         if (leftValue.getType().equals(StringType)) {
-            String newValue = resolveStringValue(block, rightValue, thisName);
+            String newValue = resolveStringValue(block, rightValue, thisName, localStringVariables,
+                    localObjectVariables);
             localStringVariables.put(leftValue.toString(), new StringVariable(newValue));
         }
         // Object variable is updated/created
         else {
-            ObjectVariable ob = resolveObjectVariable(block, rightValue, thisName);
+            ObjectVariable ob = resolveObjectVariable(block, rightValue, thisName, localStringVariables,
+                    localObjectVariables);
             if (ob != null) {
                 localObjectVariables.put(leftValue.toString(), ob);
             }
@@ -485,15 +507,20 @@ public class ObjectReader {
     /**
      * Resolves assignments to fields.
      *
-     * @param block      Current block
-     * @param leftValue  Value of left side of assignment
-     * @param rightValue Value of right side of assignment
-     * @param thisName   Name of current object
+     * @param block                Current block
+     * @param leftValue            Value of left side of assignment
+     * @param rightValue           Value of right side of assignment
+     * @param thisName             Name of current object
+     * @param localStringVariables
+     * @param localObjectVariables
      */
-    void handleFieldAssignment(Block block, Value leftValue, Value rightValue, String thisName) {
+    void handleFieldAssignment(Block block, Value leftValue, Value rightValue, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         // String field of object is updated
         if (leftValue.getType().equals(StringType)) {
-            String newValue = resolveStringValue(block, rightValue, thisName);
+            String newValue = resolveStringValue(block, rightValue, thisName, localStringVariables,
+                    localObjectVariables);
             String objIdentifier = getObjIdentifierFromFieldRef(leftValue);
             String varName = getVarNameFromFieldRef(leftValue);
 
@@ -506,7 +533,8 @@ public class ObjectReader {
         else {
             String objIdentifier = getObjIdentifierFromFieldRef(leftValue);
             String varName = getVarNameFromFieldRef(leftValue);
-            ObjectVariable objectVar = resolveObjectVariable(block, rightValue, thisName);
+            ObjectVariable objectVar = resolveObjectVariable(block, rightValue, thisName, localStringVariables,
+                    localObjectVariables);
             // Only consider this object at the moment
             if (objIdentifier.equals(thisName) && objectVar != null) {
                 thisObject.putObjectField(varName, objectVar);
@@ -517,12 +545,16 @@ public class ObjectReader {
     /**
      * Resolves assignments to static fields.
      *
-     * @param block      Current block
-     * @param leftValue  Value of left side of assignment
-     * @param rightValue Value of right side of assignment
-     * @param thisName   Name of current object
+     * @param block                Current block
+     * @param leftValue            Value of left side of assignment
+     * @param rightValue           Value of right side of assignment
+     * @param thisName             Name of current object
+     * @param localStringVariables
+     * @param localObjectVariables
      */
-    void handleStaticFieldAssigment(Block block, StaticFieldRef leftValue, Value rightValue, String thisName) {
+    void handleStaticFieldAssigment(Block block, StaticFieldRef leftValue, Value rightValue, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         String classname = leftValue.getFieldRef().declaringClass().getName();
 
         if (!staticObjectVariables.containsKey(classname)) {
@@ -532,14 +564,16 @@ public class ObjectReader {
 
         // String field of object is updated
         if (leftValue.getType().equals(StringType)) {
-            String newValue = resolveStringValue(block, rightValue, thisName);
+            String newValue = resolveStringValue(block, rightValue, thisName, localStringVariables,
+                    localObjectVariables);
             String varName = getVarNameFromFieldRef(leftValue);
             staticClass.updateStringField(varName, newValue);
         }
         // Object field is updated
         else {
             String varName = getVarNameFromFieldRef(leftValue);
-            ObjectVariable objectVar = resolveObjectVariable(block, rightValue, thisName);
+            ObjectVariable objectVar = resolveObjectVariable(block, rightValue, thisName, localStringVariables,
+                    localObjectVariables);
             if (objectVar != null) {
                 staticClass.putObjectField(varName, objectVar);
             }
@@ -549,12 +583,16 @@ public class ObjectReader {
     /**
      * Resolves the value of a variable / call / constant / etc. that returns a string.
      *
-     * @param block      Current block
-     * @param rightValue Value / expression to be resolved
-     * @param thisName   Name of current object
+     * @param block                Current block
+     * @param rightValue           Value / expression to be resolved
+     * @param thisName             Name of current object
+     * @param localStringVariables
+     * @param localObjectVariables
      * @return Current string value
      */
-    String resolveStringValue(Block block, Value rightValue, String thisName) {
+    String resolveStringValue(Block block, Value rightValue, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         if (rightValue instanceof StringConstant) {
             return getValueFromStringConstant(rightValue);
         } else if (rightValue instanceof JimpleLocal) {
@@ -584,9 +622,11 @@ public class ObjectReader {
             }
             return null;
         } else if (rightValue instanceof InvokeExpr) {
-            return (String) handleInvokeExpr(block, (InvokeExpr) rightValue, thisName);
+            return (String) handleInvokeExpr(block, (InvokeExpr) rightValue, thisName, localStringVariables,
+                    localObjectVariables);
         } else if (rightValue instanceof CastExpr) {
-            return resolveStringValue(block, ((CastExpr) rightValue).getOp(), thisName);
+            return resolveStringValue(block, ((CastExpr) rightValue).getOp(), thisName, localStringVariables,
+                    localObjectVariables);
         } else {
             return null;
         }
@@ -595,12 +635,16 @@ public class ObjectReader {
     /**
      * Resolves the value of a variable / call / constant / etc. that returns an object.
      *
-     * @param block      Current block
-     * @param rightValue Value / expression to be resolved
-     * @param thisName   Name of current object
+     * @param block                Current block
+     * @param rightValue           Value / expression to be resolved
+     * @param thisName             Name of current object
+     * @param localStringVariables
+     * @param localObjectVariables
      * @return ObjectVariable that refers to the object
      */
-    ObjectVariable resolveObjectVariable(Block block, Value rightValue, String thisName) {
+    ObjectVariable resolveObjectVariable(Block block, Value rightValue, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         if (rightValue instanceof JimpleLocal) {
             String localVar = rightValue.toString();
             return localObjectVariables.get(localVar);
@@ -636,19 +680,24 @@ public class ObjectReader {
             }
             return ob;
         } else if (rightValue instanceof InvokeExpr) {
-            return (ObjectVariable) handleInvokeExpr(block, (InvokeExpr) rightValue, thisName);
+            return (ObjectVariable) handleInvokeExpr(block, (InvokeExpr) rightValue, thisName, localStringVariables,
+                    localObjectVariables);
         } else if (rightValue instanceof CastExpr) {
-            return resolveObjectVariable(block, ((CastExpr) rightValue).getOp(), thisName);
+            return resolveObjectVariable(block, ((CastExpr) rightValue).getOp(), thisName, localStringVariables,
+                    localObjectVariables);
         } else {
             return null;
         }
     }
 
     // TODO add test
-    public void notifyVariablesReader(Block block, InvokeExpr expr, CamundaProcessVariableFunctions camundaMethod) {
+    public void notifyVariablesReader(Block block, InvokeExpr expr, CamundaProcessVariableFunctions camundaMethod,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         int location = camundaMethod.getLocation() - 1;
         VariableOperation type = camundaMethod.getOperationType();
-        String variableName = resolveStringValue(block, expr.getArgBox(location).getValue(), null);
+        String variableName = resolveStringValue(block, expr.getArgBox(location).getValue(), null, localStringVariables,
+                localObjectVariables);
 
         ProcessVariableOperation pvo;
         // Variable map maps variables to child of call activity
@@ -663,10 +712,12 @@ public class ObjectReader {
         objectReaderReceiver.handleProcessVariableManipulation(block, pvo, currentJavaClass);
     }
 
-    public void notifyEntryPointProcessor(CamundaEntryPointFunctions func, InvokeExpr expr, String thisName) {
+    public void notifyEntryPointProcessor(CamundaEntryPointFunctions func, InvokeExpr expr, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         objectReaderReceiver
                 .addEntryPoint(func, this.currentJavaClass.getName(), this.currentMethod, expr,
-                        resolveArgs(expr.getArgs(), thisName));
+                        resolveArgs(expr.getArgs(), thisName, localStringVariables, localObjectVariables));
     }
 
     public void notifyEntryPointProcessor(FluentBuilderVariable fluentBuilder) {
@@ -676,41 +727,51 @@ public class ObjectReader {
     /**
      * Resolves arguments by resolving fields and local variables.
      *
-     * @param args     Arguments
-     * @param thisName Name of current object
+     * @param args                 Arguments
+     * @param thisName             Name of current object
+     * @param localStringVariables
+     * @param localObjectVariables
      * @return List of argument values
      */
-    public ArrayList<Object> resolveArgs(List<Value> args, String thisName) {
+    public ArrayList<Object> resolveArgs(List<Value> args, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         ArrayList<Object> list = new ArrayList<>();
         for (Value arg : args) {
             if (arg.getType().equals(StringType)) {
-                list.add(resolveStringValue(null, arg, thisName));
+                list.add(resolveStringValue(null, arg, thisName, localStringVariables, localObjectVariables));
             } else if (arg.getType().equals(CamundaMethodServices.DELEGATE_EXECUTION_TYPE) ||
                     arg.getType().equals(CamundaMethodServices.MAP_VARIABLES_TYPE) ||
                     arg.getType().equals(CamundaMethodServices.VARIABLE_SCOPE_TYPE)) {
                 list.add(null);
             } else {
-                list.add(resolveObjectVariable(null, arg, thisName));
+                list.add(resolveObjectVariable(null, arg, thisName, localStringVariables, localObjectVariables));
             }
         }
         return list;
     }
 
-    public void handleMapOperation(MapVariable map, SootMethod method, InvokeExpr expr, Block block, String thisName) {
+    public void handleMapOperation(MapVariable map, SootMethod method, InvokeExpr expr, Block block, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         if (method.getName().equals("put") || method.getName().equals("putValue")) {
             // Resolve name of variable
-            String variableName = resolveStringValue(block, expr.getArg(0), thisName);
+            String variableName = resolveStringValue(block, expr.getArg(0), thisName, localStringVariables,
+                    localObjectVariables);
             map.put(variableName, expr.getArg(1));
         } else if (method.getName().equals("remove")) {
             // Delete variable
-            String variableName = resolveStringValue(block, expr.getArg(0), thisName);
+            String variableName = resolveStringValue(block, expr.getArg(0), thisName, localStringVariables,
+                    localObjectVariables);
             map.remove(variableName);
         }
         // TODO support putall
     }
 
     public FluentBuilderVariable handleFluentBuilderOperation(CamundaEntryPointFunctions foundEntryPoint,
-            InvokeExpr expr, List<Object> argValues) {
+            InvokeExpr expr, List<Object> argValues,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
         FluentBuilderVariable flbv;
         switch (foundEntryPoint) {
             case Execute:
@@ -759,14 +820,6 @@ public class ObjectReader {
 
     private String getValueFromStringConstant(Value value) {
         return ((StringConstant) value).value;
-    }
-
-    HashMap<String, StringVariable> getLocalStringVariables() {
-        return localStringVariables;
-    }
-
-    HashMap<String, ObjectVariable> getLocalObjectVariables() {
-        return localObjectVariables;
     }
 
     ObjectVariable getThisObject() {

@@ -42,7 +42,6 @@ import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import soot.SootClass;
-import soot.SootMethod;
 import soot.Value;
 import soot.toolkits.graph.Block;
 
@@ -94,7 +93,7 @@ public class ProcessVariablesCreator extends ObjectReaderReceiver {
     public BasicNode startBlockProcessing(final Block block, final List<Value> args, final SootClass javaClass,
             String sootMethod) {
         ObjectReader objectReader = new ObjectReader(this, javaClass, sootMethod);
-        objectReader.processBlock(block, args, null, null);
+        objectReader.processBlock(block, null, null);
         cleanEmptyNodes();
 
         // find last node
