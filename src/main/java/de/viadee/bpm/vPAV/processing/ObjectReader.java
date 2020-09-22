@@ -326,39 +326,7 @@ public class ObjectReader {
 
         if (foundEntryPoint != null) {
             if (foundEntryPoint.isFluentBuilder()) {
-                FluentBuilderVariable flbv;
-                switch (foundEntryPoint) {
-                    case Execute:
-                    case ExecuteWithVariablesInReturn:
-                    case SetVariable:
-                    case SetVariableLocal:
-                    case SetVariables:
-                    case SetVariablesLocal:
-                        String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
-                        flbv = (FluentBuilderVariable) localObjectVariables.get(targetObjName);
-                        break;
-                    default:
-                        flbv = new FluentBuilderVariable(foundEntryPoint);
-                        break;
-                }
-
-                // TODO handle variables and move this code into another function
-                if (foundEntryPoint.equals(CamundaEntryPointFunctions.Execute) || foundEntryPoint
-                        .equals(CamundaEntryPointFunctions.ExecuteWithVariablesInReturn)) {
-                    flbv.setWasExecuted(true);
-                    notifyEntryPointProcessor(flbv);
-                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.CreateProcessInstanceByKey)) {
-                    flbv.setProcessDefinitionKey(argValues.get(0).toString());
-                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariable) || foundEntryPoint
-                        .equals(CamundaEntryPointFunctions.SetVariableLocal)) {
-                    // Local variables are currently not supported TODO
-                    flbv.addVariable(argValues.get(0).toString());
-                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariables) || foundEntryPoint
-                        .equals(CamundaEntryPointFunctions.SetVariablesLocal)) {
-                    flbv.addAllVariables((MapVariable) argValues.get(0));
-                }
-
-                return flbv;
+                return handleFluentBuilderOperation(foundEntryPoint, expr, argValues);
             } else {
                 // Process entry point
                 notifyEntryPointProcessor(foundEntryPoint, expr, thisName);
@@ -739,6 +707,41 @@ public class ObjectReader {
             map.remove(variableName);
         }
         // TODO support putall
+    }
+
+    public FluentBuilderVariable handleFluentBuilderOperation(CamundaEntryPointFunctions foundEntryPoint,
+            InvokeExpr expr, List<Object> argValues) {
+        FluentBuilderVariable flbv;
+        switch (foundEntryPoint) {
+            case Execute:
+            case ExecuteWithVariablesInReturn:
+            case SetVariable:
+            case SetVariableLocal:
+            case SetVariables:
+            case SetVariablesLocal:
+                String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
+                flbv = (FluentBuilderVariable) localObjectVariables.get(targetObjName);
+                break;
+            default:
+                flbv = new FluentBuilderVariable(foundEntryPoint);
+                break;
+        }
+
+        if (foundEntryPoint.equals(CamundaEntryPointFunctions.Execute) || foundEntryPoint
+                .equals(CamundaEntryPointFunctions.ExecuteWithVariablesInReturn)) {
+            flbv.setWasExecuted(true);
+            notifyEntryPointProcessor(flbv);
+        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.CreateProcessInstanceByKey)) {
+            flbv.setProcessDefinitionKey(argValues.get(0).toString());
+        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariable) || foundEntryPoint
+                .equals(CamundaEntryPointFunctions.SetVariableLocal)) {
+            // Local variables are currently not supported TODO
+            flbv.addVariable(argValues.get(0).toString());
+        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariables) || foundEntryPoint
+                .equals(CamundaEntryPointFunctions.SetVariablesLocal)) {
+            flbv.addAllVariables((MapVariable) argValues.get(0));
+        }
+        return flbv;
     }
 
     public static int hashBlock(Block block) {
