@@ -326,21 +326,38 @@ public class ObjectReader {
 
         if (foundEntryPoint != null) {
             if (foundEntryPoint.isFluentBuilder()) {
-                if (foundEntryPoint.equals(CamundaEntryPointFunctions.Execute) || foundEntryPoint
-                        .equals(CamundaEntryPointFunctions.ExecuteWithVariablesInReturn)) {
-                    String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
-                    FluentBuilderVariable targetObj = (FluentBuilderVariable) localObjectVariables.get(targetObjName);
-                    targetObj.setWasExecuted(true);
-                    notifyEntryPointProcessor(targetObj);
-                    return targetObj;
-                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.CreateProcessInstanceByKey)) {
-                    FluentBuilderVariable fluentBuilder = new FluentBuilderVariable(foundEntryPoint);
-                    fluentBuilder.setProcessDefinitionKey(argValues.get(0).toString());
-                    return fluentBuilder;
-                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.CreateProcessInstanceById)) {
-                    return new FluentBuilderVariable(foundEntryPoint);
+                FluentBuilderVariable flbv;
+                switch (foundEntryPoint) {
+                    case Execute:
+                    case ExecuteWithVariablesInReturn:
+                    case SetVariable:
+                    case SetVariableLocal:
+                    case SetVariables:
+                    case SetVariablesLocal:
+                        String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
+                        flbv = (FluentBuilderVariable) localObjectVariables.get(targetObjName);
+                        break;
+                    default:
+                        flbv = new FluentBuilderVariable(foundEntryPoint);
+                        break;
                 }
 
+                // TODO handle variables and move this code into another function
+                if (foundEntryPoint.equals(CamundaEntryPointFunctions.Execute) || foundEntryPoint
+                        .equals(CamundaEntryPointFunctions.ExecuteWithVariablesInReturn)) {
+                    flbv.setWasExecuted(true);
+                    notifyEntryPointProcessor(flbv);
+                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.CreateProcessInstanceByKey)) {
+                    flbv.setProcessDefinitionKey(argValues.get(0).toString());
+                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariable) || foundEntryPoint
+                        .equals(CamundaEntryPointFunctions.SetVariableLocal)) {
+                    // Local variables are currently not supported TODO
+                    flbv.addVariable(argValues.get(0).toString());
+                } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariables) || foundEntryPoint
+                        .equals(CamundaEntryPointFunctions.SetVariablesLocal)) {
+                }
+
+                return flbv;
             } else {
                 // Process entry point
                 notifyEntryPointProcessor(foundEntryPoint, expr, thisName);

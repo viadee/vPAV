@@ -52,6 +52,10 @@ public class MapVariable extends ObjectVariable {
         values.put(key, v);
     }
 
+    public void putAll(Map<String, Value> map) {
+        this.values.putAll(map);
+    }
+
     public void remove(String key) {
         values.remove(key);
     }

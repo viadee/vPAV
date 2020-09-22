@@ -72,6 +72,14 @@ public class CamundaMethodServices {
 
     public static final String EXECUTION_OBJECT = "execution";
 
+    public static final String SET_VARIABLE = "setVariable";
+
+    public static final String SET_VARIABLE_LOCAL = "setVariableLocal";
+
+    public static final String SET_VARIABLES = "setVariables";
+
+    public static final String SET_VARIABLES_LOCAL = "setVariablesLocal";
+
     public static final String TASK_OBJECT = "task";
 
     public static final RefType DELEGATE_EXECUTION_TYPE = RefType.v(DELEGATE);

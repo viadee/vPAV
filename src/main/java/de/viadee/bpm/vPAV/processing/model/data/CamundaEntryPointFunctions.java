@@ -53,7 +53,11 @@ public enum CamundaEntryPointFunctions {
     CreateProcessInstanceById(CREATE_PROCESS_INSTANCE_BY_ID, 1, 1, false, true),
     CreateProcessInstanceByKey(CREATE_PROCESS_INSTANCE_BY_KEY, 1, 1, false, true),
     Execute(EXECUTE, 0, 2, false, true),
-    ExecuteWithVariablesInReturn(EXECUTE_WITH_VARIABLES_IN_RETURN, 0, 2, false, true);
+    ExecuteWithVariablesInReturn(EXECUTE_WITH_VARIABLES_IN_RETURN, 0, 2, false, true),
+    SetVariable(SET_VARIABLE, 2, 2, false, true),
+    SetVariableLocal(SET_VARIABLE_LOCAL, 2, 2, false, true),
+    SetVariables(SET_VARIABLES, 1, 1, false, true),
+    SetVariablesLocal(SET_VARIABLES_LOCAL, 1, 1, false, true);
 
     private String name;
 

@@ -85,4 +85,12 @@ public class FluentBuilderVariable extends ObjectVariable {
     public void setCreateMethod(CamundaEntryPointFunctions createMethod) {
         this.createMethod = createMethod;
     }
+
+    public void addVariable(String key) {
+        this.variables.put(key, null);
+    }
+
+    public void addAllVariables(MapVariable map) {
+        this.variables.putAll(map.getValues());
+    }
 }
