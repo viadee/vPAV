@@ -37,12 +37,13 @@ import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.camunda.*;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class BpmnScanner {
+
+    private BpmnScanner() {
+
+    }
 
     /**
      * Return the Implementation of an specific element (sendTask, ServiceTask or
@@ -52,8 +53,12 @@ public class BpmnScanner {
      * @return return_implementation contains implementation
      */
     public static Map.Entry<String, String> getImplementation(BaseElement element) {
-        String camundaClass = null, delegateExpression = null,
-                expression = null, decisionRef = null, type = null;
+        String camundaClass = null;
+        String delegateExpression = null;
+        String expression = null;
+        String decisionRef = null;
+        String type = null;
+
         if (element instanceof ServiceTask) {
             camundaClass = ((ServiceTask) element).getCamundaClass();
             delegateExpression = ((ServiceTask) element).getCamundaDelegateExpression();
@@ -101,22 +106,20 @@ public class BpmnScanner {
         Collection<EventDefinition> eventDefinitions = getEventDefinitions(element);
         HashMap<String, String> value = new HashMap<>();
 
-        if (eventDefinitions != null) {
-            for (EventDefinition eventDefinition : eventDefinitions) {
-                if (eventDefinition instanceof MessageEventDefinition) {
-                    MessageEventDefinition messageEventDefinition = (MessageEventDefinition) eventDefinition;
-                    if (messageEventDefinition.getCamundaExpression() != null) {
-                        value.put(BpmnConstants.CAMUNDA_EXPRESSION, messageEventDefinition.getCamundaExpression());
-                    } else if (messageEventDefinition.getCamundaDelegateExpression() != null) {
-                        value.put(BpmnConstants.CAMUNDA_DEXPRESSION,
-                                messageEventDefinition.getCamundaDelegateExpression());
-                    } else if (messageEventDefinition.getCamundaClass() != null) {
-                        value.put(BpmnConstants.CAMUNDA_CLASS, messageEventDefinition.getCamundaClass());
-                    } else if (messageEventDefinition.getCamundaType() != null) {
-                        value.put(BpmnConstants.CAMUNDA_EXT, messageEventDefinition.getCamundaType());
-                    } else {
-                        value.put(BpmnConstants.IMPLEMENTATION, "");
-                    }
+        for (EventDefinition eventDefinition : eventDefinitions) {
+            if (eventDefinition instanceof MessageEventDefinition) {
+                MessageEventDefinition messageEventDefinition = (MessageEventDefinition) eventDefinition;
+                if (messageEventDefinition.getCamundaExpression() != null) {
+                    value.put(BpmnConstants.CAMUNDA_EXPRESSION, messageEventDefinition.getCamundaExpression());
+                } else if (messageEventDefinition.getCamundaDelegateExpression() != null) {
+                    value.put(BpmnConstants.CAMUNDA_DEXPRESSION,
+                            messageEventDefinition.getCamundaDelegateExpression());
+                } else if (messageEventDefinition.getCamundaClass() != null) {
+                    value.put(BpmnConstants.CAMUNDA_CLASS, messageEventDefinition.getCamundaClass());
+                } else if (messageEventDefinition.getCamundaType() != null) {
+                    value.put(BpmnConstants.CAMUNDA_EXT, messageEventDefinition.getCamundaType());
+                } else {
+                    value.put(BpmnConstants.IMPLEMENTATION, "");
                 }
             }
         }
@@ -137,7 +140,7 @@ public class BpmnScanner {
         } else if (element instanceof CatchEvent) {
             return ((CatchEvent) element).getEventDefinitions();
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -146,17 +149,15 @@ public class BpmnScanner {
      * @param extType Type of Listener
      * @return value of Listener
      */
-    public static ArrayList<ModelElementInstance> getListener(BaseElement element, String extType) {
+    public static List<ModelElementInstance> getListener(BaseElement element, String extType) {
         ExtensionElements extensions = element.getExtensionElements();
         ArrayList<ModelElementInstance> listener = new ArrayList<>();
 
         if (extensions != null) {
             for (ModelElementInstance el : extensions.getElements()) {
-                if (extType.equals(BpmnConstants.CAMUNDA_EXECUTION_LISTENER) &&
-                        el instanceof CamundaExecutionListener) {
-                    listener.add(el);
-
-                } else if (extType.equals(BpmnConstants.CAMUNDA_TASK_LISTENER) && el instanceof CamundaTaskListener) {
+                if ((extType.equals(BpmnConstants.CAMUNDA_EXECUTION_LISTENER) &&
+                        el instanceof CamundaExecutionListener) || (extType.equals(BpmnConstants.CAMUNDA_TASK_LISTENER)
+                        && el instanceof CamundaTaskListener)) {
                     listener.add(el);
                 }
             }
@@ -171,7 +172,7 @@ public class BpmnScanner {
      * @param element Element
      * @return scriptPlaces contains script type
      */
-    public static ArrayList<String> getScriptTypes(BaseElement element) {
+    public static List<String> getScriptTypes(BaseElement element) {
         // bool to hold return values
         ArrayList<String> returnScriptType = new ArrayList<>();
 
@@ -233,7 +234,7 @@ public class BpmnScanner {
      * @param element Element
      * @return Map with timerEventDefinition-Node and his child
      */
-    public static ArrayList<TimerEventDefinition> getTimerImplementation(BaseElement element) {
+    public static List<TimerEventDefinition> getTimerImplementation(BaseElement element) {
         ArrayList<TimerEventDefinition> timers = new ArrayList<>();
         Collection<EventDefinition> eventDefinitions = getEventDefinitions(element);
         if (eventDefinitions != null) {
@@ -252,7 +253,7 @@ public class BpmnScanner {
      * @param element element
      * @return value of expression
      */
-    public static ArrayList<String> getFieldInjectionExpression(BaseElement element) {
+    public static List<String> getFieldInjectionExpression(BaseElement element) {
         ArrayList<String> varNames = new ArrayList<>();
         if (element.getExtensionElements() != null) {
             for (ModelElementInstance extension : element.getExtensionElements().getElements()) {
@@ -270,7 +271,7 @@ public class BpmnScanner {
      * @param element Element
      * @return names of variable
      */
-    public static ArrayList<String> getFieldInjectionVarName(BaseElement element) {
+    public static List<String> getFieldInjectionVarName(BaseElement element) {
         ArrayList<String> varNames = new ArrayList<>();
         if (element.getExtensionElements() != null) {
             for (ModelElementInstance extension : element.getExtensionElements().getElements()) {

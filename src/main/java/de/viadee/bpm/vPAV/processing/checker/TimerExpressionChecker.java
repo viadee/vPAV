@@ -53,6 +53,7 @@ import javax.xml.datatype.DatatypeFactory;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class TimerExpressionChecker extends AbstractElementChecker {
 
@@ -78,7 +79,7 @@ public class TimerExpressionChecker extends AbstractElementChecker {
         if (baseElement.getId() != null && (baseElement instanceof IntermediateCatchEvent
                 || baseElement instanceof StartEvent || baseElement instanceof BoundaryEvent)) {
 
-            ArrayList<TimerEventDefinition> timers = BpmnScanner.getTimerImplementation(baseElement);
+            List<TimerEventDefinition> timers = BpmnScanner.getTimerImplementation(baseElement);
 
             for (TimerEventDefinition timer : timers) {
                 if (timer.getTimeDate() != null) {

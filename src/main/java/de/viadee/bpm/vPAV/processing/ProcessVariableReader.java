@@ -676,7 +676,7 @@ public final class ProcessVariableReader {
                         t_delegateExpression, scopeId, predecessor);
             }
 
-            final ArrayList<String> t_fieldInjectionExpressions = BpmnScanner
+            final List<String> t_fieldInjectionExpressions = BpmnScanner
                     .getFieldInjectionExpression(baseElement);
             if (!t_fieldInjectionExpressions.isEmpty()) {
                 for (String t_fieldInjectionExpression : t_fieldInjectionExpressions)

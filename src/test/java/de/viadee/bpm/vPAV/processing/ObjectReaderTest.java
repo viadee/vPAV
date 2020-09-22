@@ -62,15 +62,15 @@ public class ObjectReaderTest {
 
     private static SootClass anonymousInnerSootClass;
 
-    private static String testClassName = "de.viadee.package.TestObject";
+    private static final String testClassName = "de.viadee.package.TestObject";
 
-    private ObjectVariable objVariable1 = new ObjectVariable();
+    private final ObjectVariable objVariable1 = new ObjectVariable();
 
-    private ObjectVariable objVariableField1 = new ObjectVariable();
+    private final ObjectVariable objVariableField1 = new ObjectVariable();
 
-    private ObjectVariable staticObjField = new ObjectVariable();
+    private final ObjectVariable staticObjField = new ObjectVariable();
 
-    private ObjectVariable anotherObject = new ObjectVariable();
+    private final ObjectVariable anotherObject = new ObjectVariable();
 
     private HashMap<String, StringVariable> localStringVariables;
 
@@ -142,7 +142,7 @@ public class ObjectReaderTest {
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
         args.add(StringConstant.v("myVariableValue"));
-        ArrayList<Object> argValues = objectReader.resolveArgs(args, null, localStringVariables, localObjectVariables);
+        List<Object> argValues = objectReader.resolveArgs(args, null, localStringVariables, localObjectVariables);
         ObjectReader cr = new ObjectReader(null, thisSootClass);
         cr.handleIdentityStmt(stmt, argValues, localStringVariables, localObjectVariables);
         Assert.assertEquals("myVariableValue", localStringVariables.get("r2").getValue());
@@ -382,8 +382,6 @@ public class ObjectReaderTest {
     public void testProcessBlock() {
         // Test that all units are correctly processed in the right order
         SootMethod method = thisSootClass.getMethodByName("<init>");
-        List<Value> args = new ArrayList<>();
-        args.add(StringConstant.v("passedValue"));
         List<Object> argValues = new ArrayList<>();
         argValues.add("passedValue");
         Object returnValue = objectReader
@@ -415,7 +413,7 @@ public class ObjectReaderTest {
         args.add(new JimpleLocal("r1", RefType.v("org.camunda.bpm.engine.delegate.DelegateExecution")));
         args.add(StringConstant.v("myVariableValue"));
         args.add(new JimpleLocal("objVariable1", RefType.v("java.lang.Object")));
-        ArrayList<Object> argValues = objectReader.resolveArgs(args, "this", localStringVariables, localObjectVariables);
+        List<Object> argValues = objectReader.resolveArgs(args, "this", localStringVariables, localObjectVariables);
 
         Assert.assertNull(argValues.get(0));
         Assert.assertEquals("myVariableValue", argValues.get(1));

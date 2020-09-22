@@ -34,7 +34,6 @@ package de.viadee.bpm.vPAV;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.EntryPointScanner;
-import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import soot.*;
 import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.Block;
@@ -48,8 +47,12 @@ import java.util.logging.Logger;
 
 public class SootResolverSimplified {
 
-    private static List<String> defaultMethods = Arrays
-            .asList("execute", "notify", "mapInputVariables", "mapOutputVariables");
+    private SootResolverSimplified() {
+
+    }
+
+    private static final List<String> defaultMethods = Arrays
+            .asList(CamundaMethodServices.EXECUTE, "notify", "mapInputVariables", "mapOutputVariables");
 
     private static final Logger LOGGER = Logger.getLogger(SootResolverSimplified.class.getName());
 
@@ -57,7 +60,7 @@ public class SootResolverSimplified {
             Type returnType) {
         SootClass sootClass = setupSootClass(className);
         if (sootClass == null) {
-            LOGGER.warning("Class " + className + " could not be loaded.");
+            LOGGER.warning(String.format("Class %s could not be loaded.", className));
             return null;
         }
         return getBlockFromClass(setupSootClass(className), methodName, parameterTypes, returnType);
@@ -71,8 +74,7 @@ public class SootResolverSimplified {
             returnType = VoidType.v();
         }
 
-        SootMethod sootMethod = getSootMethod(sootClass, methodName, parameterTypes, returnType);
-        return sootMethod;
+        return getSootMethod(sootClass, methodName, parameterTypes, returnType);
     }
 
     public static Block getBlockFromClass(SootClass sootClass, String methodName, List<Type> parameterTypes,
@@ -96,7 +98,7 @@ public class SootResolverSimplified {
             List<Type> parameterTypes, final Type returnType) {
         SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
-        if (methodName.equals("execute") && method == null) {
+        if (methodName.equals(CamundaMethodServices.EXECUTE) && method == null) {
             parameterTypes.remove(0);
             parameterTypes.add(CamundaMethodServices.ACTIVITY_EXECUTION_TYPE);
             method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
@@ -109,13 +111,14 @@ public class SootResolverSimplified {
 
         if (method == null) {
             LOGGER.warning(
-                    "In class " + sootClass.getName() + " - " + methodName
-                            + " method was not found by Soot with parameters.");
+                    String.format("In class %s - %s method was not found by Soot with parameters.", sootClass.getName(),
+                            methodName));
 
             method = sootClass.getMethodByNameUnsafe(methodName);
             if (method == null) {
                 LOGGER.warning(
-                        "In class " + sootClass.getName() + " - " + methodName + " method was not found by Soot");
+                        String.format("In class %s - %s method was not found by Soot", sootClass.getName(),
+                                methodName));
             }
         }
         return method;
@@ -146,7 +149,7 @@ public class SootResolverSimplified {
             Scene.v().loadNecessaryClasses();
             return sootClass;
         } else {
-            LOGGER.warning("Class " + className + " was not found by Soot");
+            LOGGER.warning(String.format("Class %s was not found by Soot", className));
             return null;
         }
     }
