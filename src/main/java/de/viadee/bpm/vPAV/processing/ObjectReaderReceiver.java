@@ -36,9 +36,7 @@ import de.viadee.bpm.vPAV.processing.code.flow.FluentBuilderVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.Node;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import org.camunda.bpm.model.bpmn.instance.CallActivity;
 import soot.SootClass;
-import soot.Value;
 import soot.jimple.InvokeExpr;
 import soot.toolkits.graph.Block;
 
