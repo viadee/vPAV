@@ -218,7 +218,8 @@ public class ObjectReaderTest {
     public void testMapVariableOperations() {
         // Test that all units are correctly processed in the right order
         SootMethod method = thisSootClass.getMethodByName("mapMethod");
-        MapVariable map = (MapVariable) objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), new ArrayList<>(), null);
+        MapVariable map = (MapVariable) objectReader.processBlock(SootResolverSimplified.getBlockFromMethod(method), new ArrayList<>(), null,
+                localStringVariables, localObjectVariables);
         Assert.assertEquals("Map should contain exactly 2 variables.", 2, map.getValues().size());
         Assert.assertNull("Map should not contain variable 'first'.", map.getValues().get("first"));
         Assert.assertNotNull("Map should contain variable 'second'.", map.getValues().get("second"));
@@ -385,7 +386,8 @@ public class ObjectReaderTest {
         List<Object> argValues = new ArrayList<>();
         argValues.add("passedValue");
         Object returnValue = objectReader
-                .processBlock(SootResolverSimplified.getBlockFromMethod(method), argValues, null);
+                .processBlock(SootResolverSimplified.getBlockFromMethod(method), argValues, null, localStringVariables,
+                        localObjectVariables);
         Assert.assertNull(returnValue);
         ObjectVariable simpleObject = objectReader.getThisObject();
         Assert.assertEquals("bye", simpleObject.getStringField("myStringField").getValue());

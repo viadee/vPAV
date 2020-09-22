@@ -85,7 +85,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
                 if (!method.isPhantom() && !method.isAbstract()) {
                     ObjectReader objectReader = new ObjectReader(this, sootClass, method.getName());
                     Block block = SootResolverSimplified.getBlockFromMethod(method);
-                    objectReader.processBlock(block, new ArrayList<>(), null);
+                    objectReader.processBlock(block, new ArrayList<>(), null, new HashMap<>(), new HashMap<>());
                 }
             }
         }

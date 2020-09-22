@@ -31,7 +31,6 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import soot.RefType;
 import soot.SootClass;
 
 import java.util.HashMap;
@@ -42,10 +41,10 @@ import java.util.HashMap;
 public class ObjectVariable {
 
     // String variables that are fields of the object
-    private HashMap<String, StringVariable> stringFields;
+    private final HashMap<String, StringVariable> stringFields;
 
     // Object variables that are fields of the object
-    private HashMap<String, ObjectVariable> objectFields;
+    private final HashMap<String, ObjectVariable> objectFields;
 
     // Save implementation if object is implemented as anonymous inner class
     private SootClass implementation;

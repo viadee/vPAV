@@ -75,7 +75,7 @@ public class ObjectReader {
     }
 
     /**
-     * onstructor that is called the first time when starting an analysis.
+     * Constructor that is called the first time when starting an analysis.
      *
      * @param objectReaderReceiver that is used for creating the data flow graph
      * @param currentJavaClass     that contains the block which will be analyzed
@@ -119,9 +119,13 @@ public class ObjectReader {
      * @param block     the block that is processed
      * @param argValues the argument values (or in case of objects, references to the variable)
      * @param thisName  the local name of the current object
+     * @param localStringVariables
+     * @param localObjectVariables
      * @return ObjectVariable / StringVariable that is returned by the method
      */
-    public Object processBlock(Block block, List<Object> argValues, String thisName) {
+    public Object processBlock(Block block, List<Object> argValues, String thisName,
+            HashMap<String, StringVariable> localStringVariables,
+            HashMap<String, ObjectVariable> localObjectVariables) {
 
         if (block == null) {
             return null;
@@ -134,10 +138,6 @@ public class ObjectReader {
         }
         processedBlocks.add(hashBlock(
                 block));
-
-        HashMap<String, StringVariable> localStringVariables = new HashMap<>();
-
-        HashMap<String, ObjectVariable> localObjectVariables = new HashMap<>();
 
         final Iterator<Unit> unitIt = block.iterator();
 
@@ -186,7 +186,7 @@ public class ObjectReader {
                 }
 
                 objectReaderReceiver.pushNodeToStack(blockNode);
-                this.processBlock(succ, argValues, thisName);
+                this.processBlock(succ, argValues, thisName, localStringVariables , localObjectVariables);
             }
             if (returnNode != null) {
                 objectReaderReceiver.pushNodeToStack(returnNode);
@@ -363,7 +363,7 @@ public class ObjectReader {
                         return this
                                 .processBlock(SootResolverSimplified.getBlockFromMethod(expr.getMethod()),
                                         argValues,
-                                        null);
+                                        null, new HashMap<>(), new HashMap<>());
                     }
 
                 }
@@ -372,7 +372,7 @@ public class ObjectReader {
                         .processBlock(SootResolverSimplified.getBlockFromMethod(
                                 findMethodInHierachy(this.currentJavaClass, expr.getMethodRef())),
                                 argValues,
-                                null);
+                                null, new HashMap<>(), new HashMap<>());
 
             } else {
                 // Method on another object is called
@@ -416,7 +416,8 @@ public class ObjectReader {
         }
         ObjectReader or = new ObjectReader(objectReaderReceiver, targetObj,
                 method.getDeclaringClass(), method.getName());
-        return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), argValues, null);
+        return or.processBlock(SootResolverSimplified.getBlockFromMethod(method), argValues, null, new HashMap<>(),
+                new HashMap<>());
     }
 
     /**
