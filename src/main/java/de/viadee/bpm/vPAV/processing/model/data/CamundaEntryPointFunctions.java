@@ -121,8 +121,4 @@ public enum CamundaEntryPointFunctions {
     public boolean isFluentBuilder() {
         return fluentBuilder;
     }
-
-    public void setFluentBuilder(boolean fluentBuilder) {
-        this.fluentBuilder = fluentBuilder;
-    }
 }
