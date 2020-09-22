@@ -45,10 +45,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class EntryPointScannerTest {
@@ -116,13 +113,16 @@ public class EntryPointScannerTest {
                         Collectors.toList());
         Assert.assertEquals("One entry point should be found.", 1, entryPoints.size());
         Assert.assertEquals("processKey", entryPoints.get(0).getProcessDefinitionKey());
-        Assert.assertEquals("One variable should be passed on start.", 1,
+        Assert.assertEquals("Three variable should be passed on start.", 3,
                 entryPoints.get(0).getProcessVariables().size());
+        Iterator<String> iter = entryPoints.get(0).getProcessVariables().iterator();
         Assert.assertEquals("The variable 'var' should have been found.", "var",
-                entryPoints.get(0).getProcessVariables().iterator().next());
+                iter.next());
+        Assert.assertEquals("The variable 'mapVariable' should have been found.", "mapVariable",
+                iter.next());
+        Assert.assertEquals("The variable 'mapVariable2' should have been found.", "mapVariable2",
+                iter.next());
     }
-
-    // TODO processinstantiationbuilder mit correlate message testen
 
     @Test
     public void testCamundaVariableMap() {

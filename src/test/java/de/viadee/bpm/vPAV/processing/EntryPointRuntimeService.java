@@ -63,10 +63,15 @@ public class EntryPointRuntimeService {
     }
 
     public void startWithProcessInstantiationBuilder() {
+        HashMap<String, Object> processVariables = new HashMap<>();
+        processVariables.put("mapVariable", "value");
+        processVariables.put("mapVariable2", "value");
+
         ProcessInstantiationBuilder instantiationBuilder = processEngine.getRuntimeService()
                 .createProcessInstanceByKey("processKey")
                 .businessKey("key")
-                .setVariable("var", "value");
+                .setVariable("var", "value")
+                .setVariables(processVariables);
 
         instantiationBuilder.execute();
     }

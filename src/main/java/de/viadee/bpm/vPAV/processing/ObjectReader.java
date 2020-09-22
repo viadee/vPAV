@@ -355,6 +355,7 @@ public class ObjectReader {
                     flbv.addVariable(argValues.get(0).toString());
                 } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariables) || foundEntryPoint
                         .equals(CamundaEntryPointFunctions.SetVariablesLocal)) {
+                    flbv.addAllVariables((MapVariable) argValues.get(0));
                 }
 
                 return flbv;
