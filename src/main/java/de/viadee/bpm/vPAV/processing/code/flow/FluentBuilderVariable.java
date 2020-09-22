@@ -29,45 +29,68 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing;
+package de.viadee.bpm.vPAV.processing.code.flow;
 
-import de.viadee.bpm.vPAV.AnotherSimpleObject;
+import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
 
-import java.util.HashMap;
+/**
+ * Represents a fluent builder variable. Currently, it is used to represent a ProcessInstantiationBuilder for finding entry points.
+ */
+public class FluentBuilderVariable extends ObjectVariable {
 
-public class SimpleObject {
+    private CamundaEntryPointFunctions createMethod;
 
-    private String myStringField;
+    private String processDefinitionKey;
 
-    private String parameterString;
+    private boolean wasExecuted;
 
-    private String anotherObjectString;
+    private MapVariable variables;
 
-    public SimpleObject(String var) {
-        myStringField = "hello";
-        method();
-        parameterString = var;
-        anotherObjectString = (new AnotherSimpleObject()).getAnotherVariable();
+    public FluentBuilderVariable(CamundaEntryPointFunctions createMethod) {
+        super();
+        this.createMethod = createMethod;
+        wasExecuted = false;
+        processDefinitionKey = null;
+        variables = new MapVariable();
     }
 
-    private void method() {
-        myStringField = "bye";
+    public String getProcessDefinitionKey() {
+        return processDefinitionKey;
     }
 
-    private String methodWithReturn() {
-        return "it_works";
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
     }
 
-    private void methodWithParameter(String var) {
-        parameterString = var;
+    public boolean isWasExecuted() {
+        return wasExecuted;
     }
 
-    private HashMap<String, Object> mapMethod() {
-        HashMap<String, Object> variables = new HashMap<>();
-        variables.put("first", "firstValue");
-        variables.put("second", methodWithReturn());
-        variables.put("third", "thirdValue");
-        variables.remove("first");
+    public void setWasExecuted(boolean wasExecuted) {
+        this.wasExecuted = wasExecuted;
+    }
+
+    public MapVariable getVariables() {
         return variables;
+    }
+
+    public void setVariables(MapVariable variables) {
+        this.variables = variables;
+    }
+
+    public CamundaEntryPointFunctions getCreateMethod() {
+        return createMethod;
+    }
+
+    public void setCreateMethod(CamundaEntryPointFunctions createMethod) {
+        this.createMethod = createMethod;
+    }
+
+    public void addVariable(String key) {
+        this.variables.put(key, null);
+    }
+
+    public void addAllVariables(MapVariable map) {
+        this.variables.putAll(map.getValues());
     }
 }

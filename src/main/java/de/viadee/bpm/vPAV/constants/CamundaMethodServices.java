@@ -51,18 +51,34 @@ public class CamundaMethodServices {
     public static final String SCOPE = "org.camunda.bpm.engine.delegate.VariableScope";
 
     public static final String MAP = "java.util.Map";
-    
+
     public static final String START_PROCESS_INSTANCE_BY_MESSAGE = "startProcessInstanceByMessage";
-    
+
     public static final String START_PROCESS_INSTANCE_BY_ID = "startProcessInstanceById";
-    
+
     public static final String START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF = "startProcessInstanceByMessageAndProcessDefinitionId";
-    
+
     public static final String START_PROCESS_INSTANCE_BY_KEY = "startProcessInstanceByKey";
 
     public static final String CORRELATE_MESSAGE = "correlateMessage";
 
+    public static final String CREATE_PROCESS_INSTANCE_BY_ID = "createProcessInstanceById";
+
+    public static final String CREATE_PROCESS_INSTANCE_BY_KEY = "createProcessInstanceByKey";
+
+    public static final String EXECUTE = "execute";
+
+    public static final String EXECUTE_WITH_VARIABLES_IN_RETURN = "executeWithVariablesInReturn";
+
     public static final String EXECUTION_OBJECT = "execution";
+
+    public static final String SET_VARIABLE = "setVariable";
+
+    public static final String SET_VARIABLE_LOCAL = "setVariableLocal";
+
+    public static final String SET_VARIABLES = "setVariables";
+
+    public static final String SET_VARIABLES_LOCAL = "setVariablesLocal";
 
     public static final String TASK_OBJECT = "task";
 

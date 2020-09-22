@@ -32,14 +32,13 @@
 package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.SootResolverSimplified;
-import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
+import de.viadee.bpm.vPAV.processing.code.flow.FluentBuilderVariable;
 import de.viadee.bpm.vPAV.processing.code.flow.MapVariable;
 import de.viadee.bpm.vPAV.processing.model.data.CamundaEntryPointFunctions;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.jimple.InvokeExpr;
-import soot.jimple.internal.JInterfaceInvokeExpr;
 import soot.toolkits.graph.Block;
 
 import java.util.*;
@@ -58,7 +57,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
 
     public EntryPointScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
-     }
+    }
 
     /**
      * scan java resources for variables and retrieve important information such as message ids and entrypoints
@@ -86,7 +85,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
                 if (!method.isPhantom() && !method.isAbstract()) {
                     ObjectReader objectReader = new ObjectReader(this, sootClass, method.getName());
                     Block block = SootResolverSimplified.getBlockFromMethod(method);
-                    objectReader.processBlock(block, new ArrayList<>(), new ArrayList<>(), null);
+                    objectReader.processBlock(block, new ArrayList<>(), null);
                 }
             }
         }
@@ -155,7 +154,8 @@ public class EntryPointScanner extends ObjectReaderReceiver {
             for (Object o : args) {
                 if (o instanceof MapVariable) {
                     Set<String> variables = ((MapVariable) o).getValues().keySet();
-                    EntryPoint ep = new EntryPoint(className, methodName, messageName, entryPointName, processDefinitionKey,
+                    EntryPoint ep = new EntryPoint(className, methodName, messageName, entryPointName,
+                            processDefinitionKey,
                             variables);
                     this.entryPoints.add(ep);
                     return;
@@ -164,6 +164,24 @@ public class EntryPointScanner extends ObjectReaderReceiver {
         }
 
         EntryPoint ep = new EntryPoint(className, methodName, messageName, entryPointName, processDefinitionKey);
+
+        this.entryPoints.add(ep);
+    }
+
+    @Override
+    public void addEntryPoint(FluentBuilderVariable fluentBuilder, String className, String methodName) {
+        Set<String> variables = fluentBuilder.getVariables().getValues().keySet();
+
+        // Change create methods to start methods because they are used later during graph building
+        String entryPointName;
+        if (fluentBuilder.getCreateMethod().equals(CamundaEntryPointFunctions.CreateProcessInstanceByKey)) {
+            entryPointName = CamundaEntryPointFunctions.StartProcessInstanceByKey.getName();
+        } else {
+            entryPointName = CamundaEntryPointFunctions.StartProcessInstanceById.getName();
+        }
+
+        EntryPoint ep = new EntryPoint(className, methodName, "", entryPointName,
+                fluentBuilder.getProcessDefinitionKey(), variables);
 
         this.entryPoints.add(ep);
     }

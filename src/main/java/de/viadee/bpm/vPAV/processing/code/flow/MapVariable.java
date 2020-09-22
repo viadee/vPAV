@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents an object variable (= currently everything that type isn´t String) during soot block analysis.
+ * Represents a map variable e.g. a HashMap.
  */
 public class MapVariable extends ObjectVariable {
 
@@ -50,6 +50,10 @@ public class MapVariable extends ObjectVariable {
 
     public void put(String key, Value v) {
         values.put(key, v);
+    }
+
+    public void putAll(Map<String, Value> map) {
+        this.values.putAll(map);
     }
 
     public void remove(String key) {
