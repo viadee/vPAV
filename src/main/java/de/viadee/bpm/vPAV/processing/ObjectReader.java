@@ -690,7 +690,6 @@ public class ObjectReader {
         }
     }
 
-    // TODO add test
     public void notifyVariablesReader(Block block, InvokeExpr expr, CamundaProcessVariableFunctions camundaMethod,
             HashMap<String, StringVariable> localStringVariables,
             HashMap<String, ObjectVariable> localObjectVariables) {
@@ -765,7 +764,6 @@ public class ObjectReader {
                     localObjectVariables);
             map.remove(variableName);
         }
-        // TODO support putall
     }
 
     public FluentBuilderVariable handleFluentBuilderOperation(CamundaEntryPointFunctions foundEntryPoint,
@@ -796,7 +794,6 @@ public class ObjectReader {
             flbv.setProcessDefinitionKey(argValues.get(0).toString());
         } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariable) || foundEntryPoint
                 .equals(CamundaEntryPointFunctions.SetVariableLocal)) {
-            // Local variables are currently not supported TODO
             flbv.addVariable(argValues.get(0).toString());
         } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariables) || foundEntryPoint
                 .equals(CamundaEntryPointFunctions.SetVariablesLocal)) {

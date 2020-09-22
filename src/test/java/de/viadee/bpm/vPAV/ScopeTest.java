@@ -121,7 +121,6 @@ public class ScopeTest {
 
     @Test
     public void testScopeTaskListener() {
-        // TODO test resolving of task in java classes
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent()
                 .userTask("MyUserTask").camundaTaskListenerExpression("create", "${task.setVariable('var', true)}")
                 .endEvent()
@@ -211,7 +210,6 @@ public class ScopeTest {
     @Test
     public void testScopeSubprocess() {
         // Tested: delegate, input parameter, output parameter, listener, multi instance, task listener
-        // TODO add more elements which are tested
         // Variables in Subprocesses are globally available if  execution.setVariableLocal is not used (not supported yet)
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().subProcess()
                 .embeddedSubProcess().startEvent()

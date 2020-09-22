@@ -206,8 +206,6 @@ public class SootResolverSimplified {
 
     public static String fixClassPathForSoot(String classFile) {
         // Trim class path because soot depends on the scan path
-        // Fixme: hacky way that hopefully works for all use cases
-
         int scanpathLength = RuntimeConfig.getInstance().getScanPath().length();
         String className = classFile.replaceAll("\\.", "/");
         if ((ConfigConstants.TARGET_TEST_PATH + className)

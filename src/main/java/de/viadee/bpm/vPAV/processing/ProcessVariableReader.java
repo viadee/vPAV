@@ -127,7 +127,6 @@ public final class ProcessVariableReader {
         getVariablesFromSignalsAndMessagesAndLinks(element, predecessor);
 
         if (extensionElements != null) {
-            // TODO not 100% sure whether this is the right position or not
             // 8) Search in Input/Output-Associations (Call Activities)
             searchVariablesInInputOutputExtensions(element,
                     extensionElements, scopeElementId, predecessor);
@@ -1071,7 +1070,7 @@ public final class ProcessVariableReader {
                 // Call method as it might modify variables
                 // REMEMBER: execution might already be saved as field of bean but currently we cannot detect this
                 String methodName = property.toString().split(" ")[1];
-                // TODO have a look at this
+
                 EntryPoint entryPoint = new EntryPoint(className, methodName, "", BpmnConstants.ATTR_EX, "");
                 // read variables in class file (bean)
                 JavaReaderStatic
