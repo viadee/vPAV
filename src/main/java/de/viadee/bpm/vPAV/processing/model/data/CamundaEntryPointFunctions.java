@@ -59,18 +59,18 @@ public enum CamundaEntryPointFunctions {
     SetVariables(SET_VARIABLES, 1, 1, false, true),
     SetVariablesLocal(SET_VARIABLES_LOCAL, 1, 1, false, true);
 
-    private String name;
+    private final String name;
 
-    private int minArgs;
+    private final int minArgs;
 
-    private int maxArgs;
+    private final int maxArgs;
 
-    private boolean withMessage;
+    private final boolean withMessage;
 
     /**
      * Describes if the method returns a fluent builder object.
      */
-    private boolean fluentBuilder;
+    private final boolean fluentBuilder;
 
     /**
      * @param name     - of the Camunda method
