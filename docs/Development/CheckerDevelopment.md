@@ -1,6 +1,6 @@
 ---
+parent: Development
 title: Checker Development
-nav_order: 6
 ---
 # Checker Development
 We try to cover a broad range of possible inconsistencies 
