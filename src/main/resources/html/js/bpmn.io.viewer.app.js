@@ -619,7 +619,6 @@ function createIssueTable(bpmnFile, tableContent, mode) {
 
 //create process variable table
 function createVariableTable(bpmnFile, tableContent) {
-    let myParent = document.getElementsByTagName("body").item(0);
     let myTable = document.getElementById("table");
     myTable.setAttribute("class", "table table-variables table-row table-bordered .table-responsive")
     let myTHead = document.createElement("thead");
@@ -663,7 +662,7 @@ function createVariableTable(bpmnFile, tableContent) {
         myTBody.appendChild(myRow);
         myTable.appendChild(myTBody);
     }
-    myParent.appendChild(myTable);
+    document.getElementById("content").appendChild(myTable);
 }
 
 function createMarkElementLink(elementId) {
@@ -697,7 +696,7 @@ function createShowOperationsLink(processVariableName) {
 function createFooter() {
     const oldFooter = document.getElementById("footer");
     if (oldFooter) {
-        oldFooter.parentNode.removeChild(oldFooter);
+        oldFooter.remove();
     }
     const footer = `
     <footer id="footer" class="footer sticky-bottom viadee-footer mt-auto py-3">
