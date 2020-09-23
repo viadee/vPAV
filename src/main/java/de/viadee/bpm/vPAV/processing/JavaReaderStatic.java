@@ -48,10 +48,16 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 import static de.viadee.bpm.vPAV.SootResolverSimplified.*;
+import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.EXECUTE;
+import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.NOTIFY;
 
 public class JavaReaderStatic {
 
     private static final Logger LOGGER = Logger.getLogger(JavaReaderStatic.class.getName());
+
+    private JavaReaderStatic() {
+
+    }
 
     /**
      * Checks a java delegate for process variable references with static code
@@ -87,10 +93,10 @@ public class JavaReaderStatic {
                 SootClass implementingClass = findClassWithDelegateMethod(sootClass);
                 if (implementingClass == null) {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
-                } else if (implementingClass.declaresMethodByName("notify")) {
+                } else if (implementingClass.declaresMethodByName(NOTIFY)) {
                     if (implementingClass != sootClass) {
-                        SootMethod method = getSootMethod(implementingClass, "notify",
-                                getParametersForDefaultMethods("notify"),
+                        SootMethod method = getSootMethod(implementingClass, NOTIFY,
+                                getParametersForDefaultMethods(NOTIFY),
                                 VoidType.v());
 
                         // Pull method from super class to child class
@@ -98,11 +104,11 @@ public class JavaReaderStatic {
                         sootClass.addMethod(method);
                     }
 
-                    classFetcherNew(sootClass, "notify", element, chapter, fieldType, predecessor);
-                } else if (implementingClass.declaresMethodByName("execute")) {
+                    classFetcherNew(sootClass, NOTIFY, element, chapter, fieldType, predecessor);
+                } else if (implementingClass.declaresMethodByName(EXECUTE)) {
                     if (implementingClass != sootClass) {
-                        SootMethod method = getSootMethod(implementingClass, "execute",
-                                getParametersForDefaultMethods("execute"),
+                        SootMethod method = getSootMethod(implementingClass, EXECUTE,
+                                getParametersForDefaultMethods(EXECUTE),
                                 VoidType.v());
 
                         // Pull method from super class to child class
@@ -110,7 +116,7 @@ public class JavaReaderStatic {
                         sootClass.addMethod(method);
                     }
 
-                    classFetcherNew(sootClass, "execute", element, chapter, fieldType, predecessor);
+                    classFetcherNew(sootClass, EXECUTE, element, chapter, fieldType, predecessor);
                 } else {
                     LOGGER.warning("No supported (execute/notify) method in " + classFile + " found.");
                 }
@@ -119,7 +125,7 @@ public class JavaReaderStatic {
     }
 
     public static SootClass findClassWithDelegateMethod(SootClass currentClass) {
-        if (currentClass.declaresMethodByName("notify") || currentClass.declaresMethodByName("execute")) {
+        if (currentClass.declaresMethodByName(NOTIFY) || currentClass.declaresMethodByName(EXECUTE)) {
             return currentClass;
         } else {
             if (currentClass.hasSuperclass()) {

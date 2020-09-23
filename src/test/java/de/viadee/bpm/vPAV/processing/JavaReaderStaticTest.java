@@ -43,7 +43,6 @@ import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import soot.Scene;
@@ -58,19 +57,12 @@ import static org.mockito.Mockito.when;
 
 public class JavaReaderStaticTest {
 
-    private JavaReaderStatic reader;
-
     @BeforeClass
     public static void setupSoot() {
         RuntimeConfig.getInstance().setTest(true);
         FileScanner.setupSootClassPaths(new LinkedList<>());
         JavaReaderStatic.setupSoot();
         Scene.v().loadNecessaryClasses();
-    }
-
-    @Before
-    public void setup() {
-        reader = new JavaReaderStatic();
     }
 
     @Test
@@ -83,7 +75,7 @@ public class JavaReaderStaticTest {
         BasicNode predecessor = new BasicNode(element, ElementChapter.GENERAL, KnownElementFieldType.UserDefined);
         BasicNode[] pred = new BasicNode[] { predecessor };
 
-        reader.getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.SimpleDelegate",
+        JavaReaderStatic.getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.SimpleDelegate",
                 element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.Class, pred);
 
         Assert.assertEquals(1, predecessor.getSuccessors().size());
@@ -102,7 +94,7 @@ public class JavaReaderStaticTest {
         pred[0] = predecessor;
         when(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                 BpmnConstants.ATTR_VAR_MAPPING_DELEGATE)).thenReturn("something");
-        reader.getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.DelegatedVarMapping",
+        JavaReaderStatic.getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.DelegatedVarMapping",
                 element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.Class, pred);
 
         Assert.assertEquals(1, predecessor.getSuccessors().size());
@@ -124,7 +116,7 @@ public class JavaReaderStaticTest {
                 "de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables.java", "startProcess",
                 "schadensmeldungKfzGlasbruch", "startProcessInstanceByMessage", null);
 
-        new JavaReaderStatic()
+        JavaReaderStatic
                 .getVariablesFromClass("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables",
                         element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.Class, entry, new BasicNode[1]);
 

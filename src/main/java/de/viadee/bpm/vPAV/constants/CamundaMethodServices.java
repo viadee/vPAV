@@ -66,6 +66,8 @@ public class CamundaMethodServices {
 
     public static final String CREATE_PROCESS_INSTANCE_BY_KEY = "createProcessInstanceByKey";
 
+    public static final String NOTIFY = "notify";
+
     public static final String EXECUTE = "execute";
 
     public static final String EXECUTE_WITH_VARIABLES_IN_RETURN = "executeWithVariablesInReturn";

@@ -48,17 +48,17 @@ import java.util.stream.Collectors;
 
 public class Graph {
 
-	private String processId;
+	private final String processId;
 
-	private LinkedHashMap<BpmnElement, List<Edge>> adjacencyListSuccessor; // [vertices] -> [edge]
+	private final LinkedHashMap<BpmnElement, List<Edge>> adjacencyListSuccessor; // [vertices] -> [edge]
 
-	private LinkedHashMap<BpmnElement, List<Edge>> adjacencyListPredecessor; // [vertices] -> [edge]
+	private final LinkedHashMap<BpmnElement, List<Edge>> adjacencyListPredecessor; // [vertices] -> [edge]
 
-	private LinkedHashMap<BpmnElement, VertexInfo> vertexInfo; // [vertex] -> [info]
+	private final LinkedHashMap<BpmnElement, VertexInfo> vertexInfo; // [vertex] -> [info]
 
-	private Collection<BpmnElement> startNodes = new ArrayList<>();
+	private final Collection<BpmnElement> startNodes = new ArrayList<>();
 
-	private Collection<BpmnElement> endNodes = new ArrayList<>();
+	private final Collection<BpmnElement> endNodes = new ArrayList<>();
 
 	public Graph(final String processId) {
 		this.processId = processId;
@@ -97,7 +97,7 @@ public class Graph {
 		vertexInfo.put(v, new VertexInfo(v));
 	}
 
-	public LinkedHashMap<BpmnElement, VertexInfo> getVertexInfo() {
+	public Map<BpmnElement, VertexInfo> getVertexInfo() {
 		return vertexInfo;
 	}
 
@@ -258,9 +258,9 @@ public class Graph {
 		// go back to the node, where the variable was deleted
 		// or go back to the start
 		if (anomaly.getAnomaly() == Anomaly.UR
-				|| ((startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.START_EVENT)
+				|| (startNode.getBaseElement().getElementType().getTypeName().equals(BpmnConstants.START_EVENT)
 						&& startNode.getBaseElement().getParentElement().getElementType().getTypeName()
-								.equals(BpmnConstants.PROCESS)))) {
+								.equals(BpmnConstants.PROCESS))) {
 
 			final List<BpmnElement> newPath = new ArrayList<>(currentPath);
 			invalidPaths.add(new Path(newPath));
@@ -302,13 +302,12 @@ public class Graph {
 	 * @return true/false
 	 */
 	private boolean containsAnomaly(final BpmnElement bpmnElement, final AnomalyContainer anomaly) {
-		boolean containsAnomaly = false;
 		for (ProcessVariableOperation processVariableOperation : bpmnElement.getDefined().values()) {
 			if (processVariableOperation.getName().equals(anomaly.getName())) {
-				containsAnomaly = true;
+				return true;
 			}
 		}
-		return containsAnomaly;
+		return false;
 	}
 
 	@Override

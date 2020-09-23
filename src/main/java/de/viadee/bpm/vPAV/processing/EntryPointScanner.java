@@ -48,20 +48,20 @@ import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
 
 public class EntryPointScanner extends ObjectReaderReceiver {
 
-    private Set<String> javaResources;
+    private final Set<String> javaResources;
 
-    private Map<String, Collection<String>> messageIdToVariableMap = new HashMap<>();
+    private final Map<String, Collection<String>> messageIdToVariableMap = new HashMap<>();
 
-    private Map<String, Collection<String>> processIdToVariableMap = new HashMap<>();
+    private final Map<String, Collection<String>> processIdToVariableMap = new HashMap<>();
 
-    private List<EntryPoint> entryPoints = new ArrayList<>();
+    private final List<EntryPoint> entryPoints = new ArrayList<>();
 
     public EntryPointScanner(final Set<String> javaResources) {
         this.javaResources = javaResources;
     }
 
     /**
-     * scan java resources for variables and retrieve important information such as message ids and entrypoints
+     * scan java resources for variables and retrieve important information such as message ids and entry points
      */
     public void scanProcessVariables() {
         for (final String filePath : javaResources) {
@@ -72,7 +72,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
     }
 
     /**
-     * Retrieve the method name which contains the entrypoint (e.g. "startProcessByXYZ")
+     * Retrieve the method name which contains the entry point (e.g. "startProcessByXYZ")
      *
      * @param filePath fully qualified path to the java class
      */
@@ -109,7 +109,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
     }
 
     /**
-     * get list of entrypoints (process message, method) where process variables have been found
+     * get list of entry points (process message, method) where process variables have been found
      *
      * @return returns list of locations
      */
