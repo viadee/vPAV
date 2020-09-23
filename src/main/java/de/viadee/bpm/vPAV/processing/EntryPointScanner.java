@@ -146,7 +146,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
             messageName = (String) args.get(0);
         }
 
-        if (function.equals(CamundaEntryPointFunctions.StartProcessInstanceByKey)) {
+        if (function.equals(CamundaEntryPointFunctions.FCT_START_PROCESS_INSTANCE_BY_KEY)) {
             processDefinitionKey = (String) args.get(0);
         }
 
@@ -175,10 +175,10 @@ public class EntryPointScanner extends ObjectReaderReceiver {
 
         // Change create methods to start methods because they are used later during graph building
         String entryPointName;
-        if (fluentBuilder.getCreateMethod().equals(CamundaEntryPointFunctions.CreateProcessInstanceByKey)) {
-            entryPointName = CamundaEntryPointFunctions.StartProcessInstanceByKey.getName();
+        if (fluentBuilder.getCreateMethod().equals(CamundaEntryPointFunctions.FCT_CREATE_PROCESS_INSTANCE_BY_KEY)) {
+            entryPointName = CamundaEntryPointFunctions.FCT_START_PROCESS_INSTANCE_BY_KEY.getName();
         } else {
-            entryPointName = CamundaEntryPointFunctions.StartProcessInstanceById.getName();
+            entryPointName = CamundaEntryPointFunctions.FCT_START_PROCESS_INSTANCE_BY_ID.getName();
         }
 
         EntryPoint ep = new EntryPoint(className, methodName, "", entryPointName,

@@ -38,7 +38,6 @@ import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Represents an BPMN element
@@ -47,13 +46,13 @@ public class BpmnElement implements AnalysisElement {
 
     private String graphId;
 
-    private String processDefinition;
+    private final String processDefinition;
 
-    private BaseElement baseElement;
+    private final BaseElement baseElement;
 
     private ControlFlowGraph controlFlowGraph;
 
-    private FlowAnalysis flowAnalysis;
+    private final FlowAnalysis flowAnalysis;
 
     private LinkedHashMap<String, ProcessVariableOperation> operations;
 
@@ -61,7 +60,7 @@ public class BpmnElement implements AnalysisElement {
 
     private LinkedHashMap<String, ProcessVariableOperation> used;
 
-    private LinkedHashMap<String, ProcessVariableOperation> killed;
+    private final LinkedHashMap<String, ProcessVariableOperation> killed;
 
     private LinkedHashMap<String, ProcessVariableOperation> inUsed;
 
@@ -75,7 +74,7 @@ public class BpmnElement implements AnalysisElement {
 
     private LinkedHashMap<String, AnalysisElement> successors;
 
-    private List<AnomalyContainer> sourceCodeAnomalies;
+    private final List<AnomalyContainer> sourceCodeAnomalies;
 
     public BpmnElement(final String processDefinition, final BaseElement element,
             final ControlFlowGraph controlFlowGraph, final FlowAnalysis flowAnalysis) {
@@ -156,7 +155,7 @@ public class BpmnElement implements AnalysisElement {
         }
     }
 
-    private ListMultimap<String, ProcessVariableOperation> processVariables;
+    private final ListMultimap<String, ProcessVariableOperation> processVariables;
 
     private List<AnomalyContainer> getSourceCodeAnomalies() {
         return sourceCodeAnomalies;

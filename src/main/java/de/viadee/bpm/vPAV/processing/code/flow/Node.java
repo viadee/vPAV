@@ -31,13 +31,11 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import java.util.LinkedHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import soot.toolkits.graph.Block;
+
+import java.util.LinkedHashMap;
 
 public class Node extends BasicNode implements Cloneable {
 

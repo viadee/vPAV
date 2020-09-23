@@ -34,7 +34,10 @@ package de.viadee.bpm.vPAV.processing;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
@@ -45,9 +48,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import soot.Scene;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -87,7 +89,7 @@ public class JavaReaderStaticTest {
         Assert.assertEquals(1, predecessor.getSuccessors().size());
         Assert.assertEquals("ServiceTask__3", pred[0].getId());
         Assert.assertEquals(5, cfg.getOperations().size());
-        HashSet<String> variables = cfg.getVariablesOfOperations();
+        Set<String> variables = cfg.getVariablesOfOperations();
         Assert.assertTrue(variables.contains("variableOne"));
         Assert.assertTrue(variables.contains("variableTwo"));
         Assert.assertTrue(variables.contains("variableThree"));
@@ -127,7 +129,7 @@ public class JavaReaderStaticTest {
                         element, ElementChapter.Implementation, KnownElementFieldType.Class, entry, new BasicNode[1]);
 
         assertEquals(3, element.getControlFlowGraph().getOperations().size());
-        HashSet<String> variables = element.getControlFlowGraph().getVariablesOfOperations();
+        Set<String> variables = element.getControlFlowGraph().getVariablesOfOperations();
         assertTrue(variables.contains("kunde"));
         assertTrue(variables.contains("vsnr"));
         assertTrue(variables.contains("kfz"));

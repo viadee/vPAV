@@ -45,8 +45,8 @@ import soot.toolkits.graph.Block;
 
 import java.util.*;
 
-import static de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions.PutValue;
-import static de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions.PutValueTyped;
+import static de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions.FCT_PUT_VALUE;
+import static de.viadee.bpm.vPAV.processing.model.data.CamundaProcessVariableFunctions.FCT_PUT_VALUE_TYPED;
 
 public class ObjectReader {
 
@@ -328,7 +328,7 @@ public class ObjectReader {
             notifyVariablesReader(block, expr, foundMethod, localStringVariables, localObjectVariables);
 
             // Also handle as Map (continue processing)
-            if (!(foundMethod.equals(PutValue) || foundMethod.equals(PutValueTyped))) {
+            if (!(foundMethod.equals(FCT_PUT_VALUE) || foundMethod.equals(FCT_PUT_VALUE_TYPED))) {
                 return null;
             }
         }
@@ -770,12 +770,12 @@ public class ObjectReader {
             Map<String, ObjectVariable> localObjectVariables) {
         FluentBuilderVariable flbv;
         switch (foundEntryPoint) {
-            case Execute:
-            case ExecuteWithVariablesInReturn:
-            case SetVariable:
-            case SetVariableLocal:
-            case SetVariables:
-            case SetVariablesLocal:
+            case FCT_EXECUTE:
+            case FCT_EXECUTE_WITH_VARIABLES_IN_RETURN:
+            case FCT_SET_VARIABLE:
+            case FCT_SET_VARIABLE_LOCAL:
+            case FCT_SET_VARIABLES:
+            case FCT_SET_VARIABLES_LOCAL:
                 String targetObjName = ((AbstractInstanceInvokeExpr) expr).getBase().toString();
                 flbv = (FluentBuilderVariable) localObjectVariables.get(targetObjName);
                 break;
@@ -784,17 +784,17 @@ public class ObjectReader {
                 break;
         }
 
-        if (foundEntryPoint.equals(CamundaEntryPointFunctions.Execute) || foundEntryPoint
-                .equals(CamundaEntryPointFunctions.ExecuteWithVariablesInReturn)) {
+        if (foundEntryPoint.equals(CamundaEntryPointFunctions.FCT_EXECUTE) || foundEntryPoint
+                .equals(CamundaEntryPointFunctions.FCT_EXECUTE_WITH_VARIABLES_IN_RETURN)) {
             flbv.setWasExecuted(true);
             notifyEntryPointProcessor(flbv);
-        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.CreateProcessInstanceByKey)) {
+        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.FCT_CREATE_PROCESS_INSTANCE_BY_KEY)) {
             flbv.setProcessDefinitionKey(argValues.get(0).toString());
-        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariable) || foundEntryPoint
-                .equals(CamundaEntryPointFunctions.SetVariableLocal)) {
+        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.FCT_SET_VARIABLE) || foundEntryPoint
+                .equals(CamundaEntryPointFunctions.FCT_SET_VARIABLE_LOCAL)) {
             flbv.addVariable(argValues.get(0).toString());
-        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.SetVariables) || foundEntryPoint
-                .equals(CamundaEntryPointFunctions.SetVariablesLocal)) {
+        } else if (foundEntryPoint.equals(CamundaEntryPointFunctions.FCT_SET_VARIABLES) || foundEntryPoint
+                .equals(CamundaEntryPointFunctions.FCT_SET_VARIABLES_LOCAL)) {
             flbv.addAllVariables((MapVariable) argValues.get(0));
         }
         return flbv;

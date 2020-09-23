@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.processing.code.flow;
 import soot.SootClass;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents an object variable (= currently everything that type isn´t String) during soot block analysis.
@@ -72,11 +73,11 @@ public class ObjectVariable {
         objectFields.put(objIdentifier, objectVar);
     }
 
-    public HashMap<String, StringVariable> getStringFields() {
+    public Map<String, StringVariable> getStringFields() {
         return stringFields;
     }
 
-    public HashMap<String, ObjectVariable> getObjectFields() {
+    public Map<String, ObjectVariable> getObjectFields() {
         return objectFields;
     }
 

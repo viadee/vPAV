@@ -31,17 +31,15 @@
  */
 package de.viadee.bpm.vPAV.processing.code.flow;
 
-import java.util.*;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
-import fj.Hash;
+
+import java.util.*;
 
 public class ControlFlowGraph {
 
-    private LinkedHashMap<String, BasicNode> nodes;
+    private final LinkedHashMap<String, BasicNode> nodes;
 
     private int nodeCounter;
 
@@ -88,7 +86,7 @@ public class ControlFlowGraph {
         return !nodes.isEmpty();
     }
 
-    public LinkedHashMap<String, BasicNode> getNodes() {
+    public Map<String, BasicNode> getNodes() {
         return nodes;
     }
 
@@ -117,7 +115,7 @@ public class ControlFlowGraph {
     }
 
     // Only used for tests
-    public HashSet<String> getVariablesOfOperations() {
+    public Set<String> getVariablesOfOperations() {
         HashSet<String> variableNames = new HashSet<>();
         ListMultimap<String, ProcessVariableOperation> operations = getOperations();
         for (ProcessVariableOperation pvo : operations.values()) {

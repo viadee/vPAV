@@ -71,7 +71,7 @@ public interface DataFlowRule {
      * EvaluationResult for each validated process variable is returned.
      * @param variables 
      * -process variables to evaluate rule on.
-     * @return Collection of EvalutionResults for variables
+     * @return Collection of EvaluationResults for variables
      */
     Collection<EvaluationResult<ProcessVariable>> evaluate(Collection<ProcessVariable> variables);
     String getRuleDescription();
