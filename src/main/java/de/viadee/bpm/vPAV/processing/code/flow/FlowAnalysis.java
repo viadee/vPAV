@@ -119,17 +119,17 @@ public class FlowAnalysis {
                     BasicNode predecessor = null;
                     ElementChapter chapter;
                     chapter = firstNode.getElementChapter();
-                    boolean isFirstHalf = !(chapter.equals(ElementChapter.OutputImplementation)
-                            || chapter.equals(ElementChapter.ExecutionListenerEnd) || chapter
-                            .equals(ElementChapter.OutputData));
+                    boolean isFirstHalf = !(chapter.equals(ElementChapter.OUTPUT_IMPLEMENTATION)
+                            || chapter.equals(ElementChapter.EXECUTION_LISTENER_END) || chapter
+                            .equals(ElementChapter.OUTPUT_DATA));
 
                     // Set predecessor and successor relationships between nodes
                     for (BasicNode curNode : analysisElement.getControlFlowGraph().getNodes().values()) {
                         if (predecessor != null) {
                             chapter = curNode.getElementChapter();
-                            if ((chapter.equals(ElementChapter.OutputImplementation)
-                                    || chapter.equals(ElementChapter.ExecutionListenerEnd)
-                                    || chapter.equals(ElementChapter.OutputData)) && isFirstHalf) {
+                            if ((chapter.equals(ElementChapter.OUTPUT_IMPLEMENTATION)
+                                    || chapter.equals(ElementChapter.EXECUTION_LISTENER_END)
+                                    || chapter.equals(ElementChapter.OUTPUT_DATA)) && isFirstHalf) {
                                 // Split in before and after nodes
                                 isFirstHalf = false;
                                 lastNodeBefore = predecessor;
@@ -532,7 +532,7 @@ public class FlowAnalysis {
                 // Call Activity
                 if (predecessor.getBaseElement() instanceof EndEvent && analysisElement instanceof BasicNode
                         && ((BasicNode) analysisElement).getElementChapter()
-                        .equals(ElementChapter.OutputData)) {
+                        .equals(ElementChapter.OUTPUT_DATA)) {
                     predecessor.getOutUnused().forEach(tempInUnused::put);
                     predecessor.getOutUsed().forEach(tempInUsed::put);
                 }
@@ -544,7 +544,7 @@ public class FlowAnalysis {
             filterLocalVariables(predecessor, tempInUnused, tempInUsed);
 
         } else if (predecessor instanceof BasicNode && ((BasicNode) predecessor).getElementChapter()
-                .equals(ElementChapter.OutputData)) {
+                .equals(ElementChapter.OUTPUT_DATA)) {
             filterVariablesWithoutScope(predecessor.getOutUnused(), tempInUnused, Arrays.asList(scopeElement,
                     analysisElement.getParentElement().getGraphId()));
             filterVariablesWithoutScope(predecessor.getOutUsed(), tempInUsed, Arrays.asList(scopeElement,
@@ -642,8 +642,8 @@ public class FlowAnalysis {
             if (analysisElement.getParentElement().getBaseElement() instanceof CallActivity
                     && analysisElement instanceof Node) {
                 Node tmpNode = (Node) analysisElement;
-                if (tmpNode.getElementChapter().equals(ElementChapter.InputImplementation)
-                        || tmpNode.getElementChapter().equals(ElementChapter.OutputImplementation)) {
+                if (tmpNode.getElementChapter().equals(ElementChapter.INPUT_IMPLEMENTATION)
+                        || tmpNode.getElementChapter().equals(ElementChapter.OUTPUT_IMPLEMENTATION)) {
                     String childProcessId = ((CallActivity) analysisElement.getParentElement().getBaseElement())
                             .getCalledElement();
                     analysisElement.getOperations().forEach((key, value) -> {
@@ -676,8 +676,8 @@ public class FlowAnalysis {
         nodes.values().forEach(node -> {
             if (node.getParentElement().getBaseElement() instanceof CallActivity && node instanceof Node) {
                 Node tmpNode = (Node) node;
-                if (tmpNode.getElementChapter().equals(ElementChapter.InputImplementation)
-                        || tmpNode.getElementChapter().equals(ElementChapter.OutputImplementation)) {
+                if (tmpNode.getElementChapter().equals(ElementChapter.INPUT_IMPLEMENTATION)
+                        || tmpNode.getElementChapter().equals(ElementChapter.OUTPUT_IMPLEMENTATION)) {
                     String childProcessId = ((CallActivity) node.getParentElement().getBaseElement())
                             .getCalledElement();
                     handleDelegateVariableMapping(node, childProcessId);
@@ -975,8 +975,8 @@ public class FlowAnalysis {
     }
 
     private boolean isDelegateVariable(ProcessVariableOperation value) {
-        return (value.getChapter().equals(ElementChapter.InputImplementation)
-                || value.getChapter().equals(ElementChapter.OutputImplementation))
+        return (value.getChapter().equals(ElementChapter.INPUT_IMPLEMENTATION)
+                || value.getChapter().equals(ElementChapter.OUTPUT_IMPLEMENTATION))
                 && value.getScopeId().equals(((CallActivity) value.getElement().getBaseElement()).getCalledElement());
     }
 

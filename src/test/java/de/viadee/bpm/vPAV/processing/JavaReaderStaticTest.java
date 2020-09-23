@@ -80,11 +80,11 @@ public class JavaReaderStaticTest {
         when(baseElement.getId()).thenReturn("ServiceTask");
         ControlFlowGraph cfg = new ControlFlowGraph();
         BpmnElement element = new BpmnElement("", baseElement, cfg, new FlowAnalysis());
-        BasicNode predecessor = new BasicNode(element, ElementChapter.General, KnownElementFieldType.UserDefined);
+        BasicNode predecessor = new BasicNode(element, ElementChapter.GENERAL, KnownElementFieldType.UserDefined);
         BasicNode[] pred = new BasicNode[] { predecessor };
 
         reader.getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.SimpleDelegate",
-                element, ElementChapter.Implementation, KnownElementFieldType.Class, pred);
+                element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.Class, pred);
 
         Assert.assertEquals(1, predecessor.getSuccessors().size());
         Assert.assertEquals("ServiceTask__3", pred[0].getId());
@@ -98,12 +98,12 @@ public class JavaReaderStaticTest {
         // Test Delegate Variable Mapping
         cfg = new ControlFlowGraph();
         element = new BpmnElement("", baseElement, cfg, new FlowAnalysis());
-        predecessor = new BasicNode(element, ElementChapter.General, KnownElementFieldType.UserDefined);
+        predecessor = new BasicNode(element, ElementChapter.GENERAL, KnownElementFieldType.UserDefined);
         pred[0] = predecessor;
         when(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                 BpmnConstants.ATTR_VAR_MAPPING_DELEGATE)).thenReturn("something");
         reader.getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.DelegatedVarMapping",
-                element, ElementChapter.Implementation, KnownElementFieldType.Class, pred);
+                element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.Class, pred);
 
         Assert.assertEquals(1, predecessor.getSuccessors().size());
         Assert.assertEquals("ServiceTask__1", pred[0].getId());
@@ -126,7 +126,7 @@ public class JavaReaderStaticTest {
 
         new JavaReaderStatic()
                 .getVariablesFromClass("de.viadee.bpm.vPAV.delegates.TestDelegateStaticInitialProcessVariables",
-                        element, ElementChapter.Implementation, KnownElementFieldType.Class, entry, new BasicNode[1]);
+                        element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.Class, entry, new BasicNode[1]);
 
         assertEquals(3, element.getControlFlowGraph().getOperations().size());
         Set<String> variables = element.getControlFlowGraph().getVariablesOfOperations();

@@ -31,6 +31,7 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import de.viadee.bpm.vPAV.processing.checker.Checker;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.springframework.util.DigestUtils;
 
@@ -66,7 +67,7 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     private String elementDescription;
 
-    private String implementationDetails; // Contains expression or source code reference if applicable
+    private final String implementationDetails; // Contains expression or source code reference if applicable
 
     /**
      * CheckerIssue
@@ -385,10 +386,7 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.hashCode() == this.hashCode())
-            return true;
-        else
-            return false;
+        return obj instanceof CheckerIssue && obj.hashCode() == this.hashCode();
     }
 
     @Override

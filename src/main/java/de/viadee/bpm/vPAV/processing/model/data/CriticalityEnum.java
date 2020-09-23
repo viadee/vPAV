@@ -36,5 +36,5 @@ package de.viadee.bpm.vPAV.processing.model.data;
  *
  */
 public enum CriticalityEnum {
-    INFO, WARNING, ERROR, SUCCESS;
+    INFO, WARNING, ERROR, SUCCESS
 }

@@ -33,10 +33,8 @@ package de.viadee.bpm.vPAV.processing;
 
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.ProcessVariablesCreator;
-import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.SootResolverSimplified;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -46,7 +44,6 @@ import soot.*;
 import soot.options.Options;
 import soot.toolkits.graph.Block;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -78,10 +75,10 @@ public class JavaReaderStatic {
 
                 // Delegate Variable Mapping
                 classFetcherNew(classFile, "mapInputVariables", element,
-                        ElementChapter.InputImplementation, fieldType, predecessor);
+                        ElementChapter.INPUT_IMPLEMENTATION, fieldType, predecessor);
 
                 classFetcherNew(classFile, "mapOutputVariables", element,
-                        ElementChapter.OutputImplementation, fieldType, predecessor);
+                        ElementChapter.OUTPUT_IMPLEMENTATION, fieldType, predecessor);
             } else {
                 // Java Delegate or Listener
                 SootClass sootClass = Scene.v()
