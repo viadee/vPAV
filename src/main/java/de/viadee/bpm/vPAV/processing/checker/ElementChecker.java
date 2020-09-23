@@ -39,11 +39,7 @@ import java.util.Collection;
 /**
  * Checks bpmn models for defined characteristics
  */
-public interface ElementChecker {
+public interface ElementChecker extends Checker {
 
     Collection<CheckerIssue> check(final BpmnElement element);
-
-    default boolean isSingletonChecker() {
-        return false;
-    }
 }

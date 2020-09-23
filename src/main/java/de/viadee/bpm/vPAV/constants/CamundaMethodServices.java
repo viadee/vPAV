@@ -66,6 +66,8 @@ public class CamundaMethodServices {
 
     public static final String CREATE_PROCESS_INSTANCE_BY_KEY = "createProcessInstanceByKey";
 
+    public static final String NOTIFY = "notify";
+
     public static final String EXECUTE = "execute";
 
     public static final String EXECUTE_WITH_VARIABLES_IN_RETURN = "executeWithVariablesInReturn";
@@ -76,9 +78,25 @@ public class CamundaMethodServices {
 
     public static final String SET_VARIABLE_LOCAL = "setVariableLocal";
 
+    public static final String GET_VARIABLE = "getVariable";
+
+    public static final String GET_VARIABLE_LOCAL = "getVariableLocal";
+
+    public static final String GET_VARIABLE_LOCAL_TYPED = "getVariableLocalTyped";
+
     public static final String SET_VARIABLES = "setVariables";
 
     public static final String SET_VARIABLES_LOCAL = "setVariablesLocal";
+
+    public static final String REMOVE_VARIABLE = "removeVariable";
+
+    public static final String REMOVE_VARIABLE_LOCAL = "removeVariableLocal";
+
+    public static final String PUT = "put";
+
+    public static final String PUT_VALUE = "putValue";
+
+    public static final String REMOVE = "remove";
 
     public static final String TASK_OBJECT = "task";
 

@@ -46,7 +46,6 @@ import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.concurrent.Flow;
 import java.util.logging.Logger;
 
 /**
@@ -56,7 +55,7 @@ public class CheckerFactory {
 
     private static final Logger LOGGER = Logger.getLogger(CheckerFactory.class.getName());
 
-    private Map<String, String> incorrectCheckers = new HashMap<>();
+    private final Map<String, String> incorrectCheckers = new HashMap<>();
 
     /**
      * create checkers
@@ -69,13 +68,14 @@ public class CheckerFactory {
      * @param invalidPathMap          invalidPathMap
      * @return checkers returns checkers
      */
-    public Collection[] createCheckerInstances(final RuleSet ruleConf, final Collection<String> resourcesNewestVersions,
+    public Collection<Checker>[] createCheckerInstances(final RuleSet ruleConf,
+            final Collection<String> resourcesNewestVersions,
             final EntryPointScanner scanner,
             final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
             final Map<AnomalyContainer, List<Path>> invalidPathMap, final FlowAnalysis flowAnalysis) {
 
         final HashSet<String> instantiatedCheckerClasses = new HashSet<>();
-        final Collection[] checkers = new Collection[2];
+        final Collection<Checker>[] checkers = new Collection[2];
         checkers[0] = createElementCheckers(instantiatedCheckerClasses, ruleConf, resourcesNewestVersions,
                 scanner);
         checkers[1] = createModelCheckers(instantiatedCheckerClasses, ruleConf, dataFlowRules,
@@ -84,10 +84,10 @@ public class CheckerFactory {
         return checkers;
     }
 
-    private Collection<ElementChecker> createElementCheckers(final HashSet<String> instantiatedCheckerClasses,
+    private Collection<Checker> createElementCheckers(final HashSet<String> instantiatedCheckerClasses,
             final RuleSet ruleConf, final Collection<String> resourcesNewestVersions,
             final EntryPointScanner scanner) {
-        final Collection<ElementChecker> elementCheckers = new ArrayList<>();
+        final Collection<Checker> elementCheckers = new ArrayList<>();
         AbstractElementChecker newChecker;
         // Create element checkers.
         for (Map<String, Rule> rules : ruleConf.getElementRules().values()) {
@@ -140,11 +140,11 @@ public class CheckerFactory {
         return elementCheckers;
     }
 
-    private Collection<ModelChecker> createModelCheckers(final HashSet<String> instantiatedCheckerClasses,
+    private Collection<Checker> createModelCheckers(final HashSet<String> instantiatedCheckerClasses,
             final RuleSet ruleConf, final Collection<DataFlowRule> dataFlowRules,
             final Collection<ProcessVariable> processVariables,
             final Map<AnomalyContainer, List<Path>> invalidPathMap, final FlowAnalysis flowAnalysis) {
-        final Collection<ModelChecker> modelCheckers = new ArrayList<>();
+        final Collection<Checker> modelCheckers = new ArrayList<>();
         ModelChecker newModelChecker;
         // Create model checkers.
         for (Map<String, Rule> rules : ruleConf.getModelRules().values()) {

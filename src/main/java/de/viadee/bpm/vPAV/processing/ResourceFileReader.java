@@ -52,6 +52,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
+
 public class ResourceFileReader {
 
     public static final Logger LOGGER = Logger.getLogger(ResourceFileReader.class.getName());
@@ -74,12 +76,12 @@ public class ResourceFileReader {
                 final DirectoryScanner directoryScanner = new DirectoryScanner();
 
                 if (RuntimeConfig.getInstance().isTest()) {
-                    if (fileName.endsWith(".java"))
+                    if (fileName.endsWith(JAVA_FILE_ENDING))
                         directoryScanner.setBasedir(ConfigConstants.JAVA_PATH_TEST);
                     else
                         directoryScanner.setBasedir(ConfigConstants.BASE_PATH_TEST);
                 } else {
-                    if (fileName.endsWith(".java"))
+                    if (fileName.endsWith(JAVA_FILE_ENDING))
                         directoryScanner.setBasedir(ConfigConstants.JAVA_PATH);
                     else
                         directoryScanner.setBasedir(RuntimeConfig.getInstance().getBasepath());

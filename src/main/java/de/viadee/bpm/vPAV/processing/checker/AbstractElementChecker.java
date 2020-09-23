@@ -48,7 +48,7 @@ public abstract class AbstractElementChecker implements ElementChecker {
      * @param bpmnScanner Unused bpmnScanner
      * @deprecated since v3.0.5
      */
-    @Deprecated
+    @Deprecated(since = "3.0.5")
     public AbstractElementChecker(final Rule rule, final BpmnScanner bpmnScanner) {
         this.rule = rule;
     }

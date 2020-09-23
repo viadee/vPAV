@@ -36,7 +36,7 @@ import de.viadee.bpm.vPAV.processing.model.data.KnownElementFieldType;
 
 public class ExpressionNode extends BasicNode {
 
-	private String expression;
+	private final String expression;
 
 	public ExpressionNode(final BpmnElement parentElement,
 			final String expression, final ElementChapter elementChapter, final KnownElementFieldType fieldType) {

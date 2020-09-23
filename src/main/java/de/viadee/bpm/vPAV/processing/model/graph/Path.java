@@ -37,7 +37,7 @@ import java.util.List;
 
 public class Path {
 
-  private List<BpmnElement> elements;
+  private final List<BpmnElement> elements;
 
   public Path(final List<BpmnElement> elements) {
     this.elements = elements;

@@ -29,22 +29,14 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.processing.code.flow;
+package de.viadee.bpm.vPAV.processing.checker;
 
-public class ArrayVariable {
+/**
+ * General checker interface
+ */
+public interface Checker {
 
-    private String[] values;
-
-    public ArrayVariable(int size) {
-        values = new String[size];
+    default boolean isSingletonChecker() {
+        return false;
     }
-
-    public String get(int index) {
-        return values[index];
-    }
-
-    public void set(int index, String value) {
-        values[index] = value;
-    }
-
 }

@@ -45,6 +45,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.NOTIFY;
+
 public class SootResolverSimplified {
 
     private SootResolverSimplified() {
@@ -52,7 +54,7 @@ public class SootResolverSimplified {
     }
 
     private static final List<String> defaultMethods = Arrays
-            .asList(CamundaMethodServices.EXECUTE, "notify", "mapInputVariables", "mapOutputVariables");
+            .asList(CamundaMethodServices.EXECUTE, NOTIFY, "mapInputVariables", "mapOutputVariables");
 
     private static final Logger LOGGER = Logger.getLogger(SootResolverSimplified.class.getName());
 
@@ -103,7 +105,7 @@ public class SootResolverSimplified {
             parameterTypes.add(CamundaMethodServices.ACTIVITY_EXECUTION_TYPE);
             method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
         }
-        if (methodName.equals("notify") && method == null) {
+        if (methodName.equals(NOTIFY) && method == null) {
             parameterTypes.remove(0);
             parameterTypes.add(CamundaMethodServices.DELEGATE_TASK_TYPE);
             method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
@@ -164,7 +166,7 @@ public class SootResolverSimplified {
 
         switch (methodName) {
             case "execute":
-            case "notify":
+            case NOTIFY:
                 parameterTypes.add(delegateExecutionType);
                 break;
             case "mapInputVariables":
@@ -191,7 +193,7 @@ public class SootResolverSimplified {
 
         switch (methodName) {
             case "execute":
-            case "notify":
+            case NOTIFY:
                 parameters.add(new JimpleLocal("del_ex", delegateExecutionType));
                 break;
             case "mapInputVariables":

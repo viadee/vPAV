@@ -33,13 +33,13 @@ package de.viadee.bpm.vPAV.config.model;
 
 public class ElementConvention {
 
-    private String name;
+    private final String name;
 
-    private String description;
+    private final String description;
 
-    private ElementFieldTypes elementFieldTypes;
+    private final ElementFieldTypes elementFieldTypes;
 
-    private String pattern;
+    private final String pattern;
 
     public ElementConvention(final String name, final ElementFieldTypes elementFieldTypes, final String description,
             final String pattern) {

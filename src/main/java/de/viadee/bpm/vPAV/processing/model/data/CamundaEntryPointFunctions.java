@@ -44,20 +44,20 @@ import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.*;
  */
 public enum CamundaEntryPointFunctions {
 
-    StartProcessInstanceById(START_PROCESS_INSTANCE_BY_ID, 1, 4, false, false),
-    StartProcessInstanceByKey(START_PROCESS_INSTANCE_BY_KEY, 1, 4, false, false),
-    StartProcessInstanceByMessage(START_PROCESS_INSTANCE_BY_MESSAGE, 1, 3, true, false),
-    StartProcessInstanceByMessageAndProcessDefinitionId(START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF, 2, 4, true,
+    FCT_START_PROCESS_INSTANCE_BY_ID(START_PROCESS_INSTANCE_BY_ID, 1, 4, false, false),
+    FCT_START_PROCESS_INSTANCE_BY_KEY(START_PROCESS_INSTANCE_BY_KEY, 1, 4, false, false),
+    FCT_START_PROCESS_INSTANCE_BY_MESSAGE(START_PROCESS_INSTANCE_BY_MESSAGE, 1, 3, true, false),
+    FCT_START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF_ID(START_PROCESS_INSTANCE_BY_MESSAGE_AND_PROCESS_DEF, 2, 4, true,
             false),
-    CorrelateMessage(CORRELATE_MESSAGE, 1, 4, true, false),
-    CreateProcessInstanceById(CREATE_PROCESS_INSTANCE_BY_ID, 1, 1, false, true),
-    CreateProcessInstanceByKey(CREATE_PROCESS_INSTANCE_BY_KEY, 1, 1, false, true),
-    Execute(EXECUTE, 0, 2, false, true),
-    ExecuteWithVariablesInReturn(EXECUTE_WITH_VARIABLES_IN_RETURN, 0, 2, false, true),
-    SetVariable(SET_VARIABLE, 2, 2, false, true),
-    SetVariableLocal(SET_VARIABLE_LOCAL, 2, 2, false, true),
-    SetVariables(SET_VARIABLES, 1, 1, false, true),
-    SetVariablesLocal(SET_VARIABLES_LOCAL, 1, 1, false, true);
+    FCT_CORRELATE_MESSAGE(CORRELATE_MESSAGE, 1, 4, true, false),
+    FCT_CREATE_PROCESS_INSTANCE_BY_ID(CREATE_PROCESS_INSTANCE_BY_ID, 1, 1, false, true),
+    FCT_CREATE_PROCESS_INSTANCE_BY_KEY(CREATE_PROCESS_INSTANCE_BY_KEY, 1, 1, false, true),
+    FCT_EXECUTE(EXECUTE, 0, 2, false, true),
+    FCT_EXECUTE_WITH_VARIABLES_IN_RETURN(EXECUTE_WITH_VARIABLES_IN_RETURN, 0, 2, false, true),
+    FCT_SET_VARIABLE(SET_VARIABLE, 2, 2, false, true),
+    FCT_SET_VARIABLE_LOCAL(SET_VARIABLE_LOCAL, 2, 2, false, true),
+    FCT_SET_VARIABLES(SET_VARIABLES, 1, 1, false, true),
+    FCT_SET_VARIABLES_LOCAL(SET_VARIABLES_LOCAL, 1, 1, false, true);
 
     private final String name;
 

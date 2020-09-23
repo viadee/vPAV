@@ -39,12 +39,9 @@ import de.viadee.bpm.vPAV.BpmnScanner;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
-import de.viadee.bpm.vPAV.config.reader.PropertiesReader;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
-import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -55,14 +52,13 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import soot.Scene;
 import soot.SootClass;
-import soot.SootResolver;
 import soot.SootResolver.SootClassNotFoundException;
 
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static de.viadee.bpm.vPAV.SootResolverSimplified.fixClassPathForSoot;
+import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
 
 /**
  * Class JavaDelegateChecker
@@ -270,10 +266,10 @@ public class JavaDelegateChecker extends AbstractElementChecker {
     /**
      * Checks for JavaDelegates in Listeners
      *
-     * @param element
-     * @param aClass
-     * @param aDelegate
-     * @param taskListener
+     * @param element      Bpmn element that is analyzed
+     * @param aClass       List of classes
+     * @param aDelegate    List of delegates
+     * @param taskListener True if it is a task listener
      * @return issues
      */
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
@@ -286,7 +282,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             location = BpmnConstants.EXECUTION_LISTENER;
 
         // classes
-        if (aClass == null || aClass.size() > 0) {
+        if (aClass != null && !aClass.isEmpty()) {
             for (String eClass : aClass) {
                 if (eClass != null && eClass.trim().length() == 0) {
                     // Error, because no class has been configured
@@ -299,7 +295,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         }
 
         // delegateExpression
-        if (aDelegate != null && aDelegate.size() > 0) {
+        if (aDelegate != null && !aDelegate.isEmpty()) {
             for (String eDel : aDelegate) {
                 if (eDel == null || eDel.trim().length() == 0) {
                     // Error, because no delegateExpression has been configured
@@ -353,7 +349,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement bpmnElement = element.getBaseElement();
-        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        final String classPath =
+                className.replaceAll("\\.", "/") + JAVA_FILE_ENDING; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         HashMap<String, String> tempMap = new HashMap<>();
         Map.Entry<String, String> location; //$NON-NLS-1$
         if (listener) {
@@ -377,7 +374,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             SootClass sClass = Scene.v()
                     .forceResolve(fixClassPathForSoot(className), SootClass.SIGNATURES);
 
-            if(sClass.isPhantom()) {
+            if (sClass.isPhantom()) {
                 throw new ClassNotFoundException("Soot class is phantom and does probably not exist.");
             }
 
@@ -429,13 +426,10 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     }
                 }
             }
-        } else {
-            if (taskListener && interfaces.contains(BpmnConstants.INTERFACE_TASK_LISTENER)) {
-                return;
-            } else if (interfaces.contains(BpmnConstants.INTERFACE_EXECUTION_LISTENER) || interfaces
-                    .contains(BpmnConstants.INTERFACE_DEL)) {
-                return;
-            }
+        } else if ((taskListener && interfaces.contains(BpmnConstants.INTERFACE_TASK_LISTENER))
+                || interfaces.contains(BpmnConstants.INTERFACE_EXECUTION_LISTENER) || interfaces
+                .contains(BpmnConstants.INTERFACE_DEL)) {
+            return;
         }
 
         if (sootClass.hasSuperclass()) {
@@ -457,14 +451,14 @@ public class JavaDelegateChecker extends AbstractElementChecker {
      * Recursively checks for the correct interface implementation of a given
      * delegate
      *
-     * @param _interface Current interface
+     * @param implInterface Current interface
      * @return True/false
      */
-    private boolean checkTransitiveInterfaces(SootClass _interface) {
-        if (_interface.getShortName().equals(BpmnConstants.INTERFACE_DEL)) {
+    private boolean checkTransitiveInterfaces(SootClass implInterface) {
+        if (implInterface.getShortName().equals(BpmnConstants.INTERFACE_DEL)) {
             return true;
         } else {
-            for (SootClass i : _interface.getInterfaces()) {
+            for (SootClass i : implInterface.getInterfaces()) {
                 if (checkTransitiveInterfaces(i)) {
                     return true;
                 }

@@ -63,9 +63,11 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
+
 public class BoundaryErrorChecker extends AbstractElementChecker {
 
-    private static Logger logger = Logger.getLogger(BoundaryErrorChecker.class.getName());
+    private static final Logger logger = Logger.getLogger(BoundaryErrorChecker.class.getName());
 
     public BoundaryErrorChecker(final Rule rule) {
         super(rule);
@@ -153,11 +155,11 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
      * In case a bean mapping exists, we check for validity of a bean, so the event can be mapped against the respective
      * task If the class or bean can be resolved, the ErrorCode gets validated
      *
-     * @param element
-     * @param issues
-     * @param bpmnElement
-     * @param errorDefEntry
-     * @param implementationRef
+     * @param element           Element that is analyzed
+     * @param issues            Issue collection to that an issue is added if one is detected
+     * @param bpmnElement       Base element of bpmn element
+     * @param errorDefEntry     Error code or error
+     * @param implementationRef Reference to implementation if the error is used in a Java context
      */
     private void checkBeanMapping(BpmnElement element, final Collection<CheckerIssue> issues,
             final BaseElement bpmnElement, final String errorDefEntry, final String implementationRef) {
@@ -205,13 +207,13 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     /**
      * Reads a resource and retrieves content as String
      *
-     * @param className
-     * @param errorCode
+     * @param className Name of class that should be analyzed
+     * @param errorCode Error code for that we are looking
      * @return boolean
      */
     private boolean readResourceFile(final String className, final String errorCode) {
 
-        final String fileName = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        final String fileName = className.replaceAll("\\.", "/") + JAVA_FILE_ENDING; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         boolean matchingErrorCode = false;
 
@@ -220,12 +222,12 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
                 final DirectoryScanner scanner = new DirectoryScanner();
 
                 if (RuntimeConfig.getInstance().isTest()) {
-                    if (fileName.endsWith(".java")) //$NON-NLS-1$
+                    if (fileName.endsWith(JAVA_FILE_ENDING)) //$NON-NLS-1$
                         scanner.setBasedir(ConfigConstants.JAVA_PATH_TEST);
                     else
                         scanner.setBasedir(ConfigConstants.BASE_PATH_TEST);
                 } else {
-                    if (fileName.endsWith(".java")) //$NON-NLS-1$
+                    if (fileName.endsWith(JAVA_FILE_ENDING)) //$NON-NLS-1$
                         scanner.setBasedir(ConfigConstants.JAVA_PATH);
                     else
                         scanner.setBasedir(RuntimeConfig.getInstance().getBasepath());
@@ -253,7 +255,8 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     /**
      * Check methodBody for content and return true if a "throw new BpmnError.." declaration is found
      *
-     * @param errorCode
+     * @param classBody Body of class that is analyzed
+     * @param errorCode Error code that should be found in class
      * @return boolean
      */
     private boolean validateContent(final String classBody, final String errorCode) {
@@ -306,7 +309,7 @@ public class BoundaryErrorChecker extends AbstractElementChecker {
     /**
      * Check if class reference for a given element exists
      *
-     * @param className
+     * @param className Name of Java class that is analyzed
      * @return boolean
      */
     private boolean checkClassFile(final String className) {

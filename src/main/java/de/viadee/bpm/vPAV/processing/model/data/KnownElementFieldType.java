@@ -66,7 +66,7 @@ public enum KnownElementFieldType {
     CamundaStandardVariables("Camunda Standard Process Variables"),
     ProcessStart("Variables passed to runtime service");
 
-    private String description;
+    private final String description;
 
     private KnownElementFieldType(final String description) {
         this.description = description;

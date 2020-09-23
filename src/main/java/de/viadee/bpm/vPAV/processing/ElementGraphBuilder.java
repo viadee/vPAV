@@ -134,7 +134,7 @@ public class ElementGraphBuilder {
 
         final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
 
-        HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
+        Map<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
         try {
             // Use first process as default process
             userVariables = (new XmlVariablesReader()).read(RuntimeConfig.getInstance().getUserVariablesFilePath(),
@@ -225,7 +225,7 @@ public class ElementGraphBuilder {
 
         // Add user defined variables
         if (userVariables != null) {
-            BasicNode userVarNode = new BasicNode(bpmnElement, ElementChapter.UserDefined,
+            BasicNode userVarNode = new BasicNode(bpmnElement, ElementChapter.USER_DEFINED,
                     KnownElementFieldType.UserDefined);
 
             for (Map.Entry<String, ProcessVariableOperation> var : userVariables.entries()) {
@@ -252,7 +252,7 @@ public class ElementGraphBuilder {
             // add process variables for start event, which set e.g. by call startProcessInstanceByKey
             for (EntryPoint ep : scanner.getEntryPoints()) {
                 if (isEntryPointApplicable(ep, graph, messageName, numProcesses)) {
-                    BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.ProcessStart,
+                    BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.PROCESS_START,
                             KnownElementFieldType.ProcessStart);
                     String scopeId = element.getScope().getAttributeValue(BpmnConstants.ATTR_ID);
 
@@ -288,7 +288,7 @@ public class ElementGraphBuilder {
                 for (EntryPoint ep : scanner.getEntryPoints()) {
                     if (ep.getEntryPointName().equals(CORRELATE_MESSAGE) && ep
                             .getMessageName().equals(messageName)) {
-                        BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.Message,
+                        BasicNode initVarNode = new BasicNode(bpmnElement, ElementChapter.MESSAGE,
                                 KnownElementFieldType.Message);
                         String scopeId = element.getScope().getAttributeValue(BpmnConstants.ATTR_ID);
 
@@ -402,9 +402,9 @@ public class ElementGraphBuilder {
         if (subprocessElement.getControlFlowGraph().getNodes().size() > 0) {
             useElementItself = true;
             ElementChapter chapter = subprocessElement.getControlFlowGraph().firstNode().getElementChapter();
-            isBefore = !(chapter.equals(ElementChapter.OutputImplementation)
-                    || chapter.equals(ElementChapter.ExecutionListenerEnd) || chapter
-                    .equals(ElementChapter.OutputData));
+            isBefore = !(chapter.equals(ElementChapter.OUTPUT_IMPLEMENTATION)
+                    || chapter.equals(ElementChapter.EXECUTION_LISTENER_END) || chapter
+                    .equals(ElementChapter.OUTPUT_DATA));
         }
 
         if (startEvents != null && !startEvents.isEmpty() && endEvents != null && !endEvents.isEmpty()) {
@@ -519,12 +519,12 @@ public class ElementGraphBuilder {
         BasicNode firstNodeAfter = null;
         ElementChapter firstNodeChapter = element.getControlFlowGraph().firstNode().getElementChapter();
         ElementChapter lastNodeChapter = element.getControlFlowGraph().lastNode().getElementChapter();
-        boolean hasFirstHalf = !(firstNodeChapter.equals(ElementChapter.OutputImplementation)
-                || firstNodeChapter.equals(ElementChapter.ExecutionListenerEnd) || firstNodeChapter
-                .equals(ElementChapter.OutputData));
-        boolean hasSecondHalf = lastNodeChapter.equals(ElementChapter.OutputImplementation)
-                || lastNodeChapter.equals(ElementChapter.ExecutionListenerEnd)
-                || lastNodeChapter.equals(ElementChapter.OutputData);
+        boolean hasFirstHalf = !(firstNodeChapter.equals(ElementChapter.OUTPUT_IMPLEMENTATION)
+                || firstNodeChapter.equals(ElementChapter.EXECUTION_LISTENER_END) || firstNodeChapter
+                .equals(ElementChapter.OUTPUT_DATA));
+        boolean hasSecondHalf = lastNodeChapter.equals(ElementChapter.OUTPUT_IMPLEMENTATION)
+                || lastNodeChapter.equals(ElementChapter.EXECUTION_LISTENER_END)
+                || lastNodeChapter.equals(ElementChapter.OUTPUT_DATA);
 
         if (!(hasFirstHalf && hasSecondHalf)) {
             return false;
@@ -537,9 +537,9 @@ public class ElementGraphBuilder {
         AnalysisElement predecessor = element.getControlFlowGraph().lastNode().getPredecessors().iterator().next();
         while (predecessor != null) {
             ElementChapter chapter = ((BasicNode) predecessor).getElementChapter();
-            if (!(chapter.equals(ElementChapter.OutputImplementation)
-                    || chapter.equals(ElementChapter.ExecutionListenerEnd) || chapter
-                    .equals(ElementChapter.OutputData))) {
+            if (!(chapter.equals(ElementChapter.OUTPUT_IMPLEMENTATION)
+                    || chapter.equals(ElementChapter.EXECUTION_LISTENER_END) || chapter
+                    .equals(ElementChapter.OUTPUT_DATA))) {
                 lastNodeBefore = (BasicNode) predecessor;
                 firstNodeAfter = curSuccessor;
                 break;

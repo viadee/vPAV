@@ -33,28 +33,29 @@ package de.viadee.bpm.vPAV.config.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class Rule {
 
-    private String id;
+    private final String id;
 
-    private String name;
+    private final String name;
 
     private boolean isActive;
 
-    private String ruleDescription;
+    private final String ruleDescription;
 
-    private Map<String, Setting> settings;
+    private final Map<String, Setting> settings;
 
-    private Collection<ElementConvention> elementConventions;
+    private final Collection<ElementConvention> elementConventions;
 
-    private ArrayList<ModelConvention> modelConventions;
+    private final List<ModelConvention> modelConventions;
 
     public Rule(final String id, final String name, final boolean isActive, final String ruleDescription,
             final Map<String, Setting> settings,
             final Collection<ElementConvention> elementConventions,
-            final ArrayList<ModelConvention> modelConventions) {
+            final List<ModelConvention> modelConventions) {
         super();
         this.id = id;
         this.name = name;
@@ -68,7 +69,7 @@ public class Rule {
     public Rule(final String name, final boolean isActive, final String ruleDescription,
                 final Map<String, Setting> settings,
                 final Collection<ElementConvention> elementConventions,
-                final ArrayList<ModelConvention> modelConventions) {
+                final List<ModelConvention> modelConventions) {
         this(name, name, isActive, ruleDescription, settings, elementConventions, modelConventions);
     }
 
@@ -96,11 +97,11 @@ public class Rule {
         return elementConventions;
     }
 
-    public ArrayList<ModelConvention> getModelConventions() {
+    public List<ModelConvention> getModelConventions() {
         return modelConventions;
     }
 
-    public ArrayList<String> getWhiteList() {
+    public List<String> getWhiteList() {
         final ArrayList<String> whiteList = new ArrayList<>();
         for (ModelConvention modelConvention : modelConventions) {
             if (modelConvention.getType() != null) {

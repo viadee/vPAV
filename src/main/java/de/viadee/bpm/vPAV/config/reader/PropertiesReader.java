@@ -90,7 +90,7 @@ public class PropertiesReader {
         String pattern = "{vPav, vpav, vPAV}.properties";
         FileSystem fs = FileSystems.getDefault();
         PathMatcher matcher = fs.getPathMatcher("glob:" + pattern);
-        FileVisitor<Path> matcherVisitor = new SimpleFileVisitor<Path>() {
+        FileVisitor<Path> matcherVisitor = new SimpleFileVisitor<>() {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {

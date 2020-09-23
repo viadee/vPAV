@@ -64,7 +64,7 @@ public class BasicNode implements AnalysisElement{
 
     ElementChapter elementChapter;
 
-    private KnownElementFieldType fieldType;
+    private final KnownElementFieldType fieldType;
 
     LinkedHashMap<String, AnalysisElement> predecessors;
 

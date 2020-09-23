@@ -33,6 +33,8 @@ package de.viadee.bpm.vPAV.processing.model.data;
 
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 
+import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.*;
+
 /**
  *
  * Enum storing Camunda methods of ProcessVariable operations.
@@ -43,44 +45,44 @@ import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
  */
 public enum CamundaProcessVariableFunctions {
 
-    SetVariable("setVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.WRITE),
-    SetVariable2("setVariable", CamundaMethodServices.RUNTIME, 3, 1, VariableOperation.WRITE),
-    SetVariableD("setVariable", CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.WRITE),
-    SetVariableS("setVariable", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
-    SetVariableLocale("setVariableLocal", CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
-    SetVariableLocale2("setVariableLocal", CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.WRITE),
-    SetVariableA("setVariable", CamundaMethodServices.ACTIVITY_EXECUTION, 2, 1, VariableOperation.WRITE),
-    GetVariable("getVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.READ),
-    GetVariable2("getVariable", CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.READ),
-    GetVariable3("getVariable", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
-    GetVariableS("getVariable", CamundaMethodServices.SCOPE, 1, 1, VariableOperation.READ),
-    GetVariableLocal("getVariableLocal", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
-    GetVariableLocalTyped("getVariableLocalTyped", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
-    GetVariableLocalTyped2("getVariableLocalTyped", CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.READ),
-    GetVariableA("getVariable", CamundaMethodServices.ACTIVITY_EXECUTION, 1, 1, VariableOperation.READ),
-    GetVariableA2("getVariable", CamundaMethodServices.ACTIVITY_EXECUTION, 2, 1, VariableOperation.READ),
-    RemoveVariable("removeVariable", CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.DELETE),
-    RemoveVariable2("removeVariable", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
-    RemoveVariableLocal("removeVariableLocal", CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
-    RemoveVariableA("removeVariable", CamundaMethodServices.ACTIVITY_EXECUTION, 1, 1, VariableOperation.DELETE),
-    Put("put", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
-    Put2("put", CamundaMethodServices.MAP, 2, 1, VariableOperation.WRITE),
-    PutValue("putValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
-    PutValueTyped("putValueTyped", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
-    GetValue("getValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.READ),
-    GetValueTyped("getValueTyped", CamundaMethodServices.VARIABLE_MAP, 1, 1, VariableOperation.READ),
-    Remove("remove", CamundaMethodServices.VARIABLE_MAP, 1, 1, VariableOperation.DELETE),
-    Remove2("remove", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.DELETE);
+    FCT_SET_VARIABLE(SET_VARIABLE, CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.WRITE),
+    FCT_SET_VARIABLE2(SET_VARIABLE, CamundaMethodServices.RUNTIME, 3, 1, VariableOperation.WRITE),
+    FCT_SET_VARIABLED(SET_VARIABLE, CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.WRITE),
+    FCT_SET_VARIABLES(SET_VARIABLE, CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
+    FCT_SET_VARIABLE_LOCAL(SET_VARIABLE_LOCAL, CamundaMethodServices.SCOPE, 2, 1, VariableOperation.WRITE),
+    FCT_SET_VARIABLE_LOCAL2(SET_VARIABLE_LOCAL, CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.WRITE),
+    FCT_SET_VARIABLEA(SET_VARIABLE, CamundaMethodServices.ACTIVITY_EXECUTION, 2, 1, VariableOperation.WRITE),
+    FCT_GET_VARIABLE(GET_VARIABLE, CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.READ),
+    FCT_GET_VARIABLE2(GET_VARIABLE, CamundaMethodServices.DELEGATE, 2, 1, VariableOperation.READ),
+    FCT_GET_VARIABLE3(GET_VARIABLE, CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
+    FCT_GET_VARIABLES(GET_VARIABLE, CamundaMethodServices.SCOPE, 1, 1, VariableOperation.READ),
+    FCT_GET_VARIABLE_LOCAL(GET_VARIABLE_LOCAL, CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
+    FCT_GET_VARIABLE_LOCAL_TYPED(GET_VARIABLE_LOCAL_TYPED, CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.READ),
+    FCT_GET_VARIABLE_LOCAL_TYPED2(GET_VARIABLE_LOCAL_TYPED, CamundaMethodServices.DELEGATE_TASK, 2, 1, VariableOperation.READ),
+    FCT_GET_VARIABLEA(GET_VARIABLE, CamundaMethodServices.ACTIVITY_EXECUTION, 1, 1, VariableOperation.READ),
+    FCT_GET_VARIABLEA2(GET_VARIABLE, CamundaMethodServices.ACTIVITY_EXECUTION, 2, 1, VariableOperation.READ),
+    FCT_REMOVE_VARIABLE(REMOVE_VARIABLE, CamundaMethodServices.DELEGATE, 1, 1, VariableOperation.DELETE),
+    FCT_REMOVE_VARIABLE2(REMOVE_VARIABLE, CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
+    FCT_REMOVE_VARIABLE_LOCAL(REMOVE_VARIABLE_LOCAL, CamundaMethodServices.DELEGATE_TASK, 1, 1, VariableOperation.DELETE),
+    FCT_REMOVE_VARIABLEA(REMOVE_VARIABLE, CamundaMethodServices.ACTIVITY_EXECUTION, 1, 1, VariableOperation.DELETE),
+    FCT_PUT(PUT, CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
+    FCT_PUT2(PUT, CamundaMethodServices.MAP, 2, 1, VariableOperation.WRITE),
+    FCT_PUT_VALUE(PUT_VALUE, CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
+    FCT_PUT_VALUE_TYPED("putValueTyped", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.WRITE),
+    FCT_GET_VALUE("getValue", CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.READ),
+    FCT_GET_VALUE_TYPED("getValueTyped", CamundaMethodServices.VARIABLE_MAP, 1, 1, VariableOperation.READ),
+    FCT_REMOVE(REMOVE, CamundaMethodServices.VARIABLE_MAP, 1, 1, VariableOperation.DELETE),
+    FCT_REMOVE2(REMOVE, CamundaMethodServices.VARIABLE_MAP, 2, 1, VariableOperation.DELETE);
 
-    private String name;
+    private final String name;
 
-    private String service;
+    private final String service;
 
-    private int numberOfArgBoxes;
+    private final int numberOfArgBoxes;
 
-    private int locationOfBox;
+    private final int locationOfBox;
 
-    private VariableOperation operationType;
+    private final VariableOperation operationType;
 
     /**
      *

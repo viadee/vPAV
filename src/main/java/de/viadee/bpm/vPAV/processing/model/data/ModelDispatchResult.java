@@ -36,9 +36,9 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import java.util.Collection;
 
 public class ModelDispatchResult {
-	private Collection<CheckerIssue> issues;
-	private Collection<BpmnElement> bpmnElements;
-	private Collection<ProcessVariable> processVariables;
+	private final Collection<CheckerIssue> issues;
+	private final Collection<BpmnElement> bpmnElements;
+	private final Collection<ProcessVariable> processVariables;
 
 	public ModelDispatchResult(final Collection<CheckerIssue> issues, final Collection<BpmnElement> bpmnElements,
 			final Collection<ProcessVariable> processVariables) {

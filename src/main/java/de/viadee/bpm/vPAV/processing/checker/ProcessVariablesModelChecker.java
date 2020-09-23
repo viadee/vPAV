@@ -45,13 +45,13 @@ import java.util.Map;
 
 public class ProcessVariablesModelChecker extends AbstractModelChecker {
 
-	public ProcessVariablesModelChecker(Rule rule,
-			Map<AnomalyContainer, List<Path>> invalidPathsMap,
-			Collection<ProcessVariable> processVariables, FlowAnalysis flowAnalysis) {
-		super(rule, invalidPathsMap, processVariables, flowAnalysis);
-	}
+    public ProcessVariablesModelChecker(Rule rule,
+            Map<AnomalyContainer, List<Path>> invalidPathsMap,
+            Collection<ProcessVariable> processVariables, FlowAnalysis flowAnalysis) {
+        super(rule, invalidPathsMap, processVariables, flowAnalysis);
+    }
 
-	/**
+    /**
      * Checks variables of a given process and identifies read/write/delete
      * anomalies
      *
@@ -93,6 +93,7 @@ public class ProcessVariablesModelChecker extends AbstractModelChecker {
         return issues;
     }
 
+    @Override
     public boolean isSingletonChecker() {
         return true;
     }

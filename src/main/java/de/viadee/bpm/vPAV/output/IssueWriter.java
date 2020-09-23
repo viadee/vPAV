@@ -50,6 +50,10 @@ import java.util.Map.Entry;
 
 public class IssueWriter {
 
+    private IssueWriter() {
+
+    }
+
     /**
      * @param rule           Rule
      * @param classification CriticalityEnum
@@ -133,8 +137,7 @@ public class IssueWriter {
         String implementationDetails = null;
         if (var.getNode() instanceof ExpressionNode) {
             implementationDetails = ((ExpressionNode) var.getNode()).getExpression();
-        }
-        else if(var.getNode() instanceof Node) {
+        } else if (var.getNode() instanceof Node) {
             implementationDetails = ((Node) var.getNode()).getJavaClass();
         }
 

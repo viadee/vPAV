@@ -81,7 +81,7 @@ public class JsonOutputWriter implements IssueOutputWriter {
 	 */
 	private static String transformToJsonDatastructure(final Collection<CheckerIssue> issues) {
 		final JsonArray jsonIssues = new JsonArray();
-		if (issues != null && issues.size() > 0) {
+		if (issues != null && !issues.isEmpty()) {
 			for (final CheckerIssue issue : issues) {
 				final JsonObject obj = new JsonObject();
 				obj.addProperty(BpmnConstants.VPAV_ID, issue.getId());
@@ -97,7 +97,7 @@ public class JsonOutputWriter implements IssueOutputWriter {
 						issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription());
 				final JsonArray jsonPaths = new JsonArray();
 				final List<Path> paths = issue.getInvalidPaths();
-				if (paths != null && paths.size() > 0) {
+				if (paths != null && !paths.isEmpty()) {
 					for (final Path path : paths) {
 						final JsonArray jsonPath = new JsonArray();
 						final List<BpmnElement> elements = path.getElements();

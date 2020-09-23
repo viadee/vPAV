@@ -58,12 +58,14 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.viadee.bpm.vPAV.constants.BpmnConstants.VPAV_ELEMENT_ID;
+
 /**
  * Create the JavaScript file for HTML-output; Needs: issues and bpmnFile names
  */
 public class JsOutputWriter implements IssueOutputWriter {
 
-	private static Logger logger = Logger.getLogger(JsOutputWriter.class.getName());
+	private static final Logger logger = Logger.getLogger(JsOutputWriter.class.getName());
 
 	private Map<String, String> ignoredIssuesMap = new HashMap<>();
 
@@ -157,7 +159,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			// write elements containing operations
 			JsonArray jsonElements = elements.stream()
 					.map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
-					.filter(o -> o.has("elementId")).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+					.filter(o -> o.has(VPAV_ELEMENT_ID)).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 			StringBuilder jsFile = new StringBuilder();
 			jsFile.append(transformJsonToJs("proz_vars", jsonElements)).append(";\n\n");
 			JsonArray jsonVariables = processVariables.stream().map(JsOutputWriter::transformProcessVariablesToJson)
@@ -180,7 +182,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final JsonObject obj = new JsonObject();
 		if (!element.getProcessVariables().isEmpty()) {
 			// elementID
-			obj.addProperty("elementId", element.getBaseElement().getId());
+			obj.addProperty(VPAV_ELEMENT_ID, element.getBaseElement().getId());
 			// bpmnFile
 			obj.addProperty(BpmnConstants.VPAV_BPMN_FILE,
 					replace("\\", element.getProcessDefinition()));
@@ -221,13 +223,13 @@ public class JsOutputWriter implements IssueOutputWriter {
 	private static JsonObject transformProcessVariablesToJson(final ProcessVariable processVariable) {
 		final JsonObject obj = new JsonObject();
 		obj.addProperty("name", processVariable.getName());
-		if (processVariable.getOperations().size() > 0) {
+		if (!processVariable.getOperations().isEmpty()) {
 			String bpmnFile = processVariable.getOperations().get(0).getElement().getProcessDefinition();
 			obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace("\\", bpmnFile));
 		}
 		Function<ProcessVariableOperation, JsonObject> processVariableToJson = o -> {
 			final JsonObject jsonOperation = new JsonObject();
-			jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
+			jsonOperation.addProperty(VPAV_ELEMENT_ID, o.getElement().getBaseElement().getId());
 			jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
 			jsonOperation.addProperty("fieldType", o.getFieldType().getDescription());
 			jsonOperation.addProperty("elementChapter", o.getChapter().toString());
@@ -257,7 +259,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 			for (CheckerIssue issue : issues) {
 				String prettyBpmnFilename = replace("\\", issue.getBpmnFile());
-				if (!prettyBpmnFilename.equals(ConfigConstants.JAVA_BASE_PATH + bpmnFilename))
+				if (!prettyBpmnFilename.equals(ConfigConstants.BASE_PATH + bpmnFilename))
 					modelIssues.remove(issue);
 			}
 
@@ -269,7 +271,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				}
 				if (ruleIssues.isEmpty())
 					newIssues.add(new CheckerIssue(ruleName, null, CriticalityEnum.SUCCESS,
-							(ConfigConstants.JAVA_BASE_PATH + bpmnFilename), null, "", "", null, null, null,
+							(ConfigConstants.BASE_PATH + bpmnFilename), null, "", "", null, null, null,
 							"No issues found", null, null));
 			}
 		}
@@ -361,14 +363,14 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 */
 	private String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
 		final JsonArray jsonIssues = new JsonArray();
-		if (issues != null && issues.size() > 0) {
+		if (issues != null && !issues.isEmpty()) {
 			for (final CheckerIssue issue : issues) {
 				final JsonObject obj = new JsonObject();
 				obj.addProperty(BpmnConstants.VPAV_ID, issue.getId());
 				obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace("\\", issue.getBpmnFile()));
 				obj.addProperty(BpmnConstants.VPAV_RULE_NAME, issue.getRuleName());
 				obj.addProperty(BpmnConstants.VPAV_RULE_DESCRIPTION, issue.getRuleDescription());
-				obj.addProperty(BpmnConstants.VPAV_ELEMENT_ID, issue.getElementId());
+				obj.addProperty(VPAV_ELEMENT_ID, issue.getElementId());
 				obj.addProperty(BpmnConstants.VPAV_ELEMENT_NAME, issue.getElementName());
 				obj.addProperty(BpmnConstants.VPAV_CLASSIFICATION, issue.getClassification().name());
 				obj.addProperty(BpmnConstants.VPAV_RESOURCE_FILE, issue.getResourceFile());
@@ -377,7 +379,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 						issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription());
 				final JsonArray jsonPaths = new JsonArray();
 				final List<Path> paths = issue.getInvalidPaths();
-				if (paths != null && paths.size() > 0) {
+				if (paths != null && !paths.isEmpty()) {
 					for (final Path path : paths) {
 						final JsonArray jsonPath = new JsonArray();
 						final List<BpmnElement> elements = path.getElements();
@@ -385,7 +387,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 							final JsonObject jsonElement = new JsonObject();
 							final String id = element.getBaseElement().getId();
 							final String name = element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
-							jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_ID, id);
+							jsonElement.addProperty(VPAV_ELEMENT_ID, id);
 							jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_NAME,
 									name == null ? null : name.replaceAll("\n", ""));
 							jsonPath.add(jsonElement);
@@ -645,7 +647,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 */
 	private String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
 		final JsonArray jsonIssues = new JsonArray();
-		if (defaultCheckers != null && defaultCheckers.size() > 0) {
+		if (defaultCheckers != null && !defaultCheckers.isEmpty()) {
 			for (String entry : defaultCheckers) {
 				final JsonObject obj = new JsonObject();
 				obj.addProperty(ConfigConstants.RULE_NAME, entry);

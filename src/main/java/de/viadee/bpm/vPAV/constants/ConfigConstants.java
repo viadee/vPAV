@@ -39,7 +39,9 @@ public class ConfigConstants {
 
     public static final String MAIN_FOLDER = "src/main/";
 
-    public static final String BASE_PATH = MAIN_FOLDER + "resources/";
+    public static final String RESOURCES = "resources/";
+
+    public static final String BASE_PATH = MAIN_FOLDER + RESOURCES;
 
     public static final String JAVA_PATH = MAIN_FOLDER + "java/";
 
@@ -53,11 +55,11 @@ public class ConfigConstants {
 
     public static final String JAVA_PATH_TEST = TEST_FOLDER + "java/";
 
-    public static final String BASE_PATH_TEST = TEST_FOLDER + "resources/";
-
-    public static final String JAVA_BASE_PATH = MAIN_FOLDER + "resources/";
+    public static final String BASE_PATH_TEST = TEST_FOLDER + RESOURCES;
 
     public static final String DATA_FOLDER = "data/";
+
+    public static final String JAVA_FILE_ENDING = ".java";
 
     public static final String RULESET = "ruleSet.xml";
 
@@ -100,8 +102,6 @@ public class ConfigConstants {
     public static final String RULE_NAME = "rulename";
 
     public static final String MESSAGE = "message";
-
-    public static final String CRITICALITY = "Criticality";
 
     public static final String WHITELIST_SOOT_DEPENDENCIES = "org/camunda/bpm/camunda-engine";
 

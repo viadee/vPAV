@@ -39,11 +39,7 @@ import java.util.Collection;
  * Checks, which concern the whole model
  *
  */
-public interface ModelChecker {
+public interface ModelChecker extends Checker {
 
     Collection<CheckerIssue> check();
-
-    default boolean isSingletonChecker() {
-        return false;
-    }
 }

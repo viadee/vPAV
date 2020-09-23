@@ -31,12 +31,14 @@
  */
 package de.viadee.bpm.vPAV.processing;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariableOperation;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -49,13 +51,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 
 import static org.junit.Assert.assertEquals;
 
 public class ReachingDefinitionTest {
-
-	private static ClassLoader cl;
 
 	private static final String BASE_PATH = "src/test/resources/";
 
@@ -65,7 +64,7 @@ public class ReachingDefinitionTest {
 		final String currentPath = file.toURI().toURL().toString();
 		final URL classUrl = new URL(currentPath + "src/test/java");
 		final URL[] classUrls = { classUrl };
-		cl = new URLClassLoader(classUrls);
+		ClassLoader cl = new URLClassLoader(classUrls);
 		RuntimeConfig.getInstance().setClassLoader(cl);
 		RuntimeConfig.getInstance().setTest(true);
 	}
@@ -80,7 +79,7 @@ public class ReachingDefinitionTest {
 		final Collection<ServiceTask> tasks = modelInstance.getModelElementsByType(ServiceTask.class);
 		final BpmnElement element = new BpmnElement(PATH, tasks.iterator().next(), new ControlFlowGraph(), new FlowAnalysis());
 		final FileScanner fileScanner = new FileScanner(new RuleSet());
-		new JavaReaderStatic().getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null,  new BasicNode[1]);
+		JavaReaderStatic.getVariablesFromJavaDelegate("de.viadee.bpm.vPAV.delegates.TestDelegateReachingDef", element, null, null,  new BasicNode[1]);
 		ListMultimap<String, ProcessVariableOperation> operations = element.getControlFlowGraph().getOperations();
 
 		assertEquals(5, operations.size());
