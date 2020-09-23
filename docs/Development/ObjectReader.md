@@ -24,7 +24,12 @@ A method is represented by a Soot block. A block is processed by the method `pro
 The two variables `localStringVariables` and `localObjectVariables` contain local variables that are created in a method.
 
 Each type of instruction e.g. `IdentityStmt` or `AssignStmt` is handled in its own method.
+The general procedure is that first variables are resolved. The variables are resolved by checking the type and the locality. 
+Depending on the characteristics, the local variables, fields of an object or static variables are checked. 
+If the variable cannot be resolved, `null` is returned. 
 
+If an instruction is encountered that has a special meaning in the camunda context like `setVariable`, a listener is notified. 
+Depending on the type of instrunction and state of analysis, either an entry point is created or a process variable operation is added to the CFG.
 
 Each block is processed only once. If a block is visited a second time, an edge is added to the existing block. 
 This prevents stack overflows if a recursion or loop is included in the method.
