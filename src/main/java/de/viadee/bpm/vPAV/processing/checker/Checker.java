@@ -29,16 +29,14 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.viadee.bpm.vPAV.exceptions;
+package de.viadee.bpm.vPAV.processing.checker;
 
-public class InvalidPropertiesConfiguration extends RuntimeException {
-    
-    public InvalidPropertiesConfiguration(final String message, Throwable e) {
-        super(message, e);
+/**
+ * General checker interface
+ */
+public interface Checker {
+
+    default boolean isSingletonChecker() {
+        return false;
     }
-
-    public InvalidPropertiesConfiguration(final String message) {
-        super(message);
-    }
-
 }

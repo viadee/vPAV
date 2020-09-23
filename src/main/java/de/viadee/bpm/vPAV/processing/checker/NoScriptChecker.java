@@ -88,7 +88,7 @@ public class NoScriptChecker extends AbstractElementChecker {
                                         //$NON-NLS-1$
                                         place)));
                 } else {
-                    ArrayList<String> allowedPlaces = settings
+                    List<String> allowedPlaces = settings
                             .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         for (String scriptType : scriptTypes)
@@ -111,13 +111,13 @@ public class NoScriptChecker extends AbstractElementChecker {
                 boolean scriptCondExp = BpmnScanner
                         .hasScriptInCondExp((SequenceFlow) bpmnElement);
                 if (settings.containsKey(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)) {
-                    ArrayList<String> allowedPlaces = settings.get(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)
+                    List<String> allowedPlaces = settings.get(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)
                             .getScriptPlaces();
-                    if (!allowedPlaces.isEmpty())
-                        if (!allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp)
-                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                    String.format(Messages.getString("NoScriptChecker.3"), //$NON-NLS-1$
-                                            CheckName.checkName(bpmnElement))));
+                    if (!allowedPlaces.isEmpty() && !allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp) {
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                String.format(Messages.getString("NoScriptChecker.3"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
+                    }
 
                 } else {
                     if (scriptCondExp) {

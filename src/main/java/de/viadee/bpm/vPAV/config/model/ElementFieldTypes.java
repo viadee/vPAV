@@ -35,9 +35,9 @@ import java.util.Collection;
 
 public class ElementFieldTypes {
 
-  private Collection<String> elementFieldTypes;
+  private final Collection<String> elementFieldTypes;
 
-  private boolean excluded;
+  private final boolean excluded;
 
   public ElementFieldTypes(final Collection<String> elementFieldTypes, final boolean excluded) {
     super();

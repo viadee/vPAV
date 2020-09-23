@@ -49,7 +49,7 @@ public class OverlapChecker extends AbstractElementChecker {
         super(rule);
     }
 
-    private Map<String, ArrayList<String>> sequenceFlowList = new HashMap<>();
+    private final Map<String, List<String>> sequenceFlowList = new HashMap<>();
 
     /**
      * Check for redundant edges between common elements (double or more flows
@@ -72,7 +72,7 @@ public class OverlapChecker extends AbstractElementChecker {
                 addToSequenceFlowList(bpmnElement.getId(), sequenceFlowDef);
             }
 
-            for (Map.Entry<String, ArrayList<String>> entry : getSequenceFlowList().entrySet()) {
+            for (Map.Entry<String, List<String>> entry : getSequenceFlowList().entrySet()) {
                 // Check whether targetRef & sourceRef of current item exist in global list
                 if (sequenceFlowDef.equals(entry.getValue()) && !bpmnElement.getId().equals(entry.getKey())) {
                     issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
@@ -91,11 +91,11 @@ public class OverlapChecker extends AbstractElementChecker {
         return issues;
     }
 
-    public Map<String, ArrayList<String>> getSequenceFlowList() {
+    public Map<String, List<String>> getSequenceFlowList() {
         return sequenceFlowList;
     }
 
-    public void addToSequenceFlowList(String id, ArrayList<String> sequenceFlowList) {
+    public void addToSequenceFlowList(String id, List<String> sequenceFlowList) {
         this.sequenceFlowList.put(id, sequenceFlowList);
     }
 }

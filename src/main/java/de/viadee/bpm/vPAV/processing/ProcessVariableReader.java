@@ -65,6 +65,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
+
 /**
  * search process variables for an bpmn element
  */
@@ -444,7 +446,7 @@ public final class ProcessVariableReader {
 
             String filePath = "";
             if (listener.getCamundaClass() != null && listener.getCamundaClass().trim().length() > 0) {
-                filePath = listener.getCamundaClass().replaceAll("\\.", "/") + ".java";
+                filePath = listener.getCamundaClass().replaceAll("\\.", "/") + JAVA_FILE_ENDING;
             }
 
             ResourceFileReader.readResourceFile(filePath, element, ElementChapter.TaskListener,

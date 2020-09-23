@@ -62,8 +62,9 @@ public class RuleSetOutputWriter {
         Writer writer = null;
 
         Path path = Paths.get(RuntimeConfig.getInstance().getEffectiveRuleset());
-        if (path.toFile().exists())
+        if (path.toFile().exists()) {
             path.toFile().delete();
+        }
 
         try {
             writer = new BufferedWriter(

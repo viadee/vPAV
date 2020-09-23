@@ -45,6 +45,8 @@ public class BpmnConstants {
 
 	public static final String PROCESS = "process";
 
+	public static final String NAMESPACE_URI = "http://www.w3.org/2001/XMLSchema-instance";
+
 	// ------------------------
 
 	public static final String CAMUNDA_CLASS = "camunda:class";

@@ -133,7 +133,7 @@ public class ElementGraphBuilder {
 
         final Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
 
-        HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
+        Map<String, ListMultimap<String, ProcessVariableOperation>> userVariables = new HashMap<>();
         try {
             // Use first process as default process
             userVariables = (new XmlVariablesReader()).read(RuntimeConfig.getInstance().getUserVariablesFilePath(),

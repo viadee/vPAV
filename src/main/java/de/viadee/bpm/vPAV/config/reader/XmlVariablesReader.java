@@ -43,6 +43,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,7 +63,7 @@ public final class XmlVariablesReader {
      * @return Map of manually defined variables
      * @throws JAXBException If file can not be found
      */
-    public HashMap<String, ListMultimap<String, ProcessVariableOperation>> read(final String file,
+    public Map<String, ListMultimap<String, ProcessVariableOperation>> read(final String file,
             final String defaultProcess) throws JAXBException {
 
         final JAXBContext jaxbContext = JAXBContext.newInstance(XmlVariables.class);
@@ -86,7 +87,7 @@ public final class XmlVariablesReader {
      * @param defaultProcess that is assigned to variables without a user defined process
      * @return HashMap of all variables grouped by creation points of variables
      */
-    private static HashMap<String, ListMultimap<String, ProcessVariableOperation>> transformFromXmlDestructure(
+    private static Map<String, ListMultimap<String, ProcessVariableOperation>> transformFromXmlDestructure(
             final XmlVariables xmlVariables, final String defaultProcess) {
         final Collection<XmlVariable> variableCollection = xmlVariables.getVariables();
         HashMap<String, ListMultimap<String, ProcessVariableOperation>> operations = new HashMap<>();

@@ -44,6 +44,7 @@ import soot.toolkits.graph.Block;
 import java.util.*;
 
 import static de.viadee.bpm.vPAV.SootResolverSimplified.fixClassPathForSoot;
+import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
 
 public class EntryPointScanner extends ObjectReaderReceiver {
 
@@ -103,7 +104,7 @@ public class EntryPointScanner extends ObjectReaderReceiver {
                     .replace("/", ".").replace(".class", "");
         } else {
             return className.replace("/", ".").replace(".class",
-                    "").replace(".java", "");
+                    "").replace(JAVA_FILE_ENDING, "");
         }
     }
 

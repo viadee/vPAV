@@ -48,7 +48,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Checks, whether a business rule task with dmn implementation is valid
@@ -73,18 +72,16 @@ public class DmnTaskChecker extends AbstractElementChecker {
             final Map.Entry<String, String> implementation = BpmnScanner
                     .getImplementation(bpmnElement);
 
-            if (implementation != null) {
+            if (implementation != null && implementation.getKey().equals(BpmnConstants.CAMUNDA_DMN)) {
                 // check if DMN reference is not empty
-                if (implementation.getKey().equals(BpmnConstants.CAMUNDA_DMN)) {
-                    if (implementation.getValue() == null || implementation.getValue().trim().length() == 0) {
-                        // Error, because no delegateExpression has been configured
-                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                String.format(Messages.getString("DmnTaskChecker.0"), //$NON-NLS-1$
-                                        CheckName.checkName(bpmnElement))));
-                    } else {
+                if (implementation.getValue() == null || implementation.getValue().trim().length() == 0) {
+                    // Error, because no delegateExpression has been configured
+                    issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                            String.format(Messages.getString("DmnTaskChecker.0"), //$NON-NLS-1$
+                                    CheckName.checkName(bpmnElement))));
+                } else {
 
-                        issues.addAll(checkDMNFile(element, implementation.getValue()));
-                    }
+                    issues.addAll(checkDMNFile(element, implementation.getValue()));
                 }
             }
         }
@@ -106,15 +103,14 @@ public class DmnTaskChecker extends AbstractElementChecker {
 
         // If a dmn path has been found, check the correctness
         URL urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnPath);
-        if (urlDMN == null) {
+        if (urlDMN == null && RuntimeConfig.getInstance().getFileScanner().getDecisionRefToPathMap()
+                .containsKey(dmnName)) {
             // Trying to retrieve the dmn filename by dmn id if the native reference doesn't result in a match
-            if (RuntimeConfig.getInstance().getFileScanner().getDecisionRefToPathMap().containsKey(dmnName)) {
-                String dmnFileName = RuntimeConfig.getInstance()
-                        .getFileScanner().getDecisionRefToPathMap().get(dmnName);
-                //Set new dmn url if retrieval by dmn id was successfull
-                if (dmnFileName != null) {
-                    urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnFileName);
-                }
+            String dmnFileName = RuntimeConfig.getInstance()
+                    .getFileScanner().getDecisionRefToPathMap().get(dmnName);
+            //Set new dmn url if retrieval by dmn id was successful
+            if (dmnFileName != null) {
+                urlDMN = RuntimeConfig.getInstance().getClassLoader().getResource(dmnFileName);
             }
         }
 

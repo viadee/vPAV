@@ -47,7 +47,7 @@ import java.util.Map;
 
 public class DataFlowChecker extends AbstractModelChecker {
 
-    private Collection<DataFlowRule> dataFlowRules;
+    private final Collection<DataFlowRule> dataFlowRules;
 
     public DataFlowChecker(final Rule rule,
             final Map<AnomalyContainer, List<Path>> invalidPathsMap,
@@ -71,6 +71,7 @@ public class DataFlowChecker extends AbstractModelChecker {
         return issues;
     }
 
+    @Override
     public boolean isSingletonChecker() {
         return true;
     }
