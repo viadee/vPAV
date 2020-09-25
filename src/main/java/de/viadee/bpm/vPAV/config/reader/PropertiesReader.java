@@ -34,8 +34,10 @@ package de.viadee.bpm.vPAV.config.reader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesConfigurationException;
 import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesParameterException;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
@@ -133,7 +135,9 @@ public class PropertiesReader {
                                 "At least 2 external report folders must be defined");
                     }
                     for (String stringPath : paths) {
-                        Path path = Paths.get(stringPath + ConfigConstants.DATA_FOLDER);
+                        Path path = Paths
+                                .get(FilenameUtils.separatorsToSystem(stringPath +
+                                        File.separator + ConfigConstants.DATA_FOLDER));
                         if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
                             throw new InvalidPropertiesParameterException(
                                     String.format("No %s folder found in reports folder: ",
