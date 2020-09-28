@@ -440,7 +440,8 @@ function downloadFile() {
 
 // download the BPMN xml file
 function downloadModel() {
-    download(controller.currentModel.xml, controller.currentModel.name, "application/xml");
+    const bpmnFile = new File([controller.currentModel.xml], controller.currentModel.name, {type: "application/xml"});
+    saveAs(bpmnFile);
 }
 
 //delete table under diagram

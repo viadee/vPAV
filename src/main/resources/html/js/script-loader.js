@@ -83,8 +83,6 @@ async function loadLogicJs() {
             "js/bootstrap-table-export.js",
             "js/TableExport.js",
             "js/FileSaver.js",
-            //miscellaneous
-            "js/download.js",
             //application
             "js/bpmn.io.viewer.app.js"];
         const executionScriptsTags = createScriptTags(executionScripts, false);

@@ -375,8 +375,6 @@ public class Runner {
                 RuntimeConfig.getInstance().getJsFolder());
         fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery-3.5.1.min.js",
                 RuntimeConfig.getInstance().getJsFolder());
-        fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "download.js",
-                RuntimeConfig.getInstance().getJsFolder());
         fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "adminlte.js",
                 RuntimeConfig.getInstance().getJsFolder());
         fileToFolderMap.put(ConfigConstants.JS_INPUT_FOLDER + "jquery.knob.js",
