@@ -63,3 +63,29 @@ To do so, add the property `userVariablesFilePath=subfolder/myVariables.xml`.
 ## Validation folder path
 You can specify the validation folder where the vPAV generated output will be stored. By default `target/vPAV/` is set.
 `target/vPAV/` ist not persistent and will be deleted when Maven executes the `clean` goal.
+
+## Multi project report
+![Projects_Summary](../img/ProjectsSummary.png "Example output from a multi project report")
+vPAV is capable of creating a summary overview using a wrapper project from other pregenerated vPAV reports.
+Therefore, it is required to create a new project with vPAV as dependency and enable the `multiProjectReport` property and defining at least two sources directories for vPAV reports in `generatedReports`.
+It is advisable to have specified a persistent validation folder path in the source projects outside of the project buid directory.
+
+```
+multiProjectReport=true
+generatedReports=C:\\Users\\viadee\\IdeaProjects\\vPAV_example\\vPAV,../camunda-bpm-examples/usertask/task-form-embedded-serialized-java-object/target/vPAV/
+```
+You can specify `generatedReports` either by relative or absolute paths like in the example,
+but please note that for absolute Windows paths it is required to escape the backslash with a double backslash.
+
+```java
+public class ModelConsistencyTest {
+    @Test
+    public void createSummary() {
+                ProcessApplicationValidator.createMultiProjectReport();
+    }
+}
+```
+To create a project summary you need to call the `createMultiProjectReport()` method.
+
+The project names displayed in the summary are derived from the folder names containing the original report.
+Please make sure to use the same version of vPAV for the source reports and the summary.
