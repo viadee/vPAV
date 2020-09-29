@@ -40,10 +40,13 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -61,15 +64,15 @@ public class PropertiesReader {
         return properties;
     }
 
-    protected Properties readPropertiesFromFile() {
+    Properties readPropertiesFromFile() {
         InputStream input = null;
         Properties properties = new Properties();
         try {
-            Path propertiesPath = findPropertiesPath();
-            if (propertiesPath == null) {
+            Optional<Path> propertiesPath = findPropertiesPath();
+            if (propertiesPath.isEmpty()) {
                 LOGGER.info("vPav.properties file could not be found. Falling back to default values...");
             } else {
-                input = Files.newInputStream(propertiesPath);
+                input = Files.newInputStream(propertiesPath.get());
                 properties.load(input);
             }
         } catch (IOException e) {
@@ -87,28 +90,16 @@ public class PropertiesReader {
         return properties;
     }
 
-    protected Path findPropertiesPath() throws IOException {
-        final Path[] foundFile = new Path[1];
-        String pattern = "{vPav, vpav, vPAV}.properties";
-        FileSystem fs = FileSystems.getDefault();
-        PathMatcher matcher = fs.getPathMatcher("glob:" + pattern);
-        FileVisitor<Path> matcherVisitor = new SimpleFileVisitor<>() {
+    private Optional<Path> findPropertiesPath() throws IOException {
 
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {
-                Path name = file.getFileName();
-                if (matcher.matches(name)) {
-                    foundFile[0] = file;
-                    return FileVisitResult.TERMINATE;
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        };
-        Files.walkFileTree(Paths.get(""), matcherVisitor);
-        return foundFile[0];
+        return Files.find(Paths.get(""),
+                Integer.MAX_VALUE,
+                (filePath, fileAttr) -> fileAttr.isRegularFile() &&
+                        (filePath.endsWith("vpav.properties") || filePath.endsWith("vPav.properties")) ||
+                        filePath.endsWith("vPAV.properties")).findFirst();
     }
 
-    protected void validateProperties(Properties properties) {
+    void validateProperties(Properties properties) {
         List<String> allowedProperties = Arrays.asList("outputhtml", "language", "basepath", "parentRuleSet", "ruleSet",
                 "scanpath", "userVariablesFilePath", "validationFolder", "multiProjectReport", "generatedReports");
         properties.keySet().forEach(key -> {
