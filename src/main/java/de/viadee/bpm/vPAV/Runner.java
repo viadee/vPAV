@@ -339,7 +339,6 @@ public class Runner {
             });
             //Copy reports from external vPAV projects
             if (RuntimeConfig.getInstance().isMultiProjectScan()) {
-                externalReportsPaths = new LinkedList<String>();
                 for (int i = 0; i < RuntimeConfig.getInstance().getGeneratedReports().length; i++) {
                     String sourcePath = RuntimeConfig.getInstance().getGeneratedReports()[i] +
                             File.separator + ConfigConstants.DATA_FOLDER;
