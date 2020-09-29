@@ -480,7 +480,6 @@ function createIssueTable(bpmnFile, tableContent, mode) {
     //fill table with all issuesof current model
     for (let issue of tableContent) {
         if (issue.bpmnFile === (properties["basepath"] + bpmnFile)) {
-            let myParent = document.getElementsByTagName("body").item(0);
             let myTBody = document.createElement("tbody");
             myRow = document.createElement("tr");
 
@@ -556,8 +555,8 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             //message
             myCell = document.createElement("td");
             //add links for process variables contained in message
-            let messageText = issue.message;
-            processVariables.filter(p => issue.message.includes(`'${p.name}'`))
+            let messageText = !!issue.message ? issue.message : "";
+            processVariables.filter(p => messageText.includes(`'${p.name}'`))
                 .forEach(p => messageText = messageText.replace(p.name, createShowOperationsLink(p.name).outerHTML));
             myCell.innerHTML = messageText;
             myRow.appendChild(myCell);
