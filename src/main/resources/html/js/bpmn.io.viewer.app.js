@@ -478,9 +478,9 @@ function createIssueTable(bpmnFile, tableContent, mode) {
     myTable.appendChild(myTHead);
 
     //fill table with all issuesof current model
+    const myTBody = document.createElement("tbody");
     for (let issue of tableContent) {
         if (issue.bpmnFile === (properties["basepath"] + bpmnFile)) {
-            let myTBody = document.createElement("tbody");
             myRow = document.createElement("tr");
 
             //ruleName
@@ -612,9 +612,9 @@ function createIssueTable(bpmnFile, tableContent, mode) {
             myRow.appendChild(myCell);
             //---------
             myTBody.appendChild(myRow);
-            myTable.appendChild(myTBody);
         }
     }
+    myTable.appendChild(myTBody);
 }
 
 //create process variable table
