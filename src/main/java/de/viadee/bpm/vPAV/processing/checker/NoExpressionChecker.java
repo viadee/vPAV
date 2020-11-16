@@ -81,13 +81,17 @@ public class NoExpressionChecker extends AbstractElementChecker {
                                 CheckName.checkName(baseElement))));
             }
 
-            // get the execution listener
-            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            // get the execution listeners
+            final List<ModelElementInstance> listeners = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
-            if (!listener.isEmpty()
+            if (!listeners.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
+                listeners.forEach((listener) -> {
+                    if (listener.getDomElement().hasAttribute(BpmnConstants.ATTR_EX)) {
+                        addIssue(element, issues, baseElement);
+                    }
+                });
             }
 
         } else if (baseElement instanceof IntermediateThrowEvent
