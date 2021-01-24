@@ -52,13 +52,11 @@ public class BasicNode implements AnalysisElement{
 
     LinkedHashMap<String, ProcessVariableOperation> killed;
 
-    LinkedHashMap<String, ProcessVariableOperation> inUsed;
+    LinkedHashMap<String, ProcessVariableOperation> usedSet;
 
-    LinkedHashMap<String, ProcessVariableOperation> inUnused;
+    LinkedHashMap<String, ProcessVariableOperation> inSet;
 
-    LinkedHashMap<String, ProcessVariableOperation> outUsed;
-
-    LinkedHashMap<String, ProcessVariableOperation> outUnused;
+    LinkedHashMap<String, ProcessVariableOperation> outSet;
 
     protected BpmnElement parentElement;
 
@@ -84,10 +82,9 @@ public class BasicNode implements AnalysisElement{
         this.defined = new LinkedHashMap<>();
         this.used = new LinkedHashMap<>();
         this.killed = new LinkedHashMap<>();
-        this.inUsed = new LinkedHashMap<>();
-        this.inUnused = new LinkedHashMap<>();
-        this.outUsed = new LinkedHashMap<>();
-        this.outUnused = new LinkedHashMap<>();
+        this.usedSet = new LinkedHashMap<>();
+        this.inSet = new LinkedHashMap<>();
+        this.outSet = new LinkedHashMap<>();
         this.fieldType = fieldType;
     }
 
@@ -201,44 +198,36 @@ public class BasicNode implements AnalysisElement{
     }
 
     @Override
-    public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
-        return inUsed;
+    public LinkedHashMap<String, ProcessVariableOperation> getUsedSet() {
+        return usedSet;
     }
 
     @Override
-    public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed) {
-        this.inUsed = inUsed;
+    public void setUsedSet(LinkedHashMap<String, ProcessVariableOperation> usedSet) {
+        this.usedSet = usedSet;
     }
 
     @Override
-    public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
-        return inUnused;
+    public LinkedHashMap<String, ProcessVariableOperation> getInSet() {
+        return inSet;
     }
 
     @Override
-    public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused) {
-        this.inUnused = inUnused;
+    public void setInSet(LinkedHashMap<String, ProcessVariableOperation> inSet) {
+        this.inSet = inSet;
     }
 
     @Override
-    public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
-        return outUsed;
+    public LinkedHashMap<String, ProcessVariableOperation> getOutSet() {
+        return outSet;
     }
 
-    @Override
-    public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
-        this.outUsed = outUsed;
-    }
 
     @Override
-    public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
-        return outUnused;
+    public void setOutSet(LinkedHashMap<String, ProcessVariableOperation> outSet) {
+        this.outSet = outSet;
     }
 
-    @Override
-    public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
-        this.outUnused = outUnused;
-    }
 
     @Override
     public BpmnElement getParentElement() {

@@ -76,6 +76,7 @@ public class MultiInstanceActivityTest {
         Scene.v().loadNecessaryClasses();
     }
 
+/* TODO
     @Test
     public void testCollection() {
         final EntryPointScanner scanner = new EntryPointScanner(null);
@@ -111,10 +112,11 @@ public class MultiInstanceActivityTest {
         Assert.assertEquals("Expected a UR anomaly but got " + anomaly1.getAnomaly().toString(), Anomaly.UR,
                 anomaly1.getAnomaly());
     }
+*/
 
-    /**
+    /** TODO
      * Test multi instance activity with collection that is defined with child elements instead of attributes
-     */
+     *//*
     @Test
     public void testCollectionChildElement() {
         final EntryPointScanner scanner = new EntryPointScanner(null);
@@ -239,7 +241,7 @@ public class MultiInstanceActivityTest {
         AnomalyContainer anomaly3 = iterator.next();
         Assert.assertEquals("The 'loopCounter' variable in Sequential_ServiceTask should raise an issue.",
                 "loopCounter", anomaly3.getVariable().getName());
-    }
+    }*/
 
     @Before
     public void clearIssues() {

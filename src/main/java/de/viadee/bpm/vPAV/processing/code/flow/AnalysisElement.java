@@ -59,21 +59,17 @@ public interface AnalysisElement {
 
     void addSuccessor(AnalysisElement successor);
 
-    LinkedHashMap<String, ProcessVariableOperation> getInUsed();
+    LinkedHashMap<String, ProcessVariableOperation> getInSet();
 
-    LinkedHashMap<String, ProcessVariableOperation> getInUnused();
+    LinkedHashMap<String, ProcessVariableOperation> getUsedSet();
 
-    LinkedHashMap<String, ProcessVariableOperation> getOutUsed();
+    LinkedHashMap<String, ProcessVariableOperation> getOutSet();
 
-    LinkedHashMap<String, ProcessVariableOperation> getOutUnused();
+    void setInSet(LinkedHashMap<String, ProcessVariableOperation> inSet);
 
-    void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsed);
+    void setUsedSet(LinkedHashMap<String, ProcessVariableOperation> usedSet);
 
-    void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnused);
-
-    void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed);
-
-    void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused);
+    void setOutSet(LinkedHashMap<String, ProcessVariableOperation> outSet);
 
     LinkedHashMap<String, ProcessVariableOperation> getUsed();
 

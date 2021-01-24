@@ -5,7 +5,7 @@
     <groupId>de.viadee</groupId>
     <artifactId>viadeeProcessApplicationValidator</artifactId>
 
-    <version>3.0.7-SNAPSHOT</version>
+    <version>3.0.7-SAC-EDITION</version>
 
     <name>viadee Process Application Validator</name>
 
@@ -396,13 +396,6 @@
                         <id>Check licenses</id>
                         <goals>
                             <goal>check</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>Insert or update license</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>format</goal>
                         </goals>
                     </execution>
                 </executions>
