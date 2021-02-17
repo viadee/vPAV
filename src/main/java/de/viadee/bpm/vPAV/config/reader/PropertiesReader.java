@@ -100,8 +100,10 @@ public class PropertiesReader {
     }
 
     void validateProperties(Properties properties) {
-        List<String> allowedProperties = Arrays.asList("outputhtml", "language", "basepath", "parentRuleSet", "ruleSet",
-                "scanpath", "userVariablesFilePath", "validationFolder", "multiProjectReport", "generatedReports");
+        List<String> allowedProperties = Arrays
+                .asList("whitelist", "outputhtml", "language", "basepath", "parentRuleSet", "ruleSet",
+                        "scanpath", "userVariablesFilePath", "validationFolder", "multiProjectReport",
+                        "generatedReports");
         properties.keySet().forEach(key -> {
             if (!allowedProperties.contains(key)) {
                 throw new InvalidPropertiesParameterException("Not allowed property: " + key);

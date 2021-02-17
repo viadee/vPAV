@@ -437,7 +437,11 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     .equals(BpmnConstants.SUPERCLASS_ABSTRACT_BPMN_ACTIVITY_BEHAVIOR)) {
                 return;
             }
-            checkImplementsInterface(sootClass.getSuperclass(), listener, taskListener, issues, classPath, element,
+
+            SootClass superClass = Scene.v()
+                    .forceResolve(fixClassPathForSoot(sootClass.getSuperclass().getName()), SootClass.SIGNATURES);
+
+            checkImplementsInterface(superClass, listener, taskListener, issues, classPath, element,
                     locationKey, initialClass);
         } else {
             // class implements not the interface "JavaDelegate"
