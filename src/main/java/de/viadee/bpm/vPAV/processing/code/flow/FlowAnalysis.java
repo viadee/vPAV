@@ -386,145 +386,174 @@ public class FlowAnalysis {
     }
 
     /**
-     * Uses the approach from ALSU07 (Reaching Definitions) to compute data flow
-     * anomalies across the embedded CFG
+     * Fixpoint computation of data-flow sets
+     * IN-Set: Intersection of the predecessor's out-set.
+     * Out-Set: (Union of in-set and defined), subtracted from killed.
+     * Used-Set: Union of Used and ( Union of successor's Used set, subtracted from(union of killed and defined).
      */
     private void computeReachingDefinitions() {
         boolean change = true;
         while (change) {
-            change = false;
-            for (AnalysisElement analysisElement : nodes.values()) {
-                // Calculate in-sets (intersection of predecessors)
-                final LinkedHashMap<String, ProcessVariableOperation> inUsed = new LinkedHashMap<>();
-                final LinkedHashMap<String, ProcessVariableOperation> inUnused = new LinkedHashMap<>();
-                final Set<ProcessVariableOperation> inUsedT = new HashSet<>(inUsed.values());
-                final Set<ProcessVariableOperation> inUnusedT = new HashSet<>(inUnused.values());
+   
+                change = false;
+                for (AnalysisElement analysisElement : nodes.values()) {
+
+            	
+                // Calculate in-set (intersection of predecessors)
+                final LinkedHashMap<String, ProcessVariableOperation> inSet = new LinkedHashMap<>();
+                final Set<ProcessVariableOperation> inSetT = new HashSet<>(inSet.values());
                 final List<AnalysisElement> predecessors = analysisElement.getPredecessors();
+                final List<AnalysisElement> successors = analysisElement.getSuccessors();
+                
+                // Get old values before calculating new values and later check for changes
+                final LinkedHashMap<String, ProcessVariableOperation> oldInSet = analysisElement.getInSet();
+                final LinkedHashMap<String, ProcessVariableOperation> oldOutSet = analysisElement.getOutSet();
+                final LinkedHashMap<String, ProcessVariableOperation> oldUsedSet = analysisElement.getUsedSet();
+
+
+
+
+
 
                 // If more than one predecessor, take intersection of operations (conservatism)
                 if (predecessors.size() > 1) {
                     for (int i = 0; i < predecessors.size(); i++) {
                         if (i == 0) {
-                            inUsedT.addAll(predecessors.get(i).getOutUsed().values());
-                            inUnusedT.addAll(predecessors.get(i).getOutUnused().values());
+                            inSetT.addAll(predecessors.get(i).getOutSet().values());
                         } else {
-                            inUsedT.retainAll(predecessors.get(i).getOutUsed().values());
-                            inUnusedT.retainAll(predecessors.get(i).getOutUnused().values());
+                            inSetT.retainAll(predecessors.get(i).getOutSet().values());
                         }
                     }
-                    inUsedT.forEach(pvo -> inUsed.put(pvo.getId(), pvo));
-                    inUnusedT.forEach(pvo -> inUnused.put(pvo.getId(), pvo));
+                    inSetT.forEach(pvo -> inSet.put(pvo.getId(), pvo));
                     // Else take union to propagate operations
                 } else {
                     for (AnalysisElement pred : predecessors) {
-                        Map<String, ProcessVariableOperation>[] inSets = filterInputVariables(pred,
-                                analysisElement);
-                        inUsed.putAll(inSets[0]);
-                        inUnused.putAll(inSets[1]);
+                        Map<String, ProcessVariableOperation>[] inSets = filterInputVariables(pred, analysisElement);
+                        inSet.putAll(inSets[0]);
                     }
                 }
 
-                analysisElement.setInUsed(inUsed);
-                analysisElement.setInUnused(inUnused);
-
-                // Get old values before calculating new values and later check for changes
-                final LinkedHashMap<String, ProcessVariableOperation> oldOutUnused = analysisElement.getOutUnused();
-                final LinkedHashMap<String, ProcessVariableOperation> oldOutUsed = analysisElement.getOutUsed();
-
-                // Calculate out-sets for used definitions (transfer functions)
-                final LinkedHashMap<String, ProcessVariableOperation> inUsedTemp = new LinkedHashMap<>(
-                        analysisElement.getInUsed());
-                final LinkedHashMap<String, ProcessVariableOperation> internalUnion = new LinkedHashMap<>(
-                        analysisElement.getInUnused());
-                final LinkedHashMap<String, ProcessVariableOperation> tempUsed = new LinkedHashMap<>(
-                        analysisElement.getUsed());
-
-                Optional<Map.Entry<String, ProcessVariableOperation>> oldOperation;
-                // Variables are overwritten if new operation
-                for (Map.Entry<String, ProcessVariableOperation> operation : analysisElement.getDefined().entrySet()) {
-                    oldOperation = internalUnion.entrySet().stream()
-                            .filter(entry -> entry.getValue().getName().equals(operation.getValue().getName()))
-                            .findFirst();
-                    // Remove old operation from input set
-                    oldOperation.ifPresent(stringProcessVariableOperationEntry -> internalUnion
-                            .remove(stringProcessVariableOperationEntry.getKey()));
-                    internalUnion.put(operation.getKey(), operation.getValue());
-
-                    // Add operation to used set if variable is defined again although it was used
-                    // before
-                    oldOperation = inUsed.entrySet().stream()
-                            .filter(entry -> entry.getValue().getName().equals(operation.getValue().getName()))
-                            .findFirst();
-                    oldOperation.ifPresent(o -> tempUsed.put(o.getKey(), o.getValue()));
+                analysisElement.setInSet(inSet);
+                
+                
+                if (!oldInSet.equals(inSet)) {
+                    change = true;
                 }
 
-                final LinkedHashMap<String, ProcessVariableOperation> internalIntersection = new LinkedHashMap<>(
-                        getIntersection(internalUnion, analysisElement.getUsed()));
-                inUsedTemp.putAll(internalIntersection);
-                final LinkedHashMap<String, ProcessVariableOperation> outUsed = new LinkedHashMap<>(
-                        getSetDifference(inUsedTemp, analysisElement.getKilled()));
+       
 
-                // Calculate out-sets for unused definitions (transfer functions)
-                final LinkedHashMap<String, ProcessVariableOperation> tempKillSet = new LinkedHashMap<>();
-                tempKillSet.putAll(analysisElement.getKilled());
-                tempKillSet.putAll(tempUsed);
 
-                final LinkedHashMap<String, ProcessVariableOperation> outUnused = new LinkedHashMap<>(
-                        getSetDifference(internalUnion, tempKillSet));
 
-                analysisElement.setOutUsed(outUsed);
-                analysisElement.setOutUnused(outUnused);
+                // Calculate out-sets
 
-                if (!oldOutUnused.equals(outUnused) || !oldOutUsed.equals(outUsed)) {
+                // In-Set
+                final LinkedHashMap<String, ProcessVariableOperation> inSetTemp = new LinkedHashMap<>(analysisElement.getInSet());
+                // Defined
+                final LinkedHashMap<String, ProcessVariableOperation> definedTemp = new LinkedHashMap<>(analysisElement.getDefined());
+                inSetTemp.putAll(definedTemp);
+                // KilledSet
+                final LinkedHashMap<String, ProcessVariableOperation> tempKillSet = new LinkedHashMap<>(analysisElement.getKilled());
+
+                final LinkedHashMap<String, ProcessVariableOperation> outSet = new LinkedHashMap<>(getSetDifference(inSetTemp, tempKillSet));
+
+                analysisElement.setOutSet(outSet);
+
+                if (!oldOutSet.equals(outSet)) {
+                    change = true;
+                }
+                
+                
+
+                // Calculate used-sets
+                final LinkedHashMap<String, ProcessVariableOperation> usedSet = new LinkedHashMap<>(analysisElement.getUsed());
+                final LinkedHashMap<String, ProcessVariableOperation> succ_usedSet = new LinkedHashMap<>();
+                final LinkedHashMap<String, ProcessVariableOperation> union_def_kill = new LinkedHashMap<>(analysisElement.getDefined());
+                union_def_kill.putAll(analysisElement.getKilled());
+
+                    for (int i = 0; i < successors.size(); i++) {
+                        succ_usedSet.putAll(successors.get(i).getUsedSet());
+                        }
+
+                final LinkedHashMap<String, ProcessVariableOperation> diff_succ_loc = getSetDifference(succ_usedSet, union_def_kill);
+                usedSet.putAll(diff_succ_loc);
+                analysisElement.setUsedSet(usedSet);
+                
+                
+                if (!oldUsedSet.equals(usedSet)) {
                     change = true;
                 }
             }
         }
+        
+
+		/*
+		 * boolean usedChange = true; while (usedChange) { usedChange = false;
+		 * 
+		 * 
+		 * ListIterator<String> iterator = new
+		 * ArrayList(nodes.keySet()).listIterator(nodes.size()); while
+		 * (iterator.hasPrevious()) { String key = iterator.previous(); AnalysisElement
+		 * analysisElement = nodes.get(key); final LinkedHashMap<String,
+		 * ProcessVariableOperation> oldUsedSet = analysisElement.getUsedSet();
+		 * 
+		 * final LinkedHashMap<String, ProcessVariableOperation> usedSet = new
+		 * LinkedHashMap<>(analysisElement.getUsed()); final LinkedHashMap<String,
+		 * ProcessVariableOperation> succ_usedSet = new LinkedHashMap<>(); final
+		 * LinkedHashMap<String, ProcessVariableOperation> union_def_kill = new
+		 * LinkedHashMap<>(analysisElement.getDefined());
+		 * union_def_kill.putAll(analysisElement.getKilled()); final
+		 * List<AnalysisElement> successors = analysisElement.getSuccessors();
+		 * 
+		 * 
+		 * for (int i = 0; i < successors.size(); i++) {
+		 * succ_usedSet.putAll(successors.get(i).getUsed()); }
+		 * 
+		 * final LinkedHashMap<String, ProcessVariableOperation> diff_succ_loc =
+		 * getSetDifference(succ_usedSet, union_def_kill);
+		 * usedSet.putAll(diff_succ_loc); analysisElement.setUsedSet(usedSet);
+		 * 
+		 * 
+		 * if (!oldUsedSet.equals(usedSet)) { usedChange = true; }
+		 * 
+		 * 
+		 * 
+		 *   }}
+		 */
+      
     }
+    
 
     private Map<String, ProcessVariableOperation>[] filterInputVariables(AnalysisElement predecessor,
             AnalysisElement analysisElement) {
         String scopePredecessor = predecessor.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
         String scopeElement = analysisElement.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
-        LinkedHashMap<String, ProcessVariableOperation> tempInUsed = new LinkedHashMap<>(predecessor.getOutUsed());
-        LinkedHashMap<String, ProcessVariableOperation> tempInUnused = new LinkedHashMap<>(predecessor.getOutUnused());
+        LinkedHashMap<String, ProcessVariableOperation> tempInSet = new LinkedHashMap<>(predecessor.getOutSet());
 
         // Subprocess or call activity
         if (!isChildOrSiblingOfScope(analysisElement.getBaseElement(), scopePredecessor) &&
                 !predecessor.getBaseElement().getScope().getElementType().getTypeName().equals("subProcess")) {
             // Check for local variables in element like input parameters
-            filterLocalVariables(predecessor, tempInUnused, tempInUsed);
+            filterLocalVariables(predecessor, tempInSet);
 
             // Change scope of variables so that they are continued to be passed
             if (isCallActivityMappingInAll(analysisElement)) {
-                copyOperationsWithCallActivityScope(tempInUnused, tempInUsed,
-                        ((Process) analysisElement.getBaseElement().getParentElement()).getId());
+                copyOperationsWithCallActivityScope(tempInSet, ((Process) analysisElement.getBaseElement().getParentElement()).getId());
 
             } else if (isCallActivityMappingOutAll(predecessor)) {
-                copyOperationsWithCallActivityScope(tempInUnused, tempInUsed,
-                        ((Process) analysisElement.getBaseElement().getParentElement()).getId());
+                copyOperationsWithCallActivityScope(tempInSet, ((Process) analysisElement.getBaseElement().getParentElement()).getId());
             } else {
-                filterVariablesWithoutScope(predecessor.getOutUnused(), tempInUnused, Arrays.asList(scopeElement,
-                        analysisElement.getParentElement().getGraphId()));
-                filterVariablesWithoutScope(predecessor.getOutUsed(), tempInUsed, Arrays.asList(scopeElement,
+                filterVariablesWithoutScope(predecessor.getOutSet(), tempInSet, Arrays.asList(scopeElement,
                         analysisElement.getParentElement().getGraphId()));
 
                 if (nodesBeforeCallActivities.containsKey(analysisElement.getGraphId())) {
                     AnalysisElement predecessorCallActivity = nodesBeforeCallActivities
                             .get(analysisElement.getGraphId());
                     // Pass Input parameters forward that are present before and after the call activity
-                    predecessorCallActivity.getOutUnused().forEach((key, value) -> {
+                    predecessorCallActivity.getOutSet().forEach((key, value) -> {
                         if (value.getScopeId().equals(analysisElement.getParentElement().getGraphId()) || value
                                 .getScopeId()
                                 .equals(scopeElement)) {
-                            tempInUnused.put(key, value);
-                        }
-                    });
-                    predecessorCallActivity.getOutUsed().forEach((key, value) -> {
-                        if (value.getScopeId().equals(analysisElement.getParentElement().getGraphId()) || value
-                                .getScopeId()
-                                .equals(scopeElement)) {
-                            tempInUnused.put(key, value);
+                            tempInSet.put(key, value);
                         }
                     });
                 }
@@ -533,42 +562,34 @@ public class FlowAnalysis {
                 if (predecessor.getBaseElement() instanceof EndEvent && analysisElement instanceof BasicNode
                         && ((BasicNode) analysisElement).getElementChapter()
                         .equals(ElementChapter.OUTPUT_DATA)) {
-                    predecessor.getOutUnused().forEach(tempInUnused::put);
-                    predecessor.getOutUsed().forEach(tempInUsed::put);
+                    predecessor.getOutSet().forEach(tempInSet::put);
                 }
             }
 
         } else if (!predecessor.getParentElement().getGraphId()
                 .equals(analysisElement.getParentElement().getGraphId())) {
             // Check for local variables in element like input parameters
-            filterLocalVariables(predecessor, tempInUnused, tempInUsed);
+            filterLocalVariables(predecessor, tempInSet);
 
         } else if (predecessor instanceof BasicNode && ((BasicNode) predecessor).getElementChapter()
                 .equals(ElementChapter.OUTPUT_DATA)) {
-            filterVariablesWithoutScope(predecessor.getOutUnused(), tempInUnused, Arrays.asList(scopeElement,
-                    analysisElement.getParentElement().getGraphId()));
-            filterVariablesWithoutScope(predecessor.getOutUsed(), tempInUsed, Arrays.asList(scopeElement,
+            filterVariablesWithoutScope(predecessor.getOutSet(), tempInSet, Arrays.asList(scopeElement,
                     analysisElement.getParentElement().getGraphId()));
         }
 
-        return new LinkedHashMap[] { tempInUsed, tempInUnused };
+        return new LinkedHashMap[] { tempInSet };
     }
 
-    private void copyOperationsWithCallActivityScope(LinkedHashMap<String, ProcessVariableOperation> tempInUnused,
-            LinkedHashMap<String, ProcessVariableOperation> tempInUsed,
-            String newScope) {
-        LinkedHashMap<String, ProcessVariableOperation> tempInUsedNew = new LinkedHashMap<>();
-        LinkedHashMap<String, ProcessVariableOperation> tempInUnusedNew = new LinkedHashMap<>();
+    private void copyOperationsWithCallActivityScope(LinkedHashMap<String, ProcessVariableOperation> tempInSet, String newScope) {
+        LinkedHashMap<String, ProcessVariableOperation> tempIn = new LinkedHashMap<>();
+        LinkedHashMap<String, ProcessVariableOperation> tempInSetNew = new LinkedHashMap<>();
 
         // Copy variables so that they keep the scope of the process
-        tempInUnused.forEach((key, value) -> tempInUnusedNew.put(key, new ProcessVariableOperation(value, newScope)));
-        tempInUsed.forEach((key, value) -> tempInUsedNew.put(key, new ProcessVariableOperation(value, newScope)));
+        tempInSet.forEach((key, value) -> tempInSetNew.put(key, new ProcessVariableOperation(value, newScope)));
 
         // Update input hash maps
-        tempInUnused.clear();
-        tempInUsed.clear();
-        tempInUnusedNew.forEach(tempInUnused::put);
-        tempInUsedNew.forEach(tempInUsed::put);
+        tempInSet.clear();
+        tempInSetNew.forEach(tempInSet::put);
     }
 
     private boolean isCallActivityMappingInAll(AnalysisElement element) {
@@ -585,14 +606,12 @@ public class FlowAnalysis {
     }
 
     private void filterLocalVariables(AnalysisElement predecessor,
-            LinkedHashMap<String, ProcessVariableOperation> tempInUnused,
-            LinkedHashMap<String, ProcessVariableOperation> tempInUsed) {
+            LinkedHashMap<String, ProcessVariableOperation> tempInSet) {
 
         // Check for local variables in element like input parameters
-        filterVariablesWithScope(predecessor.getOutUnused(), tempInUnused,
+        filterVariablesWithScope(predecessor.getOutSet(), tempInSet,
                 Collections.singletonList(predecessor.getParentElement().getGraphId()));
-        filterVariablesWithScope(predecessor.getOutUsed(), tempInUsed,
-                Collections.singletonList(predecessor.getParentElement().getGraphId()));
+
     }
 
     private void filterVariablesWithScope(LinkedHashMap<String, ProcessVariableOperation> sourceList,
@@ -683,9 +702,7 @@ public class FlowAnalysis {
                     handleDelegateVariableMapping(node, childProcessId);
                 }
             } else {
-                ddAnomalies(node);
-
-                duAnomalies(node);
+                nuAnomalies(node);
 
                 urAnomalies(node);
 
@@ -701,20 +718,17 @@ public class FlowAnalysis {
         final LinkedHashMap<String, ProcessVariableOperation> originalDefined = new LinkedHashMap<>(
                 element.getDefined());
         final LinkedHashMap<String, ProcessVariableOperation> originalUsed = new LinkedHashMap<>(element.getUsed());
-        final LinkedHashMap<String, ProcessVariableOperation> originalInUnused = new LinkedHashMap<>(
-                element.getInUnused());
-        final LinkedHashMap<String, ProcessVariableOperation> originalInUsed = new LinkedHashMap<>(element.getInUsed());
+        final LinkedHashMap<String, ProcessVariableOperation> originalInSet = new LinkedHashMap<>(
+                element.getInSet());
 
         // Delete variables that are only used in the child process
         filterDelegateVariables(originalOperations, element.getOperations(), childProcessId);
         filterDelegateVariables(originalDefined, element.getDefined(), childProcessId);
         filterDelegateVariables(originalUsed, element.getUsed(), childProcessId);
-        filterDelegateVariables(originalInUnused, element.getInUnused(), childProcessId);
-        filterDelegateVariables(originalInUsed, element.getInUsed(), childProcessId);
+        filterDelegateVariables(originalInSet, element.getInSet(), childProcessId);
 
         // Run anomaly check
-        ddAnomalies(element);
-        duAnomalies(element);
+        nuAnomalies(element);
         urAnomalies(element);
         uuAnomalies(element);
 
@@ -722,8 +736,7 @@ public class FlowAnalysis {
         element.setOperations(originalOperations);
         element.setDefined(originalDefined);
         element.setUsed(originalUsed);
-        element.setInUnused(originalInUnused);
-        element.setInUsed(originalInUsed);
+        element.setInSet(originalInSet);
     }
 
     private void filterDelegateVariables(final LinkedHashMap<String, ProcessVariableOperation> in,
@@ -736,58 +749,68 @@ public class FlowAnalysis {
     }
 
     /**
-     * Extract DD anomalies
-     *
+     * Extract Never-Used anomalies
+     * TODO
      * @param node Current node
      */
-    private void ddAnomalies(final AnalysisElement node) {
-        final LinkedHashMap<String, ProcessVariableOperation> ddAnomalies = new LinkedHashMap<>(
-                getIntersection(node.getInUnused(), node.getDefined()));
-        if (!ddAnomalies.isEmpty()) {
-            ddAnomalies.forEach((k,
-                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DD, node.getGraphId(),
+    private void nuAnomalies(final AnalysisElement node) {
+    	final LinkedHashMap<String, ProcessVariableOperation> nuAnomaliesTemp = new LinkedHashMap<>(node.getDefined());
+    	final LinkedHashMap<String, ProcessVariableOperation> nuAnomalies = new LinkedHashMap<>(nuAnomaliesTemp);
+ 
+    	for (AnalysisElement succ : node.getSuccessors())
+    	{
+    	    
+
+    	        nuAnomaliesTemp.forEach((key, value) -> succ.getUsedSet().forEach((key2, value2) -> {
+    	            if (value.getName().equals(value2.getName())) {
+    	                nuAnomalies.remove(key);
+    	            }
+    	        }));
+    		
+        }
+    	
+    	
+    
+        if (!nuAnomalies.isEmpty()) {
+            nuAnomalies.forEach((k,
+                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.NU, node.getGraphId(),
                     node.getBaseElement().getId(),
                     node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
         }
     }
 
-    /**
-     * Extract DU anomalies
-     *
-     * @param node Current node
-     */
-    private void duAnomalies(final AnalysisElement node) {
-        final LinkedHashMap<String, ProcessVariableOperation> duAnomalies = new LinkedHashMap<>(
-                getIntersection(node.getInUnused(), node.getKilled()));
-        if (!duAnomalies.isEmpty()) {
-            duAnomalies.forEach((k,
-                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getGraphId(),
-                    node.getBaseElement().getId(),
-                    node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
-        }
-    }
+//    /**
+//     * Extract DU anomalies
+//     *
+//     * @param node Current node
+//     */
+//    private void duAnomalies(final AnalysisElement node) {
+//        final LinkedHashMap<String, ProcessVariableOperation> duAnomalies = new LinkedHashMap<>(
+//                getIntersection(node.getInUnused(), node.getKilled()));
+//        if (!duAnomalies.isEmpty()) {
+//            duAnomalies.forEach((k,
+//                    v) -> node.addSourceCodeAnomaly(new AnomalyContainer(v.getName(), Anomaly.DU, node.getGraphId(),
+//                    node.getBaseElement().getId(),
+//                    node.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), v)));
+//        }
+//    }
 
     /**
      * Extract UR anomalies
-     *
+     * UR :<-> node.used - node.InSet
      * @param node Current node
      */
     private void urAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> urAnomaliesTemp = new LinkedHashMap<>(node.getUsed());
         final LinkedHashMap<String, ProcessVariableOperation> urAnomalies = new LinkedHashMap<>(urAnomaliesTemp);
 
-        urAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
+        urAnomaliesTemp.forEach((key, value) -> node.getInSet().forEach((key2, value2) -> {
             if (value.getName().equals(value2.getName())) {
                 urAnomalies.remove(key);
             }
         }));
 
-        urAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
-            if (value.getName().equals(value2.getName())) {
-                urAnomalies.remove(key);
-            }
-        }));
-
+       // Todo: Ein Knoten kann nicht mehrere Labels für dasselbe Datenobjekt besitzen
         urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
             if (value.getName().equals(value2.getName()) && value.getIndex() > value2.getIndex()) {
                 urAnomalies.remove(key);
@@ -803,26 +826,21 @@ public class FlowAnalysis {
     }
 
     /**
-     * Extract UU anomalies
-     *
+     * Extract Undefine-Undefine anomalies
+     * UU : <->  Node.Killed - Node.InSet
      * @param node Current node
      */
     private void uuAnomalies(final AnalysisElement node) {
         final LinkedHashMap<String, ProcessVariableOperation> uuAnomaliesTemp = new LinkedHashMap<>(node.getKilled());
         final LinkedHashMap<String, ProcessVariableOperation> uuAnomalies = new LinkedHashMap<>(uuAnomaliesTemp);
 
-        uuAnomaliesTemp.forEach((key, value) -> node.getInUnused().forEach((key2, value2) -> {
+        uuAnomaliesTemp.forEach((key, value) -> node.getInSet().forEach((key2, value2) -> {
             if (value.getName().equals(value2.getName())) {
                 uuAnomalies.remove(key);
             }
         }));
 
-        uuAnomaliesTemp.forEach((key, value) -> node.getInUsed().forEach((key2, value2) -> {
-            if (value.getName().equals(value2.getName())) {
-                uuAnomalies.remove(key);
-            }
-        }));
-
+        // Todo: Ein Knoten kann nicht mehrere Labels für dasselbe Datenobjekt besitzen
         uuAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
             if (value.getName().equals(value2.getName()) && value.getIndex() > value2.getIndex()) {
                 uuAnomalies.remove(key);
@@ -851,16 +869,12 @@ public class FlowAnalysis {
                     new AnomalyContainer(curr.getName(), Anomaly.UR, nodeId, element.getBaseElement().getId(),
                             element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
         }
-        if (ddSourceCode(prev, curr)) {
+        if (nuSourceCode(prev, curr)) {
             element.addSourceCodeAnomaly(
-                    new AnomalyContainer(curr.getName(), Anomaly.DD, nodeId, element.getBaseElement().getId(),
+                    new AnomalyContainer(curr.getName(), Anomaly.NU, nodeId, element.getBaseElement().getId(),
                             element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
         }
-        if (duSourceCode(prev, curr)) {
-            element.addSourceCodeAnomaly(
-                    new AnomalyContainer(curr.getName(), Anomaly.DU, nodeId, element.getBaseElement().getId(),
-                            element.getBaseElement().getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), curr));
-        }
+
         if (uuSourceCode(prev, curr)) {
             element.addSourceCodeAnomaly(
                     new AnomalyContainer(curr.getName(), Anomaly.UU, nodeId, element.getBaseElement().getId(),
@@ -891,27 +905,17 @@ public class FlowAnalysis {
     }
 
     /**
-     * DD anomaly: second last operation of PV is DEFINE, last operation is DELETE
+     * NU anomaly:  PV is DEFINE, but never used
      *
      * @param prev Previous ProcessVariable
      * @param curr Current ProcessVariable
      * @return true/false
      */
-    private boolean ddSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
+    private boolean nuSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
         return curr.getOperation().equals(WRITE) && prev.getOperation().equals(WRITE) &&
                 curr.getName().equals(prev.getName());
     }
 
-    /**
-     * DU anomaly: second last operation of PV is DEFINE, last operation is DELETE
-     *
-     * @param prev Previous ProcessVariable
-     * @param curr Current ProcessVariable
-     * @return true/false
-     */
-    private boolean duSourceCode(final ProcessVariableOperation prev, final ProcessVariableOperation curr) {
-        return curr.getOperation().equals(DELETE) && prev.getOperation().equals(WRITE);
-    }
 
     /**
      * Helper method to create the set difference of two given maps (based on

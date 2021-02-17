@@ -62,13 +62,11 @@ public class BpmnElement implements AnalysisElement {
 
     private final LinkedHashMap<String, ProcessVariableOperation> killed;
 
-    private LinkedHashMap<String, ProcessVariableOperation> inUsed;
+    private LinkedHashMap<String, ProcessVariableOperation> inSet;
 
-    private LinkedHashMap<String, ProcessVariableOperation> inUnused;
+    private LinkedHashMap<String, ProcessVariableOperation> usedSet;
 
-    private LinkedHashMap<String, ProcessVariableOperation> outUsed;
-
-    private LinkedHashMap<String, ProcessVariableOperation> outUnused;
+    private LinkedHashMap<String, ProcessVariableOperation> outSet;
 
     private LinkedHashMap<String, AnalysisElement> predecessors;
 
@@ -96,11 +94,9 @@ public class BpmnElement implements AnalysisElement {
         this.defined = new LinkedHashMap<>();
         this.used = new LinkedHashMap<>();
         this.killed = new LinkedHashMap<>();
-        this.inUsed = new LinkedHashMap<>();
-        this.inUnused = new LinkedHashMap<>();
-        this.outUsed = new LinkedHashMap<>();
-        this.outUnused = new LinkedHashMap<>();
-
+        this.inSet = new LinkedHashMap<>();
+        this.usedSet = new LinkedHashMap<>();
+        this.outSet = new LinkedHashMap<>();
         this.sourceCodeAnomalies = new ArrayList<>();
         this.graphId = graphId;
     }
@@ -223,36 +219,28 @@ public class BpmnElement implements AnalysisElement {
         this.controlFlowGraph = cfg;
     }
 
-    public LinkedHashMap<String, ProcessVariableOperation> getInUsed() {
-        return inUsed;
+    public LinkedHashMap<String, ProcessVariableOperation> getUsedSet() {
+        return usedSet;
     }
 
-    public LinkedHashMap<String, ProcessVariableOperation> getInUnused() {
-        return inUnused;
+    public LinkedHashMap<String, ProcessVariableOperation> getInSet() {
+        return inSet;
     }
 
-    public LinkedHashMap<String, ProcessVariableOperation> getOutUsed() {
-        return outUsed;
+    public LinkedHashMap<String, ProcessVariableOperation> getOutSet() {
+        return outSet;
     }
 
-    public LinkedHashMap<String, ProcessVariableOperation> getOutUnused() {
-        return outUnused;
+    public void setUsedSet(LinkedHashMap<String, ProcessVariableOperation> usedSetB) {
+        this.usedSet = usedSetB;
     }
 
-    public void setInUsed(LinkedHashMap<String, ProcessVariableOperation> inUsedB) {
-        this.inUsed = inUsedB;
+    public void setInSet(LinkedHashMap<String, ProcessVariableOperation> inSetB) {
+        this.inSet = inSetB;
     }
 
-    public void setInUnused(LinkedHashMap<String, ProcessVariableOperation> inUnusedB) {
-        this.inUnused = inUnusedB;
-    }
-
-    public void setOutUsed(LinkedHashMap<String, ProcessVariableOperation> outUsed) {
-        this.outUsed = outUsed;
-    }
-
-    public void setOutUnused(LinkedHashMap<String, ProcessVariableOperation> outUnused) {
-        this.outUnused = outUnused;
+    public void setOutSet(LinkedHashMap<String, ProcessVariableOperation> outSet) {
+        this.outSet = outSet;
     }
 
     public LinkedHashMap<String, ProcessVariableOperation> getUsed() {

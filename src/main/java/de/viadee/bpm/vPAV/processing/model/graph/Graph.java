@@ -272,7 +272,7 @@ public class Graph {
 	}
 
 	/**
-	 * Exit condition for path finding (du / dd anomaly)
+	 * Exit condition for path finding ( NU anomaly)
 	 *
 	 */
 	private List<Path> exitConditionDdDuAnomaly(final BpmnElement startNode, final AnomalyContainer anomaly,
@@ -280,7 +280,7 @@ public class Graph {
 
 		// go back to the node where the element is defined
 		// skip the startpoint
-		if ((anomaly.getAnomaly() == Anomaly.DD || anomaly.getAnomaly() == Anomaly.DU) && currentPath.size() > 1
+		if ((anomaly.getAnomaly() == Anomaly.NU ) && currentPath.size() > 1
 				&& containsAnomaly(startNode, anomaly)) {
 			final List<BpmnElement> newPath = new ArrayList<>(currentPath);
 			invalidPaths.add(new Path(newPath));

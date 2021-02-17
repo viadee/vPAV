@@ -70,10 +70,9 @@ public class Node extends BasicNode implements Cloneable {
 		myClone.defined = new LinkedHashMap<>();
 		myClone.used = new LinkedHashMap<>();
 		myClone.killed = new LinkedHashMap<>();
-		myClone.outUnused = new LinkedHashMap<>();
-		myClone.outUsed = new LinkedHashMap<>();
-		myClone.inUnused = new LinkedHashMap<>();
-		myClone.inUsed = new LinkedHashMap<>();
+		myClone.outSet = new LinkedHashMap<>();
+		myClone.inSet = new LinkedHashMap<>();
+		myClone.usedSet = new LinkedHashMap<>();
 		myClone.predecessors = new LinkedHashMap<>();
 		myClone.successors = new LinkedHashMap<>();
 

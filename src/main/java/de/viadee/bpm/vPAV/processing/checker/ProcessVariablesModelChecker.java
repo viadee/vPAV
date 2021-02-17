@@ -65,15 +65,10 @@ public class ProcessVariablesModelChecker extends AbstractModelChecker {
             final List<Path> paths = invalidPathsMap.get(anomaly);
             final ProcessVariableOperation var = anomaly.getVariable();
             if (paths != null) {
-                if (anomaly.getAnomaly() == Anomaly.DD) {
+                if (anomaly.getAnomaly() == Anomaly.NU) {
                     issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
                             anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.0"), //$NON-NLS-1$
                                     var.getName(), var.getElement().getBaseElement().getId(),
-                                    var.getChapter(), var.getFieldType().getDescription())));
-                } else if (anomaly.getAnomaly() == Anomaly.DU) {
-                    issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
-                            anomaly, String.format(Messages.getString("ProcessVariablesModelChecker.1"), //$NON-NLS-1$
-                                    var.getName(), anomaly.getElementId(),
                                     var.getChapter(), var.getFieldType().getDescription())));
                 } else if (anomaly.getAnomaly() == Anomaly.UR) {
                     issues.addAll(IssueWriter.createIssue(rule, determineCriticality(anomaly.getAnomaly()), var, paths,
@@ -103,7 +98,7 @@ public class ProcessVariablesModelChecker extends AbstractModelChecker {
      * @return Warning or error
      */
     private CriticalityEnum determineCriticality(final Anomaly anomaly) {
-        if (anomaly == Anomaly.DD || anomaly == Anomaly.DU || anomaly == Anomaly.UU) {
+        if (anomaly == Anomaly.NU || anomaly == Anomaly.UU) {
             return CriticalityEnum.WARNING;
         } else {
             return CriticalityEnum.ERROR;
