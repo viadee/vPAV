@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * Used to read the properties file (vPav.properties) and extract the configured rules
@@ -90,13 +91,19 @@ public class PropertiesReader {
         return properties;
     }
 
-    private Optional<Path> findPropertiesPath() throws IOException {
+    private Optional<Path> findPropertiesPath() {
+        Optional<Path> path = Optional.empty();
+        try (Stream<Path> walk = Files.walk(Paths.get(""))) {
+            path = walk.filter(f ->
+                    f.toString().endsWith("vpav.properties")
+                            || f.toString().endsWith("vpav.properties")
+                            || f.toString().endsWith("vpav.properties"))
+                    .findFirst();
+        } catch (IOException ignored) {
+            LOGGER.warning("IOException occured during properties scan.");
+        }
 
-        return Files.find(Paths.get(""),
-                Integer.MAX_VALUE,
-                (filePath, fileAttr) -> fileAttr.isRegularFile() &&
-                        (filePath.endsWith("vpav.properties") || filePath.endsWith("vPav.properties")) ||
-                        filePath.endsWith("vPAV.properties")).findFirst();
+        return path;
     }
 
     void validateProperties(Properties properties) {
