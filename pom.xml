@@ -154,7 +154,7 @@
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
-            <version>3.0.0-M4</version>
+            <version>3.0.2-b01</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ant</groupId>
