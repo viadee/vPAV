@@ -96,8 +96,8 @@ public class PropertiesReader {
         try (Stream<Path> walk = Files.walk(Paths.get(""))) {
             path = walk.filter(f ->
                     f.toString().endsWith("vpav.properties")
-                            || f.toString().endsWith("vpav.properties")
-                            || f.toString().endsWith("vpav.properties"))
+                            || f.toString().endsWith("vPAV.properties")
+                            || f.toString().endsWith("vPav.properties"))
                     .findFirst();
         } catch (IOException ignored) {
             LOGGER.warning("IOException occured during properties scan.");
