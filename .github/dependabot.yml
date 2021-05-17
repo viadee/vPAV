@@ -4,7 +4,7 @@
 version: 2
 updates:
   # Enable version updates for maven
-  - package-ecosystem: "java:maven"
+  - package-ecosystem: "maven"
     # Look for `pom.xml` file in the `root` directory
     directory: "/"
     # Check the maven registry for updates every day (weekdays)
