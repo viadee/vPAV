@@ -41,6 +41,7 @@ import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.instance.BaseElement;
+import org.camunda.bpm.model.bpmn.instance.SequenceFlow;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -71,6 +72,28 @@ public class IssueWriter {
         IssueService.getInstance().addIssue(new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
                 element.getProcessDefinition(), baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_ID),
                 baseElement.getAttributeValue(BpmnModelConstants.BPMN_ATTRIBUTE_NAME), message, null));
+
+        return issues;
+    }
+
+    /**
+     * @param rule              Rule
+     * @param classification    CriticalityEnum
+     * @param flow              SequenceFlow
+     * @param processDefinition processDefinition
+     * @param message           Error message
+     * @return Issues
+     */
+    public static Collection<CheckerIssue> createIssue(final Rule rule, final CriticalityEnum classification,
+            final SequenceFlow flow, final String processDefinition, final String message) {
+
+        final Collection<CheckerIssue> issues = new ArrayList<>();
+
+        final CheckerIssue issue = new CheckerIssue(rule.getName(), rule.getRuleDescription(), classification,
+                processDefinition, flow.getId(),
+                flow.getName(), message, null);
+
+        IssueService.getInstance().addIssue(issue);
 
         return issues;
     }
