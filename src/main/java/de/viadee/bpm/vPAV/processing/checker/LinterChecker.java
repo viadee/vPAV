@@ -3,6 +3,7 @@ package de.viadee.bpm.vPAV.processing.checker;
 import de.viadee.bpm.vPAV.Messages;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.Setting;
+import de.viadee.bpm.vPAV.constants.LinterConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
@@ -28,7 +29,7 @@ public class LinterChecker extends AbstractElementChecker {
         final BaseElement bpmnElement = element.getBaseElement();
         final Map<String, Setting> settings = rule.getSettings();
 
-        if (settings.containsKey("SETTING1")) {
+        if (settings.containsKey(LinterConstants.CONDITIONAL_SEQUENCE_FLOWS)) {
             issues.addAll(checkConditionalFlows(bpmnElement, element));
         }
 

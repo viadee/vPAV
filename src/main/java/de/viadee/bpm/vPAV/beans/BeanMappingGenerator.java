@@ -35,7 +35,6 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Helper methods for Maven Plugin CamundaStaticValidator
@@ -59,16 +58,14 @@ public class BeanMappingGenerator {
             // don't add spring own classes
             if (!beanName.startsWith("org.springframework")) {
                 final Object obj = ctx.getBean(beanName);
-                if (Objects.nonNull(obj)) {
-                    if (obj.getClass().getName().contains("$$")) {
-                        String name = obj.getClass().getName();
-                        while (name.contains("$$")) {
-                            name = name.substring(0, name.lastIndexOf("$$"));
-                        }
-                        beanNameToClassMap.put(beanName, name);
-                    } else {
-                        beanNameToClassMap.put(beanName, obj.getClass().getName());
+                if (obj.getClass().getName().contains("$$")) {
+                    String name = obj.getClass().getName();
+                    while (name.contains("$$")) {
+                        name = name.substring(0, name.lastIndexOf("$$"));
                     }
+                    beanNameToClassMap.put(beanName, name);
+                } else {
+                    beanNameToClassMap.put(beanName, obj.getClass().getName());
                 }
             }
         }

@@ -75,7 +75,7 @@ public class RuntimeConfig {
             "VersioningChecker", "DmnTaskChecker", "ProcessVariablesNameConventionChecker",
             "TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
             "BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
-            "MessageCorrelationChecker" };
+            "MessageCorrelationChecker", "LinterChecker" };
 
     private final String[] viadeeModelRules = { "ProcessVariablesModelChecker", "DataFlowChecker" };
 
