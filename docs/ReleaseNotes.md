@@ -4,6 +4,28 @@ nav_order: 8
 ---
 # Release notes
 
+## 3.0.6
+
+### Features
+[**Issue 180**](https://github.com/viadee/vPAV/issues/180) Implementations of Camunda API are found when abstract classes are used
+
+[**Issue 172**](https://github.com/viadee/vPAV/issues/172)
+[**Issue 159**](https://github.com/viadee/vPAV/issues/159) Elements which reference source code can be highlighted in the frontend and contain a reference to the implementation
+
+[**Issue 179**](https://github.com/viadee/vPAV/issues/179) DMNs can be referenced by their IDs
+
+### Fixes
+[**Issue 177**](https://github.com/viadee/vPAV/issues/177) Custom ruleSets are no longer overwritten by the default ruleSet
+
+[**Issue 176**](https://github.com/viadee/vPAV/issues/176) vPAV properties file can be located anywhere in the project
+
+### Misc
+
+- [New configuration option added to specific the output folder](https://viadee.github.io/vPAV/Configuration/Properties.html#validation-folder-path)
+- When downloading a BPMN model in the result overview the browser shows a download dialoge
+- The result overview now contains the project name
+
+
 ## 3.0.5
 
 ### Features
