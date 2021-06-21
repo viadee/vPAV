@@ -32,20 +32,21 @@
 package de.viadee.bpm.vPAV.config.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Setting {
 
-    private String name;
+    private final String name;
 
-    private String value;
+    private final String value;
 
-    private ArrayList<String> scriptPlaces = new ArrayList<>();
+    private final List<String> scriptPlaces = new ArrayList<>();
 
-    private String type;
+    private final String type;
 
-    private String id;
+    private final String id;
 
-    private boolean required;
+    private final boolean required;
 
     /**
      *
@@ -94,7 +95,7 @@ public class Setting {
         return required;
     }
 
-    public ArrayList<String> getScriptPlaces() {
+    public List<String> getScriptPlaces() {
         return scriptPlaces;
     }
 

@@ -31,12 +31,25 @@
  */
 package de.viadee.bpm.vPAV.config.reader;
 
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesConfigurationException;
+import de.viadee.bpm.vPAV.exceptions.InvalidPropertiesParameterException;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * Used to read the properties file (vPav.properties) and extract the configured rules
@@ -46,15 +59,21 @@ public class PropertiesReader {
 
     private static final Logger LOGGER = Logger.getLogger(PropertiesReader.class.getName());
 
-    public Properties read() {
+    public Properties initProperties() {
+        Properties properties = readPropertiesFromFile();
+        this.validateProperties(properties);
+        return properties;
+    }
+
+    Properties readPropertiesFromFile() {
         InputStream input = null;
         Properties properties = new Properties();
         try {
-            Path propertiesPath = findPropertiesPath();
-            if (propertiesPath == null) {
+            Optional<Path> propertiesPath = findPropertiesPath();
+            if (propertiesPath.isEmpty()) {
                 LOGGER.info("vPav.properties file could not be found. Falling back to default values...");
             } else {
-                input = Files.newInputStream(propertiesPath);
+                input = Files.newInputStream(propertiesPath.get());
                 properties.load(input);
             }
         } catch (IOException e) {
@@ -68,27 +87,70 @@ public class PropertiesReader {
                 }
             }
         }
+
         return properties;
     }
 
-    private Path findPropertiesPath() throws IOException {
-        final Path[] foundFile = new Path[1];
-        String pattern = "{vPav, vpav, vPAV}.properties";
-        FileSystem fs = FileSystems.getDefault();
-        PathMatcher matcher = fs.getPathMatcher("glob:" + pattern);
-        FileVisitor<Path> matcherVisitor = new SimpleFileVisitor<Path>() {
+    private Optional<Path> findPropertiesPath() {
+        Optional<Path> path = Optional.empty();
+        try (Stream<Path> walk = Files.walk(Paths.get(""))) {
+            path = walk.filter(f ->
+                    f.toString().endsWith("vpav.properties")
+                            || f.toString().endsWith("vPAV.properties")
+                            || f.toString().endsWith("vPav.properties"))
+                    .findFirst();
+        } catch (IOException ignored) {
+            LOGGER.warning("IOException occured during properties scan.");
+        }
 
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attribs) {
-                Path name = file.getFileName();
-                if (matcher.matches(name)) {
-                    foundFile[0] = file;
-                    return FileVisitResult.TERMINATE;
-                }
-                return FileVisitResult.CONTINUE;
+        return path;
+    }
+
+    void validateProperties(Properties properties) {
+        List<String> allowedProperties = Arrays.asList("outputhtml", "language", "basepath", "parentRuleSet", "ruleSet",
+                "scanpath", "userVariablesFilePath", "validationFolder", "multiProjectReport", "generatedReports");
+        properties.keySet().forEach(key -> {
+            if (!allowedProperties.contains(key)) {
+                throw new InvalidPropertiesParameterException("Not allowed property: " + key);
             }
-        };
-        Files.walkFileTree(Paths.get(""), matcherVisitor);
-        return foundFile[0];
+            if (StringUtils.isEmpty(properties.getProperty((String) key)) ||
+                    StringUtils.isBlank(properties.getProperty((String) key))) {
+                throw new InvalidPropertiesParameterException("Empty property: " + key);
+            }
+        });
+
+        //Validate properties regarding multi project report support
+        if (properties.containsKey("multiProjectReport")) {
+            if (properties.get("multiProjectReport").equals("true")) {
+                if (properties.containsKey("generatedReports")) {
+                    String[] paths = properties.get("generatedReports").toString().split(",");
+                    if (properties.containsKey("outputhtml") && properties.get("outputhtml").equals("false")) {
+                        throw new InvalidPropertiesConfigurationException(
+                                "Multi project scan not allowed when HTML output is disabled");
+                    }
+                    if (paths.length < 2) {
+                        throw new InvalidPropertiesParameterException(
+                                "At least 2 external report folders must be defined");
+                    }
+                    for (String stringPath : paths) {
+                        Path path = Paths
+                                .get(FilenameUtils.separatorsToSystem(stringPath +
+                                        File.separator + ConfigConstants.DATA_FOLDER));
+                        if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+                            throw new InvalidPropertiesParameterException(
+                                    String.format("No %s folder found in reports folder: ",
+                                            ConfigConstants.DATA_FOLDER) + stringPath);
+                        }
+                    }
+                } else
+                    throw new InvalidPropertiesConfigurationException(
+                            "Enabled multi report scan needs defined external reports paths");
+            } else if (properties.get("multiProjectReport").equals("false") && properties
+                    .containsKey("generatedReports")) {
+                throw new InvalidPropertiesConfigurationException(
+                        "External reports paths not allowed with disabled multi report scan");
+            }
+        }
+
     }
 }

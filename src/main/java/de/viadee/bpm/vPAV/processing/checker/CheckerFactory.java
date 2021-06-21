@@ -36,7 +36,8 @@ import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
 import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
@@ -54,7 +55,7 @@ public class CheckerFactory {
 
     private static final Logger LOGGER = Logger.getLogger(CheckerFactory.class.getName());
 
-    private Map<String, String> incorrectCheckers = new HashMap<>();
+    private final Map<String, String> incorrectCheckers = new HashMap<>();
 
     /**
      * create checkers
@@ -67,25 +68,26 @@ public class CheckerFactory {
      * @param invalidPathMap          invalidPathMap
      * @return checkers returns checkers
      */
-    public Collection[] createCheckerInstances(final RuleSet ruleConf, final Collection<String> resourcesNewestVersions,
-            final ProcessVariablesScanner scanner,
+    public Collection<Checker>[] createCheckerInstances(final RuleSet ruleConf,
+            final Collection<String> resourcesNewestVersions,
+            final EntryPointScanner scanner,
             final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables,
-            final Map<AnomalyContainer, List<Path>> invalidPathMap) {
+            final Map<AnomalyContainer, List<Path>> invalidPathMap, final FlowAnalysis flowAnalysis) {
 
         final HashSet<String> instantiatedCheckerClasses = new HashSet<>();
-        final Collection[] checkers = new Collection[2];
+        final Collection<Checker>[] checkers = new Collection[2];
         checkers[0] = createElementCheckers(instantiatedCheckerClasses, ruleConf, resourcesNewestVersions,
                 scanner);
         checkers[1] = createModelCheckers(instantiatedCheckerClasses, ruleConf, dataFlowRules,
-                processVariables, invalidPathMap);
+                processVariables, invalidPathMap, flowAnalysis);
 
         return checkers;
     }
 
-    private Collection<ElementChecker> createElementCheckers(final HashSet<String> instantiatedCheckerClasses,
+    private Collection<Checker> createElementCheckers(final HashSet<String> instantiatedCheckerClasses,
             final RuleSet ruleConf, final Collection<String> resourcesNewestVersions,
-            final ProcessVariablesScanner scanner) {
-        final Collection<ElementChecker> elementCheckers = new ArrayList<>();
+            final EntryPointScanner scanner) {
+        final Collection<Checker> elementCheckers = new ArrayList<>();
         AbstractElementChecker newChecker;
         // Create element checkers.
         for (Map<String, Rule> rules : ruleConf.getElementRules().values()) {
@@ -102,7 +104,7 @@ public class CheckerFactory {
                         } else if (scanner != null && rule.getName().equals("MessageCorrelationChecker")) {
                             Class<?> clazz = Class.forName(fullyQualifiedName);
                             Constructor<?> c = clazz.getConstructor(Rule.class,
-                                    ProcessVariablesScanner.class);
+                                    EntryPointScanner.class);
                             newChecker = (AbstractElementChecker) c.newInstance(rule, scanner);
                         } else {
                             Class<?> clazz = Class.forName(fullyQualifiedName);
@@ -138,11 +140,11 @@ public class CheckerFactory {
         return elementCheckers;
     }
 
-    private Collection<ModelChecker> createModelCheckers(final HashSet<String> instantiatedCheckerClasses,
+    private Collection<Checker> createModelCheckers(final HashSet<String> instantiatedCheckerClasses,
             final RuleSet ruleConf, final Collection<DataFlowRule> dataFlowRules,
             final Collection<ProcessVariable> processVariables,
-            final Map<AnomalyContainer, List<Path>> invalidPathMap) {
-        final Collection<ModelChecker> modelCheckers = new ArrayList<>();
+            final Map<AnomalyContainer, List<Path>> invalidPathMap, final FlowAnalysis flowAnalysis) {
+        final Collection<Checker> modelCheckers = new ArrayList<>();
         ModelChecker newModelChecker;
         // Create model checkers.
         for (Map<String, Rule> rules : ruleConf.getModelRules().values()) {
@@ -152,14 +154,16 @@ public class CheckerFactory {
                     try {
                         Class<?> clazz = Class.forName(fullyQualifiedName);
                         if (rule.getName().equals("DataFlowChecker")) {
-                            Constructor<?> c = clazz.getConstructor(Rule.class, Collection.class, Collection.class);
-                            newModelChecker = (ModelChecker) c.newInstance(rule, dataFlowRules, processVariables);
-                        } else if (rule.getName().equals("ProcessVariablesModelChecker")) {
-                            Constructor<?> c = clazz.getConstructor(Rule.class, Map.class);
-                            newModelChecker = (ModelChecker) c.newInstance(rule, invalidPathMap);
+                            Constructor<?> c = clazz
+                                    .getConstructor(Rule.class, Map.class, Collection.class, Collection.class,
+                                            FlowAnalysis.class);
+                            newModelChecker = (ModelChecker) c
+                                    .newInstance(rule, invalidPathMap, processVariables, dataFlowRules, flowAnalysis);
                         } else {
-                            Constructor<?> c = clazz.getConstructor(Rule.class);
-                            newModelChecker = (ModelChecker) c.newInstance(rule);
+                            Constructor<?> c = clazz
+                                    .getConstructor(Rule.class, Map.class, Collection.class, FlowAnalysis.class);
+                            newModelChecker = (ModelChecker) c
+                                    .newInstance(rule, invalidPathMap, processVariables, flowAnalysis);
                         }
 
                         // Check if checker is singleton and if an instance already exists

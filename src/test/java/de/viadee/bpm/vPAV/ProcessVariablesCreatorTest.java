@@ -78,7 +78,7 @@ public class ProcessVariablesCreatorTest {
                 null, null, new BasicNode[1]);
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
-        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args, method.getDeclaringClass());
+        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), method.getDeclaringClass(), method.getName());
 
         // Three methods, method 1 interrupted by method calls = four nodes
         Collection<BasicNode> nodes = cfg.getNodes().values();
@@ -309,7 +309,7 @@ public class ProcessVariablesCreatorTest {
                 null, null, "Process_1");
         ArrayList<Value> args = new ArrayList<>();
         args.add(new JimpleLocal("r1", RefType.v(CamundaMethodServices.DELEGATE)));
-        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), args, sc);
+        vr.startBlockProcessing(SootResolverSimplified.getBlockFromMethod(method), sc, method.getName());
         return cfg;
     }
 

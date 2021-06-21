@@ -48,6 +48,7 @@ import org.camunda.bpm.model.bpmn.instance.SubProcess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class NoScriptChecker extends AbstractElementChecker {
@@ -77,7 +78,7 @@ public class NoScriptChecker extends AbstractElementChecker {
             Map<String, Setting> settings = rule.getSettings();
 
             // Check all Elements with camunda:script tag
-            ArrayList<String> scriptTypes = BpmnScanner
+            List<String> scriptTypes = BpmnScanner
                     .getScriptTypes(bpmnElement);
             if (!scriptTypes.isEmpty()) {
                 if (!settings.containsKey(bpmnElement.getElementType().getInstanceType().getSimpleName())) {
@@ -87,7 +88,7 @@ public class NoScriptChecker extends AbstractElementChecker {
                                         //$NON-NLS-1$
                                         place)));
                 } else {
-                    ArrayList<String> allowedPlaces = settings
+                    List<String> allowedPlaces = settings
                             .get(bpmnElement.getElementType().getInstanceType().getSimpleName()).getScriptPlaces();
                     if (!allowedPlaces.isEmpty())
                         for (String scriptType : scriptTypes)
@@ -110,13 +111,13 @@ public class NoScriptChecker extends AbstractElementChecker {
                 boolean scriptCondExp = BpmnScanner
                         .hasScriptInCondExp((SequenceFlow) bpmnElement);
                 if (settings.containsKey(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)) {
-                    ArrayList<String> allowedPlaces = settings.get(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)
+                    List<String> allowedPlaces = settings.get(BpmnConstants.SIMPLE_NAME_SEQUENCE_FLOW)
                             .getScriptPlaces();
-                    if (!allowedPlaces.isEmpty())
-                        if (!allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp)
-                            issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
-                                    String.format(Messages.getString("NoScriptChecker.3"), //$NON-NLS-1$
-                                            CheckName.checkName(bpmnElement))));
+                    if (!allowedPlaces.isEmpty() && !allowedPlaces.contains(BpmnConstants.COND_EXP) && scriptCondExp) {
+                        issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element,
+                                String.format(Messages.getString("NoScriptChecker.3"), //$NON-NLS-1$
+                                        CheckName.checkName(bpmnElement))));
+                    }
 
                 } else {
                     if (scriptCondExp) {

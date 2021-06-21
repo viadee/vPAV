@@ -33,7 +33,7 @@ package de.viadee.bpm.vPAV.config.model;
 
 public class ModelConvention {
 
-    private String type;
+    private final String type;
 
     public ModelConvention(final String type) {
         super();

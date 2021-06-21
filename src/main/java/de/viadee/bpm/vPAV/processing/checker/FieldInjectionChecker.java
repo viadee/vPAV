@@ -56,8 +56,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
 
 /**
  * Class FieldInjectionChecker
@@ -94,7 +97,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
         }
 
         if (bpmnElement instanceof UserTask) {
-            ArrayList<ModelElementInstance> taskListener = BpmnScanner
+            List<ModelElementInstance> taskListener = BpmnScanner
                     .getListener(bpmnElement,
                             BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskListener.forEach(listener -> {
@@ -102,7 +105,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
                 taskClass.add(((CamundaTaskListener) listener).getCamundaClass());
             });
         }
-        ArrayList<ModelElementInstance> executionListener = BpmnScanner
+        List<ModelElementInstance> executionListener = BpmnScanner
                 .getListener(bpmnElement,
                         BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionListener.forEach(listener -> {
@@ -110,7 +113,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             executionClass.add(((CamundaExecutionListener) listener).getCamundaClass());
         });
 
-        final ArrayList<String> fieldInjectionVarNames = BpmnScanner.getFieldInjectionVarName(bpmnElement);
+        final List<String> fieldInjectionVarNames = BpmnScanner.getFieldInjectionVarName(bpmnElement);
 
         if (implementationAttr != null && !fieldInjectionVarNames.isEmpty() && (bpmnElement instanceof ServiceTask ||
                 bpmnElement instanceof BusinessRuleTask || bpmnElement instanceof SendTask)) {
@@ -159,12 +162,12 @@ public class FieldInjectionChecker extends AbstractElementChecker {
         }
 
         // checkListener
-        if (!fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null) {
+        if (!fieldInjectionVarNames.isEmpty()) {
             for (String fieldInjectionVarName : fieldInjectionVarNames)
                 issues.addAll(checkListener(element, executionClass, executionDelegate,
                         fieldInjectionVarName));
         }
-        if (!fieldInjectionVarNames.isEmpty() && fieldInjectionVarNames != null) {
+        if (!fieldInjectionVarNames.isEmpty()) {
             for (String fieldInjectionVarName : fieldInjectionVarNames)
                 issues.addAll(
                         checkListener(element, taskClass, taskDelegate, fieldInjectionVarName));
@@ -187,7 +190,7 @@ public class FieldInjectionChecker extends AbstractElementChecker {
         final Collection<CheckerIssue> issues = new ArrayList<>();
 
         // classes
-        if (aClass == null || aClass.size() > 0) {
+        if (aClass != null && !aClass.isEmpty()) {
             for (String eClass : aClass) {
                 if (eClass != null && eClass.trim().length() > 0) {
                     issues.addAll(checkClassFileForVar(element, eClass, varName));
@@ -239,7 +242,8 @@ public class FieldInjectionChecker extends AbstractElementChecker {
             final String varName) {
 
         final Collection<CheckerIssue> issues = new ArrayList<>();
-        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        final String classPath =
+                className.replaceAll("\\.", "/") + JAVA_FILE_ENDING; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         try {
             Class<?> clazz = RuntimeConfig.getInstance().getClassLoader().loadClass(className);

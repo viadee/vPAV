@@ -52,10 +52,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 
 public class UserVariablesTest {
 
@@ -80,7 +77,7 @@ public class UserVariablesTest {
 
     @Test
     public void testUserVariablesInclusionInGraph() {
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(null);
+        final EntryPointScanner scanner = new EntryPointScanner(null);
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
@@ -129,7 +126,7 @@ public class UserVariablesTest {
         // Tests that user variables are correctly read from xml and translated to ProcessVariableOperations
         XmlVariablesReader xmlVariablesReader = new XmlVariablesReader();
 
-        HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = xmlVariablesReader
+        Map<String, ListMultimap<String, ProcessVariableOperation>> userVariables = xmlVariablesReader
                 .read("UserVariablesTest/variables_allOperations.xml", "Process_1");
 
         ListMultimap<String, ProcessVariableOperation> processVariables = userVariables.get("StartEvent");
@@ -154,7 +151,7 @@ public class UserVariablesTest {
     public void testUserDefinedVariablesIncorrect() throws JAXBException {
         XmlVariablesReader xmlVariablesReader = new XmlVariablesReader();
 
-        HashMap<String, ListMultimap<String, ProcessVariableOperation>> userVariables = xmlVariablesReader
+        Map<String, ListMultimap<String, ProcessVariableOperation>> userVariables = xmlVariablesReader
                 .read("UserVariablesTest/variables_incorrect.xml", "testProcess");
 
         Assert.assertEquals("Ill-defined user variable should not be included.", 0, userVariables.size());

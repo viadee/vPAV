@@ -47,6 +47,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static de.viadee.bpm.vPAV.constants.BpmnConstants.NAMESPACE_URI;
+
 /**
  * Class EmptyAttributesChecker
  * <p>
@@ -66,7 +68,7 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
         // read attributes from task
         if ((bpmnElement instanceof ServiceTask || bpmnElement instanceof BusinessRuleTask
                 || bpmnElement instanceof SendTask)) {
-            HashMap<String, String> attributes = getImplementationAttribute(bpmnElement);
+            Map<String, String> attributes = getImplementationAttribute(bpmnElement);
             for (Map.Entry<String, String> entry : attributes.entrySet()) {
                 if (entry.getValue() == null || entry.getValue().isEmpty()) {
                     issues.addAll(generateIssue(rule, element, bpmnElement, entry));
@@ -78,7 +80,7 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
         Collection<EventDefinition> eventDefinitions = BpmnScanner.getEventDefinitions(bpmnElement);
         if (eventDefinitions != null) {
             for (EventDefinition ed : eventDefinitions) {
-                HashMap<String, String> attributes = getImplementationAttribute(ed);
+                Map<String, String> attributes = getImplementationAttribute(ed);
                 for (Map.Entry<String, String> entry : attributes.entrySet()) {
                     if (entry.getValue() == null || entry.getValue().isEmpty()) {
                         issues.addAll(generateIssue(rule, element, ed, entry));
@@ -97,20 +99,20 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
     private void checkTimeEventDefinition(TimerEventDefinition timer, BpmnElement element,
             Collection<CheckerIssue> issues) {
         if (timer.getTimeDate() != null
-                && timer.getTimeDate().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                && timer.getTimeDate().getAttributeValueNs(NAMESPACE_URI, "type")
                 == null) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
                     Messages.getString("EmptyAttributesChecker.5")));
         }
         if (timer.getTimeDuration() != null &&
-                timer.getTimeDuration().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                timer.getTimeDuration().getAttributeValueNs(NAMESPACE_URI, "type")
                         == null) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
                     Messages.getString("EmptyAttributesChecker.6")));
 
         }
         if (timer.getTimeCycle() != null
-                && timer.getTimeCycle().getAttributeValueNs("http://www.w3.org/2001/XMLSchema-instance", "type")
+                && timer.getTimeCycle().getAttributeValueNs(NAMESPACE_URI, "type")
                 == null) {
             issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.ERROR, element, timer.getId(),
                     Messages.getString("EmptyAttributesChecker.7")));
@@ -150,7 +152,7 @@ public class EmptyAttributesChecker extends AbstractElementChecker {
      * @param element Element
      * @return return_implementation contains implementation
      */
-    public HashMap<String, String> getImplementationAttribute(BaseElement element) {
+    public Map<String, String> getImplementationAttribute(BaseElement element) {
         HashMap<String, String> attributes = new HashMap<>();
 
         // Check which implementation it is

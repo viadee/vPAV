@@ -39,11 +39,13 @@ public class ConfigConstants {
 
     public static final String MAIN_FOLDER = "src/main/";
 
-    public static final String BASE_PATH = MAIN_FOLDER + "resources/";
+    public static final String RESOURCES = "resources/";
+
+    public static final String BASE_PATH = MAIN_FOLDER + RESOURCES;
 
     public static final String JAVA_PATH = MAIN_FOLDER + "java/";
 
-    public static final String TARGET_CLASS_FOLDER = "target/classes";
+    public static final String TARGET_CLASS_FOLDER = "target/classes/";
 
     public static final String TARGET_TEST_PATH = "target/test-classes/";
 
@@ -53,9 +55,11 @@ public class ConfigConstants {
 
     public static final String JAVA_PATH_TEST = TEST_FOLDER + "java/";
 
-    public static final String BASE_PATH_TEST = TEST_FOLDER + "resources/";
+    public static final String BASE_PATH_TEST = TEST_FOLDER + RESOURCES;
 
-    public static final String JS_BASE_PATH = MAIN_FOLDER + "resources/";
+    public static final String DATA_FOLDER = "data/";
+
+    public static final String JAVA_FILE_ENDING = ".java";
 
     public static final String RULESET = "ruleSet.xml";
 
@@ -77,7 +81,17 @@ public class ConfigConstants {
 
     public static final String SCRIPT_FILE_PATTERN = "**/*.groovy";
 
-    public static final String VALIDATION_HTML_OUTPUT_FILE = "validationResult.html";
+    public static final String HTML_INPUT_FOLDER = "html/";
+
+    public static final String HTML_FILE = "validationResult.html";
+
+    public static final String JS_INPUT_FOLDER = HTML_INPUT_FOLDER + "js/";
+
+    public static final String CSS_INPUT_FOLDER = HTML_INPUT_FOLDER + "css/";
+
+    public static final String IMG_INPUT_FOLDER = HTML_INPUT_FOLDER + "img/";
+
+    public static final String FONT_INPUT_FOLDER = HTML_INPUT_FOLDER + "webfonts/";
 
     public static final String VERSIONING_SCHEME_PACKAGE = "versioningSchemePackage";
 
@@ -89,9 +103,13 @@ public class ConfigConstants {
 
     public static final String MESSAGE = "message";
 
-    public static final String CRITICALITY = "Criticality";
-
     public static final String WHITELIST_SOOT_DEPENDENCIES = "org/camunda/bpm/camunda-engine";
+
+    public static final String VALIDATION_HTML_OUTPUT_FILE = "validationResult.html";
+
+    public static final String VALIDATION_OVERVIEW_REPORTS_FOLDER = "externalReports/";
+
+    public static final String VALIDATION_OVERVIEW_REPORT_DATA_JS = "reportData.js";
 
     private ConfigConstants() {
     }

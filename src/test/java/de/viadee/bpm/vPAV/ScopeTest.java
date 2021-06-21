@@ -36,7 +36,7 @@ import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
 import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.ProcessVariableReader;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -121,7 +121,6 @@ public class ScopeTest {
 
     @Test
     public void testScopeTaskListener() {
-        // TODO test resolving of task in java classes
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent()
                 .userTask("MyUserTask").camundaTaskListenerExpression("create", "${task.setVariable('var', true)}")
                 .endEvent()
@@ -211,7 +210,6 @@ public class ScopeTest {
     @Test
     public void testScopeSubprocess() {
         // Tested: delegate, input parameter, output parameter, listener, multi instance, task listener
-        // TODO add more elements which are tested
         // Variables in Subprocesses are globally available if  execution.setVariableLocal is not used (not supported yet)
         BpmnModelInstance modelInstance = Bpmn.createProcess("MyProcess").startEvent().subProcess()
                 .embeddedSubProcess().startEvent()
@@ -296,7 +294,7 @@ public class ScopeTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         FileScanner fileScanner = new FileScanner(new RuleSet());
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
-                new ProcessVariablesScanner(null), flowAnalysis);
+                new EntryPointScanner(null), flowAnalysis);
 
         flowAnalysis.analyze(graphs);
         Assert.assertEquals("test",
@@ -390,7 +388,7 @@ public class ScopeTest {
                 .camundaOutputParameter("myOutputParameter", "myValue").sequenceFlowId("MySequenceFlow")
                 .endEvent().done();
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
-                new ProcessVariablesScanner(null), flowAnalysis);
+                new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphs);
 
         // Only myOutputParameter is accessible after the service task
@@ -403,7 +401,6 @@ public class ScopeTest {
     @Test
     public void testScopeConsideredInAnalysisSubprocess() {
         ElementGraphBuilder graphBuilder = new ElementGraphBuilder(null, null);
-        FlowAnalysis flowAnalysis = new FlowAnalysis();
         FileScanner fileScanner = new FileScanner(new RuleSet());
 
         // Test that global variables are accessible in subprocesses and that variables are accessible outside
@@ -414,9 +411,9 @@ public class ScopeTest {
                 .subProcessDone()
                 .endEvent("MyEndEvent")
                 .done();
-        flowAnalysis = new FlowAnalysis();
+        FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
-                new ProcessVariablesScanner(null), flowAnalysis);
+                new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphs);
         Assert.assertEquals(1, flowAnalysis.getNodes().get("MyServiceTask__0").getInUnused().size());
         Assert.assertEquals("globalVar",
@@ -442,7 +439,7 @@ public class ScopeTest {
                 .calledElement("calledProcess")
                 .endEvent("MyEndEvent").done();
         Collection<Graph> graphs = graphBuilder.createProcessGraph(fileScanner, modelInstance, "", new ArrayList<>(),
-                new ProcessVariablesScanner(null), flowAnalysis);
+                new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphs);
 
         // Variable set in caller process is not available in called process
@@ -458,5 +455,4 @@ public class ScopeTest {
     private BpmnElement getBpmnElement(BaseElement element) {
         return new BpmnElement(null, element, new ControlFlowGraph(), new FlowAnalysis());
     }
-
 }

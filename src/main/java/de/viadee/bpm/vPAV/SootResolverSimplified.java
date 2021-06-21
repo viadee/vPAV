@@ -32,7 +32,8 @@
 package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import soot.*;
 import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.Block;
@@ -44,10 +45,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static de.viadee.bpm.vPAV.constants.CamundaMethodServices.NOTIFY;
+
 public class SootResolverSimplified {
 
-    private static List<String> defaultMethods = Arrays
-            .asList("execute", "notify", "mapInputVariables", "mapOutputVariables");
+    private SootResolverSimplified() {
+
+    }
+
+    private static final List<String> defaultMethods = Arrays
+            .asList(CamundaMethodServices.EXECUTE, NOTIFY, "mapInputVariables", "mapOutputVariables");
 
     private static final Logger LOGGER = Logger.getLogger(SootResolverSimplified.class.getName());
 
@@ -55,7 +62,7 @@ public class SootResolverSimplified {
             Type returnType) {
         SootClass sootClass = setupSootClass(className);
         if (sootClass == null) {
-            LOGGER.warning("Class " + className + " could not be loaded.");
+            LOGGER.warning(String.format("Class %s could not be loaded.", className));
             return null;
         }
         return getBlockFromClass(setupSootClass(className), methodName, parameterTypes, returnType);
@@ -69,8 +76,7 @@ public class SootResolverSimplified {
             returnType = VoidType.v();
         }
 
-        SootMethod sootMethod = getSootMethod(sootClass, methodName, parameterTypes, returnType);
-        return sootMethod;
+        return getSootMethod(sootClass, methodName, parameterTypes, returnType);
     }
 
     public static Block getBlockFromClass(SootClass sootClass, String methodName, List<Type> parameterTypes,
@@ -94,12 +100,12 @@ public class SootResolverSimplified {
             List<Type> parameterTypes, final Type returnType) {
         SootMethod method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
 
-        if (methodName.equals("execute") && method == null) {
+        if (methodName.equals(CamundaMethodServices.EXECUTE) && method == null) {
             parameterTypes.remove(0);
             parameterTypes.add(CamundaMethodServices.ACTIVITY_EXECUTION_TYPE);
             method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
         }
-        if (methodName.equals("notify") && method == null) {
+        if (methodName.equals(NOTIFY) && method == null) {
             parameterTypes.remove(0);
             parameterTypes.add(CamundaMethodServices.DELEGATE_TASK_TYPE);
             method = sootClass.getMethodUnsafe(methodName, parameterTypes, returnType);
@@ -107,13 +113,14 @@ public class SootResolverSimplified {
 
         if (method == null) {
             LOGGER.warning(
-                    "In class " + sootClass.getName() + " - " + methodName
-                            + " method was not found by Soot with parameters.");
+                    String.format("In class %s - %s method was not found by Soot with parameters.", sootClass.getName(),
+                            methodName));
 
             method = sootClass.getMethodByNameUnsafe(methodName);
             if (method == null) {
                 LOGGER.warning(
-                        "In class " + sootClass.getName() + " - " + methodName + " method was not found by Soot");
+                        String.format("In class %s - %s method was not found by Soot", sootClass.getName(),
+                                methodName));
             }
         }
         return method;
@@ -137,14 +144,14 @@ public class SootResolverSimplified {
     }
 
     public static SootClass setupSootClass(String className) {
-        className = ProcessVariablesScanner.cleanString(className, true);
-        SootClass sootClass = Scene.v().forceResolve(className, SootClass.SIGNATURES);
+        className = EntryPointScanner.cleanString(className);
+        SootClass sootClass = Scene.v().forceResolve(fixClassPathForSoot(className), SootClass.SIGNATURES);
         if (sootClass != null) {
             sootClass.setApplicationClass();
             Scene.v().loadNecessaryClasses();
             return sootClass;
         } else {
-            LOGGER.warning("Class " + className + " was not found by Soot");
+            LOGGER.warning(String.format("Class %s was not found by Soot", className));
             return null;
         }
     }
@@ -159,7 +166,7 @@ public class SootResolverSimplified {
 
         switch (methodName) {
             case "execute":
-            case "notify":
+            case NOTIFY:
                 parameterTypes.add(delegateExecutionType);
                 break;
             case "mapInputVariables":
@@ -186,7 +193,7 @@ public class SootResolverSimplified {
 
         switch (methodName) {
             case "execute":
-            case "notify":
+            case NOTIFY:
                 parameters.add(new JimpleLocal("del_ex", delegateExecutionType));
                 break;
             case "mapInputVariables":
@@ -200,6 +207,27 @@ public class SootResolverSimplified {
         }
 
         return parameters;
+    }
+
+    public static String fixClassPathForSoot(String classFile) {
+        // Trim class path because soot depends on the scan path
+        int scanpathLength = RuntimeConfig.getInstance().getScanPath().length();
+        String className = classFile.replaceAll("\\.", "/");
+        if ((ConfigConstants.TARGET_TEST_PATH + className)
+                .startsWith(RuntimeConfig.getInstance().getScanPath())) {
+            classFile = classFile
+                    .substring(scanpathLength - ConfigConstants.TARGET_TEST_PATH.length());
+        } else if ((ConfigConstants.TARGET_CLASS_FOLDER + className)
+                .startsWith(RuntimeConfig.getInstance().getScanPath())) {
+            classFile = classFile
+                    .substring(
+                            scanpathLength - ConfigConstants.TARGET_CLASS_FOLDER.length());
+        } else if (className.startsWith(RuntimeConfig.getInstance().getScanPath())) {
+            classFile = classFile
+                    .substring(scanpathLength);
+        }
+
+        return classFile;
     }
 
 }

@@ -35,17 +35,17 @@ import java.util.Objects;
 
 public class AnomalyContainer {
 
-	private String name;
+	private final String name;
 
-	private Anomaly anomaly;
+	private final Anomaly anomaly;
 
-	private String elementId;
+	private final String elementId;
 
-	private String elementName;
+	private final String elementName;
 
-	private String nodeId;
+	private final String nodeId;
 
-	private ProcessVariableOperation variable;
+	private final ProcessVariableOperation variable;
 
 	public AnomalyContainer(final String name, final Anomaly anomaly, final String elementId, final String elementName,
 			final ProcessVariableOperation variable) {
@@ -90,9 +90,7 @@ public class AnomalyContainer {
 	public boolean equals(Object obj) {
 		if (obj instanceof AnomalyContainer) {
 			final AnomalyContainer anomalyContainer = (AnomalyContainer) obj;
-			if (this.name.equals(anomalyContainer.getName()) && this.anomaly == anomalyContainer.getAnomaly()) {
-				return true;
-			}
+			return this.name.equals(anomalyContainer.getName()) && this.anomaly == anomalyContainer.getAnomaly();
 		}
 		return false;
 	}

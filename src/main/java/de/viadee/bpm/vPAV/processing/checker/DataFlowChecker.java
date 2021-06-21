@@ -33,23 +33,28 @@ package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.output.IssueWriter;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.dataflow.DataFlowRule;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-public class DataFlowChecker implements ModelChecker {
+public class DataFlowChecker extends AbstractModelChecker {
 
-    private Rule rule;
-    private Collection<DataFlowRule> dataFlowRules;
-    private Collection<ProcessVariable> processVariables;
+    private final Collection<DataFlowRule> dataFlowRules;
 
-    public DataFlowChecker(final Rule rule, final Collection<DataFlowRule> dataFlowRules, final Collection<ProcessVariable> processVariables) {
-        this.rule = rule;
+    public DataFlowChecker(final Rule rule,
+            final Map<AnomalyContainer, List<Path>> invalidPathsMap,
+            final Collection<ProcessVariable> processVariables, final Collection<DataFlowRule> dataFlowRules,
+            final FlowAnalysis flowAnalysis) {
+        super(rule, invalidPathsMap, processVariables, flowAnalysis);
         this.dataFlowRules = dataFlowRules;
-        this.processVariables = processVariables;
     }
 
     @Override
@@ -57,14 +62,16 @@ public class DataFlowChecker implements ModelChecker {
         final Collection<CheckerIssue> issues = new ArrayList<>();
         for (DataFlowRule dataFlowRule : dataFlowRules) {
             dataFlowRule.evaluate(processVariables).stream()
-                    .filter(r-> !r.isFulfilled())
-                    .map(r -> IssueWriter.createIssue(rule, dataFlowRule.getRuleDescription(), dataFlowRule.getCriticality(),
-                            r.getEvaluatedVariable(), dataFlowRule.getViolationMessageFor(r)))
+                    .filter(r -> !r.isFulfilled())
+                    .map(r -> IssueWriter
+                            .createIssue(rule, dataFlowRule.getRuleDescription(), dataFlowRule.getCriticality(),
+                                    r.getEvaluatedVariable(), dataFlowRule.getViolationMessageFor(r)))
                     .forEach(issues::addAll);
         }
         return issues;
     }
 
+    @Override
     public boolean isSingletonChecker() {
         return true;
     }

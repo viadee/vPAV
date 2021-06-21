@@ -49,7 +49,7 @@ public class VertexInfo {
     /** A mark for whether this vertex has been visited. Useful for path searching. */
     private boolean visited;
 
-    private Map<String, Void> visitedVariables;
+    private final Map<String, Void> visitedVariables;
 
     /**
      * Constructs information for the given vertex.

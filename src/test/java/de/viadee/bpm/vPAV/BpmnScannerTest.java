@@ -40,8 +40,8 @@ import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -67,8 +67,7 @@ public class BpmnScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        BpmnScanner scanner = new BpmnScanner();
-        Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
+        Map.Entry<String, String> imp = BpmnScanner.getImplementation(element.getBaseElement());
 
         assertEquals("Get unexpected implementation", imp.getKey(), impClass);
     }
@@ -89,8 +88,7 @@ public class BpmnScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        BpmnScanner scanner = new BpmnScanner();
-        Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
+        Map.Entry<String, String> imp = BpmnScanner.getImplementation(element.getBaseElement());
 
         assertEquals("Get unexpected implementation", imp.getKey(), impEx);
     }
@@ -111,12 +109,11 @@ public class BpmnScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        BpmnScanner scanner = new BpmnScanner();
-        Map.Entry<String, String> imp = scanner.getImplementation(element.getBaseElement());
+        Map.Entry<String, String> imp = BpmnScanner.getImplementation(element.getBaseElement());
 
-        assertEquals("Get unexpected implementation", imp.getKey(), impDel);
-        assertEquals("Get unexpected implementation reference", imp.getValue(),
-                "org.camunda.bpm.platform.example.servlet.ExampleServiceTask");
+        assertEquals("Get unexpected implementation", impDel, imp.getKey());
+        assertEquals("Get unexpected implementation reference",
+                "org.camunda.bpm.platform.example.servlet.ExampleServiceTask", imp.getValue());
     }
 
     /**
@@ -135,8 +132,7 @@ public class BpmnScannerTest {
         final BpmnElement element = new BpmnElement(PATH, baseElements.iterator().next(), new ControlFlowGraph(),
                 new FlowAnalysis());
 
-        BpmnScanner scanner = new BpmnScanner();
-        ArrayList<String> scripts = scanner.getScriptTypes( element.getBaseElement());
+        List<String> scripts = BpmnScanner.getScriptTypes(element.getBaseElement());
 
         assertTrue("Get unexpected implementation", scripts.contains(scriptType));
     }

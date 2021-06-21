@@ -34,12 +34,14 @@ package de.viadee.bpm.vPAV;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.config.reader.PropertiesReader;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -73,7 +75,7 @@ public class RuntimeConfig {
             "VersioningChecker", "DmnTaskChecker", "ProcessVariablesNameConventionChecker",
             "TaskNamingConventionChecker", "ElementIdConventionChecker", "MessageEventChecker", "FieldInjectionChecker",
             "BoundaryErrorChecker", "ExtensionChecker", "OverlapChecker", "SignalEventChecker",
-            "MessageCorrelationChecker" };
+            "MessageCorrelationChecker", "LinterChecker" };
 
     private final String[] viadeeModelRules = { "ProcessVariablesModelChecker", "DataFlowChecker" };
 
@@ -82,7 +84,7 @@ public class RuntimeConfig {
     private Properties properties;
 
     private RuntimeConfig() {
-        properties = new PropertiesReader().read();
+        properties = new PropertiesReader().initProperties();
     }
 
     public static RuntimeConfig getInstance() {
@@ -330,36 +332,36 @@ public class RuntimeConfig {
         return getValidationFolder() + "js/";
     }
 
+    public String getDataFolder() {
+        return getValidationFolder() + ConfigConstants.DATA_FOLDER;
+    }
+
     public String getValidationIgnoredIssuesOutput() {
-        return getJsFolder() + "ignoredIssues.js";
+        return getDataFolder() + "ignoredIssues.js";
     }
 
     public String getValidationJsProcessVariables() {
-        return getJsFolder() + "processVariables.js";
-    }
-
-    public String getValidationJsIssueSeverity() {
-        return getJsFolder() + "issue_severity.js";
+        return getDataFolder() + "processVariables.js";
     }
 
     public String getValidationJsSuccessOutput() {
-        return getJsFolder() + "bpmn_validation_success.js";
+        return getDataFolder() + "bpmn_validation_success.js";
     }
 
     public String getValidationJsCheckers() {
-        return getJsFolder() + "checkers.js";
+        return getDataFolder() + "checkers.js";
     }
 
     public String getPropertiesJsOutput() {
-        return getJsFolder() + "properties.js";
+        return getDataFolder() + "properties.js";
     }
 
     public String getValidationJsOutput() {
-        return getJsFolder() + "bpmn_validation.js";
+        return getDataFolder() + "bpmn_validation.js";
     }
 
     public String getValidationJsModelOutput() {
-        return getJsFolder() + "bpmn_model.js";
+        return getDataFolder() + "bpmn_model.js";
     }
 
     public String getCssFolder() {
@@ -370,16 +372,41 @@ public class RuntimeConfig {
         return getValidationFolder() + "img/";
     }
 
+    public String getExternalReportsFolder() {
+        return getValidationFolder() + ConfigConstants.VALIDATION_OVERVIEW_REPORTS_FOLDER;
+    }
+
+    public String getFontFolder() {
+        return getValidationFolder() + "webfonts/";
+    }
+
     public String getEffectiveRuleset() {
-        return getValidationFolder() + "effectiveRuleSet.xml";
+        return getDataFolder() + "effectiveRuleSet.xml";
     }
 
     public String getValidationXmlOutput() {
-        return getValidationFolder() + "bpmn_validation.xml";
+        return getDataFolder() + "bpmn_validation.xml";
     }
 
     public String getValidationJsonOutput() {
-        return getValidationFolder() + "bpmn_validation.json";
+        return getDataFolder() + "bpmn_validation.json";
+    }
+
+    public String getProjectName() {
+        String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
+        return rootPath.substring(rootPath.lastIndexOf('/') + 1);
+    }
+
+    public Boolean isMultiProjectScan() {
+        return Boolean.parseBoolean(properties.getProperty("multiProjectReport", "false"));
+    }
+
+    public String[] getGeneratedReports() {
+        return properties.getProperty("generatedReports", "").split(",");
+    }
+
+    public String getProjectSummaryJsOutput() {
+        return getDataFolder() + "summary.js";
     }
 
 }

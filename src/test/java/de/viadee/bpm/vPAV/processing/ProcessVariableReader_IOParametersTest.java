@@ -57,7 +57,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static de.viadee.bpm.vPAV.Helper.createElement;
 import static org.mockito.Mockito.mock;
@@ -81,7 +81,7 @@ public class ProcessVariableReader_IOParametersTest {
      */
     @Test
     public void testTypeText() {
-        LinkedHashMap<String, BasicNode> nodes = processIOParameters(
+        Map<String, BasicNode> nodes = processIOParameters(
                 prepareServiceTask("testInputText", "${myVariable}",
                         null, true));
         Assert.assertEquals(2, nodes.size());
@@ -107,7 +107,7 @@ public class ProcessVariableReader_IOParametersTest {
         list.getValues().add(firstValue);
         list.getValues().add(secondValue);
 
-        LinkedHashMap<String, BasicNode> nodes = processIOParameters(prepareServiceTask("testInputList",
+        Map<String, BasicNode> nodes = processIOParameters(prepareServiceTask("testInputList",
                 list.getTextContent(), list, true));
         Assert.assertEquals(2, nodes.size());
         Assert.assertEquals(VariableOperation.READ,
@@ -134,7 +134,7 @@ public class ProcessVariableReader_IOParametersTest {
         map.getCamundaEntries().add(firstEntry);
         map.getCamundaEntries().add(secondEntry);
 
-        LinkedHashMap<String, BasicNode> nodes = processIOParameters(prepareServiceTask("testInputMap",
+        Map<String, BasicNode> nodes = processIOParameters(prepareServiceTask("testInputMap",
                 map.getTextContent(), map, true));
         Assert.assertEquals(2, nodes.size());
         Assert.assertEquals(VariableOperation.READ,
@@ -155,7 +155,7 @@ public class ProcessVariableReader_IOParametersTest {
         script.setCamundaScriptFormat("groovy");
         script.setTextContent("§%&&//)()()(");
 
-        LinkedHashMap<String, BasicNode> nodes = processIOParameters(
+        Map<String, BasicNode> nodes = processIOParameters(
                 prepareServiceTask("testInputScript",
                         script.getTextContent(), script, true));
         Assert.assertEquals(VariableOperation.WRITE,
@@ -170,7 +170,7 @@ public class ProcessVariableReader_IOParametersTest {
 
     @Test
     public void testInputScope() {
-        LinkedHashMap<String, BasicNode> nodes = analyzeInputOutputParameters(
+        Map<String, BasicNode> nodes = analyzeInputOutputParameters(
                 prepareServiceTask("testInputText", "${myVariable}",
                         null, true), true);
         Assert.assertEquals("Process_1",
@@ -181,7 +181,7 @@ public class ProcessVariableReader_IOParametersTest {
 
     @Test
     public void testOutputScope() {
-        LinkedHashMap<String, BasicNode> nodes = analyzeInputOutputParameters(
+        Map<String, BasicNode> nodes = analyzeInputOutputParameters(
                 prepareServiceTask("testOutputText", "${myVariable}",
                         null, false), false);
         Assert.assertEquals("MyServiceTask",
@@ -190,7 +190,7 @@ public class ProcessVariableReader_IOParametersTest {
                 nodes.get("MyServiceTask__1").getOperations().get("testOutputText_0").getScopeId());
     }
 
-    public LinkedHashMap<String, BasicNode> processIOParameters(ServiceTask task) {
+    public Map<String, BasicNode> processIOParameters(ServiceTask task) {
         final BpmnElement element = new BpmnElement("", task, new ControlFlowGraph(),
                 new FlowAnalysis());
         (new ProcessVariableReader(null, mock(Rule.class)))
@@ -231,7 +231,7 @@ public class ProcessVariableReader_IOParametersTest {
         return spyTask;
     }
 
-    public LinkedHashMap<String, BasicNode> analyzeInputOutputParameters(ServiceTask task, boolean input) {
+    public Map<String, BasicNode> analyzeInputOutputParameters(ServiceTask task, boolean input) {
         final BpmnElement element = new BpmnElement("", task, new ControlFlowGraph(),
                 new FlowAnalysis());
 

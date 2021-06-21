@@ -31,11 +31,10 @@
  */
 package de.viadee.bpm.vPAV.processing.model.data;
 
+import de.viadee.bpm.vPAV.processing.checker.Checker;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.springframework.util.DigestUtils;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -68,23 +67,24 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     private String elementDescription;
 
-    private String implementationDetails; // Contains expression or source code reference if applicable
+    private final String implementationDetails; // Contains expression or source code reference if applicable
 
     /**
      * CheckerIssue
      *
-     * @param ruleName           Name of the Rule
-     * @param ruleDescription    Issue ruleDescription
-     * @param classification     Classification (Info, Warning or Error) of the rule
-     * @param bpmnFile           Path to the BPMNFile
-     * @param resourceFile       Path to resource file (e.g. dmn oder java)
-     * @param elementId          Id of the Element with issue
-     * @param elementName        Name of the Element woth issue
-     * @param variable           Name of variable
-     * @param anomaly            Type of anomaly (DD, DU, UR)
-     * @param invalidPaths       Invalid path
-     * @param message            Issue message
-     * @param elementDescription Issue elementDescription
+     * @param ruleName              Name of the Rule
+     * @param ruleDescription       Issue ruleDescription
+     * @param classification        Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile              Path to the BPMNFile
+     * @param resourceFile          Path to resource file (e.g. dmn oder java)
+     * @param elementId             Id of the Element with issue
+     * @param elementName           Name of the Element with issue
+     * @param variable              Name of variable
+     * @param anomaly               Type of anomaly (DD, DU, UR)
+     * @param invalidPaths          Invalid path
+     * @param message               Issue message
+     * @param elementDescription    Issue elementDescription
+     * @param implementationDetails like Java class if issue is related to source code
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String resourceFile, final String elementId, final String elementName,
@@ -109,17 +109,18 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     /**
      * CheckerIssue
      *
-     * @param ruleName        Name of the Rule
-     * @param ruleDescription Issue ruleDescription
-     * @param classification  Classification (Info, Warning or Error) of the rule
-     * @param bpmnFile        Path to the BPMNFile
-     * @param resourceFile    Path to resource file (e.g. dmn oder java)
-     * @param elementId       Id of the Element with issue
-     * @param elementName     Name of the Element with issue
-     * @param variable        Variable
-     * @param anomaly         Type of anomaly (DD, DU, UR)
-     * @param invalidPaths    Invalid path
-     * @param message         Issue message
+     * @param ruleName              Name of the Rule
+     * @param ruleDescription       Issue ruleDescription
+     * @param classification        Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile              Path to the BPMNFile
+     * @param resourceFile          Path to resource file (e.g. dmn oder java)
+     * @param elementId             Id of the Element with issue
+     * @param elementName           Name of the Element with issue
+     * @param variable              Variable
+     * @param anomaly               Type of anomaly (DD, DU, UR)
+     * @param invalidPaths          Invalid path
+     * @param message               Issue message
+     * @param implementationDetails like Java class if issue is related to source code
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String resourceFile, final String elementId, final String elementName,
@@ -143,15 +144,16 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     /**
      * CheckerIssue
      *
-     * @param ruleName           Name of the Rule
-     * @param ruleDescription    Issue ruleDescription
-     * @param classification     Classification (Info, Warning or Error) of the rule
-     * @param bpmnFile           Path to the BPMNFile
-     * @param resourceFile       Path to resource file (e.g. dmn oder java)
-     * @param elementId          Id of the Element with issue
-     * @param elementName        Name of the Element woth issue
-     * @param message            Issue message
-     * @param elementDescription Issue elementDescription
+     * @param ruleName              Name of the Rule
+     * @param ruleDescription       Issue ruleDescription
+     * @param classification        Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile              Path to the BPMNFile
+     * @param resourceFile          Path to resource file (e.g. dmn oder java)
+     * @param elementId             Id of the Element with issue
+     * @param elementName           Name of the Element woth issue
+     * @param message               Issue message
+     * @param elementDescription    Issue elementDescription
+     * @param implementationDetails like Java class if issue is related to source code
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String resourceFile, final String elementId, final String elementName,
@@ -172,14 +174,15 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     /**
      * CheckerIssue
      *
-     * @param ruleName           Name of the Rule
-     * @param ruleDescription    Issue ruleDescription
-     * @param classification     Classification (Info, Warning or Error) of the rule
-     * @param bpmnFile           Path to the BPMNFile
-     * @param elementId          Id of the Element with issue
-     * @param elementName        Name of the Element woth issue
-     * @param message            Issue message
-     * @param elementDescription Issue elementDescription
+     * @param ruleName              Name of the Rule
+     * @param ruleDescription       Issue ruleDescription
+     * @param classification        Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile              Path to the BPMNFile
+     * @param elementId             Id of the Element with issue
+     * @param elementName           Name of the Element woth issue
+     * @param message               Issue message
+     * @param elementDescription    Issue elementDescription
+     * @param implementationDetails like Java class if issue is related to source code
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String elementId, final String elementName, final String message,
@@ -199,13 +202,14 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     /**
      * CheckerIssue
      *
-     * @param ruleName        Name of the Rule
-     * @param ruleDescription Issue ruleDescription
-     * @param classification  Classification (Info, Warning or Error) of the rule
-     * @param bpmnFile        Path to the BPMNFile
-     * @param elementId       Id of the Element with issue
-     * @param elementName     Name of the Element woth issue
-     * @param message         Issue message
+     * @param ruleName              Name of the Rule
+     * @param ruleDescription       Issue ruleDescription
+     * @param classification        Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile              Path to the BPMNFile
+     * @param elementId             Id of the Element with issue
+     * @param elementName           Name of the Element woth issue
+     * @param message               Issue message
+     * @param implementationDetails like Java class if issue is related to source code
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String elementId, final String elementName, final String message,
@@ -224,12 +228,13 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     /**
      * CheckerIssue
      *
-     * @param ruleName       Name of the Rule
-     * @param classification Classification (Info, Warning or Error) of the rule
-     * @param bpmnFile       BpmnFile
-     * @param elementId      Id of the Element with issue
-     * @param elementName    Name of the Element woth issue
-     * @param message        Issue message
+     * @param ruleName              Name of the Rule
+     * @param classification        Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile              BpmnFile
+     * @param elementId             Id of the Element with issue
+     * @param elementName           Name of the Element woth issue
+     * @param message               Issue message
+     * @param implementationDetails like Java class if issue is related to source code
      */
     public CheckerIssue(final String ruleName, final CriticalityEnum classification, final String bpmnFile,
             final String elementId, final String elementName, final String message,
@@ -247,16 +252,17 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     /**
      * CheckerIssue
      *
-     * @param ruleName        Name of the Rule
-     * @param ruleDescription Issue ruleDescription
-     * @param classification  Classification (Info, Warning or Error) of the rule
-     * @param bpmnFile        Path to the BPMNFile
-     * @param resourceFile    Path to resource file (e.g. dmn oder java)
-     * @param elementId       Id of the Element with issue
-     * @param elementName     Name of the Element woth issue
-     * @param variable        Name of variable
-     * @param message         Issue message
-     * @param description     Issue description
+     * @param ruleName              Name of the Rule
+     * @param ruleDescription       Issue ruleDescription
+     * @param classification        Classification (Info, Warning or Error) of the rule
+     * @param bpmnFile              Path to the BPMNFile
+     * @param resourceFile          Path to resource file (e.g. dmn oder java)
+     * @param elementId             Id of the Element with issue
+     * @param elementName           Name of the Element woth issue
+     * @param variable              Name of variable
+     * @param message               Issue message
+     * @param description           Issue description
+     * @param implementationDetails like Java class if issue is related to source code
      */
     public CheckerIssue(final String ruleName, final String ruleDescription, final CriticalityEnum classification,
             final String bpmnFile, final String resourceFile, final String elementId, final String elementName,
@@ -276,9 +282,9 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
     }
 
     public String getId() {
-        return getMD5(
-                ruleName + "_" + cleanPath(bpmnFile) + "_" + cleanPath(resourceFile) + "_" + elementId + "_" + variable
-                        + "_" + message);
+        final String inputString = ruleName + "_" + cleanPath(bpmnFile) + "_" + cleanPath(resourceFile) + "_"
+                + elementId + "_" + variable + "_" + message;
+        return DigestUtils.md5DigestAsHex(inputString.getBytes());
     }
 
     // by replacing this way, ignored issues from a windows system remain ignored on
@@ -373,26 +379,6 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
         this.ruleDescription = ruleDescription;
     }
 
-    /**
-     * @param input String
-     * @return hashed Input
-     */
-    public static String getMD5(String input) {
-        try {
-            final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            final byte[] messageDigestByteArray = messageDigest.digest(input.getBytes());
-            final BigInteger number = new BigInteger(1, messageDigestByteArray);
-            String hashtext = number.toString(16);
-            // Now we need to zero pad it if you actually want the full 32 chars.
-            while (hashtext.length() < 32) {
-                hashtext = "0" + hashtext;
-            }
-            return hashtext;
-        } catch (final NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
     public int compareTo(CheckerIssue cI) {
         return classification.compareTo(cI.getClassification()) * (-1);
@@ -400,10 +386,7 @@ public class CheckerIssue implements Comparable<CheckerIssue> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.hashCode() == this.hashCode())
-            return true;
-        else
-            return false;
+        return obj instanceof CheckerIssue && obj.hashCode() == this.hashCode();
     }
 
     @Override

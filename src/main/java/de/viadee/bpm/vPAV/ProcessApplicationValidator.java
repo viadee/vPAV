@@ -39,9 +39,13 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Map;
 
 public class ProcessApplicationValidator {
+
+    private ProcessApplicationValidator() {
+
+    }
 
     private static Collection<DataFlowRule> dataFlowRules = new ArrayList<>();
 
@@ -55,7 +59,7 @@ public class ProcessApplicationValidator {
      * @param beanMap Map to resolve beans
      * @return all issues
      */
-    public static Collection<CheckerIssue> findModelInconsistencies(final HashMap<String, String> beanMap) {
+    public static Collection<CheckerIssue> findModelInconsistencies(final Map<String, String> beanMap) {
         RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
         RuntimeConfig.getInstance().setBeanMapping(beanMap);
         Runner runner = createRunner();
@@ -73,6 +77,15 @@ public class ProcessApplicationValidator {
         Runner runner = createRunner();
 
         return runner.getFilteredIssues();
+    }
+
+    /**
+     * Generate a project summary from other vPAV reports
+     */
+    public static void createMultiProjectReport() {
+        RuntimeConfig.getInstance().setClassLoader(ProcessApplicationValidator.class.getClassLoader());
+        Runner runner = new Runner();
+        runner.viadeeProcessApplicationValidator(true);
     }
 
     /**
@@ -105,7 +118,7 @@ public class ProcessApplicationValidator {
      * @param beanMap Map to resolve beans
      * @return issues with status error
      */
-    public static Collection<CheckerIssue> findModelErrors(final HashMap<String, String> beanMap) {
+    public static Collection<CheckerIssue> findModelErrors(final Map<String, String> beanMap) {
         return filterErrors(findModelInconsistencies(beanMap));
     }
 

@@ -40,7 +40,9 @@ import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 
 public class Edge {
 
-    private BpmnElement from, to;
+    private BpmnElement from;
+
+    private BpmnElement to;
 
     private int weight;
 

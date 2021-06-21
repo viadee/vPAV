@@ -37,9 +37,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RuleSet {
+
     private final Map<String, Map<String, Rule>> elementRules;
+
     private final Map<String, Map<String, Rule>> modelRules;
+
     private final Map<String, Map<String, Rule>> allRules;
+
     private boolean hasParentRuleSet = false;
 
     public RuleSet() {
@@ -48,7 +52,8 @@ public class RuleSet {
         this.allRules = new HashMap<>();
     }
 
-    public RuleSet(Map<String, Map<String, Rule>> elementRules, Map<String, Map<String, Rule>> modelRules, boolean hasParentRuleSet) {
+    public RuleSet(Map<String, Map<String, Rule>> elementRules, Map<String, Map<String, Rule>> modelRules,
+            boolean hasParentRuleSet) {
         this.elementRules = Collections.unmodifiableMap(elementRules);
         this.modelRules = Collections.unmodifiableMap(modelRules);
         this.hasParentRuleSet = hasParentRuleSet;
@@ -73,6 +78,13 @@ public class RuleSet {
 
     public Map<String, Map<String, Rule>> getAllActiveRules() {
         return allRules.entrySet().stream().filter(
+                e -> e.getValue().entrySet().stream().allMatch(
+                        r -> r.getValue().isActive()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public Map<String, Map<String, Rule>> getActiveModelRules() {
+        return modelRules.entrySet().stream().filter(
                 e -> e.getValue().entrySet().stream().allMatch(
                         r -> r.getValue().isActive()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

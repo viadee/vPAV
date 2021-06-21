@@ -65,7 +65,7 @@ public class RuleSetTest {
     /**
      * Test if parent and child ruleset are merged correctly.
      *
-     * @throws ConfigReaderException
+     * @throws ConfigReaderException if ruleSet cannot be read
      */
     @Test
     public void testMergeRuleSet() throws ConfigReaderException {

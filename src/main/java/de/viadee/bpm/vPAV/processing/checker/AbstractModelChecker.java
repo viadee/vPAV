@@ -32,13 +32,30 @@
 package de.viadee.bpm.vPAV.processing.checker;
 
 import de.viadee.bpm.vPAV.config.model.Rule;
+import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
+import de.viadee.bpm.vPAV.processing.model.data.AnomalyContainer;
+import de.viadee.bpm.vPAV.processing.model.data.ProcessVariable;
+import de.viadee.bpm.vPAV.processing.model.graph.Path;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractModelChecker implements ModelChecker {
 
     protected final Rule rule;
 
-    public AbstractModelChecker(final Rule rule) {
-        // TODO what elements should be passed?
+    protected final FlowAnalysis flowAnalysis;
+
+    protected Collection<ProcessVariable> processVariables;
+
+    protected final Map<AnomalyContainer, List<Path>> invalidPathsMap;
+
+    public AbstractModelChecker(final Rule rule, final Map<AnomalyContainer, List<Path>> invalidPathsMap,
+            final Collection<ProcessVariable> processVariables, final FlowAnalysis flowAnalysis) {
         this.rule = rule;
+        this.invalidPathsMap = invalidPathsMap;
+        this.processVariables = processVariables;
+        this.flowAnalysis = flowAnalysis;
     }
 }

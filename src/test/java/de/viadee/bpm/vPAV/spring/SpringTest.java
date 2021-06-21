@@ -31,19 +31,27 @@
  */
 package de.viadee.bpm.vPAV.spring;
 
+import de.viadee.bpm.vPAV.FileScanner;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.ProcessApplicationValidator;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import soot.G;
+import soot.Scene;
 
+import java.io.File;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 
 @RunWith(SpringRunner.class)
@@ -53,15 +61,23 @@ public class SpringTest {
     @Autowired
     private ApplicationContext ctx;
 
+    @BeforeClass
+    public static void setup() {
+        G.reset();
+        IssueService.getInstance().clear();
+
+    }
+
     @Test
     public void validateModel() {
         RuntimeConfig.getInstance().setTest(true);
         Properties properties = new Properties();
-        properties.put("basepath", RuntimeConfig.getInstance().getBasepath() + "spring/");
-        properties.put("ruleSetPath", RuntimeConfig.getInstance().getBasepath() + "spring/");
+        properties.put("scanpath", ConfigConstants.TARGET_TEST_PATH + "de/viadee/bpm/vPAV/spring/");
+        properties.put("basepath", ConfigConstants.BASE_PATH_TEST + "spring/");
+        properties.put("ruleSetPath", ConfigConstants.BASE_PATH_TEST + "spring/");
         RuntimeConfig.getInstance().setProperties(properties);
         Collection<CheckerIssue> issues = ProcessApplicationValidator.findModelInconsistencies(ctx);
-        Assert.assertEquals(1, issues.size());
-        Assert.assertEquals("UnkownVariable", issues.iterator().next().getVariable());
+
+        Assert.assertEquals("There should be one UR issue.", 1, issues.size());
     }
 }

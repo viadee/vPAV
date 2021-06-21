@@ -34,6 +34,7 @@ package de.viadee.bpm.vPAV.output;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.*;
 import de.viadee.bpm.vPAV.config.reader.*;
+import de.viadee.bpm.vPAV.exceptions.OutputWriterException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -61,8 +62,9 @@ public class RuleSetOutputWriter {
         Writer writer = null;
 
         Path path = Paths.get(RuntimeConfig.getInstance().getEffectiveRuleset());
-        if (path.toFile().exists())
+        if (path.toFile().exists()) {
             path.toFile().delete();
+        }
 
         try {
             writer = new BufferedWriter(

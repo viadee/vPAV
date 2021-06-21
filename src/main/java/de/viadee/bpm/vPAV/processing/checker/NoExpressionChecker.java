@@ -45,6 +45,7 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class NoExpressionChecker extends AbstractElementChecker {
@@ -80,13 +81,17 @@ public class NoExpressionChecker extends AbstractElementChecker {
                                 CheckName.checkName(baseElement))));
             }
 
-            // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            // get the execution listeners
+            final List<ModelElementInstance> listeners = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
-            if (!listener.isEmpty()
+            if (!listeners.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
+                listeners.forEach((listener) -> {
+                    if (listener.getDomElement().hasAttribute(BpmnConstants.ATTR_EX)) {
+                        addIssue(element, issues, baseElement);
+                    }
+                });
             }
 
         } else if (baseElement instanceof IntermediateThrowEvent
@@ -95,7 +100,8 @@ public class NoExpressionChecker extends AbstractElementChecker {
             // read attributes from event
             final Map.Entry<String, String> implementationAttrEvent = BpmnScanner.getEventImplementation(baseElement);
 
-            if (implementationAttrEvent != null && implementationAttrEvent.getKey().equals(BpmnConstants.CAMUNDA_EXPRESSION)
+            if (implementationAttrEvent != null && implementationAttrEvent.getKey()
+                    .equals(BpmnConstants.CAMUNDA_EXPRESSION)
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,
                         String.format("Usage of expression in event '%s' is against best practices.",
@@ -103,7 +109,7 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
 
             if (!listener.isEmpty()
@@ -111,27 +117,20 @@ public class NoExpressionChecker extends AbstractElementChecker {
                 addIssue(element, issues, baseElement);
             }
 
-        } else if (baseElement instanceof SequenceFlow) {
+        } else if (baseElement instanceof SequenceFlow || baseElement instanceof ExclusiveGateway
+                || baseElement instanceof ManualTask) {
 
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
             }
 
-        } else if (baseElement instanceof ExclusiveGateway) {
-            // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
-                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
-            if (!listener.isEmpty()
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
         } else if (baseElement instanceof UserTask) {
             // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!listener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
@@ -139,21 +138,13 @@ public class NoExpressionChecker extends AbstractElementChecker {
             }
 
             // get the task listener
-            final ArrayList<ModelElementInstance> taskListener = BpmnScanner.getListener(baseElement,
+            final List<ModelElementInstance> taskListener = BpmnScanner.getListener(baseElement,
                     BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
             if (!taskListener.isEmpty()
                     && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
                 addIssue(element, issues, baseElement);
             }
 
-        } else if (baseElement instanceof ManualTask) {
-            // get the execution listener
-            final ArrayList<ModelElementInstance> listener = BpmnScanner.getListener(baseElement,
-                    BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
-            if (!listener.isEmpty()
-                    && !settings.containsKey(baseElement.getElementType().getInstanceType().getSimpleName())) {
-                addIssue(element, issues, baseElement);
-            }
         }
 
         return issues;
@@ -162,12 +153,9 @@ public class NoExpressionChecker extends AbstractElementChecker {
     /**
      * Adds an issue to the collection
      *
-     * @param element
-     *            BpmnElement to be added
-     * @param issues
-     *            Collection of issues
-     * @param baseElement
-     *            BaseElement
+     * @param element     BpmnElement to be added
+     * @param issues      Collection of issues
+     * @param baseElement BaseElement
      */
     private void addIssue(BpmnElement element, final Collection<CheckerIssue> issues, final BaseElement baseElement) {
         issues.addAll(IssueWriter.createIssue(rule, CriticalityEnum.WARNING, element,

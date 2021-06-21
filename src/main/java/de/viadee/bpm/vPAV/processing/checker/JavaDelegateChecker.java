@@ -42,7 +42,6 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
 import de.viadee.bpm.vPAV.processing.CheckName;
-import de.viadee.bpm.vPAV.processing.JavaReaderStatic;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -53,11 +52,13 @@ import org.camunda.bpm.model.bpmn.instance.camunda.CamundaTaskListener;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import soot.Scene;
 import soot.SootClass;
-import soot.SootResolver;
 import soot.SootResolver.SootClassNotFoundException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.viadee.bpm.vPAV.SootResolverSimplified.fixClassPathForSoot;
+import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
 
 /**
  * Class JavaDelegateChecker
@@ -97,7 +98,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         }
 
         if (bpmnElement instanceof UserTask) {
-            ArrayList<ModelElementInstance> taskListener = BpmnScanner
+            List<ModelElementInstance> taskListener = BpmnScanner
                     .getListener(bpmnElement,
                             BpmnConstants.CAMUNDA_TASK_LISTENER);
             taskListener.forEach(listener -> {
@@ -117,7 +118,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             }
         }
 
-        ArrayList<ModelElementInstance> executionListener = BpmnScanner
+        List<ModelElementInstance> executionListener = BpmnScanner
                 .getListener(bpmnElement,
                         BpmnConstants.CAMUNDA_EXECUTION_LISTENER);
         executionListener.forEach(listener -> {
@@ -163,8 +164,9 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                             // if beanMapping ${...} reference
                             if (identifierNodes.iterator().hasNext()) {
                                 for (final IdentifierNode node : identifierNodes) {
-                                    final String classFile = RuntimeConfig.getInstance().getBeanMapping()
+                                    String classFile = RuntimeConfig.getInstance().getBeanMapping()
                                             .get(node.getName());
+
                                     // correct beanmapping was found -> check if class exists
                                     if (classFile != null && classFile.trim().length() > 0) {
                                         issues.addAll(checkClassFile(element, classFile, false, false));
@@ -264,10 +266,10 @@ public class JavaDelegateChecker extends AbstractElementChecker {
     /**
      * Checks for JavaDelegates in Listeners
      *
-     * @param element
-     * @param aClass
-     * @param aDelegate
-     * @param taskListener
+     * @param element      Bpmn element that is analyzed
+     * @param aClass       List of classes
+     * @param aDelegate    List of delegates
+     * @param taskListener True if it is a task listener
      * @return issues
      */
     private Collection<CheckerIssue> checkListener(final BpmnElement element, ArrayList<String> aClass,
@@ -280,7 +282,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
             location = BpmnConstants.EXECUTION_LISTENER;
 
         // classes
-        if (aClass == null || aClass.size() > 0) {
+        if (aClass != null && !aClass.isEmpty()) {
             for (String eClass : aClass) {
                 if (eClass != null && eClass.trim().length() == 0) {
                     // Error, because no class has been configured
@@ -293,7 +295,7 @@ public class JavaDelegateChecker extends AbstractElementChecker {
         }
 
         // delegateExpression
-        if (aDelegate != null && aDelegate.size() > 0) {
+        if (aDelegate != null && !aDelegate.isEmpty()) {
             for (String eDel : aDelegate) {
                 if (eDel == null || eDel.trim().length() == 0) {
                     // Error, because no delegateExpression has been configured
@@ -347,7 +349,8 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         final Collection<CheckerIssue> issues = new ArrayList<>();
         final BaseElement bpmnElement = element.getBaseElement();
-        final String classPath = className.replaceAll("\\.", "/") + ".java"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        final String classPath =
+                className.replaceAll("\\.", "/") + JAVA_FILE_ENDING; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         HashMap<String, String> tempMap = new HashMap<>();
         Map.Entry<String, String> location; //$NON-NLS-1$
         if (listener) {
@@ -367,18 +370,19 @@ public class JavaDelegateChecker extends AbstractElementChecker {
 
         // If a class path has been found, check the correctness
         try {
-            // Soot can also resolve classes which do not exist...
-            Class<?> clazz = RuntimeConfig.getInstance().getClassLoader().loadClass(className);
-
             // Checks, whether the correct interface was implemented
             SootClass sClass = Scene.v()
-                    .forceResolve(className, SootClass.SIGNATURES);
+                    .forceResolve(fixClassPathForSoot(className), SootClass.SIGNATURES);
+
+            if (sClass.isPhantom()) {
+                throw new ClassNotFoundException("Soot class is phantom and does probably not exist.");
+            }
 
             // Checks, whether the correct interface was implemented
             checkImplementsInterface(sClass, listener, taskListener, issues, classPath, element, location.getKey(),
                     sClass);
 
-        } catch (SootClassNotFoundException | ClassNotFoundException | AssertionError e) {
+        } catch (SootClassNotFoundException | AssertionError | ClassNotFoundException e) {
             // Throws an error, if the class was not found
             if (!className.isEmpty()) {
                 issues.add(IssueWriter.createIssueWithClassPath(rule, CriticalityEnum.ERROR, classPath, element,
@@ -422,13 +426,10 @@ public class JavaDelegateChecker extends AbstractElementChecker {
                     }
                 }
             }
-        } else {
-            if (taskListener && interfaces.contains(BpmnConstants.INTERFACE_TASK_LISTENER)) {
-                return;
-            } else if (interfaces.contains(BpmnConstants.INTERFACE_EXECUTION_LISTENER) || interfaces
-                    .contains(BpmnConstants.INTERFACE_DEL)) {
-                return;
-            }
+        } else if ((taskListener && interfaces.contains(BpmnConstants.INTERFACE_TASK_LISTENER))
+                || interfaces.contains(BpmnConstants.INTERFACE_EXECUTION_LISTENER) || interfaces
+                .contains(BpmnConstants.INTERFACE_DEL)) {
+            return;
         }
 
         if (sootClass.hasSuperclass()) {
@@ -450,14 +451,14 @@ public class JavaDelegateChecker extends AbstractElementChecker {
      * Recursively checks for the correct interface implementation of a given
      * delegate
      *
-     * @param _interface Current interface
+     * @param implInterface Current interface
      * @return True/false
      */
-    private boolean checkTransitiveInterfaces(SootClass _interface) {
-        if (_interface.getShortName().equals(BpmnConstants.INTERFACE_DEL)) {
+    private boolean checkTransitiveInterfaces(SootClass implInterface) {
+        if (implInterface.getShortName().equals(BpmnConstants.INTERFACE_DEL)) {
             return true;
         } else {
-            for (SootClass i : _interface.getInterfaces()) {
+            for (SootClass i : implInterface.getInterfaces()) {
                 if (checkTransitiveInterfaces(i)) {
                     return true;
                 }

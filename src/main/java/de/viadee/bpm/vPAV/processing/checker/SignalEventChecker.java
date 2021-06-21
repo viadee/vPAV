@@ -48,7 +48,7 @@ import java.util.Map;
 
 public class SignalEventChecker extends AbstractElementChecker {
 
-    private Map<String, BaseElement> signalNames = new HashMap<>();
+    private final Map<String, BaseElement> signalNames = new HashMap<>();
 
     public SignalEventChecker(Rule rule) {
         super(rule);

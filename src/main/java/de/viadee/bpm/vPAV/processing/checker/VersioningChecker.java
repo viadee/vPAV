@@ -42,7 +42,7 @@ import de.viadee.bpm.vPAV.config.model.Rule;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.ProcessingException;
+import de.viadee.bpm.vPAV.exceptions.ProcessingException;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.CheckerIssue;
 import de.viadee.bpm.vPAV.processing.model.data.CriticalityEnum;
@@ -60,7 +60,7 @@ import java.util.*;
  */
 public class VersioningChecker extends AbstractElementChecker {
 
-    private Collection<String> resourcesNewestVersions;
+    private final Collection<String> resourcesNewestVersions;
 
     public VersioningChecker(final Rule rule,
             final Collection<String> resourcesNewestVersions) {
@@ -110,8 +110,8 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * check versioning for execution listener
      *
-     * @param element
-     * @param extensionElements
+     * @param element           Element that is analyzed
+     * @param extensionElements Extension elements of element
      * @return issues
      */
     private Collection<CheckerIssue> checkExecutionListener(final BpmnElement element,
@@ -146,8 +146,8 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * check versioning for task listener
      *
-     * @param element
-     * @param extensionElements
+     * @param element           Bpmn element that is analyzed
+     * @param extensionElements Extensions elements of element
      * @return issues
      */
     private Collection<CheckerIssue> checkTaskListener(final BpmnElement element,
@@ -182,7 +182,7 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * check versioning for service task, send task or business rule task
      *
-     * @param element
+     * @param element Element that is analyzed
      * @return issues
      */
     private Collection<CheckerIssue> checkCommonTasks(final BpmnElement element) {
@@ -199,10 +199,12 @@ public class VersioningChecker extends AbstractElementChecker {
 
             final String t_delegateExpression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_DEL);
-            if (t_delegateExpression != null && !FileScanner.getIsDirectory()) {
-                prepareBeanWarning(t_delegateExpression, element, issues);
-            } else if (t_delegateExpression != null && FileScanner.getIsDirectory()) {
-                prepareDirBasedBeanWarning(t_delegateExpression, element, issues);
+            if (t_delegateExpression != null) {
+                if (FileScanner.getIsDirectory()) {
+                    prepareDirBasedBeanWarning(t_delegateExpression, element, issues);
+                } else {
+                    prepareBeanWarning(t_delegateExpression, element, issues);
+                }
             }
 
             final String javaReference = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
@@ -219,7 +221,7 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * check versioning for script task
      *
-     * @param element
+     * @param element Element that is analyzed
      * @return issues
      */
     private Collection<CheckerIssue> checkScriptTask(final BpmnElement element) {
@@ -240,8 +242,8 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * check versioning for message event
      *
-     * @param element
-     * @return
+     * @param element Element that is analyzed
+     * @return issues
      */
     private Collection<CheckerIssue> checkMessageEventDefinition(final BpmnElement element) {
         final Collection<CheckerIssue> issues = new ArrayList<>();
@@ -269,29 +271,32 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * convert package format into class file name
      *
-     * @param javaResource
+     * @param javaResource Java resources
      * @return file
      */
     private String getClassReference(final String javaResource) {
-        if (javaResource != null && !FileScanner.getIsDirectory()) {
-            return javaResource.substring(javaResource.lastIndexOf('.') + 1, javaResource.length())
-                    + ".class"; //$NON-NLS-1$
-        } else if (javaResource != null && FileScanner.getIsDirectory()) {
-            return javaResource;
+        if (javaResource != null) {
+            if (FileScanner.getIsDirectory()) {
+                return javaResource;
+            } else {
+                return javaResource.substring(javaResource.lastIndexOf('.') + 1)
+                        + ".class"; //$NON-NLS-1$
+            }
         }
+
         return null;
     }
 
     /**
      * convert package format into groovy file name
      *
-     * @param resourcePath
+     * @param resourcePath Path to groovy resources
      * @return file
      */
     private String getGroovyReference(String resourcePath) {
         if (resourcePath != null) {
             resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf('.'));
-            return resourcePath.substring(resourcePath.lastIndexOf('.') + 1, resourcePath.length())
+            return resourcePath.substring(resourcePath.lastIndexOf('.') + 1)
                     + ".groovy"; //$NON-NLS-1$
         }
         return null;
@@ -300,7 +305,8 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * Finds java bean in an expression and returns the java file path
      *
-     * @param expression
+     * @param expression Expression that is processed
+     * @param element    Element that is analyzed
      * @return file path
      */
     private String findBeanReferenceInExpression(final String expression, final BpmnElement element) {
@@ -336,9 +342,9 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * prepares an issue for script after check
      *
-     * @param resourcePath
-     * @param element
-     * @param issues
+     * @param resourcePath Path to resources
+     * @param element      Element that is analyzed
+     * @param issues       Collection of issues
      */
     private void prepareScriptWarning(final String resourcePath, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
@@ -351,9 +357,9 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * prepares an issue for bean after check
      *
-     * @param expression
-     * @param element
-     * @param issues
+     * @param expression Expression that is parsed
+     * @param element    Element that is analyzed
+     * @param issues     Collection of issues
      */
     private void prepareBeanWarning(final String expression, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
@@ -368,9 +374,9 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * Prepares an issue for bean after check. Gets called only if the versioning scheme is directory based
      *
-     * @param expression
-     * @param element
-     * @param issues
+     * @param expression Expression that is parsed
+     * @param element    Element that is analyzed
+     * @param issues     Collection of issues
      */
     private void prepareDirBasedBeanWarning(final String expression, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
@@ -391,9 +397,9 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * Prepares an issue for class after check
      *
-     * @param javaReference
-     * @param element
-     * @param issues
+     * @param javaReference Reference to java class
+     * @param element       Element that is analyzed
+     * @param issues        Collection of issues
      */
     private void prepareClassWarning(final String javaReference, final BpmnElement element,
             final Collection<CheckerIssue> issues) {
@@ -406,9 +412,9 @@ public class VersioningChecker extends AbstractElementChecker {
     /**
      * Prepares an issue for class after check. Gets called only if the versioning scheme is directory based
      *
-     * @param javaReference
-     * @param element
-     * @param issues
+     * @param javaReference Reference to java class
+     * @param element       Element that is analyzed
+     * @param issues        Collection of issues
      */
     private void prepareDirBasedClassWarning(String javaReference, final BpmnElement element,
             final Collection<CheckerIssue> issues) {

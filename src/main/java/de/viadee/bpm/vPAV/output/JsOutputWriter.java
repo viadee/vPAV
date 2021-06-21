@@ -31,20 +31,25 @@
  */
 package de.viadee.bpm.vPAV.output;
 
-import com.google.gson.GsonBuilder;
+import com.cronutils.utils.StringUtils;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.viadee.bpm.vPAV.IssueService;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
+import de.viadee.bpm.vPAV.exceptions.OutputWriterException;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Path;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,12 +58,14 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.viadee.bpm.vPAV.constants.BpmnConstants.VPAV_ELEMENT_ID;
+
 /**
  * Create the JavaScript file for HTML-output; Needs: issues and bpmnFile names
  */
 public class JsOutputWriter implements IssueOutputWriter {
 
-	private static Logger logger = Logger.getLogger(JsOutputWriter.class.getName());
+	private static final Logger logger = Logger.getLogger(JsOutputWriter.class.getName());
 
 	private Map<String, String> ignoredIssuesMap = new HashMap<>();
 
@@ -76,14 +83,23 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final String json_noIssues = transformToJsonDatastructure(getNoIssues(issues),
 				BpmnConstants.VPAV_NO_ISSUES_ELEMENTS);
 		final String bpmn = transformToXMLDatastructure();
-		final String wrongCheckers = transformToJsDatastructure(getWrongCheckersMap());
+		final String wrongCheckers = transformToJsDatastructure(getWrongCheckersMap()) + "\n";
 		final String defaultCheckers = transformDefaultRulesToJsDatastructure(
 				extractExternalCheckers(RuntimeConfig.getInstance().getActiveRules()));
-		final String issueSeverity = transformSeverityToJsDatastructure(createIssueSeverity(issues));
 		final String ignoredIssues = transformIgnoredIssuesToJsDatastructure(getIgnoredIssuesMap());
 		final String properties = transformPropertiesToJsonDatastructure();
+		final String summary = transformSummaryToJson(issues);
 
-		writeJS(json, json_noIssues, bpmn, wrongCheckers, defaultCheckers, issueSeverity, ignoredIssues, properties);
+		final Map<String, String> fileMap = new HashMap<>();
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsOutput(), json);
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsSuccessOutput(), json_noIssues);
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsModelOutput(), bpmn);
+		fileMap.put(RuntimeConfig.getInstance().getValidationJsCheckers(), wrongCheckers + defaultCheckers);
+		fileMap.put(RuntimeConfig.getInstance().getValidationIgnoredIssuesOutput(), ignoredIssues);
+		fileMap.put(RuntimeConfig.getInstance().getPropertiesJsOutput(), properties);
+		fileMap.put(RuntimeConfig.getInstance().getProjectSummaryJsOutput(), summary);
+
+		writeJS(fileMap);
 	}
 
 	public void prepareMaps(final Map<String, String> wrongCheckers, final Map<String, String> ignoredIssues,
@@ -91,28 +107,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 		this.setWrongCheckersMap(wrongCheckers);
 		this.setIgnoredIssuesMap(ignoredIssues);
 		this.setModelPaths(modelPath);
-	}
-
-	/**
-	 * Creates list which contains elements with multiple issues and the marks it
-	 * with highest severity
-	 *
-	 * @param issues Collected issues
-	 */
-	private Map<String, CriticalityEnum> createIssueSeverity(final Collection<CheckerIssue> issues) {
-		Map<String, CriticalityEnum> issueSeverity = new HashMap<>();
-		for (CheckerIssue issue : issues) {
-			if (!issueSeverity.containsKey(issue.getElementId())) {
-				issueSeverity.put(issue.getElementId(), issue.getClassification());
-			} else if (issueSeverity.containsKey(issue.getElementId())
-					&& issueSeverity.get(issue.getElementId()).equals(CriticalityEnum.WARNING)) {
-				if (issue.getClassification().equals(CriticalityEnum.ERROR)) {
-					issueSeverity.put(issue.getElementId(), issue.getClassification());
-				}
-			}
-		}
-
-		return issueSeverity;
 	}
 
 	/**
@@ -132,97 +126,20 @@ public class JsOutputWriter implements IssueOutputWriter {
 	}
 
 	/**
-	 *
-	 * @param json
-	 *            Elements to be marked (jsonified)
-	 * @param json_noIssues
-	 *            No issues (jsonified)
-	 * @param bpmn
-	 *            BPMN Model
-	 * @param wrongCheckers
-	 *            Wrong Checkers
-	 * @param defaultCheckers
-	 *            Default Checkers
-	 * @param issueSeverity
-	 *            Issue severity
-	 * @param ignoredIssues
-	 *            Ignored issues
-	 * @param properties
-	 * 	          vPav properties
-	 * @throws OutputWriterException
-	 *             If JavaScript could not be written
+	 * @param files A map with filenames as key and content as value
+	 * @throws OutputWriterException If JS could not be written
 	 */
-	private void writeJS(final String json, final String json_noIssues, final String bpmn, final String wrongCheckers,
-			final String defaultCheckers, final String issueSeverity, final String ignoredIssues, final String properties)
-			throws OutputWriterException {
-		if (json != null && !json.isEmpty() && properties != null && !properties.isEmpty()) {
-			String errorMsg = "js output couldn't be written";
-
-			try (FileWriter file = new FileWriter(RuntimeConfig.getInstance().getValidationJsModelOutput())) {
-				file.write(bpmn);
-			} catch (IOException e) {
-				throw new OutputWriterException(errorMsg, e);
-			}
-			try (OutputStreamWriter osWriter = new OutputStreamWriter(
-					new FileOutputStream(RuntimeConfig.getInstance().getValidationJsOutput()),
-					StandardCharsets.UTF_8)) {
-				osWriter.write(json);
-			} catch (IOException e) {
-				throw new OutputWriterException(errorMsg, e);
-			}
-			try (OutputStreamWriter osWriterSuccess = new OutputStreamWriter(
-					new FileOutputStream(RuntimeConfig.getInstance().getValidationJsSuccessOutput()),
-					StandardCharsets.UTF_8)) {
-				osWriterSuccess.write(json_noIssues);
-			} catch (IOException e) {
-				throw new OutputWriterException(errorMsg, e);
-			}
-
-			if ((wrongCheckers != null && !wrongCheckers.isEmpty())
-					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
-				try (OutputStreamWriter wrongAndDefaultCheckers = new OutputStreamWriter(
-						new FileOutputStream(RuntimeConfig.getInstance().getValidationJsCheckers()),
+	private void writeJS(Map<String, String> files) throws OutputWriterException {
+		final String errorMessage = "JS output couldn't be written";
+		for (Map.Entry<String, String> entry : files.entrySet()) {
+			if (!StringUtils.isEmpty(entry.getValue())) {
+				try (OutputStreamWriter streamWriter = new OutputStreamWriter(
+						new FileOutputStream(entry.getKey()),
 						StandardCharsets.UTF_8)) {
-					wrongAndDefaultCheckers.write(wrongCheckers);
-					wrongAndDefaultCheckers.write(defaultCheckers);
+					streamWriter.write(entry.getValue());
 				} catch (IOException e) {
-					throw new OutputWriterException(errorMsg, e);
+					throw new OutputWriterException(errorMessage, e);
 				}
-			} else if ((wrongCheckers == null || wrongCheckers.isEmpty())
-					&& (defaultCheckers != null && !defaultCheckers.isEmpty())) {
-				try (OutputStreamWriter defaultCheckerJS = new OutputStreamWriter(
-						new FileOutputStream(RuntimeConfig.getInstance().getValidationJsCheckers()),
-						StandardCharsets.UTF_8)) {
-					defaultCheckerJS.write(defaultCheckers);
-				} catch (IOException e) {
-					throw new OutputWriterException(errorMsg, e);
-				}
-			}
-
-			if (issueSeverity != null && !issueSeverity.isEmpty()) {
-				try (OutputStreamWriter issueSeverityWriter = new OutputStreamWriter(
-						new FileOutputStream(RuntimeConfig.getInstance().getValidationJsIssueSeverity()),
-						StandardCharsets.UTF_8)) {
-					issueSeverityWriter.write(issueSeverity);
-				} catch (IOException e) {
-					throw new OutputWriterException(errorMsg, e);
-				}
-			}
-			if (ignoredIssues != null && !ignoredIssues.isEmpty()) {
-				try (OutputStreamWriter ignoredIssuesWriter = new OutputStreamWriter(
-						new FileOutputStream(RuntimeConfig.getInstance().getValidationIgnoredIssuesOutput()),
-						StandardCharsets.UTF_8)) {
-					ignoredIssuesWriter.write(ignoredIssues);
-				} catch (IOException e) {
-					throw new OutputWriterException(errorMsg, e);
-				}
-			}
-			try (OutputStreamWriter osWriter = new OutputStreamWriter(
-					new FileOutputStream(RuntimeConfig.getInstance().getPropertiesJsOutput()),
-					StandardCharsets.UTF_8)) {
-				osWriter.write(properties);
-			} catch (IOException e) {
-				throw new OutputWriterException(errorMsg, e);
 			}
 		}
 	}
@@ -242,16 +159,12 @@ public class JsOutputWriter implements IssueOutputWriter {
 			// write elements containing operations
 			JsonArray jsonElements = elements.stream()
 					.map(JsOutputWriter::transformElementToJsonIncludingProcessVariables)
-					.filter(o -> o.has("elementId")).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+					.filter(o -> o.has(VPAV_ELEMENT_ID)).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 			StringBuilder jsFile = new StringBuilder();
-			jsFile.append("var proz_vars = ")
-					.append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonElements)).append(";\n\n");
-
+			jsFile.append(transformJsonToJs("proz_vars", jsonElements)).append(";\n\n");
 			JsonArray jsonVariables = processVariables.stream().map(JsOutputWriter::transformProcessVariablesToJson)
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
-			jsFile.append("var processVariables = ")
-					.append(new GsonBuilder().setPrettyPrinting().create().toJson(jsonVariables)).append(";");
-
+			jsFile.append(transformJsonToJs("processVariables", jsonVariables));
 			writer.write(jsFile.toString());
 		} catch (IOException e1) {
 			logger.warning("Processvariables couldn't be written");
@@ -269,7 +182,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 		final JsonObject obj = new JsonObject();
 		if (!element.getProcessVariables().isEmpty()) {
 			// elementID
-			obj.addProperty("elementId", element.getBaseElement().getId());
+			obj.addProperty(VPAV_ELEMENT_ID, element.getBaseElement().getId());
 			// bpmnFile
 			obj.addProperty(BpmnConstants.VPAV_BPMN_FILE,
 					replace("\\", element.getProcessDefinition()));
@@ -310,13 +223,13 @@ public class JsOutputWriter implements IssueOutputWriter {
 	private static JsonObject transformProcessVariablesToJson(final ProcessVariable processVariable) {
 		final JsonObject obj = new JsonObject();
 		obj.addProperty("name", processVariable.getName());
-		if (processVariable.getOperations().size() > 0) {
+		if (!processVariable.getOperations().isEmpty()) {
 			String bpmnFile = processVariable.getOperations().get(0).getElement().getProcessDefinition();
 			obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace("\\", bpmnFile));
 		}
 		Function<ProcessVariableOperation, JsonObject> processVariableToJson = o -> {
 			final JsonObject jsonOperation = new JsonObject();
-			jsonOperation.addProperty("elementId", o.getElement().getBaseElement().getId());
+			jsonOperation.addProperty(VPAV_ELEMENT_ID, o.getElement().getBaseElement().getId());
 			jsonOperation.addProperty("elementName", o.getElement().getBaseElement().getAttributeValue("name"));
 			jsonOperation.addProperty("fieldType", o.getFieldType().getDescription());
 			jsonOperation.addProperty("elementChapter", o.getChapter().toString());
@@ -346,7 +259,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 			for (CheckerIssue issue : issues) {
 				String prettyBpmnFilename = replace("\\", issue.getBpmnFile());
-				if (!prettyBpmnFilename.equals(ConfigConstants.JS_BASE_PATH + bpmnFilename))
+				if (!prettyBpmnFilename.equals(ConfigConstants.BASE_PATH + bpmnFilename))
 					modelIssues.remove(issue);
 			}
 
@@ -358,7 +271,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				}
 				if (ruleIssues.isEmpty())
 					newIssues.add(new CheckerIssue(ruleName, null, CriticalityEnum.SUCCESS,
-							(ConfigConstants.JS_BASE_PATH + bpmnFilename), null, "", "", null, null, null,
+							(ConfigConstants.BASE_PATH + bpmnFilename), null, "", "", null, null, null,
 							"No issues found", null, null));
 			}
 		}
@@ -450,14 +363,14 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 */
 	private String transformToJsonDatastructure(final Collection<CheckerIssue> issues, String varName) {
 		final JsonArray jsonIssues = new JsonArray();
-		if (issues != null && issues.size() > 0) {
+		if (issues != null && !issues.isEmpty()) {
 			for (final CheckerIssue issue : issues) {
 				final JsonObject obj = new JsonObject();
 				obj.addProperty(BpmnConstants.VPAV_ID, issue.getId());
 				obj.addProperty(BpmnConstants.VPAV_BPMN_FILE, replace("\\", issue.getBpmnFile()));
 				obj.addProperty(BpmnConstants.VPAV_RULE_NAME, issue.getRuleName());
 				obj.addProperty(BpmnConstants.VPAV_RULE_DESCRIPTION, issue.getRuleDescription());
-				obj.addProperty(BpmnConstants.VPAV_ELEMENT_ID, issue.getElementId());
+				obj.addProperty(VPAV_ELEMENT_ID, issue.getElementId());
 				obj.addProperty(BpmnConstants.VPAV_ELEMENT_NAME, issue.getElementName());
 				obj.addProperty(BpmnConstants.VPAV_CLASSIFICATION, issue.getClassification().name());
 				obj.addProperty(BpmnConstants.VPAV_RESOURCE_FILE, issue.getResourceFile());
@@ -466,7 +379,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 						issue.getAnomaly() == null ? null : issue.getAnomaly().getDescription());
 				final JsonArray jsonPaths = new JsonArray();
 				final List<Path> paths = issue.getInvalidPaths();
-				if (paths != null && paths.size() > 0) {
+				if (paths != null && !paths.isEmpty()) {
 					for (final Path path : paths) {
 						final JsonArray jsonPath = new JsonArray();
 						final List<BpmnElement> elements = path.getElements();
@@ -474,7 +387,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 							final JsonObject jsonElement = new JsonObject();
 							final String id = element.getBaseElement().getId();
 							final String name = element.getBaseElement().getAttributeValue(BpmnConstants.ATTR_NAME);
-							jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_ID, id);
+							jsonElement.addProperty(VPAV_ELEMENT_ID, id);
 							jsonElement.addProperty(BpmnConstants.VPAV_ELEMENT_NAME,
 									name == null ? null : name.replaceAll("\n", ""));
 							jsonPath.add(jsonElement);
@@ -484,7 +397,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				}
 
 				// Add more information regarding the implementation if given
-				if(issue.getImplementationDetails() != null) {
+				if (issue.getImplementationDetails() != null) {
 					obj.addProperty(BpmnConstants.VPAV_IMPLEMENTATION_DETAILS, issue.getImplementationDetails());
 				}
 
@@ -494,7 +407,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+		return transformJsonToJs(varName, jsonIssues);
 	}
 
 	/**
@@ -514,8 +427,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 			} catch (URISyntaxException e) {
 				logger.log(Level.SEVERE, "URI of path seems to be malformed.", e);
 			}
-		}
-		else {
+		} else {
 			// Create download basepath
 			absolutePath = "file:///" + new File(basePath).getAbsolutePath() + "/";
 		}
@@ -523,22 +435,180 @@ public class JsOutputWriter implements IssueOutputWriter {
 
 		obj.addProperty("downloadBasepath", absolutePath);
 
-		String rootPath = FilenameUtils.separatorsToUnix(Paths.get("").toAbsolutePath().toString());
-		String projectName = rootPath.substring(rootPath.lastIndexOf('/') + 1);
-		obj.addProperty("projectName", projectName);
+		obj.addProperty("projectName", RuntimeConfig.getInstance().getProjectName());
+		return transformJsonToJs("properties", obj);
+	}
 
-		return ("var properties = " + new GsonBuilder().setPrettyPrinting().create().toJson(obj) + ";");
+	private String transformSummaryToJson(Collection<CheckerIssue> issues) {
+		final String projectName = "projectName";
+		final String modelName = "modelName";
+		final String totalElements = "totalElements";
+		final String ignoredElements = "ignoredElements";
+		final String analyzedElements = "analyzedElements";
+		final String issuesString = "issues";
+		final String ignoredIssues = "ignoredIssues";
+		final String flawedElements = "flawedElements";
+		final String warnings = "warnings";
+		final String errors = "errors";
+		final String warningElements = "warningElements";
+		final String errorElements = "errorElements";
+
+		final String issuesRatio = "issuesRatio";
+		final String warningRatio = "warningRatio";
+		final String errorRatio = "errorRatio";
+		final String warningElementsRatio = "warningElementsRatio";
+		final String errorElementsRatio = "errorElementsRatio";
+		final String flawedElementsRatio = "flawedElementsRatio";
+		final JsonObject projectSummary = new JsonObject();
+
+		//Total statics for project
+		final Integer ignoredIssuesTotal = getIgnoredIssuesMap().size();
+		final Integer elementsCountTotal =
+				IssueService.getInstance().getElementIdToBpmnFileMap().values().stream()
+						.mapToInt(Set::size)
+						.sum();
+		final Long ignoredElementsTotal = IssueService.getInstance().getIssues().stream()
+				.filter(issue -> getIgnoredIssuesMap()
+						.containsKey(issue.getId()))  //Retrieve the unfiltered issue collection
+				.map(CheckerIssue::getElementId)
+				.distinct()
+				.count();
+		final Integer analyzedElementsCount = elementsCountTotal - Math.toIntExact(ignoredElementsTotal);
+		final Long flawedElementsTotal = issues.stream()
+				.map(CheckerIssue::getElementId)
+				.distinct()
+				.count();
+		projectSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
+		final Long warningsTotal = issues.stream()
+				.filter(issue -> issue.getClassification().equals(CriticalityEnum.WARNING)).count();
+		final Long errorsTotal = issues.stream()
+				.filter(issue -> issue.getClassification().equals(CriticalityEnum.ERROR)).count();
+		final Long warningsElementsTotal = issues.stream()
+				.filter(issue -> issue.getClassification().equals(CriticalityEnum.WARNING))
+				.map(CheckerIssue::getElementId)
+				.distinct()
+				.count();
+		final Long errorsElementsTotal = issues.stream()
+				.filter(issue -> issue.getClassification().equals(CriticalityEnum.ERROR))
+				.map(CheckerIssue::getElementId)
+				.distinct()
+				.count();
+		final Double issuesRatioTotal = (double) issues.size() / (double) analyzedElementsCount * 100;
+		final Double warningRatioTotal = (double) warningsTotal / (double) analyzedElementsCount * 100;
+		final Double errorRatioTotal = (double) errorsTotal / (double) analyzedElementsCount * 100;
+		final Double warningElementsTotalRatio = (double) warningsElementsTotal / (double) analyzedElementsCount * 100;
+		final Double errorElementsTotalRatio = (double) errorsElementsTotal / (double) analyzedElementsCount * 100;
+		final Double flawedElementsTotalRatio = (double) flawedElementsTotal / (double) analyzedElementsCount * 100;
+		projectSummary.addProperty(modelName, "");
+		projectSummary.addProperty(totalElements, elementsCountTotal);
+		projectSummary.addProperty(ignoredElements, ignoredElementsTotal);
+		projectSummary.addProperty(analyzedElements, analyzedElementsCount);
+		projectSummary.addProperty(issuesString, issues.size());
+		projectSummary.addProperty(ignoredIssues, ignoredIssuesTotal);
+		projectSummary.addProperty(flawedElements, flawedElementsTotal);
+		projectSummary.addProperty(warnings, warningsTotal);
+		projectSummary.addProperty(errors, errorsTotal);
+		projectSummary.addProperty(warningElements, warningsElementsTotal);
+		projectSummary.addProperty(errorElements, errorsElementsTotal);
+		projectSummary.addProperty(issuesRatio, issuesRatioTotal);
+		projectSummary.addProperty(warningRatio, warningRatioTotal);
+		projectSummary.addProperty(errorRatio, errorRatioTotal);
+		projectSummary.addProperty(warningElementsRatio, warningElementsTotalRatio);
+		projectSummary.addProperty(errorElementsRatio, errorElementsTotalRatio);
+		projectSummary.addProperty(flawedElementsRatio, flawedElementsTotalRatio);
+
+		//Statistics per BPMN model
+		final JsonArray modelsStats = new JsonArray();
+		final List<String> modelsList = new ArrayList<>(
+				IssueService.getInstance().getElementIdToBpmnFileMap().keySet());
+		modelsList.forEach(model -> {
+			final JsonObject modelSummary = new JsonObject();
+			final Long ignoredIssuesModelCount = IssueService.getInstance().getIssues()
+					.stream()//Retrieve the unfiltered issue collection
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
+					.filter(issue -> getIgnoredIssuesMap().containsKey(issue.getId()))
+					.distinct() //Some types of issues can be multiple times in the collection
+					.count();
+			final Integer elementsModelCount = IssueService.getInstance().getElementIdToBpmnFileMap()
+					.get(model)
+					.size();
+			final Long ignoredElementsModelCount = IssueService.getInstance().getIssues().stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
+					.filter(issue -> getIgnoredIssuesMap()
+							.containsKey(issue.getId()))  //Retrieve the unfiltered issue collection
+					.map(CheckerIssue::getElementId)
+					.distinct()
+					.count();
+			final Integer analyzedElementsModelCount = elementsModelCount - Math.toIntExact(ignoredElementsModelCount);
+			final Long issuesModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
+					.count();
+			final Long flawedElementsModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model))
+					.map(CheckerIssue::getElementId)
+					.distinct() //The same element can have multiple issues
+					.count();
+			final Long warningsModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
+							issue.getClassification().equals(CriticalityEnum.WARNING))
+					.count();
+			final Long errorsModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
+							issue.getClassification().equals(CriticalityEnum.ERROR))
+					.count();
+			final Long warningsElementsModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
+							issue.getClassification().equals(CriticalityEnum.WARNING))
+					.map(CheckerIssue::getElementId)
+					.distinct()
+					.count();
+			final Long errorsElementsModelCount = issues.stream()
+					.filter(issue -> FilenameUtils.separatorsToUnix(issue.getBpmnFile()).equals(model) &&
+							issue.getClassification().equals(CriticalityEnum.ERROR))
+					.map(CheckerIssue::getElementId)
+					.distinct()
+					.count();
+			final Double issuesRatioModel = (double) (issuesModelCount) / (double) analyzedElementsModelCount * 100;
+			final Double warningRatioModel = (double) (warningsModelCount) / (double) analyzedElementsModelCount * 100;
+			final Double errorRatioModel = (double) (errorsModelCount) / (double) analyzedElementsModelCount * 100;
+			final Double warningElementsModelRatio = (double) warningsElementsModelCount /
+					(double) analyzedElementsModelCount * 100;
+			final Double errorElementsModelRatio = (double) errorsElementsModelCount /
+					(double) analyzedElementsModelCount * 100;
+			final Double flawedElementsModelRatio = (double) flawedElementsModelCount /
+					(double) analyzedElementsModelCount * 100;
+			modelSummary.addProperty(projectName, RuntimeConfig.getInstance().getProjectName());
+			modelSummary.addProperty(modelName, model);
+			modelSummary.addProperty(totalElements, elementsModelCount);
+			modelSummary.addProperty(ignoredElements, ignoredElementsModelCount);
+			modelSummary.addProperty(analyzedElements, analyzedElementsModelCount);
+			modelSummary.addProperty(issuesString, issuesModelCount);
+			modelSummary.addProperty(ignoredIssues, ignoredIssuesModelCount);
+			modelSummary.addProperty(flawedElements, flawedElementsModelCount);
+			modelSummary.addProperty(warnings, warningsModelCount);
+			modelSummary.addProperty(errors, errorsModelCount);
+			modelSummary.addProperty(warningElements, warningsElementsModelCount);
+			modelSummary.addProperty(errorElements, errorsElementsModelCount);
+			modelSummary.addProperty(issuesRatio, issuesRatioModel);
+			modelSummary.addProperty(warningRatio, warningRatioModel);
+			modelSummary.addProperty(errorRatio, errorRatioModel);
+			modelSummary.addProperty(warningElementsRatio, warningElementsModelRatio);
+			modelSummary.addProperty(errorElementsRatio, errorElementsModelRatio);
+			modelSummary.addProperty(flawedElementsRatio, flawedElementsModelRatio);
+
+			modelsStats.add(modelSummary);
+		});
+		projectSummary.add("models", modelsStats);
+		return transformJsonToJs("projectSummary", projectSummary);
 	}
 
 	/**
 	 * Transforms the collection of wrong checkers into JSON format
 	 *
-	 * @param wrongCheckers
-	 *            Map of wrongly configured checkers
+	 * @param wrongCheckers Map of wrongly configured checkers
 	 * @return JavaScript variables containing the wrong checkers
 	 */
 	private String transformToJsDatastructure(final Map<String, String> wrongCheckers) {
-		final String varName = "unlocatedCheckers";
 		final JsonArray jsonIssues = new JsonArray();
 		if (wrongCheckers != null && wrongCheckers.size() > 0) {
 			for (Map.Entry<String, String> entry : wrongCheckers.entrySet()) {
@@ -548,28 +618,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				jsonIssues.add(obj);
 			}
 		}
-		return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
-	}
-
-	/**
-	 * Transforms the collection of issue severities into JSON format
-	 *
-	 * @param issues
-	 *            Map of collected issues
-	 * @return JavaScript variables containing the issues' id and severity
-	 */
-	private String transformSeverityToJsDatastructure(final Map<String, CriticalityEnum> issues) {
-		final String varName = "issueSeverity";
-		final JsonArray jsonIssues = new JsonArray();
-		if (issues != null && issues.size() > 0) {
-			for (Map.Entry<String, CriticalityEnum> entry : issues.entrySet()) {
-				final JsonObject obj = new JsonObject();
-				obj.addProperty(BpmnConstants.ATTR_ID, entry.getKey());
-				obj.addProperty(ConfigConstants.CRITICALITY, entry.getValue().name());
-				jsonIssues.add(obj);
-			}
-		}
-		return ("var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+		return transformJsonToJs("unlocatedCheckers", jsonIssues);
 	}
 
 	/**
@@ -579,7 +628,6 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the issues to be ignored
 	 */
 	private String transformIgnoredIssuesToJsDatastructure(final Map<String, String> ignoredIssues) {
-		final String ignoredIssuesList = "ignoredIssues";
 		final JsonArray ignoredIssesJson = new JsonArray();
 
 		if (ignoredIssues != null && ignoredIssues.size() > 0) {
@@ -590,8 +638,7 @@ public class JsOutputWriter implements IssueOutputWriter {
 				ignoredIssesJson.add(obj);
 			}
 		}
-		return ("var " + ignoredIssuesList + " = "
-				+ new GsonBuilder().setPrettyPrinting().create().toJson(ignoredIssues) + ";");
+		return transformJsonToJs("ignoredIssues", ignoredIssesJson);
 	}
 
 	/**
@@ -599,16 +646,41 @@ public class JsOutputWriter implements IssueOutputWriter {
 	 * @return JavaScript variables containing the default checkers
 	 */
 	private String transformDefaultRulesToJsDatastructure(final ArrayList<String> defaultCheckers) {
-		final String varName = "defaultCheckers";
 		final JsonArray jsonIssues = new JsonArray();
-		if (defaultCheckers != null && defaultCheckers.size() > 0) {
+		if (defaultCheckers != null && !defaultCheckers.isEmpty()) {
 			for (String entry : defaultCheckers) {
 				final JsonObject obj = new JsonObject();
 				obj.addProperty(ConfigConstants.RULE_NAME, entry);
 				jsonIssues.add(obj);
 			}
 		}
-		return ("\n var " + varName + " = " + new GsonBuilder().setPrettyPrinting().create().toJson(jsonIssues) + ";");
+		return transformJsonToJs("defaultCheckers", jsonIssues);
+	}
+
+	private String transformJsonToJs(String jsIdentifier, JsonElement json) {
+		return ("var " + jsIdentifier + " = " +
+				JsonOutputWriter.getJsonString(json) + ";");
+	}
+
+	/**
+	 * Generates the JS file containing the relative paths of the external vPAV reports
+	 *
+	 * @param externalReportsPaths List of the relative paths
+	 */
+	public void writeGeneratedReportsData(List<String> externalReportsPaths) {
+		JsonObject obj = new JsonObject();
+		obj.addProperty("isMultiProjectScan", RuntimeConfig.getInstance().isMultiProjectScan().toString());
+		JsonArray array = new JsonArray();
+		externalReportsPaths.forEach(array::add);
+		obj.add("reportsPaths", array);
+		File reportsPathsFile = new File(RuntimeConfig.getInstance().getExternalReportsFolder() +
+				ConfigConstants.VALIDATION_OVERVIEW_REPORT_DATA_JS);
+		String reportData = transformJsonToJs("reportData", obj);
+		try {
+			FileUtils.write(reportsPathsFile, reportData, (Charset) null);
+		} catch (IOException e) {
+			throw new RuntimeException("Couldn't write external reports paths JS");
+		}
 	}
 
 	public Map<String, String> getIgnoredIssuesMap() {

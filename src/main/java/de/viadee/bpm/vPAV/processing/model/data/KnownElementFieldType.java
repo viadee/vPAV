@@ -63,9 +63,10 @@ public enum KnownElementFieldType {
     Link("Link Name"),
     Message("Message Name"), Initial("Initial"),
     UserDefined("User Defined"),
-    CamundaStandardVariables("Camunda Standard Process Variables");
+    CamundaStandardVariables("Camunda Standard Process Variables"),
+    ProcessStart("Variables passed to runtime service");
 
-    private String description;
+    private final String description;
 
     private KnownElementFieldType(final String description) {
         this.description = description;

@@ -35,10 +35,8 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import de.viadee.bpm.vPAV.processing.model.graph.Graph;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
-import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
+import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
 import java.util.*;
@@ -52,7 +50,7 @@ public class FlowAnalysis {
 
     public static final Logger LOGGER = Logger.getLogger(FlowAnalysis.class.getName());
 
-    private LinkedHashMap<String, AnalysisElement> nodes;
+    private final LinkedHashMap<String, AnalysisElement> nodes;
 
     private int operationCounter = 0;
 
@@ -60,11 +58,11 @@ public class FlowAnalysis {
         this.nodes = new LinkedHashMap<>();
     }
 
-    private HashMap<String, AnalysisElement> nodesBeforeCallActivities = new HashMap<>();
+    private final HashMap<String, AnalysisElement> nodesBeforeCallActivities = new HashMap<>();
 
-    private HashSet<String> callActivitiesInMapping = new HashSet<>();
+    private final HashSet<String> callActivitiesInMapping = new HashSet<>();
 
-    private HashSet<String> callActivitiesOutMapping = new HashSet<>();
+    private final HashSet<String> callActivitiesOutMapping = new HashSet<>();
 
     /**
      * Given a collection of graphs, this method is the sole entrance to the
@@ -112,7 +110,7 @@ public class FlowAnalysis {
             if (analysisElement.getControlFlowGraph().hasNodes()) {
                 BasicNode firstNode = analysisElement.getControlFlowGraph().firstNode();
                 BasicNode lastNode = analysisElement.getControlFlowGraph().lastNode();
-                boolean hasNodesAfter = false;
+                boolean hasNodesAfter;
 
                 if (analysisElement.getBaseElement() instanceof CallActivity) {
                     // Split nodes in "before" and "after" nodes.
@@ -121,17 +119,17 @@ public class FlowAnalysis {
                     BasicNode predecessor = null;
                     ElementChapter chapter;
                     chapter = firstNode.getElementChapter();
-                    boolean isFirstHalf = !(chapter.equals(ElementChapter.OutputImplementation)
-                            || chapter.equals(ElementChapter.ExecutionListenerEnd) || chapter
-                            .equals(ElementChapter.OutputData));
+                    boolean isFirstHalf = !(chapter.equals(ElementChapter.OUTPUT_IMPLEMENTATION)
+                            || chapter.equals(ElementChapter.EXECUTION_LISTENER_END) || chapter
+                            .equals(ElementChapter.OUTPUT_DATA));
 
                     // Set predecessor and successor relationships between nodes
                     for (BasicNode curNode : analysisElement.getControlFlowGraph().getNodes().values()) {
                         if (predecessor != null) {
                             chapter = curNode.getElementChapter();
-                            if ((chapter.equals(ElementChapter.OutputImplementation)
-                                    || chapter.equals(ElementChapter.ExecutionListenerEnd)
-                                    || chapter.equals(ElementChapter.OutputData)) && isFirstHalf) {
+                            if ((chapter.equals(ElementChapter.OUTPUT_IMPLEMENTATION)
+                                    || chapter.equals(ElementChapter.EXECUTION_LISTENER_END)
+                                    || chapter.equals(ElementChapter.OUTPUT_DATA)) && isFirstHalf) {
                                 // Split in before and after nodes
                                 isFirstHalf = false;
                                 lastNodeBefore = predecessor;
@@ -204,7 +202,8 @@ public class FlowAnalysis {
                             if (endEvent.equals(succ)) {
                                 // End event was not found
                                 LOGGER.severe("End event in child process was not found.");
-                                return;                            }
+                                return;
+                            }
 
                             succ.clearPredecessors();
                             endEvent.clearSuccessors();
@@ -323,7 +322,7 @@ public class FlowAnalysis {
 
         temp.putAll(cfgNodes);
         nodes.putAll(temp);
-        ids.forEach(id -> nodes.remove(id));
+        ids.forEach(nodes::remove);
     }
 
     /**
@@ -418,7 +417,7 @@ public class FlowAnalysis {
                     // Else take union to propagate operations
                 } else {
                     for (AnalysisElement pred : predecessors) {
-                        LinkedHashMap<String, ProcessVariableOperation>[] inSets = filterInputVariables(pred,
+                        Map<String, ProcessVariableOperation>[] inSets = filterInputVariables(pred,
                                 analysisElement);
                         inUsed.putAll(inSets[0]);
                         inUnused.putAll(inSets[1]);
@@ -435,10 +434,10 @@ public class FlowAnalysis {
                 // Calculate out-sets for used definitions (transfer functions)
                 final LinkedHashMap<String, ProcessVariableOperation> inUsedTemp = new LinkedHashMap<>(
                         analysisElement.getInUsed());
-                final LinkedHashMap<String, ProcessVariableOperation> internalUnion = new LinkedHashMap<>();
-                internalUnion.putAll(analysisElement.getInUnused());
-                final LinkedHashMap<String, ProcessVariableOperation> tempUsed = new LinkedHashMap<>();
-                tempUsed.putAll(analysisElement.getUsed());
+                final LinkedHashMap<String, ProcessVariableOperation> internalUnion = new LinkedHashMap<>(
+                        analysisElement.getInUnused());
+                final LinkedHashMap<String, ProcessVariableOperation> tempUsed = new LinkedHashMap<>(
+                        analysisElement.getUsed());
 
                 Optional<Map.Entry<String, ProcessVariableOperation>> oldOperation;
                 // Variables are overwritten if new operation
@@ -483,7 +482,7 @@ public class FlowAnalysis {
         }
     }
 
-    private LinkedHashMap<String, ProcessVariableOperation>[] filterInputVariables(AnalysisElement predecessor,
+    private Map<String, ProcessVariableOperation>[] filterInputVariables(AnalysisElement predecessor,
             AnalysisElement analysisElement) {
         String scopePredecessor = predecessor.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
         String scopeElement = analysisElement.getBaseElement().getScope().getAttributeValue(BpmnConstants.ATTR_ID);
@@ -530,13 +529,12 @@ public class FlowAnalysis {
                     });
                 }
 
-                if (predecessor.getBaseElement() instanceof EndEvent) {
-                    // Call Activity
-                    if (analysisElement instanceof BasicNode && ((BasicNode) analysisElement).getElementChapter()
-                            .equals(ElementChapter.OutputData)) {
-                        predecessor.getOutUnused().forEach(tempInUnused::put);
-                        predecessor.getOutUsed().forEach(tempInUsed::put);
-                    }
+                // Call Activity
+                if (predecessor.getBaseElement() instanceof EndEvent && analysisElement instanceof BasicNode
+                        && ((BasicNode) analysisElement).getElementChapter()
+                        .equals(ElementChapter.OUTPUT_DATA)) {
+                    predecessor.getOutUnused().forEach(tempInUnused::put);
+                    predecessor.getOutUsed().forEach(tempInUsed::put);
                 }
             }
 
@@ -546,7 +544,7 @@ public class FlowAnalysis {
             filterLocalVariables(predecessor, tempInUnused, tempInUsed);
 
         } else if (predecessor instanceof BasicNode && ((BasicNode) predecessor).getElementChapter()
-                .equals(ElementChapter.OutputData)) {
+                .equals(ElementChapter.OUTPUT_DATA)) {
             filterVariablesWithoutScope(predecessor.getOutUnused(), tempInUnused, Arrays.asList(scopeElement,
                     analysisElement.getParentElement().getGraphId()));
             filterVariablesWithoutScope(predecessor.getOutUsed(), tempInUsed, Arrays.asList(scopeElement,
@@ -563,12 +561,8 @@ public class FlowAnalysis {
         LinkedHashMap<String, ProcessVariableOperation> tempInUnusedNew = new LinkedHashMap<>();
 
         // Copy variables so that they keep the scope of the process
-        tempInUnused.forEach((key, value) -> {
-            tempInUnusedNew.put(key, new ProcessVariableOperation(value, newScope));
-        });
-        tempInUsed.forEach((key, value) -> {
-            tempInUsedNew.put(key, new ProcessVariableOperation(value, newScope));
-        });
+        tempInUnused.forEach((key, value) -> tempInUnusedNew.put(key, new ProcessVariableOperation(value, newScope)));
+        tempInUsed.forEach((key, value) -> tempInUsedNew.put(key, new ProcessVariableOperation(value, newScope)));
 
         // Update input hash maps
         tempInUnused.clear();
@@ -596,9 +590,9 @@ public class FlowAnalysis {
 
         // Check for local variables in element like input parameters
         filterVariablesWithScope(predecessor.getOutUnused(), tempInUnused,
-                Arrays.asList(predecessor.getParentElement().getGraphId()));
+                Collections.singletonList(predecessor.getParentElement().getGraphId()));
         filterVariablesWithScope(predecessor.getOutUsed(), tempInUsed,
-                Arrays.asList(predecessor.getParentElement().getGraphId()));
+                Collections.singletonList(predecessor.getParentElement().getGraphId()));
     }
 
     private void filterVariablesWithScope(LinkedHashMap<String, ProcessVariableOperation> sourceList,
@@ -648,8 +642,8 @@ public class FlowAnalysis {
             if (analysisElement.getParentElement().getBaseElement() instanceof CallActivity
                     && analysisElement instanceof Node) {
                 Node tmpNode = (Node) analysisElement;
-                if (tmpNode.getElementChapter().equals(ElementChapter.InputImplementation)
-                        || tmpNode.getElementChapter().equals(ElementChapter.OutputImplementation)) {
+                if (tmpNode.getElementChapter().equals(ElementChapter.INPUT_IMPLEMENTATION)
+                        || tmpNode.getElementChapter().equals(ElementChapter.OUTPUT_IMPLEMENTATION)) {
                     String childProcessId = ((CallActivity) analysisElement.getParentElement().getBaseElement())
                             .getCalledElement();
                     analysisElement.getOperations().forEach((key, value) -> {
@@ -682,8 +676,8 @@ public class FlowAnalysis {
         nodes.values().forEach(node -> {
             if (node.getParentElement().getBaseElement() instanceof CallActivity && node instanceof Node) {
                 Node tmpNode = (Node) node;
-                if (tmpNode.getElementChapter().equals(ElementChapter.InputImplementation)
-                        || tmpNode.getElementChapter().equals(ElementChapter.OutputImplementation)) {
+                if (tmpNode.getElementChapter().equals(ElementChapter.INPUT_IMPLEMENTATION)
+                        || tmpNode.getElementChapter().equals(ElementChapter.OUTPUT_IMPLEMENTATION)) {
                     String childProcessId = ((CallActivity) node.getParentElement().getBaseElement())
                             .getCalledElement();
                     handleDelegateVariableMapping(node, childProcessId);
@@ -795,10 +789,8 @@ public class FlowAnalysis {
         }));
 
         urAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-            if (value.getName().equals(value2.getName())) {
-                if (value.getIndex() > value2.getIndex()) {
-                    urAnomalies.remove(key);
-                }
+            if (value.getName().equals(value2.getName()) && value.getIndex() > value2.getIndex()) {
+                urAnomalies.remove(key);
             }
         }));
 
@@ -832,10 +824,8 @@ public class FlowAnalysis {
         }));
 
         uuAnomaliesTemp.forEach((key, value) -> node.getDefined().forEach((key2, value2) -> {
-            if (value.getName().equals(value2.getName())) {
-                if (value.getIndex() > value2.getIndex()) {
-                    uuAnomalies.remove(key);
-                }
+            if (value.getName().equals(value2.getName()) && value.getIndex() > value2.getIndex()) {
+                uuAnomalies.remove(key);
             }
         }));
 
@@ -985,8 +975,8 @@ public class FlowAnalysis {
     }
 
     private boolean isDelegateVariable(ProcessVariableOperation value) {
-        return (value.getChapter().equals(ElementChapter.InputImplementation)
-                || value.getChapter().equals(ElementChapter.OutputImplementation))
+        return (value.getChapter().equals(ElementChapter.INPUT_IMPLEMENTATION)
+                || value.getChapter().equals(ElementChapter.OUTPUT_IMPLEMENTATION))
                 && value.getScopeId().equals(((CallActivity) value.getElement().getBaseElement()).getCalledElement());
     }
 

@@ -2,6 +2,13 @@
 <!DOCTYPE xml>
 <ruleSet>
     <rule>
+        <name>LinterChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="conditional-sequenceflows">conditional-sequenceflows</setting>
+        </settings>
+    </rule>
+    <rule>
         <name>MessageEventChecker</name>
         <state>true</state>
     </rule>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE xml>
+<ruleSet>
+    <rule>
+        <name>MessageEventChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>OverlapChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>ExtensionChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="CALLBACK_TIMEOUT" type="ServiceTask">\d+</setting>
+        </settings>
+    </rule>
+    <rule>
+        <name>XorConventionChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="requiredDefault">false</setting>
+        </settings>
+        <elementConventions>
+            <elementConvention>
+                <name>xorGateway</name>
+                <description>gateway name has to end with an question mark</description>
+                <pattern>.*\?</pattern>
+            </elementConvention>
+            <elementConvention>
+                <name>edges</name>
+                <description>gateway edge has to be named</description>
+                <pattern>.*</pattern>
+            </elementConvention>
+        </elementConventions>
+    </rule>
+    <rule>
+        <name>TimerExpressionChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>NoScriptChecker</name>
+        <state>true</state>
+        <settings>
+        </settings>
+    </rule>
+    <rule>
+        <name>JavaDelegateChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>BoundaryErrorChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>FieldInjectionChecker</name>
+        <state>false</state>
+    </rule>
+    <rule>
+        <name>EmbeddedGroovyScriptChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>NoExpressionChecker</name>
+        <state>true</state>
+        <settings>
+            <setting name="ServiceTask"/>
+        </settings>
+    </rule>
+    <rule>
+        <name>VersioningChecker</name>
+        <state>false</state>
+        <settings>
+            <setting name="versioningSchemeClass">([^_]*)_{1}([0-9][_][0-9]{1})\.(class|groovy)
+            </setting>
+        </settings>
+    </rule>
+    <rule>
+        <name>DmnTaskChecker</name>
+        <state>false</state>
+    </rule>
+    <rule>
+        <name>DataFlowChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>ProcessVariablesModelChecker</name>
+        <state>true</state>
+    </rule>
+    <rule>
+        <name>ProcessVariablesNameConventionChecker</name>
+        <state>false</state>
+        <elementConventions>
+            <elementConvention>
+                <name>internal</name>
+                <!-- field types for process variables -->
+                <elementFieldTypes excluded="true">
+                    <elementFieldType>Class</elementFieldType>
+                    <elementFieldType>ExternalScript</elementFieldType>
+                    <elementFieldType>DMN</elementFieldType>
+                    <elementFieldType>DelegateExpression</elementFieldType>
+                </elementFieldTypes>
+                <description>Variable has to start with "int_"</description>
+                <pattern>int_[a-zA-Z]+</pattern>
+            </elementConvention>
+            <elementConvention>
+                <name>external</name>
+                <!-- field types for process variables -->
+                <elementFieldTypes>
+                    <elementFieldType>Class</elementFieldType>
+                    <elementFieldType>ExternalScript</elementFieldType>
+                    <elementFieldType>DMN</elementFieldType>
+                    <elementFieldType>DelegateExpression</elementFieldType>
+                </elementFieldTypes>
+                <description>Variable has to start with "ext_"</description>
+                <pattern>ext_[a-zA-Z]+</pattern>
+            </elementConvention>
+        </elementConventions>
+    </rule>
+    <rule>
+        <name>TaskNamingConventionChecker</name>
+        <state>false</state>
+        <elementConventions>
+            <elementConvention>
+                <name>convention</name>
+                <description>taskname has to start with a capital letter followed by
+                    letters,hyphens or spaces
+                </description>
+                <pattern>[A-ZÄÖÜ][a-zäöü\\\-\\\s]+</pattern>
+            </elementConvention>
+        </elementConventions>
+    </rule>
+    <rule>
+        <name>ElementIdConventionChecker</name>
+        <state>false</state>
+        <elementConventions>
+            <elementConvention>
+                <name>ServiceTask</name>
+                <description>ServiceTask has to starts with "serviceTask" followed
+                    by at least two
+                    words starting with a capital letter
+                </description>
+                <pattern>serviceTask[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*
+                </pattern>
+            </elementConvention>
+        </elementConventions>
+    </rule>
+
+</ruleSet>

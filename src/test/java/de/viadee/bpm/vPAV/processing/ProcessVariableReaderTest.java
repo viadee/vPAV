@@ -35,7 +35,6 @@ import com.google.common.collect.ListMultimap;
 import de.viadee.bpm.vPAV.FileScanner;
 import de.viadee.bpm.vPAV.RuntimeConfig;
 import de.viadee.bpm.vPAV.config.model.RuleSet;
-import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
 import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
@@ -258,7 +257,7 @@ public class ProcessVariableReaderTest {
         final FileScanner fileScanner = new FileScanner(new RuleSet());
         final String PATH = BASE_PATH + "ModelWithDelegate_UR.bpmn";
         final File processDefinition = new File(PATH);
-        final ProcessVariablesScanner scanner = new ProcessVariablesScanner(
+        final EntryPointScanner scanner = new EntryPointScanner(
                 fileScanner.getJavaResourcesFileInputStream());
 
         // parse bpmn model and set delegate
@@ -297,7 +296,7 @@ public class ProcessVariableReaderTest {
 
         // Test read
         String expression = "${readVariable}";
-        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+        reader.parseJuelExpression(element, ElementChapter.GENERAL, KnownElementFieldType.Expression, expression,
                 "ScopeId",
                 new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
@@ -307,7 +306,7 @@ public class ProcessVariableReaderTest {
         // Test write
         element.setControlFlowGraph(new ControlFlowGraph());
         expression = "${execution.setVariable('writeVariable', 'newValue')}";
-        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+        reader.parseJuelExpression(element, ElementChapter.GENERAL, KnownElementFieldType.Expression, expression,
                 "ScopeId",
                 new BasicNode[1]);
         Assert.assertEquals(1, element.getControlFlowGraph().getOperations().size());
@@ -317,7 +316,7 @@ public class ProcessVariableReaderTest {
         // Test calculation
         element.setControlFlowGraph(new ControlFlowGraph());
         expression = "${(varOne + arr[idx] + arr[2] + varTwo) / 3}";
-        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+        reader.parseJuelExpression(element, ElementChapter.GENERAL, KnownElementFieldType.Expression, expression,
                 "ScopeId",
                 new BasicNode[1]);
         Assert.assertEquals(5, element.getControlFlowGraph().getOperations().size());
@@ -332,7 +331,7 @@ public class ProcessVariableReaderTest {
         // Test bean method
         element.setControlFlowGraph(new ControlFlowGraph());
         expression = "${myBean.myMethod(execution, myVariable)}";
-        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+        reader.parseJuelExpression(element, ElementChapter.GENERAL, KnownElementFieldType.Expression, expression,
                 "ScopeId",
                 new BasicNode[1]);
         Assert.assertEquals(3, element.getControlFlowGraph().getOperations().size());
@@ -345,7 +344,7 @@ public class ProcessVariableReaderTest {
         // Test bean execute
         element.setControlFlowGraph(new ControlFlowGraph());
         expression = "${myBean}";
-        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+        reader.parseJuelExpression(element, ElementChapter.GENERAL, KnownElementFieldType.Expression, expression,
                 "ScopeId",
                 new BasicNode[1]);
         Assert.assertEquals(2, element.getControlFlowGraph().getOperations().size());
@@ -358,7 +357,7 @@ public class ProcessVariableReaderTest {
         // REMEMBER multiple method calls are not (yet) supported
         element.setControlFlowGraph(new ControlFlowGraph());
         expression = "${XML(xml).attr('test').value()}";
-        reader.parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Expression, expression,
+        reader.parseJuelExpression(element, ElementChapter.GENERAL, KnownElementFieldType.Expression, expression,
                 "ScopeId",
                 new BasicNode[1]);
         Assert.assertEquals(0, element.getControlFlowGraph().getOperations().size());

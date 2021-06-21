@@ -299,7 +299,7 @@ public class DataFlowRuleBuilderTest {
 		ProcessVariableOperation build() {
 			ProcessVariableOperation pvo = new ProcessVariableOperation(name,
 					operation, "");
-			BasicNode node = new BasicNode(element, ElementChapter.General, KnownElementFieldType.FollowUpDate);
+			BasicNode node = new BasicNode(element, ElementChapter.GENERAL, KnownElementFieldType.FollowUpDate);
 			pvo.setNode(node);
 			return pvo;
 		}

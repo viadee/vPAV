@@ -40,17 +40,16 @@ import de.viadee.bpm.vPAV.constants.BpmnConstants;
 import de.viadee.bpm.vPAV.constants.CamundaMethodServices;
 import de.viadee.bpm.vPAV.constants.ConfigConstants;
 import de.viadee.bpm.vPAV.output.IssueWriter;
-import de.viadee.bpm.vPAV.processing.code.flow.*;
+import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
+import de.viadee.bpm.vPAV.processing.code.flow.BpmnElement;
+import de.viadee.bpm.vPAV.processing.code.flow.ControlFlowGraph;
 import de.viadee.bpm.vPAV.processing.code.flow.ExpressionNode;
 import de.viadee.bpm.vPAV.processing.model.data.*;
 import org.camunda.bpm.engine.impl.juel.*;
-import org.camunda.bpm.engine.impl.juel.Node;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.Query;
 import org.camunda.bpm.model.bpmn.impl.BpmnModelConstants;
 import org.camunda.bpm.model.bpmn.impl.instance.LoopDataInputRef;
 import org.camunda.bpm.model.bpmn.instance.*;
-import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.camunda.*;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
@@ -60,12 +59,13 @@ import org.camunda.bpm.model.dmn.instance.Output;
 import org.camunda.bpm.model.dmn.instance.Text;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 
-import javax.el.ELException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static de.viadee.bpm.vPAV.constants.ConfigConstants.JAVA_FILE_ENDING;
 
 /**
  * search process variables for an bpmn element
@@ -111,7 +111,7 @@ public final class ProcessVariableReader {
 
             // 3) Search variables execution listener (start)
             getVariablesFromExecutionListener(element,
-                    extensionElements, scopeId, ElementChapter.ExecutionListenerStart, predecessor);
+                    extensionElements, scopeId, ElementChapter.EXECUTION_LISTENER_START, predecessor);
         }
 
         // 4) Search variables in task
@@ -129,14 +129,13 @@ public final class ProcessVariableReader {
         getVariablesFromSignalsAndMessagesAndLinks(element, predecessor);
 
         if (extensionElements != null) {
-            // TODO not 100% sure whether this is the right position or not
             // 8) Search in Input/Output-Associations (Call Activities)
             searchVariablesInInputOutputExtensions(element,
                     extensionElements, scopeElementId, predecessor);
 
             // 9) Search variables execution listener (end)
             getVariablesFromExecutionListener(element,
-                    extensionElements, scopeId, ElementChapter.ExecutionListenerEnd, predecessor);
+                    extensionElements, scopeId, ElementChapter.EXECUTION_LISTENER_END, predecessor);
 
             // 10) Search variables in Output Parameters
             processInputOutputParameters(element, extensionElements, predecessor, false);
@@ -177,24 +176,28 @@ public final class ProcessVariableReader {
 
         for (EventDefinition eventDefinition : eventDefinitions) {
             if (eventDefinition instanceof SignalEventDefinition) {
-                signals.add(((SignalEventDefinition) eventDefinition).getSignal().getName());
+                if (Objects.nonNull(((SignalEventDefinition) eventDefinition).getSignal())) {
+                    signals.add(((SignalEventDefinition) eventDefinition).getSignal().getName());
+                }
             } else if (eventDefinition instanceof MessageEventDefinition) {
-                messages.add(((MessageEventDefinition) eventDefinition).getMessage().getName());
+                if (Objects.nonNull(((MessageEventDefinition) eventDefinition).getMessage())) {
+                    messages.add(((MessageEventDefinition) eventDefinition).getMessage().getName());
+                }
             } else if (eventDefinition instanceof LinkEventDefinition) {
                 links.add(((LinkEventDefinition) eventDefinition).getName());
             }
         }
 
         for (String signalName : signals) {
-            parseJuelExpression(element, ElementChapter.Signal, KnownElementFieldType.Signal, signalName,
+            parseJuelExpression(element, ElementChapter.SIGNAL, KnownElementFieldType.Signal, signalName,
                     scopeElementId, predecessor);
         }
         for (String messageName : messages) {
-            parseJuelExpression(element, ElementChapter.Message, KnownElementFieldType.Message, messageName,
+            parseJuelExpression(element, ElementChapter.MESSAGE, KnownElementFieldType.Message, messageName,
                     scopeElementId, predecessor);
         }
         for (String linkName : links) {
-            parseJuelExpression(element, ElementChapter.Link, KnownElementFieldType.Link, linkName, scopeElementId,
+            parseJuelExpression(element, ElementChapter.LINK, KnownElementFieldType.Link, linkName, scopeElementId,
                     predecessor);
         }
     }
@@ -213,10 +216,10 @@ public final class ProcessVariableReader {
 
         BasicNode node;
         if (input) {
-            node = new BasicNode(element, ElementChapter.InputOutput,
+            node = new BasicNode(element, ElementChapter.INPUT_OUTPUT,
                     KnownElementFieldType.InputParameter);
         } else {
-            node = new BasicNode(element, ElementChapter.InputOutput,
+            node = new BasicNode(element, ElementChapter.INPUT_OUTPUT,
                     KnownElementFieldType.OutputParameter);
         }
 
@@ -303,7 +306,7 @@ public final class ProcessVariableReader {
                         String listText = listValue.getTextContent();
                         if (listText.startsWith("${")) {
                             // Parse expression
-                            parseJuelExpression(element, ElementChapter.InputOutput, fieldType, listText,
+                            parseJuelExpression(element, ElementChapter.INPUT_OUTPUT, fieldType, listText,
                                     readScope, predecessor);
                         }
                     }
@@ -313,7 +316,7 @@ public final class ProcessVariableReader {
                         if (entry.getTextContent().startsWith("${")) {
                             // Parse expression
                             // Not sure about the scope because read is above ?
-                            parseJuelExpression(element, ElementChapter.InputOutput, fieldType,
+                            parseJuelExpression(element, ElementChapter.INPUT_OUTPUT, fieldType,
                                     entry.getTextContent(),
                                     readScope, predecessor);
                         }
@@ -325,7 +328,7 @@ public final class ProcessVariableReader {
                 }
 
             } else {
-                parseJuelExpression(element, ElementChapter.InputOutput, fieldType,
+                parseJuelExpression(element, ElementChapter.INPUT_OUTPUT, fieldType,
                         textContent,
                         readScope, predecessor);
             }
@@ -372,9 +375,9 @@ public final class ProcessVariableReader {
         List<CamundaExecutionListener> listenerList = extensionElements.getElementsQuery()
                 .filterByType(CamundaExecutionListener.class).list();
         for (final CamundaExecutionListener listener : listenerList) {
-            if ((listenerChapter.equals(ElementChapter.ExecutionListenerStart) && listener.getCamundaEvent()
+            if ((listenerChapter.equals(ElementChapter.EXECUTION_LISTENER_START) && listener.getCamundaEvent()
                     .equals("start"))
-                    || (listenerChapter.equals(ElementChapter.ExecutionListenerEnd) && listener.getCamundaEvent()
+                    || (listenerChapter.equals(ElementChapter.EXECUTION_LISTENER_END) && listener.getCamundaEvent()
                     .equals("end"))
             ) {
                 final String l_expression = listener.getCamundaExpression();
@@ -432,21 +435,21 @@ public final class ProcessVariableReader {
         for (final CamundaTaskListener listener : listenerList) {
             final String l_expression = listener.getCamundaExpression();
             if (l_expression != null) {
-                parseJuelExpression(element, ElementChapter.TaskListener, KnownElementFieldType.Expression,
+                parseJuelExpression(element, ElementChapter.TASK_LISTENER, KnownElementFieldType.Expression,
                         l_expression, scopeId, predecessor);
             }
             final String l_delegateExpression = listener.getCamundaDelegateExpression();
             if (l_delegateExpression != null) {
-                parseJuelExpression(element, ElementChapter.TaskListener, KnownElementFieldType.DelegateExpression,
+                parseJuelExpression(element, ElementChapter.TASK_LISTENER, KnownElementFieldType.DelegateExpression,
                         l_delegateExpression, scopeId, predecessor);
             }
 
             String filePath = "";
             if (listener.getCamundaClass() != null && listener.getCamundaClass().trim().length() > 0) {
-                filePath = listener.getCamundaClass().replaceAll("\\.", "/") + ".java";
+                filePath = listener.getCamundaClass().replaceAll("\\.", "/") + JAVA_FILE_ENDING;
             }
 
-            ResourceFileReader.readResourceFile(filePath, element, ElementChapter.TaskListener,
+            ResourceFileReader.readResourceFile(filePath, element, ElementChapter.TASK_LISTENER,
                     KnownElementFieldType.Class, scopeId, predecessor);
 
             final CamundaScript script = listener.getCamundaScript();
@@ -455,13 +458,13 @@ public final class ProcessVariableReader {
                 // inline script or external file?
                 final String inlineScript = script.getTextContent();
                 if (inlineScript != null && inlineScript.trim().length() > 0) {
-                    ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.TaskListener,
+                    ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.TASK_LISTENER,
                             KnownElementFieldType.InlineScript, null, scopeId, inlineScript, predecessor);
                 } else {
                     final String resourcePath = script.getCamundaResource();
                     if (resourcePath != null) {
                         getVariablesFromGroovyScript(resourcePath, element,
-                                ElementChapter.TaskListener, scopeId, predecessor);
+                                ElementChapter.TASK_LISTENER, scopeId, predecessor);
                     }
                 }
             }
@@ -478,7 +481,7 @@ public final class ProcessVariableReader {
      */
     private void getVariablesFromFormData(final BpmnElement element,
             final ExtensionElements extensionElements, final String scopeElementId, BasicNode[] predecessor) {
-        BasicNode node = new BasicNode(element, ElementChapter.FormData, KnownElementFieldType.FormField);
+        BasicNode node = new BasicNode(element, ElementChapter.FORM_DATA, KnownElementFieldType.FormField);
 
         final Query<CamundaFormData> formDataQuery = extensionElements.getElementsQuery()
                 .filterByType(CamundaFormData.class);
@@ -521,7 +524,7 @@ public final class ProcessVariableReader {
             final ExtensionElements extensionElements, final String scopeId,
             BasicNode[] predecessor) {
         final BaseElement baseElement = element.getBaseElement();
-        BasicNode node = new BasicNode(element, ElementChapter.InputData,
+        BasicNode node = new BasicNode(element, ElementChapter.INPUT_DATA,
                 KnownElementFieldType.CamundaIn);
         final List<CamundaIn> inputAssociations = extensionElements.getElementsQuery().filterByType(CamundaIn.class)
                 .list();
@@ -529,7 +532,7 @@ public final class ProcessVariableReader {
         for (final CamundaIn inputAssociation : inputAssociations) {
             String sourceExpr = inputAssociation.getCamundaSourceExpression();
             if (sourceExpr != null && !sourceExpr.isEmpty()) {
-                parseJuelExpression(element, ElementChapter.InputData,
+                parseJuelExpression(element, ElementChapter.INPUT_DATA,
                         KnownElementFieldType.CamundaIn,
                         sourceExpr, scopeId, predecessor);
             } else if (inputAssociation.getCamundaVariables() != null && inputAssociation.getCamundaVariables()
@@ -562,7 +565,7 @@ public final class ProcessVariableReader {
             final ExtensionElements extensionElements, final String scopeId,
             BasicNode[] predecessor) {
         final BaseElement baseElement = element.getBaseElement();
-        BasicNode node = new BasicNode(element, ElementChapter.OutputData,
+        BasicNode node = new BasicNode(element, ElementChapter.OUTPUT_DATA,
                 KnownElementFieldType.CamundaOut);
         final List<CamundaOut> outputAssociations = extensionElements.getElementsQuery()
                 .filterByType(CamundaOut.class).list();
@@ -570,7 +573,7 @@ public final class ProcessVariableReader {
         for (final CamundaOut outputAssociation : outputAssociations) {
             String sourceExp = outputAssociation.getCamundaSourceExpression();
             if (!(sourceExp == null || sourceExp.isEmpty())) {
-                parseJuelExpression(element, ElementChapter.OutputData, KnownElementFieldType.CamundaOut,
+                parseJuelExpression(element, ElementChapter.OUTPUT_DATA, KnownElementFieldType.CamundaOut,
                         sourceExp, ((CallActivity) baseElement).getCalledElement(), predecessor);
             } else if (outputAssociation.getCamundaVariables() != null && outputAssociation.getCamundaVariables()
                     .equals("all")) {
@@ -623,18 +626,18 @@ public final class ProcessVariableReader {
                     // inline script or external file?
                     final String inlineScript = expression.getTextContent();
                     if (inlineScript != null && inlineScript.trim().length() > 0) {
-                        ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.Details,
+                        ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.DETAILS,
                                 KnownElementFieldType.InlineScript, scopeId, null, inlineScript, predecessor);
                     } else {
                         final String resourcePath = expression.getCamundaResource();
                         if (resourcePath != null) {
-                            getVariablesFromGroovyScript(resourcePath, element, ElementChapter.Details,
+                            getVariablesFromGroovyScript(resourcePath, element, ElementChapter.DETAILS,
                                     scopeId, predecessor);
                         }
                     }
                 } else {
                     if (expression.getTextContent().trim().length() > 0) {
-                        parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.Expression,
+                        parseJuelExpression(element, ElementChapter.DETAILS, KnownElementFieldType.Expression,
                                 expression.getTextContent(), scopeId, predecessor);
                     }
                 }
@@ -664,22 +667,22 @@ public final class ProcessVariableReader {
             final String t_expression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_EX);
             if (t_expression != null) {
-                parseJuelExpression(element, ElementChapter.Implementation, KnownElementFieldType.Expression,
+                parseJuelExpression(element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.Expression,
                         t_expression, scopeId, predecessor);
             }
 
             final String t_delegateExpression = baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_DEL);
             if (t_delegateExpression != null) {
-                parseJuelExpression(element, ElementChapter.Implementation, KnownElementFieldType.DelegateExpression,
+                parseJuelExpression(element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.DelegateExpression,
                         t_delegateExpression, scopeId, predecessor);
             }
 
-            final ArrayList<String> t_fieldInjectionExpressions = BpmnScanner
+            final List<String> t_fieldInjectionExpressions = BpmnScanner
                     .getFieldInjectionExpression(baseElement);
             if (!t_fieldInjectionExpressions.isEmpty()) {
                 for (String t_fieldInjectionExpression : t_fieldInjectionExpressions)
-                    parseJuelExpression(element, ElementChapter.FieldInjections, KnownElementFieldType.Expression,
+                    parseJuelExpression(element, ElementChapter.FIELD_INJECTIONS, KnownElementFieldType.Expression,
                             t_fieldInjectionExpression, scopeId, predecessor);
             }
 
@@ -694,7 +697,7 @@ public final class ProcessVariableReader {
                 JavaReaderStatic
                         .getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                 BpmnConstants.ATTR_CLASS),
-                                element, ElementChapter.Implementation, KnownElementFieldType.Class,
+                                element, ElementChapter.IMPLEMENTATION, KnownElementFieldType.Class,
                                 predecessor);
             }
 
@@ -714,23 +717,23 @@ public final class ProcessVariableReader {
             final UserTask userTask = (UserTask) baseElement;
             final String assignee = userTask.getCamundaAssignee();
             if (assignee != null)
-                parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.Assignee,
+                parseJuelExpression(element, ElementChapter.DETAILS, KnownElementFieldType.Assignee,
                         assignee, scopeId, predecessor);
             final String candidateUsers = userTask.getCamundaCandidateUsers();
             if (candidateUsers != null)
-                parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.CandidateUsers,
+                parseJuelExpression(element, ElementChapter.DETAILS, KnownElementFieldType.CandidateUsers,
                         candidateUsers, scopeId, predecessor);
             final String candidateGroups = userTask.getCamundaCandidateGroups();
             if (candidateGroups != null)
-                parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.CandidateGroups,
+                parseJuelExpression(element, ElementChapter.DETAILS, KnownElementFieldType.CandidateGroups,
                         candidateGroups, scopeId, predecessor);
             final String dueDate = userTask.getCamundaDueDate();
             if (dueDate != null)
-                parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.DueDate,
+                parseJuelExpression(element, ElementChapter.DETAILS, KnownElementFieldType.DueDate,
                         dueDate, scopeId, predecessor);
             final String followUpDate = userTask.getCamundaFollowUpDate();
             if (followUpDate != null)
-                parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.FollowUpDate,
+                parseJuelExpression(element, ElementChapter.DETAILS, KnownElementFieldType.FollowUpDate,
                         followUpDate, scopeId, predecessor);
 
         } else if (baseElement instanceof ScriptTask) {
@@ -740,13 +743,13 @@ public final class ProcessVariableReader {
                 // inline script or external file?
                 final Script script = scriptTask.getScript();
                 if (script != null && script.getTextContent() != null && script.getTextContent().trim().length() > 0) {
-                    ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.Details,
+                    ResourceFileReader.searchProcessVariablesInCode(element, ElementChapter.DETAILS,
                             KnownElementFieldType.InlineScript, null, scopeId, script.getTextContent(), predecessor);
                 } else {
                     final String resourcePath = scriptTask.getCamundaResource();
                     if (resourcePath != null) {
                         getVariablesFromGroovyScript(resourcePath, element,
-                                ElementChapter.Details, scopeId, predecessor);
+                                ElementChapter.DETAILS, scopeId, predecessor);
                     }
                 }
             }
@@ -759,13 +762,13 @@ public final class ProcessVariableReader {
             final CallActivity callActivity = (CallActivity) baseElement;
             final String calledElement = callActivity.getCalledElement();
             if (calledElement != null && calledElement.trim().length() > 0) {
-                parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.CalledElement,
+                parseJuelExpression(element, ElementChapter.DETAILS, KnownElementFieldType.CalledElement,
                         calledElement, scopeId, predecessor);
             }
             final String caseRef = callActivity.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.CASE_REF);
             if (caseRef != null && caseRef.trim().length() > 0) {
-                parseJuelExpression(element, ElementChapter.Details, KnownElementFieldType.CaseRef,
+                parseJuelExpression(element, ElementChapter.DETAILS, KnownElementFieldType.CaseRef,
                         caseRef, scopeId, predecessor);
             }
 
@@ -775,10 +778,10 @@ public final class ProcessVariableReader {
                 JavaReaderStatic
                         .getVariablesFromJavaDelegate(baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                                 BpmnConstants.ATTR_VAR_MAPPING_CLASS),
-                                element, ElementChapter.General, KnownElementFieldType.Class, predecessor);
+                                element, ElementChapter.GENERAL, KnownElementFieldType.Class, predecessor);
             } else if (baseElement.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.ATTR_VAR_MAPPING_DELEGATE) != null) {
-                parseJuelExpression(element, ElementChapter.General, KnownElementFieldType.Class,
+                parseJuelExpression(element, ElementChapter.GENERAL, KnownElementFieldType.Class,
                         callActivity.getCamundaVariableMappingDelegateExpression(), scopeId, predecessor);
 
             }
@@ -815,14 +818,14 @@ public final class ProcessVariableReader {
         if (loopCharacteristics != null) {
 
             BasicNode node = new BasicNode(element,
-                    ElementChapter.MultiInstance, KnownElementFieldType.CamundaStandardVariables);
+                    ElementChapter.MULTI_INSTANCE, KnownElementFieldType.CamundaStandardVariables);
 
             // Add default variables
             addDefaultMultiInstanceTaskVariables(node, scopeId);
             predecessor[0] = addNodeAndGetNewPredecessor(node, element.getControlFlowGraph(), predecessor[0]);
 
             node = new BasicNode(element,
-                    ElementChapter.MultiInstance, KnownElementFieldType.LoopCharacteristics);
+                    ElementChapter.MULTI_INSTANCE, KnownElementFieldType.LoopCharacteristics);
 
             final String collectionName = loopCharacteristics.getAttributeValueNs(BpmnModelConstants.CAMUNDA_NS,
                     BpmnConstants.COLLECTION);
@@ -831,7 +834,7 @@ public final class ProcessVariableReader {
                 final Pattern pattern = Pattern.compile("\\$\\{.*}");
                 Matcher matcher = pattern.matcher(collectionName);
                 if (matcher.matches()) {
-                    parseJuelExpression(element, ElementChapter.MultiInstance,
+                    parseJuelExpression(element, ElementChapter.MULTI_INSTANCE,
                             KnownElementFieldType.CollectionElement,
                             collectionName, scopeId, predecessor);
                 } else {
@@ -853,7 +856,7 @@ public final class ProcessVariableReader {
 
                 if (cardinality != null && cardinality.trim().length() > 0) {
                     if (!cardinality.matches("\\d+")) {
-                        parseJuelExpression(element, ElementChapter.MultiInstance,
+                        parseJuelExpression(element, ElementChapter.MULTI_INSTANCE,
                                 KnownElementFieldType.LoopCardinality,
                                 cardinality, scopeId, predecessor);
                     }
@@ -864,7 +867,7 @@ public final class ProcessVariableReader {
             if (completionCondition != null) {
                 final String completionConditionExpression = completionCondition.getTextContent();
                 if (completionConditionExpression != null && completionConditionExpression.trim().length() > 0) {
-                    parseJuelExpression(element, ElementChapter.MultiInstance,
+                    parseJuelExpression(element, ElementChapter.MULTI_INSTANCE,
                             KnownElementFieldType.CompletionCondition, completionConditionExpression, scopeId,
                             predecessor);
                 }
@@ -938,7 +941,7 @@ public final class ProcessVariableReader {
             final BpmnElement element,
             final String scopeId) {
 
-        BasicNode node = new BasicNode(element, ElementChapter.Details, KnownElementFieldType.DMN);
+        BasicNode node = new BasicNode(element, ElementChapter.DETAILS, KnownElementFieldType.DMN);
 
         if (fileName != null && fileName.trim().length() > 0) {
             final InputStream resource = RuntimeConfig.getInstance().getClassLoader().getResourceAsStream(fileName);
@@ -975,6 +978,9 @@ public final class ProcessVariableReader {
         ExpressionNode expNode = new ExpressionNode(element, expression, elementChapter, fieldType);
 
         TreeStore store = new TreeStore(new Builder(Builder.Feature.METHOD_INVOCATIONS), null);
+        if (Objects.isNull(expression)) {
+            return;
+        }
         Tree tree = store.get(expression);
 
         // Only support simple expressions at the moment (only one method call or only simple reads)
@@ -1066,7 +1072,8 @@ public final class ProcessVariableReader {
                 // Call method as it might modify variables
                 // REMEMBER: execution might already be saved as field of bean but currently we cannot detect this
                 String methodName = property.toString().split(" ")[1];
-                EntryPoint entryPoint = new EntryPoint(className, methodName, "", BpmnConstants.ATTR_EX);
+
+                EntryPoint entryPoint = new EntryPoint(className, methodName, "", BpmnConstants.ATTR_EX, "");
                 // read variables in class file (bean)
                 JavaReaderStatic
                         .getVariablesFromClass(className, element, elementChapter, fieldType, entryPoint,
@@ -1111,7 +1118,7 @@ public final class ProcessVariableReader {
         return null;
     }
 
-    private BasicNode addNodeAndGetNewPredecessor(BasicNode node, ControlFlowGraph cg,
+    static BasicNode addNodeAndGetNewPredecessor(BasicNode node, ControlFlowGraph cg,
             BasicNode predecessor) {
         cg.addNode(node);
         if (predecessor != null) {

@@ -33,7 +33,7 @@ package de.viadee.bpm.vPAV;
 
 import de.viadee.bpm.vPAV.config.model.RuleSet;
 import de.viadee.bpm.vPAV.processing.ElementGraphBuilder;
-import de.viadee.bpm.vPAV.processing.ProcessVariablesScanner;
+import de.viadee.bpm.vPAV.processing.EntryPointScanner;
 import de.viadee.bpm.vPAV.processing.code.flow.BasicNode;
 import de.viadee.bpm.vPAV.processing.code.flow.FlowAnalysis;
 import de.viadee.bpm.vPAV.processing.model.data.ElementChapter;
@@ -81,7 +81,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         Assert.assertEquals("MyStartEvent",
@@ -119,7 +119,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         Assert.assertEquals("MySubProcess__0",
@@ -156,7 +156,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         Assert.assertEquals("MyStartEvent",
@@ -196,24 +196,24 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getPredecessors().get(0))
                         .getElementChapter());
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0))
                         .getElementChapter());
         Assert.assertEquals(1,
                 flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().size());
 
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors()
                         .get(0)).getElementChapter());
         Assert.assertEquals(1,
                 flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().size());
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getSuccessors().get(0)).getElementChapter());
     }
 
@@ -234,7 +234,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
@@ -297,7 +297,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
@@ -310,10 +310,10 @@ public class SubprocessTest {
                 flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0).getGraphId());
 
         // Connection Start Event Subprocess - Sub Subprocess
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSubSub").getPredecessors().get(0))
                         .getElementChapter());
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors()
                         .get(0))
                         .getElementChapter());
@@ -321,12 +321,12 @@ public class SubprocessTest {
                 flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().size());
 
         // Connection End Event Subprocess - Sub Subprocess
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors()
                         .get(0)).getElementChapter());
         Assert.assertEquals(1,
                 flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().size());
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSubSub").getSuccessors().get(0))
                         .getElementChapter());
 
@@ -360,7 +360,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
@@ -373,10 +373,10 @@ public class SubprocessTest {
                 flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0).getGraphId());
 
         // Connection Start Event Subprocess - Sub Subprocess
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSubSub").getPredecessors().get(0))
                         .getElementChapter());
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors()
                         .get(0))
                         .getElementChapter());
@@ -423,7 +423,7 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
@@ -446,12 +446,12 @@ public class SubprocessTest {
                         .getGraphId());
 
         // Connection End Event Subprocess - Sub Subprocess
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors()
                         .get(0)).getElementChapter());
         Assert.assertEquals(1,
                 flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().size());
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSubSub").getSuccessors().get(0))
                         .getElementChapter());
 
@@ -488,24 +488,24 @@ public class SubprocessTest {
         FlowAnalysis flowAnalysis = new FlowAnalysis();
         Collection<Graph> graphCollection = graphBuilder
                 .createProcessGraph(new FileScanner(new RuleSet()), modelInstance, "MyProcess", null,
-                        new ProcessVariablesScanner(null), flowAnalysis);
+                        new EntryPointScanner(null), flowAnalysis);
         flowAnalysis.analyze(graphCollection);
 
         // Connection Start Event Main Process - Subprocess
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getPredecessors().get(0))
                         .getElementChapter());
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().get(0))
                         .getElementChapter());
         Assert.assertEquals(1,
                 flowAnalysis.getNodes().get("MyStartEvent").getSuccessors().get(0).getSuccessors().size());
 
         // Connection Start Event Subprocess - Sub Subprocess
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSubSub").getPredecessors().get(0))
                         .getElementChapter());
-        Assert.assertEquals(ElementChapter.ExecutionListenerStart,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_START,
                 ((BasicNode) flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors()
                         .get(0))
                         .getElementChapter());
@@ -513,22 +513,22 @@ public class SubprocessTest {
                 flowAnalysis.getNodes().get("MyStartEventSub").getSuccessors().get(0).getSuccessors().size());
 
         // Connection End Event Subprocess - Sub Subprocess
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors()
                         .get(0)).getElementChapter());
         Assert.assertEquals(1,
                 flowAnalysis.getNodes().get("MyEndEventSub").getPredecessors().get(0).getPredecessors().size());
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSubSub").getSuccessors().get(0))
                         .getElementChapter());
 
         // Connection End Event Main Process - Subprocess
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors()
                         .get(0)).getElementChapter());
         Assert.assertEquals(1,
                 flowAnalysis.getNodes().get("MyEndEvent").getPredecessors().get(0).getPredecessors().size());
-        Assert.assertEquals(ElementChapter.ExecutionListenerEnd,
+        Assert.assertEquals(ElementChapter.EXECUTION_LISTENER_END,
                 ((BasicNode) flowAnalysis.getNodes().get("MyEndEventSub").getSuccessors().get(0)).getElementChapter());
     }
 }
