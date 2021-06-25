@@ -1,5 +1,5 @@
 ---
-parent: Available Checkers title: LinterChecker
+title: Linter Checker parent: Available Checkers
 ---
 LinterChecker
 =================================
