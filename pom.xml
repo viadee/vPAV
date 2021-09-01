@@ -84,7 +84,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>5.3.9</spring.version>
-        <spring.boot.version>2.5.3</spring.boot.version>
+        <spring.boot.version>2.5.4</spring.boot.version>
     </properties>
 
     <dependencyManagement>
@@ -170,7 +170,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
-            <version>3.8.1</version>
+            <version>3.8.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
@@ -208,7 +208,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
-            <version>3.8.1</version>
+            <version>3.8.2</version>
         </dependency>
         <dependency>
             <groupId>de.odysseus.juel</groupId>
@@ -431,7 +431,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>6.2.2</version>
+                <version>6.3.0</version>
                 <configuration>
                     <suppressionFiles>
                         <suppressionFile>owasp-dependency-check-suppressions.xml</suppressionFile>
