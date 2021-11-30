@@ -1,5 +1,5 @@
 # viadee Process Application Validator (vPAV)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.viadee/viadeeProcessApplicationValidator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.viadee/viadeeProcessApplicationValidator) [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=master)](https://travis-ci.org/viadee/vPAV)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.viadee/viadeeProcessApplicationValidator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.viadee/viadeeProcessApplicationValidator) 
 
 The tool checks Camunda projects for consistency and discovers errors in process-driven applications.
 Called as JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the sourcecode of an underlying java project, such as a delegate reference to a non-existing java class or a non-existing Spring bean.
@@ -27,6 +27,10 @@ Feel free to report issues, questions, ideas or patches. We are looking forward 
 
 ## Resources
 Status of the development branch: [![Build Status](https://travis-ci.org/viadee/vPAV.svg?branch=development)](https://travis-ci.org/viadee/vPAV)
+
+- The core ideas of the tool are summarized in the [2017 Blogpost](https://camunda.com/blog/2017/10/viadeeprocessapplicationvalidator/)
+- Konrad Schneid, Herbert Kuchen, Sebastian Thöne, and Sascha Di Bernardo. 2021. [Uncovering data-flow anomalies in BPMN-based process-driven applications](https://dl.acm.org/doi/10.1145/3412841.3442025). In <i>Proceedings of the 36th Annual ACM Symposium on Applied Computing</i> (<i>SAC '21</i>). Association for Computing Machinery, New York, NY, USA, 1504–1512. DOI:https://doi.org/10.1145/3412841.3442025
+- Konrad Schneid, Sascha Di Bernardo, Herbert Kuchen, Sebastian Thone: [Data-Flow Analysis of BPMN-Based Process-Driven Applications: Detecting Anomalies across Model and Code](https://www.ercis.org/sites/ercis/files/structure/network/research/ercis-working-papers/ercis_wp_38.pdf). In: Working Papers, European Research Center for Information Systems No. 38. Eds.: Becker, J. et al. Münster, 2021.
 
 ## Licenses
 All licenses of reused components can be found on the [maven site](http://rawgit.com/viadee/vPAV/master/docs/MavenSite/project-info.html)
