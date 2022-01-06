@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.viadee</groupId>
     <artifactId>viadeeProcessApplicationValidator</artifactId>
-    <version>3.0.7</version>
+    <version>3.0.8-SNAPSHOT</version>
 
     <name>viadee Process Application Validator</name>
 
@@ -26,7 +26,7 @@
 
     <organization>
         <name>viadee Unternehmensberatung AG</name>
-        <url>http://www.viadee.de</url>
+        <url>https://www.viadee.de</url>
     </organization>
 
     <developers>
@@ -34,43 +34,43 @@
             <name>Frank Koehne</name>
             <email>Frank.Koehne@viadee.de</email>
             <organization>viadee Unternehmensberatung AG</organization>
-            <organizationUrl>http://www.viadee.de</organizationUrl>
+            <organizationUrl>https://www.viadee.de</organizationUrl>
         </developer>
         <developer>
             <name>Claus Usener</name>
             <email>Claus-Alexander.Usener@viadee.de</email>
             <organization>viadee Unternehmensberatung AG</organization>
-            <organizationUrl>http://www.viadee.de</organizationUrl>
+            <organizationUrl>https://www.viadee.de</organizationUrl>
         </developer>
         <developer>
             <name>Marcel Flasskamp</name>
             <email>Marcel.Flasskamp@viadee.de</email>
             <organization>viadee Unternehmensberatung AG</organization>
-            <organizationUrl>http://www.viadee.de</organizationUrl>
+            <organizationUrl>https://www.viadee.de</organizationUrl>
         </developer>
         <developer>
             <name>Sascha Di Bernardo</name>
             <email>Sascha.DiBernardo@viadee.de</email>
             <organization>viadee Unternehmensberatung AG</organization>
-            <organizationUrl>http://www.viadee.de</organizationUrl>
+            <organizationUrl>https://www.viadee.de</organizationUrl>
         </developer>
         <developer>
             <name>Petra Horvath</name>
             <email>Petra.Horvath@viadee.de</email>
             <organization>viadee Unternehmensberatung AG</organization>
-            <organizationUrl>http://www.viadee.de</organizationUrl>
+            <organizationUrl>https://www.viadee.de</organizationUrl>
         </developer>
         <developer>
             <name>Lars Beyer</name>
             <email>Lars.Beyer@viadee.de</email>
             <organization>viadee Unternehmensberatung AG</organization>
-            <organizationUrl>http://www.viadee.de</organizationUrl>
+            <organizationUrl>https://www.viadee.de</organizationUrl>
         </developer>
         <developer>
             <name>Tamara Gunkel</name>
             <email>Tamara.Gunkel@viadee.de</email>
             <organization>viadee Unternehmensberatung AG</organization>
-            <organizationUrl>http://www.viadee.de</organizationUrl>
+            <organizationUrl>https://www.viadee.de</organizationUrl>
         </developer>
     </developers>
 
@@ -82,8 +82,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.3.13</spring.version>
-        <spring.boot.version>2.6.1</spring.boot.version>
+        <spring.version>5.3.14</spring.version>
+        <spring.boot.version>2.6.2</spring.boot.version>
     </properties>
 
     <dependencyManagement>
@@ -128,21 +128,15 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-            <version>${spring.boot.version}</version>
-            <scope>test</scope>
-            <exclusions>
-            	<exclusion>
-            		<groupId>org.apache.logging.log4j</groupId>
-            		<artifactId>log4j-to-slf4j</artifactId>
-            	</exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.boot.version}</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -197,7 +191,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.1.0</version>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.camunda.bpm</groupId>
@@ -258,7 +252,7 @@
         <dependency>
             <groupId>org.soot-oss</groupId>
             <artifactId>soot</artifactId>
-            <version>4.2.1</version>
+            <version>4.3.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>ca.mcgill.sable</groupId>
@@ -268,7 +262,17 @@
                     <groupId>ca.mcgill.sable</groupId>
                     <artifactId>jasmin</artifactId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.0.1-android</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.camunda.bpm.springboot</groupId>
@@ -330,7 +334,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M4</version>
+                    <version>3.0.0-M5</version>
                     <executions>
                         <execution>
                             <goals>
@@ -415,7 +419,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.9.1</version>
+                <version>3.10.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -436,7 +440,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>6.5.0</version>
+                <version>6.5.2</version>
                 <configuration>
                     <suppressionFiles>
                         <suppressionFile>owasp-dependency-check-suppressions.xml</suppressionFile>
