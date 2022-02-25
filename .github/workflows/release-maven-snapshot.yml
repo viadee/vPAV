@@ -7,6 +7,11 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      - name: Import GPG Key
+        uses: crazy-max/ghaction-import-gpg@v1
+        env:
+         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - uses: actions/checkout@v2
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v2
