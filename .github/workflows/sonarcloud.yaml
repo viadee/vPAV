@@ -1,5 +1,6 @@
-name: Build
+name: SonarCloud Analysis
 on:
+  workflow_dispatch:
   push:
     branches:
       - master,development
