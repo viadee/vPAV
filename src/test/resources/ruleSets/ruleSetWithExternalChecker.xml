@@ -5,7 +5,7 @@
         <name>TaskNamingConventionCheckerExtern</name>
         <state>true</state>
         <settings>
-            <setting name="external_Location">de.viadee.bpm.vPAV.config.reader</setting>
+            <setting name="external_Location">de.viadee.bpm.vpav.config.reader</setting>
         </settings>
         <elementConventions>
             <elementConvention>
@@ -18,7 +18,7 @@
         <name>ExternalChecker</name>
         <state>true</state>
         <settings>
-            <setting name="external_Location">de.viadee.bpm.vPAV.processing.checker</setting>
+            <setting name="external_Location">de.viadee.bpm.vpav.processing.checker</setting>
         </settings>
     </rule>
     <rule id="XorCheckerId">
