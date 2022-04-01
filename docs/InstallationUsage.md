@@ -31,7 +31,7 @@ The recommended name for this class is ModelConsistencyTest where you
 call the ProcessApplicationValidator by simply using code like the following:
 
 ```java
-import de.viadee.bpm.vPAV.ProcessApplicationValidator;
+import de.viadee.bpm.vpav.ProcessApplicationValidator;
 ...
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { SpringTestConfig.class })

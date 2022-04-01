@@ -1,7 +1,7 @@
-de.viadee.bpm.vPAV
-de.viadee.bpm.vPAV.config.reader
-de.viadee.bpm.vPAV.delegates
-de.viadee.bpm.vPAV.processing.checker
-de.viadee.bpm.vPAV.processing.model.data
-de.viadee.bpm.vPAV.processing.model.graph
-de.viadee.bpm.vPAV.processing
+de.viadee.bpm.vpav
+de.viadee.bpm.vpav.config.reader
+de.viadee.bpm.vpav.delegates
+de.viadee.bpm.vpav.processing.checker
+de.viadee.bpm.vpav.processing.model.data
+de.viadee.bpm.vpav.processing.model.graph
+de.viadee.bpm.vpav.processing

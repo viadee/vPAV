@@ -40,7 +40,7 @@ The value specifies the location of the checkerclass.
 
 ## Element checkers
 Element checkers must extend the class *AbstractElementChecker*.
-Only one parameter from the abstract class `de.viadee.bpm.vPAV.config.model.Rule` is allowed in the constructor.
+Only one parameter from the abstract class `de.viadee.bpm.vpav.config.model.Rule` is allowed in the constructor.
 
 You can find an example project [here](https://github.com/viadee/vPAV_checker_plugin_example).
 
@@ -66,7 +66,7 @@ Model checkers must extend the class *AbstractModelChecker*. The model checker c
 ```
 
 ## Checker instructions
-For both types of checkers, you have to return a collection of `de.viadee.bpm.vPAV.processing.model.data.CheckerIssue`.
+For both types of checkers, you have to return a collection of `de.viadee.bpm.vpav.processing.model.data.CheckerIssue`.
 
 ``` java
 /**
