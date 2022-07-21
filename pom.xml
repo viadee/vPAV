@@ -83,7 +83,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>5.3.22</spring.version>
-        <spring.boot.version>2.7.1</spring.boot.version>
+        <spring.boot.version>2.7.2</spring.boot.version>
         <sonar.organization>viadee</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
