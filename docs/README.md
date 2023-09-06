@@ -4,6 +4,11 @@
 The tool checks Camunda projects for consistency and discovers errors in process-driven applications.
 Called as JUnit test, it discovers esp. inconsistencies of a given BPMN model in the classpath and the sourcecode of an underlying java project, such as a delegate reference to a non-existing java class or a non-existing Spring bean.
 
+⚠️⚠️⚠️
+> Due to the paradigm shift at Camunda towards SaaS / cloud based process orchestration with Camunda 8 and the recent (incompatible) changes of the Soot project for static code analysis (which we rely on), this project is no longer actively maintained (Sept. 2023). It remains in read-only mode as a reference point and for the research papers linking here.
+> 
+⚠️⚠️⚠️
+
 A list of the consistency checks can be found [here](Checker/index.md).
 
 To get started with the viadee Process Application Validator read [Installation and Usage](https://viadee.github.io/vPAV/InstallationUsage.html) and [Output](https://viadee.github.io/vPAV/Output.html).
